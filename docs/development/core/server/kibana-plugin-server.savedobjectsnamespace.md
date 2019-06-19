@@ -2,23 +2,10 @@
 
 [Home](./index.md) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [SavedObjectsNamespace](./kibana-plugin-server.savedobjectsnamespace.md)
 
-## SavedObjectsNamespace class
+## SavedObjectsNamespace type
 
 <b>Signature:</b>
 
 ```typescript
-export declare class SavedObjectsNamespace 
+export declare type SavedObjectsNamespace = string | undefined;
 ```
-
-## Constructors
-
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)(id)](./kibana-plugin-server.savedobjectsnamespace.(constructor).md) |  | Constructs a new instance of the <code>SavedObjectsNamespace</code> class |
-
-## Properties
-
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [id](./kibana-plugin-server.savedobjectsnamespace.id.md) |  | <code>string &#124; undefined</code> |  |
-

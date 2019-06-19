@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export class SavedObjectsNamespace {
-  constructor(public readonly id?: string) {}
-}
+export type SavedObjectsNamespace = string | undefined;

@@ -25,13 +25,13 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import uuid from 'uuid';
+import { SavedObjectsNamespace } from 'src/core/server/saved_objects';
 import { SavedObjectsSchema } from '../schema';
 import { decodeVersion, encodeVersion } from '../version';
 import {
   SavedObjectsMigrationVersion,
   SavedObjectReference,
 } from '../service/saved_objects_client';
-import { SavedObjectsNamespace } from '..';
 
 /**
  * A raw document as represented directly in the saved object index.
@@ -120,10 +120,7 @@ export class SavedObjectsSerializer {
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
-      ...(namespace &&
-        !this.schema.isNamespaceAgnostic(type) && {
-          namespace: new SavedObjectsNamespace(namespace),
-        }),
+      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       attributes: _source[type],
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
@@ -152,9 +149,7 @@ export class SavedObjectsSerializer {
       [type]: attributes,
       type,
       references,
-      ...(namespace &&
-        namespace.id &&
-        !this.schema.isNamespaceAgnostic(type) && { namespace: namespace.id }),
+      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
     };
@@ -173,18 +168,18 @@ export class SavedObjectsSerializer {
    * @param {string} type - The saved object type
    * @param {string} id - The id of the saved object
    */
-  public generateRawId(namespace: SavedObjectsNamespace | undefined, type: string, id?: string) {
+  public generateRawId(namespace: SavedObjectsNamespace, type: string, id?: string) {
     const namespacePrefix =
-      namespace && namespace.id && !this.schema.isNamespaceAgnostic(type) ? `${namespace.id}:` : '';
+      namespace && !this.schema.isNamespaceAgnostic(type) ? `${String(namespace)}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 
-  private trimIdPrefix(namespace: string | undefined, type: string, id: string) {
+  private trimIdPrefix(namespace: SavedObjectsNamespace, type: string, id: string) {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
 
     const namespacePrefix =
-      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+      namespace && !this.schema.isNamespaceAgnostic(type) ? `${String(namespace)}:` : '';
     const prefix = `${namespacePrefix}${type}:`;
 
     if (!id.startsWith(prefix)) {

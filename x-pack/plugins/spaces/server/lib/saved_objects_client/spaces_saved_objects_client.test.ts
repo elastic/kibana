@@ -7,17 +7,11 @@
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { spacesServiceMock } from '../../new_platform/spaces_service/spaces_service.mock';
+import { DEFAULT_SPACE_NAMESPACE } from './default_space_namespace';
 
 const types = ['foo', 'bar', 'space'];
 
 const createMockRequest = () => ({});
-
-const createMockSavedObjectsService = () =>
-  (({
-    createNamespace: jest
-      .fn()
-      .mockImplementation((id?: string) => ({ id } as SavedObjectsNamespace)),
-  } as unknown) as SavedObjectsService);
 
 const createMockClient = () => {
   const errors = Symbol() as any;
@@ -39,13 +33,13 @@ const createSpacesService = async (spaceId: string) => {
 };
 
 [
-  { id: DEFAULT_SPACE_ID, expectedNamespace: {} },
-  { id: 'space_1', expectedNamespace: { id: 'space_1' } },
+  { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
+  { id: 'space_1', expectedNamespace: 'space_1' },
 ].forEach(currentSpace => {
   describe(`${currentSpace.id} space`, () => {
     describe('#get', () => {
       test(`allows options.namespace to be specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
 
@@ -53,13 +47,29 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.get('foo', '', { namespace: { id: 'bar' } });
+        await client.get('foo', '', { namespace: 'bar' });
 
-        expect(baseClient.get).toHaveBeenCalledWith('foo', '', { namespace: { id: 'bar' } });
+        expect(baseClient.get).toHaveBeenCalledWith('foo', '', { namespace: 'bar' });
+      });
+
+      test(`allows options.namespace to be specified using the DEFAULT_SPACE_NAMESPACE symbol`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await client.get('foo', '', { namespace: DEFAULT_SPACE_NAMESPACE });
+
+        expect(baseClient.get).toHaveBeenCalledWith('foo', '', { namespace: undefined });
       });
 
       test(`throws error if type is space`, async () => {
@@ -71,7 +81,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -89,7 +98,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
         const type = Symbol();
@@ -108,7 +116,7 @@ const createSpacesService = async (spaceId: string) => {
 
     describe('#bulkGet', () => {
       test(`allows options.namespace to be specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
 
@@ -116,14 +124,32 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.bulkGet([{ id: '', type: 'foo' }], { namespace: { id: 'bar' } });
+        await client.bulkGet([{ id: '', type: 'foo' }], { namespace: 'bar' });
 
         expect(baseClient.bulkGet).toHaveBeenCalledWith([{ id: '', type: 'foo' }], {
-          namespace: { id: 'bar' },
+          namespace: 'bar',
+        });
+      });
+
+      test(`allows options.namespace to be specified using the DEFAULT_SPACE_NAMESPACE symbol`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await client.bulkGet([{ id: '', type: 'foo' }], { namespace: DEFAULT_SPACE_NAMESPACE });
+
+        expect(baseClient.bulkGet).toHaveBeenCalledWith([{ id: '', type: 'foo' }], {
+          namespace: undefined,
         });
       });
 
@@ -136,13 +162,12 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
         await expect(
           client.bulkGet([{ id: '', type: 'foo' }, { id: '', type: 'space' }], {
-            namespace: { id: 'bar' },
+            namespace: 'bar',
           })
         ).rejects.toThrowErrorMatchingSnapshot();
       });
@@ -158,7 +183,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -177,7 +201,7 @@ const createSpacesService = async (spaceId: string) => {
 
     describe('#find', () => {
       test(`allows options.namespace to be specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
 
@@ -185,13 +209,29 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.find({ type: ['foo'], namespace: { id: 'bar' } });
+        await client.find({ type: ['foo'], namespace: 'bar' });
 
-        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo'], namespace: { id: 'bar' } });
+        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo'], namespace: 'bar' });
+      });
+
+      test(`allows options.namespace to be specified using the DEFAULT_SPACE_NAMESPACE symbol`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await client.find({ type: ['foo'], namespace: DEFAULT_SPACE_NAMESPACE });
+
+        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo'], namespace: undefined });
       });
 
       test(`throws error if options.type is space`, async () => {
@@ -205,7 +245,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -223,7 +262,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
         const options = Object.freeze({ type: 'foo' });
@@ -248,7 +286,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -268,7 +305,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -288,7 +324,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -305,7 +340,7 @@ const createSpacesService = async (spaceId: string) => {
 
     describe('#create', () => {
       test(`allows options.namespace to be specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
 
@@ -313,13 +348,29 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.create('foo', {}, { namespace: { id: 'bar' } });
+        await client.create('foo', {}, { namespace: 'bar' });
 
-        expect(baseClient.create).toHaveBeenCalledWith('foo', {}, { namespace: { id: 'bar' } });
+        expect(baseClient.create).toHaveBeenCalledWith('foo', {}, { namespace: 'bar' });
+      });
+
+      test(`allows options.namespace to be specified using the DEFAULT_SPACE_NAMESPACE symbol`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await client.create('foo', {}, { namespace: DEFAULT_SPACE_NAMESPACE });
+
+        expect(baseClient.create).toHaveBeenCalledWith('foo', {}, { namespace: undefined });
       });
 
       test(`throws error if type is space`, async () => {
@@ -331,7 +382,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -349,7 +399,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -369,7 +418,7 @@ const createSpacesService = async (spaceId: string) => {
 
     describe('#bulkCreate', () => {
       test(`allows options.namespace to be specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
 
@@ -377,17 +426,38 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
         await client.bulkCreate([{ id: '', type: 'foo', attributes: {} }], {
-          namespace: { id: 'bar' },
+          namespace: 'bar',
         });
 
         expect(baseClient.bulkCreate).toHaveBeenCalledWith(
           [{ id: '', type: 'foo', attributes: {} }],
-          { namespace: { id: 'bar' } }
+          { namespace: 'bar' }
+        );
+      });
+
+      test(`allows options.namespace to be specified using the DEFAULT_SPACE_NAMESPACE symbol`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await client.bulkCreate([{ id: '', type: 'foo', attributes: {} }], {
+          namespace: DEFAULT_SPACE_NAMESPACE,
+        });
+
+        expect(baseClient.bulkCreate).toHaveBeenCalledWith(
+          [{ id: '', type: 'foo', attributes: {} }],
+          { namespace: undefined }
         );
       });
 
@@ -400,7 +470,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -423,7 +492,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -442,7 +510,7 @@ const createSpacesService = async (spaceId: string) => {
 
     describe('#update', () => {
       test(`allows options.namespace to be specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
 
@@ -450,18 +518,29 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.update('foo', 'id', {}, { namespace: { id: 'bar' } });
+        await client.update('foo', 'id', {}, { namespace: 'bar' });
 
-        expect(baseClient.update).toHaveBeenCalledWith(
-          'foo',
-          'id',
-          {},
-          { namespace: { id: 'bar' } }
-        );
+        expect(baseClient.update).toHaveBeenCalledWith('foo', 'id', {}, { namespace: 'bar' });
+      });
+
+      test(`allows options.namespace to be specified using the DEFAULT_SPACE_NAMESPACE symbol`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await client.update('foo', 'id', {}, { namespace: DEFAULT_SPACE_NAMESPACE });
+
+        expect(baseClient.update).toHaveBeenCalledWith('foo', 'id', {}, { namespace: undefined });
       });
 
       test(`throws error if type is space`, async () => {
@@ -473,7 +552,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -491,7 +569,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -512,7 +589,7 @@ const createSpacesService = async (spaceId: string) => {
 
     describe('#delete', () => {
       test(`allows options.namespace to be specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
 
@@ -520,13 +597,29 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.delete('foo', 'id', { namespace: { id: 'bar' } });
+        await client.delete('foo', 'id', { namespace: 'bar' });
 
-        expect(baseClient.delete).toHaveBeenCalledWith('foo', 'id', { namespace: { id: 'bar' } });
+        expect(baseClient.delete).toHaveBeenCalledWith('foo', 'id', { namespace: 'bar' });
+      });
+
+      test(`allows options.namespace to be specified using the DEFAULT_SPACE_NAMESPACE symbol`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await client.delete('foo', 'id', { namespace: DEFAULT_SPACE_NAMESPACE });
+
+        expect(baseClient.delete).toHaveBeenCalledWith('foo', 'id', { namespace: undefined });
       });
 
       test(`throws error if type is space`, async () => {
@@ -538,7 +631,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -556,7 +648,6 @@ const createSpacesService = async (spaceId: string) => {
           request,
           baseClient,
           spacesService,
-          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 

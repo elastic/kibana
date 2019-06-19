@@ -119,7 +119,7 @@ export class Plugin {
 
     const { addScopedSavedObjectsClientWrapperFactory, types } = core.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
-      Number.MAX_SAFE_INTEGER - 1,
+      Number.MIN_SAFE_INTEGER,
       spacesSavedObjectsClientWrapperFactory(spacesService, types)
     );
 

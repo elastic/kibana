@@ -33,7 +33,7 @@ interface Deps {
 export type EnsureSavedObjectsPrivileges = (
   typeOrTypes: string | string[] | undefined,
   operation: SavedObjectsOperation,
-  namespace: SavedObjectsNamespace | undefined,
+  namespace: SavedObjectsNamespace,
   args: any
 ) => Promise<void>;
 
@@ -43,7 +43,7 @@ export function ensureSavedObjectsPrivilegesFactory(deps: Deps) {
   const ensureSavedObjectsPrivileges: EnsureSavedObjectsPrivileges = async (
     typeOrTypes: string | string[] | undefined,
     operation: SavedObjectsOperation,
-    namespace: SavedObjectsNamespace | undefined,
+    namespace: SavedObjectsNamespace,
     args: any
   ) => {
     const types = normalizeTypes(typeOrTypes);
@@ -100,11 +100,14 @@ function normalizeTypes(typeOrTypes: string | string[] | undefined): string[] {
   return [typeOrTypes];
 }
 
-function namespaceToSpaceId(namespace: SavedObjectsNamespace | undefined) {
-  if (!namespace || !namespace.id) {
+function namespaceToSpaceId(namespace: SavedObjectsNamespace) {
+  if (!namespace) {
     return DEFAULT_SPACE_ID;
   }
-  return namespace.id;
+  if (typeof namespace === 'string') {
+    return namespace;
+  }
+  throw new Error(`Unable to convert namespace (${String(namespace)}) to space id.`);
 }
 
 function getMissingPrivileges(response: Record<string, boolean>): string[] {

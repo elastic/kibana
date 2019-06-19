@@ -6,7 +6,7 @@
 
 import crypto from 'crypto';
 import { Legacy, Server } from 'kibana';
-import { SavedObjectsRepository } from 'src/core/server/saved_objects/service';
+import { SavedObjectsRepository } from 'src/core/server';
 import { SavedObjectsBaseOptions, SavedObject, SavedObjectAttributes } from 'src/core/server';
 import {
   EncryptedSavedObjectsService,
@@ -76,11 +76,20 @@ export class Plugin {
         id: string,
         options?: SavedObjectsBaseOptions
       ): Promise<SavedObject<T>> => {
-        const savedObject = await internalRepository.get(type, id, options);
+        if (options && typeof options.namespace === 'symbol') {
+          throw new TypeError(
+            'symbols are unsupported namespace values within the encrypted saved objects plugin'
+          );
+        }
+        const namespace: string | undefined = options
+          ? (options.namespace as string | undefined)
+          : undefined;
+
+        const savedObject = await internalRepository.get(type, id, { ...options, namespace });
         return {
           ...savedObject,
           attributes: await service.decryptAttributes(
-            { type, id, namespace: options && options.namespace && options.namespace.id },
+            { type, id, namespace },
             savedObject.attributes
           ),
         };

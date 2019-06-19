@@ -26,7 +26,6 @@ import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
 import { encodeHitVersion } from '../../version';
-import { SavedObjectsNamespace } from './namespace';
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
@@ -325,7 +324,7 @@ describe('SavedObjectsRepository', () => {
         },
         {
           id: 'logstash-*',
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
           references: [
             {
               name: 'ref_0',
@@ -480,7 +479,7 @@ describe('SavedObjectsRepository', () => {
         },
         {
           id: 'foo-id',
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         }
       );
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -532,7 +531,7 @@ describe('SavedObjectsRepository', () => {
         },
         {
           id: 'foo-id',
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         }
       );
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -833,7 +832,7 @@ describe('SavedObjectsRepository', () => {
           { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
         ],
         {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         }
       );
 
@@ -887,7 +886,7 @@ describe('SavedObjectsRepository', () => {
           { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
         ],
         {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         }
       );
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -973,7 +972,7 @@ describe('SavedObjectsRepository', () => {
       await savedObjectsRepository.bulkCreate(
         [{ type: 'globaltype', id: 'one', attributes: { title: 'Test One' } }],
         {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         }
       );
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -1005,7 +1004,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockReturnValue({ result: 'deleted' });
       await expect(
         savedObjectsRepository.delete('index-pattern', 'logstash-*', {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         })
       ).resolves.toBeDefined();
 
@@ -1027,7 +1026,7 @@ describe('SavedObjectsRepository', () => {
     it(`prepends namespace to the id when providing namespace for namespaced type`, async () => {
       callAdminCluster.mockReturnValue({ result: 'deleted' });
       await savedObjectsRepository.delete('index-pattern', 'logstash-*', {
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -1059,7 +1058,7 @@ describe('SavedObjectsRepository', () => {
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.mockReturnValue({ result: 'deleted' });
       await savedObjectsRepository.delete('globaltype', 'logstash-*', {
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -1082,10 +1081,10 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
-    it('requires namespace to be of type Namespace', async () => {
+    it('requires namespace to be a string', async () => {
       callAdminCluster.mockReturnValue(deleteByQueryResults);
       expect(
-        savedObjectsRepository.deleteByNamespace('namespace-1')
+        savedObjectsRepository.deleteByNamespace(['namespace-1', 'namespace-2'])
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(callAdminCluster).not.toHaveBeenCalled();
       expect(onBeforeWrite).not.toHaveBeenCalled();
@@ -1093,15 +1092,14 @@ describe('SavedObjectsRepository', () => {
 
     it('constructs a deleteByQuery call using all types that are namespace aware', async () => {
       callAdminCluster.mockReturnValue(deleteByQueryResults);
-      const namespace = new SavedObjectsNamespace('my-namespace');
-      const result = await savedObjectsRepository.deleteByNamespace(namespace);
+      const result = await savedObjectsRepository.deleteByNamespace('my-namespace');
 
       expect(result).toEqual(deleteByQueryResults);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
 
       expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, {
-        namespace,
+        namespace: 'my-namespace',
         type: ['config', 'baz', 'index-pattern', 'dashboard'],
       });
 
@@ -1160,7 +1158,7 @@ describe('SavedObjectsRepository', () => {
       async () => {
         callAdminCluster.mockReturnValue(namespacedSearchResults);
         const relevantOpts = {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
           search: 'foo*',
           searchFields: ['foo'],
           type: ['bar'],
@@ -1222,7 +1220,7 @@ describe('SavedObjectsRepository', () => {
 
       const response = await savedObjectsRepository.find({
         type: 'foo',
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(response.total).toBe(count);
@@ -1364,7 +1362,7 @@ describe('SavedObjectsRepository', () => {
     it('prepends namespace and type to the id when providing namespace for namespaced type', async () => {
       callAdminCluster.mockResolvedValue(namespacedResult);
       await savedObjectsRepository.get('index-pattern', 'logstash-*', {
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(onBeforeWrite).not.toHaveBeenCalled();
@@ -1394,7 +1392,7 @@ describe('SavedObjectsRepository', () => {
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.mockResolvedValue(namespacedResult);
       await savedObjectsRepository.get('globaltype', 'logstash-*', {
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(onBeforeWrite).not.toHaveBeenCalled();
@@ -1462,7 +1460,7 @@ describe('SavedObjectsRepository', () => {
           { id: 'three', type: 'globaltype' },
         ],
         {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         }
       );
 
@@ -1740,7 +1738,7 @@ describe('SavedObjectsRepository', () => {
           title: 'Testing',
         },
         {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
           references: [
             {
               name: 'ref_0',
@@ -1825,7 +1823,7 @@ describe('SavedObjectsRepository', () => {
           name: 'bar',
         },
         {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
           references: [
             {
               name: 'ref_0',
@@ -1906,7 +1904,7 @@ describe('SavedObjectsRepository', () => {
         '6.0.0-alpha1',
         'buildNum',
         {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         }
       );
 
@@ -1931,7 +1929,7 @@ describe('SavedObjectsRepository', () => {
       };
 
       await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -1950,7 +1948,7 @@ describe('SavedObjectsRepository', () => {
 
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum', {
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -1997,7 +1995,7 @@ describe('SavedObjectsRepository', () => {
       }));
 
       await savedObjectsRepository.incrementCounter('globaltype', 'foo', 'counter', {
-        namespace: new SavedObjectsNamespace('foo-namespace'),
+        namespace: 'foo-namespace',
       });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -2016,31 +2014,31 @@ describe('SavedObjectsRepository', () => {
 
       expect(
         savedObjectsRepository.incrementCounter(null, '6.0.0-alpha1', 'buildNum', {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         })
       ).rejects.toEqual(new Error('"type" argument must be a string'));
 
       expect(
         savedObjectsRepository.incrementCounter(42, '6.0.0-alpha1', 'buildNum', {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         })
       ).rejects.toEqual(new Error('"type" argument must be a string'));
 
       expect(
         savedObjectsRepository.incrementCounter({}, '6.0.0-alpha1', 'buildNum', {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         })
       ).rejects.toEqual(new Error('"type" argument must be a string'));
 
       expect(
         savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', null, {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         })
       ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
 
       expect(
         savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 42, {
-          namespace: new SavedObjectsNamespace('foo-namespace'),
+          namespace: 'foo-namespace',
         })
       ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
 

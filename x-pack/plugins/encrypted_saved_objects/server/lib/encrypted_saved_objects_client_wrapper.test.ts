@@ -92,7 +92,7 @@ describe('#create', () => {
 
   it('uses `namespace` to encrypt attributes if it is specified', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { overwrite: true, namespace: { id: 'some-namespace' } };
+    const options = { overwrite: true, namespace: 'some-namespace' };
     const mockedResponse = {
       id: 'uuid-v4-id',
       type: 'known-type',
@@ -117,7 +117,7 @@ describe('#create', () => {
     expect(mockBaseClient.create).toHaveBeenCalledWith(
       'known-type',
       { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-      { id: 'uuid-v4-id', overwrite: true, namespace: { id: 'some-namespace' } }
+      { id: 'uuid-v4-id', overwrite: true, namespace: 'some-namespace' }
     );
   });
 
@@ -141,7 +141,7 @@ describe('#create', () => {
 describe('#bulkCreate', () => {
   it('does not fail if ID is specified for not registered type', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: { id: 'some-namespace' } };
+    const options = { namespace: 'some-namespace' };
     const mockedResponse = {
       saved_objects: [
         {
@@ -189,7 +189,7 @@ describe('#bulkCreate', () => {
 
   it('fails if ID is specified for registered type', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: { id: 'some-namespace' } };
+    const options = { namespace: 'some-namespace' };
 
     const bulkCreateParams = [
       { id: 'some-id', type: 'known-type', attributes },
@@ -258,7 +258,7 @@ describe('#bulkCreate', () => {
 
   it('uses `namespace` to encrypt attributes if it is specified', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: { id: 'some-namespace' } };
+    const options = { namespace: 'some-namespace' };
     const mockedResponse = {
       saved_objects: [{ id: 'uuid-v4-id', type: 'known-type', attributes, references: [] }],
     };
@@ -320,7 +320,7 @@ describe('#bulkCreate', () => {
 
 describe('#delete', () => {
   it('redirects request to underlying base client if type is not registered', async () => {
-    const options = { namespace: { id: 'some-ns' } };
+    const options = { namespace: 'some-ns' };
 
     await wrapper.delete('unknown-type', 'some-id', options);
 
@@ -329,7 +329,7 @@ describe('#delete', () => {
   });
 
   it('redirects request to underlying base client if type is registered', async () => {
-    const options = { namespace: { id: 'some-ns' } };
+    const options = { namespace: 'some-ns' };
 
     await wrapper.delete('known-type', 'some-id', options);
 
@@ -471,7 +471,7 @@ describe('#bulkGet', () => {
       { type: 'unknown-type', id: 'some-id-2' },
     ];
 
-    const options = { namespace: { id: 'some-ns' } };
+    const options = { namespace: 'some-ns' };
     await expect(wrapper.bulkGet(bulkGetParams, options)).resolves.toEqual({
       ...mockedResponse,
       saved_objects: [
@@ -517,7 +517,7 @@ describe('#bulkGet', () => {
       { type: 'known-type', id: 'some-id-2' },
     ];
 
-    const options = { namespace: { id: 'some-ns' } };
+    const options = { namespace: 'some-ns' };
     await expect(wrapper.bulkGet(bulkGetParams, options)).resolves.toEqual({
       ...mockedResponse,
       saved_objects: [
@@ -562,7 +562,7 @@ describe('#get', () => {
 
     mockBaseClient.get.mockResolvedValue(mockedResponse);
 
-    const options = { namespace: { id: 'some-ns' } };
+    const options = { namespace: 'some-ns' };
     await expect(wrapper.get('unknown-type', 'some-id', options)).resolves.toEqual({
       ...mockedResponse,
       attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
@@ -581,7 +581,7 @@ describe('#get', () => {
 
     mockBaseClient.get.mockResolvedValue(mockedResponse);
 
-    const options = { namespace: { id: 'some-ns' } };
+    const options = { namespace: 'some-ns' };
     await expect(wrapper.get('known-type', 'some-id', options)).resolves.toEqual({
       ...mockedResponse,
       attributes: { attrOne: 'one', attrThree: 'three' },
@@ -651,7 +651,7 @@ describe('#update', () => {
 
   it('uses `namespace` to encrypt attributes if it is specified', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { version: 'some-version', namespace: { id: 'some-namespace' } };
+    const options = { version: 'some-version', namespace: 'some-namespace' };
     const mockedResponse = { id: 'some-id', type: 'known-type', attributes, references: [] };
 
     mockBaseClient.update.mockResolvedValue(mockedResponse);

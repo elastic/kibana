@@ -8,7 +8,7 @@ import {
   SecureSavedObjectsClientWrapper,
   SecureSavedObjectsClientWrapperDeps,
 } from './secure_saved_objects_client_wrapper';
-import { SavedObjectsClientContract, SavedObjectsNamespace } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 
 describe('#errors', () => {
   test(`assigns errors from constructor to .errors`, () => {
@@ -208,7 +208,7 @@ describe('#find', () => {
   test(`throws error when ensureSavedObjectsPrivileges throws an error`, async () => {
     const type1 = 'foo-type';
     const type2 = 'bar-type';
-    const namespace = { id: 'foo-namespace' } as SavedObjectsNamespace;
+    const namespace = 'foo-namespace';
     const testError = new Error('test');
     const ensureSavedObjectsPrivileges = jest.fn().mockImplementation(async () => {
       throw testError;
@@ -229,7 +229,7 @@ describe('#find', () => {
 
   test(`returns result of baseClient.find when ensureSavedObjectsPrivileges succeeds`, async () => {
     const type = 'foo-type';
-    const namespace = { id: 'foo-namespace' } as SavedObjectsNamespace;
+    const namespace = 'foo-namespace';
     const returnValue = Symbol();
     const mockBaseClient = ({
       find: jest.fn().mockReturnValue(returnValue),

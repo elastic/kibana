@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getNamespace throws an error when an invalid namespace (() => null) is provided 1`] = `"unable to determine namespace from () => null. Expected string but found function"`;
+
+exports[`getNamespace throws an error when an invalid namespace ([object Object]) is provided 1`] = `"unable to determine namespace from [object Object]. Expected string but found object"`;
+
+exports[`getNamespace throws an error when an invalid namespace (1) is provided 1`] = `"unable to determine namespace from 1. Expected string but found number"`;
+
+exports[`getNamespace throws an error when an invalid namespace (Symbol()) is provided 1`] = `"unable to determine namespace from Symbol(). Expected string but found symbol"`;
+
+exports[`getNamespace throws an error when an invalid namespace (true) is provided 1`] = `"unable to determine namespace from true. Expected string but found boolean"`;

@@ -16,7 +16,6 @@ export interface SavedObjectsService<Request = any>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [addScopedSavedObjectsClientWrapperFactory](./kibana-plugin-server.savedobjectsservice.addscopedsavedobjectsclientwrapperfactory.md) | <code>ScopedSavedObjectsClientProvider&lt;Request&gt;['addClientWrapperFactory']</code> |  |
-|  [createNamespace](./kibana-plugin-server.savedobjectsservice.createnamespace.md) | <code>(id?: string) =&gt; SavedObjectsNamespace</code> |  |
 |  [getScopedSavedObjectsClient](./kibana-plugin-server.savedobjectsservice.getscopedsavedobjectsclient.md) | <code>ScopedSavedObjectsClientProvider&lt;Request&gt;['getClient']</code> |  |
 |  [SavedObjectsClient](./kibana-plugin-server.savedobjectsservice.savedobjectsclient.md) | <code>typeof SavedObjectsClient</code> |  |
 |  [types](./kibana-plugin-server.savedobjectsservice.types.md) | <code>string[]</code> |  |

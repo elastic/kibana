@@ -9,6 +9,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 import { Server } from 'kibana';
+import { SavedObjectsNamespace } from 'src/core/server';
 import { EncryptedSavedObjectsAuditLogger } from './encrypted_saved_objects_audit_logger';
 import { EncryptionError } from './encryption_error';
 
@@ -28,7 +29,7 @@ export interface EncryptedSavedObjectTypeRegistration {
 export interface SavedObjectDescriptor {
   readonly id: string;
   readonly type: string;
-  readonly namespace?: string;
+  readonly namespace?: SavedObjectsNamespace;
 }
 
 /**
@@ -38,7 +39,7 @@ export interface SavedObjectDescriptor {
  */
 export function descriptorToArray(descriptor: SavedObjectDescriptor) {
   return descriptor.namespace
-    ? [descriptor.namespace, descriptor.type, descriptor.id]
+    ? [String(descriptor.namespace), descriptor.type, descriptor.id]
     : [descriptor.type, descriptor.id];
 }
 

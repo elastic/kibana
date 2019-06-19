@@ -19,11 +19,11 @@
 
 import Boom from 'boom';
 
+import { SavedObjectsNamespace } from 'src/core/server/saved_objects';
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
-import { SavedObjectsNamespace } from '../namespace';
 
 interface GetSearchDslOptions {
   type: string | string[];

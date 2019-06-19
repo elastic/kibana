@@ -17,7 +17,6 @@ export function spacesSavedObjectsClientWrapperFactory(
       baseClient: client,
       request,
       spacesService,
-      getNamespace: createGetNamespace(savedObjectsService),
       types,
     });
 }

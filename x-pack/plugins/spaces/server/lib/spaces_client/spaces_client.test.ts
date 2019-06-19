@@ -67,8 +67,6 @@ const createMockConfig = (mockConfig: SpacesConfigType = { maxSpaces: 1000 }) =>
   return config.schema.validate(mockConfig);
 };
 
-const mockCreateNamespace = jest.fn().mockImplementation(id => ({ id }));
-
 describe('#getAll', () => {
   const savedObjects = [
     {
@@ -128,8 +126,7 @@ describe('#getAll', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const actualSpaces = await client.getAll();
 
@@ -169,8 +166,7 @@ describe('#getAll', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const actualSpaces = await client.getAll();
 
@@ -223,8 +219,7 @@ describe('#getAll', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
       await expect(client.getAll()).rejects.toThrowErrorMatchingSnapshot();
 
@@ -279,8 +274,7 @@ describe('#getAll', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
       const actualSpaces = await client.getAll();
 
@@ -321,8 +315,7 @@ describe('#canEnumerateSpaces', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       const canEnumerateSpaces = await client.canEnumerateSpaces();
@@ -348,8 +341,7 @@ describe('#canEnumerateSpaces', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const canEnumerateSpaces = await client.canEnumerateSpaces();
 
@@ -380,8 +372,7 @@ describe('#canEnumerateSpaces', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       const canEnumerateSpaces = await client.canEnumerateSpaces();
@@ -416,8 +407,7 @@ describe('#canEnumerateSpaces', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       const canEnumerateSpaces = await client.canEnumerateSpaces();
@@ -469,8 +459,7 @@ describe('#get', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = savedObject.id;
       const actualSpace = await client.get(id);
@@ -501,8 +490,7 @@ describe('#get', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = savedObject.id;
       const actualSpace = await client.get(id);
@@ -536,8 +524,7 @@ describe('#get', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = 'foo-space';
 
@@ -574,8 +561,7 @@ describe('#get', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = savedObject.id;
 
@@ -654,8 +640,7 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -696,8 +681,7 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingSnapshot();
@@ -738,8 +722,7 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -782,8 +765,7 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingSnapshot();
@@ -821,8 +803,7 @@ describe('#create', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingSnapshot();
@@ -865,8 +846,7 @@ describe('#create', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -918,8 +898,7 @@ describe('#create', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingSnapshot();
@@ -997,8 +976,7 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -1030,8 +1008,7 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -1066,8 +1043,7 @@ describe('#update', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = savedObject.id;
       await expect(client.update(id, spaceToUpdate)).rejects.toThrowErrorMatchingSnapshot();
@@ -1105,8 +1081,7 @@ describe('#update', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -1165,8 +1140,7 @@ describe('#delete', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -1196,15 +1170,14 @@ describe('#delete', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await client.delete(id);
 
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
-      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith({ id });
+      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -1229,8 +1202,7 @@ describe('#delete', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -1262,8 +1234,7 @@ describe('#delete', () => {
         mockCallWithRequestRepository,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await client.delete(id);
@@ -1271,7 +1242,7 @@ describe('#delete', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
-      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith({ id });
+      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -1297,8 +1268,7 @@ describe('#delete', () => {
         null,
         mockConfig,
         null,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -1334,8 +1304,7 @@ describe('#delete', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -1375,8 +1344,7 @@ describe('#delete', () => {
         null,
         mockConfig,
         mockInternalRepository,
-        request,
-        mockCreateNamespace
+        request
       );
 
       await client.delete(id);
@@ -1388,7 +1356,7 @@ describe('#delete', () => {
       );
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockInternalRepository.delete).toHaveBeenCalledWith('space', id);
-      expect(mockInternalRepository.deleteByNamespace).toHaveBeenCalledWith({ id });
+      expect(mockInternalRepository.deleteByNamespace).toHaveBeenCalledWith(id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete');
     });

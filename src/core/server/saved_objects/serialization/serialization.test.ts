@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { SavedObjectsSerializer } from '.';
 import { SavedObjectsSchema } from '../schema';
 import { encodeVersion } from '../version';
-import { SavedObjectsNamespace } from '../service/lib';
 
 describe('saved object conversion', () => {
   describe('#rawToSavedObject', () => {
@@ -377,9 +376,7 @@ describe('saved object conversion', () => {
           },
         });
 
-        expect(actual).toHaveProperty('namespace');
-        expect(actual.namespace).toBeInstanceOf(SavedObjectsNamespace);
-        expect(actual.namespace!.id).toEqual('baz');
+        expect(actual).toHaveProperty('namespace', 'baz');
       });
     });
 
@@ -595,7 +592,7 @@ describe('saved object conversion', () => {
         const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const v1 = serializer.savedObjectToRaw({
           type: 'foo',
-          namespace: new SavedObjectsNamespace('bar'),
+          namespace: 'bar',
           attributes: {
             bar: true,
           },
@@ -603,7 +600,7 @@ describe('saved object conversion', () => {
 
         const v2 = serializer.savedObjectToRaw({
           type: 'foo',
-          namespace: new SavedObjectsNamespace('bar'),
+          namespace: 'bar',
           attributes: {
             bar: true,
           },
@@ -618,7 +615,7 @@ describe('saved object conversion', () => {
         const actual = serializer.savedObjectToRaw({
           type: 'foo',
           attributes: {},
-          namespace: new SavedObjectsNamespace('bar'),
+          namespace: 'bar',
         } as any);
 
         expect(actual._source).toHaveProperty('namespace', 'bar');
@@ -632,7 +629,7 @@ describe('saved object conversion', () => {
         );
         const v1 = serializer.savedObjectToRaw({
           type: 'foo',
-          namespace: new SavedObjectsNamespace('bar'),
+          namespace: 'bar',
           attributes: {
             bar: true,
           },
@@ -640,7 +637,7 @@ describe('saved object conversion', () => {
 
         const v2 = serializer.savedObjectToRaw({
           type: 'foo',
-          namespace: new SavedObjectsNamespace('bar'),
+          namespace: 'bar',
           attributes: {
             bar: true,
           },
@@ -656,7 +653,7 @@ describe('saved object conversion', () => {
         );
         const actual = serializer.savedObjectToRaw({
           type: 'foo',
-          namespace: new SavedObjectsNamespace('bar'),
+          namespace: 'bar',
           attributes: {},
         } as any);
 
@@ -992,27 +989,15 @@ describe('saved object conversion', () => {
 
   describe('#generateRawId', () => {
     describe('namespaced type without a namespace', () => {
-      test('generates an id if namespace is undefined', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
-        const id = serializer.generateRawId(undefined, 'goodbye');
-        expect(id).toMatch(/goodbye\:[\w-]+$/);
-      });
-
-      test('generates an id if namespace is has an indefined id', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
-        const id = serializer.generateRawId(new SavedObjectsNamespace(), 'goodbye');
-        expect(id).toMatch(/goodbye\:[\w-]+$/);
-      });
-
       test('generates an id if none is specified', () => {
         const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
-        const id = serializer.generateRawId(new SavedObjectsNamespace(''), 'goodbye');
+        const id = serializer.generateRawId('', 'goodbye');
         expect(id).toMatch(/goodbye\:[\w-]+$/);
       });
 
       test('uses the id that is specified', () => {
         const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
-        const id = serializer.generateRawId(new SavedObjectsNamespace(''), 'hello', 'world');
+        const id = serializer.generateRawId('', 'hello', 'world');
         expect(id).toMatch('hello:world');
       });
     });
@@ -1020,13 +1005,13 @@ describe('saved object conversion', () => {
     describe('namespaced type with a namespace', () => {
       test('generates an id if none is specified and prefixes namespace', () => {
         const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
-        const id = serializer.generateRawId(new SavedObjectsNamespace('foo'), 'goodbye');
+        const id = serializer.generateRawId('foo', 'goodbye');
         expect(id).toMatch(/foo:goodbye\:[\w-]+$/);
       });
 
       test('uses the id that is specified and prefixes the namespace', () => {
         const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
-        const id = serializer.generateRawId(new SavedObjectsNamespace('foo'), 'hello', 'world');
+        const id = serializer.generateRawId('foo', 'hello', 'world');
         expect(id).toMatch('foo:hello:world');
       });
     });
@@ -1036,13 +1021,13 @@ describe('saved object conversion', () => {
         const serializer = new SavedObjectsSerializer(
           new SavedObjectsSchema({ foo: { isNamespaceAgnostic: true } })
         );
-        const id = serializer.generateRawId(new SavedObjectsNamespace('foo'), 'goodbye');
+        const id = serializer.generateRawId('foo', 'goodbye');
         expect(id).toMatch(/goodbye\:[\w-]+$/);
       });
 
       test(`uses the id that is specified and doesn't prefix the namespace`, () => {
         const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
-        const id = serializer.generateRawId(new SavedObjectsNamespace('foo'), 'hello', 'world');
+        const id = serializer.generateRawId('foo', 'hello', 'world');
         expect(id).toMatch('hello:world');
       });
     });

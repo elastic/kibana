@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { SavedObjectsNamespace } from 'src/core/server/saved_objects';
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
-import { SavedObjectsNamespace } from '../namespace';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -62,13 +62,13 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  */
 function getClauseForType(
   schema: SavedObjectsSchema,
-  namespace: SavedObjectsNamespace | undefined,
+  namespace: SavedObjectsNamespace,
   type: string
 ) {
-  if (namespace && namespace.id && !schema.isNamespaceAgnostic(type)) {
+  if (namespace && !schema.isNamespaceAgnostic(type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespace: namespace.id } }],
+        must: [{ term: { type } }, { term: { namespace } }],
       },
     };
   }

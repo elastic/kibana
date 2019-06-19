@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SavedObjectsRepository, SavedObjectsNamespace } from './lib';
+import { SavedObjectsNamespace } from 'src/core/server';
+import { SavedObjectsRepository } from './lib';
 
 import { SavedObjectsErrorHelpers } from './lib/errors';
 

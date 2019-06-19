@@ -14,6 +14,8 @@ import { Observable } from 'rxjs';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SavedObjectsNamespace as SavedObjectsNamespace_2 } from 'src/core/server';
+import { SavedObjectsNamespace as SavedObjectsNamespace_3 } from 'src/core/server/saved_objects';
 import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
 import { ServerOptions } from 'hapi';
@@ -440,7 +442,7 @@ export interface SavedObjectReference {
 
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
-    namespace?: SavedObjectsNamespace;
+    namespace?: SavedObjectsNamespace_2;
 }
 
 // @public (undocumented)
@@ -480,7 +482,6 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
 
 // @internal (undocumented)
 export class SavedObjectsClient {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
     constructor(repository: SavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -622,11 +623,33 @@ export interface SavedObjectsMigrationVersion {
 // Warning: (ae-missing-release-tag) "SavedObjectsNamespace" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
-export class SavedObjectsNamespace {
-    constructor(id?: string | undefined);
+export type SavedObjectsNamespace = string | undefined;
+
+// Warning: (ae-missing-release-tag) "SavedObjectsRepository" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class SavedObjectsRepository {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepositoryOptions" needs to be exported by the entry point index.d.ts
+    constructor(options: SavedObjectsRepositoryOptions);
+    bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    create<T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+    deleteByNamespace(namespace: string): Promise<any>;
     // (undocumented)
-    readonly id?: string | undefined;
-}
+    find<T extends SavedObjectAttributes = any>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    // Warning: (ae-forgotten-export) The symbol "IncrementCounterOptions" needs to be exported by the entry point index.d.ts
+    incrementCounter(type: string, id: string, counterFieldName: string, options?: IncrementCounterOptions): Promise<{
+        id: string;
+        type: string;
+        updated_at: string;
+        references: any;
+        version: string;
+        attributes: any;
+    }>;
+    update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+    }
 
 // @public (undocumented)
 export interface SavedObjectsService<Request = any> {
@@ -634,8 +657,6 @@ export interface SavedObjectsService<Request = any> {
     // 
     // (undocumented)
     addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
-    // (undocumented)
-    createNamespace: (id?: string) => SavedObjectsNamespace;
     // (undocumented)
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)

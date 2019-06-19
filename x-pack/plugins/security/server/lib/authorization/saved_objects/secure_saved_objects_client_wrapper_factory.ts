@@ -7,9 +7,9 @@
 import { SavedObjectsService } from 'src/core/server';
 import { Legacy } from 'kibana';
 import { SavedObjectsClientWrapperOptions } from 'src/core/server/saved_objects/service/lib';
+import { OptionalPlugin } from '../../../../../../server/lib/optional_plugin';
 import { SpacesPlugin } from '../../../../../spaces/types';
 import { AuthorizationService } from '../service';
-import { OptionalPlugin } from '../../optional_plugin';
 import { ensureSavedObjectsPrivilegesFactory } from './ensure_saved_objects_privileges';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 

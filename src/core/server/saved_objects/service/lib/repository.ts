@@ -42,7 +42,6 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
-import { SavedObjectsNamespace } from './namespace';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -342,12 +341,12 @@ export class SavedObjectsRepository {
   /**
    * Deletes all objects from the provided namespace.
    *
-   * @param {SavedObjectsNamespace} namespace
+   * @param {string} namespace
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
-  async deleteByNamespace(namespace: SavedObjectsNamespace): Promise<any> {
-    if (!namespace || !namespace.hasOwnProperty('id')) {
-      throw new TypeError(`namespace is required`);
+  async deleteByNamespace(namespace: string): Promise<any> {
+    if (!namespace || typeof namespace !== 'string') {
+      throw new TypeError(`namespace is required, and must be a string`);
     }
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
