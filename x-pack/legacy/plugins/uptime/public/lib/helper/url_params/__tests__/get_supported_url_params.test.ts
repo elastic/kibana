@@ -9,40 +9,48 @@ import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 describe('getSupportedUrlParams', () => {
   it('returns custom values', () => {
+    expect.assertions(1);
     const customValues = {
       autorefreshInterval: '23',
       autorefreshIsPaused: 'false',
       dateRangeStart: 'foo',
       dateRangeEnd: 'bar',
+      monitorListPageIndex: '23',
+      monitorListPageSize: '50',
+      monitorListSortDirection: 'desc',
+      monitorListSortField: 'monitor.status',
       search: 'monitor.status: down',
       selectedPingStatus: 'up',
     };
     const result = getSupportedUrlParams(customValues);
-    expect(result).toEqual({
-      autorefreshInterval: 23,
-      autorefreshIsPaused: false,
-      dateRangeStart: 'foo',
-      dateRangeEnd: 'bar',
-      search: 'monitor.status: down',
-      selectedPingStatus: 'up',
-    });
+    expect(result).toMatchSnapshot();
   });
 
   it('returns default values', () => {
+    expect.assertions(2);
     const {
       AUTOREFRESH_INTERVAL,
       AUTOREFRESH_IS_PAUSED,
       DATE_RANGE_START,
       DATE_RANGE_END,
+      MONITOR_LIST_PAGE_INDEX,
+      MONITOR_LIST_PAGE_SIZE,
+      MONITOR_LIST_SORT_DIRECTION,
+      MONITOR_LIST_SORT_FIELD,
       SEARCH,
       SELECTED_PING_LIST_STATUS,
     } = CLIENT_DEFAULTS;
     const result = getSupportedUrlParams({});
+    expect(result).toMatchSnapshot();
     expect(result).toEqual({
       autorefreshInterval: AUTOREFRESH_INTERVAL,
       autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
+      monitorListPageIndex: MONITOR_LIST_PAGE_INDEX,
+      monitorListPageSize: MONITOR_LIST_PAGE_SIZE,
+      monitorListSortDirection: MONITOR_LIST_SORT_DIRECTION,
+      monitorListSortField: MONITOR_LIST_SORT_FIELD,
       search: SEARCH,
       selectedPingStatus: SELECTED_PING_LIST_STATUS,
     });

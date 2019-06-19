@@ -49,10 +49,19 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         timestamp: sourceState['@timestamp'],
       };
       if (state.checks) {
+        state.checks.sort((a: any, b: any) =>
+          a.observer.geo.name === b.observer.geo.name
+            ? 0
+            : a.observer.geo.name >= b.observer.geo.name
+            ? 1
+            : -1
+        );
         state.checks = state.checks.map((check: any) => ({
           ...check,
           timestamp: check['@timestamp'],
         }));
+      } else {
+        state.checks = [];
       }
       const f = {
         monitor_id,

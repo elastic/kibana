@@ -13,14 +13,14 @@ export const monitorStatesSchema = gql`
 
   type Check {
     agent: Agent
-    monitor: CheckMonitor
+    monitor: CheckMonitor!
     observer: CheckObserver
-    timestamp: String
+    timestamp: String!
   }
 
   type CheckMonitor {
     ip: String
-    status: String
+    status: String!
   }
 
   type Location {

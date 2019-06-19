@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSupportedUrlParams returns custom values 1`] = `
+Object {
+  "autorefreshInterval": 23,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "bar",
+  "dateRangeStart": "foo",
+  "monitorListPageIndex": 23,
+  "monitorListPageSize": 50,
+  "monitorListSortDirection": "desc",
+  "monitorListSortField": "monitor.status",
+  "search": "monitor.status: down",
+  "selectedPingStatus": "up",
+}
+`;
+
+exports[`getSupportedUrlParams returns default values 1`] = `
+Object {
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "monitorListPageIndex": 0,
+  "monitorListPageSize": 20,
+  "monitorListSortDirection": "asc",
+  "monitorListSortField": "monitor_id",
+  "search": "",
+  "selectedPingStatus": "down",
+}
+`;

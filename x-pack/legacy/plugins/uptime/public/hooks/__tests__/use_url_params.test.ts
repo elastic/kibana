@@ -8,21 +8,16 @@ import { useUrlParams } from '../use_url_params';
 
 describe('useUrlParams', () => {
   it('returns the expected params and an update function', () => {
+    expect.assertions(2);
     const history: any[] = [];
     const location = { pathname: '/', search: '_g=()' };
     const [params, updateFunction] = useUrlParams(history, location);
-    expect(params).toEqual({
-      autorefreshInterval: 60000,
-      autorefreshIsPaused: false,
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
-      search: '',
-      selectedPingStatus: 'down',
-    });
+    expect(params).toMatchSnapshot();
     expect(updateFunction).toBeInstanceOf(Function);
   });
 
   it('returns an update URL function that pushes a new URL to the history object', () => {
+    expect.assertions(3);
     const history: any[] = [];
     const location = { pathname: '/', search: '_g=()' };
     const [, updateFunction] = useUrlParams(history, location);

@@ -2756,7 +2756,11 @@
             "name": "monitor",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "CheckMonitor", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "CheckMonitor", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2772,7 +2776,11 @@
             "name": "timestamp",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -2799,7 +2807,11 @@
             "name": "status",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }

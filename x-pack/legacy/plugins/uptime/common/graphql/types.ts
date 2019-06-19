@@ -532,17 +532,17 @@ export interface Agent {
 export interface Check {
   agent?: Agent | null;
 
-  monitor?: CheckMonitor | null;
+  monitor: CheckMonitor;
 
   observer?: CheckObserver | null;
 
-  timestamp?: string | null;
+  timestamp: string;
 }
 
 export interface CheckMonitor {
   ip?: string | null;
 
-  status?: string | null;
+  status: string;
 }
 
 export interface CheckObserver {

@@ -9,12 +9,12 @@ import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
+import { EmptyState, ErrorList, FilterBar, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { StatesTable, Criteria } from '../components/functional/states_table/states_table';
+import { MonitorList, Criteria } from '../components/functional/monitor_list';
 
 interface OverviewPageProps {
   basePath: string;
@@ -117,7 +117,15 @@ export const OverviewPage = ({
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <StatesTable
+        <MonitorList
+          absoluteStartDate={absoluteStartDate}
+          absoluteEndDate={absoluteEndDate}
+          basePath={basePath}
+          dangerColor={colors.danger}
+          successColor={colors.success}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          linkParameters={linkParameters}
           pageIndex={monitorListPageIndex}
           pageSize={monitorListPageSize}
           sortDirection={monitorListSortDirection}
@@ -129,16 +137,6 @@ export const OverviewPage = ({
             sortField: monitorListSortField,
             sortDirection: monitorListSortDirection,
           }}
-        />
-        <MonitorList
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
-          basePath={basePath}
-          dangerColor={colors.danger}
-          dateRangeStart={dateRangeStart}
-          dateRangeEnd={dateRangeEnd}
-          linkParameters={linkParameters}
-          variables={sharedProps}
         />
         <EuiSpacer size="s" />
         <ErrorList linkParameters={linkParameters} variables={sharedProps} />
