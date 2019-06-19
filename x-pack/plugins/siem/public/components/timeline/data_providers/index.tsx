@@ -8,25 +8,30 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../containers/source';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../drag_and_drop/helpers';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
+  OnDataProviderEdited,
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
+import { TimelineContext } from '../timeline_context';
 
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { Providers } from './providers';
 
 interface Props {
+  browserFields: BrowserFields;
   id: string;
   dataProviders: DataProvider[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
+  onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
@@ -67,31 +72,39 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  */
 export const DataProviders = pure<Props>(
   ({
+    browserFields,
     id,
     dataProviders,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
+    onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
   }) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
-      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)}>
-        {dataProviders.length ? (
-          <Providers
-            id={id}
-            dataProviders={dataProviders}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-          />
-        ) : (
-          <Empty />
+      <TimelineContext.Consumer>
+        {({ isLoading }) => (
+          <DroppableWrapper isDropDisabled={!show || isLoading} droppableId={getDroppableId(id)}>
+            {dataProviders != null && dataProviders.length ? (
+              <Providers
+                browserFields={browserFields}
+                id={id}
+                dataProviders={dataProviders}
+                onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+                onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+                onDataProviderEdited={onDataProviderEdited}
+                onDataProviderRemoved={onDataProviderRemoved}
+                onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+              />
+            ) : (
+              <Empty />
+            )}
+          </DroppableWrapper>
         )}
-      </DroppableWrapper>
+      </TimelineContext.Consumer>
     </DropTargetDataProviders>
   )
 );

@@ -14,6 +14,7 @@ import { BASE_PATH } from '../../common/constants';
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { setHttpClient } from '../../public/services/api';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -36,7 +37,7 @@ jest.mock('react-ace', () => {
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 jest.mock('brace/ext/language_tools', () => 'brace/ext/language_tools');
 
-setHttpClient(axios.create());
+setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 let server = null;
 
 let store = null;

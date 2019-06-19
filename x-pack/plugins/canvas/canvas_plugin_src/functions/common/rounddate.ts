@@ -5,14 +5,14 @@
  */
 
 import moment from 'moment';
-import { ContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   format: string;
 }
 
-export function rounddate(): ContextFunction<'rounddate', number, Arguments, number> {
+export function rounddate(): ExpressionFunction<'rounddate', number, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().rounddate;
 
   return {

@@ -97,6 +97,25 @@ export function workpad(server) {
 
       return savedObjectsClient
         .get(CANVAS_TYPE, id)
+        .then(obj => {
+          if (
+            // not sure if we need to be this defensive
+            obj.type === 'canvas-workpad' &&
+            obj.attributes &&
+            obj.attributes.pages &&
+            obj.attributes.pages.length
+          ) {
+            obj.attributes.pages.forEach(page => {
+              const elements = (page.elements || []).filter(({ id }) => !id.startsWith('group'));
+              const groups = (page.groups || []).concat(
+                (page.elements || []).filter(({ id }) => id.startsWith('group'))
+              );
+              page.elements = elements;
+              page.groups = groups;
+            });
+          }
+          return obj;
+        })
         .then(obj => ({ id: obj.id, ...obj.attributes }))
         .then(formatResponse)
         .catch(formatResponse);

@@ -11,6 +11,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldTypeIcon } from '../../../components/field_type_icon';
+import { DisplayValue } from '../../../components/display_value';
 import { getMLJobTypeAriaLabel } from '../../../util/field_types_utils';
 
 export function FieldStatsCard({ field }) {
@@ -93,9 +94,15 @@ export function FieldStatsCard({ field }) {
                         </div>
                       </div>
                       <div>
-                        <div className="stat min heading">{field.min_value}</div>
-                        <div className="stat median heading">{field.median_value}</div>
-                        <div className="stat max heading">{field.max_value}</div>
+                        <div className="stat min value">
+                          <DisplayValue value={field.min_value}/>
+                        </div>
+                        <div className="stat median value">
+                          <DisplayValue value={field.median_value}/>
+                        </div>
+                        <div className="stat max value">
+                          <DisplayValue value={field.max_value}/>
+                        </div>
                       </div>
                     </React.Fragment>
                   }

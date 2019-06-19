@@ -11,12 +11,9 @@ import { KpiHostsESMSearchBody } from './types';
 export const buildGeneralQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
 }: RequestBasicOptions): KpiHostsESMSearchBody[] => {
   const filter = [
@@ -33,7 +30,7 @@ export const buildGeneralQuery = ({
 
   const dslQuery = [
     {
-      index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+      index: defaultIndex,
       allowNoIndices: true,
       ignoreUnavailable: true,
     },

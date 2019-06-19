@@ -6,9 +6,10 @@
 
 import { AnyObject } from '../lib/esqueue';
 import { WithRequest } from './with_request';
+import { WithInternalRequest } from './with_internal_request';
 
 export class EsIndexClient {
-  constructor(readonly self: WithRequest) {}
+  constructor(readonly self: WithRequest | WithInternalRequest) {}
 
   public exists(params: AnyObject): Promise<any> {
     return this.self.callCluster('indices.exists', params);

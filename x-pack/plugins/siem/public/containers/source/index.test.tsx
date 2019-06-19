@@ -9,17 +9,18 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import { IndexType } from '../../graphql/types';
 import { wait } from '../../lib/helpers';
 
-import { WithSource } from '.';
+import '../../mock/ui_settings';
+
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 describe('Index Fields & Browser Fields', () => {
   test('Index Fields', async () => {
     mount(
       <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
+        <WithSource sourceId="default">
           {({ indexPattern }) => {
             if (!isEqual(indexPattern.fields, [])) {
               expect(indexPattern.fields).toEqual(mockIndexFields);
@@ -38,7 +39,7 @@ describe('Index Fields & Browser Fields', () => {
   test('Browser Fields', async () => {
     mount(
       <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
+        <WithSource sourceId="default">
           {({ browserFields }) => {
             if (!isEqual(browserFields, {})) {
               expect(browserFields).toEqual(mockBrowserFields);
@@ -52,5 +53,21 @@ describe('Index Fields & Browser Fields', () => {
 
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await wait();
+  });
+
+  describe('indicesExistOrDataTemporarilyUnavailable', () => {
+    test('it returns true when undefined', () => {
+      let undefVar;
+      const result = indicesExistOrDataTemporarilyUnavailable(undefVar);
+      expect(result).toBeTruthy();
+    });
+    test('it returns true when true', () => {
+      const result = indicesExistOrDataTemporarilyUnavailable(true);
+      expect(result).toBeTruthy();
+    });
+    test('it returns false when false', () => {
+      const result = indicesExistOrDataTemporarilyUnavailable(false);
+      expect(result).toBeFalsy();
+    });
   });
 });

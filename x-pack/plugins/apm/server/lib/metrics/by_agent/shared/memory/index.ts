@@ -5,36 +5,65 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  METRIC_SYSTEM_FREE_MEMORY,
+  METRIC_SYSTEM_TOTAL_MEMORY
+} from '../../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../helpers/setup_request';
-import { fetch, MemoryMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
-import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
+import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
-const chartBase: ChartBase<MemoryMetrics> = {
+const series = {
+  memoryUsedMax: {
+    title: i18n.translate('xpack.apm.chart.memorySeries.systemMaxLabel', {
+      defaultMessage: 'Max'
+    })
+  },
+  memoryUsedAvg: {
+    title: i18n.translate('xpack.apm.chart.memorySeries.systemAverageLabel', {
+      defaultMessage: 'Average'
+    })
+  }
+};
+
+const chartBase: ChartBase = {
   title: i18n.translate(
     'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
     {
-      defaultMessage: 'Memory usage'
+      defaultMessage: 'System memory usage'
     }
   ),
   key: 'memory_usage_chart',
   type: 'linemark',
   yUnit: 'percent',
-  series: {
-    memoryUsedMax: {
-      title: i18n.translate('xpack.apm.chart.memorySeries.systemMaxLabel', {
-        defaultMessage: 'System max'
-      })
-    },
-    memoryUsedAvg: {
-      title: i18n.translate('xpack.apm.chart.memorySeries.systemAverageLabel', {
-        defaultMessage: 'System average'
-      })
-    }
-  }
+  series
+};
+
+const percentUsedScript = {
+  lang: 'expression',
+  source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
 };
 
 export async function getMemoryChartData(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<MemoryMetrics>(result, chartBase);
+  return fetchAndTransformMetrics({
+    setup,
+    serviceName,
+    chartBase,
+    aggs: {
+      memoryUsedAvg: { avg: { script: percentUsedScript } },
+      memoryUsedMax: { max: { script: percentUsedScript } }
+    },
+    additionalFilters: [
+      {
+        exists: {
+          field: METRIC_SYSTEM_FREE_MEMORY
+        }
+      },
+      {
+        exists: {
+          field: METRIC_SYSTEM_TOTAL_MEMORY
+        }
+      }
+    ]
+  });
 }

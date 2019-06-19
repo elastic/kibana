@@ -896,7 +896,7 @@ const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
         const preexistingGroupParent = groupsToDissolve.find(
           groupShape => groupShape.id === shape.parent
         );
-        // if linked, dissociate from ad hoc group parent
+        // if linked, dissociate from group parent
         return preexistingGroupParent
           ? {
               ...shape,
@@ -909,7 +909,7 @@ const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
             }
           : shape;
       }),
-    selectedShapes,
+    selectedShapes: selectedShapes.filter(s => !groupsToDissolve.find(g => g.id === s.id)),
   };
 };
 

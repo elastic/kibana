@@ -11,6 +11,7 @@ import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail
 import { TestProviders } from '../../mock/test_providers';
 
 import { EventFieldsBrowser } from './event_fields_browser';
+import { mockBrowserFields } from '../../containers/source/mock';
 
 describe('EventFieldsBrowser', () => {
   describe('column headers', () => {
@@ -18,7 +19,14 @@ describe('EventFieldsBrowser', () => {
       test(`it renders the ${header} column header`, () => {
         const wrapper = mountWithIntl(
           <TestProviders>
-            <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
+            <EventFieldsBrowser
+              browserFields={mockBrowserFields}
+              data={mockDetailItemData}
+              eventId={mockDetailItemDataId}
+              isLoading={false}
+              onUpdateColumns={jest.fn()}
+              timelineId="test"
+            />
           </TestProviders>
         );
 
@@ -31,7 +39,14 @@ describe('EventFieldsBrowser', () => {
     test('it renders a filter input with the expected placeholder', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            isLoading={false}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+          />
         </TestProviders>
       );
 
@@ -45,7 +60,14 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected icon type for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            isLoading={false}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+          />
         </TestProviders>
       );
 
@@ -64,16 +86,22 @@ describe('EventFieldsBrowser', () => {
     test('it renders the field name for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            isLoading={false}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+          />
         </TestProviders>
       );
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
-          .at(1)
-          .containsMatchingElement(<span>_id</span>)
-      ).toEqual(true);
+          .find('[data-test-subj="field-name"]')
+          .at(0)
+          .text()
+      ).toEqual('_id');
     });
   });
 
@@ -81,7 +109,14 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected value for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            isLoading={false}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+          />
         </TestProviders>
       );
       expect(
@@ -97,7 +132,14 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected field description the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            isLoading={false}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+          />
         </TestProviders>
       );
 

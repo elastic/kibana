@@ -7,6 +7,8 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
@@ -40,6 +42,7 @@ export class HostOverviewByNameQuery extends QueryTemplate<
       id = 'hostOverviewQuery',
       children,
       hostName,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -49,6 +52,7 @@ export class HostOverviewByNameQuery extends QueryTemplate<
         query={HostOverviewQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           hostName,
@@ -57,6 +61,7 @@ export class HostOverviewByNameQuery extends QueryTemplate<
             from: startDate,
             to: endDate,
           },
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
         {({ data, loading, refetch }) => {

@@ -7,11 +7,8 @@
 import { RequestBasicOptions } from '../framework/types';
 
 export const mockOptions: RequestBasicOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
-    logAlias: 'filebeat-*',
-    auditbeatAlias: 'auditbeat-*',
-    packetbeatAlias: 'packetbeat-*',
-    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',
@@ -35,7 +32,7 @@ export const mockRequest = {
       filterQuery: '',
     },
     query:
-      'fragment ChartFields on KpiHostHistogramData {\n  x: key\n  y: count {\n    value\n    doc_count\n    __typename\n  }\n  __typename\n}\n\nquery GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {\n      hosts\n      hostsHistogram {\n        ...ChartFields\n        __typename\n      }\n      authSuccess\n      authSuccessHistogram {\n        ...ChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...ChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...ChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...ChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'fragment KpiHostChartFields on KpiHostHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      hosts\n      hostsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      authSuccess\n      authSuccessHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
@@ -244,136 +241,76 @@ export const mockResult = {
   hosts: 986,
   hostsHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 3158515,
-      count: {
-        value: 919,
-      },
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 919,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 703032,
-      count: {
-        value: 82,
-      },
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 82,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 1780,
-      count: {
-        value: 4,
-      },
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 4,
     },
   ],
   authSuccess: 61,
   authSuccessHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 11739,
-      count: {
-        doc_count: 8,
-      },
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 8,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 4031,
-      count: {
-        doc_count: 52,
-      },
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 52,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 13,
-      count: {
-        doc_count: 1,
-      },
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 1,
     },
   ],
   authFailure: 15722,
   authFailureHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 11739,
-      count: {
-        doc_count: 11731,
-      },
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 11731,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 4031,
-      count: {
-        doc_count: 3979,
-      },
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 3979,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 13,
-      count: {
-        doc_count: 12,
-      },
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 12,
     },
   ],
   uniqueSourceIps: 1407,
   uniqueSourceIpsHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 3158515,
-      count: {
-        value: 1182,
-      },
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 1182,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 703032,
-      count: {
-        value: 364,
-      },
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 364,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 1780,
-      count: {
-        value: 63,
-      },
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 63,
     },
   ],
   uniqueDestinationIps: 1954,
   uniqueDestinationIpsHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 3158515,
-      count: {
-        value: 1809,
-      },
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 1809,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 703032,
-      count: {
-        value: 407,
-      },
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 407,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 1780,
-      count: {
-        value: 64,
-      },
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 64,
     },
   ],
 };

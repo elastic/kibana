@@ -10,12 +10,12 @@ import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { jobServiceProvider } from '../models/job_service';
 
-export function jobServiceRoutes(server, commonRouteConfig) {
-  server.route({
+export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
+  route({
     method: 'POST',
     path: '/api/ml/jobs/force_start_datafeeds',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { forceStartDatafeeds } = jobServiceProvider(callWithRequest);
       const {
         datafeedIds,
@@ -30,11 +30,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/stop_datafeeds',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { stopDatafeeds } = jobServiceProvider(callWithRequest);
       const { datafeedIds } = request.payload;
       return stopDatafeeds(datafeedIds)
@@ -45,11 +45,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/delete_jobs',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { deleteJobs } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return deleteJobs(jobIds)
@@ -60,11 +60,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/close_jobs',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { closeJobs } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return closeJobs(jobIds)
@@ -75,11 +75,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/jobs_summary',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobsSummary } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return jobsSummary(jobIds)
@@ -90,11 +90,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/jobs_with_timerange',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobsWithTimerange } = jobServiceProvider(callWithRequest);
       const { dateFormatTz } = request.payload;
       return jobsWithTimerange(dateFormatTz)
@@ -107,11 +107,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/jobs',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { createFullJobsList } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return createFullJobsList(jobIds)
@@ -122,11 +122,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/jobs/groups',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getAllGroups } = jobServiceProvider(callWithRequest);
       return getAllGroups()
         .catch(resp => wrapError(resp));
@@ -136,11 +136,11 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/update_groups',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { updateGroups } = jobServiceProvider(callWithRequest);
       const { jobs } = request.payload;
       return updateGroups(jobs)
@@ -151,13 +151,28 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/jobs/deleting_jobs_tasks',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { deletingJobTasks } = jobServiceProvider(callWithRequest);
       return deletingJobTasks()
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'POST',
+    path: '/api/ml/jobs/jobs_exist',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { jobsExist } = jobServiceProvider(callWithRequest);
+      const { jobIds } = request.payload;
+      return jobsExist(jobIds)
         .catch(resp => wrapError(resp));
     },
     config: {

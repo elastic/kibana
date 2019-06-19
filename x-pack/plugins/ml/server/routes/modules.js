@@ -52,13 +52,18 @@ function saveModuleItems(
     request);
 }
 
-export function dataRecognizer(server, commonRouteConfig) {
+function dataRecognizerJobsExist(callWithRequest, moduleId) {
+  const dr = new DataRecognizer(callWithRequest);
+  return dr.dataRecognizerJobsExist(moduleId);
+}
 
-  server.route({
+export function dataRecognizer({ commonRouteConfig, elasticsearchPlugin, route }) {
+
+  route({
     method: 'GET',
     path: '/api/ml/modules/recognize/{indexPatternTitle}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const indexPatternTitle = request.params.indexPatternTitle;
       return recognize(callWithRequest, indexPatternTitle)
         .catch(resp => wrapError(resp));
@@ -68,11 +73,11 @@ export function dataRecognizer(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/modules/get_module/{moduleId?}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       let moduleId = request.params.moduleId;
       if (moduleId === '') {
         // if the endpoint is called with a trailing /
@@ -87,11 +92,11 @@ export function dataRecognizer(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/modules/setup/{moduleId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const moduleId = request.params.moduleId;
 
       const {
@@ -118,6 +123,20 @@ export function dataRecognizer(server, commonRouteConfig) {
         end,
         request
       )
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
+    path: '/api/ml/modules/jobs_exist/{moduleId}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const moduleId = request.params.moduleId;
+      return dataRecognizerJobsExist(callWithRequest, moduleId)
         .catch(resp => wrapError(resp));
     },
     config: {

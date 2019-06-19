@@ -5,7 +5,7 @@
  */
 import { ConfigurationAdapter } from '../configuration';
 
-import { SourceConfigurations, SourcesAdapter } from './index';
+import { SourcesAdapter, SourceConfiguration } from './index';
 import { PartialSourceConfigurations } from './types';
 
 interface ConfigurationWithSources {
@@ -31,18 +31,19 @@ export class ConfigurationSourcesAdapter implements SourcesAdapter {
       },
     } as PartialSourceConfigurations;
 
-    return Object.entries(sourceConfigurationsWithDefault).reduce<SourceConfigurations>(
-      (result, [sourceId, sourceConfiguration]) =>
-        ({
-          ...result,
-          [sourceId]: {
-            ...sourceConfiguration,
-            fields: {
-              ...DEFAULT_FIELDS,
-              ...(sourceConfiguration.fields || {}),
-            },
+    return Object.entries(sourceConfigurationsWithDefault).reduce<
+      Record<string, SourceConfiguration>
+    >(
+      (result, [sourceId, sourceConfiguration]) => ({
+        ...result,
+        [sourceId]: {
+          ...sourceConfiguration,
+          fields: {
+            ...DEFAULT_FIELDS,
+            ...(sourceConfiguration.fields || {}),
           },
-        } as SourceConfigurations),
+        },
+      }),
       {}
     );
   }
@@ -58,10 +59,5 @@ const DEFAULT_FIELDS = {
 };
 
 const DEFAULT_SOURCE = {
-  metricAlias: 'metricbeat-*',
-  logAlias: 'filebeat-*',
-  auditbeatAlias: 'auditbeat-*',
-  packetbeatAlias: 'packetbeat-*',
-  winlogbeatAlias: 'winlogbeat-*',
   fields: DEFAULT_FIELDS,
 };

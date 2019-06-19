@@ -13,12 +13,9 @@ import { HostOverviewRequestOptions } from './types';
 export const buildHostOverviewQuery = ({
   fields,
   hostName,
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
   timerange: { from, to },
 }: HostOverviewRequestOptions) => {
@@ -38,7 +35,7 @@ export const buildHostOverviewQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

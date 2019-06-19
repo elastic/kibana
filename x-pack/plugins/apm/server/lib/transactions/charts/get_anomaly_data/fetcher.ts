@@ -8,28 +8,11 @@ import { getMlIndex } from '../../../../../common/ml_job_constants';
 import { PromiseReturnType } from '../../../../../typings/common';
 import { Setup } from '../../../helpers/setup_request';
 
-export interface ESBucket {
-  key_as_string: string; // timestamp as string
-  key: number; // timestamp
-  doc_count: number;
-  anomaly_score: {
-    value: number | null;
-  };
-  lower: {
-    value: number | null;
-  };
-  upper: {
-    value: number | null;
-  };
-}
+export type ESResponse = Exclude<
+  PromiseReturnType<typeof anomalySeriesFetcher>,
+  undefined
+>;
 
-interface Aggs {
-  ml_avg_response_times: {
-    buckets: ESBucket[];
-  };
-}
-
-export type ESResponse = PromiseReturnType<typeof anomalySeriesFetcher>;
 export async function anomalySeriesFetcher({
   serviceName,
   transactionType,
@@ -91,7 +74,8 @@ export async function anomalySeriesFetcher({
   };
 
   try {
-    return await client<void, Aggs>('search', params);
+    const response = await client.search(params);
+    return response;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {

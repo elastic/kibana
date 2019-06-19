@@ -10,9 +10,10 @@ import styled from 'styled-components';
 
 import { StatefulOpenTimeline } from '..';
 
+import { ApolloConsumer } from 'react-apollo';
 import * as i18n from '../translations';
 
-interface Props {
+export interface OpenTimelineModalButtonProps {
   /**
    * An optional callback that if specified, will perform arbitrary IO before
    * this component updates its internal toggle state.
@@ -20,7 +21,7 @@ interface Props {
   onToggle?: () => void;
 }
 
-interface State {
+export interface OpenTimelineModalButtonState {
   showModal: boolean;
 }
 
@@ -40,8 +41,11 @@ const ModalContainer = styled.div`
 /**
  * Renders a button that when clicked, displays the `Open Timelines` modal
  */
-export class OpenTimelineModalButton extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+export class OpenTimelineModalButton extends React.PureComponent<
+  OpenTimelineModalButtonProps,
+  OpenTimelineModalButtonState
+> {
+  constructor(props: OpenTimelineModalButtonProps) {
     super(props);
 
     this.state = { showModal: false };
@@ -49,36 +53,41 @@ export class OpenTimelineModalButton extends React.PureComponent<Props, State> {
 
   public render() {
     return (
-      <>
-        <EuiButtonEmpty
-          color="text"
-          data-test-subj="open-timeline-button"
-          iconSide="left"
-          iconType="folderOpen"
-          onClick={this.toggleShowModal}
-        >
-          {i18n.OPEN_TIMELINE}
-        </EuiButtonEmpty>
+      <ApolloConsumer>
+        {client => (
+          <>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="open-timeline-button"
+              iconSide="left"
+              iconType="folderOpen"
+              onClick={this.toggleShowModal}
+            >
+              {i18n.OPEN_TIMELINE}
+            </EuiButtonEmpty>
 
-        {this.state.showModal && (
-          <EuiOverlayMask>
-            <ModalContainer>
-              <EuiModal
-                data-test-subj="open-timeline-modal"
-                maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
-                onClose={this.toggleShowModal}
-              >
-                <StatefulOpenTimeline
-                  openTimeline={this.openTimeline}
-                  defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                  searchResults={[]}
-                  title={i18n.OPEN_TIMELINE_TITLE}
-                />
-              </EuiModal>
-            </ModalContainer>
-          </EuiOverlayMask>
+            {this.state.showModal && (
+              <EuiOverlayMask>
+                <ModalContainer>
+                  <EuiModal
+                    data-test-subj="open-timeline-modal"
+                    maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
+                    onClose={this.toggleShowModal}
+                  >
+                    <StatefulOpenTimeline
+                      apolloClient={client}
+                      closeModalTimeline={this.closeModalTimeline}
+                      isModal={true}
+                      defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                      title={i18n.OPEN_TIMELINE_TITLE}
+                    />
+                  </EuiModal>
+                </ModalContainer>
+              </EuiOverlayMask>
+            )}
+          </>
         )}
-      </>
+      </ApolloConsumer>
     );
   }
 
@@ -93,15 +102,7 @@ export class OpenTimelineModalButton extends React.PureComponent<Props, State> {
     }));
   };
 
-  private openTimeline = ({
-    duplicate,
-    timelineId,
-  }: {
-    duplicate: boolean;
-    timelineId: string;
-  }) => {
+  private closeModalTimeline = () => {
     this.toggleShowModal();
-
-    alert(`TODO: open timeline ID: ${timelineId} duplicate: ${duplicate}`);
   };
 }

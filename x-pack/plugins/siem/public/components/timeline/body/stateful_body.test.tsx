@@ -7,7 +7,7 @@
 import { mockBrowserFields } from '../../../containers/source/mock';
 
 import { defaultHeaders } from './column_headers/default_headers';
-import { getColumnHeaders } from './stateful_body';
+import { getColumnHeaders } from './helpers';
 
 describe('stateful_body', () => {
   describe('getColumnHeaders', () => {

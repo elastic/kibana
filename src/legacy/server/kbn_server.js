@@ -36,7 +36,7 @@ import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
-import { savedObjectsMixin } from './saved_objects';
+import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { sampleDataMixin } from './sample_data';
 import { capabilitiesMixin } from './capabilities';
 import { urlShorteningMixin } from './url_shortening';
@@ -55,21 +55,13 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    const { setupDeps, startDeps, serverOptions, handledConfigPaths } = core;
+    const { setupDeps, startDeps, serverOptions, handledConfigPaths, logger } = core;
     this.newPlatform = {
-      setup: {
-        core: {
-          elasticsearch: setupDeps.elasticsearch,
-          http: setupDeps.http,
-        },
-        plugins: setupDeps.plugins,
+      coreContext: {
+        logger,
       },
-      start: {
-        core: {
-          http: startDeps.http,
-        },
-        plugins: startDeps.plugins,
-      },
+      setup: setupDeps,
+      start: startDeps,
       stop: null,
       params: {
         serverOptions,

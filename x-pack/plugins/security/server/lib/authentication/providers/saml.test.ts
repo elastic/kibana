@@ -8,6 +8,7 @@ import Boom from 'boom';
 import sinon from 'sinon';
 
 import { requestFixture } from '../../__tests__/__fixtures__/request';
+import { LoginAttempt } from '../login_attempt';
 import { mockAuthenticationProviderOptions } from './base.mock';
 
 import { SAMLAuthenticationProvider } from './saml';
@@ -21,7 +22,21 @@ describe('SAMLAuthenticationProvider', () => {
     callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
     callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
 
-    provider = new SAMLAuthenticationProvider(providerOptions);
+    provider = new SAMLAuthenticationProvider(providerOptions, { realm: 'test-realm' });
+  });
+
+  it('throws if `realm` option is not specified', () => {
+    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+
+    expect(() => new SAMLAuthenticationProvider(providerOptions)).toThrowError(
+      'Realm name must be specified'
+    );
+    expect(() => new SAMLAuthenticationProvider(providerOptions, {})).toThrowError(
+      'Realm name must be specified'
+    );
+    expect(() => new SAMLAuthenticationProvider(providerOptions, { realm: '' })).toThrowError(
+      'Realm name must be specified'
+    );
   });
 
   describe('`authenticate` method', () => {
@@ -30,6 +45,35 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, null);
 
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
+      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      });
+
+      sinon.assert.notCalled(callWithRequest);
+      expect(request.headers.authorization).toBe('Basic some:credentials');
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle requests with non-empty `loginAttempt`.', async () => {
+      const request = requestFixture();
+
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('user', 'password');
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      });
+
+      sinon.assert.notCalled(callWithRequest);
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
@@ -44,7 +88,7 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, null);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -66,7 +110,7 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, null);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.failed()).toBe(true);
@@ -187,19 +231,6 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBeUndefined();
-    });
-
-    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
-
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token',
-      });
-
-      sinon.assert.notCalled(callWithRequest);
-      expect(request.headers.authorization).toBe('Basic some:credentials');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
@@ -345,7 +376,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -385,7 +416,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -712,7 +743,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 
@@ -783,7 +814,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).toBe('/logged_out');
     });
 
-    it('relies SAML invalidate call even if access token is presented.', async () => {
+    it('relies on SAML invalidate call even if access token is presented.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
       callWithInternalUser.withArgs('shield.samlInvalidate').resolves({ redirect: null });
@@ -797,7 +828,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 
@@ -816,7 +847,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 
@@ -835,7 +866,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 

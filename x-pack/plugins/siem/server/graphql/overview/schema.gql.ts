@@ -8,11 +8,15 @@ import gql from 'graphql-tag';
 
 export const overviewSchema = gql`
   type OverviewNetworkData {
-    packetbeatFlow: Float!
-    packetbeatDNS: Float!
-    filebeatSuricata: Float!
-    filebeatZeek: Float
     auditbeatSocket: Float
+    filebeatCisco: Float
+    filebeatNetflow: Float
+    filebeatPanw: Float
+    filebeatSuricata: Float
+    filebeatZeek: Float
+    packetbeatDNS: Float
+    packetbeatFlow: Float
+    packetbeatTLS: Float
   }
 
   type OverviewHostData {
@@ -22,6 +26,8 @@ export const overviewSchema = gql`
     auditbeatPackage: Float
     auditbeatProcess: Float
     auditbeatUser: Float
+    filebeatSystemModule: Float
+    winlogbeat: Float
   }
 
   extend type Source {
@@ -29,7 +35,13 @@ export const overviewSchema = gql`
       id: String
       timerange: TimerangeInput!
       filterQuery: String
+      defaultIndex: [String!]!
     ): OverviewNetworkData
-    OverviewHost(id: String, timerange: TimerangeInput!, filterQuery: String): OverviewHostData
+    OverviewHost(
+      id: String
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): OverviewHostData
   }
 `;

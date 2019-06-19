@@ -86,7 +86,7 @@ export const POSTED = i18n.translate('xpack.siem.open.timeline.postedLabel', {
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.siem.open.timeline.searchPlaceholder', {
-  defaultMessage: 'e.g. timeline name, description, or notes',
+  defaultMessage: 'e.g. timeline name, or description',
 });
 
 export const TIMELINE_NAME = i18n.translate('xpack.siem.open.timeline.timelineNameTableHeader', {

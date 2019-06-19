@@ -11,7 +11,7 @@ import { SpacesClient } from '../../../lib/spaces_client';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 import { getSpaceById } from '../../lib';
 
-export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
+export function initInternalSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',

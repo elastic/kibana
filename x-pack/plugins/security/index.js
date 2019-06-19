@@ -8,8 +8,8 @@ import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
-import { initPublicRolesApi } from './server/routes/api/public/roles';
-import { initPrivilegesApi } from './server/routes/api/public/privileges';
+import { initExternalRolesApi } from './server/routes/api/external/roles';
+import { initPrivilegesApi } from './server/routes/api/external/privileges';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initOverwrittenSessionView } from './server/routes/views/overwritten_session';
 import { initLoginView } from './server/routes/views/login';
@@ -41,8 +41,14 @@ export const security = (kibana) => new kibana.Plugin({
   require: ['kibana', 'elasticsearch', 'xpack_main'],
 
   config(Joi) {
+    const providerOptionsSchema = (providerName, schema) => Joi.any()
+      .when('providers', {
+        is: Joi.array().items(Joi.string().valid(providerName).required(), Joi.string()),
+        then: schema,
+        otherwise: Joi.any().forbidden(),
+      });
+
     return Joi.object({
-      authProviders: Joi.array().items(Joi.string()).default(['basic']),
       enabled: Joi.boolean().default(true),
       cookieName: Joi.string().default('sid'),
       encryptionKey: Joi.when(Joi.ref('$dist'), {
@@ -52,11 +58,6 @@ export const security = (kibana) => new kibana.Plugin({
       }),
       sessionTimeout: Joi.number().allow(null).default(null),
       secureCookies: Joi.boolean().default(false),
-      public: Joi.object({
-        protocol: Joi.string().valid(['http', 'https']),
-        hostname: Joi.string().hostname(),
-        port: Joi.number().integer().min(0).max(65535)
-      }).default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -65,6 +66,11 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
+      authc: Joi.object({
+        providers: Joi.array().items(Joi.string()).default(['basic']),
+        oidc: providerOptionsSchema('oidc', Joi.object({ realm: Joi.string().required() }).required()),
+        saml: providerOptionsSchema('saml', Joi.object({ realm: Joi.string().required() }).required()),
+      }).default()
     }).default();
   },
 
@@ -203,7 +209,7 @@ export const security = (kibana) => new kibana.Plugin({
     initAPIAuthorization(server, authorization);
     initAppAuthorization(server, xpackMainPlugin, authorization);
     initUsersApi(server);
-    initPublicRolesApi(server);
+    initExternalRolesApi(server);
     initIndicesApi(server);
     initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);

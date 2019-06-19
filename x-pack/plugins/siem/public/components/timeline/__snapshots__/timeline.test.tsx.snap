@@ -334,6 +334,25 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
           },
         },
       },
+      "event": Object {
+        "fields": Object {
+          "event.end": Object {
+            "aggregatable": true,
+            "category": "event",
+            "description": "event.end contains the date when the event ended or when the activity was last observed.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat-*",
+              "filebeat-*",
+              "packetbeat-*",
+              "winlogbeat-*",
+            ],
+            "name": "event.end",
+            "searchable": true,
+            "type": "date",
+          },
+        },
+      },
       "source": Object {
         "fields": Object {
           "source.ip": Object {
@@ -371,6 +390,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
   columns={
     Array [
       Object {
+        "aggregatable": true,
         "category": "base",
         "columnHeaderType": "not-filtered",
         "description": "Date/time when the event originated.
@@ -382,6 +402,7 @@ Required field for all events.",
         "width": 240,
       },
       Object {
+        "aggregatable": true,
         "category": "event",
         "columnHeaderType": "not-filtered",
         "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
@@ -391,6 +412,7 @@ Required field for all events.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "event",
         "columnHeaderType": "not-filtered",
         "description": "Event category.
@@ -401,6 +423,7 @@ This contains high-level information about the contents of the event. It is more
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "event",
         "columnHeaderType": "not-filtered",
         "description": "The action captured by the event.
@@ -411,6 +434,7 @@ This describes the information in the event. It is more specific than \`event.ca
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "host",
         "columnHeaderType": "not-filtered",
         "description": "Name of the host.
@@ -421,6 +445,7 @@ It can contain what \`hostname\` returns on Unix systems, the fully qualified do
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "source",
         "columnHeaderType": "not-filtered",
         "description": "IP address of the source.
@@ -431,6 +456,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "destination",
         "columnHeaderType": "not-filtered",
         "description": "IP address of the destination.
@@ -441,6 +467,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "user",
         "columnHeaderType": "not-filtered",
         "description": "Short name or login of the user.",
@@ -450,12 +477,24 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "base",
         "columnHeaderType": "not-filtered",
         "description": "Each document has an _id that uniquely identifies it",
         "example": "Y-6TfmcB0WOhS6qyMv3s",
         "id": "_id",
         "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": false,
+        "category": "base",
+        "columnHeaderType": "not-filtered",
+        "description": "For log events the message field contains the log message.
+In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
+        "example": "Hello World",
+        "id": "message",
+        "type": "text",
         "width": 180,
       },
     ]
@@ -471,6 +510,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 1",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 1",
         },
       },
@@ -483,6 +523,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 2",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 2",
         },
       },
@@ -495,6 +536,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 3",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 3",
         },
       },
@@ -507,6 +549,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 4",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 4",
         },
       },
@@ -519,6 +562,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 5",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 5",
         },
       },
@@ -531,6 +575,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 6",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 6",
         },
       },
@@ -543,6 +588,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 7",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 7",
         },
       },
@@ -555,6 +601,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 8",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 8",
         },
       },
@@ -567,6 +614,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 9",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 9",
         },
       },
@@ -579,13 +627,14 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "name": "Provider 10",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 10",
         },
       },
     ]
   }
   end={1521862432253}
-  flyoutHeaderHeight={48}
+  flyoutHeaderHeight={60}
   flyoutHeight={980}
   id="foo"
   indexPattern={
@@ -687,6 +736,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
   onChangeDataProviderKqlQuery={[MockFunction]}
   onChangeDroppableAndProvider={[MockFunction]}
   onChangeItemsPerPage={[MockFunction]}
+  onDataProviderEdited={[MockFunction]}
   onDataProviderRemoved={[MockFunction]}
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}

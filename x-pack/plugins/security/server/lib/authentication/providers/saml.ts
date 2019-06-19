@@ -11,7 +11,11 @@ import { getErrorStatusCode } from '../../errors';
 import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider } from './base';
+import {
+  AuthenticationProviderOptions,
+  BaseAuthenticationProvider,
+  RequestWithLoginAttempt,
+} from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -50,7 +54,7 @@ interface SAMLRequestQuery {
 /**
  * Defines the shape of the request with a body containing SAML response.
  */
-type RequestWithSAMLPayload = Legacy.Request & {
+type RequestWithSAMLPayload = RequestWithLoginAttempt & {
   payload: { SAMLResponse: string; RelayState?: string };
 };
 
@@ -78,7 +82,7 @@ function isAccessTokenExpiredError(err?: any) {
  * @param request Request instance.
  */
 function isRequestWithSAMLResponsePayload(
-  request: Legacy.Request
+  request: RequestWithLoginAttempt
 ): request is RequestWithSAMLPayload {
   return request.payload != null && !!(request.payload as any).SAMLResponse;
 }
@@ -96,13 +100,32 @@ function isSAMLRequestQuery(query: any): query is SAMLRequestQuery {
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
+   * Specifies Elasticsearch SAML realm name that Kibana should use.
+   */
+  private readonly realm: string;
+
+  constructor(
+    protected readonly options: Readonly<AuthenticationProviderOptions>,
+    samlOptions?: Readonly<{ realm?: string }>
+  ) {
+    super(options);
+
+    if (!samlOptions || !samlOptions.realm) {
+      throw new Error('Realm name must be specified');
+    }
+
+    this.realm = samlOptions.realm;
+  }
+
+  /**
    * Performs SAML request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: Legacy.Request, state?: ProviderState | null) {
+  public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
+    // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
     let {
       authenticationResult,
       // eslint-disable-next-line prefer-const
@@ -110,6 +133,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     } = await this.authenticateViaHeader(request);
     if (headerNotRecognized) {
       return authenticationResult;
+    }
+
+    if (request.loginAttempt().getCredentials() != null) {
+      this.debug('Login attempt is detected, but it is not supported by the provider');
+      return AuthenticationResult.notHandled();
     }
 
     if (state && authenticationResult.notHandled()) {
@@ -180,7 +208,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * forward to Elasticsearch backend.
    * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Legacy.Request) {
+  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
@@ -355,7 +383,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Legacy.Request, { accessToken }: ProviderState) {
+  private async authenticateViaState(
+    request: RequestWithLoginAttempt,
+    { accessToken }: ProviderState
+  ) {
     this.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
@@ -392,7 +423,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   private async authenticateViaRefreshToken(
-    request: Legacy.Request,
+    request: RequestWithLoginAttempt,
     { refreshToken }: ProviderState
   ) {
     this.debug('Trying to refresh access token.');
@@ -469,7 +500,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to start SAML handshake and eventually receive a token.
    * @param request Request instance.
    */
-  private async authenticateViaHandshake(request: Legacy.Request) {
+  private async authenticateViaHandshake(request: RequestWithLoginAttempt) {
     this.debug('Trying to initiate SAML handshake.');
 
     // If client can't handle redirect response, we shouldn't initiate SAML handshake.
@@ -483,7 +514,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       const { id: requestId, redirect } = await this.options.client.callWithInternalUser(
         'shield.samlPrepare',
-        { body: { acs: this.getACS() } }
+        { body: { realm: this.realm } }
       );
 
       this.debug('Redirecting to Identity Provider with SAML request.');
@@ -575,23 +606,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
       body: {
         queryString: request.url.search ? request.url.search.slice(1) : '',
-        acs: this.getACS(),
+        realm: this.realm,
       },
     });
 
     this.debug('User session has been successfully invalidated.');
 
     return redirect;
-  }
-
-  /**
-   * Constructs and returns Kibana's Assertion consumer service URL.
-   */
-  private getACS() {
-    return (
-      `${this.options.protocol}://${this.options.hostname}:${this.options.port}` +
-      `${this.options.basePath}/api/security/v1/saml`
-    );
   }
 
   /**

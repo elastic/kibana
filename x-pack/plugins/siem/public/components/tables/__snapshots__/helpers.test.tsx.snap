@@ -12,7 +12,9 @@ exports[`Table Helpers #getRowItemDraggable it returns correctly against snapsho
         "kqlQuery": "",
         "name": "item1",
         "queryMatch": Object {
+          "displayValue": "item1",
           "field": "attrName",
+          "operator": ":",
           "value": "item1",
         },
       }
@@ -35,7 +37,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "kqlQuery": "",
         "name": "item1",
         "queryMatch": Object {
+          "displayValue": "item1",
           "field": "attrName",
+          "operator": ":",
           "value": "item1",
         },
       }
@@ -43,7 +47,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     key="idPrefix-attrName-item1"
     render={[Function]}
   />
-  , 
+  ,
+  <styled.span />
   <Connect(DraggableWrapperComponent)
     dataProvider={
       Object {
@@ -54,7 +59,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "kqlQuery": "",
         "name": "item2",
         "queryMatch": Object {
+          "displayValue": "item2",
           "field": "attrName",
+          "operator": ":",
           "value": "item2",
         },
       }
@@ -62,7 +69,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     key="idPrefix-attrName-item2"
     render={[Function]}
   />
-  , 
+  ,
+  <styled.span />
   <Connect(DraggableWrapperComponent)
     dataProvider={
       Object {
@@ -73,7 +81,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "kqlQuery": "",
         "name": "item3",
         "queryMatch": Object {
+          "displayValue": "item3",
           "field": "attrName",
+          "operator": ":",
           "value": "item3",
         },
       }
@@ -114,4 +124,19 @@ exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot
     />
   </EuiToolTip>
 </div>
+`;
+
+exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] = `
+<span>
+  This string is exactly fifty-one chars in length!!
+  <EuiToolTip
+    content="This string is exactly fifty-one chars in length!!!"
+    delay="regular"
+    position="top"
+  >
+    <Styled(EuiIcon)
+      type="boxesHorizontal"
+    />
+  </EuiToolTip>
+</span>
 `;

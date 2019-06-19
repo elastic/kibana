@@ -16,6 +16,7 @@ export const domainsQuery = gql`
     $pagination: PaginationInput!
     $sort: DomainsSortField!
     $timerange: TimerangeInput!
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
@@ -27,6 +28,7 @@ export const domainsQuery = gql`
         pagination: $pagination
         sort: $sort
         timerange: $timerange
+        defaultIndex: $defaultIndex
       ) {
         totalCount
         edges {

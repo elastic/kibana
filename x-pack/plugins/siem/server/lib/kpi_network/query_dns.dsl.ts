@@ -70,10 +70,9 @@ const getDnsQueryFilter = () => [
 export const buildDnsQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    packetbeatAlias,
   },
 }: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
@@ -91,7 +90,7 @@ export const buildDnsQuery = ({
 
   const dslQuery = [
     {
-      index: [logAlias, packetbeatAlias],
+      index: defaultIndex,
       allowNoIndices: true,
       ignoreUnavailable: true,
     },

@@ -12,6 +12,8 @@ import * as apmRestServices from '../../../../services/rest/apm/services';
 import { ServiceOverview } from '..';
 import * as hooks from '../../../../hooks/useUrlParams';
 
+jest.mock('ui/kfetch');
+
 function renderServiceOverview() {
   return render(<ServiceOverview />);
 }
@@ -54,14 +56,16 @@ describe('Service Overview -> View', () => {
             agentName: 'python',
             transactionsPerMinute: 100,
             errorsPerMinute: 200,
-            avgResponseTime: 300
+            avgResponseTime: 300,
+            environments: ['test', 'dev']
           },
           {
             serviceName: 'My Go Service',
             agentName: 'go',
             transactionsPerMinute: 400,
             errorsPerMinute: 500,
-            avgResponseTime: 600
+            avgResponseTime: 600,
+            environments: []
           }
         ]
       });

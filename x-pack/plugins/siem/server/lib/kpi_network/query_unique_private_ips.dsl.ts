@@ -85,10 +85,9 @@ export const buildUniquePrvateIpQuery = (
   {
     filterQuery,
     timerange: { from, to },
+    defaultIndex,
     sourceConfiguration: {
       fields: { timestamp },
-      logAlias,
-      packetbeatAlias,
     },
   }: RequestBasicOptions
 ): KpiNetworkESMSearchBody[] => {
@@ -108,7 +107,7 @@ export const buildUniquePrvateIpQuery = (
   const dslQuery = [
     {
       allowNoIndices: true,
-      index: [logAlias, packetbeatAlias],
+      index: defaultIndex,
       ignoreUnavailable: true,
     },
     {
@@ -116,6 +115,19 @@ export const buildUniquePrvateIpQuery = (
         unique_private_ips: {
           cardinality: {
             field: `${attrQuery}.ip`,
+          },
+        },
+        histogram: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            buckets: '6',
+          },
+          aggs: {
+            count: {
+              cardinality: {
+                field: `${attrQuery}.ip`,
+              },
+            },
           },
         },
       },

@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { TransactionListAPIResponse } from '../../server/lib/transactions/get_top_transactions';
 import { loadTransactionList } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 
 const getRelativeImpact = (
@@ -21,20 +22,27 @@ const getRelativeImpact = (
   );
 
 function getWithRelativeImpact(items: TransactionListAPIResponse) {
-  const impacts = items.map(({ impact }) => impact);
+  const impacts = items
+    .map(({ impact }) => impact)
+    .filter(impact => impact !== null) as number[];
+
   const impactMin = Math.min(...impacts);
   const impactMax = Math.max(...impacts);
 
   return items.map(item => {
     return {
       ...item,
-      impactRelative: getRelativeImpact(item.impact, impactMin, impactMax)
+      impactRelative:
+        item.impact !== null
+          ? getRelativeImpact(item.impact, impactMin, impactMax)
+          : null
     };
   });
 }
 
 export function useTransactionList(urlParams: IUrlParams) {
-  const { serviceName, transactionType, start, end, kuery } = urlParams;
+  const { serviceName, transactionType, start, end } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
   const { data = [], error, status } = useFetcher(
     () => {
       if (serviceName && start && end && transactionType) {
@@ -43,11 +51,11 @@ export function useTransactionList(urlParams: IUrlParams) {
           start,
           end,
           transactionType,
-          kuery
+          uiFilters
         });
       }
     },
-    [serviceName, start, end, transactionType, kuery]
+    [serviceName, start, end, transactionType, uiFilters]
   );
 
   const memoizedData = useMemo(() => getWithRelativeImpact(data), [data]);

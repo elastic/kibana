@@ -5,16 +5,28 @@
  */
 
 import { connect } from 'react-redux';
-import { setRefreshInterval } from '../../../state/actions/workpad';
-import { getRefreshInterval } from '../../../state/selectors/workpad';
+import {
+  setRefreshInterval,
+  enableAutoplay,
+  setAutoplayInterval,
+} from '../../../state/actions/workpad';
+import { getRefreshInterval, getAutoplay } from '../../../state/selectors/workpad';
 import { ControlSettings as Component } from './control_settings';
 
-const mapStateToProps = state => ({
-  refreshInterval: getRefreshInterval(state),
-});
+const mapStateToProps = state => {
+  const { enabled, interval } = getAutoplay(state);
+
+  return {
+    refreshInterval: getRefreshInterval(state),
+    autoplayEnabled: enabled,
+    autoplayInterval: interval,
+  };
+};
 
 const mapDispatchToProps = {
   setRefreshInterval,
+  enableAutoplay,
+  setAutoplayInterval,
 };
 
 export const ControlSettings = connect(

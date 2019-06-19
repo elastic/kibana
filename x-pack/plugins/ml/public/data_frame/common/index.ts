@@ -5,6 +5,7 @@
  */
 
 export * from './aggregations';
+export * from './fields';
 export * from './dropdown';
 export * from './kibana_context';
 export * from './navigation';

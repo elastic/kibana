@@ -10,21 +10,24 @@ import React from 'react';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
-import { MoreRowItems } from '../page';
+import { MoreRowItems, Spacer } from '../page';
 
 export const getRowItemDraggable = ({
   rowItem,
   attrName,
   idPrefix,
   render,
+  dragDisplayValue,
 }: {
   rowItem: string | null | undefined;
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
+  dragDisplayValue?: string;
   maxOverflow?: number;
 }): JSX.Element => {
   if (rowItem != null) {
@@ -39,7 +42,12 @@ export const getRowItemDraggable = ({
           name: rowItem,
           excluded: false,
           kqlQuery: '',
-          queryMatch: { field: attrName, value: rowItem },
+          queryMatch: {
+            field: attrName,
+            value: rowItem,
+            displayValue: dragDisplayValue || rowItem,
+            operator: IS_OPERATOR,
+          },
         }}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
@@ -62,6 +70,7 @@ export const getRowItemDraggables = ({
   attrName,
   idPrefix,
   render,
+  dragDisplayValue,
   displayCount = 5,
   maxOverflow = 5,
 }: {
@@ -70,6 +79,7 @@ export const getRowItemDraggables = ({
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
+  dragDisplayValue?: string;
   maxOverflow?: number;
 }): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
@@ -77,7 +87,12 @@ export const getRowItemDraggables = ({
       const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
       return (
         <React.Fragment key={id}>
-          {index !== 0 ? <>,&nbsp;</> : null}
+          {index !== 0 && (
+            <>
+              {','}
+              <Spacer />
+            </>
+          )}
           <DraggableWrapper
             key={id}
             dataProvider={{
@@ -87,7 +102,12 @@ export const getRowItemDraggables = ({
               name: rowItem,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: attrName, value: rowItem },
+              queryMatch: {
+                field: attrName,
+                value: rowItem,
+                displayValue: dragDisplayValue || rowItem,
+                operator: IS_OPERATOR,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -153,3 +173,24 @@ export const getRowItemOverflow = (
     </>
   );
 };
+
+export const OverflowField = React.memo<{
+  value: string;
+  showToolTip?: boolean;
+  overflowLength?: number;
+}>(({ value, showToolTip = true, overflowLength = 50 }) => (
+  <span>
+    {showToolTip ? (
+      <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
+        <>{value.substring(0, overflowLength)}</>
+      </EuiToolTip>
+    ) : (
+      <>{value.substring(0, overflowLength)}</>
+    )}
+    {value.length > overflowLength && (
+      <EuiToolTip content={value}>
+        <MoreRowItems type="boxesHorizontal" />
+      </EuiToolTip>
+    )}
+  </span>
+));

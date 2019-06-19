@@ -17,7 +17,7 @@ interface InvalidNodeErrorProps {
 }
 
 export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = ({ nodeName }) => {
-  const { show } = useContext(SourceConfigurationFlyoutState.Context);
+  const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
 
   return (
     <WithKibanaChrome>
@@ -57,7 +57,7 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton color="primary" onClick={show}>
+                <EuiButton color="primary" onClick={showIndicesConfiguration}>
                   <FormattedMessage
                     id="xpack.infra.configureSourceActionLabel"
                     defaultMessage="Change source configuration"

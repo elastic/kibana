@@ -13,6 +13,7 @@ import {
   layerHandlerCreators,
   clipboardHandlerCreators,
   basicHandlerCreators,
+  groupHandlerCreators,
 } from '../../lib/element_handler_creators';
 import { crawlTree } from '../workpad_page/integration_utils';
 import { selectToplevelNodes } from './../../state/actions/transient';
@@ -60,7 +61,6 @@ export const SidebarHeader = compose(
   ),
   withHandlers(basicHandlerCreators),
   withHandlers(clipboardHandlerCreators),
-  withHandlers(layerHandlerCreators)
-  // TODO: restore when group and ungroup can be triggered outside of workpad_page
-  // withHandlers(groupHandlerCreators),
+  withHandlers(layerHandlerCreators),
+  withHandlers(groupHandlerCreators)
 )(Component);

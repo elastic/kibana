@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 
-import { SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { SavedObjectsService } from 'src/core/server';
 import { Request, Server } from 'hapi';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
@@ -27,8 +27,8 @@ import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objec
 import { SpacesClient } from './server/lib/spaces_client';
 import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
 import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
-import { initPublicSpacesApi } from './server/routes/api/public';
-import { initPrivateApis } from './server/routes/api/v1';
+import { initExternalSpacesApi } from './server/routes/api/external';
+import { initInternalApis } from './server/routes/api/v1';
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -48,6 +48,11 @@ export const spaces = (kibana: Record<string, any>) =>
       return {
         spaces: {
           manage: true,
+        },
+        management: {
+          kibana: {
+            spaces: true,
+          },
         },
       };
     },
@@ -170,8 +175,8 @@ export const spaces = (kibana: Record<string, any>) =>
 
       server.addScopedTutorialContextFactory(createSpacesTutorialContextFactory(spacesService));
 
-      initPrivateApis(server);
-      initPublicSpacesApi(server);
+      initInternalApis(server);
+      initExternalSpacesApi(server);
 
       initSpacesRequestInterceptors(server);
 

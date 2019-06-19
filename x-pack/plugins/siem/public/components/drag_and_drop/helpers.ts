@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isString } from 'lodash/fp';
 import { DropResult } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { dragAndDropModel } from '../../store';
+import { BrowserFields, getAllFieldsByName } from '../../containers/source';
+import { IdToDataProvider } from '../../store/drag_and_drop/model';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { dragAndDropActions, timelineActions } from '../../store/actions';
 
@@ -18,14 +23,28 @@ export const droppableIdPrefix = 'droppableId';
 
 export const draggableContentPrefix = `${draggableIdPrefix}.content.`;
 
+export const draggableFieldPrefix = `${draggableIdPrefix}.field.`;
+
 export const droppableContentPrefix = `${droppableIdPrefix}.content.`;
 
+export const droppableFieldPrefix = `${droppableIdPrefix}.field.`;
+
 export const droppableTimelineProvidersPrefix = `${droppableIdPrefix}.timelineProviders.`;
+
+export const droppableTimelineColumnsPrefix = `${droppableIdPrefix}.timelineColumns.`;
 
 export const droppableTimelineFlyoutButtonPrefix = `${droppableIdPrefix}.flyoutButton.`;
 
 export const getDraggableId = (dataProviderId: string): string =>
   `${draggableContentPrefix}${dataProviderId}`;
+
+export const getDraggableFieldId = ({
+  contextId,
+  fieldId,
+}: {
+  contextId: string;
+  fieldId: string;
+}): string => `${draggableFieldPrefix}${escapeContextId(contextId)}.${escapeFieldId(fieldId)}`;
 
 export const getDroppableId = (visualizationPlaceholderId: string): string =>
   `${droppableContentPrefix}${visualizationPlaceholderId}`;
@@ -36,11 +55,18 @@ export const sourceIsContent = (result: DropResult): boolean =>
 export const draggableIsContent = (result: DropResult): boolean =>
   result.draggableId.startsWith(draggableContentPrefix);
 
+export const draggableIsField = (result: DropResult): boolean =>
+  result.draggableId.startsWith(draggableFieldPrefix);
+
 export const reasonIsDrop = (result: DropResult): boolean => result.reason === 'DROP';
 
 export const destinationIsTimelineProviders = (result: DropResult): boolean =>
   result.destination != null &&
   result.destination.droppableId.startsWith(droppableTimelineProvidersPrefix);
+
+export const destinationIsTimelineColumns = (result: DropResult): boolean =>
+  result.destination != null &&
+  result.destination.droppableId.startsWith(droppableTimelineColumnsPrefix);
 
 export const destinationIsTimelineButton = (result: DropResult): boolean =>
   result.destination != null &&
@@ -48,20 +74,34 @@ export const destinationIsTimelineButton = (result: DropResult): boolean =>
 
 export const getTimelineIdFromDestination = (result: DropResult): string =>
   result.destination != null &&
-  (destinationIsTimelineProviders(result) || destinationIsTimelineButton(result))
+  (destinationIsTimelineProviders(result) ||
+    destinationIsTimelineButton(result) ||
+    destinationIsTimelineColumns(result))
     ? result.destination.droppableId.substring(result.destination.droppableId.lastIndexOf('.') + 1)
     : '';
 
 export const getProviderIdFromDraggable = (result: DropResult): string =>
   result.draggableId.substring(result.draggableId.lastIndexOf('.') + 1);
 
+export const getFieldIdFromDraggable = (result: DropResult): string =>
+  unEscapeFieldId(result.draggableId.substring(result.draggableId.lastIndexOf('.') + 1));
+
 export const escapeDataProviderId = (path: string) => path.replace(/\./g, '_');
+
+export const escapeContextId = (path: string) => path.replace(/\./g, '_');
+
+export const escapeFieldId = (path: string) => path.replace(/\./g, '!!!DOT!!!');
+
+export const unEscapeFieldId = (path: string) => path.replace(/!!!DOT!!!/g, '.');
 
 export const providerWasDroppedOnTimeline = (result: DropResult): boolean =>
   reasonIsDrop(result) &&
   draggableIsContent(result) &&
   sourceIsContent(result) &&
   destinationIsTimelineProviders(result);
+
+export const fieldWasDroppedOnTimelineColumns = (result: DropResult): boolean =>
+  reasonIsDrop(result) && draggableIsField(result) && destinationIsTimelineColumns(result);
 
 export const providerWasDroppedOnTimelineButton = (result: DropResult): boolean =>
   reasonIsDrop(result) &&
@@ -70,7 +110,7 @@ export const providerWasDroppedOnTimelineButton = (result: DropResult): boolean 
   destinationIsTimelineButton(result);
 
 interface AddProviderToTimelineParams {
-  dataProviders: dragAndDropModel.IdToDataProvider;
+  dataProviders: IdToDataProvider;
   result: DropResult;
   dispatch: Dispatch;
   addProvider?: ActionCreator<{
@@ -80,6 +120,17 @@ interface AddProviderToTimelineParams {
   noProviderFound?: ActionCreator<{
     id: string;
   }>;
+}
+
+interface AddFieldToTimelineColumnsParams {
+  upsertColumn?: ActionCreator<{
+    column: ColumnHeader;
+    id: string;
+    index: number;
+  }>;
+  browserFields: BrowserFields;
+  dispatch: Dispatch;
+  result: DropResult;
 }
 
 export const addProviderToTimeline = ({
@@ -97,6 +148,50 @@ export const addProviderToTimeline = ({
     dispatch(addProvider({ id: timeline, provider }));
   } else {
     dispatch(noProviderFound({ id: providerId }));
+  }
+};
+
+export const addFieldToTimelineColumns = ({
+  upsertColumn = timelineActions.upsertColumn,
+  browserFields,
+  dispatch,
+  result,
+}: AddFieldToTimelineColumnsParams): void => {
+  const timeline = getTimelineIdFromDestination(result);
+  const fieldId = getFieldIdFromDraggable(result);
+  const allColumns = getAllFieldsByName(browserFields);
+  const column = allColumns[fieldId];
+
+  if (column != null) {
+    dispatch(
+      upsertColumn({
+        column: {
+          category: column.category,
+          columnHeaderType: 'not-filtered',
+          description: isString(column.description) ? column.description : undefined,
+          example: isString(column.example) ? column.example : undefined,
+          id: fieldId,
+          type: column.type,
+          aggregatable: column.aggregatable,
+          width: DEFAULT_COLUMN_MIN_WIDTH,
+        },
+        id: timeline,
+        index: result.destination != null ? result.destination.index : 0,
+      })
+    );
+  } else {
+    // create a column definition, because it doesn't exist in the browserFields:
+    dispatch(
+      upsertColumn({
+        column: {
+          columnHeaderType: 'not-filtered',
+          id: fieldId,
+          width: DEFAULT_COLUMN_MIN_WIDTH,
+        },
+        id: timeline,
+        index: result.destination != null ? result.destination.index : 0,
+      })
+    );
   }
 };
 
@@ -120,3 +215,9 @@ export const updateShowTimeline = ({
 
   dispatch(showTimeline({ id: timeline, show }));
 };
+
+/**
+ * Prevents fields from being dragged or dropped to any area other than column
+ * header drop zone in the timeline
+ */
+export const DRAG_TYPE_FIELD = 'drag-type-field';

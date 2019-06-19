@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_GROUP_ID,
@@ -30,17 +29,7 @@ export async function getErrorGroup({
   groupId: string;
   setup: Setup;
 }) {
-  const { start, end, esFilterQuery, client, config } = setup;
-  const filter: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: 'error' } },
-    { term: { [ERROR_GROUP_ID]: groupId } },
-    { range: rangeFilter(start, end) }
-  ];
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const params = {
     index: config.get<string>('apm_oss.errorIndices'),
@@ -48,7 +37,13 @@ export async function getErrorGroup({
       size: 1,
       query: {
         bool: {
-          filter,
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [PROCESSOR_EVENT]: 'error' } },
+            { term: { [ERROR_GROUP_ID]: groupId } },
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES
+          ],
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
         }
       },
@@ -59,7 +54,7 @@ export async function getErrorGroup({
     }
   };
 
-  const resp = await client<APMError>('search', params);
+  const resp = await client.search<APMError>(params);
   const error = idx(resp, _ => _.hits.hits[0]._source);
   const transactionId = idx(error, _ => _.transaction.id);
   const traceId = idx(error, _ => _.trace.id);

@@ -322,6 +322,33 @@ export function jobsProvider(callWithRequest) {
     return { jobIds };
   }
 
+  // Checks if each of the jobs in the specified list of IDs exist.
+  // Job IDs in supplied array may contain wildcard '*' characters
+  // e.g. *_low_request_rate_ecs
+  async function jobsExist(jobIds = []) {
+    // Get the list of job IDs.
+    const jobsInfo = await callWithRequest('ml.jobs', { jobId: jobIds });
+
+    const results = {};
+    if (jobsInfo.count > 0) {
+      const allJobIds = jobsInfo.jobs.map(job => job.job_id);
+
+      // Check if each of the supplied IDs match existing jobs.
+      jobIds.forEach((jobId) => {
+        // Create a Regex for each supplied ID as wildcard * is allowed.
+        const regexp = new RegExp(`^${jobId.replace(/\*+/g, '.*')}$`);
+        const exists = allJobIds.some(existsJobId => regexp.test(existsJobId));
+        results[jobId] = exists;
+      });
+    } else {
+      jobIds.forEach((jobId) => {
+        results[jobId] = false;
+      });
+    }
+
+    return results;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -330,5 +357,6 @@ export function jobsProvider(callWithRequest) {
     jobsWithTimerange,
     createFullJobsList,
     deletingJobTasks,
+    jobsExist,
   };
 }

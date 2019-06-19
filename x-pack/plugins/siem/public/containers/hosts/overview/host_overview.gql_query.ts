@@ -7,10 +7,15 @@
 import gql from 'graphql-tag';
 
 export const HostOverviewQuery = gql`
-  query GetHostOverviewQuery($sourceId: ID!, $hostName: String!, $timerange: TimerangeInput!) {
+  query GetHostOverviewQuery(
+    $sourceId: ID!
+    $hostName: String!
+    $timerange: TimerangeInput!
+    $defaultIndex: [String!]!
+  ) {
     source(id: $sourceId) {
       id
-      HostOverview(hostName: $hostName, timerange: $timerange) {
+      HostOverview(hostName: $hostName, timerange: $timerange, defaultIndex: $defaultIndex) {
         _id
         host {
           architecture

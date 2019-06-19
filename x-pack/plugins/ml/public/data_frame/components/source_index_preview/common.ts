@@ -6,7 +6,7 @@
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { SimpleQuery } from '../../common';
+import { PivotQuery } from '../../common';
 
 export type EsFieldName = string;
 
@@ -20,7 +20,7 @@ export interface EsDoc extends Dictionary<any> {
 
 export const MAX_COLUMNS = 5;
 
-function getFlattenedFields(obj: EsDocSource): EsFieldName[] {
+export function getFlattenedFields(obj: EsDocSource): EsFieldName[] {
   const flatDocFields: EsFieldName[] = [];
   const newDocFields = Object.keys(obj);
   newDocFields.forEach(f => {
@@ -81,10 +81,7 @@ export const toggleSelectedField = (
   return selectedFields;
 };
 
-export const getSourceIndexDevConsoleStatement = (
-  query: SimpleQuery,
-  indexPatternTitle: string
-) => {
+export const getSourceIndexDevConsoleStatement = (query: PivotQuery, indexPatternTitle: string) => {
   return `GET ${indexPatternTitle}/_search\n${JSON.stringify(
     {
       query,

@@ -22,7 +22,7 @@ declare interface Ml {
 
   dataFrame: {
     getDataFrameTransforms(): Promise<any>;
-    getDataFrameTransformsStats(): Promise<any>;
+    getDataFrameTransformsStats(jobId?: string): Promise<any>;
     createDataFrameTransformsJob(jobId: string, jobConfig: any): Promise<any>;
     deleteDataFrameTransformsJob(jobId: string): Promise<any>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;

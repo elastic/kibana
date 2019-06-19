@@ -3,26 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
-type Context = boolean | number | string | null;
+type Context = number | string;
 
 interface Arguments {
   value: Context;
 }
 
-export function gt(): ContextFunction<'gt', Context, Arguments, boolean> {
+export function gt(): ExpressionFunction<'gt', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().gt;
 
   return {
     name: 'gt',
     type: 'boolean',
+    context: {
+      types: ['number', 'string'],
+    },
     help,
     args: {
       value: {
         aliases: ['_'],
-        types: ['boolean', 'number', 'string', 'null'],
+        types: ['number', 'string'],
         required: true,
         help: argHelp.value,
       },
@@ -34,7 +37,6 @@ export function gt(): ContextFunction<'gt', Context, Arguments, boolean> {
         return false;
       }
 
-      // @ts-ignore #35433 This is a wonky comparison for nulls
       return context > value;
     },
   };

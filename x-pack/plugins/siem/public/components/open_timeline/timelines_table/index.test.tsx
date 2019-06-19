@@ -9,15 +9,15 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 import { mockTimelineResults } from '../../../mock/timeline_results';
-import { TimelineResult } from '../types';
+import { OpenTimelineResult } from '../types';
 import { TimelinesTable, TimelinesTableProps } from '.';
 
 import * as i18n from '../translations';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 describe('TimelinesTable', () => {
-  let mockResults: TimelineResult[];
+  let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -400,14 +400,14 @@ describe('TimelinesTable', () => {
 
     wrapper
       .find('thead tr th button')
-      .at(1)
+      .at(0)
       .simulate('click');
 
     wrapper.update();
 
     expect(onTableChange).toHaveBeenCalledWith({
       page: { index: 0, size: 10 },
-      sort: { direction: 'asc', field: 'description' },
+      sort: { direction: 'asc', field: 'updated' },
     });
   });
 

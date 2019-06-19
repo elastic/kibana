@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { get } from 'lodash';
 import moment from 'moment';
 import { LatestMonitor, MonitorSeriesPoint, Ping } from '../../../common/graphql/types';
@@ -31,6 +30,7 @@ import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
+import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 
 interface MonitorListQueryResult {
@@ -102,30 +102,40 @@ export const MonitorListComponent = ({
               defaultMessage: 'ID',
             }),
             render: (id: string, monitor: LatestMonitor) => (
-              <EuiLink>
-                <Link
-                  data-test-subj={`monitor-page-link-${id}`}
-                  to={`/monitor/${id}${linkParameters}`}
-                >
-                  {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
-                    ? monitor.ping.monitor.name
-                    : id}
-                </Link>
-              </EuiLink>
+              <MonitorPageLink
+                id={id}
+                location={get<string | undefined>(monitor, 'ping.observer.geo.name')}
+                linkParameters={linkParameters}
+              >
+                {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
+                  ? monitor.ping.monitor.name
+                  : id}
+              </MonitorPageLink>
             ),
           },
           {
-            field: 'ping.url.full',
-            name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-              defaultMessage: 'URL',
+            field: 'ping.observer.geo.name',
+            name: i18n.translate('xpack.uptime.monitorList.geoName', {
+              defaultMessage: 'Location',
+              description: 'Users can specify a name for a location',
             }),
-            render: (url: string, monitor: LatestMonitor) => (
-              <div>
-                <EuiLink href={url} target="_blank" color="text">
-                  {url} <EuiIcon size="s" type="popout" color="subdued" />
+            render: (locationName: string | null | undefined) =>
+              !!locationName ? (
+                locationName
+              ) : (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
+                    defaultMessage: 'Add location',
+                    description:
+                      'Text that instructs the user to navigate to our docs to add a geographic location to their data',
+                  })}
+                  &nbsp;
+                  <EuiIcon size="s" type="popout" />
                 </EuiLink>
-              </div>
-            ),
+              ),
           },
           {
             field: 'ping.url.full',
@@ -166,12 +176,7 @@ export const MonitorListComponent = ({
                 'The heading column of some action buttons that will take users to other Obsevability apps',
             }),
             render: (ping: Ping, monitor: LatestMonitor) => (
-              <MonitorListActionsPopover
-                basePath={basePath}
-                dateRangeStart={dateRangeStart}
-                dateRangeEnd={dateRangeEnd}
-                monitor={monitor}
-              />
+              <MonitorListActionsPopover monitor={monitor} />
             ),
           },
         ]}

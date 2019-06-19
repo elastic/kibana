@@ -21,10 +21,12 @@ describe('DataProviders', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <DataProviders
+          browserFields={{}}
           id="foo"
           dataProviders={mockDataProviders}
           onChangeDataProviderKqlQuery={jest.fn()}
           onChangeDroppableAndProvider={jest.fn()}
+          onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
@@ -40,10 +42,12 @@ describe('DataProviders', () => {
       const wrapper = mount(
         <TestProviders>
           <DataProviders
+            browserFields={{}}
             id="foo"
             dataProviders={dataProviders}
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
@@ -59,10 +63,12 @@ describe('DataProviders', () => {
       const wrapper = mount(
         <TestProviders>
           <DataProviders
+            browserFields={{}}
             id="foo"
             dataProviders={mockDataProviders}
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
@@ -78,10 +84,12 @@ describe('DataProviders', () => {
       const wrapper = mount(
         <TestProviders>
           <DataProviders
+            browserFields={{}}
             id="foo"
             dataProviders={mockDataProviders}
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}

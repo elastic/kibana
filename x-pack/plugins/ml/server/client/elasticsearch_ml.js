@@ -105,10 +105,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
+  // Currently the endpoint uses a default size of 100 unless a size is supplied.
+  // So until paging is supported in the UI, explicitly supply a size of 1000
+  // to match the max number of docs that the endpoint can return.
   ml.getDataFrameTransforms = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms',
+        fmt: '/_data_frame/transforms/_all?size=1000',
       }
     ],
     method: 'GET'
@@ -117,7 +120,18 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.getDataFrameTransformsStats = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/_stats',
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stats',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      },
+      {
+        // Currently the endpoint uses a default size of 100 unless a size is supplied.
+        // So until paging is supported in the UI, explicitly supply a size of 1000
+        // to match the max number of docs that the endpoint can return.
+        fmt: '/_data_frame/transforms/_all/_stats?size=1000',
       }
     ],
     method: 'GET'
@@ -179,10 +193,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.stopDataFrameTransformsJob = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stop',
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>',
         req: {
           jobId: {
             type: 'string'
+          },
+          force: {
+            type: 'boolean'
           }
         }
       }

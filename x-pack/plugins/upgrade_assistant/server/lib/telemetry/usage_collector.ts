@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { SavedObjectsRepository } from 'src/legacy/server/saved_objects/service/lib/repository';
+import { SavedObjectsRepository } from 'src/core/server/saved_objects/service/lib/repository';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
@@ -100,6 +100,7 @@ export function makeUpgradeAssistantUsageCollector(server: UpgradeAssistantTelem
   const kbnServer = server as UpgradeAssistantTelemetryServer;
   const upgradeAssistantUsageCollector = kbnServer.usage.collectorSet.makeUsageCollector({
     type: UPGRADE_ASSISTANT_TYPE,
+    isReady: () => true,
     fetch: async (callCluster: any) => fetchUpgradeAssistantMetrics(callCluster, server),
   });
 

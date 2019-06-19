@@ -19,32 +19,49 @@
 
 require('ui/directives/input_focus');
 
-const mappings = require('../mappings');
+import template from './settings.html';
+import { getAutocomplete, getCurrentSettings, updateSettings, getPolling } from '../settings';
+import mappings from '../mappings';
 
 require('ui/modules')
   .get('app/sense')
   .directive('senseSettings', function () {
     return {
       restrict: 'E',
-      template: require('./settings.html'),
+      template,
       controllerAs: 'settings',
       controller: function ($scope, $element) {
-        const settings = require('../settings');
+        this.vals = getCurrentSettings();
 
-        this.vals = settings.getCurrentSettings();
-        this.apply = () => {
-          const prevSettings = settings.getAutocomplete();
-          this.vals = settings.updateSettings(this.vals);
-          // Find which, if any, autocomplete settings have changed
+        this.isPollingVisible = () => {
+          const selectedAutoCompleteOptions =
+            Object.keys(this.vals.autocomplete).filter(key => this.vals.autocomplete[key]);
+          return selectedAutoCompleteOptions.length > 0;
+        };
+
+        this.refresh = () => {
+          mappings.retrieveAutoCompleteInfo();
+        };
+
+        this.saveSettings = () => {
+          const prevSettings = getAutocomplete();
+          this.vals = updateSettings(this.vals);
+
+          // Find which, if any, autocomplete settings have changed.
           const settingsDiff = Object.keys(prevSettings).filter(key => prevSettings[key] !== this.vals.autocomplete[key]);
-          if (settingsDiff.length > 0) {
+
+          // Retrieve autocomplete info if the user has changed one of the autocomplete settings or
+          // has turned on polling.
+          if (settingsDiff.length > 0 || getPolling()) {
             const changedSettings = settingsDiff.reduce((changedSettingsAccum, setting) => {
               changedSettingsAccum[setting] = this.vals.autocomplete[setting];
               return changedSettingsAccum;
             }, {});
+
             // Update autocomplete info based on changes so new settings takes effect immediately.
             mappings.retrieveAutoCompleteInfo(changedSettings);
           }
+
           $scope.kbnTopNav.close();
         };
 
@@ -52,7 +69,7 @@ require('ui/modules')
 
         function onEnter(event) {
           if (event.which === 13) {
-            self.apply();
+            self.saveSettings();
           }
         }
 

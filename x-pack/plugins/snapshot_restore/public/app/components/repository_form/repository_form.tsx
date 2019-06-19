@@ -15,6 +15,7 @@ import { RepositoryFormStepTwo } from './step_two';
 
 interface Props {
   repository: Repository | EmptyRepository;
+  isManagedRepository?: boolean;
   isEditing?: boolean;
   isSaving: boolean;
   saveError?: React.ReactNode;
@@ -24,6 +25,7 @@ interface Props {
 
 export const RepositoryForm: React.FunctionComponent<Props> = ({
   repository: originalRepository,
+  isManagedRepository,
   isEditing,
   isSaving,
   saveError,
@@ -101,6 +103,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   const renderStepTwo = () => (
     <RepositoryFormStepTwo
       repository={repository as Repository}
+      isManagedRepository={isManagedRepository}
       isEditing={isEditing}
       isSaving={isSaving}
       onSave={saveRepository}
@@ -112,7 +115,11 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiForm isInvalid={hasValidationErrors} error={validationErrors}>
+    <EuiForm
+      isInvalid={hasValidationErrors}
+      error={validationErrors}
+      data-test-subj="repositoryForm"
+    >
       {currentStep === 1 && !isEditing ? renderStepOne() : renderStepTwo()}
     </EuiForm>
   );

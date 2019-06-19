@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -20,10 +19,10 @@ export async function calculateBucketSize(
   transactionType: string,
   setup: Setup
 ) {
-  const { start, end, esFilterQuery, client, config } = setup;
+  const { start, end, uiFiltersES, client, config } = setup;
 
-  const params: SearchParams = {
-    index: config.get('apm_oss.transactionIndices'),
+  const params = {
+    index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {
@@ -41,7 +40,8 @@ export async function calculateBucketSize(
                   format: 'epoch_millis'
                 }
               }
-            }
+            },
+            ...uiFiltersES
           ]
         }
       },
@@ -55,17 +55,8 @@ export async function calculateBucketSize(
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
+  const resp = await client.search(params);
 
-  interface Aggs {
-    stats: {
-      max: number;
-    };
-  }
-
-  const resp = await client<void, Aggs>('search', params);
   const minBucketSize: number = config.get('xpack.apm.minimumBucketSize');
   const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
   const max = resp.aggregations.stats.max;

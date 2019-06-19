@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export const SERVICE_NAME = 'service.name';
+export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_AGENT_NAME = 'agent.name';
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';

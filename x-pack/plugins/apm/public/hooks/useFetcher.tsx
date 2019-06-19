@@ -16,7 +16,7 @@ export enum FETCH_STATUS {
 
 export function useFetcher<Response>(
   fn: () => Promise<Response> | undefined,
-  useEffectKey: Array<string | boolean | number | undefined>
+  useEffectKey: any[]
 ) {
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg, ESFilter } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -24,19 +24,16 @@ export async function getBuckets({
   bucketSize: number;
   setup: Setup;
 }) {
-  const { start, end, esFilterQuery, client, config } = setup;
+  const { start, end, uiFiltersES, client, config } = setup;
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) }
+    { range: rangeFilter(start, end) },
+    ...uiFiltersES
   ];
 
   if (groupId) {
     filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
-  }
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
   }
 
   const params = {
@@ -64,13 +61,7 @@ export async function getBuckets({
     }
   };
 
-  interface Aggs {
-    distribution: {
-      buckets: Array<BucketAgg<number>>;
-    };
-  }
-
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search(params);
 
   const buckets = resp.aggregations.distribution.buckets.map(bucket => ({
     key: bucket.key,

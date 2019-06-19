@@ -31,12 +31,9 @@ const getAuthQueryFilter = () => [
 export const buildAuthQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
 }: RequestBasicOptions): KpiHostsESMSearchBody[] => {
   const filter = [
@@ -54,7 +51,7 @@ export const buildAuthQuery = ({
 
   const dslQuery = [
     {
-      index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+      index: defaultIndex,
       allowNoIndices: true,
       ignoreUnavailable: true,
     },

@@ -13,7 +13,6 @@ import { requestFixture } from '../__tests__/__fixtures__/request';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
-import { AuthScopeService } from '../auth_scope_service';
 import { LoginAttempt } from './login_attempt';
 import { initAuthenticator } from './authenticator';
 import * as ClientShield from '../../../../../server/lib/get_client_shield';
@@ -46,7 +45,6 @@ describe('Authenticator', () => {
       .stub(Session, 'create')
       .withArgs(server as any)
       .resolves(session as any);
-    sandbox.stub(AuthScopeService.prototype, 'getForRequestAndUser').resolves([]);
 
     sandbox.useFakeTimers();
   });
@@ -55,15 +53,15 @@ describe('Authenticator', () => {
 
   describe('initialization', () => {
     it('fails if authentication providers are not configured.', async () => {
-      config.get.withArgs('xpack.security.authProviders').returns([]);
+      config.get.withArgs('xpack.security.authc.providers').returns([]);
 
       await expect(initAuthenticator(server as any)).rejects.toThrowError(
-        'No authentication provider is configured. Verify `xpack.security.authProviders` config value.'
+        'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
       );
     });
 
     it('fails if configured authentication provider is not known.', async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['super-basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['super-basic']);
 
       await expect(initAuthenticator(server as any)).rejects.toThrowError(
         'Unsupported authentication provider name: super-basic.'
@@ -74,7 +72,7 @@ describe('Authenticator', () => {
   describe('`authenticate` method', () => {
     let authenticate: (request: ReturnType<typeof requestFixture>) => Promise<AuthenticationResult>;
     beforeEach(async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['basic']);
       server.plugins.kibana.systemApi.isSystemApiRequest.returns(true);
       session.clear.throws(new Error('`Session.clear` is not supposed to be called!'));
 
@@ -109,7 +107,7 @@ describe('Authenticator', () => {
 
       const authenticationResult = await authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(authenticationResult.user).toEqual(user);
     });
 
     it('creates session whenever authentication provider returns state for system API requests', async () => {
@@ -126,7 +124,7 @@ describe('Authenticator', () => {
 
       const systemAPIAuthenticationResult = await authenticate(request);
       expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(systemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(systemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -148,7 +146,7 @@ describe('Authenticator', () => {
 
       const notSystemAPIAuthenticationResult = await authenticate(request);
       expect(notSystemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(notSystemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(notSystemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -185,12 +183,12 @@ describe('Authenticator', () => {
 
       const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
       expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(systemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(systemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.notCalled(session.set);
 
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
       expect(notSystemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(notSystemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(notSystemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, notSystemAPIRequest, {
         state: { authorization: 'Basic yyy' },
@@ -253,7 +251,7 @@ describe('Authenticator', () => {
 
       const authenticationResult = await authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(authenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -280,7 +278,7 @@ describe('Authenticator', () => {
 
       const authenticationResult = await authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(authenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -331,7 +329,7 @@ describe('Authenticator', () => {
 
     it('clears session if provider requested it via setting state to `null`.', async () => {
       // Use `token` provider for this test as it's the only one that does what we want.
-      config.get.withArgs('xpack.security.authProviders').returns(['token']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['token']);
       await initAuthenticator(server as any);
       authenticate = server.expose.withArgs('authenticate').lastCall.args[1];
 
@@ -467,20 +465,6 @@ describe('Authenticator', () => {
       expect(notSystemAPIAuthenticationResult.notHandled()).toBe(true);
       sinon.assert.calledTwice(session.clear);
     });
-
-    it('complements user with `scope` property.', async () => {
-      const user = { username: 'user' };
-      const request = requestFixture({ headers: { authorization: 'Basic ***' } });
-
-      cluster.callWithRequest.withArgs(request).resolves(user);
-      (AuthScopeService.prototype.getForRequestAndUser as sinon.SinonStub)
-        .withArgs(request, user)
-        .resolves(['foo', 'bar']);
-
-      const authenticationResult = await authenticate(request);
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: ['foo', 'bar'] });
-    });
   });
 
   describe('`deauthenticate` method', () => {
@@ -488,7 +472,7 @@ describe('Authenticator', () => {
       request: ReturnType<typeof requestFixture>
     ) => Promise<DeauthenticationResult>;
     beforeEach(async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['basic']);
       config.get.withArgs('server.basePath').returns('/base-path');
 
       await initAuthenticator(server as any);
@@ -548,7 +532,7 @@ describe('Authenticator', () => {
   describe('`isAuthenticated` method', () => {
     let isAuthenticated: (request: ReturnType<typeof requestFixture>) => Promise<boolean>;
     beforeEach(async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['basic']);
 
       await initAuthenticator(server as any);
 

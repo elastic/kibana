@@ -5,11 +5,13 @@
  */
 import { useEffect, useState } from 'react';
 import { httpService } from './index';
+import { uiMetricService } from '../ui_metric';
 
 interface SendRequest {
   path: string;
   method: string;
   body?: any;
+  uimActionType?: string;
 }
 
 interface SendRequestResponse {
@@ -17,16 +19,24 @@ interface SendRequestResponse {
   error: Error;
 }
 
+const { trackUiMetric } = uiMetricService;
+
 export const sendRequest = async ({
   path,
   method,
   body,
+  uimActionType,
 }: SendRequest): Promise<Partial<SendRequestResponse>> => {
   try {
     const response = await httpService.httpClient[method](path, body);
 
-    if (!response.data) {
+    if (typeof response.data === 'undefined') {
       throw new Error(response.statusText);
+    }
+
+    // Track successful request
+    if (uimActionType) {
+      trackUiMetric(uimActionType);
     }
 
     return {
@@ -34,7 +44,7 @@ export const sendRequest = async ({
     };
   } catch (e) {
     return {
-      error: e,
+      error: e.response ? e.response : e,
     };
   }
 };
@@ -45,7 +55,15 @@ interface UseRequest extends SendRequest {
   timeout?: number;
 }
 
-export const useRequest = ({ path, method, body, interval, initialData, timeout }: UseRequest) => {
+export const useRequest = ({
+  path,
+  method,
+  body,
+  interval,
+  initialData,
+  timeout,
+  uimActionType,
+}: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<any>(initialData);
@@ -62,18 +80,10 @@ export const useRequest = ({ path, method, body, interval, initialData, timeout 
       path,
       method,
       body,
+      uimActionType,
     };
 
-    let response;
-
-    if (timeout) {
-      [response] = await Promise.all([
-        sendRequest(requestBody),
-        new Promise(resolve => setTimeout(resolve, timeout)),
-      ]);
-    } else {
-      response = await sendRequest(requestBody);
-    }
+    const response = await sendRequest(requestBody);
 
     // Don't update state if an outdated request has resolved.
     if (isOutdatedRequest) {

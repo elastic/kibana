@@ -37,6 +37,7 @@ describe('Header', () => {
         onColumnRemoved={jest.fn()}
         onColumnResized={jest.fn()}
         onColumnSorted={jest.fn()}
+        setIsResizing={jest.fn()}
         sort={sort}
         timelineId={timelineId}
       />
@@ -54,6 +55,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -77,6 +79,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -105,6 +108,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -129,6 +133,7 @@ describe('Header', () => {
               onColumnRemoved={jest.fn()}
               onColumnResized={jest.fn()}
               onColumnSorted={jest.fn()}
+              setIsResizing={jest.fn()}
               sort={sort}
               timelineId={timelineId}
             />
@@ -147,15 +152,16 @@ describe('Header', () => {
   describe('onColumnSorted', () => {
     test('it invokes the onColumnSorted callback when the header is clicked', () => {
       const mockOnColumnSorted = jest.fn();
-
+      const headerSortable = { ...columnHeader, aggregatable: true };
       const wrapper = mount(
         <TestProviders>
           <Header
-            header={columnHeader}
+            header={headerSortable}
             isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -171,6 +177,84 @@ describe('Header', () => {
         columnId: columnHeader.id,
         sortDirection: 'asc', // (because the previous state was Direction.desc)
       });
+    });
+
+    test('it does NOT invoke the onColumnSorted callback when the header is clicked and aggregatable is false', () => {
+      const mockOnColumnSorted = jest.fn();
+      const headerSortable = { ...columnHeader, aggregatable: false };
+      const wrapper = mount(
+        <TestProviders>
+          <Header
+            header={headerSortable}
+            isLoading={false}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header"]')
+        .first()
+        .simulate('click');
+
+      expect(mockOnColumnSorted).not.toHaveBeenCalled();
+    });
+
+    test('it does NOT invoke the onColumnSorted callback when the header is clicked and aggregatable is missing', () => {
+      const mockOnColumnSorted = jest.fn();
+      const headerSortable = { ...columnHeader };
+      const wrapper = mount(
+        <TestProviders>
+          <Header
+            header={headerSortable}
+            isLoading={false}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header"]')
+        .first()
+        .simulate('click');
+
+      expect(mockOnColumnSorted).not.toHaveBeenCalled();
+    });
+
+    test('it does NOT invoke the onColumnSorted callback when the header is clicked and aggregatable is undefined', () => {
+      const mockOnColumnSorted = jest.fn();
+      const headerSortable = { ...columnHeader, aggregatable: undefined };
+      const wrapper = mount(
+        <TestProviders>
+          <Header
+            header={headerSortable}
+            isLoading={false}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header"]')
+        .first()
+        .simulate('click');
+
+      expect(mockOnColumnSorted).not.toHaveBeenCalled();
     });
   });
 
@@ -272,6 +356,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -295,6 +380,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -302,6 +388,28 @@ describe('Header', () => {
       );
 
       expect(wrapper.find('[data-test-subj="header-tooltip"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('setIsResizing', () => {
+    test('setIsResizing have been call when it renders actions', () => {
+      const mockSetIsResizing = jest.fn();
+      mount(
+        <TestProviders>
+          <Header
+            header={columnHeader}
+            isLoading={false}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
+            setIsResizing={mockSetIsResizing}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      expect(mockSetIsResizing).toHaveBeenCalled();
     });
   });
 });

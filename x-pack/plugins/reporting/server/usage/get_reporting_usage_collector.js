@@ -114,11 +114,11 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
-export function getReportingUsageCollector(server) {
+export function getReportingUsageCollector(server, isReady) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-
+    isReady,
     fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();

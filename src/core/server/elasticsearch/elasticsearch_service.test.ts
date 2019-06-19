@@ -27,19 +27,21 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
+const deps = {
+  http: httpServiceMock.createSetupContract(),
+};
 configService.atPath.mockReturnValue(
-  new BehaviorSubject(
-    new ElasticsearchConfig({
-      hosts: ['http://1.2.3.4'],
-      healthCheck: {},
-      ssl: {},
-    } as any)
-  )
+  new BehaviorSubject({
+    hosts: ['http://1.2.3.4'],
+    healthCheck: {},
+    ssl: {},
+  } as any)
 );
 
 let env: Env;
@@ -56,7 +58,7 @@ afterEach(() => jest.clearAllMocks());
 
 describe('#setup', () => {
   test('returns legacy Elasticsearch config as a part of the contract', async () => {
-    const setupContract = await elasticsearchService.setup();
+    const setupContract = await elasticsearchService.setup(deps);
 
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
@@ -70,7 +72,7 @@ describe('#setup', () => {
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
-    const setupContract = await elasticsearchService.setup();
+    const setupContract = await elasticsearchService.setup(deps);
 
     const [esConfig, adminClient, dataClient] = await combineLatest(
       setupContract.legacy.config$,
@@ -87,12 +89,14 @@ describe('#setup', () => {
     expect(MockClusterClient).toHaveBeenNthCalledWith(
       1,
       esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'admin'] })
+      expect.objectContaining({ context: ['elasticsearch', 'admin'] }),
+      undefined
     );
     expect(MockClusterClient).toHaveBeenNthCalledWith(
       2,
       esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'data'] })
+      expect.objectContaining({ context: ['elasticsearch', 'data'] }),
+      expect.any(Function)
     );
 
     expect(mockAdminClusterClientInstance.close).not.toHaveBeenCalled();
@@ -100,7 +104,7 @@ describe('#setup', () => {
   });
 
   test('returns `createClient` as a part of the contract', async () => {
-    const setupContract = await elasticsearchService.setup();
+    const setupContract = await elasticsearchService.setup(deps);
 
     const mockClusterClientInstance = { close: jest.fn() };
     MockClusterClient.mockImplementation(() => mockClusterClientInstance);
@@ -112,7 +116,8 @@ describe('#setup', () => {
 
     expect(MockClusterClient).toHaveBeenCalledWith(
       mockConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] })
+      expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
+      expect.any(Function)
     );
   });
 });
@@ -125,7 +130,7 @@ describe('#stop', () => {
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
-    await elasticsearchService.setup();
+    await elasticsearchService.setup(deps);
     await elasticsearchService.stop();
 
     expect(mockAdminClusterClientInstance.close).toHaveBeenCalledTimes(1);

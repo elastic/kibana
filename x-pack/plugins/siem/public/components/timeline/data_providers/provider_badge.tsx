@@ -6,9 +6,13 @@
 
 import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
+import { isString } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+
+import { getEmptyString } from '../../empty_value';
+import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
 import * as i18n from './translations';
 
@@ -42,10 +46,11 @@ interface ProviderBadgeProps {
   providerId: string;
   togglePopover?: () => void;
   val: string | number;
+  operator: QueryOperator;
 }
 
 export const ProviderBadge = pure<ProviderBadgeProps>(
-  ({ deleteProvider, field, isEnabled, isExcluded, providerId, togglePopover, val }) => {
+  ({ deleteProvider, field, isEnabled, isExcluded, operator, providerId, togglePopover, val }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = (
       event: React.MouseEvent<HTMLButtonElement>
     ) => {
@@ -59,9 +64,9 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
       'globalFilterItem-isDisabled': !isEnabled,
       'globalFilterItem-isExcluded': isExcluded,
     });
+    const formattedValue = isString(val) && val === '' ? getEmptyString() : val;
     const prefix = isExcluded ? <span>{i18n.NOT} </span> : null;
-
-    const title = `${field}: "${val}"`;
+    const title = `${field}: "${formattedValue}"`;
 
     return (
       <ProviderBadgeStyled
@@ -74,7 +79,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         iconType="cross"
         iconSide="right"
         onClick={togglePopover}
-        onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${val}`}
+        onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
         closeButtonProps={{
           // Removing tab focus on close button because the same option can be obtained through the context menu
           // TODO: add a `DEL` keyboard press functionality
@@ -83,8 +88,16 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         data-test-subj="providerBadge"
       >
         {prefix}
-        <span className="field-value">{field}: </span>
-        <span className="field-value">&quot;{val}&quot;</span>
+        {operator !== EXISTS_OPERATOR ? (
+          <>
+            <span className="field-value">{`${field}: `}</span>
+            <span className="field-value">{`"${formattedValue}"`}</span>
+          </>
+        ) : (
+          <span className="field-value">
+            {field} {i18n.EXISTS_LABEL}
+          </span>
+        )}
       </ProviderBadgeStyled>
     );
   }

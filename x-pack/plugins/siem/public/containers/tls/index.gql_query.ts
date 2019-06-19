@@ -15,6 +15,7 @@ export const tlsQuery = gql`
     $pagination: PaginationInput!
     $sort: TlsSortField!
     $timerange: TimerangeInput!
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
@@ -25,6 +26,7 @@ export const tlsQuery = gql`
         pagination: $pagination
         sort: $sort
         timerange: $timerange
+        defaultIndex: $defaultIndex
       ) {
         totalCount
         edges {

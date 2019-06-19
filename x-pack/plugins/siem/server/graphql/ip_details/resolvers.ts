@@ -86,6 +86,7 @@ export const createIpDetailsResolvers = (
         ip: args.ip,
         domainName: args.domainName,
         flowTarget: args.flowTarget,
+        defaultIndex: args.defaultIndex,
       };
       return libs.ipDetails.getDomainFirstLastSeen(req, options);
     },

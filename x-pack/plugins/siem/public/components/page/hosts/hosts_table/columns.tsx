@@ -19,6 +19,7 @@ import { PreferenceFormattedDate } from '../../../formatted_date';
 import { HostDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
@@ -40,8 +41,8 @@ export const getHostsColumns = (
     hideForMobile: false,
     sortable: true,
     render: hostName => {
-      if (hostName != null) {
-        const id = escapeDataProviderId(`hosts-table-hostName-${hostName}`);
+      if (hostName != null && hostName.length > 0) {
+        const id = escapeDataProviderId(`hosts-table-hostName-${hostName[0]}`);
         return (
           <DraggableWrapper
             key={id}
@@ -50,9 +51,9 @@ export const getHostsColumns = (
               enabled: true,
               excluded: false,
               id,
-              name: hostName,
+              name: hostName[0],
               kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName },
+              queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -62,11 +63,11 @@ export const getHostsColumns = (
               ) : (
                 <AddToKql
                   indexPattern={indexPattern}
-                  expression={`host.name: ${escapeQueryValue(hostName)}`}
+                  expression={`host.name: "${escapeQueryValue(hostName[0])}"`}
                   componentFilterType="hosts"
                   type={type}
                 >
-                  <HostDetailsLink hostName={hostName} />
+                  <HostDetailsLink hostName={hostName[0]} />
                 </AddToKql>
               )
             }
@@ -111,7 +112,7 @@ export const getHostsColumns = (
         return (
           <AddToKql
             indexPattern={indexPattern}
-            expression={`host.os.name: ${escapeQueryValue(hostOsName)}`}
+            expression={`host.os.name: "${escapeQueryValue(hostOsName)}"`}
             componentFilterType="hosts"
             type={type}
           >
@@ -133,7 +134,7 @@ export const getHostsColumns = (
         return (
           <AddToKql
             indexPattern={indexPattern}
-            expression={`host.os.version: ${escapeQueryValue(hostOsVersion)}`}
+            expression={`host.os.version: "${escapeQueryValue(hostOsVersion)}"`}
             componentFilterType="hosts"
             type={type}
           >

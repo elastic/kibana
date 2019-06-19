@@ -17,9 +17,14 @@ import { mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { flyoutHeaderHeight } from '../flyout';
 
+import {
+  DELETE_CLASS_NAME,
+  ENABLE_CLASS_NAME,
+  EXCLUDE_CLASS_NAME,
+} from './data_providers/provider_item_actions';
+import { Timeline } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { Timeline } from './timeline';
 
 const testFlyoutHeight = 980;
 
@@ -57,6 +62,7 @@ describe('Timeline', () => {
           onChangeDataProviderKqlQuery={jest.fn()}
           onChangeDroppableAndProvider={jest.fn()}
           onChangeItemsPerPage={jest.fn()}
+          onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
@@ -89,6 +95,7 @@ describe('Timeline', () => {
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -124,6 +131,7 @@ describe('Timeline', () => {
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -159,6 +167,7 @@ describe('Timeline', () => {
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -199,6 +208,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
@@ -241,6 +251,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
@@ -252,15 +263,15 @@ describe('Timeline', () => {
           </TestProviders>
         );
         wrapper
-          .find('[data-test-subj="providerBadge"]')
+          .find('button[data-test-subj="providerBadge"]')
           .first()
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
-          .at(2)
+          .find(`[data-test-subj="providerActions"] .${DELETE_CLASS_NAME}`)
+          .first()
           .simulate('click');
 
         expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
@@ -291,6 +302,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
@@ -303,15 +315,15 @@ describe('Timeline', () => {
         );
 
         wrapper
-          .find('[data-test-subj="providerBadge"]')
+          .find('button[data-test-subj="providerBadge"]')
           .first()
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
-          .at(1)
+          .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
+          .first()
           .simulate('click');
 
         expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
@@ -345,6 +357,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
@@ -359,12 +372,14 @@ describe('Timeline', () => {
         wrapper
           .find('[data-test-subj="providerBadge"]')
           .first()
+          .find('button')
+          .first()
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
+          .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
           .first()
           .simulate('click');
 
@@ -400,6 +415,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
@@ -422,7 +438,7 @@ describe('Timeline', () => {
         );
       });
 
-      test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the accordeon menu', () => {
+      test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the accordion menu', () => {
         const dataProviders = mockDataProviders.slice(0, 1);
         dataProviders[0].and = mockDataProviders.slice(1, 3);
         const mockOnDataProviderRemoved = jest.fn();
@@ -447,6 +463,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
@@ -461,19 +478,21 @@ describe('Timeline', () => {
         wrapper
           .find('[data-test-subj="providerBadge"]')
           .at(3)
+          .find('button')
+          .first()
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
-          .at(2)
+          .find(`[data-test-subj="providerActions"] .${DELETE_CLASS_NAME}`)
+          .first()
           .simulate('click');
 
         expect(mockOnDataProviderRemoved.mock.calls[0]).toEqual(['id-Provider 1', 'id-Provider 2']);
       });
 
-      test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the accordeon menu', () => {
+      test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the accordion menu', () => {
         const dataProviders = mockDataProviders.slice(0, 1);
         dataProviders[0].and = mockDataProviders.slice(1, 3);
         const mockOnToggleDataProviderEnabled = jest.fn();
@@ -498,6 +517,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
@@ -512,13 +532,15 @@ describe('Timeline', () => {
         wrapper
           .find('[data-test-subj="providerBadge"]')
           .at(3)
+          .find('button')
+          .first()
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
-          .at(1)
+          .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
+          .first()
           .simulate('click');
 
         expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
@@ -528,7 +550,7 @@ describe('Timeline', () => {
         });
       });
 
-      test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the accordeon menu', () => {
+      test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the accordion menu', () => {
         const dataProviders = mockDataProviders.slice(0, 1);
         dataProviders[0].and = mockDataProviders.slice(1, 3);
         const mockOnToggleDataProviderExcluded = jest.fn();
@@ -553,6 +575,7 @@ describe('Timeline', () => {
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
+                onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
@@ -567,12 +590,14 @@ describe('Timeline', () => {
         wrapper
           .find('[data-test-subj="providerBadge"]')
           .at(3)
+          .find('button')
+          .first()
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
+          .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
           .first()
           .simulate('click');
 

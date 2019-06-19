@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RepositoryUtils } from '../../common/repository_utils';
 import {
   CloneProgress,
   CloneWorkerProgress,
   CloneWorkerResult,
   WorkerReservedProgress,
 } from '../../model';
-import { getDefaultBranch, getHeadRevision } from '../git_operations';
+import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
@@ -27,20 +26,24 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     protected readonly queue: Esqueue,
     protected readonly log: Logger,
     protected readonly client: EsClient,
-    protected readonly serverOptions: ServerOptions
+    protected readonly serverOptions: ServerOptions,
+    protected readonly gitOps: GitOperations
   ) {
     super(queue, log);
     this.objectClient = new RepositoryObjectClient(client);
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
+    if (res.cancelled) {
+      // Skip updating job progress if the job is done because of cancellation.
+      return;
+    }
     await super.onJobCompleted(job, res);
 
     // Update the default branch.
     const repoUri = res.uri;
-    const localPath = RepositoryUtils.repositoryLocalPath(this.serverOptions.repoPath, repoUri);
-    const revision = await getHeadRevision(localPath);
-    const defaultBranch = await getDefaultBranch(localPath);
+    const revision = await this.gitOps.getHeadRevision(repoUri);
+    const defaultBranch = await this.gitOps.getDefaultBranch(repoUri);
 
     // Update the repository data.
     try {
@@ -85,9 +88,9 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     try {
       return await this.objectClient.updateRepositoryGitStatus(uri, p);
     } catch (err) {
-      // This is a warning since it's not blocking anything.
-      this.log.warn(`Update git clone progress error.`);
-      this.log.warn(err);
+      // Do nothing here since it's not blocking anything.
+      // this.log.warn(`Update git clone progress error.`);
+      // this.log.warn(err);
     }
   }
 }

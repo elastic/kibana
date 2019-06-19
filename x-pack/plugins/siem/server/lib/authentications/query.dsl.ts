@@ -25,16 +25,15 @@ export const buildQuery = ({
   filterQuery,
   timerange: { from, to },
   pagination: { limit },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
   },
 }: RequestOptions) => {
   const esFields = reduceFields(fields, { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { term: { 'event.module': 'system' } },
     { term: { 'event.category': 'authentication' } },
     {
       range: {
@@ -56,7 +55,7 @@ export const buildQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: auditbeatAlias,
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {
@@ -65,7 +64,7 @@ export const buildQuery = ({
           terms: {
             size: limit + 1,
             field: 'user.name',
-            order: { 'failures.doc_count': 'desc' },
+            order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
           },
           aggs: {
             failures: {

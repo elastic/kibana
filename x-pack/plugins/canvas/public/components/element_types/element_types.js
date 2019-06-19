@@ -161,7 +161,7 @@ export class ElementTypes extends Component {
         id: 'elements',
         name: 'Elements',
         content: (
-          <Fragment>
+          <div className="canvasElements__filter">
             <EuiSpacer />
             <EuiSearchBar
               defaultQuery={search}
@@ -179,7 +179,7 @@ export class ElementTypes extends Component {
               filterTags={filterTags}
               handleClick={addElement}
             />
-          </Fragment>
+          </div>
         ),
       },
       {

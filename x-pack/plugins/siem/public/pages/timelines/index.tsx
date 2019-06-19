@@ -5,8 +5,11 @@
  */
 
 import React from 'react';
+import { ApolloConsumer } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { TimelinesPage } from './timelines_page';
 
-export const Timelines = pure(() => <TimelinesPage />);
+export const Timelines = pure(() => (
+  <ApolloConsumer>{client => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
+));

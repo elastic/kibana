@@ -9,6 +9,8 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   FlowDirection,
   FlowTarget,
@@ -57,6 +59,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       id = 'networkTopNFlowQuery',
       children,
       filterQuery,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -70,6 +73,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
         query={networkTopNFlowQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
@@ -86,6 +90,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
             tiebreaker: null,
           },
           filterQuery: createFilter(filterQuery),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {

@@ -18,7 +18,7 @@ Object {
     },
     "date_histogram": Object {
       "field": "timestamp",
-      "interval": "30s",
+      "fixed_interval": "30s",
       "min_doc_count": 1,
     },
   },
@@ -38,7 +38,7 @@ Object {
     },
     "date_histogram": Object {
       "field": "timestamp",
-      "interval": "30s",
+      "fixed_interval": "30s",
       "min_doc_count": 1,
     },
   },
@@ -76,7 +76,7 @@ Object {
     },
     "date_histogram": Object {
       "field": "timestamp",
-      "interval": "30s",
+      "fixed_interval": "30s",
       "min_doc_count": 1,
     },
   },
@@ -109,7 +109,7 @@ Object {
     },
     "date_histogram": Object {
       "field": "timestamp",
-      "interval": "30s",
+      "fixed_interval": "30s",
       "min_doc_count": 1,
     },
   },

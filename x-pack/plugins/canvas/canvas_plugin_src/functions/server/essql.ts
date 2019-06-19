@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { ContextFunction, Filter } from '../types';
+import { Filter } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -15,7 +16,7 @@ interface Arguments {
   timezone: string;
 }
 
-export function essql(): ContextFunction<'essql', Filter, Arguments, any> {
+export function essql(): ExpressionFunction<'essql', Filter, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().essql;
 
   return {

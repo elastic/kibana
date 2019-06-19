@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg, ESFilter } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
@@ -18,16 +18,7 @@ import { Setup } from '../../helpers/setup_request';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export async function getServicesItems(setup: Setup) {
-  const { start, end, esFilterQuery, client, config } = setup;
-
-  const filter: ESFilter[] = [
-    { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
-    { range: rangeFilter(start, end) }
-  ];
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const params = {
     index: [
@@ -39,7 +30,13 @@ export async function getServicesItems(setup: Setup) {
       size: 0,
       query: {
         bool: {
-          filter
+          filter: [
+            {
+              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
+            },
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES
+          ]
         }
       },
       aggs: {
@@ -57,6 +54,9 @@ export async function getServicesItems(setup: Setup) {
             },
             events: {
               terms: { field: PROCESSOR_EVENT, size: 2 }
+            },
+            environments: {
+              terms: { field: SERVICE_ENVIRONMENT }
             }
           }
         }
@@ -64,30 +64,14 @@ export async function getServicesItems(setup: Setup) {
     }
   };
 
-  interface ServiceBucket extends BucketAgg {
-    avg: {
-      value: number;
-    };
-    agents: {
-      buckets: BucketAgg[];
-    };
-    events: {
-      buckets: BucketAgg[];
-    };
-  }
-
-  interface Aggs extends BucketAgg {
-    services: {
-      buckets: ServiceBucket[];
-    };
-  }
-
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search(params);
   const aggs = resp.aggregations;
+
   const serviceBuckets = idx(aggs, _ => _.services.buckets) || [];
 
   const items = serviceBuckets.map(bucket => {
     const eventTypes = bucket.events.buckets;
+
     const transactions = eventTypes.find(e => e.key === 'transaction');
     const totalTransactions = idx(transactions, _ => _.doc_count) || 0;
 
@@ -98,12 +82,18 @@ export async function getServicesItems(setup: Setup) {
     const transactionsPerMinute = totalTransactions / deltaAsMinutes;
     const errorsPerMinute = totalErrors / deltaAsMinutes;
 
+    const environmentsBuckets = bucket.environments.buckets;
+    const environments = environmentsBuckets.map(
+      environmentBucket => environmentBucket.key
+    );
+
     return {
       serviceName: bucket.key,
       agentName: idx(bucket, _ => _.agents.buckets[0].key),
       transactionsPerMinute,
       errorsPerMinute,
-      avgResponseTime: bucket.avg.value
+      avgResponseTime: bucket.avg.value,
+      environments
     };
   });
 

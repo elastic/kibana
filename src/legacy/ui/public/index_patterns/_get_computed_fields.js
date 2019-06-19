@@ -17,25 +17,24 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { each, reject } from 'lodash';
 
 export function getComputedFields() {
   const self = this;
   const scriptFields = {};
-  let docvalueFields = [];
 
   // Date value returned in "_source" could be in any number of formats
   // Use a docvalue for each date field to ensure standardized formats when working with date fields
   // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
-  docvalueFields = _.reject(self.fields.byType.date, 'scripted')
+  const docvalueFields = reject(self.fields.byType.date, 'scripted')
     .map((dateField) => {
       return {
         field: dateField.name,
-        format: 'date_time',
+        format: dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1 ? 'strict_date_time' : 'date_time',
       };
     });
 
-  _.each(self.getScriptedFields(), function (field) {
+  each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {
       script: {
         source: field.script,

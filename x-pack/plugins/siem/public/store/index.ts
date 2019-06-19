@@ -8,8 +8,6 @@ export * from './model';
 export * from './reducer';
 export * from './selectors';
 
-import { createStore } from './store';
+import { createStore, getStore } from './store';
 
-const store = createStore();
-
-export { store, createStore };
+export { createStore, getStore };

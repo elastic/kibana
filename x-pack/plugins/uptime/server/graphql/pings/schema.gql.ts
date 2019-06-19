@@ -19,12 +19,20 @@ export const pingsSchema = gql`
   type Query {
     "Get a list of all recorded pings for all monitors"
     allPings(
+      "Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'."
       sort: String
+      "Optional: the number of results to return."
       size: Int
+      "Optional: the monitor ID filter."
       monitorId: String
+      "Optional: the check status to filter by."
       status: String
+      "The lower limit of the date range."
       dateRangeStart: String!
+      "The upper limit of the date range."
       dateRangeEnd: String!
+      "Optional: agent location to filter by."
+      location: String
     ): PingResults!
 
     "Gets the number of documents in the target index"
@@ -87,6 +95,26 @@ export const pingsSchema = gql`
     version: String
     name: String
     build: String
+  }
+
+  "Geolocation data added via processors to enrich events."
+  type Geo {
+    "Name of the city in which the agent is running."
+    city_name: String
+    "The name of the continent on which the agent is running."
+    continent_name: String
+    "ISO designation for the agent's country."
+    country_iso_code: String
+    "The name of the agent's country."
+    country_name: String
+    "The lat/long of the agent."
+    location: String
+    "A name for the host's location, e.g. 'us-east-1' or 'LAX'."
+    name: String
+    "ISO designation of the agent's region."
+    region_iso_code: String
+    "Name of the region hosting the agent."
+    region_name: String
   }
 
   type Host {
@@ -172,6 +200,12 @@ export const pingsSchema = gql`
     check_group: String
   }
 
+  "Metadata added by a proccessor, which is specified in its configuration."
+  type Observer {
+    "Geolocation data for the agent."
+    geo: Geo
+  }
+
   type Resolve {
     host: String
     ip: String
@@ -232,6 +266,7 @@ export const pingsSchema = gql`
     kubernetes: Kubernetes
     meta: Meta
     monitor: Monitor
+    observer: Observer
     resolve: Resolve
     socks5: Socks5
     summary: Summary

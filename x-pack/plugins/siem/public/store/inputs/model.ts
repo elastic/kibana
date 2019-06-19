@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface AbsoluteTimeRange {
+import { Omit } from '../../../common/utility_types';
+import { InputsModelId } from './constants';
+import { CONSTANTS } from '../../components/url_state/constants';
+
+export interface AbsoluteTimeRange {
   kind: 'absolute';
   fromStr: undefined;
   toStr: undefined;
@@ -12,7 +16,7 @@ interface AbsoluteTimeRange {
   to: number;
 }
 
-interface RelativeTimeRange {
+export interface RelativeTimeRange {
   kind: 'relative';
   fromStr: string;
   toStr: string;
@@ -20,9 +24,20 @@ interface RelativeTimeRange {
   to: number;
 }
 
-export type InputsModelId = 'global' | 'timeline';
+export const isRelativeTimeRange = (
+  timeRange: RelativeTimeRange | AbsoluteTimeRange | URLTimeRange
+): timeRange is RelativeTimeRange => timeRange.kind === 'relative';
+
+export const isAbsoluteTimeRange = (
+  timeRange: RelativeTimeRange | AbsoluteTimeRange | URLTimeRange
+): timeRange is AbsoluteTimeRange => timeRange.kind === 'absolute';
 
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
+
+export type URLTimeRange = Omit<TimeRange, 'from' | 'to'> & {
+  from: string | TimeRange['from'];
+  to: string | TimeRange['to'];
+};
 
 export interface Policy {
   kind: 'manual' | 'interval';
@@ -43,7 +58,19 @@ export interface InputsRange {
   linkTo: InputsModelId[];
 }
 
+export interface LinkTo {
+  linkTo: InputsModelId[];
+}
+
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+}
+export interface UrlInputsModelInputs {
+  linkTo: InputsModelId[];
+  [CONSTANTS.timerange]: TimeRange;
+}
+export interface UrlInputsModel {
+  global: UrlInputsModelInputs;
+  timeline: UrlInputsModelInputs;
 }

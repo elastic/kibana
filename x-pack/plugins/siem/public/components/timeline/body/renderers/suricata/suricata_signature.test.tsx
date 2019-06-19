@@ -21,7 +21,12 @@ describe('SuricataSignature', () => {
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = shallow(
-        <SuricataSignature id="doc-id-123" signatureId={123} signature="ET SCAN ATTACK Hello" />
+        <SuricataSignature
+          contextId="test"
+          id="doc-id-123"
+          signatureId={123}
+          signature="ET SCAN ATTACK Hello"
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -30,7 +35,7 @@ describe('SuricataSignature', () => {
   describe('Tokens', () => {
     test('should render empty if tokens are empty', () => {
       const wrapper = mountWithIntl(<Tokens tokens={[]} />);
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('should render a single if it is present', () => {

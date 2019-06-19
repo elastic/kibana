@@ -13,8 +13,8 @@ import styled from 'styled-components';
 
 import { DefaultDraggable } from '../draggables';
 
-import { SourceDestinationType } from './source_destination_ip';
-import { GeoFieldsProps } from './types';
+import { CountryFlag } from './country_flag';
+import { GeoFieldsProps, SourceDestinationType } from './types';
 
 export const SOURCE_GEO_CONTINENT_NAME_FIELD_NAME = 'source.geo.continent_name';
 export const SOURCE_GEO_COUNTRY_NAME_FIELD_NAME = 'source.geo.country_name';
@@ -77,14 +77,25 @@ const GeoFieldValues = pure<{
   values != null ? (
     <>
       {uniq(values).map(value => (
-        <GeoFlexItem grow={false} key={value}>
-          <DefaultDraggable
-            data-test-subj={fieldName}
-            field={fieldName}
-            id={`${contextId}-${eventId}-${fieldName}-${value}`}
-            tooltipContent={fieldName}
-            value={value}
-          />
+        <GeoFlexItem grow={false} key={`${contextId}-${eventId}-${fieldName}-${value}`}>
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            {fieldName === SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME ||
+            fieldName === DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME ? (
+              <EuiFlexItem grow={false}>
+                <CountryFlag countryCode={value} />
+              </EuiFlexItem>
+            ) : null}
+
+            <EuiFlexItem grow={false}>
+              <DefaultDraggable
+                data-test-subj={fieldName}
+                field={fieldName}
+                id={`${contextId}-${eventId}-${fieldName}-${value}`}
+                tooltipContent={fieldName}
+                value={value}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </GeoFlexItem>
       ))}
     </>
@@ -104,7 +115,7 @@ export const GeoFields = pure<GeoFieldsProps>(props => {
 
   const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       {uniq(propNameToFieldName).map(geo => (
         <GeoFieldValues
           contextId={contextId}

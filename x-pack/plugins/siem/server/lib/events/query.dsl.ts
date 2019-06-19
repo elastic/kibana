@@ -6,8 +6,6 @@
 
 import { SortField, TimerangeInput } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
-import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { eventFieldsMap } from '../ecs_fields';
 import { RequestOptions } from '../framework';
 import { SortRequest } from '../types';
 
@@ -16,8 +14,8 @@ import { TimerangeFilter } from './types';
 export const buildQuery = (options: RequestOptions) => {
   const { limit, cursor, tiebreaker } = options.pagination;
   const { fields, filterQuery } = options;
-  const esFields = [...reduceFields(fields, eventFieldsMap)];
   const filterClause = [...createQueryFilterClauses(filterQuery)];
+  const defaultIndex = options.defaultIndex;
 
   const getTimerangeFilter = (timerange: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerange) {
@@ -73,12 +71,7 @@ export const buildQuery = (options: RequestOptions) => {
 
   const queryDsl = {
     allowNoIndices: true,
-    index: [
-      options.sourceConfiguration.logAlias,
-      options.sourceConfiguration.auditbeatAlias,
-      options.sourceConfiguration.packetbeatAlias,
-      options.sourceConfiguration.winlogbeatAlias,
-    ],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: agg,
@@ -91,7 +84,7 @@ export const buildQuery = (options: RequestOptions) => {
       size: limit + 1,
       track_total_hits: true,
       sort,
-      _source: esFields,
+      _source: fields,
     },
   };
 

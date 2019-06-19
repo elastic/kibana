@@ -33,8 +33,8 @@ export async function getAnomalySeries({
     return;
   }
 
-  // don't fetch anomalies if kuery filter is applied
-  if (setup.esFilterQuery) {
+  // don't fetch anomalies if uiFilters are applied
+  if (setup.uiFiltersES.length > 0) {
     return;
   }
 
@@ -55,10 +55,12 @@ export async function getAnomalySeries({
     setup
   });
 
-  return anomalySeriesTransform(
-    esResponse,
-    mlBucketSize,
-    bucketSize,
-    timeSeriesDates
-  );
+  return esResponse
+    ? anomalySeriesTransform(
+        esResponse,
+        mlBucketSize,
+        bucketSize,
+        timeSeriesDates
+      )
+    : undefined;
 }

@@ -8,6 +8,8 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
+import { pathToFileURL } from 'url';
+
 import { ServerOptions } from '../server_options';
 import { LanguageServerProxy } from './proxy';
 import { InitializingError, RequestExpander } from './request_expander';
@@ -16,7 +18,6 @@ import { InitializingError, RequestExpander } from './request_expander';
 const options: ServerOptions = {
   workspacePath: '/tmp/test/workspace',
 };
-
 beforeEach(async () => {
   sinon.reset();
   if (!fs.existsSync(options.workspacePath)) {
@@ -31,6 +32,7 @@ afterEach(() => {
 });
 
 test('requests should be sequential', async () => {
+  const clock = sinon.useFakeTimers();
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
     handleRequest: sinon.stub().callsFake(() => {
@@ -53,22 +55,28 @@ test('requests should be sequential', async () => {
   };
   const response1Promise = expander.handleRequest(request1);
   const response2Promise = expander.handleRequest(request2);
+  clock.tick(100);
+  process.nextTick(() => clock.runAll());
   const response1 = await response1Promise;
   const response2 = await response2Promise;
   // response2 should not be started before response1 ends.
   expect(response1.result.end).toBeLessThanOrEqual(response2.result.start);
+  clock.restore();
 });
 
 test('requests should throw error after lsp init timeout', async () => {
+  const clock = sinon.useFakeTimers();
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
-    handleRequest: sinon.stub().callsFake(() => Promise.resolve('ok')),
+    handleRequest: sinon.stub().callsFake(() => {
+      Promise.resolve('ok');
+    }),
     initialize: sinon.stub().callsFake(
       () =>
         new Promise(resolve => {
           setTimeout(() => {
             resolve();
-          }, 200);
+          }, 300);
         })
     ),
   });
@@ -89,8 +97,11 @@ test('requests should throw error after lsp init timeout', async () => {
   mkdirp.sync(request2.workspacePath);
   const response1Promise = expander.handleRequest(request1);
   const response2Promise = expander.handleRequest(request2);
+  clock.tick(400);
+  process.nextTick(() => clock.runAll());
   await expect(response1Promise).rejects.toEqual(InitializingError);
   await expect(response2Promise).rejects.toEqual(InitializingError);
+  clock.restore();
 });
 
 test('be able to open multiple workspace', async () => {
@@ -108,6 +119,7 @@ test('be able to open multiple workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/1',
   };
+
   const request2 = {
     method: 'request2',
     params: [],
@@ -122,7 +134,7 @@ test('be able to open multiple workspace', async () => {
     proxyStub.initialize.calledOnceWith({}, [
       {
         name: request1.workspacePath,
-        uri: `file://${request1.workspacePath}`,
+        uri: pathToFileURL(request1.workspacePath).href,
       },
     ])
   ).toBeTruthy();
@@ -134,7 +146,7 @@ test('be able to open multiple workspace', async () => {
           added: [
             {
               name: request2.workspacePath,
-              uri: `file://${request2.workspacePath}`,
+              uri: pathToFileURL(request2.workspacePath).href,
             },
           ],
           removed: [],
@@ -178,13 +190,13 @@ test('be able to swap workspace', async () => {
           added: [
             {
               name: request2.workspacePath,
-              uri: `file://${request2.workspacePath}`,
+              uri: pathToFileURL(request2.workspacePath).href,
             },
           ],
           removed: [
             {
               name: request1.workspacePath,
-              uri: `file://${request1.workspacePath}`,
+              uri: pathToFileURL(request1.workspacePath).href,
             },
           ],
         },

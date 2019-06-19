@@ -6,6 +6,8 @@
 
 import './kibana_services';
 
+import { i18n } from '@kbn/i18n';
+
 // import the uiExports that we want to "use"
 import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
@@ -31,7 +33,7 @@ import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
 
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 data.query.loadLegacyDirectives();
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
@@ -44,16 +46,16 @@ routes.enable();
 
 routes
   .defaults(/.*/, {
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.maps.save) {
         return undefined;
       }
 
       return {
-        text: i18n('xpack.maps.badge.readOnly.text', {
+        text: i18n.translate('xpack.maps.badge.readOnly.text', {
           defaultMessage: 'Read only',
         }),
-        tooltip: i18n('xpack.maps.badge.readOnly.tooltip', {
+        tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save maps',
         }),
         iconType: 'glasses'

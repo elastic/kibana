@@ -14,6 +14,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -26,6 +27,7 @@ import {
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnDataProviderRemoved,
+  OnDataProviderEdited,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';
@@ -33,7 +35,7 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { KqlMode } from '../../store/timeline/model';
+import { TimelineContext } from './timeline_context';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -64,6 +66,7 @@ interface Props {
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
+  onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
@@ -91,6 +94,7 @@ export const Timeline = pure<Props>(
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
     onChangeItemsPerPage,
+    onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
@@ -101,6 +105,7 @@ export const Timeline = pure<Props>(
     const combinedQueries = combineQueries(
       dataProviders,
       indexPattern,
+      browserFields,
       kqlQueryExpression,
       kqlMode,
       start,
@@ -118,11 +123,13 @@ export const Timeline = pure<Props>(
           >
             <WrappedByAutoSizer innerRef={measureRef}>
               <TimelineHeader
+                browserFields={browserFields}
                 id={id}
                 indexPattern={indexPattern}
                 dataProviders={dataProviders}
                 onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                 onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+                onDataProviderEdited={onDataProviderEdited}
                 onDataProviderRemoved={onDataProviderRemoved}
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={onToggleDataProviderExcluded}
@@ -144,6 +151,7 @@ export const Timeline = pure<Props>(
               >
                 {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt, refetch }) => (
                   <TimelineRefetch loading={loading} id={id} refetch={refetch}>
+                    <TimelineContext.Provider value={{ isLoading: loading }} />
                     <StatefulBody
                       browserFields={browserFields}
                       data={events}

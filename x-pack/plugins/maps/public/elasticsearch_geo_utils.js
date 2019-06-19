@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse } from 'wellknown';
 import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
-import { DECIMAL_DEGREES_PRECISION, ES_GEO_FIELD_TYPE } from '../common/constants';
+import { DECIMAL_DEGREES_PRECISION, ES_GEO_FIELD_TYPE, GEO_JSON_TYPE } from '../common/constants';
 
 /**
  * Converts Elasticsearch search results into GeoJson FeatureCollection
@@ -60,7 +60,7 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
 
 function pointGeometryFactory(lat, lon) {
   return {
-    type: 'Point',
+    type: GEO_JSON_TYPE.POINT,
     coordinates: [lon, lat]
   };
 }
@@ -131,25 +131,25 @@ export function convertESShapeToGeojsonGeometry(value) {
   // The below is the correction in-place.
   switch (value.type) {
     case 'point':
-      geoJson.type = 'Point';
+      geoJson.type = GEO_JSON_TYPE.POINT;
       break;
     case 'linestring':
-      geoJson.type = 'LineString';
+      geoJson.type = GEO_JSON_TYPE.LINE_STRING;
       break;
     case 'polygon':
-      geoJson.type = 'Polygon';
+      geoJson.type = GEO_JSON_TYPE.POLYGON;
       break;
     case 'multipoint':
-      geoJson.type = 'MultiPoint';
+      geoJson.type = GEO_JSON_TYPE.MULTI_POINT;
       break;
     case 'multilinestring':
-      geoJson.type = 'MultiLineString';
+      geoJson.type = GEO_JSON_TYPE.MULTI_LINE_STRING;
       break;
     case 'multipolygon':
-      geoJson.type = 'MultiPolygon';
+      geoJson.type = GEO_JSON_TYPE.MULTI_POLYGON;
       break;
     case 'geometrycollection':
-      geoJson.type = 'GeometryCollection';
+      geoJson.type = GEO_JSON_TYPE.GEOMETRY_COLLECTION;
       break;
     case 'envelope':
     case 'circle':

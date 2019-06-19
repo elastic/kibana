@@ -21,11 +21,15 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
       const expectedResult = {
-        packetbeatFlow: 0,
-        packetbeatDNS: 0,
+        auditbeatSocket: 0,
+        filebeatCisco: 0,
+        filebeatNetflow: 1273,
+        filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        auditbeatSocket: 0,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
+        packetbeatTLS: 0,
         __typename: 'OverviewNetworkData',
       };
 
@@ -40,6 +44,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -56,11 +61,15 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
-        packetbeatFlow: 0,
-        packetbeatDNS: 0,
+        auditbeatSocket: 0,
+        filebeatCisco: 0,
+        filebeatNetflow: 1273,
+        filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        auditbeatSocket: 0,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
+        packetbeatTLS: 0,
         __typename: 'OverviewNetworkData',
       };
 
@@ -75,6 +84,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -91,11 +101,15 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
-        packetbeatFlow: 0,
-        packetbeatDNS: 0,
+        auditbeatSocket: 0,
+        filebeatCisco: 0,
+        filebeatNetflow: 1273,
+        filebeatPanw: 0,
         filebeatSuricata: 4547,
         filebeatZeek: 0,
-        auditbeatSocket: 0,
+        packetbeatDNS: 0,
+        packetbeatFlow: 0,
+        packetbeatTLS: 0,
         __typename: 'OverviewNetworkData',
       };
 
@@ -110,6 +124,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {

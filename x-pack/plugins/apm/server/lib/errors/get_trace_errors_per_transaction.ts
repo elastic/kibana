@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
-  TRACE_ID
+  TRACE_ID,
+  TRANSACTION_ID
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
@@ -16,25 +16,14 @@ export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
-interface TraceErrorsAggBucket {
-  key: string;
-  doc_count: number;
-}
-
-interface TraceErrorsAggResponse {
-  transactions: {
-    buckets: TraceErrorsAggBucket[];
-  };
-}
-
 export async function getTraceErrorsPerTransaction(
   traceId: string,
   setup: Setup
 ): Promise<ErrorsPerTransaction> {
   const { start, end, client, config } = setup;
 
-  const params: SearchParams = {
-    index: [config.get('apm_oss.errorIndices')],
+  const params = {
+    index: config.get<string>('apm_oss.errorIndices'),
     body: {
       size: 0,
       query: {
@@ -49,14 +38,14 @@ export async function getTraceErrorsPerTransaction(
       aggs: {
         transactions: {
           terms: {
-            field: 'transaction.id'
+            field: TRANSACTION_ID
           }
         }
       }
     }
   };
 
-  const resp = await client<never, TraceErrorsAggResponse>('search', params);
+  const resp = await client.search(params);
 
   return resp.aggregations.transactions.buckets.reduce(
     (acc, bucket) => ({

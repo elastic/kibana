@@ -226,7 +226,10 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
   markdown: visState => {
     const { markdown, fontSize, openLinksInNewTab } = visState.params;
-    const escapedMarkdown = escapeString(markdown);
+    let escapedMarkdown = '';
+    if (typeof markdown === 'string' || markdown instanceof String) {
+      escapedMarkdown = escapeString(markdown.toString());
+    }
     let expr = `markdownvis '${escapedMarkdown}' `;
     if (fontSize) {
       expr += ` fontSize=${fontSize} `;
@@ -267,7 +270,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (maxFontSize) {
       expr += `maxFontSize=${maxFontSize} `;
     }
-    if (showLabel) {
+    if (showLabel !== undefined) {
       expr += `showLabel=${showLabel} `;
     }
 

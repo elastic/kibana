@@ -42,6 +42,7 @@ export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
         sourceId: 'default',
         indexKey: LastEventIndexKey.hosts,
         details: {},
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       },
     },
     result: {

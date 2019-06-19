@@ -14,10 +14,10 @@ function getBucketSize({ start, end, config }: Setup) {
 }
 
 export type ErrorDistributionAPIResponse = PromiseReturnType<
-  typeof getDistribution
+  typeof getErrorDistribution
 >;
 
-export async function getDistribution({
+export async function getErrorDistribution({
   serviceName,
   groupId,
   setup

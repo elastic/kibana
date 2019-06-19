@@ -10,6 +10,8 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   Direction,
   GetHostsTableQuery,
@@ -76,6 +78,7 @@ class HostsComponentQuery extends QueryTemplate<
       endDate,
       limit,
       startDate,
+      skip,
       sourceId,
       sortField,
     } = this.props;
@@ -96,6 +99,7 @@ class HostsComponentQuery extends QueryTemplate<
         tiebreaker: null,
       },
       filterQuery: createFilter(filterQuery),
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
     };
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
@@ -103,6 +107,7 @@ class HostsComponentQuery extends QueryTemplate<
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
         variables={variables}
+        skip={skip}
       >
         {({ data, loading, fetchMore, refetch }) => {
           this.setFetchMore(fetchMore);

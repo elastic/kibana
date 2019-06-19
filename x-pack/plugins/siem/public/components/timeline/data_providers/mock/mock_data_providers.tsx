@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataProvider } from '../data_provider';
+import { DataProvider, IS_OPERATOR } from '../data_provider';
 
 interface NameToEventCount<TValue> {
   [name: string]: TValue;
@@ -39,16 +39,18 @@ export const getEventCount = (dataProviderName: string): number =>
  * in the browser, and also used as mocks in unit and functional tests.
  */
 export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEventCount).map(
-  name => ({
-    id: `id-${name}`,
-    name,
-    enabled: true,
-    excluded: false,
-    kqlQuery: '',
-    queryMatch: {
-      field: 'name',
-      value: name,
-    },
-    and: [],
-  })
+  name =>
+    ({
+      id: `id-${name}`,
+      name,
+      enabled: true,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: 'name',
+        value: name,
+        operator: IS_OPERATOR,
+      },
+      and: [],
+    } as DataProvider)
 );

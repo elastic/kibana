@@ -37,6 +37,7 @@ interface Props {
   onEventToggled: () => void;
   onPinClicked: () => void;
   showNotes: boolean;
+  showCheckboxes: boolean;
   toggleShowNotes: () => void;
   updateNote: UpdateNote;
 }
@@ -49,7 +50,6 @@ const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
 `;
 
 const ExpandEventContainer = styled.div`
-  margin-left: 5px;
   height: 25px;
   width: 25px;
 `;
@@ -60,17 +60,15 @@ const ActionLoading = styled(EuiLoadingSpinner)`
 `;
 
 const PinContainer = styled.div`
-  margin-left: 5px;
   width: 27px;
 `;
 
 const SelectEventContainer = styled(EuiFlexItem)`
   padding: 4px 0 0 7px;
-  margin-right: 2px;
 `;
 
 const NotesButtonContainer = styled(EuiFlexItem)`
-  margin: 0 7px 0 5px;
+  margin-left: 5px;
 `;
 
 const emptyNotes: string[] = [];
@@ -88,6 +86,7 @@ export const Actions = pure<Props>(
     noteIds,
     onEventToggled,
     onPinClicked,
+    showCheckboxes,
     showNotes,
     toggleShowNotes,
     updateNote,
@@ -103,14 +102,16 @@ export const Actions = pure<Props>(
         gutterSize="none"
         justifyContent="spaceBetween"
       >
-        <SelectEventContainer data-test-subj="select-event-container" grow={false}>
-          <EuiCheckbox
-            data-test-subj="select-event"
-            id={eventId}
-            checked={checked}
-            onChange={noop}
-          />
-        </SelectEventContainer>
+        {showCheckboxes && (
+          <SelectEventContainer data-test-subj="select-event-container" grow={false}>
+            <EuiCheckbox
+              data-test-subj="select-event"
+              id={eventId}
+              checked={checked}
+              onChange={noop}
+            />
+          </SelectEventContainer>
+        )}
 
         <EuiFlexItem grow={false}>
           <ExpandEventContainer>

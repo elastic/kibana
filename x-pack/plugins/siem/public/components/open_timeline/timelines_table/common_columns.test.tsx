@@ -10,17 +10,17 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 import { getEmptyValue } from '../../empty_value';
-import { TimelineResult } from '../types';
+import { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { NotePreviews } from '../note_previews';
 import { TimelinesTable } from '.';
 
 import * as i18n from '../translations';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 describe('#getCommonColumns', () => {
-  let mockResults: TimelineResult[];
+  let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -28,7 +28,7 @@ describe('#getCommonColumns', () => {
 
   describe('Expand column', () => {
     test('it renders the expand button when the timelineResult has notes', () => {
-      const hasNotes: TimelineResult[] = [{ ...mockResults[0] }];
+      const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -54,7 +54,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it does NOT render the expand button when the timelineResult notes are undefined', () => {
-      const missingNotes: TimelineResult[] = [omit('notes', { ...mockResults[0] })];
+      const missingNotes: OpenTimelineResult[] = [omit('notes', { ...mockResults[0] })];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -80,7 +80,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it does NOT render the expand button when the timelineResult notes are null', () => {
-      const nullNotes: TimelineResult[] = [{ ...mockResults[0], notes: null }];
+      const nullNotes: OpenTimelineResult[] = [{ ...mockResults[0], notes: null }];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -106,7 +106,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it does NOT render the expand button when the notes are empty', () => {
-      const emptylNotes: TimelineResult[] = [{ ...mockResults[0], notes: [] }];
+      const emptylNotes: OpenTimelineResult[] = [{ ...mockResults[0], notes: [] }];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -132,7 +132,9 @@ describe('#getCommonColumns', () => {
     });
 
     test('it does NOT render the expand button when the timelineResult savedObjectId is undefined', () => {
-      const missingSavedObjectId: TimelineResult[] = [omit('savedObjectId', { ...mockResults[0] })];
+      const missingSavedObjectId: OpenTimelineResult[] = [
+        omit('savedObjectId', { ...mockResults[0] }),
+      ];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -158,7 +160,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it does NOT render the expand button when the timelineResult savedObjectId is null', () => {
-      const nullSavedObjectId: TimelineResult[] = [{ ...mockResults[0], savedObjectId: null }];
+      const nullSavedObjectId: OpenTimelineResult[] = [{ ...mockResults[0], savedObjectId: null }];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -184,7 +186,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders the right arrow expander when the row is not expanded', () => {
-      const hasNotes: TimelineResult[] = [{ ...mockResults[0] }];
+      const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -215,7 +217,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders the down arrow expander when the row is expanded', () => {
-      const hasNotes: TimelineResult[] = [{ ...mockResults[0] }];
+      const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       const itemIdToExpandedNotesRowMap = {
         [mockResults[0].savedObjectId!]: (
@@ -253,7 +255,7 @@ describe('#getCommonColumns', () => {
 
     test('it invokes onToggleShowNotes to expand the row when the row is not expanded', () => {
       const onToggleShowNotes = jest.fn();
-      const hasNotes: TimelineResult[] = [{ ...mockResults[0] }];
+      const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       // the saved object id does not exist in the map yet, so the row is not expanded:
       const itemIdToExpandedNotesRowMap = {
@@ -293,7 +295,7 @@ describe('#getCommonColumns', () => {
 
     test('it invokes onToggleShowNotes to remove the row when the row is expanded', () => {
       const onToggleShowNotes = jest.fn();
-      const hasNotes: TimelineResult[] = [{ ...mockResults[0] }];
+      const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       // the saved object id exists in the map yet, so the row is expanded:
       const itemIdToExpandedNotesRowMap = {
@@ -392,7 +394,9 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders the title when the timeline has a title, but no saved object id', () => {
-      const missingSavedObjectId: TimelineResult[] = [omit('savedObjectId', { ...mockResults[0] })];
+      const missingSavedObjectId: OpenTimelineResult[] = [
+        omit('savedObjectId', { ...mockResults[0] }),
+      ];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -423,7 +427,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders an Untitled Timeline title when the timeline has no title and a saved object id', () => {
-      const missingTitle: TimelineResult[] = [omit('title', { ...mockResults[0] })];
+      const missingTitle: OpenTimelineResult[] = [omit('title', { ...mockResults[0] })];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -454,7 +458,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders an Untitled Timeline title when the timeline has no title, and no saved object id', () => {
-      const withMissingSavedObjectIdAndTitle: TimelineResult[] = [
+      const withMissingSavedObjectIdAndTitle: OpenTimelineResult[] = [
         omit(['title', 'savedObjectId'], { ...mockResults[0] }),
       ];
 
@@ -487,7 +491,9 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders an Untitled Timeline title when the title is just whitespace, and it has a saved object id', () => {
-      const withJustWhitespaceTitle: TimelineResult[] = [{ ...mockResults[0], title: '      ' }];
+      const withJustWhitespaceTitle: OpenTimelineResult[] = [
+        { ...mockResults[0], title: '      ' },
+      ];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -518,7 +524,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders an Untitled Timeline title when the title is just whitespace, and no saved object id', () => {
-      const withMissingSavedObjectId: TimelineResult[] = [
+      const withMissingSavedObjectId: OpenTimelineResult[] = [
         omit('savedObjectId', { ...mockResults[0], title: '      ' }),
       ];
 
@@ -580,7 +586,9 @@ describe('#getCommonColumns', () => {
     });
 
     test('it does NOT render a hyperlink when the timeline has no saved object id', () => {
-      const missingSavedObjectId: TimelineResult[] = [omit('savedObjectId', { ...mockResults[0] })];
+      const missingSavedObjectId: OpenTimelineResult[] = [
+        omit('savedObjectId', { ...mockResults[0] }),
+      ];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -705,7 +713,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders a placeholder when the timeline has no description', () => {
-      const missingDescription: TimelineResult[] = [omit('description', { ...mockResults[0] })];
+      const missingDescription: OpenTimelineResult[] = [omit('description', { ...mockResults[0] })];
 
       const wrapper = mountWithIntl(
         <TimelinesTable
@@ -735,7 +743,7 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders a placeholder when the timeline description is just whitespace', () => {
-      const justWhitespaceDescription: TimelineResult[] = [
+      const justWhitespaceDescription: OpenTimelineResult[] = [
         { ...mockResults[0], description: '      ' },
       ];
 
@@ -828,7 +836,7 @@ describe('#getCommonColumns', () => {
   });
 
   test('it renders a placeholder when the timeline has no last modified (updated) date', () => {
-    const missingUpdated: TimelineResult[] = [omit('updated', { ...mockResults[0] })];
+    const missingUpdated: OpenTimelineResult[] = [omit('updated', { ...mockResults[0] })];
 
     const wrapper = mountWithIntl(
       <TimelinesTable

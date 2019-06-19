@@ -25,19 +25,11 @@ export class Sources {
 }
 
 export interface SourcesAdapter {
-  getAll(): Promise<SourceConfigurations>;
-}
-
-export interface SourceConfigurations {
-  [sourceId: string]: SourceConfiguration;
+  getAll(): Promise<Record<string, SourceConfiguration>>;
 }
 
 export interface AliasConfiguration {
-  metricAlias: string;
-  logAlias: string;
-  auditbeatAlias: string;
-  packetbeatAlias: string;
-  winlogbeatAlias: string;
+  defaultIndex: string[];
 }
 
 export interface SourceConfiguration extends AliasConfiguration {

@@ -9,6 +9,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
@@ -163,7 +164,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   };
 
   const renderRepository = () => {
-    const { repository } = repositoryDetails;
+    const { repository, isManagedRepository } = repositoryDetails;
 
     if (!repository) {
       return null;
@@ -172,6 +173,22 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     const { type } = repository as Repository;
     return (
       <Fragment>
+        {isManagedRepository ? (
+          <Fragment>
+            <EuiCallOut
+              size="s"
+              color="warning"
+              iconType="iInCircle"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"
+                  defaultMessage="This is a managed repository used by other systems. Any changes you make might affect how these systems operate."
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </Fragment>
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
           <EuiFlexItem>
             <EuiTitle size="s">
@@ -183,9 +200,11 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {type === REPOSITORY_TYPES.source
-              ? textService.getRepositoryTypeName(type, repository.settings.delegateType)
-              : textService.getRepositoryTypeName(type)}
+            <span data-test-subj="repositoryType">
+              {type === REPOSITORY_TYPES.source
+                ? textService.getRepositoryTypeName(type, repository.settings.delegateType)
+                : textService.getRepositoryTypeName(type)}
+            </span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -194,6 +213,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               href={documentationLinksService.getRepositoryTypeDocUrl(type)}
               target="_blank"
               iconType="help"
+              data-test-subj="documentationLink"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryDetails.repositoryTypeDocLink"
@@ -212,7 +232,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {renderSnapshotCount()}
+        <span data-test-subj="snapshotCount">{renderSnapshotCount()}</span>
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
@@ -288,7 +308,12 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
       ) : (
         <Fragment>
           <EuiSpacer size="m" />
-          <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
+          <EuiButton
+            onClick={verifyRepository}
+            color="primary"
+            isLoading={isLoadingVerification}
+            data-test-subj="verifyRepositoryButton"
+          >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
               defaultMessage="Verify repository"
@@ -329,6 +354,17 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
                         onClick={() =>
                           deleteRepositoryPrompt([repositoryName], onRepositoryDeleted)
                         }
+                        isDisabled={repositoryDetails.isManagedRepository}
+                        title={
+                          repositoryDetails.isManagedRepository
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.repositoryDetails.removeManagedRepositoryButtonTitle',
+                                {
+                                  defaultMessage: 'You cannot delete a managed repository.',
+                                }
+                              )
+                            : null
+                        }
                       >
                         <FormattedMessage
                           id="xpack.snapshotRestore.repositoryDetails.removeButtonLabel"
@@ -364,20 +400,20 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      data-test-subj="srRepositoryDetailsFlyout"
+      data-test-subj="repositoryDetail"
       aria-labelledby="srRepositoryDetailsFlyoutTitle"
       size="m"
       maxWidth={400}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id="srRepositoryDetailsFlyoutTitle" data-test-subj="srRepositoryDetailsFlyoutTitle">
+          <h2 id="srRepositoryDetailsFlyoutTitle" data-test-subj="title">
             {repositoryName}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody data-test-subj="srRepositoryDetailsContent">{renderBody()}</EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="content">{renderBody()}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>

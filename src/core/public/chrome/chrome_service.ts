@@ -23,11 +23,11 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { IconType } from '@elastic/eui';
-import { InjectedMetadataSetup } from '../injected_metadata';
-import { NotificationsSetup } from '../notifications';
+import { InjectedMetadataStart } from '../injected_metadata';
+import { NotificationsStart } from '../notifications';
 import { NavLinksService } from './nav_links/nav_links_service';
 import { ApplicationStart } from '../application';
-import { BasePathStart } from '../base_path';
+import { HttpStart } from '../http';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -63,14 +63,11 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
-interface SetupDeps {
-  injectedMetadata: InjectedMetadataSetup;
-  notifications: NotificationsSetup;
-}
-
 interface StartDeps {
   application: ApplicationStart;
-  basePath: BasePathStart;
+  http: HttpStart;
+  injectedMetadata: InjectedMetadataStart;
+  notifications: NotificationsStart;
 }
 
 /** @internal */
@@ -83,7 +80,7 @@ export class ChromeService {
     this.browserSupportsCsp = browserSupportsCsp;
   }
 
-  public setup({ injectedMetadata, notifications }: SetupDeps) {
+  public start({ application, http, injectedMetadata, notifications }: StartDeps) {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
     const brand$ = new Rx.BehaviorSubject<ChromeBrand>({});
@@ -103,6 +100,8 @@ export class ChromeService {
     }
 
     return {
+      navLinks: this.navLinks.start({ application, http }),
+
       /**
        * Set the brand configuration. Normally the `logo` property will be rendered as the
        * CSS background for the home link in the chrome navigation, but when the page is
@@ -230,20 +229,11 @@ export class ChromeService {
     };
   }
 
-  public start({ application, basePath }: StartDeps) {
-    return {
-      navLinks: this.navLinks.start({ application, basePath }),
-    };
-  }
-
   public stop() {
     this.navLinks.stop();
     this.stop$.next();
   }
 }
-
-/** @public */
-export type ChromeSetup = ReturnType<ChromeService['setup']>;
 
 /** @public */
 export type ChromeStart = ReturnType<ChromeService['start']>;

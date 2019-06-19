@@ -15,7 +15,7 @@ import {
   OnSelectionChange,
   OnTableChange,
   OnToggleShowNotes,
-  TimelineResult,
+  OpenTimelineResult,
 } from '../types';
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
@@ -27,6 +27,7 @@ import * as i18n from '../translations';
 const TimelinesTableContainer = styled.div`
   .euiTableCellContent {
     animation: none;
+    text-align: left;
   }
 
   .euiTableCellContent__text {
@@ -89,7 +90,7 @@ export interface TimelinesTableProps {
   onToggleShowNotes: OnToggleShowNotes;
   pageIndex: number;
   pageSize: number;
-  searchResults: TimelineResult[];
+  searchResults: OpenTimelineResult[];
   showExtendedColumnsAndActions: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
@@ -138,7 +139,7 @@ export const TimelinesTable = pure<TimelinesTableProps>(
     };
 
     const selection = {
-      selectable: (timelineResult: TimelineResult) => timelineResult.savedObjectId != null,
+      selectable: (timelineResult: OpenTimelineResult) => timelineResult.savedObjectId != null,
       selectableMessage: (selectable: boolean) =>
         !selectable ? i18n.MISSING_SAVED_OBJECT_ID : undefined,
       onSelectionChange,

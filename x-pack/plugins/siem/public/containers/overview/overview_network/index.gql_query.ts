@@ -7,15 +7,28 @@
 import gql from 'graphql-tag';
 
 export const overviewNetworkQuery = gql`
-  query GetOverviewNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {
+  query GetOverviewNetworkQuery(
+    $sourceId: ID!
+    $timerange: TimerangeInput!
+    $filterQuery: String
+    $defaultIndex: [String!]!
+  ) {
     source(id: $sourceId) {
       id
-      OverviewNetwork(timerange: $timerange, filterQuery: $filterQuery) {
-        packetbeatFlow
-        packetbeatDNS
+      OverviewNetwork(
+        timerange: $timerange
+        filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
+      ) {
+        auditbeatSocket
+        filebeatCisco
+        filebeatNetflow
+        filebeatPanw
         filebeatSuricata
         filebeatZeek
-        auditbeatSocket
+        packetbeatDNS
+        packetbeatFlow
+        packetbeatTLS
       }
     }
   }
