@@ -324,18 +324,17 @@ function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete(
       }
 
       // Schedule next request.
-      pollTimeoutId = setTimeout(retrieveAutoCompleteInfo, POLL_INTERVAL);
+      pollTimeoutId = setTimeout(() => {
+        // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
+        // a scheduled request if the user turns off polling.
+        if (settings.getPolling()) {
+          retrieveAutoCompleteInfo();
+        }
+      }, POLL_INTERVAL);
     });
 }
 
-function startPolling() {
-  // Technically, we don't need this method and we could just expose retrieveAutoCompleteInfo.
-  // However, we'll want to allow the user to turn polling on and off eventually so we'll leave this
-  // here to support this eventual functionality.
-  retrieveAutoCompleteInfo();
-}
-
-export default _.assign(mappingObj, {
+export default {
   getFields,
   getTemplates,
   getIndices,
@@ -344,6 +343,5 @@ export default _.assign(mappingObj, {
   loadAliases,
   expandAliases,
   clear,
-  startPolling,
   retrieveAutoCompleteInfo,
-});
+};

@@ -29,6 +29,7 @@
     "xpack.code": "x-pack/plugins/code",
     "xpack.crossClusterReplication": "x-pack/plugins/cross_cluster_replication",
     "xpack.dashboardMode": "x-pack/plugins/dashboard_mode",
+    "xpack.fileUpload": "x-pack/plugins/file_upload",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",

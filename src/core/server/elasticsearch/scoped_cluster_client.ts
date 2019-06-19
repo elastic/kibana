@@ -44,7 +44,10 @@ export class ScopedClusterClient {
     private readonly internalAPICaller: APICaller,
     private readonly scopedAPICaller: APICaller,
     private readonly headers?: Headers
-  ) {}
+  ) {
+    this.callAsCurrentUser = this.callAsCurrentUser.bind(this);
+    this.callAsInternalUser = this.callAsInternalUser.bind(this);
+  }
 
   /**
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
