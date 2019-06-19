@@ -22,7 +22,7 @@ export default function deleteActionTests({ getService }: KibanaFunctionalTestDe
       await supertest
         .delete(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
-        .expect(200, {})
+        .expect(200, {});
     });
 
     it(`should return 404 when action doesn't exist`, async () => {

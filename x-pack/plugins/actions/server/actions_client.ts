@@ -114,7 +114,10 @@ export class ActionsClient {
     const { actionTypeId } = existingObject.attributes;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
 
-    const validatedActionTypeConfig = validateActionTypeConfig(actionType, attributes.actionTypeConfig);
+    const validatedActionTypeConfig = validateActionTypeConfig(
+      actionType,
+      attributes.actionTypeConfig
+    );
     attributes = this.moveEncryptedAttributesToSecrets(actionType.unencryptedAttributes, {
       ...attributes,
       actionTypeConfig: validatedActionTypeConfig,
