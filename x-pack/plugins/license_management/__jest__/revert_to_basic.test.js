@@ -45,7 +45,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should not display for active gold license', () => {
     const rendered = getComponent(
@@ -54,7 +54,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should not display for active platinum license', () => {
     const rendered = getComponent(
@@ -63,6 +63,6 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
 });

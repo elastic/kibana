@@ -113,7 +113,7 @@ describe('draggables', () => {
           <DefaultDraggable id="draggable-id" field="some-field" value={undefined} />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if value is null', () => {
@@ -122,7 +122,7 @@ describe('draggables', () => {
           <DefaultDraggable id="draggable-id" field="some-field" value={null} />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {
@@ -229,7 +229,7 @@ describe('draggables', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if value is null', () => {
@@ -244,7 +244,7 @@ describe('draggables', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns Empty string text if value is an empty string', () => {

@@ -9,13 +9,13 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 
-export function notificationRoutes(server, commonRouteConfig) {
+export function notificationRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/notification_settings',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const params = {
         includeDefaults: true,
         filterPath: '**.xpack.notification'

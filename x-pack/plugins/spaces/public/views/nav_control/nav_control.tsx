@@ -42,42 +42,39 @@ export interface SpacesNavState {
 
 let spacesManager: SpacesManager;
 
-module.controller(
-  'spacesNavController',
-  ($scope: any, $http: any, chrome: any, activeSpace: any) => {
-    const domNode = document.getElementById(`spacesNavReactRoot`);
-    const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
+module.controller('spacesNavController', ($scope: any, chrome: any, activeSpace: any) => {
+  const domNode = document.getElementById(`spacesNavReactRoot`);
+  const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
-    spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+  spacesManager = new SpacesManager(spaceSelectorURL);
 
-    let mounted = false;
+  let mounted = false;
 
-    $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
-      if (isVisible && !mounted && !Path.isUnauthenticated()) {
-        render(
-          <I18nContext>
-            <NavControlPopover
-              spacesManager={spacesManager}
-              activeSpace={activeSpace}
-              anchorPosition={'rightCenter'}
-              buttonClass={SpacesGlobalNavButton}
-            />
-          </I18nContext>,
-          domNode
-        );
-        mounted = true;
-      }
-    });
+  $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
+    if (isVisible && !mounted && !Path.isUnauthenticated()) {
+      render(
+        <I18nContext>
+          <NavControlPopover
+            spacesManager={spacesManager}
+            activeSpace={activeSpace}
+            anchorPosition={'rightCenter'}
+            buttonClass={SpacesGlobalNavButton}
+          />
+        </I18nContext>,
+        domNode
+      );
+      mounted = true;
+    }
+  });
 
-    // unmount react on controller destroy
-    $scope.$on('$destroy', () => {
-      if (domNode) {
-        unmountComponentAtNode(domNode);
-      }
-      mounted = false;
-    });
-  }
-);
+  // unmount react on controller destroy
+  $scope.$on('$destroy', () => {
+    if (domNode) {
+      unmountComponentAtNode(domNode);
+    }
+    mounted = false;
+  });
+});
 
 module.service('spacesNavState', (activeSpace: any) => {
   return {
@@ -92,7 +89,7 @@ module.service('spacesNavState', (activeSpace: any) => {
   } as SpacesNavState;
 });
 
-chromeHeaderNavControlsRegistry.register(($http: any, chrome: any, activeSpace: any) => ({
+chromeHeaderNavControlsRegistry.register((chrome: any, activeSpace: any) => ({
   name: 'spaces',
   order: 1000,
   side: NavControlSide.Left,
@@ -103,7 +100,7 @@ chromeHeaderNavControlsRegistry.register(($http: any, chrome: any, activeSpace: 
 
     const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
-    spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+    spacesManager = new SpacesManager(spaceSelectorURL);
 
     ReactDOM.render(
       <I18nContext>
