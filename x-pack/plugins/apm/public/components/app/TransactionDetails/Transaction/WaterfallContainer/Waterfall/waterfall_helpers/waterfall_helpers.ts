@@ -254,7 +254,7 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
     }
 
     const item = itemsById[id];
-    if (item.docType === 'transaction') {
+    if (item && item.docType === 'transaction') {
       return item.transaction;
     }
   };
