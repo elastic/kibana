@@ -17,9 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-
 import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
@@ -33,34 +30,34 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
-import { Schemas } from './schemas';
+import { Schema } from '../schemas';
 
 const GROUP_NAMES = {
   BUCKETS: 'buckets',
 };
 
-interface AggAddReactWrapperProps {
+interface DefaultEditorAggAddProps {
   group?: AggConfig[];
   groupName: string;
-  schemas: Schemas[];
+  schemas: Schema[];
   stats: {
     max: number;
     min: number;
     count: number;
     deprecate: boolean;
   };
-  addSchema(schema: Schemas): void;
+  addSchema(schema: Schema): void;
 }
 
-function AggAddReactWrapper<T>({
+function DefaultEditorAggAdd({
   group = [],
   groupName,
   schemas,
   addSchema,
   stats,
-}: AggAddReactWrapperProps) {
+}: DefaultEditorAggAddProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const onSelectSchema = (schema: Schemas) => {
+  const onSelectSchema = (schema: Schema) => {
     setIsPopoverOpen(false);
     addSchema(schema);
   };
@@ -81,7 +78,7 @@ function AggAddReactWrapper<T>({
       ? i18n.translate('common.ui.vis.editors.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
       : i18n.translate('common.ui.vis.editors.aggAdd.metricLabel', { defaultMessage: 'metric' });
 
-  const isSchemaDisabled = (schema: Schemas): boolean => {
+  const isSchemaDisabled = (schema: Schema): boolean => {
     const count = group.filter(agg => agg.schema.name === schema.name).length;
     return count >= schema.max;
   };
@@ -134,4 +131,4 @@ function AggAddReactWrapper<T>({
   ) : null;
 }
 
-export { AggAddReactWrapper };
+export { DefaultEditorAggAdd };

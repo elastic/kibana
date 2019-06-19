@@ -88,7 +88,7 @@ uiModules
 
         $scope.addSchema = function (schema) {
           const aggConfig = new AggConfig($scope.state.aggs, {
-            schema: schema,
+            schema,
             id: AggConfig.nextId($scope.state.aggs),
           });
           aggConfig.brandNew = true;

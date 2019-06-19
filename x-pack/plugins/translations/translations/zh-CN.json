@@ -2195,7 +2195,6 @@
     "tableVis.params.totalFunctionLabel": "汇总函数",
     "tableVis.tableVisDescription": "在表中显示值",
     "tableVis.tableVisEditorConfig.schemas.metricTitle": "指标",
-    "tableVis.tableVisEditorConfig.schemas.splitTitle": "拆分表",
     "tableVis.tableVisTitle": "数据表",
     "tableVis.vis.noResultsFoundTitle": "找不到结果",
     "tagCloud.feedbackMessage.tooSmallContainerDescription": "容器太小，无法显示整个云。标记可能被裁剪或省略。",

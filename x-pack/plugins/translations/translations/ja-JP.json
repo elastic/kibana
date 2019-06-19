@@ -2621,7 +2621,6 @@
     "tableVis.params.totalFunctionLabel": "合計機能",
     "tableVis.tableVisDescription": "表に値を表示します",
     "tableVis.tableVisEditorConfig.schemas.metricTitle": "メトリック",
-    "tableVis.tableVisEditorConfig.schemas.splitTitle": "表を分割",
     "tableVis.tableVisTitle": "データ表",
     "tableVis.vis.noResultsFoundTitle": "結果が見つかりませんでした",
     "tagCloud.feedbackMessage.tooSmallContainerDescription": "コンテナーが小さすぎてクラウド全体を表示できません。タグが切り取られたか省略されている可能性があります。",

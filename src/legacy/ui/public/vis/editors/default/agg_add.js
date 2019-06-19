@@ -18,13 +18,13 @@
  */
 
 import { uiModules } from '../../../modules';
-import { AggAddReactWrapper } from './add_aggregation';
+import { DefaultEditorAggAdd } from './components/default_editor_agg_add.tsx';
 import { wrapInI18nContext } from 'ui/i18n';
 
 uiModules
   .get('kibana')
   .directive('visEditorAggAdd', reactDirective =>
-    reactDirective(wrapInI18nContext(AggAddReactWrapper), [
+    reactDirective(wrapInI18nContext(DefaultEditorAggAdd), [
       ['group', { watchDepth: 'collection' }],
       ['schemas', { watchDepth: 'collection' }],
       ['stats', { watchDepth: 'reference' }],

@@ -17,4 +17,16 @@
  * under the License.
  */
 
-export type Schemas = any;
+import { AggParam } from '../../../agg_types';
+
+export interface Schema {
+  aggFilter: string | string[];
+  deprecate: boolean;
+  editor: boolean | string;
+  group: 'metrics' | 'buckets';
+  max: number;
+  min: number;
+  name: string;
+  params: AggParam[];
+  title: string;
+}
