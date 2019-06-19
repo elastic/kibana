@@ -50,6 +50,33 @@
   >
     <div class="kuiLocalDropdownHeader">
       <legend
+        class="kuiLocalDropdownHeader__label"
+        i18n-id="console.settingsPage.jsonLabel"
+        i18n-default-message="JSON syntax"
+      ></legend>
+    </div>
+
+    <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
+      <input
+        class="kuiCheckBox"
+        name="jsonTripleQuotes"
+        type="checkbox"
+        ng-model="settings.vals.tripleQuotes"
+      >
+      <span
+        class="kuiCheckBoxLabel__text"
+        i18n-id="console.settingsPage.tripleQuotesLabelText"
+        i18n-default-message="Use triple quotes in output pane"
+      ></span>
+    </label>
+  </fieldset>
+
+  <fieldset
+    class="kuiVerticalRhythm"
+    role="group"
+  >
+    <div class="kuiLocalDropdownHeader">
+      <legend
         id="consoleAutocomplete"
         class="kuiLocalDropdownHeader__label"
         i18n-id="console.settingsPage.autocompleteLabel"
