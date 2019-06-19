@@ -99,15 +99,6 @@ export const getMapCenter = ({ map }) => map.mapState.center ?
 
 export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 
-export const getMapColors = ({ map }) => {
-  return map.layerList.reduce((accu, layer) => {
-    // This will evolve as color options are expanded
-    const color = _.get(layer, 'style.properties.fillColor.options.color');
-    if (color) accu.push(color);
-    return accu;
-  }, []);
-};
-
 export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
   map.mapState.timeFilters : timefilter.getTime();
 
@@ -166,6 +157,19 @@ export const getSelectedLayer = createSelector(
   (selectedLayerId, layerList) => {
     return layerList.find(layer => layer.getId() === selectedLayerId);
   });
+
+export const getMapColors = createSelector(
+  getTransientLayerId,
+  getLayerListRaw,
+  (transientLayerId, layerList) => layerList.reduce((accu, layer) => {
+    if (layer.id === transientLayerId) {
+      return accu;
+    }
+    const color = _.get(layer, 'style.properties.fillColor.options.color');
+    if (color) accu.push(color);
+    return accu;
+  }, [])
+);
 
 export const getSelectedLayerJoinDescriptors = createSelector(
   getSelectedLayer,
