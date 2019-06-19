@@ -26,7 +26,8 @@ describe('ml_telemetry', () => {
   });
 
   describe('storeMlTelemetry', () => {
-    let server: any;
+    let elasticsearchPlugin: any;
+    let savedObjects: any;
     let mlTelemetry: MlTelemetry;
     let savedObjectsClientInstance: any;
 
@@ -34,16 +35,12 @@ describe('ml_telemetry', () => {
       savedObjectsClientInstance = { create: jest.fn() };
       const callWithInternalUser = jest.fn();
       const internalRepository = jest.fn();
-      server = {
-        savedObjects: {
-          SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
-          getSavedObjectsRepository: jest.fn(() => internalRepository),
-        },
-        plugins: {
-          elasticsearch: {
-            getCluster: jest.fn(() => ({ callWithInternalUser })),
-          },
-        },
+      elasticsearchPlugin = {
+        getCluster: jest.fn(() => ({ callWithInternalUser })),
+      };
+      savedObjects = {
+        SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
+        getSavedObjectsRepository: jest.fn(() => internalRepository),
       };
       mlTelemetry = {
         file_data_visualizer: {
@@ -53,24 +50,25 @@ describe('ml_telemetry', () => {
     });
 
     it('should call savedObjectsClient create with the given MlTelemetry object', () => {
-      storeMlTelemetry(server, mlTelemetry);
+      storeMlTelemetry(elasticsearchPlugin, savedObjects, mlTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toBe(mlTelemetry);
     });
 
     it('should call savedObjectsClient create with the ml-telemetry document type and ID', () => {
-      storeMlTelemetry(server, mlTelemetry);
+      storeMlTelemetry(elasticsearchPlugin, savedObjects, mlTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('ml-telemetry');
       expect(savedObjectsClientInstance.create.mock.calls[0][2].id).toBe(ML_TELEMETRY_DOC_ID);
     });
 
     it('should call savedObjectsClient create with overwrite: true', () => {
-      storeMlTelemetry(server, mlTelemetry);
+      storeMlTelemetry(elasticsearchPlugin, savedObjects, mlTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][2].overwrite).toBe(true);
     });
   });
 
   describe('getSavedObjectsClient', () => {
-    let server: any;
+    let elasticsearchPlugin: any;
+    let savedObjects: any;
     let savedObjectsClientInstance: any;
     let callWithInternalUser: any;
     let internalRepository: any;
@@ -79,29 +77,26 @@ describe('ml_telemetry', () => {
       savedObjectsClientInstance = { create: jest.fn() };
       callWithInternalUser = jest.fn();
       internalRepository = jest.fn();
-      server = {
-        savedObjects: {
-          SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
-          getSavedObjectsRepository: jest.fn(() => internalRepository),
-        },
-        plugins: {
-          elasticsearch: {
-            getCluster: jest.fn(() => ({ callWithInternalUser })),
-          },
-        },
+      elasticsearchPlugin = {
+        getCluster: jest.fn(() => ({ callWithInternalUser })),
+      };
+      savedObjects = {
+        SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
+        getSavedObjectsRepository: jest.fn(() => internalRepository),
       };
     });
 
     it('should return a SavedObjectsClient initialized with the saved objects internal repository', () => {
-      const result = getSavedObjectsClient(server);
+      const result = getSavedObjectsClient(elasticsearchPlugin, savedObjects);
 
       expect(result).toBe(savedObjectsClientInstance);
-      expect(server.savedObjects.SavedObjectsClient).toHaveBeenCalledWith(internalRepository);
+      expect(savedObjects.SavedObjectsClient).toHaveBeenCalledWith(internalRepository);
     });
   });
 
   describe('incrementFileDataVisualizerIndexCreationCount', () => {
-    let server: any;
+    let elasticsearchPlugin: any;
+    let savedObjects: any;
     let savedObjectsClientInstance: any;
     let callWithInternalUser: any;
     let internalRepository: any;
@@ -147,36 +142,32 @@ describe('ml_telemetry', () => {
       );
       callWithInternalUser = jest.fn();
       internalRepository = jest.fn();
-      server = {
-        savedObjects: {
-          SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
-          getSavedObjectsRepository: jest.fn(() => internalRepository),
-        },
-        plugins: {
-          elasticsearch: {
-            getCluster: jest.fn(() => ({ callWithInternalUser })),
-          },
-        },
+      savedObjects = {
+        SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
+        getSavedObjectsRepository: jest.fn(() => internalRepository),
+      };
+      elasticsearchPlugin = {
+        getCluster: jest.fn(() => ({ callWithInternalUser })),
       };
     }
 
     it('should not increment if telemetry status cannot be determined', async () => {
       mockInit();
-      await incrementFileDataVisualizerIndexCreationCount(server);
+      await incrementFileDataVisualizerIndexCreationCount(elasticsearchPlugin, savedObjects);
 
       expect(savedObjectsClientInstance.create.mock.calls).toHaveLength(0);
     });
 
     it('should not increment if telemetry status is disabled', async () => {
       mockInit(false);
-      await incrementFileDataVisualizerIndexCreationCount(server);
+      await incrementFileDataVisualizerIndexCreationCount(elasticsearchPlugin, savedObjects);
 
       expect(savedObjectsClientInstance.create.mock.calls).toHaveLength(0);
     });
 
     it('should initialize index_creation_count with 1', async () => {
       mockInit(true);
-      await incrementFileDataVisualizerIndexCreationCount(server);
+      await incrementFileDataVisualizerIndexCreationCount(elasticsearchPlugin, savedObjects);
 
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('ml-telemetry');
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({
@@ -186,7 +177,7 @@ describe('ml_telemetry', () => {
 
     it('should increment index_creation_count to 2', async () => {
       mockInit(true, 1);
-      await incrementFileDataVisualizerIndexCreationCount(server);
+      await incrementFileDataVisualizerIndexCreationCount(elasticsearchPlugin, savedObjects);
 
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('ml-telemetry');
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({

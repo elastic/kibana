@@ -49,10 +49,15 @@ export {
   ScopedClusterClient,
   ElasticsearchClientConfig,
   APICaller,
+  FakeRequest,
+  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
+  AuthHeaders,
+  AuthResultData,
   AuthToolkit,
+  GetAuthHeaders,
   KibanaRequest,
   KibanaRequestRoute,
   OnPreAuthHandler,
@@ -91,8 +96,7 @@ export interface CoreSetup {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    getBasePathFor: HttpServiceSetup['getBasePathFor'];
-    setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
   };
 }

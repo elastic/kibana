@@ -6,88 +6,28 @@
 
 import _ from 'lodash';
 
-import { IndexPatternPrivateState } from './indexpattern';
+import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
+import { operationDefinitionMap, OperationDefinition } from './operations';
 
 export function toExpression(state: IndexPatternPrivateState) {
   if (state.columnOrder.length === 0) {
     return null;
   }
 
-  const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
   const sortedColumns = state.columnOrder.map(col => state.columns[col]);
 
-  const indexName = state.indexPatterns[state.currentIndexPatternId].title;
+  function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
+    // Typescript is not smart enough to infer that definitionMap[C['operationType']] is always OperationDefinition<C>,
+    // but this is made sure by the typing of the operation map
+    const operationDefinition = (operationDefinitionMap[
+      column.operationType
+    ] as unknown) as OperationDefinition<C>;
+    return operationDefinition.toEsAggsConfig(column, columnId);
+  }
 
-  if (sortedColumns.every(({ operationType }) => operationType === 'value')) {
-    const idMap = fieldNames.reduce(
-      (currentIdMap, fieldName, index) => ({
-        ...currentIdMap,
-        [fieldName]: state.columnOrder[index],
-      }),
-      {} as Record<string, string>
-    );
-    return `esdocs index="${indexName}" fields="${fieldNames.join(', ')}" sort="${
-      fieldNames[0]
-    }, DESC" | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
-  } else if (sortedColumns.length) {
-    const firstMetric = sortedColumns.findIndex(({ isBucketed }) => !isBucketed);
+  if (sortedColumns.length) {
     const aggs = sortedColumns.map((col, index) => {
-      if (col.operationType === 'date_histogram') {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: 'date_histogram',
-          schema: 'segment',
-          params: {
-            field: col.sourceField,
-            // TODO: This range should be passed in from somewhere else
-            timeRange: {
-              from: 'now-1d',
-              to: 'now',
-            },
-            useNormalizedEsInterval: true,
-            interval: '1h',
-            drop_partials: false,
-            min_doc_count: 1,
-            extended_bounds: {},
-          },
-        };
-      } else if (col.operationType === 'terms') {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: 'terms',
-          schema: 'segment',
-          params: {
-            field: col.sourceField,
-            orderBy: state.columnOrder[firstMetric] || undefined,
-            order: 'desc',
-            size: 5,
-            otherBucket: false,
-            otherBucketLabel: 'Other',
-            missingBucket: false,
-            missingBucketLabel: 'Missing',
-          },
-        };
-      } else if (col.operationType === 'count') {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: 'count',
-          schema: 'metric',
-          params: {},
-        };
-      } else {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: col.operationType,
-          schema: 'metric',
-          params: {
-            field: col.sourceField,
-          },
-        };
-      }
+      return getEsAggsConfig(col, state.columnOrder[index]);
     });
 
     const idMap = state.columnOrder.reduce(

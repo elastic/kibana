@@ -7,11 +7,11 @@
 import sinon from 'sinon';
 
 import { WorkerReservedProgress } from '../../model';
+import { GitOperations } from '../git_operations';
 import { IndexerFactory } from '../indexer';
 import { RepositoryLspIndexStatusReservedField } from '../indexer/schema';
 import { CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
-import { ServerOptions } from '../server_options';
 import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { CancellationSerivce } from './cancellation_service';
@@ -76,7 +76,7 @@ test('Execute index job.', async () => {
     log,
     esClient as EsClient,
     [(indexerFactory as any) as IndexerFactory],
-    {} as ServerOptions,
+    {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
 
@@ -147,7 +147,7 @@ test('Execute index job and then cancel.', async () => {
     log,
     esClient as EsClient,
     [(indexerFactory as any) as IndexerFactory],
-    {} as ServerOptions,
+    {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
 
@@ -223,7 +223,7 @@ test('Index job skipped/deduplicated if revision matches', async () => {
     log,
     esClient as EsClient,
     [(indexerFactory as any) as IndexerFactory],
-    {} as ServerOptions,
+    {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
 
@@ -302,7 +302,7 @@ test('Index job continue if revision matches and checkpoint found', async () => 
     log,
     esClient as EsClient,
     [(indexerFactory as any) as IndexerFactory],
-    {} as ServerOptions,
+    {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
 
@@ -338,7 +338,7 @@ test('On index job enqueued.', async () => {
     log,
     esClient as EsClient,
     [],
-    {} as ServerOptions,
+    {} as GitOperations,
     {} as CancellationSerivce
   );
 
@@ -366,7 +366,7 @@ test('On index job completed.', async () => {
     log,
     esClient as EsClient,
     [],
-    {} as ServerOptions,
+    {} as GitOperations,
     {} as CancellationSerivce
   );
 
@@ -401,7 +401,7 @@ test('On index job completed because of cancellation.', async () => {
     log,
     esClient as EsClient,
     [],
-    {} as ServerOptions,
+    {} as GitOperations,
     {} as CancellationSerivce
   );
 

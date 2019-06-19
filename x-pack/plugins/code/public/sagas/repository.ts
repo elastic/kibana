@@ -54,7 +54,11 @@ function requestDeleteRepo(uri: string) {
 }
 
 function requestIndexRepo(uri: string) {
-  return kfetch({ pathname: `/api/code/repo/index/${uri}`, method: 'post' });
+  return kfetch({
+    pathname: `/api/code/repo/index/${uri}`,
+    method: 'post',
+    body: JSON.stringify({ reindex: true }),
+  });
 }
 
 function* handleDeleteRepo(action: Action<string>) {

@@ -144,7 +144,7 @@ class ManageSpacePageUI extends Component<Props, State> {
     const { showAlteringActiveSpaceDialog } = this.state;
 
     return (
-      <Fragment>
+      <div data-test-subj="spaces-edit-page">
         {this.getFormHeading()}
 
         <EuiSpacer size={'s'} />
@@ -188,7 +188,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             }}
           />
         )}
-      </Fragment>
+      </div>
     );
   };
 

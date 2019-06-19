@@ -28,7 +28,7 @@ import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
@@ -82,7 +82,7 @@ module.controller('MlExplorerController', function (
   const tzConfig = config.get('dateFormat:tz');
   $scope.dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
-  $scope.MlTimeBuckets = Private(IntervalHelperProvider);
+  $scope.MlTimeBuckets = MlTimeBuckets;
 
   let resizeTimeout = null;
 

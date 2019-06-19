@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOperationTypesForField, getPotentialColumns, getColumnOrder } from './operations';
+import { getOperationTypesForField, getPotentialColumns } from './operations';
 import { IndexPatternPrivateState } from './indexpattern';
+import { hasField } from './state_helpers';
 
 const expectedIndexPatterns = {
   1: {
@@ -45,7 +46,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'terms']));
+      ).toEqual(expect.arrayContaining(['terms']));
     });
 
     it('should return operations on numbers', () => {
@@ -56,7 +57,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'avg', 'sum', 'min', 'max']));
+      ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
     });
 
     it('should return operations on dates', () => {
@@ -67,7 +68,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'date_histogram']));
+      ).toEqual(expect.arrayContaining(['date_histogram']));
     });
 
     it('should return no operations on unknown types', () => {
@@ -121,7 +122,7 @@ describe('getOperationTypesForField', () => {
     it('should return operations on dates', () => {
       expect(
         getOperationTypesForField({
-          type: 'dates',
+          type: 'date',
           name: 'a',
           aggregatable: true,
           searchable: true,
@@ -149,13 +150,16 @@ describe('getOperationTypesForField', () => {
         columns: {
           col1: {
             operationId: 'op1',
-            label: 'Value of timestamp',
+            label: 'Date Histogram of timestamp',
             dataType: 'date',
-            isBucketed: false,
+            isBucketed: true,
 
             // Private
-            operationType: 'value',
+            operationType: 'date_histogram',
             sourceField: 'timestamp',
+            params: {
+              interval: 'h',
+            },
           },
         },
       };
@@ -170,20 +174,10 @@ describe('getOperationTypesForField', () => {
     it('should list operations by field for a regular index pattern', () => {
       const columns = getPotentialColumns(state);
 
-      expect(columns.map(col => [col.sourceField, col.operationType])).toMatchInlineSnapshot(`
+      expect(
+        columns.map(col => [hasField(col) ? col.sourceField : '_documents_', col.operationType])
+      ).toMatchInlineSnapshot(`
 Array [
-  Array [
-    "bytes",
-    "value",
-  ],
-  Array [
-    "bytes",
-    "sum",
-  ],
-  Array [
-    "bytes",
-    "avg",
-  ],
   Array [
     "bytes",
     "min",
@@ -193,20 +187,20 @@ Array [
     "max",
   ],
   Array [
-    "documents",
+    "bytes",
+    "avg",
+  ],
+  Array [
+    "_documents_",
     "count",
   ],
   Array [
-    "source",
-    "value",
+    "bytes",
+    "sum",
   ],
   Array [
     "source",
     "terms",
-  ],
-  Array [
-    "timestamp",
-    "value",
   ],
   Array [
     "timestamp",
@@ -215,105 +209,5 @@ Array [
 ]
 `);
     });
-  });
-});
-
-describe('getColumnOrder', () => {
-  it('should work for empty columns', () => {
-    expect(getColumnOrder({})).toEqual([]);
-  });
-
-  it('should work for one column', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Value of timestamp',
-          dataType: 'string',
-          isBucketed: false,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
-        },
-      })
-    ).toEqual(['col1']);
-  });
-
-  it('should put any number of aggregations before metrics', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Top Values of category',
-          dataType: 'string',
-          isBucketed: true,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
-        },
-        col2: {
-          operationId: 'op2',
-          label: 'Average of bytes',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'bytes',
-        },
-        col3: {
-          operationId: 'op3',
-          label: 'Date Histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
-
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'timestamp',
-        },
-      })
-    ).toEqual(['col1', 'col3', 'col2']);
-  });
-
-  it('should reorder aggregations based on suggested priority', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Top Values of category',
-          dataType: 'string',
-          isBucketed: true,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
-          suggestedOrder: 2,
-        },
-        col2: {
-          operationId: 'op2',
-          label: 'Average of bytes',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'bytes',
-          suggestedOrder: 0,
-        },
-        col3: {
-          operationId: 'op3',
-          label: 'Date Histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
-
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'timestamp',
-          suggestedOrder: 1,
-        },
-      })
-    ).toEqual(['col3', 'col1', 'col2']);
   });
 });

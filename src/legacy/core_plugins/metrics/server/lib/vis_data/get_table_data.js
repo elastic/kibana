@@ -26,7 +26,10 @@ import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(
+    req,
+    panelIndexPattern
+  );
   const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
@@ -38,10 +41,12 @@ export async function getTableData(req, panel) {
 
   try {
     const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
-    const [resp] = await searchRequest.search([{
-      body,
-      index: panelIndexPattern,
-    }]);
+    const [resp] = await searchRequest.search([
+      {
+        body,
+        index: panelIndexPattern,
+      },
+    ]);
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
 
     return {
@@ -54,7 +59,7 @@ export async function getTableData(req, panel) {
 
       return {
         ...meta,
-        ...handleErrorResponse(panel)(err)
+        ...handleErrorResponse(panel)(err),
       };
     }
   }

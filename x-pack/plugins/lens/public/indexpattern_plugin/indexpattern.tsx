@@ -16,23 +16,26 @@ import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
+  DatasourceSuggestion,
 } from '../types';
 import { getIndexPatterns } from './loader';
 import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
+import { buildColumnForOperationType, getOperationTypesForField } from './operations';
 
-export type OperationType =
-  | 'value'
-  | 'terms'
-  | 'date_histogram'
-  | 'sum'
-  | 'avg'
-  | 'min'
-  | 'max'
-  | 'count';
+export type OperationType = IndexPatternColumn['operationType'];
 
-export interface IndexPatternColumn {
+export type IndexPatternColumn =
+  | DateHistogramIndexPatternColumn
+  | TermsIndexPatternColumn
+  | SumIndexPatternColumn
+  | AvgIndexPatternColumn
+  | MinIndexPatternColumn
+  | MaxIndexPatternColumn
+  | CountIndexPatternColumn;
+
+export interface BaseIndexPatternColumn {
   // Public
   operationId: string;
   label: string;
@@ -41,9 +44,44 @@ export interface IndexPatternColumn {
 
   // Private
   operationType: OperationType;
+  suggestedOrder?: DimensionPriority;
+}
+
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+type ParameterlessIndexPatternColumn<
+  TOperationType extends OperationType,
+  TBase extends BaseIndexPatternColumn = FieldBasedIndexPatternColumn
+> = Omit<TBase, 'operationType'> & { operationType: TOperationType };
+
+export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
   suggestedOrder?: DimensionPriority;
 }
+
+export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'date_histogram';
+  params: {
+    interval: string;
+    timeZone?: string;
+  };
+}
+
+export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'terms';
+  params: {
+    size: number;
+    orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+  };
+}
+
+export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
+  'count',
+  BaseIndexPatternColumn
+>;
+export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
+export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
+export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
+export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
 
 export interface IndexPattern {
   id: string;
@@ -243,11 +281,95 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       };
     },
 
-    getDatasourceSuggestionsForField() {
+    getDatasourceSuggestionsForField(
+      state,
+      item
+    ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+      const field: IndexPatternField = item as IndexPatternField;
+
+      if (Object.keys(state.columns).length) {
+        // Not sure how to suggest multiple fields yet
+        return [];
+      }
+
+      const operations = getOperationTypesForField(field);
+      const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
+
+      if (hasBucket) {
+        const column = buildColumnForOperationType(0, hasBucket, undefined, field);
+
+        const countColumn = buildColumnForOperationType(1, 'count');
+
+        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
+          state: {
+            ...state,
+            columns: {
+              col1: column,
+              col2: countColumn,
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+
+          table: {
+            columns: [
+              {
+                columnId: 'col1',
+                operation: columnToOperation(column),
+              },
+              {
+                columnId: 'col2',
+                operation: columnToOperation(countColumn),
+              },
+            ],
+            isMultiRow: true,
+            datasourceSuggestionId: 0,
+          },
+        };
+
+        return [suggestion];
+      } else if (state.indexPatterns[state.currentIndexPatternId].timeFieldName) {
+        const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
+        const dateField = currentIndexPattern.fields.find(
+          f => f.name === currentIndexPattern.timeFieldName
+        )!;
+
+        const column = buildColumnForOperationType(0, operations[0], undefined, field);
+
+        const dateColumn = buildColumnForOperationType(1, 'date_histogram', undefined, dateField);
+
+        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
+          state: {
+            ...state,
+            columns: {
+              col1: dateColumn,
+              col2: column,
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+
+          table: {
+            columns: [
+              {
+                columnId: 'col1',
+                operation: columnToOperation(column),
+              },
+              {
+                columnId: 'col2',
+                operation: columnToOperation(dateColumn),
+              },
+            ],
+            isMultiRow: true,
+            datasourceSuggestionId: 0,
+          },
+        };
+
+        return [suggestion];
+      }
+
       return [];
     },
 
-    getDatasourceSuggestionsFromCurrentState() {
+    getDatasourceSuggestionsFromCurrentState(state) {
       return [];
     },
   };

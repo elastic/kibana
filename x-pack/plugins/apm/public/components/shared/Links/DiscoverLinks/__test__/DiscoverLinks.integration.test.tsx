@@ -15,6 +15,8 @@ import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
 
+jest.mock('ui/kfetch');
+
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')
   .mockReturnValue(

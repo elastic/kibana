@@ -39,13 +39,13 @@ describe('Suggestions', () => {
   test('is null when show is false', () => {
     const noShowProps = { ...defaultProps, show: false };
     const wrapper = shallow(<Suggestions {...noShowProps} />);
-    expect(wrapper.html()).toBeNull();
+    expect(wrapper.isEmptyRender()).toBeTruthy();
   });
 
   test('is null when no suggestions are available', () => {
     const noSuggestions = { ...defaultProps, suggestions: [] };
     const wrapper = shallow(<Suggestions {...noSuggestions} />);
-    expect(wrapper.html()).toBeNull();
+    expect(wrapper.isEmptyRender()).toBeTruthy();
   });
 
   test('creates suggestion list item for each suggestion passed in via props', () => {

@@ -89,7 +89,7 @@ describe('xy_suggestions', () => {
       ],
     });
 
-    expect(rest.length).toEqual(0);
+    expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
   "seriesType": "line",
@@ -114,7 +114,7 @@ Object {
       ],
     });
 
-    expect(rest.length).toEqual(0);
+    expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
   "seriesType": "line",
@@ -147,7 +147,7 @@ Object {
       ],
     });
 
-    expect(rest.length).toEqual(0);
+    expect(rest).toHaveLength(0);
     expect([suggestionSubset(s1), suggestionSubset(s2)]).toMatchInlineSnapshot(`
 Array [
   Object {
