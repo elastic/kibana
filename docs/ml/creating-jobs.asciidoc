@@ -59,7 +59,7 @@ image::ml/images/ml-data-recognizer-metricbeat.jpg[A screenshot of the {metricbe
 
 These wizards create {ml} jobs, dashboards, searches, and visualizations that
 are customized to help you analyze your {auditbeat}, {filebeat}, and
-{metrecbeat} data.
+{metricbeat} data.
 
 [NOTE] 
 ===============================
