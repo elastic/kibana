@@ -33,7 +33,7 @@ import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 // @ts-ignore
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 
 // @ts-ignore
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -47,7 +47,7 @@ import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter
 // @ts-ignore
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
-import { ContextMenuActionsRegistryProvider, Query, EmbeddableFactory } from 'ui/embeddable';
+import { ContextMenuActionsRegistryProvider, EmbeddableFactory } from 'ui/embeddable';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 
@@ -63,7 +63,7 @@ import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
+import { StaticIndexPattern, Query } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import moment from 'moment';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
@@ -215,7 +215,6 @@ class DashboardAppController {
   }) {
     const filterManager = Private(FilterManagerProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
-    const docTitle = Private<{ change: (title: string) => void }>(DocTitleProvider);
     const embeddableFactories = Private(
       EmbeddableFactoriesRegistryProvider
     ) as EmbeddableFactoryRegistry;

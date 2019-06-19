@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { createSpacesService } from './create_spaces_service';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
+import { SpacesService } from '../new_platform/spaces_service';
+import { SavedObjectsService } from 'src/core/server';
+import { SpacesAuditLogger } from './audit_logger';
+import { elasticsearchServiceMock, httpServiceMock } from '../../../../../src/core/server/mocks';
+import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
+import { createOptionalPlugin } from '../../../../server/lib/optional_plugin';
 
 const server = {
   config: () => {
@@ -21,19 +27,29 @@ const server = {
   },
 };
 
+const log = {
+  log: jest.fn(),
+  trace: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  fatal: jest.fn(),
+};
+
+const service = new SpacesService(log, server.config().get('server.basePath'));
+
 describe('createSpacesTutorialContextFactory', () => {
-  it('should create a valid context factory', () => {
-    const spacesService = createSpacesService(server);
+  it('should create a valid context factory', async () => {
+    const spacesService = spacesServiceMock.createSetupContract();
     expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
   });
 
-  it('should create context with the current space id for space my-space-id', () => {
-    const spacesService = createSpacesService(server);
+  it('should create context with the current space id for space my-space-id', async () => {
+    const spacesService = spacesServiceMock.createSetupContract('my-space-id');
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
-    const request = {
-      getBasePath: () => '/foo/s/my-space-id',
-    };
+    const request = {};
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',
@@ -41,13 +57,18 @@ describe('createSpacesTutorialContextFactory', () => {
     });
   });
 
-  it('should create context with the current space id for the default space', () => {
-    const spacesService = createSpacesService(server);
+  it('should create context with the current space id for the default space', async () => {
+    const spacesService = await service.setup({
+      http: httpServiceMock.createSetupContract(),
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      savedObjects: {} as SavedObjectsService,
+      security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+      spacesAuditLogger: {} as SpacesAuditLogger,
+      config$: Rx.of({ maxSpaces: 1000 }),
+    });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
-    const request = {
-      getBasePath: () => '/foo',
-    };
+    const request = {};
 
     expect(contextFactory(request)).toEqual({
       spaceId: DEFAULT_SPACE_ID,
