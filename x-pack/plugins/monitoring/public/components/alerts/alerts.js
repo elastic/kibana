@@ -13,7 +13,6 @@ import { mapSeverity } from './map_severity';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 const linkToCategories = {
@@ -130,7 +129,7 @@ const getColumns = (kbnUrl, scope) => ([
   },
 ]);
 
-const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl }) => {
+export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
   const alertsFlattened = alerts.map(alert => ({
     ...alert,
     status: alert.metadata.severity,
@@ -154,8 +153,7 @@ const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl })
       search={{
         box: {
           incremental: true,
-          placeholder: intl.formatMessage({
-            id: 'xpack.monitoring.alerts.filterAlertsPlaceholder',
+          placeholder: i18n.translate('xpack.monitoring.alerts.filterAlertsPlaceholder', {
             defaultMessage: 'Filter Alerts…'
           })
 
@@ -168,5 +166,3 @@ const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl })
     />
   );
 };
-
-export const Alerts = injectI18n(AlertsUI);

@@ -4,11 +4,9 @@
 
 ```ts
 
-import * as CSS from 'csstype';
-import { default } from 'react';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import * as PropTypes from 'prop-types';
+import React from 'react';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -97,9 +95,6 @@ export interface ChromeNavLink {
 // Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type ChromeSetup = ReturnType<ChromeService['setup']>;
-
-// @public (undocumented)
 export type ChromeStart = ReturnType<ChromeService['start']>;
 
 // @internal (undocumented)
@@ -109,13 +104,9 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    chrome: ChromeSetup;
-    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     http: HttpSetup;
-    // (undocumented)
-    i18n: I18nSetup;
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -136,6 +127,8 @@ export interface CoreStart {
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
+    // (undocumented)
+    uiSettings: UiSettingsStart;
 }
 
 // @internal
@@ -199,6 +192,12 @@ export interface HttpServiceBase {
     // (undocumented)
     addLoadingCount(count$: Observable<number>): void;
     // (undocumented)
+    basePath: {
+        get: () => string;
+        prepend: (url: string) => string;
+        remove: (url: string) => string;
+    };
+    // (undocumented)
     delete: HttpHandler;
     // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
     // 
@@ -206,8 +205,6 @@ export interface HttpServiceBase {
     fetch: HttpHandler;
     // (undocumented)
     get: HttpHandler;
-    // (undocumented)
-    getBasePath(): string;
     // (undocumented)
     getLoadingCount$(): Observable<number>;
     // (undocumented)
@@ -221,13 +218,9 @@ export interface HttpServiceBase {
     // (undocumented)
     post: HttpHandler;
     // (undocumented)
-    prependBasePath(path: string): string;
-    // (undocumented)
     put: HttpHandler;
     // (undocumented)
     removeAllInterceptors(): void;
-    // (undocumented)
-    removeBasePath(path: string): string;
     // (undocumented)
     stop(): void;
 }
@@ -239,14 +232,11 @@ export type HttpSetup = HttpServiceBase;
 export type HttpStart = HttpServiceBase;
 
 // @public
-export interface I18nSetup {
+export interface I18nStart {
     Context: ({ children }: {
-        children: default.ReactNode;
+        children: React.ReactNode;
     }) => JSX.Element;
 }
-
-// @public (undocumented)
-export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {
@@ -310,8 +300,6 @@ export interface OverlayRef {
 
 // @public (undocumented)
 export interface OverlayStart {
-    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
@@ -341,6 +329,13 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 export interface PluginInitializerContext {
 }
 
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
+
 export { Toast }
 
 // Warning: (ae-forgotten-export) The symbol "ToastInputFields" needs to be exported by the entry point index.d.ts
@@ -352,7 +347,6 @@ export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 export class ToastsApi {
     constructor(deps: {
         uiSettings: UiSettingsSetup;
-        i18n: I18nSetup;
     });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
@@ -402,6 +396,9 @@ export class UiSettingsClient {
 
 // @public (undocumented)
 export type UiSettingsSetup = UiSettingsClient;
+
+// @public (undocumented)
+export type UiSettingsStart = UiSettingsClient;
 
 // @public (undocumented)
 export interface UiSettingsState {

@@ -6,6 +6,7 @@
 
 
 import { EMSFileSource } from './ems_file_source';
+import { GeojsonFileSource } from './client_file_source';
 import { KibanaRegionmapSource } from './kibana_regionmap_source';
 import { XYZTMSSource } from './xyz_tms_source';
 import { EMSTMSSource } from './ems_tms_source';
@@ -16,6 +17,7 @@ import { ESSearchSource } from './es_search_source';
 
 
 export const ALL_SOURCES = [
+  GeojsonFileSource,
   ESSearchSource,
   ESGeoGridSource,
   EMSFileSource,

@@ -39,15 +39,22 @@ export class SearchBar extends React.PureComponent<Props> {
     }
 
     // Update the url and push to history as well.
-    const queries = querystring.parse(history.location.search.replace('?', ''));
+    const previousQueries = querystring.parse(history.location.search.replace('?', ''));
+    const queries: any =
+      repoScopes.length === 0
+        ? {
+            ...previousQueries,
+            q: query,
+          }
+        : {
+            ...previousQueries,
+            q: query,
+            repoScope: repoScopes,
+          };
     history.push(
       url.format({
         pathname: '/search',
-        query: {
-          ...queries,
-          q: query,
-          repoScope: repoScopes,
-        },
+        query: queries,
       })
     );
   };
@@ -59,7 +66,10 @@ export class SearchBar extends React.PureComponent<Props> {
   }
 
   public onSubmit = (q: string) => {
-    this.onSearchChanged(q);
+    // ignore empty query
+    if (q.trim().length > 0) {
+      this.onSearchChanged(q);
+    }
   };
 
   public onSelect = (item: AutocompleteSuggestion) => {

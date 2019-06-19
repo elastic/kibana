@@ -71,7 +71,7 @@ export const HomePage = pure(() => (
           <HelpMenu />
 
           <WithSource sourceId="default">
-            {({ browserFields }) => (
+            {({ browserFields, indexPattern }) => (
               <DragDropContextWrapper browserFields={browserFields}>
                 <AutoSaveWarningMsg />
                 <Flyout

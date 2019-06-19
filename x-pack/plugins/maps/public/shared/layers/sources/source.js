@@ -8,6 +8,8 @@ import { copyPersistentState } from '../../../store/util';
 
 export class AbstractSource {
 
+  static isIndexingSource = false;
+
   static renderEditor() {
     throw new Error('Must implement Source.renderEditor');
   }
@@ -101,8 +103,16 @@ export class AbstractSource {
     return 0;
   }
 
+  getSyncMeta() {
+    return {};
+  }
+
   isJoinable() {
     return false;
+  }
+
+  shouldBeIndexed() {
+    return AbstractSource.isIndexingSource;
   }
 
   supportsElasticsearchFilters() {

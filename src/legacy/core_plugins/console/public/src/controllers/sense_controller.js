@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 
 import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 import $ from 'jquery';
@@ -36,10 +36,14 @@ module.run(function ($rootScope) {
 });
 
 module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, kbnUiAceKeyboardModeService) {
-  const docTitle = Private(DocTitleProvider);
   docTitle.change('Console');
 
   $scope.topNavController = Private(SenseTopNavController);
+
+  // Since we pass this callback via reactDirective into a react component, which has the function defined as required
+  // in it's prop types, we should set this initially (before it's set in the $timeout below). Without this line
+  // the component we pass this in will throw an propType validation error.
+  $scope.getRequestsAsCURL = () => '';
 
   // We need to wait for these elements to be rendered before we can select them with jQuery
   // and then initialize this app

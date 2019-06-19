@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { Handlebars } from '../../../common/lib/handlebars';
-import { ContextFunction, Datatable, Render, Style } from '../types';
+import { Datatable, Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 type Context = Datatable | null;
 
 interface Arguments {
-  expression: string[];
+  content: string[];
   font: Style;
 }
 
@@ -21,7 +22,7 @@ interface Return {
   font: Style;
 }
 
-export function markdown(): ContextFunction<'markdown', Context, Arguments, Render<Return>> {
+export function markdown(): ExpressionFunction<'markdown', Context, Arguments, Render<Return>> {
   const { help, args: argHelp } = getFunctionHelp().markdown;
 
   return {
@@ -33,10 +34,10 @@ export function markdown(): ContextFunction<'markdown', Context, Arguments, Rend
       types: ['datatable', 'null'],
     },
     args: {
-      expression: {
-        aliases: ['_'],
+      content: {
+        aliases: ['_', 'expression'],
         types: ['string'],
-        help: argHelp.expression,
+        help: argHelp.content,
         default: '""',
         multi: true,
       },
@@ -47,7 +48,7 @@ export function markdown(): ContextFunction<'markdown', Context, Arguments, Rend
       },
     },
     fn: (context, args) => {
-      const compileFunctions = args.expression.map(str =>
+      const compileFunctions = args.content.map(str =>
         Handlebars.compile(String(str), { knownHelpersOnly: true })
       );
       const ctx = {

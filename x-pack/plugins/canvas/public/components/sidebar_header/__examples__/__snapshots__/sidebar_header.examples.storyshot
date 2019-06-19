@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/SidebarHeader/ default 1`] = `
+exports[`Storyshots components/Sidebar/SidebarHeader default 1`] = `
 <div
   style={
     Object {
@@ -107,7 +107,7 @@ exports[`Storyshots components/SidebarHeader/ default 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/SidebarHeader/ without layer controls 1`] = `
+exports[`Storyshots components/Sidebar/SidebarHeader without layer controls 1`] = `
 <div
   style={
     Object {

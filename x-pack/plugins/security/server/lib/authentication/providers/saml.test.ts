@@ -22,7 +22,21 @@ describe('SAMLAuthenticationProvider', () => {
     callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
     callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
 
-    provider = new SAMLAuthenticationProvider(providerOptions);
+    provider = new SAMLAuthenticationProvider(providerOptions, { realm: 'test-realm' });
+  });
+
+  it('throws if `realm` option is not specified', () => {
+    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+
+    expect(() => new SAMLAuthenticationProvider(providerOptions)).toThrowError(
+      'Realm name must be specified'
+    );
+    expect(() => new SAMLAuthenticationProvider(providerOptions, {})).toThrowError(
+      'Realm name must be specified'
+    );
+    expect(() => new SAMLAuthenticationProvider(providerOptions, { realm: '' })).toThrowError(
+      'Realm name must be specified'
+    );
   });
 
   describe('`authenticate` method', () => {
@@ -74,7 +88,7 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, null);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -96,7 +110,7 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, null);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.failed()).toBe(true);
@@ -362,7 +376,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -402,7 +416,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -729,7 +743,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 
@@ -800,7 +814,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).toBe('/logged_out');
     });
 
-    it('relies SAML invalidate call even if access token is presented.', async () => {
+    it('relies on SAML invalidate call even if access token is presented.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
       callWithInternalUser.withArgs('shield.samlInvalidate').resolves({ redirect: null });
@@ -814,7 +828,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 
@@ -833,7 +847,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 
@@ -852,7 +866,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
         body: {
           queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
+          realm: 'test-realm',
         },
       });
 

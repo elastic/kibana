@@ -10,6 +10,8 @@ import { MemoryRouter } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 
+jest.mock('ui/kfetch');
+
 jest.mock(
   'ui/chrome',
   () => ({
@@ -24,7 +26,7 @@ jest.mock(
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now', mode: 'quick' };
             case 'timepicker:refreshIntervalDefaults':
-              return { display: 'Off', pause: false, value: 0 };
+              return { pause: false, value: 0 };
             default:
               throw new Error(`Unexpected config key: ${key}`);
           }

@@ -8,31 +8,59 @@ import { mount, ReactWrapper } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { StatItemsComponent, StatItemsProps } from '.';
+import {
+  StatItemsComponent,
+  StatItemsProps,
+  addValueToFields,
+  addValueToAreaChart,
+  addValueToBarChart,
+  useKpiMatrixStatus,
+  StatItems,
+} from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { fieldTitleChartMapping } from '../page/network/kpi_network';
+import {
+  mockData,
+  mockEnableChartsData,
+  mockNoChartMappings,
+} from '../page/network/kpi_network/mock';
+import { mockGlobalState, apolloClientObservable } from '../../mock';
+import { State, createStore } from '../../store';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+import { KpiNetworkData, KpiHostsData } from '../../graphql/types';
+jest.mock('../charts/barchart');
+jest.mock('../charts/areachart');
 
-describe('Stat Items', () => {
+describe('Stat Items Component', () => {
+  const state: State = mockGlobalState;
+
+  const store = createStore(state, apolloClientObservable);
+
   describe.each([
     [
       mount(
-        <StatItemsComponent
-          fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
-          description="HOSTS"
-          key="mock-keys"
-        />
+        <ReduxStoreProvider store={store}>
+          <StatItemsComponent
+            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+            description="HOSTS"
+            key="mock-keys"
+          />
+        </ReduxStoreProvider>
       ),
     ],
     [
       mount(
-        <StatItemsComponent
-          fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
-          description="HOSTS"
-          areaChart={[]}
-          barChart={[]}
-          key="mock-keys"
-        />
+        <ReduxStoreProvider store={store}>
+          <StatItemsComponent
+            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+            description="HOSTS"
+            areaChart={[]}
+            barChart={[]}
+            key="mock-keys"
+          />
+        </ReduxStoreProvider>
       ),
     ],
   ])('disable charts', wrapper => {
@@ -85,27 +113,27 @@ describe('Stat Items', () => {
         {
           key: 'uniqueSourceIpsHistogram',
           value: [
-            { x: 1556686800000, y: 580213 },
-            { x: 1556730000000, y: 1096175 },
-            { x: 1556773200000, y: 12382 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
           color: '#DB1374',
         },
         {
           key: 'uniqueDestinationIpsHistogram',
           value: [
-            { x: 1556686800000, y: 565975 },
-            { x: 1556730000000, y: 1084366 },
-            { x: 1556773200000, y: 12280 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
           color: '#490092',
         },
       ],
       barChart: [
-        { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
+        { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#DB1374' },
         {
           key: 'uniqueDestinationIps',
-          value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+          value: [{ x: 'uniqueDestinationIps', y: 2354 }],
           color: '#490092',
         },
       ],
@@ -114,7 +142,11 @@ describe('Stat Items', () => {
     };
     let wrapper: ReactWrapper;
     beforeAll(() => {
-      wrapper = mount(<StatItemsComponent {...mockStatItemsData} />);
+      wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <StatItemsComponent {...mockStatItemsData} />
+        </ReduxStoreProvider>
+      );
     });
     test('it renders the default widget', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -139,5 +171,85 @@ describe('Stat Items', () => {
     test('should render separator', () => {
       expect(wrapper.find(EuiHorizontalRule)).toHaveLength(1);
     });
+  });
+});
+
+describe('addValueToFields', () => {
+  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockKpiNetworkData = mockData.KpiNetwork;
+  test('should update value from data', () => {
+    const result = addValueToFields(mockNetworkMappings.fields, mockKpiNetworkData);
+    expect(result).toEqual(mockEnableChartsData.fields);
+  });
+});
+
+describe('addValueToAreaChart', () => {
+  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockKpiNetworkData = mockData.KpiNetwork;
+  test('should add areaChart from data', () => {
+    const result = addValueToAreaChart(mockNetworkMappings.fields, mockKpiNetworkData);
+    expect(result).toEqual(mockEnableChartsData.areaChart);
+  });
+});
+
+describe('addValueToBarChart', () => {
+  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockKpiNetworkData = mockData.KpiNetwork;
+  test('should add areaChart from data', () => {
+    const result = addValueToBarChart(mockNetworkMappings.fields, mockKpiNetworkData);
+    expect(result).toEqual(mockEnableChartsData.barChart);
+  });
+});
+
+describe('useKpiMatrixStatus', () => {
+  const mockNetworkMappings = fieldTitleChartMapping;
+  const mockKpiNetworkData = mockData.KpiNetwork;
+  const MockChildComponent = (mappedStatItemProps: StatItemsProps) => <span />;
+  const MockHookWrapperComponent = ({
+    fieldsMapping,
+    data,
+  }: {
+    fieldsMapping: Readonly<StatItems[]>;
+    data: KpiNetworkData | KpiHostsData;
+  }) => {
+    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
+
+    return (
+      <div>
+        {statItemsProps.map(mappedStatItemProps => {
+          return <MockChildComponent {...mappedStatItemProps} />;
+        })}
+      </div>
+    );
+  };
+
+  test('it updates status correctly', () => {
+    const wrapper = mount(
+      <>
+        <MockHookWrapperComponent fieldsMapping={mockNetworkMappings} data={mockKpiNetworkData} />
+      </>
+    );
+
+    expect(wrapper.find('MockChildComponent').get(0).props).toEqual(mockEnableChartsData);
+  });
+
+  test('it should not append areaChart if enableAreaChart is off', () => {
+    const wrapper = mount(
+      <>
+        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockKpiNetworkData} />
+      </>
+    );
+
+    expect(wrapper.find('MockChildComponent').get(0).props.areaChart).toBeUndefined();
+  });
+
+  test('it should not append barChart if enableBarChart is off', () => {
+    const wrapper = mount(
+      <>
+        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockKpiNetworkData} />
+      </>
+    );
+
+    expect(wrapper.find('MockChildComponent').get(0).props.barChart).toBeUndefined();
   });
 });

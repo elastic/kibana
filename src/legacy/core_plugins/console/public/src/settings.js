@@ -51,6 +51,16 @@ function setAutocomplete(settings) {
   return true;
 }
 
+export function getPolling() {
+  return storage.get('console_polling', true);
+}
+
+function setPolling(polling) {
+  storage.set('console_polling', polling);
+  applyCurrentSettings();
+  return true;
+}
+
 export function applyCurrentSettings(editor) {
   if (typeof editor === 'undefined') {
     applyCurrentSettings(getInput());
@@ -67,13 +77,15 @@ export function getCurrentSettings() {
     autocomplete: getAutocomplete(),
     wrapMode: getWrapMode(),
     fontSize: parseFloat(getFontSize()),
+    polling: Boolean(getPolling()),
   };
 }
 
-export function updateSettings({ fontSize, wrapMode, autocomplete }) {
+export function updateSettings({ fontSize, wrapMode, autocomplete, polling }) {
   setFontSize(fontSize);
   setWrapMode(wrapMode);
   setAutocomplete(autocomplete);
+  setPolling(polling);
   getInput().focus();
   return getCurrentSettings();
 }

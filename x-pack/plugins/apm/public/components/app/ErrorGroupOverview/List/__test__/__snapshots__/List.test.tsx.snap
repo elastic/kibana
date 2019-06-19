@@ -71,9 +71,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         aria-relevant="text"
         className="euiScreenReaderOnly"
         role="status"
-      >
-        Below is a table of 0 items.
-      </caption>
+      />
       <thead>
         <tr>
           <th
@@ -125,7 +123,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
             </div>
           </th>
           <th
-            aria-live={true}
+            aria-live="polite"
             aria-sort="none"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_occurrenceCount_3"
@@ -155,7 +153,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
             </button>
           </th>
           <th
-            aria-live={true}
+            aria-live="polite"
             aria-sort="descending"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
@@ -375,9 +373,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         aria-relevant="text"
         className="euiScreenReaderOnly"
         role="status"
-      >
-        Below is a table of 4 items.
-      </caption>
+      />
       <thead>
         <tr>
           <th
@@ -429,7 +425,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </div>
           </th>
           <th
-            aria-live={true}
+            aria-live="polite"
             aria-sort="none"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_occurrenceCount_3"
@@ -459,7 +455,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </button>
           </th>
           <th
-            aria-live={true}
+            aria-live="polite"
             aria-sort="descending"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_latestOccurrenceAt_4"

@@ -91,7 +91,11 @@ test('sets enabled to false when spaces is turned off', async () => {
     }
   });
   const serverMock = getServerMock({ config: () => ({ get: mockConfigGet }) });
-  const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverMock);
+  const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+    config: serverMock.config(),
+    usage: serverMock.usage,
+    xpackMain: serverMock.plugins.xpack_main,
+  });
   const usageStats: UsageStats = await getSpacesUsage(defaultCallClusterMock);
   expect(usageStats.enabled).toBe(false);
 });
@@ -104,7 +108,11 @@ describe('with a basic license', () => {
     serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = jest
       .fn()
       .mockReturnValue('basic');
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithBasicLicenseMock);
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+      config: serverWithBasicLicenseMock.config(),
+      usage: serverWithBasicLicenseMock.usage,
+      xpackMain: serverWithBasicLicenseMock.plugins.xpack_main,
+    });
     usageStats = await getSpacesUsage(defaultCallClusterMock);
   });
 
@@ -135,7 +143,12 @@ describe('with no license', () => {
   beforeAll(async () => {
     const serverWithNoLicenseMock = getServerMock();
     serverWithNoLicenseMock.plugins.xpack_main.info.isAvailable = jest.fn().mockReturnValue(false);
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithNoLicenseMock);
+
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+      config: serverWithNoLicenseMock.config(),
+      usage: serverWithNoLicenseMock.usage,
+      xpackMain: serverWithNoLicenseMock.plugins.xpack_main,
+    });
     usageStats = await getSpacesUsage(defaultCallClusterMock);
   });
 
@@ -164,7 +177,11 @@ describe('with platinum license', () => {
     serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = jest
       .fn()
       .mockReturnValue('platinum');
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithPlatinumLicenseMock);
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+      config: serverWithPlatinumLicenseMock.config(),
+      usage: serverWithPlatinumLicenseMock.usage,
+      xpackMain: serverWithPlatinumLicenseMock.plugins.xpack_main,
+    });
     usageStats = await getSpacesUsage(defaultCallClusterMock);
   });
 

@@ -12,14 +12,14 @@ import { get } from 'lodash';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { JobStatuses } from '../constants/job_statuses';
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
 import {
   EuiButton,
 } from '@elastic/eui';
 import { downloadReport } from '../lib/download_report';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 /**
  * Poll for changes to reports. Inform the user of changes when the license is active.
@@ -27,7 +27,7 @@ import { getNewPlatform } from 'ui/new_platform';
 uiModules.get('kibana')
   .run((Private, reportingPollConfig) => {
     // Don't show users any reporting toasts until they're logged in.
-    if (Private(PathProvider).isUnauthenticated()) {
+    if (Path.isUnauthenticated()) {
       return;
     }
 
@@ -59,13 +59,13 @@ uiModules.get('kibana')
 
       let seeReportLink;
 
-      const core = getNewPlatform().start.core;
+      const { chrome } = npStart.core;
 
       // In-case the license expired/changed between the time they queued the job and the time that
       // the job completes, that way we don't give the user a toast to download their report if they can't.
       // NOTE: this should be looking at configuration rather than the existence of a navLink
-      if (core.chrome.navLinks.has('kibana:management')) {
-        const managementUrl = core.chrome.navLinks.get('kibana:management').url;
+      if (chrome.navLinks.has('kibana:management')) {
+        const managementUrl = chrome.navLinks.get('kibana:management').url;
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
           <p>

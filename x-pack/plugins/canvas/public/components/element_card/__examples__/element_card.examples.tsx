@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { ElementCard } from '../element_card';
 import { elasticLogo } from '../../../lib/elastic_logo';
 
-storiesOf('components/ElementCard', module)
+storiesOf('components/Elements/ElementCard', module)
   .addDecorator(story => (
     <div
       style={{

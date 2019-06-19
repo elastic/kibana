@@ -26,7 +26,9 @@ export default function ({ getService }) {
 
   const { createIndex, deleteAllIndices } = registerElasticSearchHelpers(es);
 
-  describe('follower indices', () => {
+  describe('follower indices', function () {
+    this.tags(['skipCloud']);
+
     before(() => addCluster());
 
     after(() => Promise.all([

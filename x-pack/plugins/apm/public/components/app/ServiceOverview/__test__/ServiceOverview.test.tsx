@@ -12,6 +12,8 @@ import * as apmRestServices from '../../../../services/rest/apm/services';
 import { ServiceOverview } from '..';
 import * as hooks from '../../../../hooks/useUrlParams';
 
+jest.mock('ui/kfetch');
+
 function renderServiceOverview() {
   return render(<ServiceOverview />);
 }

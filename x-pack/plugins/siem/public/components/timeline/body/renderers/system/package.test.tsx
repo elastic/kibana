@@ -39,7 +39,7 @@ describe('Package', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if all of the package information is undefined ', () => {
@@ -54,7 +54,7 @@ describe('Package', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns just the package name', () => {

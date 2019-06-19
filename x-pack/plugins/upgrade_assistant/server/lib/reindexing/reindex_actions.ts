@@ -7,10 +7,7 @@
 import moment from 'moment';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import {
-  FindResponse,
-  SavedObjectsClient,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { SavedObjectsFindResponse, SavedObjectsClientContract } from 'src/core/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
@@ -71,7 +68,7 @@ export interface ReindexActions {
    * Finds the reindex operation saved object for the given index.
    * @param indexName
    */
-  findReindexOperations(indexName: string): Promise<FindResponse<ReindexOperation>>;
+  findReindexOperations(indexName: string): Promise<SavedObjectsFindResponse<ReindexOperation>>;
 
   /**
    * Returns an array of all reindex operations that have a status.
@@ -113,7 +110,7 @@ export interface ReindexActions {
 }
 
 export const reindexActionsFactory = (
-  client: SavedObjectsClient,
+  client: SavedObjectsClientContract,
   callCluster: CallCluster
 ): ReindexActions => {
   // ----- Internal functions
@@ -140,7 +137,7 @@ export const reindexActionsFactory = (
       reindexOp.id,
       { ...reindexOp.attributes, locked: moment().format() },
       { version: reindexOp.version }
-    );
+    ) as Promise<ReindexSavedObject>;
   };
 
   const releaseLock = (reindexOp: ReindexSavedObject) => {
@@ -149,7 +146,7 @@ export const reindexActionsFactory = (
       reindexOp.id,
       { ...reindexOp.attributes, locked: null },
       { version: reindexOp.version }
-    );
+    ) as Promise<ReindexSavedObject>;
   };
 
   // ----- Public interface
@@ -180,7 +177,7 @@ export const reindexActionsFactory = (
       const newAttrs = { ...reindexOp.attributes, locked: moment().format(), ...attrs };
       return client.update<ReindexOperation>(REINDEX_OP_TYPE, reindexOp.id, newAttrs, {
         version: reindexOp.version,
-      });
+      }) as Promise<ReindexSavedObject>;
     },
 
     async runWhileLocked(reindexOp, func) {

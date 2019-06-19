@@ -124,7 +124,7 @@ export const MonitorListComponent = ({
                 locationName
               ) : (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/add-host-metadata.html#add-host-metadata"
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
                   target="_blank"
                 >
                   {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
@@ -176,12 +176,7 @@ export const MonitorListComponent = ({
                 'The heading column of some action buttons that will take users to other Obsevability apps',
             }),
             render: (ping: Ping, monitor: LatestMonitor) => (
-              <MonitorListActionsPopover
-                basePath={basePath}
-                dateRangeStart={dateRangeStart}
-                dateRangeEnd={dateRangeEnd}
-                monitor={monitor}
-              />
+              <MonitorListActionsPopover monitor={monitor} />
             ),
           },
         ]}

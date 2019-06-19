@@ -49,6 +49,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
       id = 'authenticationQuery',
       children,
       filterQuery,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -59,6 +60,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
         query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {

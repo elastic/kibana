@@ -73,10 +73,8 @@ beforeEach(() => {
       ]);
       return metadata;
     })(),
-    chrome: chromeServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
-    i18n: i18nServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract() as jest.Mocked<UiSettingsClient>,
   };
@@ -89,6 +87,7 @@ beforeEach(() => {
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract() as jest.Mocked<UiSettingsClient>,
   };
   mockStartContext = {
     ...omit(mockStartDeps, 'injectedMetadata'),
@@ -169,9 +168,9 @@ test('`PluginsService.setup` calls loadPluginBundles with http and plugins', asy
   await pluginsService.setup(mockSetupDeps);
 
   expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginA');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginB');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginC');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.basePath.prepend, 'pluginA');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.basePath.prepend, 'pluginB');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.basePath.prepend, 'pluginC');
 });
 
 test('`PluginsService.setup` initalizes plugins with CoreContext', async () => {

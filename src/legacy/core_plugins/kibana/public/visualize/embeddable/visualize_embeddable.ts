@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import { ContainerState, Embeddable } from 'ui/embeddable';
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
-import { Filters, Query, TimeRange } from 'ui/embeddable/types';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { VisualizeLoader } from 'ui/visualize/loader';
@@ -31,6 +30,9 @@ import {
   VisualizeUpdateParams,
 } from 'ui/visualize/loader/types';
 import { i18n } from '@kbn/i18n';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { Filter } from '@kbn/es-query';
 
 export interface VisualizeEmbeddableConfiguration {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
@@ -51,7 +53,7 @@ export class VisualizeEmbeddable extends Embeddable {
   private panelTitle?: string;
   private timeRange?: TimeRange;
   private query?: Query;
-  private filters?: Filters;
+  private filters?: Filter[];
 
   constructor({
     onEmbeddableStateChanged,
@@ -180,7 +182,7 @@ export class VisualizeEmbeddable extends Embeddable {
       timeRange: containerState.timeRange,
       query: containerState.query,
       filters: containerState.filters,
-      cssClass: `panel-content panel-content--fullWidth`,
+      cssClass: `embPanel__content embPanel__content--fullWidth`,
       dataAttrs,
     };
 

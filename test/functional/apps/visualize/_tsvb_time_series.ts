@@ -23,6 +23,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder } = getPageObjects(['visualBuilder', 'visualize']);
   const retry = getService('retry');
+  const log = getService('log');
 
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
@@ -78,13 +79,49 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(series.length).to.be(2);
       });
 
-      it('should show the correct count in the legend with custom numeric template', async () => {
+      it('should show the correct count in the legend with custom numeric formatter', async () => {
         const expectedLegendValue = '$ 156';
 
         await visualBuilder.clickSeriesOption();
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with percent formatter', async () => {
+        const expectedLegendValue = '15,600%';
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Percent');
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with bytes formatter', async () => {
+        const expectedLegendValue = '156B';
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Bytes');
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Duration');
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
+        const actualCountDefault = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCountDefault).to.be('a few seconds');
+
+        log.debug(`to: 'Human readable', from: 'Seconds'`);
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Seconds' });
+        const actualCountSec = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCountSec).to.be('3 minutes');
+
+        log.debug(`to: 'Human readable', from: 'Minutes'`);
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Minutes' });
+        const actualCountMin = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCountMin).to.be('3 hours');
       });
     });
   });

@@ -7,15 +7,8 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { HookWrapper } from '../../mock/hook_wrapper';
+import { globalNode, HookWrapper } from '../../mock';
 import { scrollToTop } from '.';
-
-interface Global extends NodeJS.Global {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  window?: any;
-}
-
-const globalNode: Global = global;
 
 const spyScroll = jest.fn();
 const spyScrollTo = jest.fn();

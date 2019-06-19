@@ -6,9 +6,22 @@
 import { EuiFlexGroup, EuiText, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { CustomSeriesColorsMap, DataSeriesColorsValues, getSpecId } from '@elastic/charts';
+import {
+  CustomSeriesColorsMap,
+  DataSeriesColorsValues,
+  getSpecId,
+  mergeWithDefaultTheme,
+  PartialTheme,
+  LIGHT_THEME,
+  DARK_THEME,
+  ScaleType,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
+import chrome from 'ui/chrome';
+import moment from 'moment-timezone';
 
+const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
@@ -25,12 +38,6 @@ export const ChartHolder = () => (
   </FlexGroup>
 );
 
-export interface AreaChartData {
-  key: string;
-  value: ChartData[] | [] | null;
-  color?: string | undefined;
-}
-
 export interface ChartData {
   x: number | string | null;
   y: number | string | null;
@@ -38,14 +45,27 @@ export interface ChartData {
   g?: number | string;
 }
 
-export interface BarChartData {
+export interface ChartSeriesConfigs {
+  series?: {
+    xScaleType?: ScaleType | undefined;
+    yScaleType?: ScaleType | undefined;
+  };
+  axis?: {
+    xTickFormatter?: TickFormatter | undefined;
+    yTickFormatter?: TickFormatter | undefined;
+  };
+}
+
+export interface ChartConfigsData {
   key: string;
-  value: [ChartData] | [] | null;
+  value: ChartData[] | [] | null;
   color?: string | undefined;
+  areachartConfigs?: ChartSeriesConfigs | undefined;
+  barchartConfigs?: ChartSeriesConfigs | undefined;
 }
 
 export const WrappedByAutoSizer = styled.div`
-  height: 100px;
+  height: ${chartHeight}px;
   position: relative;
 
   &:hover {
@@ -53,16 +73,13 @@ export const WrappedByAutoSizer = styled.div`
   }
 `;
 
-export const numberFormatter = (value: string | number) => {
-  return value.toLocaleString && value.toLocaleString();
-};
-
 export enum SeriesType {
   BAR = 'bar',
   AREA = 'area',
   LINE = 'line',
 }
 
+// Customize colors: https://ela.st/custom-colors
 export const getSeriesStyle = (
   seriesKey: string,
   color: string | undefined,
@@ -79,3 +96,31 @@ export const getSeriesStyle = (
 
   return customSeriesColors;
 };
+
+// Apply margins and paddings: https://ela.st/charts-spacing
+export const getTheme = () => {
+  const theme: PartialTheme = {
+    chartMargins: {
+      left: 0,
+      right: 0,
+      // Apply some paddings to the top to avoid chopping the y tick https://ela.st/chopping-edge
+      top: 4,
+      bottom: 0,
+    },
+    chartPaddings: {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    },
+    scales: {
+      barsPadding: 0.5,
+    },
+  };
+  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+  return mergeWithDefaultTheme(theme, defaultTheme);
+};
+
+const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
