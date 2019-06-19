@@ -11,16 +11,14 @@ brew tap elastic/tap
 -------------------------
 
 Once you've tapped the Elastic Homebrew repo, you can use `brew install` to
-install {kib}:
+install the default distribution of {kib}:
 
 [source,sh]
 -------------------------
-brew install elastic/tap/kibana
+brew install elastic/tap/kibana-full
 -------------------------
 
-This installs the most recently released default distribution of {kib}.
-Append the version number to install a previous version, for example
-`elastic/tap/kibana@6.8`. To install the OSS distribution,
+This installs the most recently released default distribution of {kib}. To install the OSS distribution,
 specify `elastic/tap/kibana-oss`.
 
 [[brew-layout]]
