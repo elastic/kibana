@@ -67,8 +67,8 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const params = {
         some: 'nested',
         data: {
-          here: true
-        }
+          here: true,
+        },
       };
       const actual = buildPipelineVisFunction.input_control_vis({ params });
       expect(actual).toMatchSnapshot();
@@ -87,7 +87,12 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     it('handles markdown function', () => {
-      const params = { markdown: '## hello _markdown_', fontSize: 12, openLinksInNewTab: true, foo: 'bar' };
+      const params = {
+        markdown: '## hello _markdown_',
+        fontSize: 12,
+        openLinksInNewTab: true,
+        foo: 'bar',
+      };
       const actual = buildPipelineVisFunction.markdown({ params });
       expect(actual).toMatchSnapshot();
     });
@@ -173,18 +178,18 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     describe('handles tagcloud function', () => {
-      const params = {};
-
       it('without buckets', () => {
+        const params = {};
         const schemas = { metric: [{ accessor: 0 }] };
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
 
       it('with buckets', () => {
+        const params = {};
         const schemas = {
           metric: [{ accessor: 0 }],
-          segment: [{ accessor: 1 }]
+          segment: [{ accessor: 1 }],
         };
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
@@ -196,21 +201,21 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
-
     });
 
     describe('handles region_map function', () => {
-      const params = { metric: {} };
       it('without buckets', () => {
+        const params = { metric: {} };
         const schemas = { metric: [0] };
         const actual = buildPipelineVisFunction.region_map({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
 
       it('with buckets', () => {
+        const params = {};
         const schemas = {
           metric: [0],
-          segment: [1, 2]
+          segment: [1, 2],
         };
         const actual = buildPipelineVisFunction.region_map({ params }, schemas);
         expect(actual).toMatchSnapshot();
@@ -222,7 +227,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const schemas = {
         metric: [0],
         segment: [1, 2],
-        geo_centroid: [3, 4]
+        geo_centroid: [3, 4],
       };
       const actual = buildPipelineVisFunction.tile_map({ params }, schemas);
       expect(actual).toMatchSnapshot();
@@ -232,7 +237,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const params = {};
       const schemas = {
         metric: [0],
-        segment: [1, 2]
+        segment: [1, 2],
       };
       const actual = buildPipelineVisFunction.pie({ params }, schemas);
       expect(actual).toMatchSnapshot();
