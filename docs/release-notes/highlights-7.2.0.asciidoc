@@ -190,7 +190,7 @@ The query bar suggests influencer field names and values for the selected jobs
 as you type.
 
 [float]
-=== Simplified creation of {ml} jobs for sample data sets and {metribeat} data
+=== Simplified creation of {ml} jobs for sample data sets and {metricbeat} data
 
 If you use the {kib} sample data sets, there are now {ml} jobs for the
 sample eCommerce orders and the sample web logs. These jobs demonstrate a
