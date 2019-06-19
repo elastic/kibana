@@ -16,6 +16,14 @@ export const dynamicColorShape = PropTypes.shape({
   field: fieldShape,
 });
 
+export const staticOrientationShape = PropTypes.shape({
+  orientation: PropTypes.number.isRequired,
+});
+
+export const dynamicOrientationShape = PropTypes.shape({
+  field: fieldShape,
+});
+
 export const staticSizeShape = PropTypes.shape({
   size: PropTypes.number.isRequired,
 });
@@ -29,6 +37,8 @@ export const dynamicSizeShape = PropTypes.shape({
 export const styleOptionShapes = [
   staticColorShape,
   dynamicColorShape,
+  staticOrientationShape,
+  dynamicOrientationShape,
   staticSizeShape,
   dynamicSizeShape
 ];

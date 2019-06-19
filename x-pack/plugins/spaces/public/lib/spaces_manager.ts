@@ -5,53 +5,60 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-
-import { IHttpResponse } from 'angular';
 import { EventEmitter } from 'events';
+import { kfetch } from 'ui/kfetch';
 import { Space } from '../../common/model/space';
 
 export class SpacesManager extends EventEmitter {
-  private httpAgent: any;
-  private baseUrl: any;
   private spaceSelectorURL: string;
 
-  constructor(httpAgent: any, chrome: any, spaceSelectorURL: string) {
+  constructor(spaceSelectorURL: string) {
     super();
-    this.httpAgent = httpAgent;
-    this.baseUrl = chrome.addBasePath(`/api/spaces`);
     this.spaceSelectorURL = spaceSelectorURL;
   }
 
   public async getSpaces(): Promise<Space[]> {
-    return await this.httpAgent
-      .get(`${this.baseUrl}/space`)
-      .then((response: IHttpResponse<Space[]>) => response.data);
+    return await kfetch({ pathname: '/api/spaces/space' });
   }
 
   public async getSpace(id: string): Promise<Space> {
-    return await this.httpAgent
-      .get(`${this.baseUrl}/space/${id}`)
-      .then((response: IHttpResponse<Space[]>) => response.data);
+    return await kfetch({ pathname: `/api/spaces/space/${encodeURIComponent(id)}` });
   }
 
   public async createSpace(space: Space) {
-    return await this.httpAgent.post(`${this.baseUrl}/space`, space);
+    return await kfetch({
+      pathname: `/api/spaces/space`,
+      method: 'POST',
+      body: JSON.stringify(space),
+    });
   }
 
   public async updateSpace(space: Space) {
-    return await this.httpAgent.put(`${this.baseUrl}/space/${space.id}?overwrite=true`, space);
+    return await kfetch({
+      pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
+      query: {
+        overwrite: true,
+      },
+      method: 'PUT',
+      body: JSON.stringify(space),
+    });
   }
 
   public async deleteSpace(space: Space) {
-    return await this.httpAgent.delete(`${this.baseUrl}/space/${space.id}`);
+    return await kfetch({
+      pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
+      method: 'DELETE',
+    });
   }
 
   public async changeSelectedSpace(space: Space) {
-    return await this.httpAgent
-      .post(`${this.baseUrl}/v1/space/${space.id}/select`)
-      .then((response: IHttpResponse<any>) => {
-        if (response.data && response.data.location) {
-          window.location = response.data.location;
+    await kfetch({
+      pathname: `/api/spaces/v1/space/${encodeURIComponent(space.id)}/select`,
+      method: 'POST',
+    })
+      .then(response => {
+        if (response.location) {
+          window.location = response.location;
         } else {
           this._displayError();
         }

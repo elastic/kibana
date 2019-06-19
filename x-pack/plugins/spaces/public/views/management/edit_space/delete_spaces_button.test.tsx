@@ -6,29 +6,19 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { DeleteSpacesButton } from './delete_spaces_button';
+import { spacesManagerMock } from '../../../lib/mocks';
 
 const space = {
   id: 'my-space',
   name: 'My Space',
   disabledFeatures: [],
 };
-const buildMockChrome = () => {
-  return {
-    addBasePath: (path: string) => path,
-  };
-};
 
 describe('DeleteSpacesButton', () => {
   it('renders as expected', () => {
-    const mockHttp = {
-      delete: jest.fn(() => Promise.resolve()),
-    };
-    const mockChrome = buildMockChrome();
-
-    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
+    const spacesManager = spacesManagerMock.create();
 
     const spacesNavState: SpacesNavState = {
       getActiveSpace: () => space,
