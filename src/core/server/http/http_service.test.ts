@@ -214,6 +214,30 @@ test('stops http server', async () => {
   expect(httpServer.stop).toHaveBeenCalledTimes(1);
 });
 
+test('stops not ready server if it is running', async () => {
+  const configService = createConfigService();
+  const mockHapiServer = {
+    start: jest.fn(),
+    stop: jest.fn(),
+    route: jest.fn(),
+  };
+  const httpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: mockHapiServer }),
+    start: noop,
+    stop: jest.fn(),
+  };
+  mockHttpServer.mockImplementation(() => httpServer);
+
+  const service = new HttpService({ configService, env, logger });
+
+  await service.setup();
+
+  await service.stop();
+
+  expect(mockHapiServer.stop).toHaveBeenCalledTimes(1);
+});
+
 test('register route handler', async () => {
   const configService = createConfigService();
 

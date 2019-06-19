@@ -155,7 +155,7 @@ export class HttpServer {
     await this.server.start();
     const serverPath = this.config!.rewriteBasePath || this.config!.basePath || '';
     this.log.info('http server running');
-    this.log.debug(`http server listens at ${this.server.info.uri}${serverPath}`);
+    this.log.debug(`http server listening on ${this.server.info.uri}${serverPath}`);
   }
 
   public async stop() {

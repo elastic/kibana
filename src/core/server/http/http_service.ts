@@ -94,7 +94,9 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     const config = await this.config$.pipe(first()).toPromise();
     if (this.shouldListen(config)) {
       if (this.notReadyServer) {
+        this.log.debug('stopping NotReady server');
         await this.notReadyServer.stop();
+        this.notReadyServer = undefined;
       }
       // If a redirect port is specified, we start an HTTP server at this port and
       // redirect all requests to the SSL port.
@@ -162,6 +164,9 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     this.configSubscription.unsubscribe();
     this.configSubscription = undefined;
 
+    if (this.notReadyServer) {
+      await this.notReadyServer.stop();
+    }
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
     await Promise.all([...this.secondaryServers.values()].map(s => s.stop()));
@@ -169,6 +174,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
   }
 
   private async runNotReadyServer(config: HttpConfig) {
+    this.log.debug('starting NotReady server');
     const httpServer = new HttpServer(this.log);
     const { server } = await httpServer.setup(config);
     this.notReadyServer = server;
