@@ -20,6 +20,16 @@ import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 
 describe('KibanaRequest', () => {
+  describe('get all headers', () => {
+    it('returns all headers', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', authorization: 'token' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.headers).toEqual({ custom: 'one', authorization: 'token' });
+    });
+  });
+
   describe('#getFilteredHeaders', () => {
     it('returns request headers', () => {
       const request = httpServerMock.createRawRequest({
