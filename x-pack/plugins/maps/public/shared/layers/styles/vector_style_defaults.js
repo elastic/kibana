@@ -56,7 +56,13 @@ export function getDefaultStaticProperties(mapColors = []) {
       options: {
         size: DEFAULT_ICON_SIZE
       }
-    }
+    },
+    iconOrientation: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        orientation: 0
+      }
+    },
   };
 }
 
@@ -66,27 +72,37 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
+        field: undefined,
       }
     },
     lineColor: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
+        field: undefined,
       }
     },
     lineWidth: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
-        maxSize: DEFAULT_MAX_SIZE
+        maxSize: DEFAULT_MAX_SIZE,
+        field: undefined,
       }
     },
     iconSize: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
-        maxSize: DEFAULT_MAX_SIZE
+        maxSize: DEFAULT_MAX_SIZE,
+        field: undefined,
       }
-    }
+    },
+    iconOrientation: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        field: undefined,
+      }
+    },
   };
 }
