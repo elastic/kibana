@@ -4,36 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { Server } from 'hapi';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { HttpServiceSetup, Logger } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
-import { SpacesClient } from '../spaces_client';
 import { addSpaceIdToPath, getSpaceIdFromPath } from '../spaces_url_parser';
+import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
+import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
-interface KbnServer extends Server {
-  getHiddenUiAppById: (appId: string) => any;
+export interface OnPostAuthInterceptorDeps {
+  config: KibanaConfig;
+  onPostAuth: (handler: any) => void;
+  getHiddenUiAppById: (appId: string) => unknown;
+  http: HttpServiceSetup;
+  xpackMain: XPackMainPlugin;
+  spacesService: SpacesServiceSetup;
+  log: Logger;
 }
 
-export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
-  const serverBasePath: string = server.config().get('server.basePath');
-  const xpackMainPlugin = server.plugins.xpack_main;
+export function initSpacesOnPostAuthRequestInterceptor({
+  config,
+  xpackMain,
+  spacesService,
+  log,
+  http,
+  onPostAuth,
+  getHiddenUiAppById,
+}: OnPostAuthInterceptorDeps) {
+  const serverBasePath: string = config.get('server.basePath');
 
-  server.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
+  onPostAuth(async function spacesOnPostAuthHandler(request: any, h: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
     const isRequestingApplication = path.startsWith('/app');
+
+    const spacesClient = await spacesService.scopedClient(request);
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth credentials,
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot) {
       try {
-        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
         const spaces = await spacesClient.getAll();
 
-        const config = server.config();
         const basePath: string = config.get('server.basePath');
         const defaultRoute: string = config.get('server.defaultRoute');
 
@@ -48,7 +63,7 @@ export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
 
         if (spaces.length > 0) {
           // render spaces selector instead of home page
-          const app = server.getHiddenUiAppById('space_selector');
+          const app = getHiddenUiAppById('space_selector');
           return (await h.renderApp(app, { spaces })).takeover();
         }
       } catch (error) {
@@ -62,30 +77,26 @@ export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
       let spaceId: string = '';
       let space: Space;
       try {
-        const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-          request
-        );
-        spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
+        spaceId = getSpaceIdFromPath(http.basePath.get(request), serverBasePath);
 
-        server.log(['spaces', 'debug'], `Verifying access to space "${spaceId}"`);
+        log.debug(`Verifying access to space "${spaceId}"`);
 
         space = await spacesClient.get(spaceId);
       } catch (error) {
-        server.log(
-          ['spaces', 'error'],
+        log.error(
           `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
         );
         // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
-        return h.redirect(getSpaceSelectorUrl(server.config())).takeover();
+        return h.redirect(getSpaceSelectorUrl(config)).takeover();
       }
 
       // Verify application is available in this space
       // The management page is always visible, so we shouldn't be restricting access to the kibana application in any situation.
       const appId = path.split('/', 3)[2];
       if (appId !== 'kibana' && space && space.disabledFeatures.length > 0) {
-        server.log(['spaces', 'debug'], `Verifying application is available: "${appId}"`);
+        log.debug(`Verifying application is available: "${appId}"`);
 
-        const allFeatures = xpackMainPlugin.getFeatures();
+        const allFeatures = xpackMain.getFeatures();
 
         const isRegisteredApp = allFeatures.some(feature => feature.app.includes(appId));
         if (isRegisteredApp) {
@@ -95,10 +106,7 @@ export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
 
           const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
           if (!isAvailableInSpace) {
-            server.log(
-              ['spaces', 'error'],
-              `App ${appId} is not enabled within space "${spaceId}".`
-            );
+            log.error(`App ${appId} is not enabled within space "${spaceId}".`);
             return Boom.notFound();
           }
         }
