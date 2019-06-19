@@ -24,7 +24,7 @@ export function indexManagement(kibana)  {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [
         'plugins/index_management',
-      ],
+      ]
     },
     init: function (server) {
       const router = createRouter(server, PLUGIN.ID, '/api/index_management/');

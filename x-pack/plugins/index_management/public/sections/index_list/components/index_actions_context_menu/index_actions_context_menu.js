@@ -570,7 +570,7 @@ export class IndexActionsContextMenu extends Component {
             <EuiSpacer size="l" />
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
+                id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
                 defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
                 values={{ selectedIndexCount }}
               />
@@ -595,7 +595,7 @@ export class IndexActionsContextMenu extends Component {
               id="confirmCloseIndicesCheckbox"
               label={
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.deleteIndex.checkboxLabel"
+                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
                   defaultMessage="I understand the consequences of closing a system index"
                 />
               }
