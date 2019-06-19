@@ -18,83 +18,7 @@
  */
 
 import { deleteAll } from '../lib';
-import { dirname, relative } from 'path';
-import { StaticFilesystemCreator } from 'static-fs/dist/main';
-import { calculateHash, isFile, mkdir, writeFile, copyFile, readFile } from 'static-fs/dist/lib/common';
-
-// Creates a static-fs loader in our final build
-const createLoaderFile = async (filePath) => {
-  const sourceFile = require.resolve(`static-fs/dist/lib/static-loader`);
-  await copyFile(sourceFile, filePath);
-};
-
-// Patches our final build node entry points in order
-// to make the server code able to read the node_modules
-// from ours static modules fs
-const patchEntryPoints = async (build, entryPoints, staticModulesLoader, staticModulesFs) => {
-  for (const each of entryPoints) {
-    const entryPoint = require.resolve(build.resolvePath(each));
-    const isEntryPointAFile = await isFile(entryPoint);
-
-    if (isEntryPointAFile) {
-      let loaderPath = relative(dirname(entryPoint), staticModulesLoader).replace(/\\/g, '/');
-      if (loaderPath.charAt(0) !== '.') {
-        loaderPath = `./${loaderPath}`;
-      }
-      let fsPath = relative(dirname(entryPoint), staticModulesFs).replace(/\\/g, '/');
-      fsPath = `\${__dirname }/${fsPath}`;
-      let content = await readFile(entryPoint, { encoding: 'utf8' });
-      const patchLine = `require('${loaderPath}').load(require.resolve(\`${fsPath}\`));\n`;
-      let prefix = '';
-      if (content.indexOf(patchLine) === -1) {
-        const rx = /^#!.*$/gm.exec(content.toString());
-        if (rx && rx.index === 0) {
-          prefix = `${rx[0]}\n`;
-          // remove prefix
-          content = content.replace(prefix, '');
-        }
-        // strip existing loader
-        content = content.replace(/^require.*static-loader.js.*$/gm, '');
-        content = content.replace(/\/\/ load static module: .*$/gm, '');
-        content = content.trim();
-        content = `${prefix}// load static module: ${fsPath}\n${patchLine}\n${content}`;
-
-        await writeFile(entryPoint, content);
-      }
-    }
-  }
-};
-
-// Moves our node_modules to inside our static filesystem
-const addModulesToStaticModulesFs = async (nodeModulesDir, staticModulesFs, hash) => {
-  const sf = new StaticFilesystemCreator();
-
-  await sf.addFolder(nodeModulesDir, '/node_modules');
-  await mkdir(dirname(staticModulesFs));
-  await sf.write(staticModulesFs, hash);
-};
-
-// Generates the entire static modules file system
-const generateStaticModulesFs = async (build) => {
-  const nodeModulesDir = build.resolvePath('node_modules');
-  const staticModulesDir = build.resolvePath('static_modules');
-  const staticModulesFs = build.resolvePath(staticModulesDir, 'static_modules.fs');
-  const staticModulesLoader = build.resolvePath(staticModulesDir, 'static_loader.js');
-  const entryPointsToPatch = [
-    'src/setup_node_env/babel_register'
-  ];
-
-  const hash = calculateHash({
-    staticModulesDir,
-    staticModulesFs,
-    staticModulesLoader,
-    entryPointsToPatch
-  });
-
-  await createLoaderFile(staticModulesLoader);
-  await patchEntryPoints(build, entryPointsToPatch, staticModulesLoader, staticModulesFs);
-  await addModulesToStaticModulesFs(nodeModulesDir, staticModulesFs, hash);
-};
+import { generateStaticFsVolume } from 'static-fs';
 
 export const CreateStaticModulesFsTask = {
   description:
@@ -103,7 +27,19 @@ export const CreateStaticModulesFsTask = {
   async run(config, log, build) {
     // Creates the static filesystem with
     // every node_module we have
-    await generateStaticModulesFs(build);
+    await generateStaticFsVolume(
+      build.resolvePath('.'),
+      build.resolvePath('static_modules'),
+      'static_modules.sfs',
+      [
+        build.resolvePath('node_modules')
+      ],
+      [
+        require.resolve(
+          build.resolvePath('src/setup_node_env/babel_register')
+        )
+      ]
+    );
 
     // Delete node_modules folder
     await deleteAll(
