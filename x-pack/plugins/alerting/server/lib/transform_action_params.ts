@@ -10,8 +10,7 @@ import { AlertActionParams, State, Context } from '../types';
 
 export function transformActionParams(params: AlertActionParams, state: State, context: Context) {
   const result: AlertActionParams = {};
-  for (const key of Object.keys(params)) {
-    const value = params[key];
+  for (const [key, value] of Object.entries(params)) {
     if (isPlainObject(value)) {
       result[key] = transformActionParams(value as AlertActionParams, state, context);
     } else if (typeof value !== 'string') {

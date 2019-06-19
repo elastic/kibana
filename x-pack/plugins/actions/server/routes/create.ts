@@ -60,7 +60,7 @@ export function createRoute(server: Hapi.Server) {
       const actionsClient = request.getActionsClient!();
 
       return await actionsClient.create({
-        data: request.payload.attributes,
+        attributes: request.payload.attributes,
         options: {
           migrationVersion: request.payload.migrationVersion,
           references: request.payload.references,

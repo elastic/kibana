@@ -32,7 +32,7 @@ export class AlertInstance {
 
   resetFire() {
     this.internalShouldFire = false;
-    delete this.fireOptions;
+    this.fireOptions = undefined;
     return this;
   }
 

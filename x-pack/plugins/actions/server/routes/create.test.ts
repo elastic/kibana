@@ -66,7 +66,7 @@ it('creates an action with proper parameters', async () => {
   expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Object {
-    "data": Object {
+    "attributes": Object {
       "actionTypeConfig": Object {
         "foo": true,
       },
