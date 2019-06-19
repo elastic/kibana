@@ -16,19 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { combineReducers } from 'redux';
-import { embeddablesReducer } from './embeddables';
-
-import { panelsReducer } from './panels';
-
-import { viewReducer } from './view';
-
-import { metadataReducer } from './metadata';
-
-export const dashboard = combineReducers({
-  embeddables: embeddablesReducer,
-  metadata: metadataReducer,
-  panels: panelsReducer,
-  view: viewReducer,
-});
+export { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+export { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
+export { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
+export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';

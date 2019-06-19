@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { PanelHeaderContainer as PanelHeader } from './panel_header_container';
+export * from './types';
+export * from './search_embeddable_factory';
+export * from './search_embeddable';

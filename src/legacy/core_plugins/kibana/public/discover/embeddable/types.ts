@@ -17,45 +17,32 @@
  * under the License.
  */
 
-import React from 'react';
-import sinon from 'sinon';
-import { shallow } from 'enzyme';
-
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { SavedSearch } from '../types';
 import {
-  DashboardAddPanel,
-} from './add_panel';
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../../../../embeddable_api/public/index';
 
-jest.mock('ui/capabilities',
-  () => ({
-    capabilities: {
-      get: () => ({
-        visualize: {
-          show: true,
-          save: true
-        }
-      })
-    }
-  }), { virtual: true });
+export interface SearchInput extends EmbeddableInput {
+  timeRange: TimeRange;
+  query?: Query;
+  filters?: Filter[];
+  hidePanelTitles?: boolean;
+  columns?: string[];
+  sort?: string[];
+}
 
-jest.mock('ui/notify',
-  () => ({
-    toastNotifications: {
-      addDanger: () => {},
-    }
-  }), { virtual: true });
+export interface SearchOutput extends EmbeddableOutput {
+  editUrl: string;
+  indexPatterns?: StaticIndexPattern[];
+  editable: boolean;
+}
 
-let onClose;
-beforeEach(() => {
-  onClose = sinon.spy();
-});
-
-test('render', () => {
-  const component = shallow(<DashboardAddPanel
-    onClose={onClose}
-    visTypes={{}}
-    addNewPanel={() => {}}
-    addNewVis={() => {}}
-    embeddableFactories={[]}
-  />);
-  expect(component).toMatchSnapshot();
-});
+export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
+  getSavedSearch(): SavedSearch;
+}

@@ -22,16 +22,6 @@ import _ from 'lodash';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { IInjector } from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n';
-
-// @ts-ignore
-import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-
-// @ts-ignore
-import { docTitle } from 'ui/doc_title';
-
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 // @ts-ignore
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
@@ -39,7 +29,6 @@ import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter
 // @ts-ignore
 import { getFilterGenerator } from 'ui/filter_manager';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { EmbeddableFactory } from 'ui/embeddable';
 
 import {
   AppStateClass as TAppStateClass,
@@ -51,16 +40,13 @@ import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { StaticIndexPattern, Query } from 'src/legacy/core_plugins/data/public';
 import moment from 'moment';
+import { StaticIndexPattern, Query } from '../../../data/public';
+
+import { ViewMode } from '../../../embeddable_api/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn, AddFilterFn } from './types';
 
-// @ts-ignore -- going away soon
-import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
-
-import { DashboardStateManager } from './dashboard_state_manager';
-import { DashboardViewMode } from './dashboard_view_mode';
 import { DashboardAppController } from './dashboard_app_controller';
 
 export interface DashboardAppScope extends ng.IScope {
@@ -68,7 +54,7 @@ export interface DashboardAppScope extends ng.IScope {
   appState: TAppState;
   screenTitle: string;
   model: {
-    query: Query | string;
+    query: Query;
     filters: Filter[];
     timeRestore: boolean;
     title: string;
@@ -82,7 +68,7 @@ export interface DashboardAppScope extends ng.IScope {
   panels: SavedDashboardPanel[];
   indexPatterns: StaticIndexPattern[];
   $evalAsync: any;
-  dashboardViewMode: DashboardViewMode;
+  dashboardViewMode: ViewMode;
   expandedPanel?: string;
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
@@ -104,9 +90,6 @@ export interface DashboardAppScope extends ng.IScope {
   kbnTopNav: any;
   enterEditMode: () => void;
   $listen: any;
-  getEmbeddableFactory: (type: string) => EmbeddableFactory;
-  getDashboardState: () => DashboardStateManager;
-  refresh: () => void;
 }
 
 const app = uiModules.get('app/dashboard', [
@@ -116,10 +99,6 @@ const app = uiModules.get('app/dashboard', [
   'kibana/courier',
   'kibana/config',
 ]);
-
-app.directive('dashboardViewportProvider', function(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DashboardViewportProvider));
-});
 
 app.directive('dashboardApp', function($injector: IInjector) {
   const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
@@ -145,7 +124,6 @@ app.directive('dashboardApp', function($injector: IInjector) {
     controllerAs: 'dashboardApp',
     controller: (
       $scope: DashboardAppScope,
-      $rootScope: ng.IRootScopeService,
       $route: any,
       $routeParams: {
         id?: string;
@@ -156,11 +134,12 @@ app.directive('dashboardApp', function($injector: IInjector) {
       dashboardConfig: {
         getHideWriteControls: () => boolean;
       },
-      localStorage: WindowLocalStorage
+      localStorage: {
+        get: (prop: string) => unknown;
+      }
     ) =>
       new DashboardAppController({
         $route,
-        $rootScope,
         $scope,
         $routeParams,
         getAppState,

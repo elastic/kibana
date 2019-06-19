@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { combineReducers } from 'redux';
-import { dashboard } from './dashboard/reducers';
-import { CoreKibanaState } from './selectors';
-
-/**
- * Only a single reducer now, but eventually there should be one for each sub app that is part of the
- * core kibana plugins.
- */
-export const reducers = combineReducers<CoreKibanaState>({
-  dashboard,
-});
+export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
