@@ -53,7 +53,7 @@ interface VisTypeAliasListEntry extends VisTypeAlias {
 interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
   visTypesRegistry: VisType[];
-  visTypeAliases: VisTypeAlias[];
+  visTypeAliases?: VisTypeAlias[];
   showExperimental: boolean;
 }
 
@@ -161,7 +161,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
   private filteredVisTypes(
     visTypes: VisType[],
-    visTypeAliases: any[],
+    visTypeAliases: any[] = [],
     query: string
   ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
     const types = visTypes.filter(type => {

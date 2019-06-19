@@ -34,7 +34,7 @@ interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: VisType[];
-  visTypeAliases: VisTypeAlias[];
+  visTypeAliases?: VisTypeAlias[];
   editorParams?: string[];
 }
 
