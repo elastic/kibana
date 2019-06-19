@@ -33,7 +33,7 @@ import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 // @ts-ignore
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 
 // @ts-ignore
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -215,7 +215,6 @@ class DashboardAppController {
   }) {
     const filterManager = Private(FilterManagerProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
-    const docTitle = Private<{ change: (title: string) => void }>(DocTitleProvider);
     const embeddableFactories = Private(
       EmbeddableFactoriesRegistryProvider
     ) as EmbeddableFactoryRegistry;

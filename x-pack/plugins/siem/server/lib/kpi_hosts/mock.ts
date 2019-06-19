@@ -32,7 +32,7 @@ export const mockRequest = {
       filterQuery: '',
     },
     query:
-      'fragment ChartFields on KpiHostHistogramData {\n  x: key\n  y: count {\n    value\n    doc_count\n    __typename\n  }\n  __typename\n}\n\nquery GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {\n      hosts\n      hostsHistogram {\n        ...ChartFields\n        __typename\n      }\n      authSuccess\n      authSuccessHistogram {\n        ...ChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...ChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...ChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...ChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'fragment KpiHostChartFields on KpiHostHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      hosts\n      hostsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      authSuccess\n      authSuccessHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
@@ -241,75 +241,75 @@ export const mockResult = {
   hosts: 986,
   hostsHistogram: [
     {
-      x: '2019-05-03T13:00:00.000Z',
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 919,
     },
     {
-      x: '2019-05-04T01:00:00.000Z',
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
       y: 82,
     },
     {
-      x: '2019-05-04T13:00:00.000Z',
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
       y: 4,
     },
   ],
   authSuccess: 61,
   authSuccessHistogram: [
     {
-      x: '2019-05-03T13:00:00.000Z',
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 8,
     },
     {
-      x: '2019-05-04T01:00:00.000Z',
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
       y: 52,
     },
     {
-      x: '2019-05-04T13:00:00.000Z',
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
       y: 1,
     },
   ],
   authFailure: 15722,
   authFailureHistogram: [
     {
-      x: '2019-05-03T13:00:00.000Z',
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 11731,
     },
     {
-      x: '2019-05-04T01:00:00.000Z',
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
       y: 3979,
     },
     {
-      x: '2019-05-04T13:00:00.000Z',
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
       y: 12,
     },
   ],
   uniqueSourceIps: 1407,
   uniqueSourceIpsHistogram: [
     {
-      x: '2019-05-03T13:00:00.000Z',
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 1182,
     },
     {
-      x: '2019-05-04T01:00:00.000Z',
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
       y: 364,
     },
     {
-      x: '2019-05-04T13:00:00.000Z',
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
       y: 63,
     },
   ],
   uniqueDestinationIps: 1954,
   uniqueDestinationIpsHistogram: [
     {
-      x: '2019-05-03T13:00:00.000Z',
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 1809,
     },
     {
-      x: '2019-05-04T01:00:00.000Z',
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
       y: 407,
     },
     {
-      x: '2019-05-04T13:00:00.000Z',
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
       y: 64,
     },
   ],
