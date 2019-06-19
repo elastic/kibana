@@ -14,7 +14,7 @@ Point, polygon, and line features support different styling properties.
 Only applies when the point feature is symbolized as a circle.
 
 *Border width*:: The border width of the point features.
-Only applies when point feature is symbolized as a circle.
+Only applies when the point feature is symbolized as a circle.
 
 *Symbol*:: Specify whether to symbolize the point as a circle or icon.
 
