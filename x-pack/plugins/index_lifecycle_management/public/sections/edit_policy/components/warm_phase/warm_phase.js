@@ -5,7 +5,8 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import {
   EuiTextColor,
@@ -17,6 +18,7 @@ import {
   EuiSwitch,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
+
 import {
   PHASE_WARM,
   PHASE_ENABLED,
@@ -32,7 +34,8 @@ import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { MinAgeInput } from '../min_age_input';
-class WarmPhaseUi extends PureComponent {
+
+export class WarmPhase extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
     showNodeDetailsFlyout: PropTypes.func.isRequired,
@@ -49,22 +52,18 @@ class WarmPhaseUi extends PureComponent {
       errors,
       isShowingErrors,
       hotPhaseRolloverEnabled,
-      intl,
     } = this.props;
 
-    const shrinkLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel',
-      defaultMessage: 'Shrink index',
+    const shrinkLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
+      defaultMessage: 'Shrink index'
     });
 
-    const moveToWarmPhaseOnRolloverLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
-      defaultMessage: 'Move to warm phase on rollover',
+    const moveToWarmPhaseOnRolloverLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel', {
+      defaultMessage: 'Move to warm phase on rollover'
     });
 
-    const forcemergeLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel',
-      defaultMessage: 'Force merge data',
+    const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel', {
+      defaultMessage: 'Force merge data'
     });
 
     return (
@@ -169,8 +168,7 @@ class WarmPhaseUi extends PureComponent {
                       isShowingErrors={isShowingErrors}
                       errors={errors}
                       helpText={
-                        intl.formatMessage({
-                          id: 'xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText',
+                        i18n.translate('xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText', {
                           defaultMessage: 'By default, the number of replicas remains the same.'
                         })
                       }
@@ -235,9 +233,8 @@ class WarmPhaseUi extends PureComponent {
                         <EuiFlexItem grow={false}>
                           <ErrableFormRow
                             id={`${PHASE_WARM}-${PHASE_PRIMARY_SHARD_COUNT}`}
-                            label={intl.formatMessage({
-                              id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
-                              defaultMessage: 'Number of primary shards',
+                            label={i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel', {
+                              defaultMessage: 'Number of primary shards'
                             })}
                             errorKey={PHASE_PRIMARY_SHARD_COUNT}
                             isShowingErrors={isShowingErrors}
@@ -297,9 +294,8 @@ class WarmPhaseUi extends PureComponent {
                 {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
                   <ErrableFormRow
                     id={`${PHASE_WARM}-${PHASE_FORCE_MERGE_SEGMENTS}`}
-                    label={intl.formatMessage({
-                      id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
-                      defaultMessage: 'Number of segments',
+                    label={i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel', {
+                      defaultMessage: 'Number of segments'
                     })}
                     errorKey={PHASE_FORCE_MERGE_SEGMENTS}
                     isShowingErrors={isShowingErrors}
@@ -330,4 +326,3 @@ class WarmPhaseUi extends PureComponent {
     );
   }
 }
-export const WarmPhase = injectI18n(WarmPhaseUi);

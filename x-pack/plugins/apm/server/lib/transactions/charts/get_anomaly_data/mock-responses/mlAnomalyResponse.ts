@@ -6,7 +6,7 @@
 
 import { ESResponse } from '../fetcher';
 
-export const mlAnomalyResponse: ESResponse = {
+export const mlAnomalyResponse: ESResponse = ({
   took: 3,
   timed_out: false,
   _shards: {
@@ -124,4 +124,4 @@ export const mlAnomalyResponse: ESResponse = {
       ]
     }
   }
-};
+} as unknown) as ESResponse;

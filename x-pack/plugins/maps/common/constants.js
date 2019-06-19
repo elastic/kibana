@@ -8,6 +8,8 @@ export const GIS_API_PATH = 'api/maps';
 export const EMS_DATA_FILE_PATH = 'ems/file';
 export const EMS_DATA_TMS_PATH = 'ems/tms';
 export const EMS_META_PATH = 'ems/meta';
+export const SPRITE_PATH = '/maps/sprite';
+export const MAKI_SPRITE_PATH = `${SPRITE_PATH}/maki`;
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
@@ -21,6 +23,8 @@ export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const SOURCE_DATA_ID_ORIGIN = 'source';
+
+export const GEOJSON_FILE = 'GEOJSON_FILE';
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;

@@ -21,17 +21,12 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 routes.when('/management/spaces/list', {
   template,
   k7Breadcrumbs: getListBreadcrumbs,
-  controller(
-    $scope: any,
-    $http: any,
-    chrome: any,
-    spacesNavState: SpacesNavState,
-    spaceSelectorURL: string
-  ) {
+  requireUICapability: 'management.kibana.spaces',
+  controller($scope: any, spacesNavState: SpacesNavState, spaceSelectorURL: string) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+      const spacesManager = new SpacesManager(spaceSelectorURL);
 
       render(
         <I18nContext>
@@ -53,17 +48,12 @@ routes.when('/management/spaces/list', {
 routes.when('/management/spaces/create', {
   template,
   k7Breadcrumbs: getCreateBreadcrumbs,
-  controller(
-    $scope: any,
-    $http: any,
-    chrome: any,
-    spacesNavState: SpacesNavState,
-    spaceSelectorURL: string
-  ) {
+  requireUICapability: 'management.kibana.spaces',
+  controller($scope: any, spacesNavState: SpacesNavState, spaceSelectorURL: string) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+      const spacesManager = new SpacesManager(spaceSelectorURL);
 
       render(
         <I18nContext>
@@ -89,9 +79,9 @@ routes.when('/management/spaces/edit', {
 routes.when('/management/spaces/edit/:spaceId', {
   template,
   k7Breadcrumbs: () => getEditBreadcrumbs(),
+  requireUICapability: 'management.kibana.spaces',
   controller(
     $scope: any,
-    $http: any,
     $route: any,
     chrome: any,
     spacesNavState: SpacesNavState,
@@ -102,7 +92,7 @@ routes.when('/management/spaces/edit/:spaceId', {
 
       const { spaceId } = $route.current.params;
 
-      const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+      const spacesManager = new SpacesManager(spaceSelectorURL);
 
       render(
         <I18nContext>

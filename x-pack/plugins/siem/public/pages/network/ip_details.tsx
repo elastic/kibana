@@ -20,22 +20,22 @@ import { manageQuery } from '../../components/page/manage_query';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { FlowTargetSelectConnected } from '../../components/page/network/flow_target_select_connected';
 import { IpOverview } from '../../components/page/network/ip_overview';
+import { UsersTable } from '../../components/page/network/users_table';
+import { TlsTable } from '../../components/page/network/tls_table';
+import { UseUrlState } from '../../components/url_state';
 import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { TlsQuery } from '../../containers/tls';
+import { UsersQuery } from '../../containers/users';
 import { FlowTarget, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
-import { TlsTable } from '../../components/page/network/tls_table';
 
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-import { TlsQuery } from '../../containers/tls';
-import { UsersTable } from '../../components/page/network/users_table';
-import { UsersQuery } from '../../containers/users';
-import { UrlStateContainer } from '../../components/url_state';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
@@ -62,7 +62,6 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
           <StickyContainer>
             <FiltersGlobal>
               <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
-              <UrlStateContainer indexPattern={indexPattern} />
             </FiltersGlobal>
 
             <HeaderPage
@@ -77,109 +76,117 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
 
             <GlobalTime>
               {({ to, from, setQuery }) => (
-                <>
-                  <IpOverviewQuery
-                    sourceId="default"
-                    filterQuery={filterQuery}
-                    type={networkModel.NetworkType.details}
-                    ip={decodeIpv6(ip)}
-                  >
-                    {({ ipOverviewData, loading }) => (
-                      <IpOverview
+                <UseUrlState indexPattern={indexPattern}>
+                  {({ isInitializing }) => (
+                    <>
+                      <IpOverviewQuery
+                        skip={isInitializing}
+                        sourceId="default"
+                        filterQuery={filterQuery}
+                        type={networkModel.NetworkType.details}
                         ip={decodeIpv6(ip)}
-                        data={ipOverviewData}
-                        loading={loading}
-                        type={networkModel.NetworkType.details}
+                      >
+                        {({ ipOverviewData, loading }) => (
+                          <IpOverview
+                            ip={decodeIpv6(ip)}
+                            data={ipOverviewData}
+                            loading={loading}
+                            type={networkModel.NetworkType.details}
+                            flowTarget={flowTarget}
+                          />
+                        )}
+                      </IpOverviewQuery>
+
+                      <EuiHorizontalRule />
+
+                      <DomainsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
                         flowTarget={flowTarget}
-                      />
-                    )}
-                  </IpOverviewQuery>
+                        ip={decodeIpv6(ip)}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={networkModel.NetworkType.details}
+                      >
+                        {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                          <DomainsTableManage
+                            data={domains}
+                            indexPattern={indexPattern}
+                            id={id}
+                            flowTarget={flowTarget}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            ip={ip}
+                            loading={loading}
+                            loadMore={loadMore}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            totalCount={totalCount}
+                            type={networkModel.NetworkType.details}
+                          />
+                        )}
+                      </DomainsQuery>
 
-                  <EuiHorizontalRule />
+                      <EuiSpacer />
 
-                  <DomainsQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    flowTarget={flowTarget}
-                    ip={decodeIpv6(ip)}
-                    sourceId="default"
-                    startDate={from}
-                    type={networkModel.NetworkType.details}
-                  >
-                    {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                      <DomainsTableManage
-                        data={domains}
-                        indexPattern={indexPattern}
-                        id={id}
+                      <UsersQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
                         flowTarget={flowTarget}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        ip={ip}
-                        loading={loading}
-                        loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        totalCount={totalCount}
+                        ip={decodeIpv6(ip)}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
                         type={networkModel.NetworkType.details}
-                      />
-                    )}
-                  </DomainsQuery>
+                      >
+                        {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                          <UsersTableManage
+                            data={users}
+                            id={id}
+                            flowTarget={flowTarget}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            loading={loading}
+                            loadMore={loadMore}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            totalCount={totalCount}
+                            type={networkModel.NetworkType.details}
+                          />
+                        )}
+                      </UsersQuery>
 
-                  <EuiSpacer />
+                      <EuiSpacer />
 
-                  <UsersQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    flowTarget={flowTarget}
-                    ip={decodeIpv6(ip)}
-                    sourceId="default"
-                    startDate={from}
-                    type={networkModel.NetworkType.details}
-                  >
-                    {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                      <UsersTableManage
-                        data={users}
-                        id={id}
+                      <TlsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
                         flowTarget={flowTarget}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        loading={loading}
-                        loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        totalCount={totalCount}
+                        ip={decodeIpv6(ip)}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
                         type={networkModel.NetworkType.details}
-                      />
-                    )}
-                  </UsersQuery>
-
-                  <EuiSpacer />
-
-                  <TlsQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    flowTarget={flowTarget}
-                    ip={decodeIpv6(ip)}
-                    sourceId="default"
-                    startDate={from}
-                    type={networkModel.NetworkType.details}
-                  >
-                    {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                      <TlsTableManage
-                        data={tls}
-                        id={id}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
-                        loading={loading}
-                        loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        totalCount={totalCount}
-                        type={networkModel.NetworkType.details}
-                      />
-                    )}
-                  </TlsQuery>
-                </>
+                      >
+                        {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                          <TlsTableManage
+                            data={tls}
+                            id={id}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
+                            loading={loading}
+                            loadMore={loadMore}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            totalCount={totalCount}
+                            type={networkModel.NetworkType.details}
+                          />
+                        )}
+                      </TlsQuery>
+                    </>
+                  )}
+                </UseUrlState>
               )}
             </GlobalTime>
           </StickyContainer>

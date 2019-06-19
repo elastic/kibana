@@ -15,6 +15,7 @@ import {
   getOpsStatsCollector,
   getSettingsCollector,
 } from './server/kibana_monitoring/collectors';
+import { initInfraSource } from './server/lib/logs/init_infra_source';
 
 /**
  * Initialize the Kibana Monitoring plugin by starting up asynchronous server tasks
@@ -115,4 +116,8 @@ export const init = (monitoringPlugin, server) => {
       showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
     };
   });
+};
+
+export const postInit = server => {
+  initInfraSource(server);
 };

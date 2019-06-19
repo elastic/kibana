@@ -43,7 +43,6 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
           <div
             style={{
               position: 'absolute',
-              backgroundColor: theme.euiColorEmptyShade,
               borderBottom: `1px solid ${theme.euiColorMediumShade}`,
               height: px(margins.top),
               zIndex: 2,
@@ -70,7 +69,7 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 tickFormat={tickFormat}
                 tickPadding={20}
                 style={{
-                  text: { fill: theme.euiColorMediumShade }
+                  text: { fill: theme.euiColorDarkShade }
                 }}
               />
 

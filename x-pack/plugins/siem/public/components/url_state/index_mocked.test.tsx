@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { throttle } from 'lodash/fp';
 import * as React from 'react';
-import { UrlStateContainerLifecycle } from './';
-import { getMockPropsObj, mockHistory, filterQuery, testCases } from './test_dependencies';
-import { networkModel } from '../../store';
-import { UrlStateContainerPropTypes } from './types';
+
+import { HookWrapper } from '../../mock/hook_wrapper';
+import { hostsModel, networkModel } from '../../store';
+
 import { CONSTANTS } from './constants';
+import { getMockPropsObj, mockHistory, filterQuery, testCases } from './test_dependencies';
+import { UrlStateContainerPropTypes } from './types';
+import { useUrlStateHooks } from './use_url_state';
+import { wait } from 'react-testing-library';
 
 jest.mock('lodash/fp');
 
@@ -34,7 +38,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         namespaceLower: 'network',
         type: networkModel.NetworkType.page,
       }).noSearch.definedQuery;
-      const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
+      const wrapper = mount(<HookWrapper hook={() => useUrlStateHooks(mockProps)} />);
 
       const newUrlState = {
         ...mockProps.urlState,
@@ -61,17 +65,19 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           },
         },
       };
-
-      wrapper.setProps({ urlState: newUrlState });
-      wrapper.update();
-      expect(mockHistory.replace.mock.calls[2][0]).toStrictEqual({
-        hash: '',
-        pathname: '/network',
-        search:
-          '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))',
-        state: '',
+      wait(() => {
+        wrapper.setProps({ urlState: newUrlState });
+        wrapper.update();
+        expect(mockHistory.replace.mock.calls[2][0]).toStrictEqual({
+          hash: '',
+          pathname: '/network',
+          search:
+            '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))',
+          state: '',
+        });
       });
     });
+
     test('kql query redux state updates the url', () => {
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
@@ -79,7 +85,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         namespaceLower: 'network',
         type: networkModel.NetworkType.page,
       }).noSearch.definedQuery;
-      const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
+      const wrapper = mount(<HookWrapper hook={() => useUrlStateHooks(mockProps)} />);
 
       const newUrlState = {
         [CONSTANTS.kqlQuery]: {
@@ -91,15 +97,17 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         },
       };
 
-      wrapper.setProps({ urlState: newUrlState });
-      wrapper.update();
+      wait(() => {
+        wrapper.setProps({ urlState: newUrlState });
+        wrapper.update();
 
-      expect(mockHistory.replace.mock.calls[0][0]).toStrictEqual({
-        hash: '',
-        pathname: '/network',
-        search:
-          "?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page,type:page)",
-        state: '',
+        expect(mockHistory.replace.mock.calls[0][0]).toStrictEqual({
+          hash: '',
+          pathname: '/network',
+          search:
+            "?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page,type:page)",
+          state: '',
+        });
       });
     });
   });
@@ -110,22 +118,59 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath, type) => {
           mockProps = getMockPropsObj({ page, examplePath, namespaceLower, type }).noSearch
             .undefinedQuery;
-          shallow(<UrlStateContainerLifecycle {...mockProps} />);
+          mount(<HookWrapper hook={() => useUrlStateHooks(mockProps)} />);
 
-          expect(mockHistory.replace.mock.calls[0][0]).toEqual({
+          wait(() => {
+            expect(mockHistory.replace.mock.calls[0][0]).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search: `?_g=()&kqlQuery=(filterQuery:!n,queryLocation:${page},type:${type})`,
+              state: '',
+            });
+
+            expect(mockHistory.replace.mock.calls[1][0]).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search:
+                '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+              state: '',
+            });
+          });
+        });
+      });
+
+      test('url state is set from redux data when location updates', () => {
+        mockProps = getMockPropsObj({
+          page: CONSTANTS.hostsPage,
+          examplePath: '/hosts',
+          namespaceLower: 'hosts',
+          type: hostsModel.HostsType.page,
+        }).noSearch.undefinedQuery;
+        const updatedProps = getMockPropsObj({
+          page: CONSTANTS.networkPage,
+          examplePath: '/network',
+          namespaceLower: 'network',
+          type: networkModel.NetworkType.page,
+        }).noSearch.undefinedQuery;
+        const wrapper = mount(<HookWrapper hook={() => useUrlStateHooks(mockProps)} />);
+
+        wait(() => {
+          // @ts-ignore ignore staticContext warning
+          wrapper.setProps(updatedProps);
+          wrapper.update();
+          // sets new kqlQuery
+          expect(mockHistory.replace.mock.calls[2][0]).toEqual({
             hash: '',
-            pathname: examplePath,
-            search: `?_g=()&kqlQuery=(filterQuery:!n,queryLocation:${page},type:${type})`,
+            pathname: '/network',
+            search: `?_g=()&kqlQuery=(filterQuery:!n,queryLocation:${CONSTANTS.networkPage},type:${
+              networkModel.NetworkType.page
+            })`,
             state: '',
           });
-
-          expect(mockHistory.replace.mock.calls[1][0]).toEqual({
-            hash: '',
-            pathname: examplePath,
-            search:
-              '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
-            state: '',
-          });
+          // sets same timeline
+          expect(mockHistory.replace.mock.calls[3][0].search).toEqual(
+            mockHistory.replace.mock.calls[1][0].search
+          );
         });
       });
     });

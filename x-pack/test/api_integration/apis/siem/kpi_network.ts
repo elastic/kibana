@@ -26,22 +26,22 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 7,
             __typename: 'KpiNetworkHistogramData',
           },
@@ -50,22 +50,22 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
         uniqueDestinationPrivateIpsHistogram: [
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 8,
           },
         ],
@@ -107,22 +107,22 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 7,
             __typename: 'KpiNetworkHistogramData',
           },
@@ -131,22 +131,22 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
         uniqueDestinationPrivateIpsHistogram: [
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 8,
           },
         ],

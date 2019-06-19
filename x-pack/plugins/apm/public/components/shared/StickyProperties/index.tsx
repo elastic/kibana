@@ -142,6 +142,7 @@ export function StickyProperties({
                 minWidth: width,
                 ...itemStyles
               }}
+              grow={false}
             >
               {getPropertyLabel(prop)}
               {getPropertyValue(prop)}
