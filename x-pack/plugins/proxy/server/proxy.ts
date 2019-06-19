@@ -17,6 +17,7 @@ const cryptoConstants = (crypto as any).constants;
 
 const readFileAsync = promisify(readFile);
 
+import Boom from 'boom';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import Wreck from 'wreck';
@@ -39,10 +40,6 @@ export interface ProxyServiceSetup {
 }
 
 export interface ProxyServiceStart {
-  on: (event: string | symbol, listener: (...args: any[]) => void) => ClusterDocClient;
-  off: (event: string | symbol, listener: (...args: any[]) => void) => ClusterDocClient;
-  once: (event: string | symbol, listener: (...args: any[]) => void) => ClusterDocClient;
-  removeAllListeners: (event?: string | symbol) => ClusterDocClient;
   assignResource: (
     resource: string,
     type: string,
@@ -175,10 +172,6 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   public async start() {
     await this.clusterDocClient.start();
     const start: ProxyServiceStart = {
-      on: this.clusterDocClient.on.bind(this.clusterDocClient),
-      off: this.clusterDocClient.off.bind(this.clusterDocClient),
-      once: this.clusterDocClient.once.bind(this.clusterDocClient),
-      removeAllListeners: this.clusterDocClient.removeAllListeners.bind(this.clusterDocClient),
       assignResource: this.assignResource.bind(this),
       unassignResource: this.unassignResource.bind(this),
       proxyResource: this.proxyResource.bind(this),
@@ -219,6 +212,10 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
 
   // @TODO update to allow passing of request parametsrs
   public async proxyRequest(req: KibanaRequest, resource?: string, retryCount = 0): Promise<any> {
+    if (!this.clusterDocClient.validState) {
+      const err = new Error('Proxy is in an invalid state and cannot be used');
+      throw Boom.boomify(err, { statusCode: 500 });
+    }
     const method = req.route.method;
     const url = new URL(req.url.toString());
     const headers = req.getFilteredHeaders([]);

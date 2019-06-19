@@ -207,7 +207,7 @@ test('assign and unassign resource', async () => {
   await clusterDoc.stop();
 });
 
-test('honeybadgers on conflicts', async () => {
+test('it continues on errors', async () => {
   const esClients = {
     adminClient: {},
     dataClient: {
@@ -235,9 +235,39 @@ test('honeybadgers on conflicts', async () => {
   }
 
   expect(setTimeout).toHaveBeenCalledTimes(1);
+  expect(clusterDoc.validState).toBeTruthy();
+});
+
+test('it continues on errors still', async () => {
+  const esClients = {
+    adminClient: {},
+    dataClient: {
+      callAsInternalUser: jest.fn(() => {
+        return new Promise((resolve, reject) => {
+          reject(new Error('bar'));
+        });
+      }),
+    },
+  };
+
+  const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
+  const config = configService({
+    updateInterval: 100,
+    timeoutThreshold: 100,
+  });
+  const clusterDoc = new ClusterDocClient({ config, env, logger });
+
   try {
-    await clusterDoc.stop();
+    await clusterDoc.setup(elasticClient);
+    await clusterDoc.start();
   } catch (err) {
-    expect(err.output.statusCode).toBe(409);
+    expect(err).toBeFalsy();
   }
+
+  setTimeout(() => {
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+    expect(clusterDoc.validState).toBeFalsy();
+  }, 1);
+
+  jest.runAllTimers();
 });

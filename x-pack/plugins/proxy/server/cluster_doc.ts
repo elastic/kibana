@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventEmitter } from 'events';
 import Boom from 'boom';
 import { v4 } from 'uuid';
 import { Observable, Subscription, pairs } from 'rxjs';
@@ -52,8 +51,9 @@ function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (min - max) + min);
 }
 
-export class ClusterDocClient extends EventEmitter {
+export class ClusterDocClient {
   public nodeName: string;
+  public validState: boolean = true;
   private readonly updateFloor = 30 * 1000; // 30 seconds is the fastest you can update
   private routingTable: RoutingTable = {};
   private elasticsearch?: Observable<ClusterClient>;
@@ -72,13 +72,12 @@ export class ClusterDocClient extends EventEmitter {
   private readonly config$: Observable<ProxyPluginType>;
 
   constructor(initializerContext: PluginInitializerContext) {
-    super();
     this.nodeName = v4();
     this.config$ = initializerContext.config.create<ProxyPluginType>();
     this.log = initializerContext.logger.get('proxy');
   }
 
-  public async setup(esClient: Partial<ElasticsearchServiceSetup>) {
+  public async setup(esClient: ElasticsearchServiceSetup) {
     this.elasticsearch = esClient.dataClient$;
     this.configSubscription = this.config$.subscribe(config => {
       this.setConfig(config);
@@ -121,6 +120,10 @@ export class ClusterDocClient extends EventEmitter {
     // getting the ndoe list will refresh the internal routing table to match
     // whatever the es doc contains, so this needs to be done before we assign
     // the new node to the routing table, or we lose the update
+    if (!this.validState) {
+      this.log.error('The proxy is not in a valid state, you may not assign resources');
+      throw new Error('Unable to assign resource because proxy is in an invalid state');
+    }
     const nodes = await this.getNodeList();
     if (this.routingTable[resource]) {
       throw new Error(`${resource} already exists on ${this.routingTable[resource].node}`);
@@ -136,6 +139,10 @@ export class ClusterDocClient extends EventEmitter {
   }
 
   public async unassignResource(resource: string) {
+    if (!this.validState) {
+      this.log.error('The proxy is not in a valid state, you may not unassign resources');
+      throw new Error('Unable to unassign resource because proxy is in an invalid state');
+    }
     const nodes = await this.getNodeList();
     delete this.routingTable[resource];
     const currentTime = new Date().getTime();
@@ -236,27 +243,46 @@ export class ClusterDocClient extends EventEmitter {
   }
 
   private async mainLoop(): Promise<void> {
-    const nodes = await this.getNodeList();
-    const finishTime = new Date().getTime();
+    let nodes = {} as NodeList;
+    try {
+      nodes = await this.getNodeList();
+      this.validState = true;
+    } catch (err) {
+      this.log.error(
+        'Unable to read or parse proxy document. Proxy will be disabled until this succeeds'
+      );
+      this.validState = false;
+      this.setTimer();
+      return;
+    }
 
-    for (const [key, node] of Object.entries(nodes)) {
-      const timeout = finishTime - node.lastUpdate;
-      if (!node || timeout > this.timeoutThreshold) {
-        this.log.warn(`Node ${key} has not updated in ${timeout}ms and has been dropped`);
-        this.removeNode(key);
-        delete nodes[key];
+    const finishTime = new Date().getTime();
+    if (this.validState) {
+      for (const [key, node] of Object.entries(nodes)) {
+        const timeout = finishTime - node.lastUpdate;
+        if (!node || timeout > this.timeoutThreshold) {
+          this.log.warn(`Node ${key} has not updated in ${timeout}ms and has been dropped`);
+          this.removeNode(key);
+          delete nodes[key];
+        }
       }
     }
 
     try {
       await this.updateNodeList(this.updateLocalNode(nodes, finishTime));
+      this.validState = true;
     } catch (err) {
-      // on conflict, skip until next loop
-      if (err.output.statusCode !== 409) {
-        this.emit('error', err);
-        return;
+      if (err.output.statusCode === 409) {
+        this.log.error('Could not update document. Proxy state might be out of sync', err);
+      } else {
+        this.log.error(
+          'Invalid response from elasticsearch, or issue with local state. Proxy state will be disabled until this succeeds',
+          err
+        );
+        this.validState = false;
       }
+    } finally {
+      this.setTimer();
     }
-    this.setTimer();
   }
 }
