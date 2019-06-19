@@ -45,6 +45,9 @@ export class AlertInstance {
   }
 
   fire(actionGroup: string, context: Context = {}) {
+    if (this.shouldFire()) {
+      throw new Error('Alert instance already fired, cannot fire twice');
+    }
     this.internalShouldFire = true;
     this.fireOptions = { actionGroup, context, state: this.state };
     return this;

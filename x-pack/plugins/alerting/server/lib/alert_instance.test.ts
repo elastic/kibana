@@ -74,6 +74,14 @@ describe('fire()', () => {
       state: { otherField: true },
     });
   });
+
+  test('cannot fire twice', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.fire('default', { field: true });
+    expect(() =>
+      alertInstance.fire('default', { field: false })
+    ).toThrowErrorMatchingInlineSnapshot(`"Alert instance already fired, cannot fire twice"`);
+  });
 });
 
 describe('replaceState()', () => {
