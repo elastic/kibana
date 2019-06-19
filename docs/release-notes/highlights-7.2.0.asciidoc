@@ -212,6 +212,22 @@ These wizards expedite the creation of pre-configured jobs, dashboards, searches
 and visualizations. For more information, see
 {kibana-ref}/ml-jobs.html[Creating {ml} jobs].
 
+[float]
+=== View recent log entries alongside your monitoring data
+
+You can now see your cluster's recent log entries within the *Stack Monitoring*
+application:
+
+[role="screenshot"]
+image::release-notes/images/7.2-monitoring-logs.png["Monitoring recent {es} logs"]
+
+See {kibana-ref}/elasticsearch-metrics.html[{es} monitoring metrics]. If you
+want to see earlier log entries, you can follow a link to the
+{kibana-ref}/xpack-logs.html[Logs UI] and continue your investigation there.
+
+TIP: You must use {filebeat} to collect the logs.
+
+//See {ref}/configuring-filebeat.html[Collecting {es} log data with {filebeat}].
 // end::notable-highlights[]
 
 [float]
