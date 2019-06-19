@@ -87,11 +87,7 @@ describe.skip('<WatchEdit />', () => {
         expect(JSON.parse(codeEditor.props().value as string)).toEqual(defaultWatchJson);
 
         // ID should not be editable
-        expect(
-          find('idInput')
-            .getDOMNode()
-            .getAttribute('disabled')
-        ).toEqual(null);
+        expect(find('idInput').props().readOnly).toEqual(true);
       });
 
       test('save a watch with new values', async () => {

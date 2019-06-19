@@ -225,13 +225,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
 
           expect(exists('simulateResultsFlyout')).toBe(false);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
-          await act(async () => {
-            actions.clickSimulateButton();
-            await nextTick();
-            component.update();
-          });
-
           httpRequestsMockHelpers.setLoadExecutionResultResponse({
             watchHistoryItem: {
               details: {},
@@ -239,6 +232,13 @@ describe.skip('<JsonWatchEdit /> create route', () => {
                 actionStatuses: [],
               },
             },
+          });
+
+          // @ts-ignore (remove when react 16.9.0 is released)
+          await act(async () => {
+            actions.clickSimulateButton();
+            await nextTick();
+            component.update();
           });
 
           const latestRequest = server.requests[server.requests.length - 1];

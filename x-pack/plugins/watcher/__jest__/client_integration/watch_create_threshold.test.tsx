@@ -138,7 +138,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
           form.setInputValue('nameInput', '');
 
-          expect(form.getErrorsMessages()).toContain('Name is required');
+          expect(form.getErrorsMessages()).toContain('Name is required.');
         });
 
         test('should not allow empty time field', () => {
@@ -168,11 +168,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
         test('should disable the Create button with invalid fields', () => {
           const { find } = testBed;
 
-          expect(
-            find('saveWatchButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual('');
+          expect(find('saveWatchButton').props().disabled).toEqual(true);
         });
 
         test('it should enable the Create button and render additonal content with valid fields', async () => {
@@ -188,13 +184,9 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
             component.update();
           });
 
-          expect(
-            find('saveWatchButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual(null);
+          expect(find('saveWatchButton').props().disabled).toEqual(false);
 
-          expect(find('watchConditionTitle').text()).toBe('Matching the following condition');
+          expect(find('watchConditionTitle').text()).toBe('Match the following condition');
           expect(exists('watchVisualizationChart')).toBe(true);
           expect(exists('watchActionsPanel')).toBe(true);
         });
@@ -230,11 +222,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('loggingTextInput', '');
 
           expect(form.getErrorsMessages()).toContain('Log text is required.');
-          expect(
-            find('simulateActionButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual('');
+          expect(find('simulateActionButton').props().disabled).toEqual(true);
 
           // Next, provide valid field and verify
           form.setInputValue('loggingTextInput', LOGGING_MESSAGE);
@@ -303,11 +291,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('indexInput', '');
 
           expect(form.getErrorsMessages()).toContain('Index name is required.');
-          expect(
-            find('simulateActionButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual('');
+          expect(find('simulateActionButton').props().disabled).toEqual(true);
 
           // Next, provide valid field and verify
           form.setInputValue('indexInput', INDEX);
@@ -441,11 +425,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('emailBodyInput', '');
 
           expect(form.getErrorsMessages()).toContain('Email body is required.');
-          expect(
-            find('simulateActionButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual('');
+          expect(find('simulateActionButton').props().disabled).toEqual(true);
 
           // Next, provide valid field and verify
           find('watchActionAccordion.mockComboBox').simulate('change', [
@@ -533,11 +513,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
             'Webhook host is required.',
             'Webhook port is required.',
           ]);
-          expect(
-            find('simulateActionButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual('');
+          expect(find('simulateActionButton').props().disabled).toEqual(true);
 
           // Next, provide valid fields and verify
           form.setInputValue('webhookMethodSelect', METHOD);
@@ -627,11 +603,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
             'Jira issue type is required.',
             'Jira summary is required.',
           ]);
-          expect(
-            find('simulateActionButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual('');
+          expect(find('simulateActionButton').props().disabled).toEqual(true);
 
           // Next, provide valid fields and verify
           form.setInputValue('jiraProjectKeyInput', PROJECT_KEY);
@@ -712,11 +684,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('pagerdutyDescriptionInput', '');
 
           expect(form.getErrorsMessages()).toContain('PagerDuty description is required.');
-          expect(
-            find('simulateActionButton')
-              .getDOMNode()
-              .getAttribute('disabled')
-          ).toEqual('');
+          expect(find('simulateActionButton').props().disabled).toEqual(true);
 
           // Next, provide valid fields and verify
           form.setInputValue('pagerdutyDescriptionInput', DESCRIPTION);
