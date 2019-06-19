@@ -24,7 +24,7 @@ In this tutorial we are going to use the Metrics explorer to create system load 
 Once we've explored the system load metrics,
 we'll show you how to filter down to a specific host and start exploring outbound network traffic for each interface.
 Before we get started, if you don't have any Metricbeat data, you'll need to head over to our
-{beats-ref}/metricbeat-overview.html[Metricbeat documentation] and learn how to install and start collection.
+{metricbeat-ref}/metricbeat-overview.html[Metricbeat documentation] and learn how to install and start collection.
 
 1. Navigate to the Infrastructure UI in Kibana and select **Metrics Explorer**
 The initial screen should be empty with the metric field selection open.
