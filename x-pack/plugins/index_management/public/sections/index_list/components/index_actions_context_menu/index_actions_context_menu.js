@@ -411,26 +411,6 @@ export class IndexActionsContextMenu extends Component {
 
     const systemIndexModalBody = (
       <div>
-        <EuiCallOut
-          title={
-            i18n.translate(
-              'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
-              {
-                defaultMessage: 'Deleting a system index can break Kibana'
-              }
-            )
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutDescription"
-              defaultMessage="System indices are critical for internal operations.
-                Deleting an index cannot be undone. Make sure you have appropriate backups."
-            />
-          </p>
-        </EuiCallOut>
         <EuiSpacer size="l" />
         <p>
           <FormattedMessage
@@ -455,17 +435,37 @@ export class IndexActionsContextMenu extends Component {
             </li>
           ))}
         </ul>
-        <EuiCheckbox
-          id="confirmDeleteIndicesCheckbox"
-          label={
-            <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.deleteIndex.checkboxLabel"
-              defaultMessage="I understand the consequences of deleting a system index"
-            />
+        <EuiCallOut
+          title={
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
+              {
+                defaultMessage: 'Deleting a system index can break Kibana'
+              }
+            )
           }
-          checked={isActionConfirmed}
-          onChange={e => this.confirmAction(e.target.checked)}
-        />
+          color="danger"
+          iconType="alert"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutDescription"
+              defaultMessage="System indices are critical for internal operations.
+                Deleting an index cannot be undone. Make sure you have appropriate backups."
+            />
+          </p>
+          <EuiCheckbox
+            id="confirmDeleteIndicesCheckbox"
+            label={
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.deleteIndex.checkboxLabel"
+                defaultMessage="I understand the consequences of deleting a system index"
+              />
+            }
+            checked={isActionConfirmed}
+            onChange={e => this.confirmAction(e.target.checked)}
+          />
+        </EuiCallOut>
       </div>
     );
 
@@ -547,26 +547,6 @@ export class IndexActionsContextMenu extends Component {
           }
         >
           <div>
-            <EuiCallOut
-              title={
-                i18n.translate(
-                  'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
-                  {
-                    defaultMessage: 'Closing a system index can break Kibana'
-                  }
-                )
-              }
-              color="danger"
-              iconType="alert"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
-                  defaultMessage="System indices are critical for internal operations.
-                    You can reopen the index using the Open Index API."
-                />
-              </p>
-            </EuiCallOut>
             <EuiSpacer size="l" />
             <p>
               <FormattedMessage
@@ -591,17 +571,37 @@ export class IndexActionsContextMenu extends Component {
                 </li>
               ))}
             </ul>
-            <EuiCheckbox
-              id="confirmCloseIndicesCheckbox"
-              label={
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
-                  defaultMessage="I understand the consequences of closing a system index"
-                />
+            <EuiCallOut
+              title={
+                i18n.translate(
+                  'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
+                  {
+                    defaultMessage: 'Closing a system index can break Kibana'
+                  }
+                )
               }
-              checked={isActionConfirmed}
-              onChange={e => this.confirmAction(e.target.checked)}
-            />
+              color="danger"
+              iconType="alert"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
+                  defaultMessage="System indices are critical for internal operations.
+                    You can reopen the index using the Open Index API."
+                />
+              </p>
+              <EuiCheckbox
+                id="confirmCloseIndicesCheckbox"
+                label={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
+                    defaultMessage="I understand the consequences of closing a system index"
+                  />
+                }
+                checked={isActionConfirmed}
+                onChange={e => this.confirmAction(e.target.checked)}
+              />
+            </EuiCallOut>
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
