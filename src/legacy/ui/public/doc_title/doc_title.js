@@ -52,25 +52,18 @@ function update() {
   document.title = render();
 }
 
-const docTitleService = {
+export const docTitleService = {
   render,
   change,
   reset,
   update,
 };
 
-
 uiModules.get('kibana')
-  .run(function ($rootScope, docTitle) {
+  .run(function ($rootScope) {
   // always bind to the route events
-    $rootScope.$on('$routeChangeStart', docTitle.reset);
-    $rootScope.$on('$routeChangeError', docTitle.update);
-    $rootScope.$on('$routeChangeSuccess', docTitle.update);
-  })
-  .factory('docTitle', () => docTitleService);
-
-// return a "private module" so that it can be used both ways
-export function DocTitleProvider(docTitle) {
-  return docTitle;
-}
+    $rootScope.$on('$routeChangeStart', docTitleService.reset);
+    $rootScope.$on('$routeChangeError', docTitleService.update);
+    $rootScope.$on('$routeChangeSuccess', docTitleService.update);
+  });
 

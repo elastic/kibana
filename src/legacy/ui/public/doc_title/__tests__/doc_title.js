@@ -21,7 +21,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { DocTitleProvider, setBaseTitle } from '../doc_title';
+import { setBaseTitle, docTitleService } from '../doc_title';
 
 describe('docTitle Service', function () {
   let initialDocTitle;
@@ -44,11 +44,11 @@ describe('docTitle Service', function () {
     $provide.decorator('$rootScope', decorateWithSpy('$on'));
   }));
 
-  beforeEach(ngMock.inject(function ($injector, Private) {
+  beforeEach(ngMock.inject(function ($injector) {
     if (_.random(0, 1)) {
       docTitle = $injector.get('docTitle');
     } else {
-      docTitle = Private(DocTitleProvider);
+      docTitle = docTitleService;
     }
 
     $rootScope = $injector.get('$rootScope');

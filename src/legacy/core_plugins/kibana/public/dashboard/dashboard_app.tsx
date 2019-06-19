@@ -33,7 +33,7 @@ import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 // @ts-ignore
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitleService } from 'ui/doc_title';
 
 // @ts-ignore
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -215,7 +215,6 @@ class DashboardAppController {
   }) {
     const filterManager = Private(FilterManagerProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
-    const docTitle = Private<{ change: (title: string) => void }>(DocTitleProvider);
     const embeddableFactories = Private(
       EmbeddableFactoriesRegistryProvider
     ) as EmbeddableFactoryRegistry;
@@ -231,7 +230,7 @@ class DashboardAppController {
 
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
-      docTitle.change(dash.title);
+      docTitleService.change(dash.title);
     }
 
     const dashboardStateManager = new DashboardStateManager({
@@ -502,7 +501,7 @@ class DashboardAppController {
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
-              docTitle.change(dash.lastSavedTitle);
+              docTitleService.change(dash.lastSavedTitle);
               updateViewMode(DashboardViewMode.VIEW);
             }
           }
