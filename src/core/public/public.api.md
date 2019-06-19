@@ -127,6 +127,8 @@ export interface CoreStart {
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
+    // (undocumented)
+    uiSettings: UiSettingsStart;
 }
 
 // @internal
@@ -190,6 +192,12 @@ export interface HttpServiceBase {
     // (undocumented)
     addLoadingCount(count$: Observable<number>): void;
     // (undocumented)
+    basePath: {
+        get: () => string;
+        prepend: (url: string) => string;
+        remove: (url: string) => string;
+    };
+    // (undocumented)
     delete: HttpHandler;
     // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
     // 
@@ -197,8 +205,6 @@ export interface HttpServiceBase {
     fetch: HttpHandler;
     // (undocumented)
     get: HttpHandler;
-    // (undocumented)
-    getBasePath(): string;
     // (undocumented)
     getLoadingCount$(): Observable<number>;
     // (undocumented)
@@ -212,13 +218,9 @@ export interface HttpServiceBase {
     // (undocumented)
     post: HttpHandler;
     // (undocumented)
-    prependBasePath(path: string): string;
-    // (undocumented)
     put: HttpHandler;
     // (undocumented)
     removeAllInterceptors(): void;
-    // (undocumented)
-    removeBasePath(path: string): string;
     // (undocumented)
     stop(): void;
 }
@@ -394,6 +396,9 @@ export class UiSettingsClient {
 
 // @public (undocumented)
 export type UiSettingsSetup = UiSettingsClient;
+
+// @public (undocumented)
+export type UiSettingsStart = UiSettingsClient;
 
 // @public (undocumented)
 export interface UiSettingsState {

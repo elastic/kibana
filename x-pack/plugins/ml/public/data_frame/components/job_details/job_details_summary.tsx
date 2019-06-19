@@ -13,12 +13,12 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { JobDetailsExposedState } from './job_details_form';
 
 export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
-  ({ createIndexPattern, jobId, targetIndex, touched }) => {
+  ({ createIndexPattern, jobId, destinationIndex, touched }) => {
     if (touched === false) {
       return null;
     }
 
-    const targetIndexHelpText = createIndexPattern
+    const destinationIndexHelpText = createIndexPattern
       ? i18n.translate('xpack.ml.dataframe.jobDetailsSummary.createIndexPatternMessage', {
           defaultMessage: 'A Kibana index pattern will be created for this job.',
         })
@@ -34,12 +34,12 @@ export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
           <EuiFieldText defaultValue={jobId} disabled={true} />
         </EuiFormRow>
         <EuiFormRow
-          helpText={targetIndexHelpText}
-          label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.targetIndexLabel', {
-            defaultMessage: 'Target index',
+          helpText={destinationIndexHelpText}
+          label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.destinationIndexLabel', {
+            defaultMessage: 'Destination index',
           })}
         >
-          <EuiFieldText defaultValue={targetIndex} disabled={true} />
+          <EuiFieldText defaultValue={destinationIndex} disabled={true} />
         </EuiFormRow>
       </Fragment>
     );

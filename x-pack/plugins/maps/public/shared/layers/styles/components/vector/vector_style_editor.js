@@ -7,11 +7,16 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
+import chrome from 'ui/chrome';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
+import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
+import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
+import { SYMBOLIZE_AS_CIRCLE } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
+import { SYMBOL_OPTIONS } from '../../symbol_utils';
 
 import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 
@@ -135,18 +140,59 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderPointProperties() {
+    let lineColor;
+    let lineWidth;
+    let iconOrientation;
+    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE)  {
+      lineColor = (
+        <Fragment>
+          {this._renderLineColor()}
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+      lineWidth = (
+        <Fragment>
+          {this._renderLineWidth()}
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+    } else {
+      iconOrientation = (
+        <Fragment>
+          <OrientationEditor
+            styleProperty="iconOrientation"
+            handlePropertyChange={this.props.handlePropertyChange}
+            styleDescriptor={this.props.styleProperties.iconOrientation}
+            ordinalFields={this.state.ordinalFields}
+            defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
+            defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
+          />
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+    }
+
     return (
       <Fragment>
+
         {this._renderFillColor()}
         <EuiSpacer size="m" />
 
-        {this._renderLineColor()}
-        <EuiSpacer size="m" />
+        {lineColor}
 
-        {this._renderLineWidth()}
-        <EuiSpacer size="m" />
+        {lineWidth}
+
+        <VectorStyleSymbolEditor
+          styleOptions={this.props.styleProperties.symbol.options}
+          handlePropertyChange={this.props.handlePropertyChange}
+          symbolOptions={SYMBOL_OPTIONS}
+          isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}
+        />
+
+        {iconOrientation}
 
         {this._renderSymbolSize()}
+
       </Fragment>
     );
   }
