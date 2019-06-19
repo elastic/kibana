@@ -24,12 +24,10 @@ export async function save({
 }) {
   dispatch({ type: 'SAVING' });
 
-  const title = (state.visualization.state as { title: string }).title;
-
   // TODO: error handling
   const doc = await store.save({
-    title,
     id: state.persistedId,
+    title: state.title,
     type: 'lens',
     visualizationType: state.visualization.activeId || 'unknown',
     datasourceType: state.datasource.activeId || 'unknown',

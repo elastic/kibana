@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EditorFrameProps } from '../editor_frame';
 import { LensDocument } from '../../persistence/lens_store';
 
 export interface EditorFrameState {
   persistedId?: string;
   saving: boolean;
+  title: string;
   visualization: {
     activeId: string | null;
     state: unknown;
@@ -31,6 +33,10 @@ export type Action =
     }
   | {
       type: 'SAVED';
+    }
+  | {
+      type: 'UPDATE_TITLE';
+      title: string;
     }
   | {
       type: 'UPDATE_PERSISTED_ID';
@@ -62,6 +68,7 @@ export type Action =
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     saving: false,
+    title: i18n.translate('lns.chartTitle', { defaultMessage: 'Untitled chart' }),
     datasource: {
       state: null,
       isLoading: Boolean(props.initialDatasourceId),
@@ -83,14 +90,14 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'RESET':
       return action.state;
     case 'UPDATE_PERSISTED_ID':
-      return {
-        ...state,
-        persistedId: action.id,
-      };
+      return { ...state, persistedId: action.id };
+    case 'UPDATE_TITLE':
+      return { ...state, title: action.title };
     case 'VISUALIZATION_LOADED':
       return {
         ...state,
         persistedId: action.doc.id,
+        title: action.doc.title,
         datasource: {
           ...state.datasource,
           activeId: action.doc.datasourceType || null,

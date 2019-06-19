@@ -24,6 +24,7 @@ describe('save editor frame state', () => {
       dispatch,
       redirectTo: jest.fn(),
       state: {
+        title: 'aaa',
         datasource: { activeId: '1', isLoading: false, state: {} },
         saving: false,
         visualization: { activeId: '2', state: {} },
@@ -56,14 +57,15 @@ describe('save editor frame state', () => {
       dispatch: jest.fn(),
       redirectTo: jest.fn(),
       state: {
+        title: 'bbb',
         datasource: { activeId: '1', isLoading: false, state: '2' },
         saving: false,
-        visualization: { activeId: '3', state: { title: 'Heyo!!!', bar: '4' } },
+        visualization: { activeId: '3', state: '4' },
       },
       visualization: {
         getPersistableState(state) {
           return {
-            things: `${(state as { bar: string }).bar}_vis_persisted`,
+            things: `${state}_vis_persisted`,
           };
         },
       },
@@ -76,7 +78,7 @@ describe('save editor frame state', () => {
         datasource: { stuff: '2_datsource_persisted' },
         visualization: { things: '4_vis_persisted' },
       },
-      title: 'Heyo!!!',
+      title: 'bbb',
       type: 'lens',
       visualizationType: '3',
     });
@@ -90,6 +92,7 @@ describe('save editor frame state', () => {
       dispatch,
       redirectTo,
       state: {
+        title: 'ccc',
         datasource: { activeId: '1', isLoading: false, state: {} },
         saving: false,
         visualization: { activeId: '2', state: {} },
@@ -113,6 +116,7 @@ describe('save editor frame state', () => {
       dispatch,
       redirectTo,
       state: {
+        title: 'ddd',
         datasource: { activeId: '1', isLoading: false, state: {} },
         persistedId: id,
         saving: false,

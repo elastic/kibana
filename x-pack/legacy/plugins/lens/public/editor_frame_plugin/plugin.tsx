@@ -52,47 +52,45 @@ export class EditorFramePlugin {
           const persistedId = routeProps.match.params.id;
 
           return (
-            <I18nProvider>
-              <InitializableComponent
-                watch={[persistedId]}
-                init={async () => {
-                  if (!persistedId) {
-                    return { doc: undefined };
-                  } else {
-                    return store.load(persistedId).then(doc => ({ doc }));
-                  }
-                }}
-                render={({ doc }) => {
-                  if (!this.ExpressionRenderer) {
-                    return null;
-                  }
-
-                  return (
-                    <EditorFrame
-                      store={store}
-                      datasourceMap={this.datasources}
-                      visualizationMap={this.visualizations}
-                      initialDatasourceId={firstDatasourceId || null}
-                      initialVisualizationId={firstVisualizationId || null}
-                      ExpressionRenderer={this.ExpressionRenderer}
-                      redirectTo={path => routeProps.history.push(path)}
-                      doc={doc}
-                    />
-                  );
-                }}
-              />
-            </I18nProvider>
+            <InitializableComponent
+              watch={[persistedId]}
+              init={async () => {
+                if (!persistedId) {
+                  return;
+                } else {
+                  return store.load(persistedId);
+                }
+              }}
+              render={doc => {
+                return (
+                  <EditorFrame
+                    store={store}
+                    datasourceMap={this.datasources}
+                    visualizationMap={this.visualizations}
+                    initialDatasourceId={(doc && doc.datasourceType) || firstDatasourceId || null}
+                    initialVisualizationId={
+                      (doc && doc.visualizationType) || firstVisualizationId || null
+                    }
+                    ExpressionRenderer={this.ExpressionRenderer!}
+                    redirectTo={path => routeProps.history.push(path)}
+                    doc={doc}
+                  />
+                );
+              }}
+            />
           );
         };
 
         render(
-          <HashRouter>
-            <Switch>
-              <Route exact path="/edit/:id" render={renderEditor} />
-              <Route exact path="/" render={renderEditor} />
-              <Route component={NotFound} />
-            </Switch>
-          </HashRouter>,
+          <I18nProvider>
+            <HashRouter>
+              <Switch>
+                <Route exact path="/edit/:id" render={renderEditor} />
+                <Route exact path="/" render={renderEditor} />
+                <Route component={NotFound} />
+              </Switch>
+            </HashRouter>
+          </I18nProvider>,
           domElement
         );
       },

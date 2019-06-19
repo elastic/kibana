@@ -56,12 +56,13 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          saving: false,
           datasource: {
             activeId: 'testDatasource',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'aaa',
           visualization: {
             activeId: 'testVis',
             state: {},
@@ -80,12 +81,13 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          saving: false,
           datasource: {
             activeId: 'testDatasource',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'bbb',
           visualization: {
             activeId: 'testVis',
             state: {},
@@ -105,12 +107,13 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          saving: false,
           datasource: {
             activeId: 'testDatasource',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'ccc',
           visualization: {
             activeId: 'testVis',
             state: testVisState,
@@ -132,12 +135,13 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          saving: false,
           datasource: {
             activeId: 'testDatasource',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'ddd',
           visualization: {
             activeId: 'testVis',
             state: testVisState,
@@ -158,12 +162,13 @@ describe('editor_frame state management', () => {
     it('should should switch active datasource and purge visualization state', () => {
       const newState = reducer(
         {
-          saving: false,
           datasource: {
             activeId: 'testDatasource',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'eee',
           visualization: {
             activeId: 'testVis',
             state: {},
@@ -184,12 +189,13 @@ describe('editor_frame state management', () => {
     it('should mark as saving', () => {
       const newState = reducer(
         {
-          saving: false,
           datasource: {
             activeId: 'a',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'fff',
           visualization: {
             activeId: 'b',
             state: {},
@@ -206,12 +212,13 @@ describe('editor_frame state management', () => {
     it('should mark as saved', () => {
       const newState = reducer(
         {
-          saving: true,
           datasource: {
             activeId: 'a',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'hhh',
           visualization: {
             activeId: 'b',
             state: {},
@@ -228,12 +235,13 @@ describe('editor_frame state management', () => {
     it('should change the persisted id', () => {
       const newState = reducer(
         {
-          saving: true,
           datasource: {
             activeId: 'a',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'iii',
           visualization: {
             activeId: 'b',
             state: {},
@@ -251,12 +259,13 @@ describe('editor_frame state management', () => {
     it('should reset the state', () => {
       const newState = reducer(
         {
-          saving: true,
           datasource: {
             activeId: 'a',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'jjj',
           visualization: {
             activeId: 'b',
             state: {},
@@ -272,6 +281,7 @@ describe('editor_frame state management', () => {
             },
             persistedId: 'bar',
             saving: false,
+            title: 'lll',
             visualization: {
               activeId: 'q',
               state: { my: 'viz' },
@@ -298,12 +308,13 @@ describe('editor_frame state management', () => {
     it('should load the state from the doc', () => {
       const newState = reducer(
         {
-          saving: false,
           datasource: {
             activeId: 'a',
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'mmm',
           visualization: {
             activeId: 'b',
             state: {},
@@ -335,6 +346,7 @@ describe('editor_frame state management', () => {
         },
         persistedId: 'b',
         saving: false,
+        title: 'heyo!',
         visualization: {
           activeId: 'line',
           state: {

@@ -29,9 +29,6 @@ Object {
         ],
         "splitSeriesAccessors": Array [],
         "stackAccessors": Array [],
-        "title": Array [
-          "Foo",
-        ],
         "x": Array [
           Object {
             "chain": Array [

@@ -80,7 +80,6 @@ function getSuggestion(
     score: 1,
     datasourceSuggestionId,
     state: {
-      title,
       legend: { isVisible: true, position: Position.Right },
       seriesType: isDate ? 'line' : 'bar',
       splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],

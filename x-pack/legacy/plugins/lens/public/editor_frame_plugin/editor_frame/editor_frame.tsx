@@ -17,6 +17,7 @@ import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { LensStore, LensDocument } from '../../persistence/lens_store';
 import { save } from './save';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface EditorFrameProps {
   doc?: LensDocument;
@@ -170,16 +171,18 @@ export function EditorFrame(props: EditorFrameProps) {
           />
         }
         workspacePanel={
-          <WorkspacePanel
-            activeDatasource={datasource}
-            activeVisualizationId={state.visualization.activeId}
-            datasourcePublicAPI={datasourcePublicAPI!}
-            datasourceState={state.datasource.state}
-            visualizationState={state.visualization.state}
-            visualizationMap={props.visualizationMap}
-            dispatch={dispatch}
-            ExpressionRenderer={props.ExpressionRenderer}
-          />
+          <WorkspacePanelWrapper title={state.title} dispatch={dispatch}>
+            <WorkspacePanel
+              activeDatasource={datasource}
+              activeVisualizationId={state.visualization.activeId}
+              datasourcePublicAPI={datasourcePublicAPI!}
+              datasourceState={state.datasource.state}
+              visualizationState={state.visualization.state}
+              visualizationMap={props.visualizationMap}
+              dispatch={dispatch}
+              ExpressionRenderer={props.ExpressionRenderer}
+            />
+          </WorkspacePanelWrapper>
         }
         suggestionsPanel={
           <SuggestionPanel

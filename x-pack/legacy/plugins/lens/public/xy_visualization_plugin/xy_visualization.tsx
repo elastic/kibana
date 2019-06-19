@@ -58,7 +58,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
         function: 'lens_xy_chart',
         arguments: {
           seriesType: [state.seriesType],
-          title: [state.title],
           legend: [
             {
               type: 'expression',
