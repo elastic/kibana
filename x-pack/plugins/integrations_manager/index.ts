@@ -11,8 +11,8 @@ import {
   CoreSetup,
   LegacyPluginInitializer,
   LegacyPluginOptions,
-  ServerPluginInitializerContext,
   Server,
+  ServerPluginInitializerContext,
 } from './common/types';
 import { Plugin } from './server/plugin';
 import manifest from './kibana.json';
