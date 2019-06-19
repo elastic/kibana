@@ -141,7 +141,6 @@ export interface InternalCoreSetup {
  * @public
  */
 export interface InternalCoreStart {
-  http: HttpServiceStart;
   plugins: PluginsServiceStart;
 }
 
