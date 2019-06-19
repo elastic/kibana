@@ -6,18 +6,31 @@
 
 import { Subject } from 'rxjs';
 import { timefilter as timefilterDep } from 'ui/timefilter';
-import { Timefilter, RefreshInterval } from 'src/legacy/ui/public/timefilter/timefilter';
+import { RefreshInterval } from 'src/legacy/ui/public/timefilter/timefilter';
 
-export type Action = string;
+interface Time {
+  to: string | undefined;
+  from: string | undefined;
+}
 
-export const TIMEFILTER = {
-  SET_TIME: 'set_time',
-  SET_REFRESH_INTERVAL: 'set_refresh_interval',
-};
-
-export const timefilter$ = new Subject();
+const timefilterUpdate$ = new Subject();
+const refreshIntervalUpdate$ = new Subject();
 
 class MlTimefilter {
+  constructor() {
+    // listen for original timefilter emitted events
+    timefilterDep.on('fetch', this.emitUpdate); // setTime or setRefreshInterval called
+    timefilterDep.on('refreshIntervalUpdate', this.emitRefreshIntervalUpdate); // setRefreshInterval called
+  }
+
+  emitUpdate() {
+    timefilterUpdate$.next();
+  }
+
+  emitRefreshIntervalUpdate() {
+    refreshIntervalUpdate$.next();
+  }
+
   disableAutoRefreshSelector() {
     return timefilterDep.disableAutoRefreshSelector();
   }
@@ -34,6 +47,14 @@ class MlTimefilter {
     return timefilterDep.enableTimeRangeSelector();
   }
 
+  isAutoRefreshSelectorEnabled() {
+    return timefilterDep.isAutoRefreshSelectorEnabled;
+  }
+
+  isTimeRangeSelectorEnabled() {
+    return timefilterDep.isAutoRefreshSelectorEnabled;
+  }
+
   getActiveBounds() {
     return timefilterDep.getActiveBounds();
   }
@@ -46,17 +67,25 @@ class MlTimefilter {
     return timefilterDep.getTime();
   }
 
-  off() {}
+  off(event: string) {
+    timefilterDep.off(event, this.emitRefreshIntervalUpdate);
+  }
 
-  on() {}
-  // in timefilter dependency - 'fetch' is emitted
+  // in timefilter dependency - 'fetch', 'refreshIntervalUpdate' emitted
   setRefreshInterval(interval: RefreshInterval) {
     timefilterDep.setRefreshInterval(interval);
   }
   // in timefilter dependency - 'fetch' is emitted
-  setTime(time: Timefilter['time']) {
+  setTime(time: Time) {
     timefilterDep.setTime(time);
-    timefilter$.next({ action: TIMEFILTER.SET_TIME, payload: time });
+  }
+  // consumer must call unsubscribe on return value
+  subscribeToUpdates(callback: () => void) {
+    return timefilterUpdate$.subscribe(callback);
+  }
+  // consumer must call unsubscribe on return value
+  subscribeToRefreshIntervalUpdate(callback: () => void) {
+    return refreshIntervalUpdate$.subscribe(callback);
   }
 }
 
