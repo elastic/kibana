@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DatasourceDimensionPanelProps } from '../../types';
 import {
   IndexPatternColumn,
@@ -19,7 +20,7 @@ import { getPotentialColumns, operationDefinitionMap } from '../operations';
 import { FieldSelect } from './field_select';
 import { Settings } from './settings';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
-import { changeColumn, hasField } from '../state_helpers';
+import { changeColumn, hasField, deleteColumn } from '../state_helpers';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -64,18 +65,29 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
         }}
       >
         <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={null}>
+          <EuiFlexItem>
             <EuiFlexGroup alignItems="center">
               <Settings
                 {...props}
                 selectedColumn={selectedColumn}
                 filteredColumns={filteredColumns}
               />
-              <FieldSelect
-                {...props}
-                selectedColumn={selectedColumn}
-                filteredColumns={filteredColumns}
-              />
+              {selectedColumn && (
+                <EuiFlexItem>
+                  <EuiButtonIcon
+                    data-test-subj="indexPattern-dimensionPopover-remove"
+                    iconType="cross"
+                    iconSize="s"
+                    color="danger"
+                    aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                      defaultMessage: 'Remove',
+                    })}
+                    onClick={() => {
+                      props.setState(deleteColumn(props.state, props.columnId));
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

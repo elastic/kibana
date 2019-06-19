@@ -13,37 +13,32 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSideNav,
-  EuiComboBox,
   EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  IndexPatternColumn,
-  OperationType,
-  FieldBasedIndexPatternColumn,
-  IndexPatternPrivateState,
-} from '../indexpattern';
+import { IndexPatternColumn, OperationType, FieldBasedIndexPatternColumn } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
 import { operationDefinitionMap, getOperations, getOperationDisplay } from '../operations';
 import { hasField, getColumnOrder } from '../state_helpers';
+import { FieldSelect } from './field_select';
 
 export interface SettingsProps extends IndexPatternDimensionPanelProps {
   selectedColumn: IndexPatternColumn;
   filteredColumns: IndexPatternColumn[];
 }
 
-export function Settings({
-  selectedColumn,
-  filteredColumns,
-  state,
-  columnId,
-  setState,
-}: SettingsProps) {
+export function Settings(props: SettingsProps) {
+  // TODO kill internal state when closing settings
+  const { selectedColumn, filteredColumns, state, columnId, setState } = props;
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [invalidOperationType, setInvalidOperationType] = useState<OperationType | null>(null);
+  // TODO remove this
+  const [showAllOptions, setShowAllOptions] = useState(false);
   const ParamEditor =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType].paramEditor;
-  const operations = getOperations();
+  const possibleOperationTypes = filteredColumns.map(col => col.operationType);
+  const operations = getOperations().filter(op => possibleOperationTypes.includes(op));
   const operationPanels = getOperationDisplay();
   const functionsFromField = selectedColumn
     ? filteredColumns.filter(col => {
@@ -56,57 +51,94 @@ export function Settings({
       })
     : filteredColumns;
 
+  const supportedOperations = operations.filter(op =>
+    functionsFromField.some(col => col.operationType === op)
+  );
+
+  const unsupportedOperations = operations.filter(
+    op => !functionsFromField.some(col => col.operationType === op)
+  );
+
+  function operationNavItem(op: OperationType) {
+    return {
+      name: operationPanels[op].displayName,
+      id: op as string,
+      className: classNames({
+        'lnsConfigPanel__operation--selected': Boolean(
+          invalidOperationType === op ||
+            (!invalidOperationType && selectedColumn && selectedColumn.operationType === op)
+        ),
+      }),
+      onClick() {
+        if (!functionsFromField.some(col => col.operationType === op)) {
+          setInvalidOperationType(op);
+          return;
+        }
+        if (invalidOperationType) {
+          setInvalidOperationType(null);
+        }
+        if (selectedColumn.operationType === op) {
+          return;
+        }
+        const newColumn: IndexPatternColumn = filteredColumns.find(
+          col =>
+            col.operationType === op &&
+            (!('sourceField' in col) ||
+              !('sourceField' in selectedColumn) ||
+              col.sourceField === selectedColumn.sourceField)
+        )!;
+
+        const newColumns = {
+          ...state.columns,
+          [columnId]: newColumn,
+        };
+
+        setState({
+          ...state,
+          columnOrder: getColumnOrder(newColumns),
+          columns: newColumns,
+        });
+      },
+    };
+  }
+
   const sideNavItems = [
     {
       name: '',
       id: '0',
-      items: operations.map(op => ({
-        name: operationPanels[op].displayName,
-        id: op,
-        className: classNames({
-          'lnsConfigPanel__operation--unsupported':
-            !invalidOperationType && !functionsFromField.some(col => col.operationType === op),
-          'lnsConfigPanel__operation--selected': Boolean(
-            invalidOperationType === op ||
-              (!invalidOperationType && selectedColumn && selectedColumn.operationType === op)
-          ),
-        }),
-        onClick() {
-          if (!functionsFromField.some(col => col.operationType === op)) {
-            setInvalidOperationType(op);
-            return;
-          }
-          if (invalidOperationType) {
-            setInvalidOperationType(null);
-          }
-          if (selectedColumn.operationType === op) {
-            return;
-          }
-          const newColumn: IndexPatternColumn = filteredColumns.find(
-            col =>
-              col.operationType === op &&
-              (!('sourceField' in col) ||
-                !('sourceField' in selectedColumn) ||
-                col.sourceField === selectedColumn.sourceField)
-          )!;
-
-          const newColumns = {
-            ...state.columns,
-            [columnId]: newColumn,
-          };
-
-          setState({
-            ...state,
-            columnOrder: getColumnOrder(newColumns),
-            columns: newColumns,
-          });
-        },
-      })),
+      items: supportedOperations.map(operationNavItem),
     },
   ];
 
+  if (showAllOptions) {
+    sideNavItems.push({
+      name: 'Additional options',
+      id: '2',
+      items: unsupportedOperations.map(operationNavItem),
+    });
+  } else {
+    sideNavItems.push({
+      name: '',
+      id: '1',
+      items: [
+        {
+          name: 'Show all options',
+          id: 'additional_options',
+          className: 'lnsConfigPanel__operation--action',
+          onClick: () => {
+            setShowAllOptions(true);
+          },
+        },
+      ],
+    });
+  }
+
   const fieldColumns = filteredColumns.filter(
-    col => 'sourceField' in col
+    col =>
+      'sourceField' in col &&
+      (invalidOperationType
+        ? col.operationType === invalidOperationType
+        : selectedColumn && col.operationType === selectedColumn.operationType)
   ) as FieldBasedIndexPatternColumn[];
 
   const uniqueColumnsByField = _.uniq(fieldColumns, col => col.sourceField);
@@ -118,30 +150,26 @@ export function Settings({
   const fieldOptions = uniqueColumnsByField.map(col => ({
     label: col.sourceField,
     value: col.operationId,
-    disabled: invalidOperationType
-      ? col.operationType !== invalidOperationType
-      : selectedColumn && col.operationType !== selectedColumn.operationType,
   }));
 
-  return selectedColumn ? (
-    <EuiFlexItem grow={null}>
+  return (
+    <EuiFlexItem>
       <EuiPopover
         id={columnId}
         className="lnsConfigPanel__summaryPopover"
         anchorClassName="lnsConfigPanel__summaryPopoverAnchor"
         button={
-          <EuiFlexItem data-test-subj="indexPattern-dimension" grow={true}>
-            <EuiButtonIcon
-              data-test-subj="indexPattern-dimensionPopover-button"
-              onClick={() => {
-                setSettingsOpen(!isSettingsOpen);
-              }}
-              iconType="gear"
-              aria-label={i18n.translate('xpack.lens.indexPattern.settingsLabel', {
-                defaultMessage: 'Settings',
-              })}
-            />
-          </EuiFlexItem>
+          <EuiButton
+            onClick={() => {
+              setSettingsOpen(true);
+            }}
+          >
+            {selectedColumn
+              ? selectedColumn.label
+              : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
+                  defaultMessage: 'Configure dimension',
+                })}
+          </EuiButton>
         }
         isOpen={isSettingsOpen}
         closePopover={() => {
@@ -151,58 +179,18 @@ export function Settings({
         withTitle
         panelPaddingSize="s"
       >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem
-            grow={!ParamEditor}
-            className={`lnsConfigPanel__summaryPopoverLeft ${ParamEditor &&
-              'lnsConfigPanel__summaryPopoverLeft--shaded'}`}
-          >
-            <EuiSideNav items={sideNavItems} />
+        <EuiFlexGroup gutterSize="s" direction="column">
+          <EuiFlexItem>
+            <FieldSelect {...props} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" direction="column">
-              <EuiFlexItem>
-                {'sourceField' in selectedColumn && (
-                  <EuiComboBox
-                    fullWidth
-                    data-test-subj="indexPattern-popover-dimension-field"
-                    placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
-                      defaultMessage: 'Field',
-                    })}
-                    options={fieldOptions}
-                    selectedOptions={
-                      selectedColumn && 'sourceField' in selectedColumn
-                        ? [
-                            {
-                              label: selectedColumn.sourceField,
-                              value: selectedColumn.operationId,
-                            },
-                          ]
-                        : []
-                    }
-                    singleSelection={{ asPlainText: true }}
-                    isClearable={false}
-                    onChange={choices => {
-                      const column: IndexPatternColumn = filteredColumns.find(
-                        ({ operationId }) => operationId === choices[0].value
-                      )!;
-                      const newColumns: IndexPatternPrivateState['columns'] = {
-                        ...state.columns,
-                        [columnId]: column,
-                      };
-
-                      if (invalidOperationType) {
-                        setInvalidOperationType(null);
-                      }
-
-                      setState({
-                        ...state,
-                        columns: newColumns,
-                        columnOrder: getColumnOrder(newColumns),
-                      });
-                    }}
-                  />
-                )}
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem
+                grow={!ParamEditor}
+                className={`lnsConfigPanel__summaryPopoverLeft ${ParamEditor &&
+                  'lnsConfigPanel__summaryPopoverLeft--shaded'}`}
+              >
+                <EuiSideNav items={sideNavItems} />
               </EuiFlexItem>
               <EuiFlexItem>
                 {invalidOperationType ? (
@@ -224,5 +212,5 @@ export function Settings({
         </EuiFlexGroup>
       </EuiPopover>
     </EuiFlexItem>
-  ) : null;
+  );
 }
