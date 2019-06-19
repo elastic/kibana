@@ -43,6 +43,7 @@ type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
 const createMock = () => {
   const mocked: jest.Mocked<UiSettingsServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
 
@@ -53,4 +54,5 @@ const createMock = () => {
 export const uiSettingsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createSetupContractMock,
 };

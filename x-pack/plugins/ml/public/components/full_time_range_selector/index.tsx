@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Query } from 'ui/embeddable';
 import { IndexPattern } from 'ui/index_patterns';
 import { EuiButton } from '@elastic/eui';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { setFullTimeRange } from './full_time_range_selector_service';
 
 interface Props {

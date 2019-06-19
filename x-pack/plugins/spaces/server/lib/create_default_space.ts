@@ -5,15 +5,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getClient } from '../../../../server/lib/get_client_shield';
+
+import { first } from 'rxjs/operators';
+import { ElasticsearchServiceSetup, SavedObjectsService } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
-export async function createDefaultSpace(server: any) {
-  const { callWithInternalUser: callCluster } = getClient(server);
+interface Deps {
+  elasticsearch: ElasticsearchServiceSetup;
+  savedObjects: SavedObjectsService;
+}
 
-  const { getSavedObjectsRepository, SavedObjectsClient } = server.savedObjects;
+export async function createDefaultSpace({ elasticsearch, savedObjects }: Deps) {
+  const { getSavedObjectsRepository, SavedObjectsClient } = savedObjects;
 
-  const savedObjectsRepository = getSavedObjectsRepository(callCluster);
+  const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
+
+  const savedObjectsRepository = getSavedObjectsRepository(client.callAsInternalUser);
 
   const defaultSpaceExists = await doesDefaultSpaceExist(
     SavedObjectsClient,

@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 import { get } from 'lodash';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { ReindexStatus } from '../../common/types';
 import { EsVersionPrecheck } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
@@ -26,7 +26,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
   );
   const savedObjectsClient = new server.savedObjects.SavedObjectsClient(
     savedObjectsRepository
-  ) as SavedObjectsClient;
+  ) as SavedObjectsClientContract;
 
   // Cannot pass server.log directly because it's value changes during startup (?).
   // Use this function to proxy through.
