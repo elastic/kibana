@@ -5,7 +5,6 @@
  */
 
 import {
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,

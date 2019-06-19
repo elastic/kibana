@@ -5,7 +5,7 @@ exports[`Storyshots components/Tags/TagList empty list 1`] = `null`;
 exports[`Storyshots components/Tags/TagList with badge tags 1`] = `
 Array [
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#cc3b54",
@@ -24,7 +24,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#5bc149",
@@ -43,7 +43,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#fbc545",
@@ -162,7 +162,7 @@ Array [
 exports[`Storyshots components/Tags/TagList with lots of tags 1`] = `
 Array [
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#cc3b54",
@@ -181,7 +181,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#5bc149",
@@ -200,7 +200,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#fbc545",
@@ -219,7 +219,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#9b3067",
@@ -238,7 +238,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#1819bd",
@@ -257,7 +257,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#d41e93",
@@ -276,7 +276,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#3486d2",
@@ -295,7 +295,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#b870d8",
@@ -314,7 +314,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#f4a4a7",
@@ -333,7 +333,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#072d6d",

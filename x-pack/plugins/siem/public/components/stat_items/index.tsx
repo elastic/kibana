@@ -17,11 +17,13 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { get, getOr } from 'lodash/fp';
+import { ScaleType, niceTimeFormatter } from '@elastic/charts';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
-import { ChartConfigsData, ChartData } from '../charts/common';
+import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
+import { GlobalTime } from '../../containers/global_time';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -49,12 +51,35 @@ export interface StatItems {
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
+  areachartConfigs?: ChartSeriesConfigs;
+  barchartConfigs?: ChartSeriesConfigs;
 }
 
 export interface StatItemsProps extends StatItems {
   areaChart?: ChartConfigsData[];
   barChart?: ChartConfigsData[];
 }
+
+export const numberFormatter = (value: string | number): string => value.toLocaleString();
+export const areachartConfigs = (from: number, to: number) => ({
+  series: {
+    xScaleType: ScaleType.Time,
+    yScaleType: ScaleType.Linear,
+  },
+  axis: {
+    xTickFormatter: niceTimeFormatter([from, to]),
+    yTickFormatter: numberFormatter,
+  },
+});
+export const barchartConfigs = {
+  series: {
+    xScaleType: ScaleType.Ordinal,
+    yScaleType: ScaleType.Linear,
+  },
+  axis: {
+    xTickFormatter: numberFormatter,
+  },
+};
 
 export const addValueToFields = (
   fields: StatItem[],
@@ -129,7 +154,7 @@ export const useKpiMatrixStatus = (
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
   ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
-    const isBarChartDataAbailable =
+    const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
       barChart.every(item => item.value != null && item.value.length > 0);
@@ -148,7 +173,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             {fields.map(field => (
               <FlexItem key={`stat-items-field-${field.key}`}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  {(isAreaChartDataAvailable || isBarChartDataAbailable) && field.icon && (
+                  {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
                     <FlexItem grow={false}>
                       <EuiIcon
                         type={field.icon}
@@ -177,13 +202,17 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
           <EuiFlexGroup>
             {enableBarChart && (
               <FlexItem>
-                <BarChart barChart={barChart!} />
+                <BarChart barChart={barChart} configs={barchartConfigs} />
               </FlexItem>
             )}
 
             {enableAreaChart && (
               <FlexItem>
-                <AreaChart areaChart={areaChart!} />
+                <GlobalTime>
+                  {({ from, to }) => (
+                    <AreaChart areaChart={areaChart} configs={areachartConfigs(from, to)} />
+                  )}
+                </GlobalTime>
               </FlexItem>
             )}
           </EuiFlexGroup>

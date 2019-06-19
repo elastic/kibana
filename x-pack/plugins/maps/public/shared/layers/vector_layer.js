@@ -35,6 +35,12 @@ const ALL_SHAPE_MB_FILTER = [
   ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
 ];
 
+const POINT_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
+];
+
 
 let idCounter = 0;
 function generateNumericalId() {
@@ -434,13 +440,47 @@ export class VectorLayer extends AbstractLayer {
     if (featureCollection !== featureCollectionOnMap) {
       mbGeoJSONSource.setData(featureCollection);
     }
-    this._style.setFeatureState(featureCollection, mbMap, this.getId());
+
+    const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
+
+    // "feature-state" data expressions are not supported with layout properties.
+    // To work around this limitation,
+    // scaled layout properties (like icon-size) must fall back to geojson property values :(
+    if (hasGeoJsonProperties) {
+      mbGeoJSONSource.setData(featureCollection);
+    }
   }
 
   _setMbPointsProperties(mbMap) {
+    const pointLayerId = this._getMbPointLayerId();
+    const symbolLayerId = this._getMbSymbolLayerId();
+    const pointLayer = mbMap.getLayer(pointLayerId);
+    const symbolLayer = mbMap.getLayer(symbolLayerId);
+
+    let layerId;
+    if (this._style.arePointsSymbolizedAsCircles()) {
+      layerId = pointLayerId;
+      if (symbolLayer) {
+        mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
+      }
+      this._setMbCircleProperties(mbMap);
+    } else {
+      layerId = symbolLayerId;
+      if (pointLayer) {
+        mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
+      }
+      this._setMbSymbolProperties(mbMap);
+    }
+
+    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+  }
+
+  _setMbCircleProperties(mbMap) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
+
     if (!pointLayer) {
       mbMap.addLayer({
         id: pointLayerId,
@@ -448,15 +488,35 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
+      mbMap.setFilter(pointLayerId, POINT_MB_FILTER);
     }
+
     this._style.setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
       pointLayerId: pointLayerId,
     });
-    mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+  }
+
+  _setMbSymbolProperties(mbMap) {
+    const sourceId = this.getId();
+    const symbolLayerId = this._getMbSymbolLayerId();
+    const symbolLayer = mbMap.getLayer(symbolLayerId);
+
+    if (!symbolLayer) {
+      mbMap.addLayer({
+        id: symbolLayerId,
+        type: 'symbol',
+        source: sourceId,
+      });
+      mbMap.setFilter(symbolLayerId, POINT_MB_FILTER);
+    }
+
+    this._style.setMBSymbolPropertiesForPoints({
+      alpha: this.getAlpha(),
+      mbMap,
+      symbolLayerId: symbolLayerId,
+    });
   }
 
   _setMbLinePolygonProperties(mbMap) {
@@ -518,6 +578,10 @@ export class VectorLayer extends AbstractLayer {
     return this.getId() +  '_circle';
   }
 
+  _getMbSymbolLayerId() {
+    return this.getId() +  '_symbol';
+  }
+
   _getMbLineLayerId() {
     return this.getId() + '_line';
   }
@@ -527,9 +591,8 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getMbLayerIds() {
-    return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
+    return [this._getMbPointLayerId(), this._getMbSymbolLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
   }
-
 
   _addJoinsToSourceTooltips(tooltipsFromSource) {
     for (let i = 0; i < tooltipsFromSource.length; i++) {
@@ -545,7 +608,6 @@ export class VectorLayer extends AbstractLayer {
       }
     }
   }
-
 
   async getPropertiesForTooltip(properties) {
 

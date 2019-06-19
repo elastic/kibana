@@ -21,12 +21,12 @@ function importData(callWithRequest, id, index, settings, mappings, ingestPipeli
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
-export function fileDataVisualizerRoutes(server, commonRouteConfig) {
-  server.route({
+export function fileDataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugin, route, savedObjects }) {
+  route({
     method: 'POST',
     path: '/api/ml/file_data_visualizer/analyze_file',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const data = request.payload;
 
       return analyzeFiles(callWithRequest, data, request.query)
@@ -38,11 +38,11 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/file_data_visualizer/import',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { id } = request.query;
       const { index, data, settings, mappings, ingestPipeline } = request.payload;
 
@@ -50,7 +50,7 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
       // follow-up import calls to just add additional data will include the `id` of the created
       // index, we'll ignore those and don't increment the counter.
       if (id === undefined) {
-        incrementFileDataVisualizerIndexCreationCount(server);
+        incrementFileDataVisualizerIndexCreationCount(elasticsearchPlugin, savedObjects);
       }
 
       return importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data)
