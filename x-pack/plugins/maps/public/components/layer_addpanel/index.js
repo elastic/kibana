@@ -6,37 +6,32 @@
 
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
-import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { getSelectedLayer, getMapColors } from '../../selectors/map_selectors';
+import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE, updateIndexingStage,
+  getIndexingStage, INDEXING_STAGE } from '../../store/ui';
+import { getMapColors } from '../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../store/non_serializable_instances';
 import {
-  clearTransientLayerStateAndCloseFlyout,
   setTransientLayer,
   addLayer,
   setSelectedLayer,
-  removeTransientLayer
+  removeTransientLayer,
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
-  const selectedLayer = getSelectedLayer(state);
+  const indexingStage = getIndexingStage(state);
   return {
     inspectorAdapters: getInspectorAdapters(state),
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
-    hasLayerSelected: !!selectedLayer,
-    isLoading: selectedLayer && selectedLayer.isLayerLoading(),
     mapColors: getMapColors(state),
+    isIndexingTriggered: indexingStage === INDEXING_STAGE.TRIGGERED,
+    isIndexingSuccess: indexingStage === INDEXING_STAGE.SUCCESS,
+    isIndexingReady: indexingStage === INDEXING_STAGE.READY,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    closeFlyout: () => {
-      dispatch(clearTransientLayerStateAndCloseFlyout());
-    },
-    previewLayer: async (layer) => {
-      //this removal always needs to happen prior to adding the new layer
-      //many source editors allow users to modify the settings in the add-source wizard
-      //this triggers a new request for preview. Any existing transient layers need to be cleared before the new one can be added.
+    viewLayer: async layer => {
       await dispatch(setSelectedLayer(null));
       await dispatch(removeTransientLayer());
       dispatch(addLayer(layer.toLayerDescriptor()));
@@ -51,6 +46,8 @@ function mapDispatchToProps(dispatch) {
       dispatch(setTransientLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
+    setIndexingTriggered: () => dispatch(updateIndexingStage(INDEXING_STAGE.TRIGGERED)),
+    resetIndexing: () => dispatch(updateIndexingStage(null)),
   };
 }
 

@@ -8,14 +8,16 @@ import React from 'react';
 
 import { Chart, BarSeries, Axis, Position, getSpecId, ScaleType, Settings } from '@elastic/charts';
 import { getAxisId } from '@elastic/charts';
+import { getOr, get } from 'lodash/fp';
 import {
   ChartConfigsData,
   WrappedByAutoSizer,
   ChartHolder,
-  numberFormatter,
   SeriesType,
   getSeriesStyle,
   getTheme,
+  ChartSeriesConfigs,
+  browserTimezone,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -24,7 +26,13 @@ export const BarChartBaseComponent = React.memo<{
   data: ChartConfigsData[];
   width: number | null | undefined;
   height: number | null | undefined;
+  configs?: ChartSeriesConfigs | undefined;
 }>(({ data, ...chartConfigs }) => {
+  const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
+  const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
+  const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
+  const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
+
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings rotation={90} theme={getTheme()} />
@@ -37,10 +45,11 @@ export const BarChartBaseComponent = React.memo<{
             id={barSeriesSpecId}
             key={barSeriesKey}
             name={series.key}
-            xScaleType={ScaleType.Ordinal}
-            yScaleType={ScaleType.Linear}
+            xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
+            yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
             yAccessors={['y']}
+            timeZone={browserTimezone}
             splitSeriesAccessors={['g']}
             data={series.value!}
             stackAccessors={['y']}
@@ -49,17 +58,23 @@ export const BarChartBaseComponent = React.memo<{
         );
       })}
 
-      <Axis
-        id={getAxisId(`stat-items-barchart-${data[0].key}-x`)}
-        position={Position.Bottom}
-        tickSize={0}
-        tickFormat={numberFormatter}
-      />
-      <Axis
-        id={getAxisId(`stat-items-barchart-${data[0].key}-y`)}
-        position={Position.Left}
-        tickSize={0}
-      />
+      {xTickFormatter ? (
+        <Axis
+          id={xAxisId}
+          position={Position.Bottom}
+          showOverlappingTicks={false}
+          tickSize={0}
+          tickFormat={xTickFormatter}
+        />
+      ) : (
+        <Axis id={xAxisId} position={Position.Bottom} showOverlappingTicks={false} tickSize={0} />
+      )}
+
+      {yTickFormatter ? (
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+      ) : (
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} />
+      )}
     </Chart>
   ) : null;
 });
@@ -68,27 +83,29 @@ export const BarChartWithCustomPrompt = React.memo<{
   data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
-}>(({ data, height, width }) => {
+  configs?: ChartSeriesConfigs | undefined;
+}>(({ data, height, width, configs }) => {
   return data &&
     data.length &&
     data.some(
       ({ value }) =>
         value != null && value.length > 0 && value.every(chart => chart.y != null && chart.y > 0)
     ) ? (
-    <BarChartBaseComponent height={height} width={width} data={data} />
+    <BarChartBaseComponent height={height} width={width} data={data} configs={configs} />
   ) : (
     <ChartHolder />
   );
 });
 
-export const BarChart = React.memo<{ barChart: ChartConfigsData[] | null | undefined }>(
-  ({ barChart }) => (
-    <AutoSizer detectAnyWindowResize={false} content>
-      {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer innerRef={measureRef}>
-          <BarChartWithCustomPrompt height={height} width={width} data={barChart} />
-        </WrappedByAutoSizer>
-      )}
-    </AutoSizer>
-  )
-);
+export const BarChart = React.memo<{
+  barChart: ChartConfigsData[] | null | undefined;
+  configs?: ChartSeriesConfigs | undefined;
+}>(({ barChart, configs }) => (
+  <AutoSizer detectAnyWindowResize={false} content>
+    {({ measureRef, content: { height, width } }) => (
+      <WrappedByAutoSizer innerRef={measureRef}>
+        <BarChartWithCustomPrompt height={height} width={width} data={barChart} configs={configs} />
+      </WrappedByAutoSizer>
+    )}
+  </AutoSizer>
+));

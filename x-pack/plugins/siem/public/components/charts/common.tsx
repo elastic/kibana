@@ -14,9 +14,12 @@ import {
   PartialTheme,
   LIGHT_THEME,
   DARK_THEME,
+  ScaleType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
 import chrome from 'ui/chrome';
+import moment from 'moment-timezone';
 
 const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
@@ -42,10 +45,23 @@ export interface ChartData {
   g?: number | string;
 }
 
+export interface ChartSeriesConfigs {
+  series?: {
+    xScaleType?: ScaleType | undefined;
+    yScaleType?: ScaleType | undefined;
+  };
+  axis?: {
+    xTickFormatter?: TickFormatter | undefined;
+    yTickFormatter?: TickFormatter | undefined;
+  };
+}
+
 export interface ChartConfigsData {
   key: string;
   value: ChartData[] | [] | null;
   color?: string | undefined;
+  areachartConfigs?: ChartSeriesConfigs | undefined;
+  barchartConfigs?: ChartSeriesConfigs | undefined;
 }
 
 export const WrappedByAutoSizer = styled.div`
@@ -56,10 +72,6 @@ export const WrappedByAutoSizer = styled.div`
     z-index: 100;
   }
 `;
-
-export const numberFormatter = (value: string | number) => {
-  return value.toLocaleString && value.toLocaleString();
-};
 
 export enum SeriesType {
   BAR = 'bar',
@@ -109,3 +121,6 @@ export const getTheme = () => {
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
   return mergeWithDefaultTheme(theme, defaultTheme);
 };
+
+const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
