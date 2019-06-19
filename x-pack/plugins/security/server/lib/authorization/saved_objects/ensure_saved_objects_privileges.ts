@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { SavedObjectsNamespace } from 'src/core/server';
+import { SavedObjectsNamespace, SavedObjectsErrorHelpers } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import { CheckPrivileges, CheckPrivilegesAtResourceResponse } from '../check_privileges';
 import { Actions } from '../actions';
@@ -20,10 +20,7 @@ export type SavedObjectsOperation =
   | 'find';
 
 interface Deps {
-  errors: {
-    decorateGeneralError: (error: Error, reason: string) => Error;
-    decorateForbiddenError: (error: Error) => Error;
-  };
+  errors: typeof SavedObjectsErrorHelpers;
   spacesEnabled: boolean;
   checkPrivileges: CheckPrivileges;
   actionsService: Actions;
@@ -56,7 +53,7 @@ export function ensureSavedObjectsPrivilegesFactory(deps: Deps) {
 
     try {
       if (spacesEnabled) {
-        const spaceId = namespaceToSpaceId(namespace);
+        const spaceId = namespaceToSpaceId(namespace, errors);
         privilegeResponse = await checkPrivileges.atSpace(spaceId, actions);
       } else {
         privilegeResponse = await checkPrivileges.globally(actions);
@@ -100,14 +97,20 @@ function normalizeTypes(typeOrTypes: string | string[] | undefined): string[] {
   return [typeOrTypes];
 }
 
-function namespaceToSpaceId(namespace: SavedObjectsNamespace) {
+function namespaceToSpaceId(
+  namespace: SavedObjectsNamespace,
+  errors: typeof SavedObjectsErrorHelpers
+) {
   if (!namespace) {
     return DEFAULT_SPACE_ID;
   }
   if (typeof namespace === 'string') {
     return namespace;
   }
-  throw new Error(`Unable to convert namespace (${String(namespace)}) to space id.`);
+
+  throw errors.decorateGeneralError(
+    new Error(`Unable to convert namespace (${String(namespace)}) to space id.`)
+  );
 }
 
 function getMissingPrivileges(response: Record<string, boolean>): string[] {

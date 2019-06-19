@@ -17,7 +17,7 @@ const createMockErrors = () => {
     decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
     generalError,
     decorateGeneralError: jest.fn().mockReturnValue(generalError),
-  };
+  } as any;
 };
 
 const createMockAuditLogger = () => {
@@ -222,6 +222,33 @@ describe('checkSavedObjectsPrivileges', () => {
         [mockActions.savedObject.get(type, operation)],
         args
       );
+    });
+
+    it('throws an error when "options.namespace" is a symbol', async () => {
+      const operation = 'create';
+      const username = Symbol();
+      const type = 'foo';
+      const args = {
+        foo: Symbol(),
+      };
+
+      const checkPrivilegesImpl = jest.fn(async () => ({
+        hasAllRequested: false,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, operation)]: false,
+        },
+      }));
+
+      const {
+        checkSavedObjectsPrivileges,
+        mockActions,
+        mockErrors,
+      } = createCheckSavedObjectsPrivileges(true, checkPrivilegesImpl);
+
+      await expect(
+        checkSavedObjectsPrivileges(type, operation, Symbol('foo'), args)
+      ).rejects.toThrowError(mockErrors.generalError);
     });
 
     it('checks at the current space, using an undefined namespace, throwing general error when checkPrivileges.atSpace throws an error', async () => {
