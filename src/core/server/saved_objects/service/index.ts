@@ -38,6 +38,7 @@ export {
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
   SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
 } from './lib';
 
