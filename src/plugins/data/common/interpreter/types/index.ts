@@ -27,4 +27,4 @@ export {
 } from './common';
 export { ExpressionFunction } from './functions';
 export { ExpressionType } from './types';
-// export * from '../common/types';
+export * from '../expression_types';
