@@ -15,7 +15,7 @@ export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 
-export const MAP_BASE_URL = `/app/maps#/map`
+export const MAP_BASE_URL = `/app/maps#/map`;
 
 export function createMapPath(id) {
   return `${MAP_BASE_URL}/${id}`;

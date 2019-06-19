@@ -42,7 +42,7 @@ export class TypesService {
       VisFactoryProvider,
       VisTypesRegistryProvider,
       defaultFeedbackMessage, // make default in base vis type, or move?
-      visTypeAliasRegistry: visTypeAliasRegistry,
+      visTypeAliasRegistry,
     };
   }
 

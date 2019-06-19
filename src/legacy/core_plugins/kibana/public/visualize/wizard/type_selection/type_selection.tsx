@@ -199,6 +199,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
     let stage = {};
+    const isVisTypeAlias = !!visType.url;
     if (visType.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.experimentalTitle', {
@@ -209,9 +210,20 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
             'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
         }),
       };
+    } else if (isVisTypeAlias) {
+      stage = {
+        betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
+          defaultMessage: 'External application',
+        }),
+        betaBadgeTooltipContent: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTooltip', {
+          defaultMessage:
+            'This item will lead to a separate application within Kibana, but outside of Visualize.',
+        }),
+        betaBadgeIconType: 'popout',
+      };
     }
+
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const isVisTypeAlias = !!visType.url;
     const onClick = isVisTypeAlias
       ? () => {
           window.location = chrome.addBasePath(visType.url);
