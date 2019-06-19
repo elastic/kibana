@@ -18,7 +18,7 @@
  */
 
 import { uiModules } from '../../../modules';
-import { DefaultEditorAggAdd } from './components/default_editor_agg_add.tsx';
+import { DefaultEditorAggAdd } from './components/default_editor_agg_add';
 import { wrapInI18nContext } from 'ui/i18n';
 
 uiModules
