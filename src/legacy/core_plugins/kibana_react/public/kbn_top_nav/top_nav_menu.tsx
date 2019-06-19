@@ -20,8 +20,6 @@
 import React, { Component } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { SearchBar } from 'plugins/data';
 import { TopNavMenuData, TopNavMenuItem } from './top_nav_menu_item';
 
 interface Props {
@@ -37,7 +35,7 @@ interface State {
 export class TopNavMenu extends Component<Props, State> {
   public render() {
     return (
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+      <EuiFlexGroup data-test-subj="top-nav" justifyContent="flexStart" gutterSize="xs">
         {this.renderItems()}
       </EuiFlexGroup>
     );

@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 export type TopNavMenuAction = (menuItem: any, navController: any, anchorElement: any) => void;
 
@@ -59,8 +59,12 @@ export class TopNavMenuItem extends Component<Props, State> {
   public render() {
     const menuData = this.props.data;
     return (
-      <EuiButtonEmpty isDisabled={this.isDisabled()} onClick={this.handleClick.bind(this)}>
-        {menuData.label || menuData.key}
+      <EuiButtonEmpty
+        size="xs"
+        isDisabled={this.isDisabled()}
+        onClick={this.handleClick.bind(this)}
+      >
+        {_.capitalize(menuData.label || menuData.key)}
       </EuiButtonEmpty>
     );
   }

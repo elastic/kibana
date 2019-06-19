@@ -1,10 +1,10 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
   <!-- Local nav. -->
-  <kbn-top-nav name="visualize" config="topNavMenu">
-    <!-- Transcluded elements. -->
-    <div data-transclude-slots>
-      <!-- Search. -->
-      <div
+  <kbn-top-nav2 name="visualize" config="topNavMenu">
+  </kbn-top-nav2>
+
+  <!-- Search. -->
+  <div
         data-transclude-slot="bottomRow"
         ng-show="chrome.getVisible()"
         class="fullWidth"
@@ -48,8 +48,6 @@
           ></search-bar>
         </div>
       </div>
-    </div>
-  </kbn-top-nav>
 
   <!--
     The top nav is hidden in embed mode but the filter bar must still be present so
