@@ -27,6 +27,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   snapshotDetails,
   restoreSettings,
   updateRestoreSettings,
+  errors,
 }) => {
   const {
     indices: snapshotIndices,
@@ -170,6 +171,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       defaultMessage="Only the selected indices will be restored"
                     />
                   }
+                  isInvalid={Boolean(errors.indices)}
+                  error={errors.indices}
                 >
                   <EuiSelectable
                     allowExclusions={false}
@@ -269,6 +272,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           defaultMessage="Use regular expressions"
                         />
                       }
+                      isInvalid={Boolean(errors.renamePattern)}
+                      error={errors.renamePattern}
                     >
                       <EuiFieldText
                         value={renamePattern}
@@ -293,6 +298,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           defaultMessage="Replacement pattern"
                         />
                       }
+                      isInvalid={Boolean(errors.renameReplacement)}
+                      error={errors.renameReplacement}
                     >
                       <EuiFieldText
                         value={renameReplacement}

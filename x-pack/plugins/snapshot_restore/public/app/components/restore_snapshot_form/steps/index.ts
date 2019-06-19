@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SnapshotDetails, RestoreSettings } from '../../../../../common/types';
+import { RestoreValidation } from '../../../services/validation';
 
 export interface StepProps {
   snapshotDetails: SnapshotDetails;
   restoreSettings: RestoreSettings;
   updateRestoreSettings: (updatedSettings: Partial<RestoreSettings>) => void;
+  errors: RestoreValidation['errors'];
 }
 
 export { RestoreSnapshotStepLogistics } from './step_logistics';

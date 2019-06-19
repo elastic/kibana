@@ -34,6 +34,13 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
     ignoreIndexSettings,
   } = restoreSettings;
 
+  let parsedIndexSettings: { [key: string]: any } | undefined;
+  try {
+    parsedIndexSettings = indexSettings && JSON.parse(indexSettings);
+  } catch (e) {
+    // Silently swallow parsing error
+  }
+
   const renderSummaryTab = () => (
     <Fragment>
       <EuiSpacer size="m" />
@@ -177,9 +184,9 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {indexSettings || ignoreIndexSettings ? (
+      {parsedIndexSettings || ignoreIndexSettings ? (
         <EuiFlexGroup>
-          {indexSettings ? (
+          {parsedIndexSettings ? (
             <EuiFlexItem style={{ maxWidth: '50%' }}>
               <EuiDescriptionList textStyle="reverse">
                 <EuiDescriptionListTitle>
@@ -190,7 +197,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   <EuiFlexGrid columns={2} gutterSize="none">
-                    {Object.entries(indexSettings).map(([setting, value]) => (
+                    {Object.entries(parsedIndexSettings).map(([setting, value]) => (
                       <Fragment key={setting}>
                         <EuiFlexItem>
                           <EuiText size="s">

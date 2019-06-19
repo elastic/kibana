@@ -28,6 +28,7 @@ import { StepProps } from './';
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
   restoreSettings,
   updateRestoreSettings,
+  errors,
 }) => {
   const { indexSettings, ignoreIndexSettings } = restoreSettings;
 
@@ -39,15 +40,9 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
 
   // Caching state for togglable settings
   const [cachedRestoreSettings, setCachedRestoreSettings] = useState<RestoreSettings>({
-    indexSettings: indexSettings ? { ...indexSettings } : {},
+    indexSettings: indexSettings || '{}',
     ignoreIndexSettings: ignoreIndexSettings ? [...ignoreIndexSettings] : [],
   });
-
-  // State for raw (string) input for modify index settings
-  const [rawIndexSettings, setRawIndexSettings] = useState<string>(
-    JSON.stringify(cachedRestoreSettings.indexSettings, null, 2)
-  );
-  const [isRawIndexSettingsValid, setIsRawIndexSettingsValid] = useState<boolean>(true);
 
   // List of settings for ignore settings combobox suggestions, using a state because users can add custom settings
   const [ignoreIndexSettingsOptions, setIgnoreIndexSettingsOptions] = useState<
@@ -142,7 +137,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 if (isChecked) {
                   setIsUsingIndexSettings(true);
                   updateRestoreSettings({
-                    indexSettings: { ...cachedRestoreSettings.indexSettings },
+                    indexSettings: cachedRestoreSettings.indexSettings,
                   });
                 } else {
                   setIsUsingIndexSettings(false);
@@ -162,13 +157,8 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                   }
                   fullWidth
                   describedByIds={['stepSettingsIndexSettingsDescription']}
-                  isInvalid={!isRawIndexSettingsValid}
-                  error={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsEditorFormatError"
-                      defaultMessage="Invalid JSON format"
-                    />
-                  }
+                  isInvalid={Boolean(errors.indexSettings)}
+                  error={errors.indexSettings}
                   helpText={
                     <FormattedMessage
                       id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsEditorDescription"
@@ -183,7 +173,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                     mode="json"
                     theme="textmate"
                     width="100%"
-                    value={rawIndexSettings}
+                    value={indexSettings}
                     setOptions={{
                       showLineNumbers: false,
                       tabSize: 2,
@@ -202,20 +192,13 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                       />
                     }
                     onChange={(value: string) => {
-                      setRawIndexSettings(value);
-                      try {
-                        const parsedSettings = JSON.parse(value);
-                        setIsRawIndexSettingsValid(true);
-                        updateRestoreSettings({
-                          indexSettings: parsedSettings,
-                        });
-                        setCachedRestoreSettings({
-                          ...cachedRestoreSettings,
-                          indexSettings: parsedSettings,
-                        });
-                      } catch (e) {
-                        setIsRawIndexSettingsValid(false);
-                      }
+                      updateRestoreSettings({
+                        indexSettings: value,
+                      });
+                      setCachedRestoreSettings({
+                        ...cachedRestoreSettings,
+                        indexSettings: value,
+                      });
                     }}
                   />
                 </EuiFormRow>
@@ -284,6 +267,8 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                       defaultMessage="Select settings"
                     />
                   }
+                  isInvalid={Boolean(errors.ignoreIndexSettings)}
+                  error={errors.ignoreIndexSettings}
                 >
                   <EuiComboBox
                     placeholder={i18n.translate(

@@ -6,11 +6,10 @@
 
 export interface RestoreSettings {
   indices?: string[];
-  ignoreUnavailable?: boolean;
-  includeGlobalState?: boolean;
   renamePattern?: string;
   renameReplacement?: string;
+  includeGlobalState?: boolean;
   partial?: boolean;
-  indexSettings?: { [key: string]: any };
+  indexSettings?: string;
   ignoreIndexSettings?: string[];
 }

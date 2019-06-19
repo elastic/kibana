@@ -5,8 +5,16 @@
  */
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiSpacer,
+} from '@elastic/eui';
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { RestoreValidation, validateRestore } from '../../services/validation';
 import {
   RestoreSnapshotStepLogistics,
   RestoreSnapshotStepSettings,
@@ -32,24 +40,38 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
   // Restore details state
   const [restoreSettings, setRestoreSettings] = useState<RestoreSettings>({});
 
+  // Restore validation state
+  const [validation, setValidation] = useState<RestoreValidation>({
+    isValid: true,
+    errors: {},
+  });
+
   const updateRestoreSettings = (updatedSettings: Partial<RestoreSettings>): void => {
     const newRestoreSettings = { ...restoreSettings, ...updatedSettings };
+    const newValidation = validateRestore(newRestoreSettings);
     setRestoreSettings(newRestoreSettings);
+    setValidation(newValidation);
   };
 
   const updateCurrentStep = (step: number) => {
-    // Validation logic here
+    if (!validation.isValid) {
+      return;
+    }
     setCurrentStep(step);
   };
 
   const onBack = () => {
-    // Validation logic here
+    if (!validation.isValid) {
+      return;
+    }
     const previousStep = currentStep - 1;
     setCurrentStep(previousStep);
   };
 
   const onNext = () => {
-    // Validation logic here
+    if (!validation.isValid) {
+      return;
+    }
     const nextStep = currentStep + 1;
     setCurrentStep(nextStep);
     setMaxCompletedStep(nextStep > maxCompletedStep ? nextStep : maxCompletedStep);
@@ -65,44 +87,56 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
         updateCurrentStep={updateCurrentStep}
       />
       <EuiSpacer size="l" />
-      <CurrentStepForm
-        snapshotDetails={snapshotDetails}
-        restoreSettings={restoreSettings}
-        updateRestoreSettings={updateRestoreSettings}
-      />
-      <EuiSpacer size="l" />
-      <EuiFlexGroup>
-        {currentStep > 1 ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="arrowLeft" onClick={() => onBack()}>
-              <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.backButtonLabel"
-                defaultMessage="Back"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        ) : null}
-        {currentStep < 3 ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="arrowRight" onClick={() => onNext()}>
-              <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.nextButtonLabel"
-                defaultMessage="Next"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
-        {currentStep === 3 ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton fill color="secondary" iconType="check" onClick={() => onSubmit()}>
-              <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.submitButtonLabel"
-                defaultMessage="Execute restore"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
+      <EuiForm>
+        <CurrentStepForm
+          snapshotDetails={snapshotDetails}
+          restoreSettings={restoreSettings}
+          updateRestoreSettings={updateRestoreSettings}
+          errors={validation.errors}
+        />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup>
+          {currentStep > 1 ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                onClick={() => onBack()}
+                disabled={!validation.isValid}
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.restoreForm.backButtonLabel"
+                  defaultMessage="Back"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
+          {currentStep < 3 ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                iconType="arrowRight"
+                onClick={() => onNext()}
+                disabled={!validation.isValid}
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.restoreForm.nextButtonLabel"
+                  defaultMessage="Next"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+          {currentStep === 3 ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton fill color="secondary" iconType="check" onClick={() => onSubmit()}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.restoreForm.submitButtonLabel"
+                  defaultMessage="Execute restore"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiForm>
       <EuiSpacer size="m" />
     </Fragment>
   );
