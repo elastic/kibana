@@ -5,28 +5,31 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
-import { SavedObjectsNamespace } from 'src/core/server';
-import { isReservedSpace } from '../../common/is_reserved_space';
-import { Space } from '../../common/model/space';
-import { SpacesAuditLogger } from './audit_logger';
+import { Legacy } from 'kibana';
+import { KibanaRequest } from 'src/core/server';
+import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
+import { isReservedSpace } from '../../../common/is_reserved_space';
+import { Space } from '../../../common/model/space';
+import { SpacesAuditLogger } from '../audit_logger';
+import { SpacesConfigType } from '../../new_platform/config';
 
+type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
 export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,
     private readonly debugLogger: (message: string) => void,
-    private readonly authorization: any,
+    private readonly authorization: AuthorizationService | null,
     private readonly callWithRequestSavedObjectRepository: any,
-    private readonly config: any,
+    private readonly config: SpacesConfigType,
     private readonly internalSavedObjectRepository: any,
-    private readonly request: any,
-    private readonly createNamespace: (id?: string) => SavedObjectsNamespace
+    private readonly request: SpacesClientRequestFacade
   ) {}
 
   public async canEnumerateSpaces(): Promise<boolean> {
     if (this.useRbac()) {
-      const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+      const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
       const { hasAllRequested } = await checkPrivileges.globally(
-        this.authorization.actions.space.manage
+        this.authorization!.actions.space.manage
       );
       this.debugLogger(`SpacesClient.canEnumerateSpaces, using RBAC. Result: ${hasAllRequested}`);
       return hasAllRequested;
@@ -42,7 +45,7 @@ export class SpacesClient {
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
-        perPage: this.config.get('xpack.spaces.maxSpaces'),
+        perPage: this.config.maxSpaces,
         sortField: 'name.keyword',
       });
 
@@ -51,14 +54,14 @@ export class SpacesClient {
       const spaces = saved_objects.map(this.transformSavedObjectToSpace);
 
       const spaceIds = spaces.map((space: Space) => space.id);
-      const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+      const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
       const { username, spacePrivileges } = await checkPrivileges.atSpaces(
         spaceIds,
-        this.authorization.actions.login
+        this.authorization!.actions.login
       );
 
       const authorized = Object.keys(spacePrivileges).filter(spaceId => {
-        return spacePrivileges[spaceId][this.authorization.actions.login];
+        return spacePrivileges[spaceId][this.authorization!.actions.login];
       });
 
       this.debugLogger(
@@ -89,7 +92,7 @@ export class SpacesClient {
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
         page: 1,
-        perPage: this.config.get('xpack.spaces.maxSpaces'),
+        perPage: this.config.maxSpaces,
         sortField: 'name.keyword',
       });
 
@@ -105,7 +108,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       await this.ensureAuthorizedAtSpace(
         id,
-        this.authorization.actions.login,
+        this.authorization!.actions.login,
         'get',
         `Unauthorized to get ${id} space`
       );
@@ -123,7 +126,7 @@ export class SpacesClient {
       this.debugLogger(`SpacesClient.create(), using RBAC. Checking if authorized globally`);
 
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.space.manage,
+        this.authorization!.actions.space.manage,
         'create',
         'Unauthorized to create spaces'
       );
@@ -139,7 +142,7 @@ export class SpacesClient {
       page: 1,
       perPage: 0,
     });
-    if (total >= this.config.get('xpack.spaces.maxSpaces')) {
+    if (total >= this.config.maxSpaces) {
       throw Boom.badRequest(
         'Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting'
       );
@@ -159,7 +162,7 @@ export class SpacesClient {
   public async update(id: string, space: Space) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.space.manage,
+        this.authorization!.actions.space.manage,
         'update',
         'Unauthorized to update spaces'
       );
@@ -177,7 +180,7 @@ export class SpacesClient {
   public async delete(id: string) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.space.manage,
+        this.authorization!.actions.space.manage,
         'delete',
         'Unauthorized to delete spaces'
       );
@@ -198,11 +201,14 @@ export class SpacesClient {
   }
 
   private useRbac(): boolean {
-    return this.authorization && this.authorization.mode.useRbacForRequest(this.request);
+    // TODO: remove "as any" once Security is updated to NP conventions
+    return (
+      this.authorization != null && this.authorization.mode.useRbacForRequest(this.request as any)
+    );
   }
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
-    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
     const { username, hasAllRequested } = await checkPrivileges.globally(action);
 
     if (hasAllRequested) {
@@ -220,7 +226,7 @@ export class SpacesClient {
     method: string,
     forbiddenMessage: string
   ) {
-    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
     const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, action);
 
     if (hasAllRequested) {

@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsService,
-} from 'src/core/server/saved_objects';
-import { SpacesService } from '../create_spaces_service';
+import { SavedObjectsClientWrapperFactory } from 'src/core/server';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { createGetNamespace } from './get_namespace';
+import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
 export function spacesSavedObjectsClientWrapperFactory(
-  spacesService: SpacesService,
-  savedObjectsService: SavedObjectsService,
+  spacesService: SpacesServiceSetup,
   types: string[]
 ): SavedObjectsClientWrapperFactory {
   return ({ client, request }) =>

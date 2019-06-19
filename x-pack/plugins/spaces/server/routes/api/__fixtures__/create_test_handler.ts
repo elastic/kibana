@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { createOptionalPlugin } from '../../../../../../server/lib/optional_plugin';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
+import { ExternalRouteDeps } from '../external';
+import { SpacesService } from '../../../new_platform/spaces_service';
+import { SpacesAuditLogger } from '../../../lib/audit_logger';
+import { InternalRouteDeps } from '../v1';
+import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -44,10 +52,11 @@ export const defaultPreCheckLicenseImpl = (request: any) => '';
 
 const baseConfig: TestConfig = {
   'server.basePath': '',
-  'xpack.spaces.maxSpaces': 1000,
 };
 
-export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: any) => void) {
+export function createTestHandler(
+  initApiFn: (deps: ExternalRouteDeps & InternalRouteDeps) => void
+) {
   const teardowns: TeardownFn[] = [];
 
   const spaces = createSpaces();
@@ -86,11 +95,6 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
     };
 
     server.decorate('server', 'config', jest.fn<any, any>(() => mockConfig));
-
-    initApiFn(server, pre);
-
-    server.decorate('request', 'getBasePath', jest.fn());
-    server.decorate('request', 'setBasePath', jest.fn());
 
     const mockSavedObjectsRepository = {
       get: jest.fn((type, id) => {
@@ -133,22 +137,60 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       },
     };
 
-    server.plugins.spaces = {
-      spacesClient: {
-        getScopedClient: jest.fn((req: any) => {
-          return new SpacesClient(
-            null as any,
-            () => null,
-            null,
-            mockSavedObjectsRepository,
-            mockConfig,
-            mockSavedObjectsRepository,
-            req,
-            id => ({ id })
-          );
-        }),
-      },
+    server.plugins.elasticsearch = {
+      createCluster: jest.fn(),
+      waitUntilReady: jest.fn(),
+      getCluster: jest.fn().mockReturnValue({
+        callWithRequest: jest.fn(),
+        callWithInternalUser: jest.fn(),
+      }),
     };
+
+    const log = {
+      log: jest.fn(),
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    };
+
+    const service = new SpacesService(log, server.config().get('server.basePath'));
+    const spacesService = await service.setup({
+      http: httpServiceMock.createSetupContract(),
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      savedObjects: server.savedObjects,
+      security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+      spacesAuditLogger: {} as SpacesAuditLogger,
+      config$: Rx.of({ maxSpaces: 1000 }),
+    });
+
+    spacesService.scopedClient = jest.fn((req: any) => {
+      return Promise.resolve(
+        new SpacesClient(
+          null as any,
+          () => null,
+          null,
+          mockSavedObjectsRepository,
+          { maxSpaces: 1000 },
+          mockSavedObjectsRepository,
+          req
+        )
+      );
+    });
+
+    initApiFn({
+      http: ({
+        server,
+        route: server.route.bind(server),
+      } as unknown) as SpacesHttpServiceSetup,
+      routePreCheckLicenseFn: pre,
+      savedObjects: server.savedObjects,
+      spacesService,
+      log,
+      config: mockConfig as KibanaConfig,
+    });
 
     teardowns.push(() => server.stop());
 
@@ -171,7 +213,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       }
 
       if (expectSpacesClientCall) {
-        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+        expect(spacesService.scopedClient).toHaveBeenCalledWith(
           expect.objectContaining({
             headers: expect.objectContaining({
               authorization: headers.authorization,
@@ -179,7 +221,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
           })
         );
       } else {
-        expect(server.plugins.spaces.spacesClient.getScopedClient).not.toHaveBeenCalled();
+        expect(spacesService.scopedClient).not.toHaveBeenCalled();
       }
 
       return response;
