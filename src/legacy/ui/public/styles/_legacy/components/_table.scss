@@ -1,3 +1,5 @@
+@import '../../../../../core_plugins/kibana/public/discover/doc_table/doc_table_source_mixin.scss';
+
 .table {
   // Nesting
   .table {
@@ -19,30 +21,7 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
     }
   }
 
-  /**
-   * 1. Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
-   *    row in the Context Log.
-   */
-  dl.source {
-    margin-bottom: 0;
-    line-height:2em;
-    word-break: break-all;
-    word-break: break-word;
-
-    dt, dd {
-      display: inline;
-    }
-
-    dt {
-      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
-      color: $euiTextColor;
-      padding: ($euiSizeXS / 2) $euiSizeXS;
-      margin-right: $euiSizeXS;
-      font-family: $euiCodeFontFamily;
-      word-break: normal;
-      border-radius: $euiBorderRadius;
-    }
-  }
+  @include style_doc_source;
 
 }
 

@@ -1,3 +1,4 @@
+@import './_doc_table_source_mixin.scss';
 /**
  * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
  */
@@ -36,26 +37,7 @@ doc-table {
       font-size: 1.1em;
     }
   }
-  
-  dl.source {
-    margin-bottom: 0;
-    line-height:2em;
-    word-break: break-all;
-    word-break: break-word;
-
-    dt, dd {
-      display: inline;
-    }
-
-    dt {
-      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
-      color: $euiTextColor;
-      padding: ($euiSizeXS / 2) $euiSizeXS;
-      margin-right: $euiSizeXS;
-      word-break: normal;
-      border-radius: $euiBorderRadius;
-    }
-  }
+  @include style_doc_source;
 }
 
 .kbnDocTable__row {
