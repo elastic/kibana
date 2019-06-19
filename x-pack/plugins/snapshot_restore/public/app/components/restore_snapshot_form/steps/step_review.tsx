@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { serializeRestoreSettings } from '../../../../../common/lib';
 import { StepProps } from './';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
@@ -30,16 +31,11 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
     renameReplacement,
     partial,
     includeGlobalState,
-    indexSettings,
     ignoreIndexSettings,
   } = restoreSettings;
 
-  let parsedIndexSettings: { [key: string]: any } | undefined;
-  try {
-    parsedIndexSettings = indexSettings && JSON.parse(indexSettings);
-  } catch (e) {
-    // Silently swallow parsing error
-  }
+  const serializedRestoreSettings = serializeRestoreSettings(restoreSettings);
+  const { index_settings: serializedIndexSettings } = serializedRestoreSettings;
 
   const renderSummaryTab = () => (
     <Fragment>
@@ -184,9 +180,9 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {parsedIndexSettings || ignoreIndexSettings ? (
+      {serializedIndexSettings || ignoreIndexSettings ? (
         <EuiFlexGroup>
-          {parsedIndexSettings ? (
+          {serializedIndexSettings ? (
             <EuiFlexItem style={{ maxWidth: '50%' }}>
               <EuiDescriptionList textStyle="reverse">
                 <EuiDescriptionListTitle>
@@ -197,7 +193,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   <EuiFlexGrid columns={2} gutterSize="none">
-                    {Object.entries(parsedIndexSettings).map(([setting, value]) => (
+                    {Object.entries(serializedIndexSettings).map(([setting, value]) => (
                       <Fragment key={setting}>
                         <EuiFlexItem>
                           <EuiText size="s">
@@ -259,7 +255,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
         theme="textmate"
         isReadOnly
         setOptions={{ maxLines: Infinity }}
-        value={JSON.stringify(restoreSettings, null, 2)}
+        value={JSON.stringify(serializedRestoreSettings, null, 2)}
         editorProps={{ $blockScrolling: Infinity }}
         aria-label={
           <FormattedMessage

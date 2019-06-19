@@ -13,3 +13,13 @@ export interface RestoreSettings {
   indexSettings?: string;
   ignoreIndexSettings?: string[];
 }
+
+export interface RestoreSettingsEs {
+  indices?: string[];
+  rename_pattern?: string;
+  rename_replacement?: string;
+  include_global_state?: boolean;
+  partial?: boolean;
+  index_settings?: { [key: string]: any };
+  ignore_index_settings?: string[];
+}
