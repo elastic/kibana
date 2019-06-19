@@ -8,46 +8,45 @@ import Boom from 'boom';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
+import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
-export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
+export function initGetSpacesApi(deps: ExternalRouteDeps) {
+  const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+
+  http.route({
     method: 'GET',
     path: '/api/spaces/space',
-    async handler(request: any) {
-      server.log(['spaces', 'debug'], `Inside GET /api/spaces/space`);
+    async handler(request: ExternalRouteRequestFacade) {
+      log.debug(`Inside GET /api/spaces/space`);
 
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       let spaces: Space[];
 
       try {
-        server.log(['spaces', 'debug'], `Attempting to retrieve all spaces`);
+        log.debug(`Attempting to retrieve all spaces`);
         spaces = await spacesClient.getAll();
-        server.log(['spaces', 'debug'], `Retrieved ${spaces.length} spaces`);
+        log.debug(`Retrieved ${spaces.length} spaces`);
       } catch (error) {
-        server.log(['spaces', 'debug'], `Error retrieving spaces: ${error}`);
+        log.debug(`Error retrieving spaces: ${error}`);
         return wrapError(error);
       }
 
       return spaces;
     },
-    config: {
+    options: {
       pre: [routePreCheckLicenseFn],
     },
   });
 
-  server.route({
+  http.route({
     method: 'GET',
     path: '/api/spaces/space/{id}',
-    async handler(request: any) {
+    async handler(request: ExternalRouteRequestFacade) {
       const spaceId = request.params.id;
 
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+      const { SavedObjectsClient } = savedObjects;
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       try {
         return await spacesClient.get(spaceId);
@@ -58,7 +57,7 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
         return wrapError(error);
       }
     },
-    config: {
+    options: {
       pre: [routePreCheckLicenseFn],
     },
   });

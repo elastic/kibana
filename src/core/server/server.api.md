@@ -194,6 +194,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
+    readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
     // (undocumented)
@@ -498,6 +499,21 @@ export class SavedObjectsClient {
 // 
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
+
+// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+    // (undocumented)
+    client: SavedObjectsClientContract;
+    // (undocumented)
+    request: Request;
+}
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
