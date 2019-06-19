@@ -129,7 +129,8 @@ export default function init(input, output, sourceLocation = 'stored') {
     input.moveCursorTo(pos.row + prefix.length, 0);
     input.focus();
   };
+
   setupAutosave();
   loadSavedState();
-  mappings.startPolling();
+  mappings.retrieveAutoCompleteInfo();
 }
