@@ -24,7 +24,7 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../common/timefilter';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlDocumentCountChart', function () {

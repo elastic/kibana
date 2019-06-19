@@ -7,7 +7,7 @@
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 import React from 'react';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../common/timefilter';
 
 export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
   timefilter.disableTimeRangeSelector();

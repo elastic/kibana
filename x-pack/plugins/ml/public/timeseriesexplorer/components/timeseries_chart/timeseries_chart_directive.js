@@ -17,7 +17,7 @@ import ReactDOM from 'react-dom';
 import { TimeseriesChart } from './timeseries_chart';
 
 import angular from 'angular';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../common/timefilter';
 
 import { ResizeChecker } from 'ui/resize_checker';
 

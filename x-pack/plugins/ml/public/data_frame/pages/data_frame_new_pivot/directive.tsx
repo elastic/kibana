@@ -14,7 +14,7 @@ const module = uiModules.get('apps/ml', ['react']);
 import { IndexPattern } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../common/timefilter';
 import { InjectorService } from '../../../../common/types/angular';
 
 // @ts-ignore

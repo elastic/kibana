@@ -53,7 +53,7 @@ jest.mock('ui/chrome',
   }), { virtual: true });
 
 import moment from 'moment';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../common/timefilter';
 
 timefilter.enableTimeRangeSelector();
 timefilter.enableAutoRefreshSelector();

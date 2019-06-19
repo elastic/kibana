@@ -19,7 +19,7 @@ import { getSettingsBreadcrumbs } from './breadcrumbs';
 
 import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../common/timefilter';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />

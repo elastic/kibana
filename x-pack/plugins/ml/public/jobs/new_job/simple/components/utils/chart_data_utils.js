@@ -13,7 +13,7 @@ import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlSimpleJobSearchService } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../../common/timefilter';
 
 export function ChartDataUtilsProvider() {
 

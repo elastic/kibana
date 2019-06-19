@@ -22,7 +22,7 @@ import {
 
 import { isFullLicense } from '../../license/check_license';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../common/timefilter';
 
 function startTrialDescription() {
   return (

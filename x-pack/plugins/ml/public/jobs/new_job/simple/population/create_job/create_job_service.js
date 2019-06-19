@@ -15,7 +15,7 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../../common/timefilter';
 
 export function PopulationJobServiceProvider() {
 
