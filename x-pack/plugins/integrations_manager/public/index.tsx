@@ -6,7 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreSetup } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
@@ -28,7 +28,7 @@ function App() {
 }
 
 class Plugin {
-  public setup(core: CoreSetup) {
+  public start(core: CoreStart) {
     const { i18n } = core;
     ReactDOM.render(
       <i18n.Context>
@@ -60,6 +60,6 @@ checkForRoot().then(() => {
     i18n: {
       Context: I18nContext,
     },
-  } as CoreSetup;
-  new Plugin().setup(core);
+  } as CoreStart;
+  new Plugin().start(core);
 });
