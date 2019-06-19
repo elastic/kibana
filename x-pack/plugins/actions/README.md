@@ -34,7 +34,7 @@ The following table describes the properties of the `options` object.
 |unencryptedAttributes|A list of opt-out attributes that don't need to be encrypted, these attributes won't need to be re-entered on import / export when the feature becomes available. These attributes will also be readable / displayed when it comes to a table / edit screen.|array of strings|
 |validate.params|When developing an action type, it needs to accept parameters to know what to do with the action. (Example to, from, subject, body of an email). Use joi object validation if you would like `params` to be validated before being passed to the executor.|Joi schema|
 |validate.config|Similar to params, a config is required when creating an action. (for example host, port, username, password of an email server). Use the joi object validation if you would like the config to be validated before being passed to the executor.|Joi schema|
-|executor|This is where the code of an action type lives. This is a function to be called for executing an action by either alerting or manually by using the exposed function by the plugin (see firing actions). For full details, see executor section below.|Function|
+|executor|This is where the code of an action type lives. This is a function gets called for executing an action from either alerting or manually by using the exposed function (see firing actions). For full details, see executor section below.|Function|
 
 ### Executor
 
@@ -96,7 +96,7 @@ Payload:
 |---|---|---|
 |attributes.description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
 |attributes.actionTypeId|The id value of the action type you want to call when the action executes.|string|
-|attributes.actionTypeConfig|The configuration the action type expects. See related action type to see what attributes is expected. This will also validate agains the action type if config validation is defined.|object|
+|attributes.actionTypeConfig|The configuration the action type expects. See related action type to see what attributes is expected. This will also validate against the action type if config validation is defined.|object|
 |references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API, see saved objects API documentation.<br><br>In most cases you can leave this empty.|Array|
 |migrationVersion|The version of the most recent migrations. This is the same as `migrationVersion` in the saved objects API, see saved objects API documentation.<br><br>In most cases you can leave this empty.|object|
 

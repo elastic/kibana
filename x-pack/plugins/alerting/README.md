@@ -115,7 +115,7 @@ Payload:
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
 |interval|The interval in milliseconds the alert should execute.|number|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
-|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
+|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
 #### `DELETE /api/alert/{id}`: Delete alert
 
@@ -170,14 +170,14 @@ This factory returns an instance of `AlertInstance`. The alert instance class ha
 |Method|Description|
 |---|---|
 |getState()|Get the current state of the alert instance.|
-|fire(actionGroup, context)|Called to fire actions. The group relates to the group of alert `actions` to fire and the context will be used for templating purposes.|
+|fire(actionGroup, context)|Called to fire actions. The actionGroup relates to the group of alert `actions` to fire and the context will be used for templating purposes. This should only be called once per alert instance.|
 |replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when fire isn't called during an execution.|
 
 ## Templating actions
 
 There needs to be a way to map alert context into action parameters. For this, we started off by adding template support. Any string within the `params` of an alert saved object's `actions` will be processed as a template and can inject context or state values. 
 
-When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.fire(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
+When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.fire(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
 
 ### Examples
 
