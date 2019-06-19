@@ -45,7 +45,7 @@ import moment from 'moment';
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../common/timefilter';
 
 import {
   getExploreSeriesLink,

@@ -13,7 +13,7 @@ import moment from 'moment';
 import rison from 'rison-node';
 
 import chrome from 'ui/chrome';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../common/timefilter';
 
 import { CHART_TYPE } from '../explorer/explorer_constants';
 

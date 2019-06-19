@@ -23,7 +23,7 @@ import 'plugins/ml/components/controls';
 
 import { toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
-import { timefilter } from 'ui/timefilter';
+import { timefilter, timefilter$ } from '../../common/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
@@ -678,9 +678,6 @@ module.controller('MlTimeSeriesExplorerController', function (
     }, 0);
   };
 
-  // Refresh the data when the time range is altered.
-  $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
-
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
   refreshWatcher.init(() => {
@@ -697,6 +694,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   const intervalSub = interval$.subscribe(tableControlsListener);
   const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
+  const timefilterSubscription = timefilter$.subscribe($scope.refresh);
   // Listen for changes to job selection.
   const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
     // Clear the detectorIndex, entities and forecast info.
@@ -717,6 +715,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     severitySub.unsubscribe();
     annotationsRefreshSub.unsubscribe();
     jobSelectServiceSub.unsubscribe();
+    timefilterSubscription.unsubscribe();
   });
 
   $scope.$on('contextChartSelected', function (event, selection) {
