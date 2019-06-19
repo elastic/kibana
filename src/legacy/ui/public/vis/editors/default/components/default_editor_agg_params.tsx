@@ -99,9 +99,9 @@ interface DefaultEditorAggParamsProps {
   groupName: string;
   indexPattern: any;
   responseValueAggs: AggConfig[] | null;
-  onAggParamsChange: (agg: AggConfig, aggParams: any) => void;
+  onAggParamsChange: (agg: AggConfig, paramName: string, value: any) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-  setTouched: () => void;
+  setTouched: (isTouched: boolean) => void;
   setValidity: (isValid: boolean) => void;
 }
 
@@ -133,20 +133,27 @@ function DefaultEditorAggParams({
     agg
   );
 
-  Object.keys(editorConfig).forEach(param => {
-    const paramConfig = editorConfig[param];
-    const paramOptions = agg.type.params.find((paramOption: any) => paramOption.name === param);
-
-    // If the parameter has a fixed value in the config, set this value.
-    // Also for all supported configs we should freeze the editor for this param.
-    if (paramConfig.hasOwnProperty('fixedValue')) {
-      if (paramOptions && paramOptions.deserialize) {
-        agg.params[param] = paramOptions.deserialize(paramConfig[property]);
-      } else {
-        agg.params[param] = paramConfig[property];
-      }
-    }
-  });
+  useEffect(
+    () => {
+      Object.keys(editorConfig).forEach(param => {
+        const paramConfig = editorConfig[param];
+        const paramOptions = agg.type.params.find((paramOption: any) => paramOption.name === param);
+        const property = 'fixedValue';
+        // If the parameter has a fixed value in the config, set this value.
+        // Also for all supported configs we should freeze the editor for this param.
+        if (paramConfig.hasOwnProperty('fixedValue')) {
+          let newValue;
+          if (paramOptions && paramOptions.deserialize) {
+            newValue = paramOptions.deserialize(paramConfig[property]);
+          } else {
+            newValue = paramConfig[property];
+          }
+          onAggParamsChange(agg, param, newValue);
+        }
+      });
+    },
+    [editorConfig]
+  );
 
   const params = getAggParamsToRender(agg, editorConfig, config, vis, responseValueAggs);
   const allParams = [...params.basic, ...params.advanced];
@@ -154,8 +161,7 @@ function DefaultEditorAggParams({
 
   useEffect(
     () => {
-      console.log('agg.type changed - ' + allParams);
-      setValidity(true);
+      setTouched(false);
     },
     [agg.type]
   );
@@ -171,31 +177,20 @@ function DefaultEditorAggParams({
 
   useEffect(
     () => {
-      // when validity was changed
       setValidity(isFormValid);
-      setTouched(false);
     },
     [isFormValid]
   );
 
-  // useEffect(
-  //   () => {
-  //     // when a form were applied
-  //     onChangeAggType({ type: 'agg_selector_touched', touched: formIsTouched });
-  //   },
-  //   [formIsTouched]
-  // );
-
   useEffect(
     () => {
-      // when a form were touched
+      // when all invalid controls were touched
       if (isReactFormTouched) {
         setTouched(true);
       }
     },
     [isReactFormTouched]
   );
-  console.log(`field - ${JSON.stringify(aggParams)}`);
 
   return (
     <EuiForm isInvalid={!!errors.length} error={errors}>

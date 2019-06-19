@@ -19,11 +19,12 @@
 
 import React, { useEffect } from 'react';
 
+import { AggConfig } from 'ui/vis';
 import { AggParamEditorProps, AggParamCommonProps } from './agg_param_editor_props';
 
 interface AggParamReactWrapperProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
-  onChange(value?: T): void;
+  onChange(agg: AggConfig, paramName: string, value?: T): void;
 }
 
 function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {

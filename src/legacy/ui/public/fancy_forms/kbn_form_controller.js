@@ -32,6 +32,7 @@ export function decorateFormController($delegate, $injector) {
       super(...superArgs);
 
       const onSubmit = (event) => {
+        this.$submitted = true;
         this._markInvalidTouched(event);
       };
 
@@ -53,7 +54,7 @@ export function decorateFormController($delegate, $injector) {
     }
 
     describeErrors() {
-      const count = Object.keys(this.$error).length;
+      const count = this.softErrorCount();
       return i18n.translate('common.ui.fancyForm.errorDescription',
         {
           defaultMessage: '{count, plural, one {# Error} other {# Errors}}',

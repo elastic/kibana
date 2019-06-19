@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import $ from 'jquery';
 import './agg_params';
 import './new_agg_params';
 import './agg_add';
@@ -30,14 +29,14 @@ import { move } from '../../../utils/collection';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAgg', ($compile) => {
+  .directive('visEditorAgg', () => {
     return {
       restrict: 'A',
       template: aggTemplate,
-      require: ['form', '^^form'],
+      require: ['^form', '^ngModel'],
       link: function ($scope, $el, attrs, controllers) {
         const kbnForm = controllers[0];
-        const visualizeEditorForm = controllers[1];
+        const ngModelCtrl = controllers[1];
         $scope.editorOpen = !!$scope.agg.brandNew;
         $scope.aggIsTooLow = false;
 
@@ -123,14 +122,12 @@ uiModules
           return $scope.$index > firstDifferentSchema;
         }
 
+        // The model can become touched either onBlur event or when the form is submitted.
+        // We watch $touched to identify when the form is submitted.
         $scope.$watch(() => {
-          // The model can become touched either onBlur event or when the form is submitted.
-          return visualizeEditorForm.$submitted;
+          return ngModelCtrl.$touched;
         }, (value) => {
           $scope.formIsTouched = value;
-          if (true) {
-            kbnForm.$setDirty();
-          }
         }, true);
 
         $scope.onAggTypeChange = (agg, value) => {
@@ -146,14 +143,14 @@ uiModules
         };
 
         $scope.setValidity = (isValid) => {
-          kbnForm.$setValidity(`aggParams${$scope.agg.id}`, isValid);
+          ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
         };
 
         $scope.setTouched = (isTouched) => {
           if (isTouched) {
-            kbnForm.$setDirty();
+            ngModelCtrl.$setTouched();
           } else {
-            kbnForm.$setPristine();
+            ngModelCtrl.$setUntouched();
           }
         };
       }
