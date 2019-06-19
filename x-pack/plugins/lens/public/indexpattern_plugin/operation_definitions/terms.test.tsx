@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 
-describe('date_histogram', () => {
+describe('terms', () => {
   let state: IndexPatternPrivateState;
   const InlineOptions = termsOperation.paramEditor!;
 
@@ -110,6 +110,7 @@ describe('date_histogram', () => {
         },
       });
     });
+
     it('should render current value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

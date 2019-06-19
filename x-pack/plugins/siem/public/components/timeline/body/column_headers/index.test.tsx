@@ -17,6 +17,14 @@ import { TestProviders } from '../../../../mock/test_providers';
 
 import { ColumnHeaders } from '.';
 
+jest.mock('../../../resize_handle/is_resizing', () => ({
+  ...jest.requireActual('../../../resize_handle/is_resizing'),
+  isContainerResizing: () => ({
+    isResizing: true,
+    setIsResizing: jest.fn(),
+  }),
+}));
+
 describe('ColumnHeaders', () => {
   describe('rendering', () => {
     const sort: Sort = {
@@ -99,6 +107,36 @@ describe('ColumnHeaders', () => {
             .first()
             .text()
         ).toContain(h.id);
+      });
+    });
+
+    test('it disables dragging during a column resize', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <ColumnHeaders
+            actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+            browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
+            isLoading={false}
+            minWidth={1000}
+            onColumnSorted={jest.fn()}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onUpdateColumns={jest.fn()}
+            showEventsSelect={false}
+            sort={sort}
+            timelineId={'test'}
+          />
+        </TestProviders>
+      );
+
+      defaultHeaders.forEach(h => {
+        expect(
+          wrapper
+            .find('[data-test-subj="draggable"]')
+            .first()
+            .prop('isDragDisabled')
+        ).toBe(true);
       });
     });
   });

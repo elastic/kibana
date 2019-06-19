@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiRange, EuiSelect, EuiContextMenuItem } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
-import { updateColumnParam } from './utils';
+import { updateColumnParam } from '../state_helpers';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -113,7 +113,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     });
     return (
       <EuiForm>
-        <EuiFormRow label="Number of values">
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.terms.size', {
+            defaultMessage: 'Number of values',
+          })}
+        >
           <FixedEuiRange
             min={1}
             max={20}
@@ -135,6 +139,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
                 updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
               )
             }
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
+              defaultMessage: 'Number of values',
+            })}
           />
         </EuiFormRow>
       </EuiForm>

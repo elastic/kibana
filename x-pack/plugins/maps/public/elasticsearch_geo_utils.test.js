@@ -12,7 +12,7 @@ import {
   convertMapExtentToPolygon,
 } from './elasticsearch_geo_utils';
 
-import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
+import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
 
 const geoFieldName = 'location';
 const mapExtent = {
@@ -132,16 +132,6 @@ describe('hitsToGeoJson', () => {
   });
 
   describe('dot in geoFieldName', () => {
-    const configMock = {
-      get: (key) => {
-        if (key === 'metaFields') {
-          return [];
-        }
-        throw new Error(`Unexpected config key: ${key}`);
-      },
-      watch: () => {}
-    };
-    const flattenHitWrapper = IndexPatternsFlattenHitProvider(configMock); // eslint-disable-line new-cap
     const indexPatternMock = {
       fields: {
         byName: {

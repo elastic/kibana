@@ -40,7 +40,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
@@ -53,9 +53,12 @@ export class MetricPanelConfig extends Component {
 
   componentWillMount() {
     const { model } = this.props;
-    if (!model.background_color_rules || (model.background_color_rules && model.background_color_rules.length === 0)) {
+    if (
+      !model.background_color_rules ||
+      (model.background_color_rules && model.background_color_rules.length === 0)
+    ) {
       this.props.onChange({
-        background_color_rules: [{ id: uuid.v1() }]
+        background_color_rules: [{ id: uuid.v1() }],
       });
     }
   }
@@ -88,10 +91,7 @@ export class MetricPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.metric.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.metric.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -108,10 +108,12 @@ export class MetricPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.metric.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.metric.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
                   <QueryBarInput
@@ -168,14 +170,8 @@ export class MetricPanelConfig extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
-          >
-            <FormattedMessage
-              id="tsvb.metric.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+            <FormattedMessage id="tsvb.metric.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
@@ -192,7 +188,6 @@ export class MetricPanelConfig extends Component {
       </div>
     );
   }
-
 }
 
 MetricPanelConfig.propTypes = {

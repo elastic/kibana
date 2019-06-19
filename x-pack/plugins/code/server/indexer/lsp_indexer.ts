@@ -11,7 +11,10 @@ import { ResponseError } from 'vscode-jsonrpc';
 
 import { ProgressReporter } from '.';
 import { TEXT_FILE_LIMIT } from '../../common/file';
-import { LanguageServerNotInstalled } from '../../common/lsp_error_codes';
+import {
+  LanguageServerNotInstalled,
+  LanguageServerStartFailed,
+} from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -44,6 +47,7 @@ export class LspIndexer extends AbstractIndexer {
     protected readonly revision: string,
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
+    protected readonly gitOps: GitOperations,
     protected readonly client: EsClient,
     protected readonly log: Logger
   ) {
@@ -97,14 +101,15 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
+    let repo;
     try {
       const {
         workspaceRepo,
         workspaceRevision,
       } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
+      repo = workspaceRepo;
       const workspaceDir = workspaceRepo.workdir();
-      const gitOperator = new GitOperations(this.options.repoPath);
-      const fileIterator = await gitOperator.iterateRepo(this.repoUri, 'head');
+      const fileIterator = await this.gitOps.iterateRepo(this.repoUri, 'head');
       for await (const file of fileIterator) {
         const filePath = file.path!;
         const req: LspIndexRequest = {
@@ -119,13 +124,16 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
+    } finally {
+      if (repo) {
+        repo.cleanup();
+      }
     }
   }
 
   protected async getIndexRequestCount(): Promise<number> {
     try {
-      const gitOperator = new GitOperations(this.options.repoPath);
-      return await gitOperator.countRepoFiles(this.repoUri, 'head');
+      return await this.gitOps.countRepoFiles(this.repoUri, 'head');
     } catch (error) {
       this.log.error(`Get lsp index requests count error.`);
       this.log.error(error);
@@ -195,6 +203,8 @@ export class LspIndexer extends AbstractIndexer {
       .set(IndexStatsKey.Reference, 0)
       .set(IndexStatsKey.File, 0);
     const { repoUri, revision, filePath, localRepoPath } = request;
+
+    this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
 
@@ -246,9 +256,13 @@ export class LspIndexer extends AbstractIndexer {
       if (error instanceof ResponseError && error.code === LanguageServerNotInstalled) {
         // TODO maybe need to report errors to the index task and warn user later
         this.log.debug(`Index symbols or references error due to language server not installed`);
+      } else if (error instanceof ResponseError && error.code === LanguageServerStartFailed) {
+        this.log.debug(
+          `Index symbols or references error due to language server can't be started.`
+        );
       } else {
-        this.log.error(`Index symbols or references error.`);
-        this.log.error(error);
+        this.log.warn(`Index symbols or references error.`);
+        this.log.warn(error);
       }
     }
 

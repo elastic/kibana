@@ -48,7 +48,7 @@ export const MetricsExplorerPage = injectI18n(
             intl.formatMessage(
               {
                 id: 'xpack.infra.infrastructureMetricsExplorerPage.documentTitle',
-                defaultMessage: '{previousTitle} | Metrics explorer',
+                defaultMessage: '{previousTitle} | Metrics Explorer',
               },
               {
                 previousTitle,

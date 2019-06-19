@@ -119,7 +119,7 @@ describe('IndexPattern Data Source', () => {
           operationId: 'op1',
           label: 'My Op',
           dataType: 'string',
-          isBucketed: false,
+          isBucketed: true,
 
           // Private
           operationType: 'terms',
@@ -252,6 +252,204 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getDatasourceSuggestionsForField', () => {
+    describe('with no previous selections', () => {
+      let initialState: IndexPatternPrivateState;
+
+      beforeEach(async () => {
+        initialState = await indexPatternDatasource.initialize({
+          currentIndexPatternId: '1',
+          columnOrder: [],
+          columns: {},
+        });
+      });
+
+      it('should apply a bucketed aggregation for a string field', () => {
+        const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
+          name: 'source',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).toHaveLength(1);
+        expect(suggestions[0].state).toEqual(
+          expect.objectContaining({
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: expect.objectContaining({
+                operationType: 'terms',
+                sourceField: 'source',
+              }),
+              col2: expect.objectContaining({
+                operationType: 'count',
+              }),
+            },
+          })
+        );
+        expect(suggestions[0].table).toEqual({
+          datasourceSuggestionId: 0,
+          isMultiRow: true,
+          columns: [
+            expect.objectContaining({
+              columnId: 'col1',
+            }),
+            expect.objectContaining({
+              columnId: 'col2',
+            }),
+          ],
+        });
+      });
+
+      it('should apply a bucketed aggregation for a date field', () => {
+        const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
+          name: 'timestamp',
+          type: 'date',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).toHaveLength(1);
+        expect(suggestions[0].state).toEqual(
+          expect.objectContaining({
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: expect.objectContaining({
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+              }),
+              col2: expect.objectContaining({
+                operationType: 'count',
+              }),
+            },
+          })
+        );
+        expect(suggestions[0].table).toEqual({
+          datasourceSuggestionId: 0,
+          isMultiRow: true,
+          columns: [
+            expect.objectContaining({
+              columnId: 'col1',
+            }),
+            expect.objectContaining({
+              columnId: 'col2',
+            }),
+          ],
+        });
+      });
+
+      it('should select a metric for a number field', () => {
+        const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
+          name: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).toHaveLength(1);
+        expect(suggestions[0].state).toEqual(
+          expect.objectContaining({
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: expect.objectContaining({
+                sourceField: 'timestamp',
+                operationType: 'date_histogram',
+              }),
+              col2: expect.objectContaining({
+                sourceField: 'bytes',
+                operationType: 'min',
+              }),
+            },
+          })
+        );
+        expect(suggestions[0].table).toEqual({
+          datasourceSuggestionId: 0,
+          isMultiRow: true,
+          columns: [
+            expect.objectContaining({
+              columnId: 'col1',
+            }),
+            expect.objectContaining({
+              columnId: 'col2',
+            }),
+          ],
+        });
+      });
+
+      it('should not make any suggestions for a number without a time field', async () => {
+        const state: IndexPatternPrivateState = {
+          currentIndexPatternId: '1',
+          columnOrder: [],
+          columns: {},
+          indexPatterns: {
+            1: {
+              id: '1',
+              title: 'no timefield',
+              fields: [
+                {
+                  name: 'bytes',
+                  type: 'number',
+                  aggregatable: true,
+                  searchable: true,
+                },
+              ],
+            },
+          },
+        };
+
+        const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(state, {
+          name: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).toHaveLength(0);
+      });
+    });
+
+    describe('with a prior column', () => {
+      let initialState: IndexPatternPrivateState;
+
+      beforeEach(async () => {
+        initialState = await indexPatternDatasource.initialize(persistedState);
+      });
+
+      it('should not suggest for string', () => {
+        expect(
+          indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
+            name: 'source',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          })
+        ).toHaveLength(0);
+      });
+
+      it('should not suggest for date', () => {
+        expect(
+          indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
+            name: 'timestamp',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+          })
+        ).toHaveLength(0);
+      });
+
+      it('should not suggest for number', () => {
+        expect(
+          indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
+            name: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          })
+        ).toHaveLength(0);
+      });
+    });
+  });
+
   describe('#getPublicAPI', () => {
     let publicAPI: DatasourcePublicAPI;
 
@@ -276,7 +474,7 @@ describe('IndexPattern Data Source', () => {
           id: 'op1',
           label: 'My Op',
           dataType: 'string',
-          isBucketed: false,
+          isBucketed: true,
         } as Operation);
       });
     });

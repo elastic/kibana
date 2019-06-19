@@ -192,7 +192,7 @@ describe('ilm summary extension', () => {
   test('should render null when index has no index lifecycle policy', () => {
     const extension = ilmSummaryExtension(indexWithoutLifecyclePolicy);
     const rendered = mountWithIntl(extension);
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should return extension when index has lifecycle policy', () => {
     const extension = ilmSummaryExtension(indexWithLifecyclePolicy);

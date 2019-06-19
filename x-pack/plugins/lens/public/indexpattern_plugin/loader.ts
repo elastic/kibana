@@ -24,8 +24,8 @@ interface SavedRestrictionsObject {
       string,
       {
         agg: string;
-        interval?: number;
         fixed_interval?: string;
+        calendar_interval?: string;
         delay?: string;
         time_zone?: string;
       }

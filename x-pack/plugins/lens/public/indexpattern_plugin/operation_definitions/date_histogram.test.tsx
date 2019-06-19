@@ -16,7 +16,21 @@ describe('date_histogram', () => {
 
   beforeEach(() => {
     state = {
-      indexPatterns: {},
+      indexPatterns: {
+        1: {
+          id: '1',
+          title: 'Mock Indexpattern',
+          fields: [
+            {
+              name: 'timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+        },
+      },
       currentIndexPatternId: '1',
       columnOrder: ['col1'],
       columns: {
@@ -35,6 +49,38 @@ describe('date_histogram', () => {
         },
       },
     };
+  });
+
+  describe('buildColumn', () => {
+    it('should create column object with default params', () => {
+      const column = dateHistogramOperation.buildColumn('op', 0, {
+        name: 'timestamp',
+        type: 'date',
+        esTypes: ['date'],
+        aggregatable: true,
+        searchable: true,
+      });
+      expect(column.params.interval).toEqual('h');
+    });
+
+    it('should create column object with restrictions', () => {
+      const column = dateHistogramOperation.buildColumn('op', 0, {
+        name: 'timestamp',
+        type: 'date',
+        esTypes: ['date'],
+        aggregatable: true,
+        searchable: true,
+        aggregationRestrictions: {
+          date_histogram: {
+            agg: 'date_histogram',
+            time_zone: 'UTC',
+            calendar_interval: '1y',
+          },
+        },
+      });
+      expect(column.params.interval).toEqual('1y');
+      expect(column.params.timeZone).toEqual('UTC');
+    });
   });
 
   describe('toEsAggsConfig', () => {
@@ -87,6 +133,38 @@ describe('date_histogram', () => {
           },
         },
       });
+    });
+
+    it('should not render options if they are restricted', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          state={{
+            ...state,
+            indexPatterns: {
+              1: {
+                ...state.indexPatterns[1],
+                fields: [
+                  {
+                    ...state.indexPatterns[1].fields[0],
+                    aggregationRestrictions: {
+                      date_histogram: {
+                        agg: 'date_histogram',
+                        time_zone: 'UTC',
+                        calendar_interval: '1h',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          }}
+          setState={setStateSpy}
+          columnId="col1"
+        />
+      );
+
+      expect(instance.find(EuiRange)).toHaveLength(0);
     });
   });
 });

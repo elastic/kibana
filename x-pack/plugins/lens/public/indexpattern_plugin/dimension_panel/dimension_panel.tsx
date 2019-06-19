@@ -15,10 +15,11 @@ import {
   IndexPatternField,
 } from '../indexpattern';
 
-import { getPotentialColumns, operationDefinitionMap, getColumnOrder } from '../operations';
+import { getPotentialColumns, operationDefinitionMap } from '../operations';
 import { FieldSelect } from './field_select';
 import { Settings } from './settings';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
+import { changeColumn, hasField } from '../state_helpers';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -35,17 +36,15 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
 
   const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
 
+  function findColumnByField(field: IndexPatternField) {
+    return filteredColumns.find(col => hasField(col) && col.sourceField === field.name);
+  }
+
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
     const field = dragging as IndexPatternField;
 
-    return (
-      !!field &&
-      !!field.type &&
-      filteredColumns.some(
-        col => 'sourceField' in col && col.sourceField === (field as IndexPatternField).name
-      )
-    );
+    return !!field && !!field.type && !!findColumnByField(field as IndexPatternField);
   }
 
   return (
@@ -54,34 +53,31 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={field => {
-          const column = columns.find(
-            col => 'sourceField' in col && col.sourceField === (field as IndexPatternField).name
-          );
+          const column = findColumnByField(field as IndexPatternField);
 
           if (!column) {
             // TODO: What do we do if we couldn't find a column?
             return;
           }
 
-          const newColumns: IndexPatternPrivateState['columns'] = {
-            ...props.state.columns,
-            [props.columnId]: column,
-          };
-
-          props.setState({
-            ...props.state,
-            columnOrder: getColumnOrder(newColumns),
-            columns: newColumns,
-          });
+          props.setState(changeColumn(props.state, props.columnId, column));
         }}
       >
-        <EuiFlexGroup alignItems="center">
-          <Settings {...props} selectedColumn={selectedColumn} filteredColumns={filteredColumns} />
-          <FieldSelect
-            {...props}
-            selectedColumn={selectedColumn}
-            filteredColumns={filteredColumns}
-          />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={null}>
+            <EuiFlexGroup alignItems="center">
+              <Settings
+                {...props}
+                selectedColumn={selectedColumn}
+                filteredColumns={filteredColumns}
+              />
+              <FieldSelect
+                {...props}
+                selectedColumn={selectedColumn}
+                filteredColumns={filteredColumns}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </DragDrop>
     </ChildDragDropProvider>

@@ -8,13 +8,9 @@ import _ from 'lodash';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiButtonEmpty, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import {
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  IndexPatternPrivateState,
-} from '../indexpattern';
+import { IndexPatternColumn, FieldBasedIndexPatternColumn } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
-import { getColumnOrder } from '../operations';
+import { changeColumn, deleteColumn, hasField, sortByField } from '../state_helpers';
 
 export interface FieldSelectProps extends IndexPatternDimensionPanelProps {
   selectedColumn: IndexPatternColumn;
@@ -29,23 +25,19 @@ export function FieldSelect({
   setState,
 }: FieldSelectProps) {
   const [isFieldSelectOpen, setFieldSelectOpen] = useState(false);
-  const fieldColumns = filteredColumns.filter(
-    col => 'sourceField' in col
-  ) as FieldBasedIndexPatternColumn[];
+  const fieldColumns = filteredColumns.filter(hasField) as FieldBasedIndexPatternColumn[];
 
-  const uniqueColumnsByField = _.uniq(
-    fieldColumns
-      .filter(col => selectedColumn && col.operationType === selectedColumn.operationType)
-      .concat(fieldColumns),
-    col => col.sourceField
+  const uniqueColumnsByField = sortByField(
+    _.uniq(
+      fieldColumns
+        .filter(col => selectedColumn && col.operationType === selectedColumn.operationType)
+        .concat(fieldColumns),
+      col => col.sourceField
+    )
   );
 
-  uniqueColumnsByField.sort((column1, column2) => {
-    return column1.sourceField.localeCompare(column2.sourceField);
-  });
-
   const fieldOptions = [];
-  const fieldLessColumn = filteredColumns.find(column => !('sourceField' in column));
+  const fieldLessColumn = filteredColumns.find(column => !hasField(column));
   if (fieldLessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
@@ -98,7 +90,7 @@ export function FieldSelect({
             })}
             options={fieldOptions}
             selectedOptions={
-              selectedColumn && 'sourceField' in selectedColumn
+              selectedColumn && hasField(selectedColumn)
                 ? [
                     {
                       label: selectedColumn.sourceField,
@@ -108,22 +100,20 @@ export function FieldSelect({
                 : []
             }
             singleSelection={{ asPlainText: true }}
-            isClearable={false}
+            isClearable={true}
             onChange={choices => {
+              setFieldSelectOpen(false);
+
+              if (choices.length === 0) {
+                setState(deleteColumn(state, columnId));
+                return;
+              }
+
               const column: IndexPatternColumn = filteredColumns.find(
                 ({ operationId }) => operationId === choices[0].value
               )!;
-              const newColumns: IndexPatternPrivateState['columns'] = {
-                ...state.columns,
-                [columnId]: column,
-              };
 
-              setFieldSelectOpen(false);
-              setState({
-                ...state,
-                columns: newColumns,
-                columnOrder: getColumnOrder(newColumns),
-              });
+              setState(changeColumn(state, columnId, column));
             }}
           />
         )}
@@ -139,16 +129,7 @@ export function FieldSelect({
               defaultMessage: 'Remove',
             })}
             onClick={() => {
-              const newColumns: IndexPatternPrivateState['columns'] = {
-                ...state.columns,
-              };
-              delete newColumns[columnId];
-
-              setState({
-                ...state,
-                columns: newColumns,
-                columnOrder: getColumnOrder(newColumns),
-              });
+              setState(deleteColumn(state, columnId));
             }}
           />
         </EuiFlexItem>

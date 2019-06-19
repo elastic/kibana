@@ -30,7 +30,7 @@ describe('suggestion helpers', () => {
       'vis1',
       {}
     );
-    expect(suggestions.length).toBe(1);
+    expect(suggestions).toHaveLength(1);
     expect(suggestions[0].state).toBe(suggestedState);
   });
 
@@ -57,7 +57,7 @@ describe('suggestion helpers', () => {
       'vis1',
       {}
     );
-    expect(suggestions.length).toBe(3);
+    expect(suggestions).toHaveLength(3);
   });
 
   it('should rank the visualizations by score', () => {

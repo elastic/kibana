@@ -8,11 +8,13 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiContextMenuItem } from '@elastic/eui';
 import { IndexPatternPrivateState } from '../indexpattern';
-import { getPotentialColumns, getColumnOrder, operationDefinitionMap } from '../operations';
+import { changeColumn } from '../state_helpers';
+import { getPotentialColumns, operationDefinitionMap } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 
+jest.mock('../state_helpers');
 jest.mock('../operations');
 
 const expectedIndexPatterns = {
@@ -55,7 +57,7 @@ describe('IndexPatternDimensionPanel', () => {
       columns: {
         col1: {
           operationId: 'op1',
-          label: 'Value of timestamp',
+          label: 'Date Histogram of timestamp',
           dataType: 'date',
           isBucketed: true,
 
@@ -139,7 +141,7 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    expect(wrapper.find(EuiComboBox).length).toEqual(1);
+    expect(wrapper.find(EuiComboBox)).toHaveLength(1);
   });
 
   it('should not show any choices if the filter returns false', () => {
@@ -158,7 +160,7 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
+    expect(wrapper.find(EuiComboBox)!.prop('options')!).toHaveLength(0);
   });
 
   it('should render the inline options directly', () => {
@@ -172,7 +174,9 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    expect(operationDefinitionMap.date_histogram.paramEditor as jest.Mock).toHaveBeenCalled();
+    expect(operationDefinitionMap.date_histogram.paramEditor as jest.Mock).toHaveBeenCalledTimes(
+      1
+    );
   });
 
   it('should not render the settings button if there are no settings or options', () => {
@@ -186,7 +190,7 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="indexPattern-dimensionPopover-button"]').length).toBe(0);
+    expect(wrapper.find('[data-test-subj="indexPattern-dimensionPopover-button"]')).toHaveLength(0);
   });
 
   it('should render the settings button if there are settings', () => {
@@ -417,7 +421,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
-  it('should always request the new sort order when changing the function', () => {
+  it('should use helper function when changing the function', () => {
     const setState = jest.fn();
 
     const wrapper = mount(
@@ -456,12 +460,14 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    expect(getColumnOrder).toHaveBeenCalledWith({
-      col1: expect.objectContaining({
+    expect(changeColumn).toHaveBeenCalledWith(
+      expect.anything(),
+      'col1',
+      expect.objectContaining({
         sourceField: 'bytes',
         operationType: 'min',
-      }),
-    });
+      })
+    );
   });
 
   it('should clear the dimension with the clear button', () => {

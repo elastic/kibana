@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { DimensionPriority } from '../types';
 import {
   IndexPatternColumn,
@@ -22,6 +21,7 @@ import {
 } from './operation_definitions/metrics';
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
+import { sortByField } from './state_helpers';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -35,6 +35,7 @@ type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends ((k
   ? I
   : never;
 
+// this type makes sure that there is an operation definition for each column type
 export type AllOperationDefinitions = UnionToIntersection<PossibleOperationDefinitionMapEntyries>;
 
 export const operationDefinitionMap: AllOperationDefinitions = {
@@ -57,7 +58,8 @@ export interface ParamEditorProps {
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
 }
-export interface OperationDefinition<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> {
+
+export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   displayName: string;
   // TODO make this a function dependend on the indexpattern with typeMeta information
@@ -95,13 +97,13 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
     .map(({ type }) => type);
 }
 
-function buildColumnForOperationType<T extends OperationType>(
+export function buildColumnForOperationType<T extends OperationType>(
+  index: number,
   op: T,
-  operationId: string,
   suggestedOrder?: DimensionPriority,
   field?: IndexPatternField
 ): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn(operationId, suggestedOrder, field);
+  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, field);
 }
 
 export function getPotentialColumns(
@@ -115,7 +117,7 @@ export function getPotentialColumns(
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(op, `${op}${index}`, suggestedOrder, field)
+        buildColumnForOperationType(index, op, suggestedOrder, field)
       );
     })
     .reduce((prev, current) => prev.concat(current));
@@ -126,29 +128,5 @@ export function getPotentialColumns(
     }
   });
 
-  columns.sort((column1, column2) => {
-    if ('sourceField' in column1 && 'sourceField' in column2) {
-      return column1.sourceField.localeCompare(column2.sourceField);
-    }
-    return column1.operationType.localeCompare(column2.operationType);
-  });
-
-  return columns;
-}
-
-export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
-  const entries = Object.entries(columns);
-
-  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
-
-  return aggregations
-    .sort(([id, col], [id2, col2]) => {
-      return (
-        // Sort undefined orders last
-        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
-        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
-      );
-    })
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id));
+  return sortByField(columns);
 }

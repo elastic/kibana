@@ -18,7 +18,7 @@ export function toExpression(state: IndexPatternPrivateState) {
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
     // Typescript is not smart enough to infer that definitionMap[C['operationType']] is always OperationDefinition<C>,
-    // but this is made sure by the typing in operations/index.ts
+    // but this is made sure by the typing of the operation map
     const operationDefinition = (operationDefinitionMap[
       column.operationType
     ] as unknown) as OperationDefinition<C>;

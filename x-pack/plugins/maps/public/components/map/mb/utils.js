@@ -6,8 +6,17 @@
 
 import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
+import chrome from 'ui/chrome';
+import { MAKI_SPRITE_PATH } from '../../../../common/constants';
+
+function relativeToAbsolute(url) {
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
+}
 
 export async function createMbMapInstance({ node, initialView, scrollZoom }) {
+  const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
   return new Promise((resolve) => {
     const options = {
       attributionControl: false,
@@ -16,6 +25,7 @@ export async function createMbMapInstance({ node, initialView, scrollZoom }) {
         version: 8,
         sources: {},
         layers: [],
+        sprite: makiUrl
       },
       scrollZoom
     };

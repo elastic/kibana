@@ -6,6 +6,8 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFlyoutBody,
@@ -15,10 +17,8 @@ import {
   EuiSpacer,
   EuiPortal,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-
-export class NodeAttrsDetailsUi extends PureComponent {
+export class NodeAttrsDetails extends PureComponent {
   static propTypes = {
     fetchNodeDetails: PropTypes.func.isRequired,
     close: PropTypes.func.isRequired,
@@ -32,7 +32,7 @@ export class NodeAttrsDetailsUi extends PureComponent {
   }
 
   render() {
-    const { selectedNodeAttrs, details, close, intl } = this.props;
+    const { selectedNodeAttrs, details, close } = this.props;
 
     return (
       <EuiPortal>
@@ -51,17 +51,14 @@ export class NodeAttrsDetailsUi extends PureComponent {
             <EuiInMemoryTable
               items={details}
               columns={[
-                { field: 'nodeId', name: intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.nodeAttrDetails.idField',
-                  defaultMessage: 'ID',
+                { field: 'nodeId', name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.idField', {
+                  defaultMessage: 'ID'
                 }) },
-                { field: 'stats.name', name: intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.nodeAttrDetails.nameField',
-                  defaultMessage: 'Name',
+                { field: 'stats.name', name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.nameField', {
+                  defaultMessage: 'Name'
                 }) },
-                { field: 'stats.host', name: intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.nodeAttrDetails.hostField',
-                  defaultMessage: 'Host',
+                { field: 'stats.host', name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.hostField', {
+                  defaultMessage: 'Host'
                 }) },
               ]}
               pagination={true}
@@ -73,5 +70,3 @@ export class NodeAttrsDetailsUi extends PureComponent {
     );
   }
 }
-export const NodeAttrsDetails = injectI18n(NodeAttrsDetailsUi);
-

@@ -13,17 +13,13 @@ import {
 
 describe('ML - security utils', () => {
 
-  function mockServerFactory(isAvailable = true, isEnabled = true) {
+  function mockXpackMainPluginFactory(isAvailable = true, isEnabled = true) {
     return {
-      plugins: {
-        xpack_main: {
-          info: {
-            isAvailable: () => isAvailable,
-            feature: () => ({
-              isEnabled: () => isEnabled
-            })
-          }
-        }
+      info: {
+        isAvailable: () => isAvailable,
+        feature: () => ({
+          isEnabled: () => isEnabled
+        })
       }
     };
   }
@@ -31,15 +27,15 @@ describe('ML - security utils', () => {
   describe('isSecurityDisabled', () => {
 
     it('returns not disabled for given mock server object #1', () => {
-      expect(isSecurityDisabled(mockServerFactory())).to.be(false);
+      expect(isSecurityDisabled(mockXpackMainPluginFactory())).to.be(false);
     });
 
     it('returns not disabled for given mock server object #2', () => {
-      expect(isSecurityDisabled(mockServerFactory(false))).to.be(false);
+      expect(isSecurityDisabled(mockXpackMainPluginFactory(false))).to.be(false);
     });
 
     it('returns disabled for given mock server object #3', () => {
-      expect(isSecurityDisabled(mockServerFactory(true, false))).to.be(true);
+      expect(isSecurityDisabled(mockXpackMainPluginFactory(true, false))).to.be(true);
     });
 
   });

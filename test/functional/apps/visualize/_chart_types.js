@@ -46,9 +46,9 @@ export default function ({ getService, getPageObjects }) {
         'Region Map',
         'Tag Cloud',
         'Timelion',
+        'Timeseries',
         'Vega',
         'Vertical Bar',
-        'Visual Builder',
       ];
 
       // find all the chart types and make sure there all there

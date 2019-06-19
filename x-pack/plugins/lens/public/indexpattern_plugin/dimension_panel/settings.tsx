@@ -16,20 +16,11 @@ import {
   EuiComboBox,
   EuiCallOut,
 } from '@elastic/eui';
-import classNames from 'classnames';
-import {
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  IndexPatternPrivateState,
-  OperationType,
-} from '../indexpattern';
+import { IndexPatternColumn, OperationType, FieldBasedIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
-import {
-  getColumnOrder,
-  operationDefinitionMap,
-  getOperations,
-  getOperationDisplay,
-} from '../operations';
+import { operationDefinitionMap, getOperations, getOperationDisplay } from '../operations';
+import { hasField, getColumnOrder } from '../state_helpers';
+import classNames from 'classnames';
 
 export interface SettingsProps extends IndexPatternDimensionPanelProps {
   selectedColumn: IndexPatternColumn;
@@ -52,9 +43,9 @@ export function Settings({
   const functionsFromField = selectedColumn
     ? filteredColumns.filter(col => {
         return (
-          (!('sourceField' in selectedColumn) && !('sourceField' in col)) ||
-          ('sourceField' in selectedColumn &&
-            'sourceField' in col &&
+          (!hasField(selectedColumn) && !hasField(col)) ||
+          (hasField(selectedColumn) &&
+            hasField(col) &&
             col.sourceField === selectedColumn.sourceField)
         );
       })

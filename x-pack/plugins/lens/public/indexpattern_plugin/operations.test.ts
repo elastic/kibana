@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOperationTypesForField, getPotentialColumns, getColumnOrder } from './operations';
+import { getOperationTypesForField, getPotentialColumns } from './operations';
 import { IndexPatternPrivateState } from './indexpattern';
+import { hasField } from './state_helpers';
 
 const expectedIndexPatterns = {
   1: {
@@ -149,9 +150,9 @@ describe('getOperationTypesForField', () => {
         columns: {
           col1: {
             operationId: 'op1',
-            label: 'Value of timestamp',
+            label: 'Date Histogram of timestamp',
             dataType: 'date',
-            isBucketed: false,
+            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -174,10 +175,7 @@ describe('getOperationTypesForField', () => {
       const columns = getPotentialColumns(state);
 
       expect(
-        columns.map(col => [
-          'sourceField' in col ? col.sourceField : '_documents_',
-          col.operationType,
-        ])
+        columns.map(col => [hasField(col) ? col.sourceField : '_documents_', col.operationType])
       ).toMatchInlineSnapshot(`
 Array [
   Array [
@@ -211,126 +209,5 @@ Array [
 ]
 `);
     });
-  });
-});
-
-describe('getColumnOrder', () => {
-  it('should work for empty columns', () => {
-    expect(getColumnOrder({})).toEqual([]);
-  });
-
-  it('should work for one column', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Value of timestamp',
-          dataType: 'string',
-          isBucketed: false,
-
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'timestamp',
-          params: {
-            interval: 'h',
-          },
-        },
-      })
-    ).toEqual(['col1']);
-  });
-
-  it('should put any number of aggregations before metrics', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Top Values of category',
-          dataType: 'string',
-          isBucketed: true,
-
-          // Private
-          operationType: 'terms',
-          sourceField: 'category',
-          params: {
-            size: 5,
-            orderBy: {
-              type: 'alphabetical',
-            },
-          },
-        },
-        col2: {
-          operationId: 'op2',
-          label: 'Average of bytes',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'avg',
-          sourceField: 'bytes',
-        },
-        col3: {
-          operationId: 'op3',
-          label: 'Date Histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
-
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'timestamp',
-          params: {
-            interval: '1d',
-          },
-        },
-      })
-    ).toEqual(['col1', 'col3', 'col2']);
-  });
-
-  it('should reorder aggregations based on suggested priority', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Top Values of category',
-          dataType: 'string',
-          isBucketed: true,
-
-          // Private
-          operationType: 'terms',
-          sourceField: 'category',
-          params: {
-            size: 5,
-            orderBy: {
-              type: 'alphabetical',
-            },
-          },
-          suggestedOrder: 2,
-        },
-        col2: {
-          operationId: 'op2',
-          label: 'Average of bytes',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'avg',
-          sourceField: 'bytes',
-          suggestedOrder: 0,
-        },
-        col3: {
-          operationId: 'op3',
-          label: 'Date Histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
-
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'timestamp',
-          suggestedOrder: 1,
-          params: {
-            interval: '1d',
-          },
-        },
-      })
-    ).toEqual(['col3', 'col1', 'col2']);
   });
 });
