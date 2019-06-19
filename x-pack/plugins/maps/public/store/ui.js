@@ -28,6 +28,7 @@ const INITIAL_STATE = {
   isReadOnly: false,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isFilterable: false,
+  isSetViewOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
