@@ -21,7 +21,7 @@ Only applies when the point feature is symbolized as a circle.
 *Symbol orientation*:: The symbol orientation rotating the icon clockwise.
 Only applies when the point feature is symbolized as an icon.
 
-*Symbol size*:: The symbol size radius in pixels.
+*Symbol size*:: The radius of the symbol size, in pixels.
 
 
 [float]
