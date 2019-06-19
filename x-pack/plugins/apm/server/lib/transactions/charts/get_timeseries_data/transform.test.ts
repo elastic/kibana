@@ -96,7 +96,7 @@ describe('getTpmBuckets', () => {
       }
     ];
     const bucketSize = 10;
-    expect(getTpmBuckets(buckets, bucketSize)).toEqual([
+    expect(getTpmBuckets(buckets as any, bucketSize)).toEqual([
       {
         dataPoints: [
           { x: 0, y: 0 },

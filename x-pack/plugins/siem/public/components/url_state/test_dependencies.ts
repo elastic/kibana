@@ -47,6 +47,7 @@ export const mockHistory = {
 };
 
 export const defaultProps: UrlStateContainerPropTypes = {
+  children: jest.fn(),
   match: {
     isExact: true,
     params: '',

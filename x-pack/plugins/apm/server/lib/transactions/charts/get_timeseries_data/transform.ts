@@ -10,19 +10,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
-export interface ApmTimeSeriesResponse {
-  totalHits: number;
-  responseTimes: {
-    avg: Coordinate[];
-    p95: Coordinate[];
-    p99: Coordinate[];
-  };
-  tpmBuckets: Array<{
-    key: string;
-    dataPoints: Coordinate[];
-  }>;
-  overallAvgDuration?: number;
-}
+export type ApmTimeSeriesResponse = ReturnType<typeof timeseriesTransformer>;
 
 export function timeseriesTransformer({
   timeseriesResponse,
@@ -30,7 +18,7 @@ export function timeseriesTransformer({
 }: {
   timeseriesResponse: ESResponse;
   bucketSize: number;
-}): ApmTimeSeriesResponse {
+}) {
   const aggs = timeseriesResponse.aggregations;
   const overallAvgDuration = idx(aggs, _ => _.overall_avg_duration.value);
   const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets);

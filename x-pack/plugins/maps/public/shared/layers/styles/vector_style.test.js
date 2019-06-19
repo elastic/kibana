@@ -49,6 +49,12 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         options: {},
         type: 'STATIC',
       },
+      iconOrientation: {
+        options: {
+          orientation: 0,
+        },
+        type: 'STATIC',
+      },
       iconSize: {
         options: {
           color: 'a color',
