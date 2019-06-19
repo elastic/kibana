@@ -95,18 +95,26 @@
   </div>
 
   <new-vis-editor-agg-params
-    ng-if="true"
+    ng-if="onAggTypeChange"
     ng-show="editorOpen"
-    ng-model="_internalNgModelStateAggParams"
     id="visAggEditorParams{{agg.id}}"
     agg="agg"
     agg-index="$index"
     agg-is-too-low="aggIsTooLow"
+    agg-params="agg.params"
+    agg-type="agg.type"
+    config="config"
     editor-config="editorConfig"
+    form-is-touched="formIsTouched"
     group-name="groupName"
     index-pattern="vis.indexPattern"
+    response-value-aggs="responseValueAggs"
+    vis="vis"
     on-agg-type-change="onAggTypeChange"
-    on-agg-params-change="onAggParamsChange">
+    on-agg-params-change="onAggParamsChange"
+    set-touched="setTouched"
+    set-validity="setValidity"
+    update-param-models="updateParamModels">
   </new-vis-editor-agg-params>
 
   <!-- <vis-editor-agg-params

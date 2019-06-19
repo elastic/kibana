@@ -23,75 +23,22 @@ import { DefaultEditorAggParams } from './components/default_editor_agg_params';
 
 uiModules
   .get('app/visualize')
-  .directive('visAggParamsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
-    ['agg', { watchDepth: 'collection' }],
+  .directive('newVisEditorAggParams', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
+    ['agg', { watchDepth: 'reference' }],
     ['aggType', { watchDepth: 'reference' }],
     ['aggParams', { watchDepth: 'collection' }],
     ['config', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
-    ['responseValueAggs', { watchDepth: 'reference' }],
+    ['responseValueAggs', { watchDepth: 'collection' }],
     ['vis', { watchDepth: 'reference' }],
     ['onAggTypeChange', { watchDepth: 'reference' }],
     ['onAggParamsChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
+    ['updateParamModels', { watchDepth: 'reference' }],
     'id',
     'aggIndex',
     'groupName',
     'aggIsTooLow',
     'formIsTouched'
-  ]))
-  .directive('newVisEditorAggParams', function () {
-    return {
-      restrict: 'E',
-      scope: true,
-      require: '^ngModel',
-      template: function () {
-        return `<vis-agg-params-react-wrapper
-            ng-if="onAggTypeChange"
-            agg="agg"
-            agg-index="aggIndex"
-            agg-is-too-low="aggIsTooLow"
-            agg-params="agg.params"
-            agg-type="agg.type"
-            config="config"
-            form-is-touched="formIsTouched"
-            group-name="groupName"
-            index-pattern="indexPattern"
-            response-value-aggs="responseValueAggs"
-            vis="vis"
-            on-agg-type-change="onAggTypeChange"
-            on-agg-params-change="onAggParamsChange"
-            set-touched="setTouched"
-            set-validity="setValidity"
-          ></vis-agg-params-react-wrapper>`;
-      },
-      link: {
-        pre: function ($scope, $el, attr) {
-          $scope.$bind('agg', attr.agg);
-          $scope.$bind('aggIndex', attr.aggIndex);
-          $scope.$bind('indexPattern', attr.indexPattern);
-        },
-        post: function ($scope, $el, attr, ngModelCtrl) {
-          $scope.formIsTouched = false;
-
-          $scope.$watch(() => {
-            // The model can become touched either onBlur event or when the form is submitted.
-            return ngModelCtrl.$touched;
-          }, (value) => {
-            if (value) {
-              $scope.formIsTouched = true;
-            }
-          }, true);
-
-          $scope.setValidity = (isValid) => {
-            ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
-          };
-
-          $scope.setTouched = () => {
-            ngModelCtrl.$setTouched();
-          };
-        }
-      }
-    };
-  });
+  ]));
