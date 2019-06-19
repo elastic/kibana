@@ -50,6 +50,7 @@ export default function PointSeriesVisType(Private) {
             },
             labels: {
               show: true,
+              filter: true,
               truncate: 100
             },
             title: {}

@@ -49,22 +49,3 @@ export enum ViewMode {
   EDIT = 'edit',
   VIEW = 'view',
 }
-export interface TimeRange {
-  to: string;
-  from: string;
-}
-
-export interface RefreshConfig {
-  pause: boolean;
-  value: number;
-}
-
-export enum QueryLanguageType {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
-
-export interface Query {
-  language: QueryLanguageType;
-  query: string;
-}

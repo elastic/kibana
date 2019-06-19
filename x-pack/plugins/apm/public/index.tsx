@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'react-vis/dist/style.css';
-import { CoreSetup } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
@@ -48,6 +48,6 @@ checkForRoot().then(() => {
     i18n: {
       Context: I18nContext
     }
-  } as CoreSetup;
-  plugin().setup(core);
+  } as CoreStart;
+  plugin().start(core);
 });

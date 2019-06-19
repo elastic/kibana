@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { get, has } from 'lodash';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
@@ -33,7 +32,7 @@ import {
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
-import { createOptionalPlugin } from './server/lib/optional_plugin';
+import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -59,11 +58,6 @@ export const security = (kibana) => new kibana.Plugin({
       }),
       sessionTimeout: Joi.number().allow(null).default(null),
       secureCookies: Joi.boolean().default(false),
-      public: Joi.object({
-        protocol: Joi.string().valid(['http', 'https']),
-        hostname: Joi.string().hostname(),
-        port: Joi.number().integer().min(0).max(65535)
-      }).default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -75,26 +69,14 @@ export const security = (kibana) => new kibana.Plugin({
       authc: Joi.object({
         providers: Joi.array().items(Joi.string()).default(['basic']),
         oidc: providerOptionsSchema('oidc', Joi.object({ realm: Joi.string().required() }).required()),
-        saml: providerOptionsSchema('saml', Joi.object({ realm: Joi.string() })),
+        saml: providerOptionsSchema('saml', Joi.object({ realm: Joi.string().required() }).required()),
       }).default()
     }).default();
   },
 
-  deprecations: function ({ unused, rename }) {
+  deprecations: function ({ unused }) {
     return [
       unused('authorization.legacyFallback.enabled'),
-      rename('authProviders', 'authc.providers'),
-      (settings, log) => {
-        const hasSAMLProvider = get(settings, 'authc.providers', []).includes('saml');
-        if (hasSAMLProvider && !get(settings, 'authc.saml.realm')) {
-          log('Config key "authc.saml.realm" will become mandatory when using the SAML authentication provider in the next major version.');
-        }
-
-        if (has(settings, 'public')) {
-          log('Config key "public" is deprecated and will be removed in the next major version. ' +
-            'Specify "authc.saml.realm" instead.');
-        }
-      }
     ];
   },
 

@@ -7,6 +7,9 @@
 import { matchContainerName } from '../../utils/symbol_utils';
 
 describe('matchSymbolName', () => {
+  it('should match symbol whose name is exactly the container name', () => {
+    expect(matchContainerName('Session', 'Session')).toBe(true);
+  });
   it('should match symbol that has type annotation', () => {
     expect(matchContainerName('Session', 'Session<key, value>')).toBe(true);
   });

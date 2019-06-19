@@ -49,6 +49,10 @@ export class UiSettingsService {
     return this.uiSettingsClient;
   }
 
+  public start(): UiSettingsStart {
+    return this.uiSettingsClient!;
+  }
+
   public stop() {
     if (this.uiSettingsClient) {
       this.uiSettingsClient.stop();
@@ -62,3 +66,6 @@ export class UiSettingsService {
 
 /** @public */
 export type UiSettingsSetup = UiSettingsClient;
+
+/** @public */
+export type UiSettingsStart = UiSettingsClient;

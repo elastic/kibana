@@ -58,6 +58,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
       dnsSortField,
       filterQuery,
       isPtrIncluded,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -68,6 +69,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
         query={networkDnsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {

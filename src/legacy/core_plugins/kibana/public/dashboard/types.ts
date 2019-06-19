@@ -17,10 +17,18 @@
  * under the License.
  */
 
-import { Query } from 'ui/embeddable';
+import { EmbeddableFactory } from 'ui/embeddable';
 import { AppState } from 'ui/state_management/app_state';
+import { UIRegistry } from 'ui/registry/_registry';
 import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { DashboardViewMode } from './dashboard_view_mode';
+
+export interface EmbeddableFactoryRegistry extends UIRegistry<EmbeddableFactory> {
+  byName: { [key: string]: EmbeddableFactory };
+}
+
+export type NavAction = (menuItem: any, navController: any, anchorElement: any) => void;
 
 export interface GridData {
   w: number;

@@ -31,6 +31,8 @@ export const repositorySearchFailed = createAction<Error>('REPOSITORY SEARCH FAI
 
 export const changeSearchScope = createAction<SearchScope>('CHANGE SEARCH SCOPE');
 
+export const suggestionSearch = createAction<string>('SUGGESTION SEARCH');
+
 // For repository search typeahead
 export const repositorySearchQueryChanged = createAction<RepositorySearchPayload>(
   'REPOSITORY SEARCH QUERY CHANGED'

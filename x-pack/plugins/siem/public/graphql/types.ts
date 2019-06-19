@@ -1068,7 +1068,7 @@ export interface KpiNetworkData {
 }
 
 export interface KpiNetworkHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -1096,7 +1096,7 @@ export interface KpiHostsData {
 }
 
 export interface KpiHostHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -1180,41 +1180,41 @@ export interface NetworkDnsItem {
 }
 
 export interface OverviewNetworkData {
-  auditbeatSocket: number;
+  auditbeatSocket?: number | null;
 
-  filebeatCisco: number;
+  filebeatCisco?: number | null;
 
-  filebeatNetflow: number;
+  filebeatNetflow?: number | null;
 
-  filebeatPanw: number;
+  filebeatPanw?: number | null;
 
-  filebeatSuricata: number;
+  filebeatSuricata?: number | null;
 
-  filebeatZeek: number;
+  filebeatZeek?: number | null;
 
-  packetbeatDNS: number;
+  packetbeatDNS?: number | null;
 
-  packetbeatFlow: number;
+  packetbeatFlow?: number | null;
 
-  packetbeatTLS: number;
+  packetbeatTLS?: number | null;
 }
 
 export interface OverviewHostData {
-  auditbeatAuditd: number;
+  auditbeatAuditd?: number | null;
 
-  auditbeatFIM: number;
+  auditbeatFIM?: number | null;
 
-  auditbeatLogin: number;
+  auditbeatLogin?: number | null;
 
-  auditbeatPackage: number;
+  auditbeatPackage?: number | null;
 
-  auditbeatProcess: number;
+  auditbeatProcess?: number | null;
 
-  auditbeatUser: number;
+  auditbeatUser?: number | null;
 
-  filebeatSystemModule: number;
+  filebeatSystemModule?: number | null;
 
-  winlogbeat: number;
+  winlogbeat?: number | null;
 }
 
 export interface UncommonProcessesData {
@@ -3248,21 +3248,21 @@ export namespace GetOverviewHostQuery {
   export type OverviewHost = {
     __typename?: 'OverviewHostData';
 
-    auditbeatAuditd: number;
+    auditbeatAuditd?: number | null;
 
-    auditbeatFIM: number;
+    auditbeatFIM?: number | null;
 
-    auditbeatLogin: number;
+    auditbeatLogin?: number | null;
 
-    auditbeatPackage: number;
+    auditbeatPackage?: number | null;
 
-    auditbeatProcess: number;
+    auditbeatProcess?: number | null;
 
-    auditbeatUser: number;
+    auditbeatUser?: number | null;
 
-    filebeatSystemModule: number;
+    filebeatSystemModule?: number | null;
 
-    winlogbeat: number;
+    winlogbeat?: number | null;
   };
 }
 
@@ -3291,23 +3291,23 @@ export namespace GetOverviewNetworkQuery {
   export type OverviewNetwork = {
     __typename?: 'OverviewNetworkData';
 
-    auditbeatSocket: number;
+    auditbeatSocket?: number | null;
 
-    filebeatCisco: number;
+    filebeatCisco?: number | null;
 
-    filebeatNetflow: number;
+    filebeatNetflow?: number | null;
 
-    filebeatPanw: number;
+    filebeatPanw?: number | null;
 
-    filebeatSuricata: number;
+    filebeatSuricata?: number | null;
 
-    filebeatZeek: number;
+    filebeatZeek?: number | null;
 
-    packetbeatDNS: number;
+    packetbeatDNS?: number | null;
 
-    packetbeatFlow: number;
+    packetbeatFlow?: number | null;
 
-    packetbeatTLS: number;
+    packetbeatTLS?: number | null;
   };
 }
 
@@ -5041,7 +5041,7 @@ export namespace KpiHostChartFields {
   export type Fragment = {
     __typename?: 'KpiHostHistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
@@ -5051,7 +5051,7 @@ export namespace KpiNetworkChartFields {
   export type Fragment = {
     __typename?: 'KpiNetworkHistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };

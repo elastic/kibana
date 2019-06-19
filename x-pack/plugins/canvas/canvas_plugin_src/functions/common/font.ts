@@ -9,7 +9,15 @@ import inlineStyle from 'inline-style';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
-import { CSSStyle, FontFamily, FontWeight, Style, TextAlignment, TEXT_ALIGNMENTS } from '../types';
+import {
+  CSSStyle,
+  FontFamily,
+  FontWeight,
+  TextDecoration,
+  Style,
+  TextAlignment,
+  FontStyle,
+} from '../types';
 
 interface Arguments {
   align: TextAlignment;
@@ -38,7 +46,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       align: {
         default: 'left',
         help: argHelp.align,
-        options: TEXT_ALIGNMENTS,
+        options: Object.values(TextAlignment),
         types: ['string'],
       },
       color: {
@@ -83,7 +91,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       if (!Object.values(FontWeight).includes(args.weight)) {
         throw errors.invalidFontWeight(args.weight);
       }
-      if (!TEXT_ALIGNMENTS.includes(args.align)) {
+      if (!Object.values(TextAlignment).includes(args.align)) {
         throw errors.invalidTextAlignment(args.align);
       }
 
@@ -94,8 +102,8 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       const spec: CSSStyle = {
         fontFamily: args.family,
         fontWeight: args.weight,
-        fontStyle: args.italic ? 'italic' : 'normal',
-        textDecoration: args.underline ? 'underline' : 'none',
+        fontStyle: args.italic ? FontStyle.ITALIC : FontStyle.NORMAL,
+        textDecoration: args.underline ? TextDecoration.UNDERLINE : TextDecoration.NONE,
         textAlign: args.align,
         fontSize: `${args.size}px`, // apply font size as a pixel setting
         lineHeight, // apply line height as a pixel setting

@@ -1,43 +1,8 @@
-<div ng-controller="aggParam.controller">
-  <div class="form-group">
-    <label
-      for="visEditorSubAggMetric{{agg.id}}"
-      i18n-id="common.ui.aggTypes.metricLabel"
-      i18n-default-message="Metric"
-    ></label>
-    <select
-      id="visEditorSubAggMetric{{agg.id}}"
-      name="metricAgg"
-      ng-model="agg.params.metricAgg"
-      agg="agg"
-      required
-      validate-agg
-      class="form-control">
-      <option
-        ng-repeat="respAgg in responseValueAggs track by respAgg.id"
-        value="{{respAgg.id}}"
-        ng-if="respAgg.type.name !== agg.type.name"
-        ng-disabled="isDisabledAgg(respAgg)"
-        ng-selected="agg.params.metricAgg === respAgg.id"
-        i18n-id="common.ui.aggTypes.definiteMetricLabel"
-        i18n-default-message="metric: {safeMakeLabel}"
-        i18n-values="{ safeMakeLabel: safeMakeLabel(respAgg) }"
-      ></option>
-      <option
-        value="custom"
-        ng-selected="agg.params.metricAgg === 'custom'"
-        i18n-id="common.ui.aggTypes.customMetricLabel"
-        i18n-default-message="Custom Metric"
-      ></option>
-    </select>
-  </div>
-  <div ng-if="agg.params.metricAgg === 'custom'" class="visEditorAgg__subAgg">
-    <ng-form name="customMetricForm">
-      <vis-editor-agg-params
-        index-pattern="agg.getIndexPattern()"
-        agg="agg.params.customMetric"
-        group-name="'metrics'">
-      </vis-editor-agg-params>
-    </ng-form>
-  </div>
+<div ng-controller="aggParam.controller" ng-show="agg.params.metricAgg === 'custom'" class="visEditorAgg__subAgg">
+  <vis-editor-agg-params
+    index-pattern="agg.getIndexPattern()"
+    agg="agg.params.customMetric"
+    ng-if="agg.params.metricAgg === 'custom'"
+    group-name="'metrics'">
+  </vis-editor-agg-params>
 </div>

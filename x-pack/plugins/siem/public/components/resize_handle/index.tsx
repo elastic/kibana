@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { fromEvent, Observable, Subscription } from 'rxjs';
-import { mergeMap, takeUntil } from 'rxjs/operators';
+import { concatMap, takeUntil } from 'rxjs/operators';
 import styled, { injectGlobal } from 'styled-components';
 
 export type OnResize = (
@@ -21,6 +21,12 @@ export type OnResize = (
 
 export const resizeCursorStyle = 'col-resize';
 export const globalResizeCursorClassName = 'global-resize-cursor';
+
+/** This polyfill is for Safari only. `movementX` is more accurate and "feels" better, so only use this function on Safari */
+export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: number }) =>
+  prevX !== 0 ? screenX - prevX : 0;
+
+const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navigator.userAgent);
 
 // eslint-disable-next-line no-unused-expressions
 injectGlobal`
@@ -47,6 +53,10 @@ interface Props {
   onResize: OnResize;
 }
 
+interface State {
+  isResizing: boolean;
+}
+
 const ResizeHandleContainer = styled.div<{ height?: string }>`
   cursor: ${resizeCursorStyle};
   ${({ height }) => (height != null ? `height: ${height}` : '')}
@@ -60,12 +70,11 @@ export const removeGlobalResizeCursorStyleFromBody = () => {
   document.body.classList.remove(globalResizeCursorClassName);
 };
 
-export const isResizing = () => document.body.className.includes(globalResizeCursorClassName);
-
-export class Resizeable extends React.PureComponent<Props> {
-  private drag$: Observable<Event> | null;
-  private ref: React.RefObject<HTMLElement>;
+export class Resizeable extends React.PureComponent<Props, State> {
+  private drag$: Observable<MouseEvent> | null;
   private dragSubscription: Subscription | null;
+  private prevX: number = 0;
+  private ref: React.RefObject<HTMLElement>;
   private upSubscription: Subscription | null;
 
   constructor(props: Props) {
@@ -76,18 +85,26 @@ export class Resizeable extends React.PureComponent<Props> {
     this.drag$ = null;
     this.dragSubscription = null;
     this.upSubscription = null;
+
+    this.state = {
+      isResizing: false,
+    };
   }
 
   public componentDidMount() {
     const { id, onResize } = this.props;
 
-    const move$ = fromEvent(document, 'mousemove');
-    const down$ = fromEvent(this.ref.current!, 'mousedown');
-    const up$ = fromEvent(document, 'mouseup');
+    const move$ = fromEvent<MouseEvent>(document, 'mousemove');
+    const down$ = fromEvent<MouseEvent>(this.ref.current!, 'mousedown');
+    const up$ = fromEvent<MouseEvent>(document, 'mouseup');
 
-    this.drag$ = down$.pipe(mergeMap(() => move$.pipe(takeUntil(up$))));
+    this.drag$ = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
     this.dragSubscription = this.drag$.subscribe(e => {
-      const delta = (e as MouseEvent).movementX;
+      const delta = isSafari ? this.calculateDelta(e) : e.movementX;
+
+      if (!this.state.isResizing) {
+        this.setState({ isResizing: true });
+      }
 
       onResize({ id, delta });
 
@@ -95,8 +112,10 @@ export class Resizeable extends React.PureComponent<Props> {
     });
 
     this.upSubscription = up$.subscribe(() => {
-      if (isResizing()) {
+      if (this.state.isResizing) {
         removeGlobalResizeCursorStyleFromBody();
+
+        this.setState({ isResizing: false });
       }
     });
   }
@@ -116,7 +135,7 @@ export class Resizeable extends React.PureComponent<Props> {
 
     return (
       <>
-        {render(isResizing())}
+        {render(this.state.isResizing)}
         <ResizeHandleContainer
           data-test-subj="resize-handle-container"
           height={height}
@@ -127,4 +146,12 @@ export class Resizeable extends React.PureComponent<Props> {
       </>
     );
   }
+
+  private calculateDelta = (e: MouseEvent) => {
+    const deltaX = calculateDeltaX({ prevX: this.prevX, screenX: e.screenX });
+
+    this.prevX = e.screenX;
+
+    return deltaX;
+  };
 }

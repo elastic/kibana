@@ -9,12 +9,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getColorRampStops } from './color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
-import { getDefaultStaticProperties } from './vector_style_defaults';
+import { getDefaultProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
+import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
+import {
+  getMakiSymbolAnchor,
+  LARGE_MAKI_ICON_SIZE,
+  SMALL_MAKI_ICON_SIZE,
+  HALF_LARGE_MAKI_ICON_SIZE
+} from './symbol_utils';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -37,12 +44,12 @@ export class VectorStyle extends AbstractStyle {
   static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
-      properties: { ...getDefaultStaticProperties(), ...properties }
+      properties: { ...getDefaultProperties(), ...properties }
     };
   }
 
   static createDefaultStyleProperties(mapColors) {
-    return getDefaultStaticProperties(mapColors);
+    return getDefaultProperties(mapColors);
   }
 
   static getDisplayName() {
@@ -278,12 +285,16 @@ export class VectorStyle extends AbstractStyle {
 
   getIcon = () => {
     const styles = this.getProperties();
+    const symbolId = this.arePointsSymbolizedAsCircles()
+      ? undefined
+      : this._descriptor.properties.symbol.options.symbolId;
     return (
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
         fillColor={styles.fillColor}
         lineColor={styles.lineColor}
+        symbolId={symbolId}
       />
     );
   }
@@ -303,11 +314,26 @@ export class VectorStyle extends AbstractStyle {
     return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  _getScaledFields() {
+  _getStyleFields() {
     return this.getDynamicPropertiesArray()
-      .map(({ options }) => {
+      .map(({ styleName, options }) => {
         const name = options.field.name;
+
+        // "feature-state" data expressions are not supported with layout properties.
+        // To work around this limitation, some styling values must fall back to geojson property values.
+        let supportsFeatureState = true;
+        let isScaled = true;
+        if (styleName === 'iconSize'
+          && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
+          supportsFeatureState = false;
+        } else if (styleName === 'iconOrientation') {
+          supportsFeatureState = false;
+          isScaled = false;
+        }
+
         return {
+          supportsFeatureState,
+          isScaled,
           name,
           range: this._getFieldRange(name),
           computedName: VectorStyle.getComputedFieldName(name),
@@ -334,8 +360,8 @@ export class VectorStyle extends AbstractStyle {
       return;
     }
 
-    const scaledFields  = this._getScaledFields();
-    if (scaledFields.length === 0) {
+    const styleFields  = this._getStyleFields();
+    if (styleFields.length === 0) {
       return;
     }
 
@@ -349,23 +375,41 @@ export class VectorStyle extends AbstractStyle {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
 
-      for (let j = 0; j < scaledFields.length; j++) {
-        const { name, range, computedName } = scaledFields[j];
-        const unscaledValue = parseFloat(feature.properties[name]);
-        let scaledValue;
-        if (isNaN(unscaledValue) || !range) {//cannot scale
-          scaledValue = -1;//put outside range
-        } else if (range.delta === 0) {//values are identical
-          scaledValue = 1;//snap to end of color range
+      for (let j = 0; j < styleFields.length; j++) {
+        const { supportsFeatureState, isScaled, name, range, computedName } = styleFields[j];
+        const value = parseFloat(feature.properties[name]);
+        let styleValue;
+        if (isScaled) {
+          if (isNaN(value) || !range) {//cannot scale
+            styleValue = -1;//put outside range
+          } else if (range.delta === 0) {//values are identical
+            styleValue = 1;//snap to end of color range
+          } else {
+            styleValue = (feature.properties[name] - range.min) / range.delta;
+          }
         } else {
-          scaledValue = (feature.properties[name] - range.min) / range.delta;
+          if (isNaN(value)) {
+            styleValue = 0;
+          } else {
+            styleValue = value;
+          }
         }
-        tmpFeatureState[computedName] = scaledValue;
+
+        if (supportsFeatureState) {
+          tmpFeatureState[computedName] = styleValue;
+        } else {
+          feature.properties[computedName] = styleValue;
+        }
       }
       tmpFeatureIdentifier.source = sourceId;
       tmpFeatureIdentifier.id = feature.id;
       mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
+
+    const hasGeoJsonProperties = styleFields.some(({ supportsFeatureState }) => {
+      return !supportsFeatureState;
+    });
+    return hasGeoJsonProperties;
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
@@ -385,7 +429,7 @@ export class VectorStyle extends AbstractStyle {
     return   [
       'interpolate',
       ['linear'],
-      ['feature-state', targetName],
+      ['coalesce', ['feature-state', targetName], 0],
       0, minSize,
       1, maxSize
     ];
@@ -409,15 +453,18 @@ export class VectorStyle extends AbstractStyle {
     return null;
   }
 
+  _isSizeDynamicConfigComplete(styleDescriptor) {
+    return _.has(styleDescriptor, 'options.field.name')
+      && _.has(styleDescriptor, 'options.minSize')
+      && _.has(styleDescriptor, 'options.maxSize');
+  }
+
   _getMbSize(styleDescriptor) {
     if (styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC) {
       return styleDescriptor.options.size;
     }
 
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.minSize')
-      && _.has(styleDescriptor, 'options.maxSize');
-    if (isDynamicConfigComplete) {
+    if (this._isSizeDynamicConfigComplete(styleDescriptor)) {
       return this._getMbDataDrivenSize({
         fieldName: styleDescriptor.options.field.name,
         minSize: styleDescriptor.options.minSize,
@@ -486,5 +533,60 @@ export class VectorStyle extends AbstractStyle {
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
     }
+  }
+
+  async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
+
+    const symbolId = this._descriptor.properties.symbol.options.symbolId;
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
+    const color = this._getMBColor(this._descriptor.properties.fillColor);
+    // icon-color is only supported on SDF icons.
+    mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
+    mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
+
+    // circle sizing is by radius
+    // to make icons be similiar in size to circles then have to deal with icon in half width measurements
+    const iconSize = this._descriptor.properties.iconSize;
+    if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
+      const iconPixels = iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
+        ? LARGE_MAKI_ICON_SIZE
+        : SMALL_MAKI_ICON_SIZE;
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+
+      const halfIconPixels = iconPixels / 2;
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / halfIconPixels);
+    } else if (this._isSizeDynamicConfigComplete(iconSize)) {
+      const iconPixels = iconSize.options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
+        ? LARGE_MAKI_ICON_SIZE
+        : SMALL_MAKI_ICON_SIZE;
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+
+      const halfIconPixels = iconPixels / 2;
+      const targetName = VectorStyle.getComputedFieldName(iconSize.options.field.name);
+      // Using property state instead of feature-state because layout properties do not support feature-state
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
+        'interpolate',
+        ['linear'],
+        ['coalesce', ['get', targetName], 0],
+        0, iconSize.options.minSize / halfIconPixels,
+        1, iconSize.options.maxSize / halfIconPixels
+      ]);
+    }
+
+    const iconOrientation = this._descriptor.properties.iconOrientation;
+    if (iconOrientation.type === VectorStyle.STYLE_TYPE.STATIC) {
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
+    } else if (_.has(iconOrientation, 'options.field.name')) {
+      const targetName = VectorStyle.getComputedFieldName(iconOrientation.options.field.name);
+      // Using property state instead of feature-state because layout properties do not support feature-state
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
+        'coalesce', ['get', targetName], 0
+      ]);
+    }
+  }
+
+  arePointsSymbolizedAsCircles() {
+    return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
   }
 }
