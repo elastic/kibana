@@ -32,7 +32,7 @@ interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
   timefilter?: string;
 }
 
-export const saveQuery = async (attributes: SavedQueryAttributes, id: string = '') => {
+export const saveQuery = async (attributes: SavedQueryAttributes, id?: string) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const query = {
@@ -80,18 +80,7 @@ export const saveQuery = async (attributes: SavedQueryAttributes, id: string = '
     throw new Error(rawQueryResponse.error.message);
   }
 
-  const responseObject: SavedQueryAttributes = {
-    title: rawQueryResponse.attributes.title,
-    description: rawQueryResponse.attributes.description,
-    query: rawQueryResponse.attributes.query,
-  };
-  if (rawQueryResponse.attributes.filters) {
-    responseObject.filters = JSON.parse(rawQueryResponse.attributes.filters);
-  }
-  if (rawQueryResponse.attributes.timefilter) {
-    responseObject.timefilter = JSON.parse(rawQueryResponse.attributes.timefilter);
-  }
-  return { id: rawQueryResponse.id, attributes: responseObject };
+  return parseSavedQueryObject(rawQueryResponse);
 };
 
 export const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
