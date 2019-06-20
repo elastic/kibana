@@ -29,7 +29,7 @@ import { move } from '../../../utils/collection';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAgg', () => {
+  .directive('visEditorAgg', ($compile) => {
     return {
       restrict: 'A',
       template: aggTemplate,
@@ -153,6 +153,17 @@ uiModules
             ngModelCtrl.$setUntouched();
           }
         };
+
+        addSchemaEditor();
+
+        function addSchemaEditor() {
+          const $schemaEditor = $el.find('.schemaEditors');
+
+          if ($scope.agg.schema.editor) {
+            $schemaEditor.append($scope.agg.schema.editor);
+            $compile($schemaEditor)($scope.$new());
+          }
+        }
       }
     };
   });

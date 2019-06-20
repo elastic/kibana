@@ -21,11 +21,10 @@ import React, { useReducer, useEffect } from 'react';
 
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggType } from 'ui/agg_types';
+// @ts-ignore
+import { aggTypes, AggType } from 'ui/agg_types';
 import { AggConfig, Vis } from 'ui/vis';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
-// @ts-ignore
-import { aggTypes, AggParam } from '../../../../agg_types';
 import { DefaultEditorAggParam } from './default_editor_agg_param';
 import {
   getAggParamsToRender,
@@ -46,17 +45,18 @@ import {
 import { editorConfigProviders } from '../../config/editor_config_providers';
 import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
 
+const FIXED_VALUE_PROP = 'fixedValue';
+const DEFAULT_PROP = 'default';
 interface DefaultEditorAggParamsProps {
-  id: string;
   agg: AggConfig;
   aggIndex: number;
   aggIsTooLow: boolean;
   config: any;
-  formIsTouched: boolean;
-  vis: Vis;
   groupName: string;
+  formIsTouched: boolean;
   indexPattern: any;
   responseValueAggs: AggConfig[] | null;
+  vis: Vis;
   onAggParamsChange: (agg: AggConfig, paramName: string, value: any) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   setTouched: (isTouched: boolean) => void;
@@ -79,9 +79,7 @@ function DefaultEditorAggParams({
   setValidity,
 }: DefaultEditorAggParamsProps) {
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
-  const isSubAggregation = aggIndex >= 1 && groupName === 'buckets';
   const errors = getError(agg, aggIsTooLow);
-  const SchemaEditorComponent = agg.schema.editorComponent;
 
   const editorConfig = editorConfigProviders.getConfigForAgg(
     aggTypes.byType[groupName],
@@ -108,17 +106,17 @@ function DefaultEditorAggParams({
         const paramConfig = editorConfig[param];
         const paramOptions = agg.type.params.find((paramOption: any) => paramOption.name === param);
 
-        const hasFixedValue = paramConfig.hasOwnProperty('fixedValue');
-        const hasDefault = paramConfig.hasOwnProperty('default');
+        const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
+        const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
         // If the parameter has a fixed value in the config, set this value.
         // Also for all supported configs we should freeze the editor for this param.
         if (hasFixedValue || hasDefault) {
           let newValue;
-          let property = 'fixedValue';
+          let property = FIXED_VALUE_PROP;
           let typedParamConfig: EditorParamConfig = paramConfig as FixedParam;
 
           if (hasDefault) {
-            property = 'default';
+            property = DEFAULT_PROP;
             typedParamConfig = paramConfig as TimeIntervalParam;
           }
 
@@ -191,12 +189,11 @@ function DefaultEditorAggParams({
       error={errors}
       data-test-subj={`visAggEditorParams${agg.id}`}
     >
-      {SchemaEditorComponent && <SchemaEditorComponent />}
       <DefaultEditorAggSelect
         agg={agg}
         value={agg.type}
         aggTypeOptions={groupedAggTypeOptions}
-        isSubAggregation={isSubAggregation}
+        isSubAggregation={aggIndex >= 1 && groupName === 'buckets'}
         showValidation={formIsTouched || aggType.touched ? !aggType.validity : false}
         setValue={value => {
           onAggTypeChange(agg, value);

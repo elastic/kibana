@@ -59,7 +59,9 @@ function getAggParamsToRender(
         // Filter out, i.e. don't render, any parameter that is hidden via the editor config.
         .filter((param: AggParam) => !get(editorConfig, [param.name, 'hidden'], false))) ||
     [];
-  paramsToRender.forEach((param: AggParam, i: number) => {
+
+  // build collection of agg params components
+  paramsToRender.forEach((param: AggParam, index: number) => {
     let indexedFields: FieldParamType[] = [];
 
     if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
@@ -74,13 +76,14 @@ function getAggParamsToRender(
       indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
     }
 
-    if (indexedFields.length && i > 0) {
-      // don't draw the rest of the options if there are no indexed fields.
+    if (!indexedFields.length && index > 0) {
+      // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).
       return;
     }
 
     const type = param.advanced ? 'advanced' : 'basic';
 
+    // show params with an editor component
     if (param.editorComponent) {
       params[type].push({
         agg,
