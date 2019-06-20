@@ -604,6 +604,22 @@ To complicate matters further, a significant amount of the business logic in Kib
 
 Also unlike the server-side migration, we won't concern ourselves with creating shimmed plugin definitions that then get copied over to complete the migration.
 
+### Loading you brwoser-side shim
+
+Use `newPlatformPluginShim` "ui-export":
+
+```js
+export default function(kibana) {
+  return new kibana.Plugin({
+    uiExports: {
+      newPlatformPluginShim: ['plugins/my_plugin_name/shim/public'],
+    },
+  );
+}
+```
+
+The above will load your shim from `src/legacy/core_plugins/my_plugin_name/public/shim/public/index.ts`.
+
 ### Move UI modules into plugins
 
 Everything inside of the `ui/public` directory is going to be dealt with in one of the following ways:

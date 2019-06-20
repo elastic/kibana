@@ -67,6 +67,7 @@ export {
   search,
   autocompleteProviders,
   shareContextMenuExtensions,
+  newPlatformPluginShim,
 } from './ui_app_extensions';
 
 export {
