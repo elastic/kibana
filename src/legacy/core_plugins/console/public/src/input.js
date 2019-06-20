@@ -143,7 +143,8 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             let value = xhr.responseText;
             const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
 
-            if (mode === null || mode === 'application/json') {
+            // Apply triple quotes to output.
+            if (settings.getTripleQuotes() && (mode === null || mode === 'application/json')) {
               // assume json - auto pretty
               try {
                 value = utils.expandLiteralStrings(value);
