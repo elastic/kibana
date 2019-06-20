@@ -50,10 +50,6 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
         help: argHelp.fields,
         types: ['string'],
       },
-      metaFields: {
-        help: argHelp.metaFields,
-        types: ['string'],
-      },
       count: {
         types: ['number'],
         default: 100,
