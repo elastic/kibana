@@ -21,7 +21,7 @@ import { EmbeddableFactory } from 'ui/embeddable';
 import { AppState } from 'ui/state_management/app_state';
 import { UIRegistry } from 'ui/registry/_registry';
 import { Filter } from '@kbn/es-query';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { AppState as TAppState } from 'ui/state_management/app_state';
 import { DashboardViewMode } from './dashboard_view_mode';
 

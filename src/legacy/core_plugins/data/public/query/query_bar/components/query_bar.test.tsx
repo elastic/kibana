@@ -80,6 +80,11 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         intl={null as any}
+        onChange={noop}
+        onSave={noop}
+        onSaveNew={noop}
+        onLoadSavedQuery={noop}
+        isDirty={false}
       />
     );
 
@@ -97,6 +102,11 @@ describe('QueryBar', () => {
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
+        onChange={noop}
+        onSave={noop}
+        onSaveNew={noop}
+        onLoadSavedQuery={noop}
+        isDirty={false}
       />
     );
 

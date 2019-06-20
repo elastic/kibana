@@ -21,7 +21,7 @@
  * WARNING: these typings are incomplete
  */
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { SavedQuery } from 'plugins/data';
+import { SavedQuery } from '../../../../legacy/core_plugins/data/public';
 
 export type AutocompleteProvider = (
   args: {

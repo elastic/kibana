@@ -54,8 +54,8 @@ import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
 import { Query, SavedQuery } from 'plugins/data';
-import { data } from 'plugins/data/setup';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
+import { data } from '../../../data/public/setup';
 import {
   DashboardAppState,
   EmbeddableFactoryRegistry,

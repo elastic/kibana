@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttributes } from 'src/core/server';
 import { SavedQueryAttributes, SavedQuery } from '../index';
 
 interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
@@ -104,7 +104,10 @@ export const findSavedQueries = async (searchText: string = ''): Promise<SavedQu
     sortField: '_score',
   });
 
-  return response.savedObjects.map(savedObject => parseSavedQueryObject(savedObject));
+  return response.savedObjects.map(
+    (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
+      parseSavedQueryObject(savedObject)
+  );
 };
 
 export const getSavedQuery = async (id: string): Promise<SavedQuery> => {

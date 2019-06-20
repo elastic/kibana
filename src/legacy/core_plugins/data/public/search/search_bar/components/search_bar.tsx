@@ -24,6 +24,8 @@ import {
   EuiPopoverTitle,
   EuiButtonEmpty,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -40,7 +42,6 @@ import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { saveQuery } from '../lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
-import { EuiFlexGroup, EuiFlexItem } from '../../../../../../../../../eui/src/components/flex';
 
 interface DateRange {
   from: string;
