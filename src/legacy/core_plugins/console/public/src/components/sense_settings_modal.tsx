@@ -90,31 +90,30 @@ export function DevToolsSettingsModal(props: Props) {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
-        <EuiModalBody>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="console.settingsPage.fontSizeLabel"
-                    defaultMessage="Font Size"
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFieldNumber
-                autoFocus
-                data-test-subj="fontSizeInput"
-                value={fontSize}
-                onChange={e => {
-                  setFontSize((e.target.value as unknown) as number);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
+        <EuiModalBody className="euiText euiText--medium euiText--constrainedWidth">
           <EuiFlexGrid columns={1}>
+            <EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="console.settingsPage.fontSizeLabel"
+                      defaultMessage="Font Size"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  autoFocus
+                  data-test-subj="fontSizeInput"
+                  value={fontSize}
+                  onChange={e => {
+                    setFontSize((e.target.value as unknown) as number);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiSwitch
                 checked={wrapMode}
@@ -130,12 +129,12 @@ export function DevToolsSettingsModal(props: Props) {
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s">
+              <h4>
                 <FormattedMessage
                   id="console.settingsPage.autocompleteLabel"
                   defaultMessage="Autocomplete"
                 />
-              </EuiText>
+              </h4>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiSwitch
