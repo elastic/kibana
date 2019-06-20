@@ -1,0 +1,156 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { Legacy } from 'kibana';
+import { AuthorizationService } from './service';
+import { isAuthorizedKibanaUser } from './is_authorized_kibana_user';
+import { TransformApplicationsFromEsResponse } from './types';
+
+function buildAuthorizationService(
+  privilegesResponse: TransformApplicationsFromEsResponse = { success: true, value: [] }
+) {
+  return ({
+    application: 'kibana-.kibana',
+    getPrivilegesWithRequest: jest.fn().mockResolvedValue(privilegesResponse),
+    mode: {
+      useRbacForRequest: jest.fn().mockReturnValue(true),
+    },
+    privileges: {
+      get: () => ({
+        global: {
+          all: ['actions'],
+          read: ['actions'],
+        },
+        space: {
+          all: ['actions'],
+          read: ['actions'],
+        },
+        features: {
+          feature1: {
+            all: ['actions'],
+          },
+        },
+        reserved: {
+          reserved_feature_1: ['actions'],
+        },
+      }),
+    },
+  } as unknown) as AuthorizationService;
+}
+
+function buildRequest(): Legacy.Request {
+  const request: Legacy.Request = ({
+    headers: { authorization: 'Basic: somegarbage' },
+  } as unknown) as Legacy.Request;
+
+  return request;
+}
+
+describe('isAuthorizedKibanaUser', () => {
+  it('returns true for superusers', async () => {
+    const request = buildRequest();
+    const authService = buildAuthorizationService();
+
+    await expect(isAuthorizedKibanaUser(authService, request, ['superuser'])).resolves.toEqual(
+      true
+    );
+  });
+
+  it('returns false for users with no privileges', async () => {
+    const request = buildRequest();
+    const authService = buildAuthorizationService();
+
+    await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(false);
+  });
+
+  it('returns false for users with only reserved privileges', async () => {
+    const request = buildRequest();
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {},
+          _reserved: ['foo'],
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(false);
+  });
+
+  it('returns true for users with a base privilege', async () => {
+    const request = buildRequest();
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: ['all'],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(true);
+  });
+
+  it('returns true for users with a feature privilege', async () => {
+    const request = buildRequest();
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {
+            feature1: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(true);
+  });
+
+  it('returns true for users with both reserved and non-reserved privileges', async () => {
+    const request = buildRequest();
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {
+            feature1: ['all'],
+          },
+          _reserved: ['foo'],
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(true);
+  });
+
+  it('returns false for users with unknown privileges', async () => {
+    const request = buildRequest();
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {
+            feature1: ['unknown'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(false);
+  });
+});
