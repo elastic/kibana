@@ -269,7 +269,7 @@ Default: `"eq"`
 
 Alias: `this`, `b`
 |`any`
-|The value to compare the _context_ to, usually returned by a subexpression
+|The value to compare the _context_ to, usually returned by a sub-expression.
 |===
 
 *Returns:* `boolean`
@@ -279,8 +279,7 @@ Alias: `this`, `b`
 [[containerStyle_fn]]
 === `containerStyle`
 
-Creates an object used for describing the properties of a series on a chart. 
-You would usually use this inside of a charting function.
+Creates an object used for styling an element's container, including background, border, and opacity.
 
 *Accepts:* `null`
 
@@ -290,39 +289,45 @@ You would usually use this inside of a charting function.
 
 |`border`
 |`string`
-|Valid CSS border string
+|A valid CSS border string
 
 |`borderRadius`
 |`string`
-|Number of pixels to use when rounding the border
+|The number of pixels to use when rounding the border
 
 |`padding`
 |`string`
-|Content distance in pixels from border
+|Content distance, in pixels, from the border.
 
 |`backgroundColor`
 |`string`
-|Valid CSS background color string
+|A valid CSS background color string.
 
 |`backgroundImage`
 |`string`
-|Valid CSS background image string
+|A valid CSS background image string.
 
 |`backgroundSize`
 |`string`
-|Valid CSS background size string 
+|A valid CSS background size string.
 
 Default: `"contain"`
 
 |`backgroundRepeat`
 |`string`
-|Valid CSS background repeat string 
+|A valid CSS background repeat string.
 
 Default: `"no-repeat"`
 
 |`opacity`
 |`number`
-|A number between 0 and 1 representing the degree of transparency of the element
+|A number between 0 and 1 that represents the degree of transparency of the element.
+
+|`overflow`
+|`string`
+|A valid CSS overflow value
+
+Default: `"hidden"`
 |===
 
 *Returns:* `containerStyle`
@@ -655,7 +660,7 @@ capitalization
 [[filterrows_fn]]
 === `filterrows`
 
-Filters rows in a `datatable` based on the return value of a subexpression.
+Filters rows in a `datatable` based on the return value of a sub-expression.
 
 *Accepts:* `datatable`
 
@@ -932,7 +937,7 @@ Performs conditional logic.
 
 Alias: `condition`
 |`boolean`
-|A `true` or `false`, usually returned by a subexpression. 
+|A `true` or `false`, usually returned by a sub-expression. 
 If this is not supplied, then the input _context_ will be used.
 
 |`then`
@@ -964,7 +969,7 @@ Displays an image.
 
 Aliases: `dataurl`, `url`
 |`string`, `null`
-|An image asset can be provided as a base64 dataurl, or passed in as a subexpression
+|An image asset can be provided as a base64 dataurl, or passed in as a sub-expression
 (see example below)
 
 |`mode`
@@ -1540,7 +1545,7 @@ Configures a repeating image element.
 
 |`image`
 |`string`
-|An image asset can be provided as a base64 dataurl, or passed in as a subexpression
+|An image asset can be provided as a base64 dataurl, or passed in as a sub-expression
  (see example below)
 
 |`size`
@@ -1627,7 +1632,7 @@ Configures an image reveal element.
 
 |`image`
 |`string`
-|The image to reveal. An image asset can be provided as a base64 dataurl, or passed in as a subexpression 
+|The image to reveal. An image asset can be provided as a base64 dataurl, or passed in as a sub-expression 
 (see example below) 
 
 |`emptyImage`
