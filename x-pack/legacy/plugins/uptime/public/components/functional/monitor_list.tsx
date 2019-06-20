@@ -5,8 +5,8 @@
  */
 
 import {
-  EuiIcon,
-  EuiInMemoryTable,
+  EuiButtonIcon,
+  EuiBasicTable,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -223,6 +223,10 @@ export interface Criteria {
   };
 }
 
+interface ExpandedRowMapItem {
+  [key: string]: JSX.Element;
+}
+
 export const MonitorListComponent = (props: Props) => {
   const {
     absoluteStartDate,
@@ -239,8 +243,9 @@ export const MonitorListComponent = (props: Props) => {
     sortDirection,
     sortField,
   } = props;
-  const [expandedItems, setExpandedItems] = useState<{ [key: string]: JSX.Element | null }>({});
   if (!data || !data.monitorStates) return null;
+
+  const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const {
     summaries: items,
@@ -272,42 +277,46 @@ export const MonitorListComponent = (props: Props) => {
           />
         </h5>
       </EuiTitle>
-      <EuiPanel paddingSize="s">
-        <EuiBasicTable
-          error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-          loading={loading}
-          isExpandable
-          itemId="monitor_id"
-          itemIdToExpandedRowMap={expandedItems}
-          items={items || []}
-          onChange={onChange}
-          pagination={pagination}
-          sorting={sorting}
-          columns={[
-            {
-              field: 'monitor_id',
-              name: '',
-              sortable: true,
-              width: '40px',
-              render: (id: string) => {
-                return (
-                  <EuiButtonIcon
-                    aria-label="TODODONOTMERGEWITHOUTSETTINGTHIS"
-                    iconType={expandedItems[id] ? 'arrowUp' : 'arrowDown'}
-                    onClick={() =>
-                      expandedItems[id]
-                        ? setExpandedItems({})
-                        : setExpandedItems({
-                            [id]: drawer(
-                              items.find(({ monitor_id: monitorId }) => monitorId === id),
-                              dangerColor,
-                              successColor
-                            ),
-                          })
+      <EuiPanel>
+      <EuiBasicTable
+        error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
+        loading={loading}
+        isExpandable
+        itemId="monitor_id"
+        itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMapItem, id: string) => {
+          return {
+            ...map,
+            [id]: drawer(
+              items.find(({ monitor_id: monitorId }) => monitorId === id),
+              dangerColor,
+              successColor
+            ),
+          };
+        }, {})}
+        items={items || []}
+        onChange={onChange}
+        pagination={pagination}
+        sorting={sorting}
+        columns={[
+          {
+            field: 'monitor_id',
+            name: '',
+            sortable: true,
+            width: '40px',
+            render: (id: string) => {
+              return (
+                <EuiButtonIcon
+                  aria-label="TODODONOTMERGEWITHOUTSETTINGTHIS"
+                  iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
+                  onClick={() => {
+                    if (drawerIds.find(i => id === i)) {
+                      updateDrawerIds(drawerIds.filter(p => p !== id));
+                    } else {
+                      updateDrawerIds([...drawerIds, id]);
                     }
-                  />
-                );
-              },
+                  }}
+                />
+              );
             },
             {
               field: 'state.monitor.status',
