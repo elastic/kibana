@@ -16,6 +16,7 @@ import {
   getRoute,
   updateRoute,
   listActionTypesRoute,
+  fireRoute,
 } from './routes';
 
 import { registerBuiltInActionTypes } from './builtin_action_types';
@@ -64,6 +65,7 @@ export function init(server: Legacy.Server) {
   findRoute(server);
   updateRoute(server);
   listActionTypesRoute(server);
+  fireRoute(server);
 
   const fireFn = createFireFunction({
     taskManager: taskManager!,
@@ -77,6 +79,7 @@ export function init(server: Legacy.Server) {
     const actionsClient = new ActionsClient({
       savedObjectsClient,
       actionTypeRegistry,
+      fireFn,
     });
     return actionsClient;
   });

@@ -39,9 +39,17 @@ interface FindOptions {
   };
 }
 
+interface FireOptions {
+  id: string;
+  params: Record<string, any>;
+  namespace?: string;
+  basePath: string;
+}
+
 interface ConstructorOptions {
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
+  fireFn(fireOptions: FireOptions): Promise<any>;
 }
 
 interface UpdateOptions {
@@ -56,10 +64,12 @@ interface UpdateOptions {
 export class ActionsClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
+  private readonly fireFn: (fireOptions: FireOptions) => Promise<any>;
 
-  constructor({ actionTypeRegistry, savedObjectsClient }: ConstructorOptions) {
+  constructor({ actionTypeRegistry, savedObjectsClient, fireFn }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
+    this.fireFn = fireFn;
   }
 
   /**
@@ -101,6 +111,13 @@ export class ActionsClient {
    */
   public async delete({ id }: { id: string }) {
     return await this.savedObjectsClient.delete('action', id);
+  }
+
+  /**
+   * Fire action
+   */
+  public async fire({ id, params }: { id: string; params: Record<string, any> }) {
+    return await this.fireFn({ id, params, namespace: '', basePath: '' });
   }
 
   /**

@@ -7,6 +7,7 @@
 export { createRoute } from './create';
 export { deleteRoute } from './delete';
 export { findRoute } from './find';
+export { fireRoute } from './fire';
 export { getRoute } from './get';
 export { updateRoute } from './update';
 export { listActionTypesRoute } from './list_action_types';
