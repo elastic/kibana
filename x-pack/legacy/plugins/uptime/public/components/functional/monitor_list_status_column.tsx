@@ -8,15 +8,13 @@ import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elas
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-type StatusValues = 'up' | 'down' | 'mixed';
-
 interface MonitorListStatusColumnProps {
   absoluteTime: string;
   relativeTime: string;
-  status: StatusValues;
+  status: string;
 }
 
-const getHealthColor = (status: StatusValues): string => {
+const getHealthColor = (status: string): string => {
   switch (status) {
     case 'up':
       return 'success';
@@ -29,7 +27,7 @@ const getHealthColor = (status: StatusValues): string => {
   }
 };
 
-const getHealthMessage = (status: StatusValues): string | null => {
+const getHealthMessage = (status: string): string | null => {
   switch (status) {
     case 'up':
       return i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
