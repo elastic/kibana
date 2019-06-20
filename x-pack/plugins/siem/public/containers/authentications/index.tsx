@@ -97,10 +97,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
                   ...fetchMoreResult.source,
                   Authentications: {
                     ...fetchMoreResult.source.Authentications,
-                    edges: [
-                      ...prev.source.Authentications.edges,
-                      ...fetchMoreResult.source.Authentications.edges,
-                    ],
+                    edges: [...fetchMoreResult.source.Authentications.edges],
                   },
                 },
               };

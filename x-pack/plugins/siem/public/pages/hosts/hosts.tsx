@@ -127,7 +127,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                         totalCount,
                         loading,
                         pageInfo,
-                        loadMore,
+                        loadPage,
                         id,
                         refetch,
                       }) => (
@@ -140,7 +140,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           totalCount={totalCount}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
+                          loadPage={loadPage}
                           type={hostsModel.HostsType.page}
                         />
                       )}

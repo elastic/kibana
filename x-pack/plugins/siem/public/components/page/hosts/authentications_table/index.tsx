@@ -19,12 +19,14 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
-import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
+
+const tableType = hostsModel.HostsTableType.authentications;
 
 interface OwnProps {
   data: AuthenticationsEdges[];
@@ -32,7 +34,7 @@ interface OwnProps {
   hasNextPage: boolean;
   nextCursor: string;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number, cursor: string) => void;
   type: hostsModel.HostsType;
 }
 
@@ -42,6 +44,16 @@ interface AuthenticationTableReduxProps {
 
 interface AuthenticationTableDispatchProps {
   updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
+  updateTableLimit: ActionCreator<{
+    limit: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
 }
 
 type AuthenticationTableProps = OwnProps &
@@ -73,13 +85,15 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     hasNextPage,
     limit,
     loading,
-    loadMore,
+    loadPage,
     totalCount,
     nextCursor,
     updateLimitPagination,
+    updateTableActivePage,
+    updateTableLimit,
     type,
   }) => (
-    <LoadMoreTable
+    <PaginatedTable
       columns={getAuthenticationColumnsCurated(type)}
       hasNextPage={hasNextPage}
       headerCount={totalCount}
@@ -89,10 +103,22 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       limit={limit}
       loading={loading}
       loadingTitle={i18n.AUTHENTICATIONS}
-      loadMore={() => loadMore(nextCursor)}
+      loadPage={newActivePage => loadPage(newActivePage, nextCursor)}
       pageOfItems={data}
+      totalCount={totalCount}
       updateLimitPagination={newLimit =>
-        updateLimitPagination({ limit: newLimit, hostsType: type })
+        updateTableLimit({
+          hostsType: type,
+          limit: newLimit,
+          tableType,
+        })
+      }
+      updateActivePage={newPage =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        })
       }
     />
   )
@@ -109,6 +135,8 @@ export const AuthenticationTable = connect(
   makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateAuthenticationsLimit,
+    updateTableActivePage: hostsActions.updateTableActivePage,
+    updateTableLimit: hostsActions.updateTableLimit,
   }
 )(AuthenticationTableComponent);
 
