@@ -53,10 +53,6 @@ export const MetricsExplorerChart = injectI18n(
     const handleTimeChange = (from: number, to: number) => {
       onTimeChange(moment(from).toISOString(), moment(to).toISOString());
     };
-    const dateFormatter = useCallback(
-      niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp]),
-      [series, series.rows]
-    );
     const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
     return (
       <React.Fragment>
@@ -101,7 +97,10 @@ export const MetricsExplorerChart = injectI18n(
                 id={getAxisId('timestamp')}
                 position={Position.Bottom}
                 showOverlappingTicks={true}
-                tickFormat={dateFormatter}
+                tickFormat={useCallback(
+                  niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp]),
+                  [series, series.rows]
+                )}
               />
               <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
               <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />

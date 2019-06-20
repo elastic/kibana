@@ -157,6 +157,8 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         url = `/s/${spaceId}${url}`;
       }
     }
+    const basePath = internalRequest.getBasePath();
+    url = `${basePath}${url}`;
 
     const request = {
       url,
