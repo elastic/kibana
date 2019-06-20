@@ -14,7 +14,7 @@ import {
   Server,
   ServerPluginInitializerContext,
 } from './common/types';
-import { Plugin } from './server/plugin';
+import { Plugin as ServerPlugin } from './server/plugin';
 import manifest from './kibana.json';
 import { PLUGIN_ID } from './common/constants';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
@@ -86,7 +86,7 @@ const pluginOptions: LegacyPluginOptions = {
       },
     };
     const initializerContext: ServerPluginInitializerContext = {};
-    new Plugin(initializerContext).setup(coreSetup);
+    new ServerPlugin(initializerContext).setup(coreSetup);
   },
   postInit: undefined,
   isEnabled: false,
