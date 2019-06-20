@@ -36,39 +36,6 @@
 
 jest.mock('ui/metadata');
 jest.mock('ui/chrome');
-jest.mock('ui/new_platform', () => {
-  return {
-    __reset__: () => {},
-    __setup__: () => {},
-    __start__: () => {},
-    npSetup: {
-      core: {},
-      plugins: {
-        data: {
-          interpreter: {
-            __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
-              functionsRegistry: {
-                register: () => {},
-              },
-              renderersRegistry: {
-                register: () => {},
-              },
-              typesRegistry: {
-                register: () => {},
-              },
-            },
-          },
-        },
-      },
-    },
-    npStart: {
-      core: {},
-      plugins: {
-        data: {},
-      },
-    },
-  };
-});
 
 jest.mock('moment-timezone', () => {
   // We always want to mock the timezone moment-timezone guesses, since otherwise

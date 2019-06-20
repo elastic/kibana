@@ -17,29 +17,35 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { tagcloud } from './tag_cloud_fn';
-
-jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
-
-describe('interpreter/functions#tagcloud', () => {
-  const fn = functionWrapper(tagcloud);
-  const context = {
-    type: 'kibana_datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
+export const mockNewPlatformBackdoor = () => {
+  return {
+    __setup__: () => {},
+    __start__: () => {},
+    npSetup: {
+      core: {},
+      plugins: {
+        data: {
+          interpreter: {
+            __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+              functionsRegistry: {
+                register: () => {},
+              },
+              renderersRegistry: {
+                register: () => {},
+              },
+              typesRegistry: {
+                register: () => {},
+              },
+            },
+          },
+        },
+      },
+    },
+    npStart: {
+      core: {},
+      plugins: {
+        data: {},
+      },
+    },
   };
-  const visConfig = {
-    scale: 'linear',
-    orientation: 'single',
-    minFontSize: 18,
-    maxFontSize: 72,
-    showLabel: true,
-    metric: { accessor: 0, format: { id: 'number' } },
-  };
-
-  it('returns an object with the correct structure', () => {
-    const actual = fn(context, visConfig);
-    expect(actual).toMatchSnapshot();
-  });
-});
+};

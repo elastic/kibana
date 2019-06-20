@@ -20,6 +20,7 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { tilemap } from './tilemap_fn';
 
+jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
 jest.mock('ui/vis/map/convert_to_geojson', () => ({
   convertToGeoJson: jest.fn().mockReturnValue({
     featureCollection: {
