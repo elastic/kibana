@@ -30,6 +30,7 @@
         <div class="fullWidth kuiVerticalRhythmSmall">
           <search-bar
             query="state.query"
+            saved-query="savedQuery"
             screen-title="state.vis.title"
             on-query-submit="updateQueryAndFetch"
             app-name="'visualize'"
@@ -45,6 +46,8 @@
             refresh-interval="refreshInterval.value"
             show-auto-refresh-only="showAutoRefreshOnlyInQueryBar"
             on-refresh-change="onRefreshChange"
+            on-saved="onQuerySaved"
+            on-saved-query-updated="onSavedQueryUpdated"
           ></search-bar>
         </div>
       </div>

@@ -53,7 +53,9 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
+import { data } from 'plugins/data/setup';
 
+const { savedQueryService } = data.search.services;
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -464,6 +466,56 @@ function VisEditor(
       value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
     });
   };
+
+  $scope.onQuerySaved = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  const updateStateFromSavedQuery = (savedQuery) => {
+    $state.query = savedQuery.attributes.query;
+    queryFilter.setFilters(savedQuery.attributes.filters || []);
+
+    if (savedQuery.attributes.timefilter) {
+      timefilter.setTime({
+        from: savedQuery.attributes.timefilter.timeFrom,
+        to: savedQuery.attributes.timefilter.timeTo,
+      });
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+      }
+    }
+
+    $scope.fetch();
+  };
+
+  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+    if (!newSavedQuery) return;
+    $state.savedQuery = newSavedQuery.id;
+    $state.save();
+
+    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      updateStateFromSavedQuery(newSavedQuery);
+    }
+  });
+
+  $scope.$watch('state.savedQuery', newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
+
+    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      $scope.$evalAsync(() => {
+        $scope.savedQuery = savedQuery;
+        updateStateFromSavedQuery(savedQuery);
+      });
+    });
+  }
+  );
 
   /**
    * Called when the user clicks "Save" button.
