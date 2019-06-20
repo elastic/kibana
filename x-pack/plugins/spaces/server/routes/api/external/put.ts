@@ -9,18 +9,19 @@ import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
+import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
-export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
+export function initPutSpacesApi(deps: ExternalRouteDeps) {
+  const { http, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+
+  http.route({
     method: 'PUT',
     path: '/api/spaces/space/{id}',
-    async handler(request: any) {
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+    async handler(request: ExternalRouteRequestFacade) {
+      const { SavedObjectsClient } = savedObjects;
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
-      const space: Space = request.payload;
+      const space: Space = request.payload as Space;
       const id = request.params.id;
 
       let result: Space;
@@ -35,7 +36,7 @@ export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
 
       return result;
     },
-    config: {
+    options: {
       validate: {
         payload: spaceSchema,
       },

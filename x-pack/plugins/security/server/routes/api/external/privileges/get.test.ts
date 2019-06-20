@@ -7,6 +7,7 @@ import Boom from 'boom';
 import { Server } from 'hapi';
 import { RawKibanaPrivileges } from '../../../../../common/model';
 import { initGetPrivilegesApi } from './get';
+import { AuthorizationService } from '../../../../lib/authorization/service';
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {
@@ -37,13 +38,13 @@ const createMockServer = () => {
   const mockServer = new Server({ debug: false, port: 8080 });
 
   mockServer.plugins.security = {
-    authorization: {
+    authorization: ({
       privileges: {
         get: jest.fn().mockImplementation(() => {
           return createRawKibanaPrivileges();
         }),
       },
-    },
+    } as unknown) as AuthorizationService,
   } as any;
   return mockServer;
 };

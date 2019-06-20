@@ -155,9 +155,14 @@ export class LspIncrementalIndexer extends LspIndexer {
       this.diff = await this.gitOps.getDiff(this.repoUri, this.originRevision, this.revision);
       return this.diff.files.length;
     } catch (error) {
-      this.log.error(`Get lsp incremental index requests count error.`);
-      this.log.error(error);
-      throw error;
+      if (this.isCancelled()) {
+        this.log.debug(`Incremental indexer got cancelled. Skip get index count error.`);
+        return 1;
+      } else {
+        this.log.error(`Get lsp incremental index requests count error.`);
+        this.log.error(error);
+        throw error;
+      }
     }
   }
 
