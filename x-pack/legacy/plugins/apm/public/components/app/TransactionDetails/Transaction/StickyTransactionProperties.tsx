@@ -125,8 +125,8 @@ export function StickyTransactionProperties({
     const { os, device } = userAgent;
     const width = '25%';
     stickyProperties.push({
-      label: i18n.translate('xpack.apm.transactionDetails.browserLabel', {
-        defaultMessage: 'Browser'
+      label: i18n.translate('xpack.apm.transactionDetails.userAgentLabel', {
+        defaultMessage: 'User agent'
       }),
       val: [userAgent.name, userAgent.version].filter(Boolean).join(' '),
       truncated: true,
@@ -135,8 +135,8 @@ export function StickyTransactionProperties({
 
     if (os) {
       stickyProperties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.osLabel', {
-          defaultMessage: 'OS'
+        label: i18n.translate('xpack.apm.transactionDetails.userAgentOsLabel', {
+          defaultMessage: 'User agent OS'
         }),
         val: os.full,
         truncated: true,
@@ -145,9 +145,12 @@ export function StickyTransactionProperties({
     }
 
     stickyProperties.push({
-      label: i18n.translate('xpack.apm.transactionDetails.deviceLabel', {
-        defaultMessage: 'OS'
-      }),
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.userAgentDeviceLabel',
+        {
+          defaultMessage: 'User agent device'
+        }
+      ),
       val: device.name,
       width
     });
