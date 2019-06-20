@@ -36,6 +36,7 @@
     "xpack.indexLifecycleMgmt": "x-pack/plugins/index_lifecycle_management",
     "xpack.infra": "x-pack/plugins/infra",
     "xpack.kueryAutocomplete": "x-pack/plugins/kuery_autocomplete",
+    "xpack.lens": "x-pack/plugins/lens",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
     "xpack.maps": "x-pack/plugins/maps",
     "xpack.ml": "x-pack/plugins/ml",
