@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggConfig, Vis } from 'ui/vis';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
-import { aggTypes, AggParam, FieldParamType } from 'ui/agg_types';
+import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { groupAggregationsBy } from '../default_editor_utils';
 import { EditorConfig } from '../../config/types';
+import { AggTypeState, AggParamsState } from './default_editor_agg_params_state';
 
 interface ParamInstanceBase {
   agg: AggConfig;
@@ -130,4 +131,27 @@ function getAggTypeOptions(agg: AggConfig, indexPattern: IndexPattern, groupName
   return groupAggregationsBy(aggTypeOptions, 'subtype');
 }
 
-export { getAggParamsToRender, getError, getAggTypeOptions };
+/**
+ * Calculates a form touched state.
+ * If an aggregation is not selected, it returns a value of touched agg selector state.
+ * Else if there are no agg params, it returns false.
+ * Otherwise it returns true if each invalid param is touched.
+ * @param aggType Selected aggregation.
+ * @param aggTypeState State of aggregation selector.
+ * @param aggParams State of aggregation parameters.
+ */
+function getFormTouched(aggType: AggType, aggTypeState: AggTypeState, aggParams: AggParamsState) {
+  if (!aggType) {
+    return aggTypeState.touched;
+  }
+
+  if (isEmpty(aggParams)) {
+    return false;
+  }
+
+  return Object.keys(aggParams).every((paramsName: string) =>
+    aggParams[paramsName].validity ? true : aggParams[paramsName].touched
+  );
+}
+
+export { getAggParamsToRender, getError, getAggTypeOptions, getFormTouched };

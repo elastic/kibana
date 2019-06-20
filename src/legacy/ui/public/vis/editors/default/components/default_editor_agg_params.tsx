@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React, { useReducer, useEffect } from 'react';
 
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
@@ -31,6 +32,7 @@ import {
   getError,
   getAggTypeOptions,
   ParamInstance,
+  getFormTouched,
 } from './default_editor_agg_params_helper';
 import {
   aggTypeReducer,
@@ -81,13 +83,24 @@ function DefaultEditorAggParams({
   const errors = getError(agg, aggIsTooLow);
   const SchemaEditorComponent = agg.schema.editorComponent;
 
-  const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, validity: true });
-
   const editorConfig = editorConfigProviders.getConfigForAgg(
     aggTypes.byType[groupName],
     indexPattern,
     agg
   );
+  const params = getAggParamsToRender({ agg, config, editorConfig, responseValueAggs }, vis);
+  const allParams = [...params.basic, ...params.advanced];
+  const [aggParams, onChangeAggParams] = useReducer(
+    aggParamsReducer,
+    allParams,
+    initAggParamsState
+  );
+  const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, validity: true });
+
+  const isFormValid =
+    aggType.validity &&
+    Object.keys(aggParams).every((paramsName: string) => aggParams[paramsName].validity);
+  const isReactFormTouched = getFormTouched(agg.type, aggType, aggParams);
 
   useEffect(
     () => {
@@ -123,29 +136,12 @@ function DefaultEditorAggParams({
     [editorConfig]
   );
 
-  const params = getAggParamsToRender({ agg, config, editorConfig, responseValueAggs }, vis);
-  const allParams = [...params.basic, ...params.advanced];
-  const [aggParams, onChangeAggParams] = useReducer(
-    aggParamsReducer,
-    allParams,
-    initAggParamsState
-  );
-
   useEffect(
     () => {
       setTouched(false);
     },
     [agg.type]
   );
-
-  const isFormValid =
-    aggType.validity &&
-    Object.keys(aggParams).every((paramsName: string) => aggParams[paramsName].validity);
-  const isReactFormTouched =
-    (agg.type ? false : aggType.touched) &&
-    Object.keys(aggParams).every((paramsName: string) =>
-      aggParams[paramsName].validity ? true : aggParams[paramsName].touched
-    );
 
   useEffect(
     () => {
@@ -190,7 +186,11 @@ function DefaultEditorAggParams({
   };
 
   return (
-    <EuiForm isInvalid={!!errors.length} error={errors}>
+    <EuiForm
+      isInvalid={!!errors.length}
+      error={errors}
+      data-test-subj={`visAggEditorParams${agg.id}`}
+    >
       {SchemaEditorComponent && <SchemaEditorComponent />}
       <DefaultEditorAggSelect
         agg={agg}

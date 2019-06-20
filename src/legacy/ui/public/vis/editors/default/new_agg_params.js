@@ -25,7 +25,6 @@ uiModules
   .get('app/visualize')
   .directive('newVisEditorAggParams', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
     ['agg', { watchDepth: 'reference' }],
-    ['aggType', { watchDepth: 'reference' }],
     ['aggParams', { watchDepth: 'collection' }],
     ['config', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
