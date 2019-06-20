@@ -24,7 +24,7 @@ export class Cancelable<T> {
     });
   }
 
-  public cancel(error = 'canceled'): void {
+  public cancel(error: any = 'canceled'): void {
     if (this._cancel) {
       this._cancel(error);
     } else if (this.reject) {
@@ -36,5 +36,12 @@ export class Cancelable<T> {
     if (this.reject) {
       this.reject(error);
     }
+  }
+
+  public static fromPromise<T>(promise: Promise<T>) {
+    return new Cancelable((resolve, reject, c) => {
+      promise.then(resolve);
+      promise.catch(reject);
+    });
   }
 }

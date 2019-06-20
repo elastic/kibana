@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
-import { FindOptions } from 'src/legacy/server/saved_objects/service';
+import { SavedObjectsFindOptions } from 'src/core/server';
 
 import { Pick3 } from '../../../common/utility_types';
 import {
@@ -59,7 +59,7 @@ export class Timeline {
     search: string | null,
     sort: SortTimeline | null
   ): Promise<ResponseTimelines> {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -226,7 +226,7 @@ export class Timeline {
     return timelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
   }
 
-  private async getAllSavedTimeline(request: FrameworkRequest, options: FindOptions) {
+  private async getAllSavedTimeline(request: FrameworkRequest, options: SavedObjectsFindOptions) {
     const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
 
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(

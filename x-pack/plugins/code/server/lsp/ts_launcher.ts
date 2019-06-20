@@ -10,9 +10,9 @@ import { resolve } from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { LanguageServerProxy } from './proxy';
-import { RequestExpander } from './request_expander';
 import { AbstractLauncher } from './abstract_launcher';
+import { LanguageServerProxy } from './proxy';
+import { InitializeOptions, RequestExpander } from './request_expander';
 
 const TS_LANG_DETACH_PORT = 2089;
 
@@ -37,10 +37,19 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     builtinWorkspace: boolean,
     maxWorkspace: number
   ): RequestExpander {
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-      installNodeDependency: this.options.security.installNodeDependency,
-      gitHostWhitelist: this.options.security.gitHostWhitelist,
-    });
+    return new RequestExpander(
+      proxy,
+      builtinWorkspace,
+      maxWorkspace,
+      this.options,
+      {
+        initialOptions: {
+          installNodeDependency: this.options.security.installNodeDependency,
+          gitHostWhitelist: this.options.security.gitHostWhitelist,
+        },
+      } as InitializeOptions,
+      this.log
+    );
   }
   async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
     const p = spawn(process.execPath, [installationPath, '-p', port.toString(), '-c', '1'], {
