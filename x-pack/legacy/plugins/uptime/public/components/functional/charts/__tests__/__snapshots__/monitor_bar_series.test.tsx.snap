@@ -13,7 +13,6 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
     renderer="canvas"
   >
     <inject-SettingsComponent-with-chartStore
-      tooltipType="vertical"
       xDomain={
         Object {
           "max": 1548700920000,
