@@ -25,7 +25,6 @@ import {
   EmbeddableFactory,
 } from '../embeddables';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { IRegistry } from '../types';
 
 export interface PanelState<
   E extends { [key: string]: unknown } & { id: string } = { [key: string]: unknown } & {
@@ -59,7 +58,7 @@ export interface IContainer<
   I extends ContainerInput = ContainerInput,
   O extends ContainerOutput = ContainerOutput
 > extends IEmbeddable<I, O> {
-  readonly embeddableFactories: IRegistry<EmbeddableFactory>;
+  readonly embeddableFactories: Map<string, EmbeddableFactory>;
 
   /**
    * Call if you want to wait until an embeddable with that id has finished loading.
