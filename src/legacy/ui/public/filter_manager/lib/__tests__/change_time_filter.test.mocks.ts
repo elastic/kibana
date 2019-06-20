@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { createLogKey } from './create_log_key';
+import { chromeServiceMock } from '../../../../../../core/public/mocks';
 
-describe('createLogKey', () => {
-  it('should create a key starting with "kibana.history"', () => {
-    expect(createLogKey('foo', 'bar')).toMatch(/^kibana\.history/);
-  });
-
-  it('should include a hashed suffix of the identifier when present', () => {
-    const expectedSuffix = `/N4rLtula/QIYB+3If6bXDONEO5CnqBPrlURto+/j7k=`;
-    expect(createLogKey('foo', 'bar')).toMatch(`kibana.history.foo-${expectedSuffix}`);
-  });
-
-  it('should not include a hashed suffix if the identifier is not present', () => {
-    expect(createLogKey('foo')).toEqual('kibana.history.foo');
-  });
-});
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));
