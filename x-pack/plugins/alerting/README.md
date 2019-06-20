@@ -52,53 +52,123 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 
 ### Example
 
+This example receives server and threshold as parameters. It will read the CPU usage of the server and fire actions if the reading is greater than the threshold.
+
 ```
 server.plugins.alerting.registerType({
-  id: 'my-alert-type',
-  name: 'My alert type',
-  validate: {
-    params: Joi.object()
-      .keys({
-        myParam: Joi.string().required(),
-      })
-      .required(),
-  },
-  async execute({
-    scheduledRunAt,
-    previousScheduledRunAt,
-    services,
-    params,
-    state,
-  }: AlertExecuteOptions) {  
-    // Use this example to fire a single action, server_1 is a unique identifier of the server
-    // the instance is about. This will be used to make `getState()` return previous state on matching identifiers.
-    services.alertInstanceFactory('server_1')
-      .replaceState({
-        // Alert instance level state, use getState() for
-        // previous and persisted values
-        ...
-      })
-      // 'default' refers to a group of actions to fire, see 'actions' in create alert section
-      .fire('default', {
-        server: 'server_1',
-      });
-    
-    // Use this example to fire multiple actions
-    // This scenario allows a single query and "fan-off" zero, one or many alerts based on the results
-    for (const server of ['server_1', 'server_2', 'server_3']) {
-      services.alertInstanceFactory(server)
-      	 .replaceState({
-      	 	// State specific to "server_x"
-      	 	...
-      	 })
-      	 .fire('default', { server });
-    }
-    
-    // Returning updated alert type level state
-    return {
-      ...
-    };
-  },
+	id: 'my-alert-type',
+	name: 'My alert type',
+	validate: {
+		params: Joi.object()
+			.keys({
+				server: Joi.string().required(),
+				threshold: Joi.number().min(0).max(1).required(),
+			})
+			.required(),
+	},
+	async execute({
+		scheduledRunAt,
+		previousScheduledRunAt,
+		services,
+		params,
+		state,
+	}: AlertExecuteOptions) {
+		const { server, threshold } = params; // Let's assume params is { server: 'server_1', threshold: 0.8 }
+
+		// Call a function to get the server's current CPU usage
+		const currentCpuUsage = await getCpuUsage(server);
+
+		// Only fire if CPU usage is greater than threshold
+		if (currentCpuUsage > threshold) {
+			// The first argument is a unique identifier the alert instance is about. In this scenario
+			// the provided server will be used. Also, this id will be used to make `getState()` return
+			// previous state, if any, on matching identifiers.
+			const alertInstance = services.alertInstanceFactory(server);
+
+			// State from last execution. This will exist if an alert instance was created and fired
+			// in the previous execution
+			const { cpuUsage: previousCpuUsage } = alertInstance.getState();
+
+			// Replace state entirely with new values
+			alertInstance.replaceState({
+				cpuUsage: currentCpuUsage,
+			});
+
+			// 'default' refers to a group of actions to fire, see 'actions' in create alert section
+			alertInstance.fire('default', {
+				server,
+				hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
+			});
+		}
+
+		// Returning updated alert type level state, this will become available
+		// within the `state` function parameter at the next execution
+		return {
+			// This is an example attribute you could set, it makes more sense to use this state when
+			// the alert type fires multiple instances but wants a single place to track certain values.
+			lastChecked: new Date(),
+		};
+	},
+});
+```
+
+This example only receives threshold as a parameter. It will read the CPU usage of all the servers and fire individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
+
+```
+server.plugins.alerting.registerType({
+	id: 'my-alert-type',
+	name: 'My alert type',
+	validate: {
+		params: Joi.object()
+			.keys({
+				threshold: Joi.number().min(0).max(1).required(),
+			})
+			.required(),
+	},
+	async execute({
+		scheduledRunAt,
+		previousScheduledRunAt,
+		services,
+		params,
+		state,
+	}: AlertExecuteOptions) {
+		const { threshold } = params; // Let's assume params is { threshold: 0.8 }
+
+		// Call a function to get the CPU readings on all the servers. The result will be
+		// an array of { server, cpuUsage }.
+		const cpuUsageByServer = await getCpuUsageByServer();
+
+		for (const { server, cpuUsage: currentCpuUsage } of cpuUsageByServer) {
+			// Only fire if CPU usage is greater than threshold
+			if (currentCpuUsage > threshold) {
+				// The first argument is a unique identifier the alert instance is about. In this scenario
+				// the provided server will be used. Also, this id will be used to make `getState()` return
+				// previous state, if any, on matching identifiers.
+				const alertInstance = services.alertInstanceFactory(server);
+
+				// State from last execution. This will exist if an alert instance was created and fired
+				// in the previous execution
+				const { cpuUsage: previousCpuUsage } = alertInstance.getState();
+
+				// Replace state entirely with new values
+				alertInstance.replaceState({
+					cpuUsage: currentCpuUsage,
+				});
+
+				// 'default' refers to a group of actions to fire, see 'actions' in create alert section
+				alertInstance.fire('default', {
+					server,
+					hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
+				});
+			}
+		}
+
+		// Single object containing state that isn't specific to a server, this will become available
+		// within the `state` function parameter at the next execution
+		return {
+			lastChecked: new Date(),
+		};
+	},
 });
 ```
 
