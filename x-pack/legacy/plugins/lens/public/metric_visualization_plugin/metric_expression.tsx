@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { MetricConfig } from './types';
 import { KibanaDatatable } from '../types';
 import { RenderFunction } from './plugin';
+import { AutoScale } from './auto_scale';
 
 export interface MetricChartProps {
   data: KibanaDatatable;
@@ -86,12 +87,13 @@ export function MetricChart({ data, args }: MetricChartProps) {
   const value = Number(Number(row[accessor]).toFixed(3)).toString();
 
   return (
-    <EuiFlexGroup className="lnsChart" alignItems="center" justifyContent="spaceAround">
-      <EuiFlexItem grow={false}>
-        {/* TODO: Auto-scale the text on resizes */}
-        <div style={{ textAlign: 'center', fontWeight: 600, fontSize: '60pt' }}>{value}</div>
-        <EuiText textAlign="center">{title}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AutoScale>
+      <EuiFlexGroup className="lnsChart" alignItems="center" justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <div style={{ textAlign: 'center', fontWeight: 600, fontSize: '60pt' }}>{value}</div>
+          <EuiText textAlign="center">{title}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </AutoScale>
   );
 }
