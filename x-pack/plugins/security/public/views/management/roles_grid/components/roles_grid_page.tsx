@@ -225,6 +225,7 @@ class RolesGridPageUI extends Component<Props, State> {
           id: 'xpack.security.management.roles.actionsColumnName',
           defaultMessage: 'Actions',
         }),
+        width: '150px',
         actions: [
           {
             available: (role: Role) => !isReadOnlyRole(role),
