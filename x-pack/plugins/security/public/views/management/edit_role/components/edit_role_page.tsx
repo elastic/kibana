@@ -10,7 +10,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiForm,
   EuiFormRow,
   EuiPanel,
@@ -68,18 +67,7 @@ class EditRolePageUI extends Component<Props, State> {
 
     let role: Role;
     if (props.action === 'clone') {
-      role = prepareRoleClone(props.role, (name: string) =>
-        props.intl.formatMessage(
-          {
-            id: 'xpack.security.management.editRole.defaultCloneRoleName',
-            defaultMessage: 'copy_of_{roleName}',
-            description: 'Role name with a "copy_of_" prefix. Must not include spaces.',
-          },
-          {
-            roleName: name,
-          }
-        )
-      );
+      role = prepareRoleClone(props.role);
     } else {
       role = copyRole(props.role);
     }

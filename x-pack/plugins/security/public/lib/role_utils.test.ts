@@ -134,7 +134,7 @@ describe('role', () => {
   });
 
   describe('prepareRoleClone', () => {
-    it('should return a copy of the role with metadata and transient_metadata removed, using the provided naming function for the new name', () => {
+    it('should return a copy of the role with metadata and transient_metadata removed, creating a new role name', () => {
       const role: Role = {
         name: 'my_role',
         elasticsearch: {
@@ -167,8 +167,8 @@ describe('role', () => {
         },
       };
 
-      const result = prepareRoleClone(role, jest.fn().mockReturnValue('new_role_name'));
-      expect(result.name).toEqual('new_role_name');
+      const result = prepareRoleClone(role);
+      expect(result.name).toEqual('copy_of_my_role');
       expect(role.name).toEqual('my_role');
 
       expect(result.elasticsearch).toEqual({

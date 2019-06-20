@@ -5,6 +5,7 @@
  */
 
 import { cloneDeep, get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { Role } from '../../common/model';
 
 /**
@@ -48,13 +49,19 @@ export function copyRole(role: Role) {
  * Creates a deep copy of the role suitable for cloning.
  *
  * @param role the Role to clone.
- * @param namingFunction a function responsible for creating the new role name.
  */
-export function prepareRoleClone(role: Role, namingFunction: (name: string) => string): Role {
+export function prepareRoleClone(role: Role): Role {
   const clone = copyRole(role);
+
   delete clone.metadata;
   delete clone.transient_metadata;
-  clone.name = namingFunction(clone.name);
+
+  clone.name = i18n.translate('xpack.security.roleUtils.defaultCloneRoleName', {
+    defaultMessage: 'copy_of_{roleName}',
+    values: {
+      roleName: role.name,
+    },
+  });
 
   return clone;
 }
