@@ -135,9 +135,14 @@ export class LspIndexer extends AbstractIndexer {
     try {
       return await this.gitOps.countRepoFiles(this.repoUri, 'head');
     } catch (error) {
-      this.log.error(`Get lsp index requests count error.`);
-      this.log.error(error);
-      throw error;
+      if (this.isCancelled()) {
+        this.log.debug(`Indexer got cancelled. Skip get index count error.`);
+        return 1;
+      } else {
+        this.log.error(`Get lsp index requests count error.`);
+        this.log.error(error);
+        throw error;
+      }
     }
   }
 

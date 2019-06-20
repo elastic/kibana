@@ -6,7 +6,7 @@
 
 import { indexPatternService } from './kibana_services';
 
-export async function getIndexPatternsFromIds(indexPatternIds) {
+export async function getIndexPatternsFromIds(indexPatternIds = []) {
 
   const promises = [];
   indexPatternIds.forEach((id) => {

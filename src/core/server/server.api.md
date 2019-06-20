@@ -18,7 +18,6 @@ import { SavedObjectsNamespace as SavedObjectsNamespace_2 } from 'src/core/serve
 import { SavedObjectsNamespace as SavedObjectsNamespace_3 } from 'src/core/server/saved_objects';
 import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
-import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -162,7 +161,7 @@ export interface HttpServiceSetup extends HttpServerSetup {
 
 // @public (undocumented)
 export interface HttpServiceStart {
-    isListening: () => boolean;
+    isListening: (port: number) => boolean;
 }
 
 // @internal (undocumented)
@@ -177,8 +176,6 @@ export interface InternalCoreSetup {
 
 // @public (undocumented)
 export interface InternalCoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
     // (undocumented)
     plugins: PluginsServiceStart;
 }

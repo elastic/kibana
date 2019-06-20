@@ -17,10 +17,19 @@
  * under the License.
  */
 
-import { uiRegistry } from 'ui/registry/_registry';
+import { DashboardDoc } from './types';
+import { isDoc } from '../../../migrations/is_doc';
 
-export const IndexPatternCreationConfigRegistry = uiRegistry({
-  name: 'indexPatternCreation',
-  index: ['name'],
-  order: ['order'],
-});
+export function isDashboardDoc(
+  doc: { [key: string]: unknown } | DashboardDoc
+): doc is DashboardDoc {
+  if (!isDoc(doc)) {
+    return false;
+  }
+
+  if (typeof (doc as DashboardDoc).attributes.panelsJSON !== 'string') {
+    return false;
+  }
+
+  return true;
+}

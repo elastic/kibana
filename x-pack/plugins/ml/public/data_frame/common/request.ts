@@ -162,7 +162,7 @@ export function getDataFrameRequest(
       dictionaryToArray(pivotState.aggList)
     ),
     dest: {
-      index: jobDetailsState.targetIndex,
+      index: jobDetailsState.destinationIndex,
     },
   };
 

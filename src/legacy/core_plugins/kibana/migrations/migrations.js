@@ -18,6 +18,7 @@
  */
 
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+import { migrations730 as dashboardMigrations730 } from '../public/dashboard/migrations';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -113,8 +114,9 @@ const migrateDateHistogramAggregation = doc => {
           delete agg.params.customInterval;
         }
 
-        if (get(agg, 'params.customBucket.type', null) === 'date_histogram'
-          && agg.params.customBucket.params
+        if (
+          get(agg, 'params.customBucket.type', null) === 'date_histogram' &&
+          agg.params.customBucket.params
         ) {
           if (agg.params.customBucket.params.interval === 'custom') {
             agg.params.customBucket.params.interval = agg.params.customBucket.params.customInterval;
@@ -127,7 +129,7 @@ const migrateDateHistogramAggregation = doc => {
         attributes: {
           ...doc.attributes,
           visState: JSON.stringify(visState),
-        }
+        },
       };
     }
   }
@@ -151,7 +153,10 @@ function removeDateHistogramTimeZones(doc) {
           delete agg.params.time_zone;
         }
 
-        if (get(agg, 'params.customBucket.type', null) === 'date_histogram' && agg.params.customBucket.params) {
+        if (
+          get(agg, 'params.customBucket.type', null) === 'date_histogram' &&
+          agg.params.customBucket.params
+        ) {
           delete agg.params.customBucket.params.time_zone;
         }
       });
@@ -163,15 +168,16 @@ function removeDateHistogramTimeZones(doc) {
 
 // migrate gauge verticalSplit to alignment
 // https://github.com/elastic/kibana/issues/34636
-function migrateGaugeVerticalSplitToAlignment(doc, logger)  {
+function migrateGaugeVerticalSplitToAlignment(doc, logger) {
   const visStateJSON = get(doc, 'attributes.visState');
 
   if (visStateJSON) {
     try {
       const visState = JSON.parse(visStateJSON);
       if (visState && visState.type === 'gauge' && !visState.params.gauge.alignment) {
-
-        visState.params.gauge.alignment = visState.params.gauge.verticalSplit ? 'vertical' : 'horizontal';
+        visState.params.gauge.alignment = visState.params.gauge.verticalSplit
+          ? 'vertical'
+          : 'horizontal';
         delete visState.params.gauge.verticalSplit;
         return {
           ...doc,
@@ -228,7 +234,7 @@ function transformFilterStringToQueryObject(doc) {
 
       // migrate the annotations query string:
       const annotations = get(visState, 'params.annotations') || [];
-      annotations.forEach((item) => {
+      annotations.forEach(item => {
         if (!item.query_string) {
           // we don't need to transform anything if there isn't a filter at all
           return;
@@ -243,7 +249,7 @@ function transformFilterStringToQueryObject(doc) {
       });
       // migrate the series filters
       const series = get(visState, 'params.series') || [];
-      series.forEach((item) => {
+      series.forEach(item => {
         if (!item.filter) {
           // we don't need to transform anything if there isn't a filter at all
           return;
@@ -259,7 +265,7 @@ function transformFilterStringToQueryObject(doc) {
         // series item split filters filter
         if (item.split_filters) {
           const splitFilters = get(item, 'split_filters') || [];
-          splitFilters.forEach((filter) => {
+          splitFilters.forEach(filter => {
             if (!filter.filter) {
               // we don't need to transform anything if there isn't a filter at all
               return;
@@ -287,10 +293,10 @@ function migrateFiltersAggQuery(doc) {
     try {
       const visState = JSON.parse(visStateJSON);
       if (visState && visState.aggs) {
-        visState.aggs.forEach((agg) => {
+        visState.aggs.forEach(agg => {
           if (agg.type !== 'filters') return;
 
-          agg.params.filters.forEach((filter) => {
+          agg.params.filters.forEach(filter => {
             if (filter.input.language) return filter;
             filter.input.language = 'lucene';
           });
@@ -311,16 +317,72 @@ function migrateFiltersAggQuery(doc) {
   return doc;
 }
 
-const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
-const executeMigrations730 = flow(migrateGaugeVerticalSplitToAlignment, transformFilterStringToQueryObject, migrateFiltersAggQuery);
+function replaceMovAvgToMovFn(doc, logger) {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+
+      if (visState && visState.type === 'metrics') {
+        const series = get(visState, 'params.series', []);
+
+        series.forEach(part => {
+          if (part.metrics && Array.isArray(part.metrics)) {
+            part.metrics.forEach(metric => {
+              if (metric.type === 'moving_average') {
+                metric.model_type = metric.model;
+                metric.alpha = get(metric, 'settings.alpha', 0.3);
+                metric.beta = get(metric, 'settings.beta', 0.1);
+                metric.gamma = get(metric, 'settings.gamma', 0.3);
+                metric.period = get(metric, 'settings.period', 1);
+                metric.multiplicative = get(metric, 'settings.type') === 'mult';
+
+                delete metric.minimize;
+                delete metric.model;
+                delete metric.settings;
+                delete metric.predict;
+              }
+            });
+          }
+        });
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      logger.warning(`Exception @ replaceMovAvgToMovFn! ${e}`);
+      logger.warning(`Exception @ replaceMovAvgToMovFn! Payload: ${visStateJSON}`);
+    }
+  }
+
+  return doc;
+}
+
+const executeMigrations720 = flow(
+  migratePercentileRankAggregation,
+  migrateDateHistogramAggregation
+);
+const executeMigrations730 = flow(
+  migrateGaugeVerticalSplitToAlignment,
+  transformFilterStringToQueryObject,
+  migrateFiltersAggQuery,
+  replaceMovAvgToMovFn
+);
 
 export const migrations = {
   'index-pattern': {
-    '6.5.0': (doc) => {
+    '6.5.0': doc => {
       doc.attributes.type = doc.attributes.type || undefined;
       doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
       return doc;
-    }
+    },
   },
   visualization: {
     /**
@@ -334,7 +396,7 @@ export const migrations = {
      * only contained the 6.7.2 migration and not the 7.0.1 migration.
      */
     '6.7.2': removeDateHistogramTimeZones,
-    '7.0.0': (doc) => {
+    '7.0.0': doc => {
       // Set new "references" attribute
       doc.references = doc.references || [];
 
@@ -411,17 +473,20 @@ export const migrations = {
         newDoc.attributes.visState = JSON.stringify(visState);
         return newDoc;
       } catch (e) {
-        throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
+        throw new Error(
+          `Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`
+        );
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
     '7.2.0': doc => executeMigrations720(doc),
-    '7.3.0': executeMigrations730
+    '7.3.0': executeMigrations730,
   },
   dashboard: {
-    '7.0.0': (doc) => {
+    '7.0.0': doc => {
       // Set new "references" attribute
       doc.references = doc.references || [];
+
       // Migrate index pattern
       migrateIndexPattern(doc);
       // Migrate panels
@@ -455,9 +520,10 @@ export const migrations = {
       doc.attributes.panelsJSON = JSON.stringify(panels);
       return doc;
     },
+    '7.3.0': dashboardMigrations730
   },
   search: {
-    '7.0.0': (doc) => {
+    '7.0.0': doc => {
       // Set new "references" attribute
       doc.references = doc.references || [];
       // Migrate index pattern
