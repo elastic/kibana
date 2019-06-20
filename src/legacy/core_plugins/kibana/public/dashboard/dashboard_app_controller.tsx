@@ -53,7 +53,8 @@ import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { Query } from 'src/legacy/core_plugins/data/public';
+import { Query, SavedQuery } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import {
   DashboardAppState,
@@ -77,6 +78,8 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { getDashboardTitle } from './dashboard_strings';
 import { panelActionsStore } from './store/panel_actions_store';
 import { DashboardAppScope } from './dashboard_app';
+
+const { savedQueryService } = data.search.services;
 
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
@@ -286,6 +289,60 @@ export class DashboardAppController {
       queryFilter.addFiltersAndChangeTimeFilter(filters);
       $scope.appState.$newFilters = [];
     };
+
+    $scope.onQuerySaved = savedQuery => {
+      $scope.savedQuery = savedQuery;
+    };
+
+    $scope.onSavedQueryUpdated = savedQuery => {
+      $scope.savedQuery = savedQuery;
+    };
+
+    const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
+      queryFilter.setFilters(savedQuery.attributes.filters || []);
+      dashboardStateManager.applyFilters(
+        savedQuery.attributes.query,
+        savedQuery.attributes.filters || []
+      );
+      if (savedQuery.attributes.timefilter) {
+        timefilter.setTime({
+          from: savedQuery.attributes.timefilter.timeFrom,
+          to: savedQuery.attributes.timefilter.timeTo,
+        });
+        if (savedQuery.attributes.timefilter.refreshInterval) {
+          timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+        }
+      }
+      $scope.refresh();
+    };
+
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
+      if (!newSavedQuery) return;
+      dashboardStateManager.setSavedQueryId(newSavedQuery.id);
+
+      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+        updateStateFromSavedQuery(newSavedQuery);
+      }
+    });
+
+    $scope.$watch(
+      () => {
+        return dashboardStateManager.getSavedQueryId();
+      },
+      newSavedQueryId => {
+        if (!newSavedQueryId) {
+          $scope.savedQuery = undefined;
+          return;
+        }
+
+        savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+          $scope.$evalAsync(() => {
+            $scope.savedQuery = savedQuery;
+            updateStateFromSavedQuery(savedQuery);
+          });
+        });
+      }
+    );
 
     $scope.$watch('appState.$newFilters', (filters: Filter[] = []) => {
       if (filters.length === 1) {
