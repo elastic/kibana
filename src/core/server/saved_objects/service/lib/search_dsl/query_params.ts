@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsNamespace } from 'src/core/server/saved_objects';
+import { SavedObjectsNamespace } from '../namespace';
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 

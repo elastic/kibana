@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 
-import { SavedObjectsNamespace } from 'src/core/server/saved_objects';
+import { SavedObjectsNamespace } from '../namespace';
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';

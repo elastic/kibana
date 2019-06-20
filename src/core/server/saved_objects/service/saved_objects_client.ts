@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsNamespace } from 'src/core/server';
-import { SavedObjectsRepository } from './lib';
-
+import { SavedObjectsRepository, SavedObjectsNamespace } from './lib';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
