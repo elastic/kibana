@@ -5,10 +5,10 @@
  */
 
 export interface UserAgent {
-  device: {
+  device?: {
     name: string;
   };
-  name: string;
+  name?: string;
   original: string;
   os?: {
     name: string;

@@ -144,16 +144,18 @@ export function StickyTransactionProperties({
       });
     }
 
-    stickyProperties.push({
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.userAgentDeviceLabel',
-        {
-          defaultMessage: 'User agent device'
-        }
-      ),
-      val: device.name,
-      width
-    });
+    if (device) {
+      stickyProperties.push({
+        label: i18n.translate(
+          'xpack.apm.transactionDetails.userAgentDeviceLabel',
+          {
+            defaultMessage: 'User agent device'
+          }
+        ),
+        val: device.name,
+        width
+      });
+    }
   }
 
   return <StickyProperties stickyProperties={stickyProperties} />;
