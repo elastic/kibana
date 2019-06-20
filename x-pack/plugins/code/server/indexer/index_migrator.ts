@@ -15,6 +15,7 @@ import { Repository } from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
+import { EsException } from './es_exception';
 import pkg from './schema/version.json';
 
 export class IndexMigrator {
@@ -57,9 +58,18 @@ export class IndexMigrator {
           body,
         });
       } catch (error) {
-        this.log.error(`Create new index ${newIndexName} for index migration error.`);
-        this.log.error(error);
-        throw error;
+        if (
+          error.body &&
+          error.body.error &&
+          error.body.error.type === EsException.RESOURCE_ALREADY_EXISTS_EXCEPTION
+        ) {
+          this.log.debug(`The target verion index already exists. Skip index migration`);
+          return;
+        } else {
+          this.log.error(`Create new index ${newIndexName} for index migration error.`);
+          this.log.error(error);
+          throw error;
+        }
       }
 
       try {
