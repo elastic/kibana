@@ -93,5 +93,6 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
+    uiSettings: deps.uiSettings,
   };
 }

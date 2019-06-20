@@ -5,27 +5,16 @@
  */
 
 import { connect } from 'react-redux';
-import { ToolbarOverlay } from './view';
-import { getDrawState, getUniqueIndexPatternIds } from '../../selectors/map_selectors';
+import { ToolbarOverlay } from './toolbar_overlay';
+import { getUniqueIndexPatternIds } from '../../selectors/map_selectors';
 import { getIsFilterable } from '../../store/ui';
-import { updateDrawState } from '../../actions/store_actions';
-
 
 function mapStateToProps(state = {}) {
   return {
     isFilterable: getIsFilterable(state),
-    drawState: getDrawState(state),
     uniqueIndexPatternIds: getUniqueIndexPatternIds(state)
   };
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    initiateDraw: (options) => {
-      dispatch(updateDrawState(options));
-    }
-  };
-}
-
-const connectedToolbarOverlay = connect(mapStateToProps, mapDispatchToProps)(ToolbarOverlay);
+const connectedToolbarOverlay = connect(mapStateToProps, null)(ToolbarOverlay);
 export { connectedToolbarOverlay as ToolbarOverlay };

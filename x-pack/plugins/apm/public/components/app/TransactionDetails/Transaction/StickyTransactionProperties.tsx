@@ -119,5 +119,39 @@ export function StickyTransactionProperties({
     }
   ];
 
+  const { user_agent: userAgent } = transaction;
+
+  if (userAgent) {
+    const { os, device } = userAgent;
+    const width = '25%';
+    stickyProperties.push({
+      label: i18n.translate('xpack.apm.transactionDetails.browserLabel', {
+        defaultMessage: 'Browser'
+      }),
+      val: [userAgent.name, userAgent.version].filter(Boolean).join(' '),
+      truncated: true,
+      width
+    });
+
+    if (os) {
+      stickyProperties.push({
+        label: i18n.translate('xpack.apm.transactionDetails.osLabel', {
+          defaultMessage: 'OS'
+        }),
+        val: os.full,
+        truncated: true,
+        width
+      });
+    }
+
+    stickyProperties.push({
+      label: i18n.translate('xpack.apm.transactionDetails.deviceLabel', {
+        defaultMessage: 'OS'
+      }),
+      val: device.name,
+      width
+    });
+  }
+
   return <StickyProperties stickyProperties={stickyProperties} />;
 }

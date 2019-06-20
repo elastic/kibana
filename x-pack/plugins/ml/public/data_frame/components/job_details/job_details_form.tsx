@@ -19,7 +19,7 @@ import { EsIndexName, IndexPatternTitle, JobId } from './common';
 export interface JobDetailsExposedState {
   createIndexPattern: boolean;
   jobId: JobId;
-  targetIndex: EsIndexName;
+  destinationIndex: EsIndexName;
   touched: boolean;
   valid: boolean;
 }
@@ -28,7 +28,7 @@ export function getDefaultJobDetailsState(): JobDetailsExposedState {
   return {
     createIndexPattern: true,
     jobId: '',
-    targetIndex: '',
+    destinationIndex: '',
     touched: false,
     valid: false,
   };
@@ -49,7 +49,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const defaults = { ...getDefaultJobDetailsState(), ...overrides };
 
   const [jobId, setJobId] = useState<JobId>(defaults.jobId);
-  const [targetIndex, setTargetIndex] = useState<EsIndexName>(defaults.targetIndex);
+  const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(defaults.destinationIndex);
   const [jobIds, setJobIds] = useState<JobId[]>([]);
   const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
   const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
@@ -99,11 +99,11 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   }, []);
 
   const jobIdExists = jobIds.some(id => jobId === id);
-  const indexNameExists = indexNames.some(name => targetIndex === name);
-  const indexPatternTitleExists = indexPatternTitles.some(name => targetIndex === name);
+  const indexNameExists = indexNames.some(name => destinationIndex === name);
+  const indexPatternTitleExists = indexPatternTitles.some(name => destinationIndex === name);
   const valid =
     jobId !== '' &&
-    targetIndex !== '' &&
+    destinationIndex !== '' &&
     !jobIdExists &&
     !indexNameExists &&
     (!indexPatternTitleExists || !createIndexPattern);
@@ -111,9 +111,9 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   // expose state to wizard
   useEffect(
     () => {
-      onChange({ createIndexPattern, jobId, targetIndex, touched: true, valid });
+      onChange({ createIndexPattern, jobId, destinationIndex, touched: true, valid });
     },
-    [createIndexPattern, jobId, targetIndex, valid]
+    [createIndexPattern, jobId, destinationIndex, valid]
   );
 
   return (
@@ -142,26 +142,26 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.targetIndexLabel', {
-          defaultMessage: 'Target index',
+        label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.destinationIndexLabel', {
+          defaultMessage: 'Destination index',
         })}
         isInvalid={indexNameExists}
         error={
           indexNameExists && [
-            i18n.translate('xpack.ml.dataframe.jobDetailsForm.targetIndexError', {
+            i18n.translate('xpack.ml.dataframe.jobDetailsForm.destinationIndexError', {
               defaultMessage: 'An index with this name already exists.',
             }),
           ]
         }
       >
         <EuiFieldText
-          placeholder="target index"
-          value={targetIndex}
-          onChange={e => setTargetIndex(e.target.value)}
+          placeholder="destination index"
+          value={destinationIndex}
+          onChange={e => setDestinationIndex(e.target.value)}
           aria-label={i18n.translate(
-            'xpack.ml.dataframe.jobDetailsForm.targetIndexInputAriaLabel',
+            'xpack.ml.dataframe.jobDetailsForm.destinationIndexInputAriaLabel',
             {
-              defaultMessage: 'Choose a unique target index name.',
+              defaultMessage: 'Choose a unique destination index name.',
             }
           )}
           isInvalid={indexNameExists}

@@ -81,9 +81,9 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       const indexPatterns = Private(IndexPatternsProvider);
       return indexPatterns.getTitles();
     },
-    spaces($http, chrome, spacesEnabled) {
+    spaces(spacesEnabled) {
       if (spacesEnabled) {
-        return new SpacesManager($http, chrome).getSpaces();
+        return new SpacesManager().getSpaces();
       }
       return [];
     },

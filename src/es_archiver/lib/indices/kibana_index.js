@@ -26,7 +26,7 @@ import wreck from '@hapi/wreck';
 
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../legacy/ui/ui_exports';
-import { KibanaMigrator } from '../../../legacy/server/saved_objects/migrations';
+import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
 import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 /**

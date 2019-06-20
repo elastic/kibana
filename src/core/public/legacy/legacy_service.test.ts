@@ -90,6 +90,7 @@ const i18nStart = i18nServiceMock.createStartContract();
 const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
 const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
+const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 
 const defaultStartDeps = {
   core: {
@@ -100,6 +101,7 @@ const defaultStartDeps = {
     injectedMetadata: injectedMetadataStart,
     notifications: notificationsStart,
     overlays: overlayStart,
+    uiSettings: uiSettingsStart,
   },
   targetDomElement: document.createElement('div'),
   plugins: {},
