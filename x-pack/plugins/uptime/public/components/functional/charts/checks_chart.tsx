@@ -98,7 +98,6 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
               [upString]: up || 0,
             }))}
             id={upSeriesSpecId}
-            seriesType="area"
             stackAccessors={['x']}
             timeZone="local"
             xAccessor="x"
@@ -113,7 +112,6 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
               [downString]: down || 0,
             }))}
             id={downSeriesSpecId}
-            seriesType="area"
             stackAccessors={['x']}
             timeZone="local"
             xAccessor="x"
