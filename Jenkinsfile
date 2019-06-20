@@ -7,9 +7,9 @@ pipeline {
     BASE_DIR = "."
     CI = true
     HOME = "${JENKINS_HOME}"
-    // PR_SOURCE_BRANCH = ${ghprbSourceBranch}
-    // PR_TARGET_BRANCH = ${ghprbTargetBranch}
-    // PR_AUTHOR = ${ghprbPullAuthorLogin}
+    PR_SOURCE_BRANCH = ${ghprbSourceBranch}
+    PR_TARGET_BRANCH = ${ghprbTargetBranch}
+    PR_AUTHOR = ${ghprbPullAuthorLogin}
   }
   stages {
     stage('Kickoff') {
