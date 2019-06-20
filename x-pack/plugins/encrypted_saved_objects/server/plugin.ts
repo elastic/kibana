@@ -6,7 +6,7 @@
 
 import crypto from 'crypto';
 import { Legacy, Server } from 'kibana';
-import { SavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsService } from 'src/core/server';
 import { SavedObjectsBaseOptions, SavedObject, SavedObjectAttributes } from 'src/core/server';
 import {
   EncryptedSavedObjectsService,
@@ -22,7 +22,7 @@ export const CONFIG_PREFIX = `xpack.${PLUGIN_ID}`;
 interface CoreSetup {
   config: { encryptionKey?: string };
   elasticsearch: Legacy.Plugins.elasticsearch.Plugin;
-  savedObjects: Legacy.SavedObjectsService;
+  savedObjects: SavedObjectsService;
 }
 
 interface PluginsSetup {
@@ -63,7 +63,7 @@ export class Plugin {
       ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
     );
 
-    const internalRepository: SavedObjectsRepository = core.savedObjects.getSavedObjectsRepository(
+    const internalRepository: SavedObjectsClientContract = core.savedObjects.getSavedObjectsRepository(
       core.elasticsearch.getCluster('admin').callWithInternalUser
     );
 

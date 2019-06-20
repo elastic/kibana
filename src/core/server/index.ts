@@ -98,7 +98,6 @@ export {
   SavedObjectsFindResponse,
   SavedObjectsMigrationVersion,
   SavedObjectsNamespace,
-  SavedObjectsRepository,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
