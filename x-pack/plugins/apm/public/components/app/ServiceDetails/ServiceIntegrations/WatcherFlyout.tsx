@@ -599,18 +599,24 @@ export class WatcherFlyout extends Component<
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{flyoutBody}</EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButton
-            onClick={this.createWatch}
-            fill
-            disabled={!this.state.actions.email && !this.state.actions.slack}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
-              {
-                defaultMessage: 'Create watch'
-              }
-            )}
-          </EuiButton>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={this.createWatch}
+                fill
+                disabled={
+                  !this.state.actions.email && !this.state.actions.slack
+                }
+              >
+                {i18n.translate(
+                  'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
+                  {
+                    defaultMessage: 'Create watch'
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
