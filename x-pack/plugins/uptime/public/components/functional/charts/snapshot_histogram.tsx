@@ -82,7 +82,9 @@ export const SnapshotHistogram = ({
           )}
           position={Position.Left}
           showOverlappingTicks={true}
-          title="Monitors"
+          title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
+            defaultMessage: 'Monitors',
+          })}
         />
         <BarSeries
           customSeriesColors={getColorsMap(successColor, upSpecId)}
