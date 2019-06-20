@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render icon select when symbolized as Icon 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  label="Symbol"
+  labelType="label"
+>
+  <EuiSelect
+    compressed={false}
+    fullWidth={false}
+    hasNoInitialSelection={false}
+    isLoading={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "text": "circle",
+          "value": "circle",
+        },
+        Object {
+          "text": "icon",
+          "value": "icon",
+        },
+      ]
+    }
+    value="icon"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiComboBox
+    compressed={false}
+    fullWidth={false}
+    isClearable={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "label": "symbol1",
+          "value": "symbol1",
+        },
+        Object {
+          "label": "symbol2",
+          "value": "symbol2",
+        },
+      ]
+    }
+    renderOption={[Function]}
+    selectedOptions={
+      Array [
+        Object {
+          "label": "symbol1",
+          "value": "symbol1",
+        },
+      ]
+    }
+    singleSelection={true}
+  />
+</EuiFormRow>
+`;
+
+exports[`Should render symbol select when symbolized as Circle 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  label="Symbol"
+  labelType="label"
+>
+  <EuiSelect
+    compressed={false}
+    fullWidth={false}
+    hasNoInitialSelection={false}
+    isLoading={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "text": "circle",
+          "value": "circle",
+        },
+        Object {
+          "text": "icon",
+          "value": "icon",
+        },
+      ]
+    }
+    value="circle"
+  />
+</EuiFormRow>
+`;

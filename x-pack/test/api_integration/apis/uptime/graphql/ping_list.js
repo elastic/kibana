@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { pingsQueryString } from '../../../../../plugins/uptime/public/queries';
+import { pingsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import pingList from './fixtures/ping_list';
 import pingListCount from './fixtures/ping_list_count';
 import pingListMonitorId from './fixtures/ping_list_monitor_id';
