@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
-import { HostItem } from '../../../../../public/graphql/types';
+import { useState, useEffect } from 'react';
 import { anomaliesTableData } from './anomalies_table_data';
 import { getTopSeverityJobs } from './get_top_severity';
 
@@ -16,58 +15,47 @@ const stable: string[] = [];
 // if the user does not have privileges
 
 interface Args {
-  hostItem: HostItem | null | undefined;
+  ip: string;
   endDate: number;
   startDate: number;
 }
 
-export const useAnomaliesTableData = ({ hostItem, startDate, endDate }: Args) => {
+export const useAnomaliesTableDataByNetwork = ({ ip, startDate, endDate }: Args) => {
   const [tableData, setTableData] = useState(stable);
   const [loading, setLoading] = useState(true);
 
-  const fetchFunc = async (hostName: string, earliestMs: number, latestMs: number) => {
+  const fetchFunc = async (fetchIp: string, earliestMs: number, latestMs: number) => {
     const data = await anomaliesTableData({
       earliestMs,
       latestMs,
       influencers: [
         {
-          fieldName: 'host.hostname', // TODO: Remove this to only use host.name once the jobs are fixed
-          fieldValue: hostName,
+          fieldName: 'destination.ip',
+          fieldValue: fetchIp,
         },
         {
-          fieldName: 'host.name',
-          fieldValue: hostName,
+          fieldName: 'source.ip',
+          fieldValue: fetchIp,
         },
       ],
     });
     // TODO: Move this up and out of here
-    console.log('Retrieved the anomalies Table Data of:', data);
+    console.log('[ip][Retrieved the anomalies Table Data for ip of]', data);
     const reduced = getTopSeverityJobs(data.anomalies);
     // TODO: Change out the hostname for the regular deal
-    console.log('[FINAL setTableData call]:', reduced);
+    console.log('[ip][dataset reduced]:', reduced);
     setTableData(reduced);
     setLoading(false);
   };
-
   useEffect(
     () => {
-      if (
-        hostItem != null &&
-        hostItem.host != null &&
-        hostItem.host.name != null &&
-        hostItem.host.name[0]
-      ) {
-        console.log('Here we are with data in the useEffect and I have data');
-        fetchFunc(hostItem.host.name[0], startDate, endDate);
-      } else {
-        console.log('I have no data yet');
-      }
-
+      console.log(`[ip inputs with earliestMs active][${ip}][${startDate}][${endDate}]`);
+      fetchFunc(ip, startDate, endDate);
       return () => {
         console.log('[Here is where you would unsubscribe]');
       };
     },
-    [hostItem, startDate, endDate]
+    [ip, startDate, endDate]
   );
 
   return [loading, tableData];

@@ -56,15 +56,13 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 export const HostOverview = React.memo<HostSummaryProps>(
   ({ data, loading, startDate, endDate }) => {
     const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
-    const reducedTableData = useAnomaliesTableData({ hostItem: data, startDate, endDate });
-    console.log(
-      'Yo, I am being rendered and my tableData is:',
-      reducedTableData,
-      'and my config is:',
-      config,
-      'and my data is:',
-      data
-    );
+    const [isLoading, reducedTableData] = useAnomaliesTableData({
+      hostItem: data,
+      startDate,
+      endDate,
+    });
+    console.log('Yo, I am being rendered and my tableData is:', reducedTableData);
+    console.log('Loading is:', isLoading);
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
         rowItems={getOr([], fieldName, fieldData)}
@@ -106,13 +104,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
             ),
         },
         {
-          title: 'Anomaly Scores',
+          title: 'Top Anomaly Severity By Job',
           description: (
             <AnomalyScores
               scores={reducedTableData}
               startDate={startDate}
               endDate={endDate}
               hostItem={data}
+              isLoading={isLoading}
             />
           ),
         },

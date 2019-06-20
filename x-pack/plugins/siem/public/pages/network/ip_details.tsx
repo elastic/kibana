@@ -93,6 +93,8 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             loading={loading}
                             type={networkModel.NetworkType.details}
                             flowTarget={flowTarget}
+                            startDate={from}
+                            endDate={to}
                           />
                         )}
                       </IpOverviewQuery>

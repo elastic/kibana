@@ -32,10 +32,10 @@ export const formatToolTip = score => {
   );
 };
 
-export const AnomalyScores = React.memo<any>(
-  ({ scores, startDate, endDate, hostItem, isLoading }) => {
+export const AnomalyScoresByNetwork = React.memo<any>(
+  ({ scores, startDate, endDate, ip, isLoading }) => {
     if (isLoading) {
-      console.log('I am loading yo');
+      console.log('[ip]I am loading yo');
       return <EuiLoadingSpinner size="m" />;
     } else {
       console.log('I am done loading yo');
@@ -43,27 +43,14 @@ export const AnomalyScores = React.memo<any>(
     console.log('my scores for rendering are:', startDate, endDate);
     const startDateIso = new Date(startDate).toISOString();
     const endDateIso = new Date(endDate).toISOString();
-    if (
-      hostItem == null ||
-      hostItem.host == null ||
-      hostItem.host.name == null ||
-      scores == null ||
-      startDate == null ||
-      endDate == null
-    ) {
-      return getEmptyTagValue();
-    }
     const items = scores.map((score, index) => {
-      const id = escapeDataProviderId(`anomaly-scores-${score.jobId}`);
+      const id = escapeDataProviderId(`anomaly-scores-network-${score.jobId}`);
       return (
         <EuiToolTip key={score.jobId} title={score.jobId} content={formatToolTip(score)}>
           <EuiLink
             href={`ml#/timeseriesexplorer?_g=(ml:(jobIds:!(${
               score.jobId
-            })),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${startDateIso}',mode:absolute,to:'${endDateIso}'))&_a=(mlSelectInterval:(display:Auto,val:auto),mlSelectSeverity:(color:%23d2e9f7,display:warning,val:0),mlTimeSeriesExplorer:(detectorIndex:0,entities:(host.name:${
-              hostItem.host.name[0]
-            },process.name:'',host.hostname:'${hostItem.host.name}')))
-    `}
+            })),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${startDateIso}',mode:absolute,to:'${endDateIso}'))&_a=(mlSelectInterval:(display:Auto,val:auto),mlSelectSeverity:(color:%23d2e9f7,display:warning,val:0),mlTimeSeriesExplorer:(detectorIndex:0,entities:(destination.ip:'${ip}',process.name:'',source.ip:'${ip}')))`}
             target="_blank"
           >
             <DraggableWrapper

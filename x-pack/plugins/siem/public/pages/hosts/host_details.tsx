@@ -36,13 +36,6 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { hasPrivileges } from '../../lib/ml/rest/has_privledges';
-import { jobsSummary } from '../../lib/ml/rest/jobs/jobs_summary';
-import { anomaliesTableData } from '../../lib/ml/rest/results/anomalies_table_data';
-
-hasPrivileges();
-jobsSummary();
-anomaliesTableData();
 
 const type = hostsModel.HostsType.details;
 

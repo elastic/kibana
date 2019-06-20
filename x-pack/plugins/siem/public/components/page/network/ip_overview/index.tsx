@@ -9,6 +9,7 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { useAnomaliesTableDataByNetwork } from '../../../../lib/ml/rest/results/use_anomalies_table_data_by_network';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -25,6 +26,7 @@ import {
 import * as i18n from './translations';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
+import { AnomalyScoresByNetwork } from '../../hosts/host_overview/anomaly_scores_by_network';
 
 interface DescriptionList {
   title: string;
@@ -36,6 +38,8 @@ interface OwnProps {
   flowTarget: FlowTarget;
   ip: string;
   loading: boolean;
+  startDate: number;
+  endDate: number;
   type: networkModel.NetworkType;
 }
 
@@ -57,61 +61,86 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
   );
 };
 
-export const IpOverview = pure<IpOverviewProps>(({ ip, data, loading, flowTarget }) => {
-  const typeData: Overview = data[flowTarget]!;
-  const descriptionLists: Readonly<DescriptionList[][]> = [
-    [
-      {
-        title: i18n.LOCATION,
-        description: locationRenderer(
-          [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
-          data
-        ),
-      },
-      {
-        title: i18n.AUTONOMOUS_SYSTEM,
-        description: typeData
-          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget)
-          : getEmptyTagValue(),
-      },
-    ],
-    [
-      { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },
-      { title: i18n.LAST_SEEN, description: dateRenderer('lastSeen', typeData) },
-    ],
-    [
-      {
-        title: i18n.HOST_ID,
-        description: typeData
-          ? hostIdRenderer({ host: data.host, ipFilter: ip })
-          : getEmptyTagValue(),
-      },
-      {
-        title: i18n.HOST_NAME,
-        description: typeData ? hostNameRenderer(data.host, ip) : getEmptyTagValue(),
-      },
-    ],
-    [
-      { title: i18n.WHOIS, description: whoisRenderer(ip) },
-      { title: i18n.REPUTATION, description: reputationRenderer(ip) },
-    ],
-  ];
-  return (
-    <OverviewWrapper>
-      {loading && (
-        <>
-          <LoadingOverlay />
-          <LoadingPanel
-            height="100%"
-            width="100%"
-            text=""
-            position="absolute"
-            zIndex={3}
-            data-test-subj="LoadingPanelLoadMoreTable"
-          />
-        </>
-      )}
-      {descriptionLists.map((descriptionList, index) => getDescriptionList(descriptionList, index))}
-    </OverviewWrapper>
-  );
-});
+export const IpOverview = pure<IpOverviewProps>(
+  ({ ip, data, loading, flowTarget, startDate, endDate }) => {
+    console.log('[ip][startDate]', startDate);
+    console.log('[ip][endDate]', endDate);
+    const [isLoading, reducedTableData] = useAnomaliesTableDataByNetwork({
+      ip,
+      startDate,
+      endDate,
+    });
+    console.log('[ip][isLoading]', isLoading);
+    console.log('[ip][tableData]', reducedTableData);
+    const typeData: Overview = data[flowTarget]!;
+    const descriptionLists: Readonly<DescriptionList[][]> = [
+      [
+        {
+          title: i18n.LOCATION,
+          description: locationRenderer(
+            [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
+            data
+          ),
+        },
+        {
+          title: i18n.AUTONOMOUS_SYSTEM,
+          description: typeData
+            ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget)
+            : getEmptyTagValue(),
+        },
+        {
+          title: 'Top Anomaly Severity By Job Rendering',
+          description: (
+            <AnomalyScoresByNetwork
+              scores={reducedTableData}
+              startDate={startDate}
+              endDate={endDate}
+              ip={ip}
+              isLoading={isLoading}
+            />
+          ),
+        },
+      ],
+      [
+        { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },
+        { title: i18n.LAST_SEEN, description: dateRenderer('lastSeen', typeData) },
+      ],
+      [
+        {
+          title: i18n.HOST_ID,
+          description: typeData
+            ? hostIdRenderer({ host: data.host, ipFilter: ip })
+            : getEmptyTagValue(),
+        },
+        {
+          title: i18n.HOST_NAME,
+          description: typeData ? hostNameRenderer(data.host, ip) : getEmptyTagValue(),
+        },
+      ],
+      [
+        { title: i18n.WHOIS, description: whoisRenderer(ip) },
+        { title: i18n.REPUTATION, description: reputationRenderer(ip) },
+      ],
+    ];
+    return (
+      <OverviewWrapper>
+        {loading && (
+          <>
+            <LoadingOverlay />
+            <LoadingPanel
+              height="100%"
+              width="100%"
+              text=""
+              position="absolute"
+              zIndex={3}
+              data-test-subj="LoadingPanelLoadMoreTable"
+            />
+          </>
+        )}
+        {descriptionLists.map((descriptionList, index) =>
+          getDescriptionList(descriptionList, index)
+        )}
+      </OverviewWrapper>
+    );
+  }
+);
