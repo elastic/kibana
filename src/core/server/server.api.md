@@ -14,8 +14,6 @@ import { Observable } from 'rxjs';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { SavedObjectsNamespace as SavedObjectsNamespace_2 } from 'src/core/server';
-import { SavedObjectsNamespace as SavedObjectsNamespace_3 } from 'src/core/server/saved_objects';
 import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
 import { Type } from '@kbn/config-schema';
@@ -439,7 +437,7 @@ export interface SavedObjectReference {
 
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
-    namespace?: SavedObjectsNamespace_2;
+    namespace?: SavedObjectsNamespace;
 }
 
 // @public (undocumented)
@@ -619,7 +617,7 @@ export interface SavedObjectsMigrationVersion {
 }
 
 // @public
-export type SavedObjectsNamespace = string | undefined;
+export type SavedObjectsNamespace = string | undefined | symbol;
 
 // @public (undocumented)
 export interface SavedObjectsService<Request = any> {
