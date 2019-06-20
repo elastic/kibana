@@ -102,11 +102,9 @@ server.plugins.alerting.registerType({
 });
 ```
 
-## Alerts
+## RESTful API
 
-Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type.
-
-### RESTful API
+Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type. See below for CRUD operations using the API.
 
 #### `POST /api/alert`: Create alert
 

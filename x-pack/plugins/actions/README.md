@@ -1,11 +1,11 @@
 # Kibana actions
 
-The Kibana actions plugin provides a common place to execute actions. It supports:
+The Kibana actions plugin provides a common place to execute actions. You can:
 
-- Registering types of actions
-- List the registered types of actions
-- Fire actions
-- CRUD on actions w/ encrypted configurations
+- Register an action type
+- View a list of registered types
+- Fire an action either manually or by using an alert
+- Perform CRUD on actions with encrypted configurations
 
 ## Terminology
 
@@ -52,6 +52,8 @@ This is the primary function for an action type. Whenever the action needs to ex
 
 ### Example
 
+Below is an example email action type. The attributes `host` and `port` are configured to be unencrypted by using the `unencryptedAttributes` attribute.
+
 ```
 server.plugins.actions.registerType({
   id: 'smtp',
@@ -82,11 +84,9 @@ server.plugins.actions.registerType({
 });
 ```
 
-## Actions
+## RESTful API
 
-Using an action type requires an action to be created that will contain and encrypt configuration for a given action type.
-
-### API
+Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See below for CRUD operations using the API.
 
 #### `POST /api/action`: Create action
 
