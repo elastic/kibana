@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
