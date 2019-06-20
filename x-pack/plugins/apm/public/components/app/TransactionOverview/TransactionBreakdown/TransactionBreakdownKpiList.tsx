@@ -9,7 +9,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiText,
-  EuiTitle
+  EuiTitle,
+  EuiIcon
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { InfraFormatterType } from '../../../../../../infra/public/lib/lib';
@@ -26,12 +27,10 @@ interface Props {
   kpis: TransactionBreakdownKpi[];
 }
 
-const Dot = styled.span`
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  background-color: ${props => props.color};
+const Description = styled.span`
+   {
+    white-space: nowrap;
+  }
 `;
 
 const KpiDescription: React.FC<{
@@ -46,31 +45,11 @@ const KpiDescription: React.FC<{
       wrap={false}
     >
       <EuiFlexItem grow={false}>
-        <Dot color={color} />
+        <EuiIcon type="dot" color={color} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
-          {name}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-const KpiTitle: React.FC<{
-  percentage: number;
-  count: number;
-}> = ({ percentage, count }) => {
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <span>{FORMATTERS[InfraFormatterType.percent](percentage)}</span>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued">
-          ({FORMATTERS[InfraFormatterType.number](count)})
+          <Description>{name}</Description>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -87,7 +66,11 @@ const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
               <KpiDescription name={kpi.name} color={kpi.color} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <KpiTitle percentage={kpi.percentage} count={kpi.count} />
+              <EuiTitle size="s">
+                <span>
+                  {FORMATTERS[InfraFormatterType.percent](kpi.percentage)}
+                </span>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

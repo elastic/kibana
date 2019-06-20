@@ -19,10 +19,10 @@ export async function getTransactionBreakdown({
   setup: Setup;
   serviceName: string;
 }) {
-  const { uiFiltersES, client } = setup;
+  const { uiFiltersES, client, config } = setup;
 
   const params = {
-    index: 'apm-metrics',
+    index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       size: 0,
       query: {
@@ -30,14 +30,14 @@ export async function getTransactionBreakdown({
           must: [
             {
               term: {
-                'service.name.keyword': {
+                'service.name': {
                   value: serviceName
                 }
               }
             },
             {
               term: {
-                'transaction.type.keyword': {
+                'transaction.type': {
                   value: 'request'
                 }
               }
@@ -61,13 +61,13 @@ export async function getTransactionBreakdown({
         },
         types: {
           terms: {
-            field: 'span.type.keyword',
+            field: 'span.type',
             size: 42
           },
           aggs: {
             subtypes: {
               terms: {
-                field: 'span.subtype.keyword',
+                field: 'span.subtype',
                 missing: '',
                 size: 42
               },
