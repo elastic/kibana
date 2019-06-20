@@ -36,7 +36,7 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
       <EuiIconTip
         content={i18n.translate('common.ui.vis.defaultEditor.controls.dotSizeRatioHelpText', {
           defaultMessage:
-            'Change the ratio of the radius of the smallest point to the largest point',
+            'Change the ratio of the radius of the smallest point to the largest point.',
         })}
         position="right"
       />
@@ -50,7 +50,7 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
   }, []);
 
   return (
-    <EuiFormRow className="visEditorSidebar__aggParamFormRow" fullWidth={true} label={label}>
+    <EuiFormRow fullWidth={true} label={label}>
       <EuiRange
         compressed
         fullWidth={true}

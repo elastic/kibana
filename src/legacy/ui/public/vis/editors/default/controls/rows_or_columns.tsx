@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggControlProps } from './agg_control_props';
 
@@ -46,16 +46,18 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>)
   ];
 
   return (
-    <EuiButtonGroup
-      className="visEditorSidebar__aggParamFormRow"
-      legend={i18n.translate('common.ui.vis.defaultEditor.controls.splitByLegend', {
-        defaultMessage: 'Split chart by rows or columns',
-      })}
-      options={options}
-      isFullWidth={true}
-      idSelected={idSelected}
-      onChange={optionId => setValue(aggParams, PARAMS.NAME, optionId === PARAMS.ROWS)}
-    />
+    <EuiFormRow className="visEditorSidebar__aggParamFormRow" fullWidth={true}>
+      <EuiButtonGroup
+        data-test-subj="visEditorSplitBy"
+        legend={i18n.translate('common.ui.vis.defaultEditor.controls.splitByLegend', {
+          defaultMessage: 'Split chart by rows or columns.',
+        })}
+        options={options}
+        isFullWidth={true}
+        idSelected={idSelected}
+        onChange={optionId => setValue(aggParams, PARAMS.NAME, optionId === PARAMS.ROWS)}
+      />
+    </EuiFormRow>
   );
 }
 

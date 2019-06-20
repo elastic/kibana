@@ -1241,7 +1241,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickSplitDirection(direction) {
-      await testSubjects.clickByCssSelector(`#visEditorSplitBy__${direction}`);
+      const control = await testSubjects.find('visEditorSplitBy');
+      const radioBtn = await control.findByCssSelector(`[title="${direction}"]`);
+      await radioBtn.click();
     }
 
     async countNestedTables() {
