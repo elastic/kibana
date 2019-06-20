@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`stringifyUrlParams creates expected string value 1`] = `"?autorefreshInterval=50000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&monitorListPageIndex=1&monitorListPageSize=15&monitorListSortDirection=desc&monitorListSortField=monitor_id&search=monitor.id%3A%20foo&selectedPingStatus=down"`;
