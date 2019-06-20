@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { first } from 'lodash';
 import { DATES } from './constants';
-import { MetricsExplorerResponse } from '../../../../plugins/infra/server/routes/metrics_explorer/types';
+import { MetricsExplorerResponse } from '../../../../legacy/plugins/infra/server/routes/metrics_explorer/types';
 import { KbnTestProvider } from './types';
 
 const { min, max } = DATES['7.0.0'].hosts;
