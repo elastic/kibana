@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { EuiSpacer } from '@elastic/eui';
@@ -19,126 +18,14 @@ import {
   KpiValue,
 } from '../../../../components/stat_items';
 import { KpiIpDetailsData } from '../../../../graphql/types';
-
-import * as i18n from './translations';
-import { PreferenceFormattedBytes } from '../../../formatted_bytes';
-import { getEmptyTagValue } from '../../../empty_value';
-
-const kipsPerRow = 1;
+import { fieldTitleMatrixMapping, fieldTitleChartMapping } from './columns';
 const kpiWidgetHeight = 228;
-
-const euiColorVis1 = '#3185FC';
-const euiColorVis2 = '#DB1374';
-const euiColorVis3 = '#490092';
+const kipsPerRow = 1;
 
 interface KpiIpDetailsProps {
   data: KpiIpDetailsData;
   loading: boolean;
 }
-
-export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
-  {
-    key: 'packets',
-    fields: [
-      {
-        key: 'sourcePackets',
-        value: null,
-        name: i18n.OUT,
-        description: i18n.OUT,
-        color: euiColorVis2,
-        icon: 'visMapCoordinate',
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-      {
-        key: 'destinationPackets',
-        value: null,
-        name: i18n.IN,
-        description: i18n.IN,
-        color: euiColorVis3,
-        icon: 'visMapCoordinate',
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.PACKETS,
-    enableAreaChart: true,
-    enableBarChart: true,
-    grow: 1,
-  },
-  {
-    key: 'bytes',
-    fields: [
-      {
-        key: 'sourceByte',
-        value: null,
-        name: i18n.OUT,
-        description: i18n.OUT,
-        color: euiColorVis2,
-        icon: 'visMapCoordinate',
-        render: bytes => {
-          if (bytes != null) {
-            return <PreferenceFormattedBytes value={bytes} />;
-          } else {
-            return getEmptyTagValue();
-          }
-        },
-      },
-      {
-        key: 'destinationByte',
-        value: null,
-        name: i18n.IN,
-        description: i18n.IN,
-        color: euiColorVis3,
-        icon: 'visMapCoordinate',
-        render: bytes => {
-          if (bytes != null) {
-            return <PreferenceFormattedBytes value={bytes} />;
-          } else {
-            return getEmptyTagValue();
-          }
-        },
-      },
-    ],
-    description: i18n.BYTES,
-    enableAreaChart: true,
-    enableBarChart: true,
-    grow: 1,
-  },
-];
-
-const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
-  {
-    key: 'connections',
-    fields: [
-      {
-        key: 'connections',
-        value: null,
-        color: euiColorVis1,
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.CONNECTIONS,
-    grow: 1,
-  },
-  {
-    key: 'hosts',
-    fields: [
-      {
-        key: 'hosts',
-        value: null,
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.HOSTS,
-  },
-];
 
 const FlexGroup = styled(EuiFlexGroup)`
   min-height: ${kpiWidgetHeight}px;
@@ -174,7 +61,7 @@ export const KpiIpDetailsComponent = React.memo<KpiIpDetailsProps>(({ data, load
     </FlexGroup>
   ) : (
     <EuiFlexGroup wrap>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1}>
         {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
           <React.Fragment key={`kpi-ip-details-row-${idx}`}>
             {idx !== 0 && <EuiSpacer size="l" />}
@@ -182,7 +69,7 @@ export const KpiIpDetailsComponent = React.memo<KpiIpDetailsProps>(({ data, load
           </React.Fragment>
         ))}
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem grow={4}>
         <KpiIpDetailsBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
       </EuiFlexItem>
     </EuiFlexGroup>

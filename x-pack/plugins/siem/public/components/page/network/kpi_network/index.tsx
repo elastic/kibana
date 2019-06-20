@@ -19,112 +19,15 @@ import {
   KpiValue,
 } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
-
-import * as i18n from './translations';
-import { getEmptyTagValue } from '../../../empty_value';
+import { fieldTitleMatrixMapping, fieldTitleChartMapping } from './columns';
 
 const kipsPerRow = 2;
 const kpiWidgetHeight = 228;
-
-const euiColorVis1 = '#3185FC';
-const euiColorVis2 = '#DB1374';
-const euiColorVis3 = '#490092';
 
 interface KpiNetworkProps {
   data: KpiNetworkData;
   loading: boolean;
 }
-
-export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
-  {
-    key: 'UniqueIps',
-    fields: [
-      {
-        key: 'uniqueSourcePrivateIps',
-        value: null,
-        name: i18n.SRC,
-        description: i18n.SOURCE,
-        color: euiColorVis2,
-        icon: 'visMapCoordinate',
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-      {
-        key: 'uniqueDestinationPrivateIps',
-        value: null,
-        name: i18n.DIST,
-        description: i18n.DESTINATION,
-        color: euiColorVis3,
-        icon: 'visMapCoordinate',
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.UNIQUE_PRIVATE_IPS,
-    enableAreaChart: true,
-    enableBarChart: true,
-    grow: 2,
-  },
-];
-
-const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
-  {
-    key: 'networkEvents',
-    fields: [
-      {
-        key: 'networkEvents',
-        value: null,
-        color: euiColorVis1,
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.NETWORK_EVENTS,
-    grow: 1,
-  },
-  {
-    key: 'dnsQueries',
-    fields: [
-      {
-        key: 'dnsQueries',
-        value: null,
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.DNS_QUERIES,
-  },
-  {
-    key: 'uniqueFlowId',
-    fields: [
-      {
-        key: 'uniqueFlowId',
-        value: null,
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.UNIQUE_FLOW_IDS,
-  },
-  {
-    key: 'tlsHandshakes',
-    fields: [
-      {
-        key: 'tlsHandshakes',
-        value: null,
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.TLS_HANDSHAKES,
-  },
-];
 
 const FlexGroup = styled(EuiFlexGroup)`
   min-height: ${kpiWidgetHeight}px;
