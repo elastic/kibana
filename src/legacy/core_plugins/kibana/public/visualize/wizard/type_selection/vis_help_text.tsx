@@ -36,15 +36,14 @@ export const VisHelpText = ({ name, title, description, highlightMsg }: VisHelpT
       </EuiTitle>
       <EuiSpacer size="s" />
       <div id={`visTypeDescription-${name}`}>
-        {highlightMsg && (
-          <React.Fragment>
-            <EuiText>
+        <EuiText>
+          {highlightMsg && (
+            <p>
               <em>{highlightMsg}</em>
-            </EuiText>
-            <EuiSpacer size="s" />
-          </React.Fragment>
-        )}
-        <EuiText>{description}</EuiText>
+            </p>
+          )}
+          {description}
+        </EuiText>
       </div>
     </React.Fragment>
   );
