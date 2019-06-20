@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import events from 'events';
-
-export class HttpRequestEmitter extends events.EventEmitter {}
+export enum EsException {
+  INDEX_NOT_FOUND_EXCEPTION = 'index_not_found_exception',
+  RESOURCE_ALREADY_EXISTS_EXCEPTION = 'resource_already_exists_exception',
+}

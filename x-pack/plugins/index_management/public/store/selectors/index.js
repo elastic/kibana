@@ -33,6 +33,16 @@ export const getIndexStatusByIndexName = (state, indexName) => {
   const { status } = indices[indexName] || {};
   return status;
 };
+export const getIsSystemIndexByName = (indexNames) => {
+  return indexNames.reduce((obj, indexName) => {
+    obj[indexName] = indexName.startsWith('.');
+    return obj;
+  }, {});
+};
+export const hasSystemIndex = (indexNames) => {
+  return Boolean(indexNames.find(indexName => indexName.startsWith('.')));
+};
+
 const defaultFilterFields = ['name'];
 
 const filterByToggles = (indices, toggleNameToVisibleMap) => {

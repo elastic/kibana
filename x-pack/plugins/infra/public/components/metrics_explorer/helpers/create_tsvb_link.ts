@@ -79,7 +79,7 @@ const mapMetricToSeries = (metric: MetricsExplorerOptionsMetric) => {
   };
 };
 
-const createFilterFromOptions = (
+export const createFilterFromOptions = (
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries
 ) => {
@@ -88,9 +88,10 @@ const createFilterFromOptions = (
     filters.push(options.filterQuery);
   }
   if (options.groupBy) {
-    filters.push(`${options.groupBy}: ${series.id}`);
+    const id = series.id.replace('"', '\\"');
+    filters.push(`${options.groupBy} : "${id}"`);
   }
-  return filters.join(' AND ');
+  return { language: 'kuery', query: filters.join(' and ') };
 };
 
 export const createTSVBLink = (
