@@ -23,30 +23,44 @@ import { Header } from './components/header';
 import { wrapInI18nContext } from 'ui/i18n';
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { npStart } from '../../../new_platform';
+import { NavControlSide } from '.';
 
 const module = uiModules.get('kibana');
 
-module.directive('headerGlobalNav', (reactDirective, chrome, Private, uiCapabilities) => {
-  const { recentlyAccessed } = require('ui/persisted_log');
+module.directive('headerGlobalNav', (reactDirective, Private) => {
+  const newPlatform = npStart.core;
+
+  // Continue to support legacy nav controls not registered with the NP.
+  // NOTE: in future change this needs to be moved out of this directive.
   const navControls = Private(chromeHeaderNavControlsRegistry);
-  const homeHref = chrome.addBasePath('/app/kibana#/home');
+  (navControls.bySide[NavControlSide.Left] || [])
+    .forEach(navControl => newPlatform.chrome.navControls.registerLeft({
+      order: navControl.order,
+      mount: navControl.render,
+    }));
+  (navControls.bySide[NavControlSide.Right] || [])
+    .forEach(navControl => newPlatform.chrome.navControls.registerRight({
+      order: navControl.order,
+      mount: navControl.render,
+    }));
 
   return reactDirective(wrapInI18nContext(Header), [
     // scope accepted by directive, passed in as React props
     'appTitle',
-    'isVisible',
   ],
   {},
   // angular injected React props
   {
-    badge$: chrome.badge.get$(),
-    breadcrumbs$: chrome.breadcrumbs.get$(),
-    helpExtension$: chrome.helpExtension.get$(),
-    navLinks$: npStart.core.chrome.navLinks.getNavLinks$(),
-    recentlyAccessed$: recentlyAccessed.get$(),
-    forceAppSwitcherNavigation$: npStart.core.chrome.navLinks.getForceAppSwitcherNavigation$(),
-    navControls,
-    homeHref,
-    uiCapabilities,
+    isVisible$: newPlatform.chrome.getIsVisible$(),
+    badge$: newPlatform.chrome.getBadge$(),
+    breadcrumbs$: newPlatform.chrome.getBreadcrumbs$(),
+    helpExtension$: newPlatform.chrome.getHelpExtension$(),
+    navLinks$: newPlatform.chrome.navLinks.getNavLinks$(),
+    forceAppSwitcherNavigation$: newPlatform.chrome.navLinks.getForceAppSwitcherNavigation$(),
+    homeHref: newPlatform.http.basePath.prepend('/app/kibana#/home'),
+    uiCapabilities: newPlatform.application.capabilities,
+    recentlyAccessed$: newPlatform.chrome.recentlyAccessed.get$(),
+    navControlsLeft$: newPlatform.chrome.navControls.getLeft$(),
+    navControlsRight$: newPlatform.chrome.navControls.getRight$(),
   });
 });

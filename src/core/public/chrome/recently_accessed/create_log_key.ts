@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { Sha256 } from '../crypto';
-
-export function createLogKey(type: string, optionalIdentifier: string) {
+export async function createLogKey(type: string, optionalIdentifier?: string) {
   const baseKey = `kibana.history.${type}`;
 
   if (!optionalIdentifier) {
     return baseKey;
   }
 
-  const protectedIdentifier = new Sha256().update(optionalIdentifier, 'utf8').digest('base64');
+  const encoder = new TextEncoder();
+  const data = encoder.encode(optionalIdentifier);
+  const buffer = await window.crypto.subtle.digest({ name: 'SHA-256' }, data);
+  const protectedIdentifier = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+
   return `${baseKey}-${protectedIdentifier}`;
 }
