@@ -17,7 +17,7 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
       const expected = {
-        connections: 6157,
+        connections: 113,
         hosts: 1,
         sourcePackets: 1,
         sourcePacketsHistogram: [
@@ -141,7 +141,7 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
       const expected = {
-        connections: 665,
+        connections: 1,
         hosts: 1,
         sourcePackets: 0,
         sourcePacketsHistogram: null,

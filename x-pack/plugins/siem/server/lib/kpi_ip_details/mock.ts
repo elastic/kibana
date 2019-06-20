@@ -273,7 +273,7 @@ export const mockResponse = {
 };
 
 export const mockResult = {
-  connections: 228246187,
+  connections: 13368,
   hosts: 4,
   sourcePackets: 12575222,
   sourcePacketsHistogram: [
