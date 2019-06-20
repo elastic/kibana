@@ -82,12 +82,14 @@ include::plugins.asciidoc[]
 
 include::development.asciidoc[]
 
-include::limitations.asciidoc[]
-
 include::release-notes/highlights.asciidoc[]
+
+include::CHANGELOG.asciidoc[]
 
 include::migration.asciidoc[]
 
-include::CHANGELOG.asciidoc[]
+include::limitations.asciidoc[]
+
+include::release-notes/highlights-versions.asciidoc[]
 
 include::redirects.asciidoc[]

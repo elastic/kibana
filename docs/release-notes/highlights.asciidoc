@@ -1,17 +1,90 @@
 [[release-highlights]]
-= Release Highlights
+= Release Notes
 
 [partintro]
 --
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes>>. 
+<<release-whats-new,What’s New>> | <<release-fixes,Bug fixes>> | <<release-breaking-changes,Breaking changes>> | <<release-known-issues,Known issues>>
 
-* <<release-highlights-7.2.0>>
-* <<release-highlights-7.1.0>>
-* <<release-highlights-7.0.0>>
+Welcome to the 7.2.0 release of Kibana. This version brings new features, enhancements, and bug fixes. 
 
+[float]
+[[release-whats-new]]
+== What’s new
+This version includes a number of significant updates. Key highlights include:
+
+* <<release-dark-mode,Dark mode everywhere>>
+* <<release-design,New design and navigation>>
+* <<release-save,Save objects aware of each other through references>>
+* <<release-autocomplete,Autocomplete queries on by default>>
+* <<release-filter,New filter bar and datepicker>>
+* <<release-maps,Maps for geospatial analysis>>
+
+[float]
+[[release-dark-mode]]
+=== Dark mode everywhere
+Kibana now supports a dark mode theme across the entire application. This setting is saved at the space level. To try it out, go to Management > Advanced settings, flip the dark mode switch, save, and reload your page. Because theming is now a Space concern, you can no longer set dark or light mode on an individual dashboards.
+
+[role="screenshot"]
+image::images/highlights-dark-mode.png[Kibana dark mode]
+
+[float]
+[[release-design]]
+=== New design and navigation
+Since the introduction of the link:https://elastic.github.io/eui/#/[Elastic UI library] in 6.2 Kibana has slowly been shifting towards a design revamp. 7.0.0 Beta 1 is the first release to show it off in its final form. The most prominent change is a switch to a new global navigation which introduces a constant header to manage Spaces and breadcrumbs. We're also now defaulting the side navigation to a collapsed view so that individual applications have more horizontal space to work with. We also did some much needed touch ups to our Dashboards and other applications with a big change to our default fonts.
+
+[float]
+[[release-save]]
+=== Saved objects aware of each other through references
+One challenge in Kibana has always been around how we reference saved objects in relation to each other. In 7.0.0 Beta 1 saved objects no longer contain ids of other saved objects under attributes. They have been moved under references with a named reference in attributes. This will make it easier for us during the 7.x release cycle to better handle how we deal with imports and exports of saved objects.
+
+[float]
+[[release-autocomplete]]
+=== Autocomplete queries on by default
+In Kibana 6.3 we introduced autocomplete features to our query bar along with the Kibana Query Language. In 7.0.0 Beta 1 that feature is now turned on by default. For users that prefer the Lucene syntax that option is still available and can be toggled on or off as you need in advanced settings.
+
+[float]
+[[release-filter]]
+=== New datepicker and filter
+The date picker is now completely accessible and no longer pushes the content of the page down (or forces a query reload) as you interact with it. We've also made it easier than ever to deal with complex date queries like mixing relative times with absolute ones. Like before, you can save your own presets or jump to quick dates at any time.
+
+Kibana 7 also introduces a redesigned filter bar. We've made it easier than ever to deal with these filters in bulk and apply them from within your dashboards and saved searches.
+
+[float]
+[[release-maps]]
+=== Maps for geospatial analysis
+Kibana 7.2.0 Beta 1 includes our new Maps application (beta) for geospatial analysis and location based analytics. With features like multiple layers and indices in a map, plotting raw documents, dynamic client side styling and the ability to search globally across multiple layers you will truly be able to understand and monitor your data with ease.
+
+[float]
+[[release-fixes]]
+== Bug fixes
+Kibana 7.2.0 has these notable fixes.  For a for a complete list of bug fixes and enhancements, link:https://github.com/elastic/kibana/pulls?utf8=✓&q=is%3Apr+is%3Aclosed+label%3Av7.0.0+-label%3Achore+-label%3Anon-issue+-label%3Abackport+-label%3Av6.7.0+-label%3Av6.6.0+-label%3Adocs+[check out the Changelog].  You can add labels to sort by functional area. 
+
+* link:https://github.com/elastic/kibana/pull/33065[Adds searching by index and node to Upgrade Assistant #33065]
+* link:https://github.com/elastic/kibana/pull/32286[Removes types from saved_objects repository #32286]
+* link:https://github.com/elastic/kibana/pull/29448[Adds user annotations to Machine Learning #29448]
+* link:https://github.com/elastic/kibana/pull/27353[Fixes dashboard so it refreshes visualizations #27353] 
+
+[float]
+[[release-breaking-changes]]
+== Breaking changes
+Be aware of these important breaking changes when upgrading your application to Kibana 7.2.0.  For a complete list, including details on each change, see <<breaking-changes-7.2,Breaking changes in 7.2.0>>.
+
+* link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html#_legacy_browsers_namely_ie11_will_see_a_security_warning_message_whenever_they_load_kibana[Shows security warning when loading Kibana in legacy browsers]
+* link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html#_legacy_browsers_namely_ie11_will_see_a_security_warning_message_whenever_they_load_kibana[Removes support for using PhantomJS browser to capture screenshots]
+* link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html#_saved_object_structure_change[Adds references attribute to saved object API]
+* link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html#breaking_70_setting_changes[Removes previously deprecated elasticsearch.* settings]
+
+[float]
+[[release-known-issues]]
+== Known issues
+Following are the known issues in Kibana 7.2.0 and associated workarounds. 
+
+[float]
+== Older versions
+Need a previous version? Check out the <<release-highlights-previous-versions,available versions>>. 
+
+[float]
+== Give us your feedback 
+
+We welcome any comments you might have to improve Kibana.  You can provide feedback on the link:https://discuss.elastic.co/c/kibana[Kibana forum].
 --
-
-include::highlights-7.2.0.asciidoc[]
-include::highlights-7.1.0.asciidoc[]
-include::highlights-7.0.0.asciidoc[]

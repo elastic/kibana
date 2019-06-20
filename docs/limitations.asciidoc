@@ -1,8 +1,6 @@
 [[limitations]]
-= Limitations
+== Limitations
 
-[partintro]
---
 {kib} currently has the following limitations.
 
 * <<nested-objects>>
@@ -15,8 +13,11 @@ These {stack} features also have limitations that affect {kib}:
 * {stack-ov}/ml-limitations.html[Machine learning]
 * {stack-ov}/security-limitations.html[Security]
 
---
+
+:leveloffset: +1
 
 include::limitations/nested-objects.asciidoc[]
 
 include::limitations/export-data.asciidoc[]
+
+:leveloffset: 0

@@ -1,8 +1,6 @@
 [[release-notes]]
-= Release Notes
+== Changelog
 
-[partintro]
---
 // Use these for links to issue and pulls. Note issues and pulls redirect one to
 // each other on Github, so don't worry too much on using the right prefix.
 :issue: https://github.com/elastic/kibana/issues/
@@ -21,7 +19,7 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha2>>
 * <<release-notes-7.0.0-alpha1>>
 
---
+:leveloffset: +1
 
 [[release-notes-7.2.0]]
 == {kib} 7.2.0
@@ -2624,6 +2622,4 @@ if the field is switched, and then switched back to the previous field {pull}251
 * Moves inspector code from Vis to embeddable visualize handler {pull}24112[#24112]
 * Removes inspector from Vis {pull}24112[#24112]
 
-
-
-
+:leveloffset: 0
