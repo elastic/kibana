@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 routes.when(`${ROLES_PATH}/:action/:name?`, {
   template,
   k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-    $route.current.params.name
+    $route.current.params.action === 'edit' && $route.current.params.name
       ? getEditRoleBreadcrumbs
       : getCreateRoleBreadcrumbs
   ),
