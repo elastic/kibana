@@ -10,6 +10,7 @@
       <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
         <search-bar
           query="model.query"
+          saved-query="savedQuery"
           screen-title="screenTitle"
           on-query-submit="updateQueryAndFetch"
           app-name="'dashboard'"
@@ -23,6 +24,8 @@
           is-refresh-paused="model.refreshInterval.pause"
           refresh-interval="model.refreshInterval.value"
           on-refresh-change="onRefreshChange"
+          on-saved="onQuerySaved"
+          on-saved-query-updated="onSavedQueryUpdated"
         ></search-bar>
       </div>
     </div>

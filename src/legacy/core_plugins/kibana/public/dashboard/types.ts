@@ -100,9 +100,9 @@ export interface DashboardAppStateParameters {
     useMargins: boolean;
   };
   query: Query | string;
-  savedQuery: SavedQuery;
   filters: Filter[];
   viewMode: DashboardViewMode;
+  savedQuery?: string;
 }
 
 // This could probably be improved if we flesh out AppState more... though AppState will be going away

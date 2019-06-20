@@ -63,7 +63,8 @@ import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { StaticIndexPattern, Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
+import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import moment from 'moment';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
@@ -90,6 +91,8 @@ import { TopNavIds } from './top_nav/top_nav_ids';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { getDashboardTitle } from './dashboard_strings';
 import { panelActionsStore } from './store/panel_actions_store';
+
+const { savedQueryService } = data.search.services;
 
 type ConfirmModalFn = (
   message: string,
@@ -124,7 +127,6 @@ interface DashboardAppScope extends ng.IScope {
   screenTitle: string;
   model: {
     query: Query | string;
-    savedQuery: SavedQuery;
     filters: Filter[];
     timeRestore: boolean;
     title: string;
@@ -134,6 +136,7 @@ interface DashboardAppScope extends ng.IScope {
       | { to: string | moment.Moment | undefined; from: string | moment.Moment | undefined };
     refreshInterval: any;
   };
+  savedQuery?: SavedQuery;
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: StaticIndexPattern[];
@@ -150,6 +153,8 @@ interface DashboardAppScope extends ng.IScope {
   $listenAndDigestAsync: any;
   onCancelApplyFilters: () => void;
   onApplyFilters: (filters: Filter[]) => void;
+  onQuerySaved: (savedQuery: SavedQuery) => void;
+  onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
   topNavMenu: any;
   showFilterBar: () => boolean;
   showAddPanel: any;
@@ -265,7 +270,6 @@ class DashboardAppController {
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {
         query: dashboardStateManager.getQuery(),
-        savedQuery: dashboardStateManager.getSavedQuery(),
         filters: queryFilter.getFilters(),
         timeRestore: dashboardStateManager.getTimeRestore(),
         title: dashboardStateManager.getTitle(),
@@ -286,47 +290,6 @@ class DashboardAppController {
           });
         });
       }
-      const savedQuery = dashboardStateManager.getSavedQuery();
-      if (savedQuery) {
-        $scope.savedQuery = savedQuery;
-      }
-      // savedQuery: function (AppState, Private) {
-      //   const appState = new AppState();
-      //   const savedQueryId = appState.savedQuery;
-      //   const savedObjectsClient = Private(SavedObjectsClientProvider);
-
-      //   if (savedQueryId) {
-      //     return savedObjectsClient.get('query', savedQueryId).then(savedQuery => {
-      //       if (savedQuery.error) return;
-      //       let filters = savedQuery.attributes.filters;
-      //       if (filters) {
-      //         filters = JSON.parse(filters);
-      //       }
-      //       let time = savedQuery.attributes.timefilter;
-      //       if (time) {
-      //         time = JSON.parse(savedQuery.attributes.timefilter);
-
-      //         timefilter.setTime({
-      //           from: time.timeFrom,
-      //           to: time.timeTo,
-      //         });
-
-      //         if (time.refreshInterval) {
-      //           timefilter.setRefreshInterval(time.refreshInterval);
-      //         }
-      //       }
-
-      //       return {
-      //         id: savedQuery.id,
-      //         attributes: {
-      //           ...savedQuery.attributes,
-      //           filters: filters,
-      //           timefilter: time,
-      //         }
-      //       };
-      //     });
-      //   }
-      // }
     };
 
     // Part of the exposed plugin API - do not remove without careful consideration.
@@ -433,6 +396,60 @@ class DashboardAppController {
       queryFilter.addFiltersAndChangeTimeFilter(filters);
       $scope.appState.$newFilters = [];
     };
+
+    $scope.onQuerySaved = savedQuery => {
+      $scope.savedQuery = savedQuery;
+    };
+
+    $scope.onSavedQueryUpdated = savedQuery => {
+      $scope.savedQuery = savedQuery;
+    };
+
+    const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
+      queryFilter.setFilters(savedQuery.attributes.filters || []);
+      dashboardStateManager.applyFilters(
+        savedQuery.attributes.query,
+        savedQuery.attributes.filters || []
+      );
+      if (savedQuery.attributes.timefilter) {
+        timefilter.setTime({
+          from: savedQuery.attributes.timefilter.timeFrom,
+          to: savedQuery.attributes.timefilter.timeTo,
+        });
+        if (savedQuery.attributes.timefilter.refreshInterval) {
+          timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+        }
+      }
+      $scope.refresh();
+    };
+
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
+      if (!newSavedQuery) return;
+      dashboardStateManager.setSavedQueryId(newSavedQuery.id);
+
+      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+        updateStateFromSavedQuery(newSavedQuery);
+      }
+    });
+
+    $scope.$watch(
+      () => {
+        return dashboardStateManager.getSavedQueryId();
+      },
+      newSavedQueryId => {
+        if (!newSavedQueryId) {
+          $scope.savedQuery = undefined;
+          return;
+        }
+
+        savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+          $scope.$evalAsync(() => {
+            $scope.savedQuery = savedQuery;
+            updateStateFromSavedQuery(savedQuery);
+          });
+        });
+      }
+    );
 
     $scope.$watch('appState.$newFilters', (filters: Filter[] = []) => {
       if (filters.length === 1) {

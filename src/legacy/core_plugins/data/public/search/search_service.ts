@@ -19,6 +19,7 @@
 
 import { once } from 'lodash';
 import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
+import * as savedQueryService from './search_bar/lib/saved_query_service';
 
 /**
  * Search Service
@@ -29,6 +30,9 @@ export class SearchService {
     return {
       ui: {
         SearchBar,
+      },
+      services: {
+        savedQueryService,
       },
       loadLegacyDirectives: once(setupSearchBarDirective),
     };

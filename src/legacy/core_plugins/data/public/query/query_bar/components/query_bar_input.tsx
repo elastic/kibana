@@ -43,7 +43,7 @@ import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { SavedQueryRow } from './saved_query_row';
 import { SavedQueryAttributes, SavedQuery } from '../../../search/search_bar';
-import { findSavedQueries } from '../lib/saved_query_service';
+import { findSavedQueries } from '../../../search/search_bar/lib/saved_query_service';
 
 interface Props {
   indexPatterns: Array<IndexPattern | string>;

@@ -38,7 +38,7 @@ import { toastNotifications } from 'ui/notify';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery, SavedQueryAttributes } from '../index';
-import { saveQuery } from '../../../query/query_bar/lib/saved_query_service';
+import { saveQuery } from '../lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
 import { EuiFlexGroup, EuiFlexItem } from '../../../../../../../../../eui/src/components/flex';
 

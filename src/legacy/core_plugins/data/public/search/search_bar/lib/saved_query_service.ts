@@ -18,8 +18,8 @@
  */
 
 import chrome from 'ui/chrome';
-import { SavedObjectAttributes } from 'src/core/server';
-import { SavedQueryAttributes, SavedQuery } from '../../../search/search_bar';
+import { SavedObjectAttributes } from 'kibana/server';
+import { SavedQueryAttributes, SavedQuery } from '../index';
 
 interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
   title: string;
