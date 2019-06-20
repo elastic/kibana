@@ -11,8 +11,7 @@
 }
 
 .mapLayerControl__addLayerButton,
-.mapLayerControl__openLayerTOCButton,
-.mapViewControl__gotoButton {
+.mapLayerControl__openLayerTOCButton {
   pointer-events: all;
 
   &:enabled,
@@ -23,8 +22,7 @@
 }
 
 .mapLayerControl__openLayerTOCButton,
-.mapLayerControl__closeLayerTOCButton,
-.mapViewControl__gotoButton {
+.mapLayerControl__closeLayerTOCButton {
   @include size($euiSizeXL);
   background-color: $euiColorEmptyShade !important; // During all states
 }

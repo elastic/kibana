@@ -12,7 +12,7 @@ import { pathToFileURL } from 'url';
 
 import { ServerOptions } from '../server_options';
 import { LanguageServerProxy } from './proxy';
-import { InitializingError, RequestExpander } from './request_expander';
+import { InitializingError, RequestExpander, WorkspaceUnloadedError } from './request_expander';
 
 // @ts-ignore
 const options: ServerOptions = {
@@ -31,19 +31,41 @@ afterEach(() => {
   });
 });
 
-test('requests should be sequential', async () => {
-  const clock = sinon.useFakeTimers();
+function createMockProxy(initDelay: number = 0, requestDelay: number = 0) {
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
     handleRequest: sinon.stub().callsFake(() => {
-      const start = Date.now();
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ result: { start, end: Date.now() } });
-        }, 100);
-      });
+      if (requestDelay > 0) {
+        const start = Date.now();
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve({ result: { start, end: Date.now() } });
+          }, requestDelay);
+        });
+      } else {
+        return sinon.stub().resolvesArg(0);
+      }
     }),
+    initialize: sinon.stub().callsFake(
+      () =>
+        new Promise(resolve => {
+          proxyStub.initialized = true;
+          if (initDelay > 0) {
+            setTimeout(() => {
+              resolve();
+            }, initDelay);
+          } else {
+            resolve();
+          }
+        })
+    ),
   });
+  return proxyStub;
+}
+
+test('requests should be sequential', async () => {
+  const clock = sinon.useFakeTimers();
+  const proxyStub = createMockProxy(0, 100);
   const expander = new RequestExpander(proxyStub, false, 1, options);
   const request1 = {
     method: 'request1',
@@ -66,20 +88,7 @@ test('requests should be sequential', async () => {
 
 test('requests should throw error after lsp init timeout', async () => {
   const clock = sinon.useFakeTimers();
-  // @ts-ignore
-  const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
-    handleRequest: sinon.stub().callsFake(() => {
-      Promise.resolve('ok');
-    }),
-    initialize: sinon.stub().callsFake(
-      () =>
-        new Promise(resolve => {
-          setTimeout(() => {
-            resolve();
-          }, 300);
-        })
-    ),
-  });
+  const proxyStub = createMockProxy(300);
   const expander = new RequestExpander(proxyStub, false, 1, options);
   const request1 = {
     method: 'request1',
@@ -105,14 +114,7 @@ test('requests should throw error after lsp init timeout', async () => {
 });
 
 test('be able to open multiple workspace', async () => {
-  // @ts-ignore
-  const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
-    initialize: sinon.stub().callsFake(() => {
-      proxyStub.initialized = true;
-      return Promise.resolve();
-    }),
-    handleRequest: sinon.stub().resolvesArg(0),
-  });
+  const proxyStub = createMockProxy();
   const expander = new RequestExpander(proxyStub, true, 2, options);
   const request1 = {
     method: 'request1',
@@ -158,14 +160,7 @@ test('be able to open multiple workspace', async () => {
 });
 
 test('be able to swap workspace', async () => {
-  // @ts-ignore
-  const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
-    initialize: sinon.stub().callsFake(() => {
-      proxyStub.initialized = true;
-      return Promise.resolve();
-    }),
-    handleRequest: sinon.stub().resolvesArg(0),
-  });
+  const proxyStub = createMockProxy();
   const expander = new RequestExpander(proxyStub, true, 1, options);
   const request1 = {
     method: 'request1',
@@ -204,4 +199,28 @@ test('be able to swap workspace', async () => {
       isNotification: true,
     })
   ).toBeTruthy();
+});
+
+test('requests should be cancelled if workspace is unloaded', async () => {
+  // @ts-ignore
+  const clock = sinon.useFakeTimers();
+  const proxyStub = createMockProxy(300);
+  const expander = new RequestExpander(proxyStub, true, 1, options);
+  const workspace1 = '/tmp/test/workspace/1';
+  const request = {
+    method: 'request1',
+    params: [],
+    workspacePath: workspace1,
+    timeoutForInitializeMs: 500,
+  };
+  mkdirp.sync(workspace1);
+  const promise1 = expander.handleRequest(request);
+  clock.tick(100);
+  const promise2 = expander.handleRequest(request);
+  await expander.unloadWorkspace(workspace1);
+  clock.tick(400);
+  process.nextTick(() => clock.runAll());
+  await expect(promise1).rejects.toEqual(WorkspaceUnloadedError);
+  await expect(promise2).rejects.toEqual(WorkspaceUnloadedError);
+  clock.restore();
 });

@@ -87,7 +87,6 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         this.killProcess(p);
       }
     });
-    proxy.listen();
     this.startConnect(proxy);
     await new Promise((resolve, reject) => {
       proxy.onConnected(() => {
