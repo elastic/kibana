@@ -5,7 +5,7 @@ set -e
 ###
 ### keep until 6.8.2 snapshots are available
 ###
-export TEST_ES_BRANCH=6.8.1-58f9e974
+export TEST_ES_BRANCH=6.8.1
 
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
