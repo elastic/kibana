@@ -12,6 +12,8 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiFormRow,
+  EuiLink,
+  EuiPanel,
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
@@ -168,7 +170,30 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   helpText={
                     <FormattedMessage
                       id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesHelpText"
-                      defaultMessage="Only the selected indices will be restored"
+                      defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored"
+                      // defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored. {selectOrDeselectAllLink}"
+                      values={{
+                        count: restoreIndices && restoreIndices.length,
+                        // selectOrDeselectAllLink: (
+                        //   <EuiLink
+                        //     onClick={() => {
+                        //       const newOptions = indicesOptions.map(option => ({
+                        //         ...option,
+                        //         checked: undefined,
+                        //       }));
+                        //       console.log(newOptions);
+                        //       setIndicesOptions(newOptions);
+                        //       updateRestoreSettings({ indices: [] });
+                        //       setCachedRestoreSettings({
+                        //         ...cachedRestoreSettings,
+                        //         indices: [],
+                        //       });
+                        //     }}
+                        //   >
+                        //     De-select all
+                        //   </EuiLink>
+                        // ),
+                      }}
                     />
                   }
                   isInvalid={Boolean(errors.indices)}
@@ -184,16 +209,22 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           newSelectedIndices.push(label);
                         }
                       });
-                      updateRestoreSettings({ indices: [...newSelectedIndices] });
                       setIndicesOptions(options);
+                      updateRestoreSettings({ indices: [...newSelectedIndices] });
                       setCachedRestoreSettings({
                         ...cachedRestoreSettings,
                         indices: [...newSelectedIndices],
                       });
                     }}
-                    listProps={{ bordered: true }}
+                    searchable
+                    height={300}
                   >
-                    {list => list}
+                    {(list, search) => (
+                      <EuiPanel paddingSize="s" hasShadow={false}>
+                        {search}
+                        {list}
+                      </EuiPanel>
+                    )}
                   </EuiSelectable>
                 </EuiFormRow>
               </Fragment>

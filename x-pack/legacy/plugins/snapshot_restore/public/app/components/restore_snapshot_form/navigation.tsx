@@ -33,16 +33,16 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
       }),
       isComplete: maxCompletedStep >= 2,
       isSelected: currentStep === 2,
-      disabled: maxCompletedStep < 2,
+      disabled: maxCompletedStep < 1,
       onClick: () => updateCurrentStep(2),
     },
     {
       title: i18n.translate('xpack.snapshotRestore.restoreForm.navigation.stepReviewName', {
         defaultMessage: 'Review',
       }),
-      isComplete: maxCompletedStep >= 3,
+      isComplete: maxCompletedStep >= 2,
       isSelected: currentStep === 3,
-      disabled: maxCompletedStep < 3,
+      disabled: maxCompletedStep < 2,
       onClick: () => updateCurrentStep(3),
     },
   ];

@@ -68,6 +68,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
       return;
     }
     setCurrentStep(step);
+    clearSaveError();
   };
 
   const onBack = () => {
@@ -84,8 +85,8 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
       return;
     }
     const nextStep = currentStep + 1;
+    setMaxCompletedStep(Math.max(currentStep, maxCompletedStep));
     setCurrentStep(nextStep);
-    setMaxCompletedStep(nextStep > maxCompletedStep ? nextStep : maxCompletedStep);
   };
 
   const executeRestore = () => {
