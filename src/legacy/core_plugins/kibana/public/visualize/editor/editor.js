@@ -514,8 +514,7 @@ function VisEditor(
         updateStateFromSavedQuery(savedQuery);
       });
     });
-  }
-  );
+  });
 
   /**
    * Called when the user clicks "Save" button.

@@ -73,6 +73,8 @@ import 'ui/capabilities/route_setup';
 import { data } from 'plugins/data/setup';
 data.search.loadLegacyDirectives();
 
+const { savedQueryService } = data.search.services;
+
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
   LOADING: 'loading',
@@ -166,43 +168,6 @@ uiRoutes
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));
-      },
-      savedQuery: function (AppState, Private) {
-        const appState = new AppState();
-        const savedQueryId = appState.savedQuery;
-        const savedObjectsClient = Private(SavedObjectsClientProvider);
-
-        if (savedQueryId) {
-          return savedObjectsClient.get('query', savedQueryId).then(savedQuery => {
-            if (savedQuery.error) return;
-            let filters = savedQuery.attributes.filters;
-            if (filters) {
-              filters = JSON.parse(filters);
-            }
-            let time = savedQuery.attributes.timefilter;
-            if (time) {
-              time = JSON.parse(savedQuery.attributes.timefilter);
-
-              timefilter.setTime({
-                from: time.timeFrom,
-                to: time.timeTo,
-              });
-
-              if (time.refreshInterval) {
-                timefilter.setRefreshInterval(time.refreshInterval);
-              }
-            }
-
-            return {
-              id: savedQuery.id,
-              attributes: {
-                ...savedQuery.attributes,
-                filters: filters,
-                timefilter: time,
-              }
-            };
-          });
-        }
       }
     }
   });
@@ -932,30 +897,54 @@ function discoverController(
   $scope.showAllRows = function () {
     $scope.minimumVisibleRows = $scope.hits;
   };
-  $scope.onQuerySaved = function (savedQuery) {
+
+  $scope.onQuerySaved = savedQuery => {
     $scope.savedQuery = savedQuery;
   };
 
-  $scope.onSavedQueryUpdated = function (savedQuery) {
+  $scope.onSavedQueryUpdated = savedQuery => {
     $scope.savedQuery = savedQuery;
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery) => {
-    if (!newSavedQuery) return;
+  const updateStateFromSavedQuery = (savedQuery) => {
+    $state.query = savedQuery.attributes.query;
+    queryFilter.setFilters(savedQuery.attributes.filters || []);
 
-    if (newSavedQuery.attributes.timefilter) {
+    if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
-        from: newSavedQuery.attributes.timefilter.timeFrom,
-        to: newSavedQuery.attributes.timefilter.timeTo,
+        from: savedQuery.attributes.timefilter.timeFrom,
+        to: savedQuery.attributes.timefilter.timeTo,
       });
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+      }
     }
 
-    queryFilter.setFilters(newSavedQuery.attributes.filters || []);
+    $scope.fetch();
+  };
 
-    $state.query = newSavedQuery.attributes.query;
+  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+    if (!newSavedQuery) return;
     $state.savedQuery = newSavedQuery.id;
     $state.save();
-    $scope.fetch();
+
+    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      updateStateFromSavedQuery(newSavedQuery);
+    }
+  });
+
+  $scope.$watch('state.savedQuery', newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
+
+    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      $scope.$evalAsync(() => {
+        $scope.savedQuery = savedQuery;
+        updateStateFromSavedQuery(savedQuery);
+      });
+    });
   });
 
   async function setupVisualization() {
