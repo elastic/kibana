@@ -7,11 +7,7 @@
 import { Subject } from 'rxjs';
 import { timefilter as timefilterDep } from 'ui/timefilter';
 import { RefreshInterval } from 'src/legacy/ui/public/timefilter/timefilter';
-
-interface Time {
-  to: string | undefined;
-  from: string | undefined;
-}
+import { TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
 
 const timefilterUpdate$ = new Subject();
 const refreshIntervalUpdate$ = new Subject();
@@ -76,7 +72,7 @@ class MlTimefilter {
     timefilterDep.setRefreshInterval(interval);
   }
   // in timefilter dependency - 'fetch' is emitted
-  setTime(time: Time) {
+  setTime(time: TimeRange) {
     timefilterDep.setTime(time);
   }
   // consumer must call unsubscribe on return value

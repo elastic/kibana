@@ -6,22 +6,24 @@
 
 import React, { SFC, useState, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { TimeHistory, TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
 import { timefilter } from '../../../../common/timefilter';
 
 interface Props {
-  timeHistory: any;
+  dateFormat: string;
+  timeHistory: TimeHistory;
 }
 
-function getRecentlyUsedRanges(timeHistory: any): Array<{ start: string; end: string }> {
-  return timeHistory.get().map(({ from, to }: { from: number; to: number }) => {
+function getRecentlyUsedRanges(timeHistory: TimeHistory): Array<{ start: string; end: string }> {
+  return timeHistory.get().map(({ from, to }: TimeRange) => {
     return {
       start: from,
       end: to,
     };
   });
 }
-// TODO: fix types
-export const TopNav: SFC<Props> = ({ timeHistory }) => {
+
+export const TopNav: SFC<Props> = ({ dateFormat, timeHistory }) => {
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges(timeHistory));
@@ -76,8 +78,7 @@ export const TopNav: SFC<Props> = ({ timeHistory }) => {
         onRefresh={updateFilter}
         onRefreshChange={updateInterval}
         recentlyUsedRanges={recentlyUsedRanges}
-        // date-format="dateFormat"
-        // showUpdateButton={true}
+        dateFormat={dateFormat}
       />
     )
   );

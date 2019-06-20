@@ -17,7 +17,9 @@ interface Tab {
 }
 
 interface Props {
+  dateFormat: string;
   disableLinks: boolean;
+  showTabs: boolean;
   tabId: string;
   timeHistory: any;
 }
@@ -73,12 +75,17 @@ function getTabs(disableLinks: boolean): Tab[] {
   ];
 }
 
-export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId, timeHistory }) => {
+export const NavigationMenu: SFC<Props> = ({
+  dateFormat,
+  disableLinks,
+  showTabs,
+  tabId,
+  timeHistory,
+}) => {
   const [tabs] = useState(getTabs(disableLinks));
   const [selectedTabId, setSelectedTabId] = useState(tabId);
 
   function onSelectedTabChanged(id: string) {
-    // TODO: change href but keep what's saved in url
     moveToSelectedTab(id);
     setSelectedTabId(id);
   }
@@ -86,7 +93,7 @@ export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId, timeHistory })
   function renderTabs() {
     return tabs.map((tab: Tab) => (
       <EuiTab
-        className="MlNavigationMenu__tab"
+        className="mlNavigationMenu__tab"
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         disabled={tab.disabled}
@@ -99,12 +106,12 @@ export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId, timeHistory })
 
   return (
     <Fragment>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" className="MlNavigationMenu__topNav">
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" className="mlNavigationMenu__topNav">
         <EuiFlexItem grow={false}>
-          <TopNav timeHistory={timeHistory} />
+          <TopNav dateFormat={dateFormat} timeHistory={timeHistory} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiTabs>{renderTabs()}</EuiTabs>
+      {showTabs && <EuiTabs>{renderTabs()}</EuiTabs>}
     </Fragment>
   );
 };

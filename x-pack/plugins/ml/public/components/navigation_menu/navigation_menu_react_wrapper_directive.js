@@ -15,16 +15,30 @@ const module = uiModules.get('apps/ml');
 
 import 'ui/directives/kbn_href';
 
-module.directive('mlNavMenu', function () {
+
+module.directive('mlNavMenu', function (config) {
   return {
     restrict: 'E',
     transclude: true,
     link: function (scope, element, attrs) {
-      // TODO: does scope.name need to be set?
-      // TODO: set showTabs to pass as prop
+      const { name } = attrs;
+      let showTabs = false;
+
+      if (name === 'jobs' ||
+        name === 'settings' ||
+        name === 'data_frame' ||
+        name === 'datavisualizer' ||
+        name === 'filedatavisualizer' ||
+        name === 'timeseriesexplorer' ||
+        name === 'access-denied' ||
+        name === 'explorer') {
+        showTabs = true;
+      }
       const props = {
+        dateFormat: config.get('dateFormat'),
         disableLinks: (isFullLicense() === false),
-        tabId: attrs.name,
+        showTabs,
+        tabId: name,
         timeHistory
       };
 

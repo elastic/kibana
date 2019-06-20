@@ -40,6 +40,8 @@ export interface Timefilter {
   enableTimeRangeSelector: () => void;
   off: (event: string, reload: () => void) => void;
   on: (event: string, reload: () => void) => void;
+  isAutoRefreshSelectorEnabled: boolean;
+  isTimeRangeSelectorEnabled: boolean;
 }
 
 export const timefilter: Timefilter;
