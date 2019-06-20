@@ -13,7 +13,7 @@ import { getUiFiltersES } from '../services/ui_filters/get_ui_filters_es';
 import { TransactionBreakdownAPIResponse } from '../../server/lib/transactions/breakdown';
 
 export function useTransactionBreakdown(urlParams: IUrlParams) {
-  const { serviceName, start, end } = urlParams;
+  const { serviceName, start, end, transactionName } = urlParams;
 
   const uiFilters = useUiFilters(urlParams);
 
@@ -25,6 +25,7 @@ export function useTransactionBreakdown(urlParams: IUrlParams) {
           query: {
             start,
             end,
+            transactionName,
             uiFiltersES: await getUiFiltersES(uiFilters)
           }
         });

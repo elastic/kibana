@@ -7,6 +7,7 @@
 import { flatten } from 'lodash';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
+import { rangeFilter } from '../../helpers/range_filter';
 
 export type TransactionBreakdownAPIResponse = PromiseReturnType<
   typeof getTransactionBreakdown
@@ -14,12 +15,14 @@ export type TransactionBreakdownAPIResponse = PromiseReturnType<
 
 export async function getTransactionBreakdown({
   setup,
-  serviceName
+  serviceName,
+  transactionName
 }: {
   setup: Setup;
   serviceName: string;
+  transactionName?: string;
 }) {
-  const { uiFiltersES, client, config } = setup;
+  const { uiFiltersES, client, config, start, end } = setup;
 
   const params = {
     index: config.get<string>('apm_oss.metricsIndices'),
@@ -42,9 +45,19 @@ export async function getTransactionBreakdown({
                 }
               }
             },
-            // We don't have real data yet
-            // { range: rangeFilter(start, end) },
-            ...uiFiltersES
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES,
+            ...(transactionName
+              ? [
+                  {
+                    term: {
+                      'transaction.name': {
+                        value: transactionName
+                      }
+                    }
+                  }
+                ]
+              : [])
           ]
         }
       },

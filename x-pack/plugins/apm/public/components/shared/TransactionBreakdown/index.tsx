@@ -7,7 +7,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useState, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { sortBy } from 'lodash';
-import { useTransactionBreakdown } from '../../../../hooks/useTransactionBreakdown';
+import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
@@ -27,12 +27,18 @@ const COLORS = [
 
 const TransactionBreakdown: React.FC<{
   serviceName: string;
+  transactionName?: string;
   start: string | undefined;
   end: string | undefined;
-}> = ({ serviceName, start, end }) => {
+}> = ({ serviceName, start, end, transactionName }) => {
   const [showChart, setShowChart] = useState(false);
 
-  const { data } = useTransactionBreakdown({ serviceName, start, end });
+  const { data } = useTransactionBreakdown({
+    serviceName,
+    start,
+    end,
+    transactionName
+  });
 
   const kpis = useMemo(
     () => {
