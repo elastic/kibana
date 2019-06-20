@@ -23,11 +23,10 @@ import storage from '../storage';
 
 // settings
 import { getCurrentSettings, updateSettings } from '../settings';
-import { showSettingsModal } from '../components/show_settings_modal';
+import { showSettingsModal } from '../components/settings_show_modal';
 
 // help
-
-import { showHelpPanel } from '../components/show_help_panel';
+import { showHelpPanel } from '../components/help_show_panel';
 
 
 export function SenseTopNavController(Private) {
@@ -39,7 +38,6 @@ export function SenseTopNavController(Private) {
       label: i18n.translate('console.topNav.welcomeTabLabel', {
         defaultMessage: 'Welcome'
       }),
-      hideButton: true,
       template: `<sense-welcome></sense-welcome>`,
       testId: 'consoleWelcomeButton',
     },

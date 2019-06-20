@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { OpenHelpPanel } from './sense_help';
+import { OpenHelpPanel } from './help_panel';
 import { I18nContext } from 'ui/i18n';
 
 let isOpen = false;

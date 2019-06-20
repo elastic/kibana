@@ -20,7 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EditorExample } from './sense_help_example';
+import { EditorExample } from './help_example';
 
 import {
   EuiFlexGroup,
@@ -32,7 +32,7 @@ import {
   EuiSpacer,
   EuiPanel,
 } from '@elastic/eui';
-import { showHelpPanel } from './show_help_panel';
+import { showHelpPanel } from './help_show_panel';
 
 export function OpenHelpPanel(props) {
   return (

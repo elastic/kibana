@@ -25,7 +25,6 @@ import {
   EuiButtonEmpty,
   EuiFieldNumber,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,

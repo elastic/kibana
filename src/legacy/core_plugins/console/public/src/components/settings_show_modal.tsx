@@ -20,7 +20,7 @@
 import { I18nContext } from 'ui/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DevToolsSettingsModal } from './sense_settings_modal';
+import { DevToolsSettingsModal } from './settings_modal';
 import { DevToolsSettings } from './dev_tools_settings';
 
 export function showSettingsModal(
