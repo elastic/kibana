@@ -11,20 +11,22 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
   help: i18n.translate('xpack.canvas.functions.essqlHelpText', {
-    defaultMessage: '{essql}',
+    defaultMessage: 'Queries {es} using {es} {sql}',
     values: {
-      essql: 'Elasticsearch SQL',
+      es: 'Elasticsearch',
+      sql: 'SQL',
     },
   }),
   args: {
     query: i18n.translate('xpack.canvas.functions.essql.args.queryHelpText', {
-      defaultMessage: '{sql} query',
+      defaultMessage: 'An {es} {sql} query',
       values: {
+        es: 'Elasticsearch',
         sql: 'SQL',
       },
     }),
     count: i18n.translate('xpack.canvas.functions.essql.args.countHelpText', {
-      defaultMessage: 'The number of docs to pull back. Smaller numbers perform better',
+      defaultMessage: 'The number of documents to retrieve. Smaller numbers perform better.',
     }),
     timezone: i18n.translate('xpack.canvas.functions.essql.args.timezoneHelpText', {
       defaultMessage:

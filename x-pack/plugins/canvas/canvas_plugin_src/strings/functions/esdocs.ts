@@ -12,8 +12,8 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
   help: i18n.translate('xpack.canvas.functions.esdocsHelpText', {
     defaultMessage:
-      'Query {es} and get back raw documents. We recommend you specify the fields you want, ' +
-      'especially if you are going to ask for a lot of rows',
+      'Query {es} and returns raw documents. Specify the fields you want to receive, ' +
+      'especially if you are asking for a lot of rows',
     values: {
       es: 'elasticsearch',
     },

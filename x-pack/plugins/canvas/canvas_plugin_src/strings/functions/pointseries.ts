@@ -38,7 +38,7 @@ export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
       defaultMessage: 'For elements that support it, the size of the marks',
     }),
     text: i18n.translate('xpack.canvas.functions.pointseries.args.textHelpText', {
-      defaultMessage: 'For use in charts that support it, the text to show in the mark',
+      defaultMessage: 'For elements that support it, the text to show in the mark',
     }),
   },
 };

@@ -23,22 +23,22 @@ export const timelion = () => ({
     },
     interval: {
       types: ['string'],
-      help: 'Bucket interval for the time series',
+      help: 'The bucket interval for the time series.',
       default: 'auto',
     },
     from: {
       type: ['string'],
-      help: 'Elasticsearch date math string for the start of the time range',
+      help: 'The Elasticsearch `datemath` string for the start of the time range.',
       default: 'now-1y',
     },
     to: {
       type: ['string'],
-      help: 'Elasticsearch date math string for the end of the time range',
+      help: 'The Elasticsearch `datemath` string for the end of the time range.',
       default: 'now',
     },
     timezone: {
       type: ['string'],
-      help: 'Timezone for the time range',
+      help: 'Timezone for the time range. See [Moment Timezone](https://momentjs.com/timezone/)',
       default: 'UTC',
     },
   },

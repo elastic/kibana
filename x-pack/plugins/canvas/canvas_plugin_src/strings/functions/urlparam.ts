@@ -12,7 +12,7 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof urlparam>> = {
   help: i18n.translate('xpack.canvas.functions.urlparamHelpText', {
     defaultMessage:
-      'Access {url} parameters and use them in expressions. Eg {example}. This will always return a string',
+      'Accesses {url} parameters to use in expressions, (e.g. {example}) and returns them as a string.',
     values: {
       url: 'URL',
       example: 'https://localhost:5601/app/canvas?myVar=20',
@@ -26,9 +26,9 @@ export const help: FunctionHelp<FunctionFactory<typeof urlparam>> = {
       },
     }),
     default: i18n.translate('xpack.canvas.functions.urlparam.args.defaultHelpText', {
-      defaultMessage: 'Return this string if the {url} parameter is not defined',
+      defaultMessage: 'If the {url} parameter is not present, return this string instead.',
       values: {
-        url: 'url',
+        url: 'URL',
       },
     }),
   },

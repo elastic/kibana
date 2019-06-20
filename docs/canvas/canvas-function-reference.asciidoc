@@ -535,7 +535,7 @@ Default: `all`
 [[esdocs_fn]]
 === `esdocs`
 
-Queries {es} and gets back raw documents. Specify the fields you want to receive, 
+Queries {es} and returns raw documents. Specify the fields you want to receive, 
 especially if you are asking for a lot of rows.
 
 *Accepts:* `filter`
@@ -586,7 +586,7 @@ Default: `100`
 [[essql_fn]]
 === `essql`
 
-Specifies an {es} SQL.
+Specifies an {es} SQL query.
 
 *Accepts:* `filter`
 
@@ -602,9 +602,15 @@ Alias: `q`, `query`
 
 |`count`
 |`number`
-|The number of documents to retrieve
+|The number of documents to retrieve. Smaller numbers perform better.
 
 Default: `1000`
+
+|`timezone`
+|`string`
+|The timezone to use for date operations, valid ISO8601 formats and UTC offsets both work.
+
+Default: `UTC`
 |===
 
 *Returns:* `datatable`
@@ -673,7 +679,7 @@ and a `false` value removes it.
 [[filters_fn]]
 === `filters`
 
-Collects element filters on the workpad, usually to provide them to a data source.
+Aggregates element filters from the workpad for use elsewhere, usually a data source.
 
 *Accepts:* `null`
 
@@ -691,7 +697,7 @@ Alias: `group`
 
 Alias: `nogroup`, `nogroups`
 |`boolean`
-|Don't include filters that belong to groups
+|Exclude filters that belong to a filter group
 
 Default: `false`
 |===
@@ -984,8 +990,8 @@ data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW
 [[location_fn]]
 === `location`
 
-Uses the browser's location functionality to get your current location. Usually 
-quite slow, but fairly accurate.
+Find your current location using the Geolocation API of the browser. Performance can vary, but is fairly accurate. 
+See: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation.
 
 *Accepts:* `null`
 
@@ -1072,7 +1078,7 @@ Alias: `exp`, `fn`, `function`
 [[markdown_fn]]
 === `markdown`
 
-Adds an element for rendering Markdown text. Great for single numbers, metrics, or paragraphs of text.
+Adds an element that renders Markdown text. TIP: Use the <<markdown_fn>> function for single numbers, metrics, and paragraphs of text.
 
 *Accepts:* `datatable`, `null`
 
@@ -1084,14 +1090,13 @@ Adds an element for rendering Markdown text. Great for single numbers, metrics, 
 
 Alias: `expression`, `content`
 |`string`
-|A `string` containing Markdown. You can pass this multiple 
-times to achieve concatenation 
+|A string of text that contains Markdown. To concatenate, pass the <<string_fn>> function multiple times.
 
 Default: `""`
 
 |`font`
 |`style`
-|Font settings. Technically, you can put other styles in here too 
+|Set the CSS font properties, (e.g. font-family, font-weight). Other CSS styles can be included as well.
 
 Default: `{<<font_fn>>}`
 |===
@@ -1409,7 +1414,7 @@ then deduplicated by those keys using the specified TinyMath function.
 
 |`text`
 |`string`
-|For use in charts that support it, the text to show in the mark
+|For elements that support it, the text to show in the mark
 |===
 
 *Returns:* `pointseries`
@@ -2054,25 +2059,25 @@ Default: `".es(*)"`
 
 |`interval`
 |`string`
-|Bucket interval for the time series 
+|The bucket interval for the time series 
 
 Default: `"auto"`
 
 |`from`
 |`string`
-|{es} `datemath` string for the start of the time range 
+|The {es} `datemath` string for the start of the time range.
 
 Default: `"now-1y"`
 
 |`to`
 |`string`
-|{es} date math `string` for the end of the time range 
+|The {es} `datemath` string for the end of the time range.
 
 Default: `"now"`
 
 |`timezone`
 |`string`
-|Time zone for the time range 
+|Timezone for the time range. See [Moment Timezone](https://momentjs.com/timezone/).
 
 Default: `"UTC"`
 |===
@@ -2108,7 +2113,7 @@ Alias: `type`
 [[urlparam_fn]]
 === `urlparam`
 
-Accesses URL parameters and use them in expressions. This will always return a `string`.
+Accesses URL parameters to use in expressions, (e.g. https://localhost:5601/app/canvas?myVar=20) and returns them as a string.
 
 *Accepts:* `null`
 
@@ -2124,7 +2129,7 @@ Aliases: `var`, `variable`
 
 |`default`
 |`string`
-|Return this `string` if the url parameter is not defined  
+|If the URL parameter is not present, return this string instead.
 
 Default: `""`
 |===

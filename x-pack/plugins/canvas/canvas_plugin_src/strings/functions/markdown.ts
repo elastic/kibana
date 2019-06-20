@@ -12,21 +12,27 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
   help: i18n.translate('xpack.canvas.functions.markdownHelpText', {
     defaultMessage:
-      'An element for rendering {markdown} text. Great for single numbers, metrics or paragraphs of text.',
+      'Adds an element that renders {markdown} text. TIP: Use the `markdown` function for single numbers, metrics, and paragraphs of text.',
     values: {
-      markdown: 'markdown',
+      markdown: 'Markdown',
     },
   }),
   args: {
     content: i18n.translate('xpack.canvas.functions.markdown.args.contentHelpText', {
       defaultMessage:
-        'A {markdown} expression. You can pass this multiple times to achieve concatenation',
+        'A string of text that contains {markdown}. To concatenate, pass the `string` function multiple times.',
       values: {
-        markdown: 'markdown',
+        markdown: 'Markdown',
       },
     }),
     font: i18n.translate('xpack.canvas.functions.markdown.args.fontHelpText', {
-      defaultMessage: 'Font settings. Technically, you can add other styles in here as well',
+      defaultMessage:
+        'Set the {css} font properties, (e.g. {fontFamily}, {fontWeight}). Other {css} styles can be included as well.',
+      values: {
+        css: 'CSS',
+        fontFamily: 'font-family',
+        fontWeight: 'font-weight',
+      },
     }),
   },
 };
