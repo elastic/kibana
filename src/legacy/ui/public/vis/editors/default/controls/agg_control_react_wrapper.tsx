@@ -20,11 +20,14 @@
 import React from 'react';
 import { AggControlProps } from './agg_control_props';
 
-interface AggControlReactWrapperProps extends AggControlProps {
-  component: React.FunctionComponent<AggControlProps>;
+interface AggControlReactWrapperProps<T> extends AggControlProps<T> {
+  component: React.FunctionComponent<AggControlProps<T>>;
 }
 
-function AggControlReactWrapper({ component: Component, ...rest }: AggControlReactWrapperProps) {
+function AggControlReactWrapper({
+  component: Component,
+  ...rest
+}: AggControlReactWrapperProps<boolean | number>) {
   return <Component {...rest} />;
 }
 
