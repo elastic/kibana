@@ -5,8 +5,8 @@
  */
 
 import Joi from 'joi';
-import { AlertExecuteOptions, AlertType } from '../../../../../plugins/alerting';
-import { ActionTypeExecutorOptions, ActionType } from '../../../../../plugins/actions';
+import { AlertExecuteOptions, AlertType } from '../../../../../legacy/plugins/alerting';
+import { ActionTypeExecutorOptions, ActionType } from '../../../../../legacy/plugins/actions';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {

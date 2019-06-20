@@ -50,7 +50,7 @@
     "test:ui:runner": "node scripts/functional_test_runner",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
-    "typespec": "typings-tester --config x-pack/plugins/canvas/public/lib/aeroelastic/tsconfig.json x-pack/plugins/canvas/public/lib/aeroelastic/__fixtures__/typescript/typespec_tests.ts",
+    "typespec": "typings-tester --config x-pack/legacy/plugins/canvas/public/lib/aeroelastic/tsconfig.json x-pack/legacy/plugins/canvas/public/lib/aeroelastic/__fixtures__/typescript/typespec_tests.ts",
     "checkLicenses": "node scripts/check_licenses --dev",
     "build": "node scripts/build --all-platforms",
     "start": "node --trace-warnings --trace-deprecation scripts/kibana --dev ",
@@ -86,7 +86,7 @@
     "packages": [
       "packages/*",
       "x-pack",
-      "x-pack/plugins/*",
+      "x-pack/legacy/plugins/*",
       "test/plugin_functional/plugins/*",
       "test/interpreter_functional/plugins/*"
     ],
@@ -137,7 +137,7 @@
     "bluebird": "3.5.5",
     "boom": "^7.2.0",
     "brace": "0.11.1",
-    "cache-loader": "4.0.0",
+    "cache-loader": "1.2.2",
     "chalk": "^2.4.1",
     "color": "1.0.3",
     "commander": "2.20.0",
