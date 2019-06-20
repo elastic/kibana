@@ -56,6 +56,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const database: DatabaseAdapter = {
       search: async (request: any, params: any) => mockEsQueryResult,
       count: async (request: any, params: any) => null,
+      head: async (request: any, params: any) => null,
     };
     const adapter = new ElasticsearchMonitorsAdapter(database);
     const result = await adapter.getMonitors({}, 'now-15m', 'now');
@@ -70,6 +71,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const database = {
       search,
       count: async (request: any, params: any) => null,
+      head: async (request: any, params: any) => null,
     };
     const adapter = new ElasticsearchMonitorsAdapter(database);
     await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now');
@@ -84,6 +86,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const database = {
       search,
       count: async (request: any, params: any) => null,
+      head: async (request: any, params: any) => null,
     };
     const adapter = new ElasticsearchMonitorsAdapter(database);
     await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now', 'Philadelphia');

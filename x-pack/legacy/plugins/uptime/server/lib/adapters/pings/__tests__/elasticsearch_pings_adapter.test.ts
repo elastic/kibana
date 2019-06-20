@@ -48,6 +48,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     database = {
       search: async (request: any, params: any) => mockEsSearchResult,
       count: async (request: any, params: any) => mockEsCountResult,
+      head: async (request: any, params: any) => null,
     };
     adapter = new ElasticsearchPingsAdapter(database);
     serverRequest = {
@@ -78,7 +79,11 @@ describe('ElasticsearchPingsAdapter class', () => {
           },
         },
       });
-      const pingDatabase = { search, count: jest.fn() };
+      const pingDatabase = {
+        search,
+        count: jest.fn(),
+        head: async (request: any, params: any) => null,
+      };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
@@ -118,7 +123,11 @@ describe('ElasticsearchPingsAdapter class', () => {
           },
         },
       });
-      const pingDatabase = { search, count: jest.fn() };
+      const pingDatabase = {
+        search,
+        count: jest.fn(),
+        head: async (request: any, params: any) => null,
+      };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
 
@@ -179,7 +188,11 @@ describe('ElasticsearchPingsAdapter class', () => {
           ],
         },
       };
-      const pingDatabase = { search, count: jest.fn() };
+      const pingDatabase = {
+        search,
+        count: jest.fn(),
+        head: async (request: any, params: any) => null,
+      };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
@@ -237,7 +250,11 @@ describe('ElasticsearchPingsAdapter class', () => {
         },
       });
       const searchFilter = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
-      const pingDatabase = { search, count: jest.fn() };
+      const pingDatabase = {
+        search,
+        count: jest.fn(),
+        head: async (request: any, params: any) => null,
+      };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
@@ -284,7 +301,11 @@ describe('ElasticsearchPingsAdapter class', () => {
         },
       });
       const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`;
-      const pingDatabase = { search, count: jest.fn() };
+      const pingDatabase = {
+        search,
+        count: jest.fn(),
+        head: async (request: any, params: any) => null,
+      };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
@@ -331,7 +352,11 @@ describe('ElasticsearchPingsAdapter class', () => {
         },
       });
       const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`;
-      const pingDatabase = { search, count: jest.fn() };
+      const pingDatabase = {
+        search,
+        count: jest.fn(),
+        head: async (request: any, params: any) => null,
+      };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
