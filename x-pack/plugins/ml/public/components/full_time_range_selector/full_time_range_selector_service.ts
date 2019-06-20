@@ -7,10 +7,10 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { Query } from 'ui/embeddable';
 import { IndexPattern } from 'ui/index_patterns';
 import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { ml } from '../../services/ml_api_service';
 
 export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {

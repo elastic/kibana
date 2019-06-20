@@ -6,11 +6,11 @@
 
 import { InstallationType } from '../../common/installation';
 import { LanguageServer } from '../../common/language_server';
-import { GoLauncher } from './go_launcher';
+import { CtagsLauncher } from './ctags_launcher';
+import { GoServerLauncher } from './go_launcher';
 import { JavaLauncher } from './java_launcher';
 import { LauncherConstructor } from './language_server_launcher';
 import { TypescriptServerLauncher } from './ts_launcher';
-import { CtagsLauncher } from './ctags_launcher';
 
 export interface LanguageServerDefinition extends LanguageServer {
   builtinWorkspaceFolders: boolean;
@@ -46,7 +46,7 @@ export const GO: LanguageServerDefinition = {
   name: 'Go',
   builtinWorkspaceFolders: true,
   languages: ['go'],
-  launcher: GoLauncher,
+  launcher: GoServerLauncher,
   installationType: InstallationType.Plugin,
   installationPluginName: 'goLanguageServer',
 };

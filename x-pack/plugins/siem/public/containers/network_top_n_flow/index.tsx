@@ -59,6 +59,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       id = 'networkTopNFlowQuery',
       children,
       filterQuery,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -72,6 +73,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
         query={networkTopNFlowQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {

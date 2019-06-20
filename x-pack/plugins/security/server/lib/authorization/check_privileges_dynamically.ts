@@ -13,7 +13,7 @@ import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from '.
  */
 
 import { SpacesPlugin } from '../../../../spaces/types';
-import { OptionalPlugin } from '../optional_plugin';
+import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 
 export type CheckPrivilegesDynamically = (
   privilegeOrPrivileges: string | string[]

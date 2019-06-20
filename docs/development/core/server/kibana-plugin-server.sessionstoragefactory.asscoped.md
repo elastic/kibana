@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-asScoped: (request: Readonly<Request> | KibanaRequest) => SessionStorage<T>;
+asScoped: (request: KibanaRequest) => SessionStorage<T>;
 ```

@@ -62,7 +62,7 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
   });
 
