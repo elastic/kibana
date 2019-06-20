@@ -39,7 +39,6 @@ export class GoLauncher implements ILanguageServerLauncher {
       }
     });
 
-    proxy.listen();
     await proxy.connect();
     return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
   }

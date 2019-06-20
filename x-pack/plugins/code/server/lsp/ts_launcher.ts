@@ -37,10 +37,17 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     builtinWorkspace: boolean,
     maxWorkspace: number
   ): RequestExpander {
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-      installNodeDependency: this.options.security.installNodeDependency,
-      gitHostWhitelist: this.options.security.gitHostWhitelist,
-    });
+    return new RequestExpander(
+      proxy,
+      builtinWorkspace,
+      maxWorkspace,
+      this.options,
+      {
+        installNodeDependency: this.options.security.installNodeDependency,
+        gitHostWhitelist: this.options.security.gitHostWhitelist,
+      },
+      this.log
+    );
   }
   async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
     const p = spawn(process.execPath, [installationPath, '-p', port.toString(), '-c', '1'], {
