@@ -42,7 +42,7 @@ export const VisHelpText = ({ name, title, description, highlightMsg }: VisHelpT
               <em>{highlightMsg}</em>
             </p>
           )}
-          {description}
+          <p>{description}</p>
         </EuiText>
       </div>
     </React.Fragment>
