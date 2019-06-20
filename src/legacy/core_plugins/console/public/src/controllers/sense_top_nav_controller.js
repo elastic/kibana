@@ -26,7 +26,7 @@ import { getCurrentSettings, updateSettings } from '../settings';
 import { showSettingsModal } from '../components/settings_show_modal';
 
 // help
-import { showHelpPanel } from '../components/help_show_panel';
+import { helpShowPanel } from '../components/help_show_panel';
 
 
 export function SenseTopNavController(Private) {
@@ -75,7 +75,7 @@ export function SenseTopNavController(Private) {
         defaultMessage: 'Help',
       }),
       run: () => {
-        showHelpPanel();
+        helpShowPanel();
       },
       testId: 'consoleHelpButton',
     },

@@ -24,7 +24,7 @@ import { I18nContext } from 'ui/i18n';
 
 let isOpen = false;
 
-export function showHelpPanel() {
+export function helpShowPanel() {
   if (isOpen) {
     return;
   }

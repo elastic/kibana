@@ -32,7 +32,7 @@ import {
   EuiSpacer,
   EuiPanel,
 } from '@elastic/eui';
-import { showHelpPanel } from './help_show_panel';
+import { helpShowPanel } from './help_show_panel';
 
 export function OpenHelpPanel(props) {
   return (
@@ -154,6 +154,6 @@ export function OpenHelpPanel(props) {
   );
 }
 
-showHelpPanel.propTypes = {
+helpShowPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
