@@ -10,7 +10,7 @@ image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kib
 [[metrics-explorer-requirements]]
 === Metrics explorer requirements and considerations
 
-* The Metric explorer assumes you have data collected from {beats-ref}/metricbeat-overview.html[Metricbeat].
+* The Metric explorer assumes you have data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
 * You will need read permissions on `metricbeat-*` or the metric index specified in the Infrastructure configuration UI.
 * Metrics explorer uses the timestamp field set in the Infrastructure configuration UI. By default that is set to `@timestmap`.
 * The interval for the X Axis is set to `auto`. The bucket size is determined by the time range.
