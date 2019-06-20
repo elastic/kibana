@@ -58,17 +58,17 @@ export const SnapshotComponent = ({
   data && data.snapshot ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={4}>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.endpointStatusTitle"
+              defaultMessage="Current status"
+            />
+          </h5>
+        </EuiTitle>
         <EuiPanel paddingSize="s">
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.uptime.snapshot.endpointStatusTitle"
-                    defaultMessage="Current status"
-                  />
-                </h5>
-              </EuiTitle>
               <EuiSpacer size="s" />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -109,16 +109,15 @@ export const SnapshotComponent = ({
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={8}>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.statusOverTimeTitle"
+              defaultMessage="Status over time"
+            />
+          </h5>
+        </EuiTitle>
         <EuiPanel paddingSize="s" style={{ height: 170 }}>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.uptime.snapshot.statusOverTimeTitle"
-                defaultMessage="Status over time"
-              />
-            </h5>
-          </EuiTitle>
-          <EuiSpacer size="s" />
           {data.snapshot.histogram && (
             <SnapshotHistogram
               absoluteStartDate={absoluteStartDate}
