@@ -33,35 +33,48 @@ require('ui/modules')
       restrict: 'E',
       template,
       controllerAs: 'history',
+      scope: {
+        isShown: '=',
+        historyDirty: '=',
+      },
       controller: function ($scope, $element) {
-        this.reqs = history.getHistory();
-        this.selectedIndex = 0;
-        this.selectedReq = this.reqs[this.selectedIndex];
-        this.viewingReq = this.selectedReq;
-
-        // calculate the text description of a request
-        this.describeReq = memoize((req) => {
-          const endpoint = req.endpoint;
-          const date = moment(req.time);
-
-          let formattedDate = date.format('MMM D');
-          if (date.diff(moment(), 'days') > -7) {
-            formattedDate = date.fromNow();
-          }
-
-          return `${endpoint} (${formattedDate})`;
+        $scope.$watch('historyDirty', () => {
+          this.init();
         });
-        this.describeReq.cache = new WeakMap();
+
+        $scope.$watch('isShown', () => {
+          if ($scope.isShown) this.init();
+        });
+
+        this.init = () => {
+          this.reqs = history.getHistory();
+          this.selectedIndex = 0;
+          this.selectedReq = this.reqs[this.selectedIndex];
+          this.viewingReq = this.selectedReq;
+
+          // calculate the text description of a request
+          this.describeReq = memoize((req) => {
+            const endpoint = req.endpoint;
+            const date = moment(req.time);
+
+            let formattedDate = date.format('MMM D');
+            if (date.diff(moment(), 'days') > -7) {
+              formattedDate = date.fromNow();
+            }
+
+            return `${endpoint} (${formattedDate})`;
+          });
+          this.describeReq.cache = new WeakMap();
+        };
 
         // main actions
         this.clear = () => {
           history.clearHistory($element);
-          $scope.kbnTopNav.close();
+          this.init();
         };
 
         this.restore = (req = this.selectedReq) => {
           history.restoreFromHistory(req);
-          $scope.kbnTopNav.close();
         };
 
         this.onKeyDown = (ev) => {

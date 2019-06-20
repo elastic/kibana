@@ -17,38 +17,34 @@
  * under the License.
  */
 
-import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
 import { i18n } from '@kbn/i18n';
-import { welcomeShowPanel } from '../components/welcome_show_panel';
-import storage from '../storage';
 
-// settings
+// @ts-ignore
 import { getCurrentSettings, updateSettings } from '../settings';
-import { showSettingsModal } from '../components/settings_show_modal';
+import { showSettingsModal } from './settings_show_modal';
 
 // help
 import { helpShowPanel } from '../components/help_show_panel';
 
-
-export function SenseTopNavController(Private) {
-  const KbnTopNavController = Private(KbnTopNavControllerProvider);
-
-  const controller = new KbnTopNavController([
+export function getTopNavConfig(toggleHistory: () => void) {
+  return [
     {
       key: 'history',
       label: i18n.translate('console.topNav.historyTabLabel', {
-        defaultMessage: 'History'
+        defaultMessage: 'History',
       }),
       description: i18n.translate('console.topNav.historyTabDescription', {
         defaultMessage: 'History',
       }),
-      template: `<sense-history></sense-history>`,
+      run: () => {
+        toggleHistory();
+      },
       testId: 'consoleHistoryButton',
     },
     {
       key: 'settings',
       label: i18n.translate('console.topNav.settingsTabLabel', {
-        defaultMessage: 'Settings'
+        defaultMessage: 'Settings',
       }),
       description: i18n.translate('console.topNav.settingsTabDescription', {
         defaultMessage: 'Settings',
@@ -62,7 +58,7 @@ export function SenseTopNavController(Private) {
     {
       key: 'help',
       label: i18n.translate('console.topNav.helpTabLabel', {
-        defaultMessage: 'Help'
+        defaultMessage: 'Help',
       }),
       description: i18n.translate('console.topNav.helpTabDescription', {
         defaultMessage: 'Help',
@@ -72,11 +68,5 @@ export function SenseTopNavController(Private) {
       },
       testId: 'consoleHelpButton',
     },
-  ]);
-
-  if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    welcomeShowPanel();
-  }
-
-  return controller;
+  ];
 }

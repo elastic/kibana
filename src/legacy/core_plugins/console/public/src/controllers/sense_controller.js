@@ -23,9 +23,14 @@ import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
 import init from '../app';
-import { SenseTopNavController } from './sense_top_nav_controller';
 import { getEndpointFromPosition } from '../autocomplete';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
+
+// welcome message
+import { welcomeShowPanel } from '../helpers/welcome_show_panel';
+import storage from '../storage';
+
+import { getTopNavConfig } from '../helpers/get_top_nav';
 
 const module = require('ui/modules').get('app/sense');
 
@@ -35,11 +40,17 @@ module.run(function ($rootScope) {
   };
 });
 
+function showWelcomeMessageIfNeeded() {
+  if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
+    welcomeShowPanel();
+  }
+}
+
 module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, kbnUiAceKeyboardModeService) {
   const docTitle = Private(DocTitleProvider);
   docTitle.change('Console');
 
-  $scope.topNavController = Private(SenseTopNavController);
+  showWelcomeMessageIfNeeded();
 
   // Since we pass this callback via reactDirective into a react component, which has the function defined as required
   // in it's prop types, we should set this initially (before it's set in the $timeout below). Without this line
@@ -86,6 +97,15 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       }
     });
   };
+
+  $scope.showHistory = false;
+  $scope.historyDirty = undefined;
+  $scope.toggleHistory = () => {
+    $scope.showHistory = !$scope.showHistory;
+  };
+
+  $scope.topNavMenu = getTopNavConfig($scope.toggleHistory);
+
   $scope.openDocumentation = () => {
     if (!$scope.documentation) {
       return;
@@ -95,7 +115,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
 
   $scope.sendSelected = () => {
     input.focus();
-    input.sendCurrentRequestToES();
+    input.sendCurrentRequestToES(() => {
+      $scope.historyDirty = new Date().getTime();
+    });
     return false;
   };
 

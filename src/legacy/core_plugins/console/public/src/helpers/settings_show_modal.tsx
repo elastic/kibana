@@ -20,8 +20,8 @@
 import { I18nContext } from 'ui/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DevToolsSettingsModal } from './settings_modal';
-import { DevToolsSettings } from './dev_tools_settings';
+import { DevToolsSettingsModal } from '../components/settings_modal';
+import { DevToolsSettings } from '../components/dev_tools_settings';
 
 export function showSettingsModal(
   curSettings: DevToolsSettings,

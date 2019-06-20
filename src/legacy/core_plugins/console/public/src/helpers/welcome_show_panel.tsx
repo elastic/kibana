@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
-import { WelcomePanel } from './welcome_panel';
+import { WelcomePanel } from '../components/welcome_panel';
 // @ts-ignore
 import storage from '../storage';
 

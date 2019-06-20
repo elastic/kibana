@@ -71,7 +71,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
 
   let CURRENT_REQ_ID = 0;
 
-  function sendCurrentRequestToES() {
+  function sendCurrentRequestToES(addedToHistoryCb) {
 
     const reqId = ++CURRENT_REQ_ID;
 
@@ -133,6 +133,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
           ) {
             // we have someone on the other side. Add to history
             history.addToHistory(esPath, esMethod, esData);
+            addedToHistoryCb();
 
 
             let value = xhr.responseText;
