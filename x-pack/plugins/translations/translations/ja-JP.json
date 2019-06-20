@@ -4510,7 +4510,6 @@
     "xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel": "{selectedIndexCount, plural, one {インデックス} other {インデックス} }のキャッシュを消去",
     "xpack.idxMgmt.indexActionsMenu.closeIndexLabel": "{selectedIndexCount, plural, one {インデックス} other {インデックス} }を閉じる",
     "xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText": "キャンセル",
-    "xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText": "確認",
     "xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle": "{selectedIndexCount, plural, one {インデックス} other {インデックス} } の削除の確認",
     "xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription": "{selectedIndexCount, plural, one {このインデックス} other {これらのインデックス} }を削除しようとしています:",
     "xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription": "この操作は元に戻すことができません。適切なバックアップがあることを確認してください。",
