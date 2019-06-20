@@ -14,6 +14,13 @@ The Kibana alerting plugin provides a common place to set up alerts. You can:
 
 **Alert Instance**: The instance(s) created from an alert type execution.
 
+A Kibana alert detects a condition and fires one or more actions when that condition occurs.  Alerts work by going through the followings steps:
+
+1. Run a periodic check to detect a condition (the check is provided by an Alert Type) 
+2. Convert that condition into one or more stateful Alert Instances
+3. Map Alert Instances to pre-defined Actions, using templating
+4. Execute the Actions
+
 ## Usage
 
 1. Develop and register an alert type (see alert types -> example).
