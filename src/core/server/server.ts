@@ -85,11 +85,9 @@ export class Server {
   }
 
   public async start() {
-    const httpStart = await this.http.start();
     const pluginsStart = await this.plugins.start({});
 
     const coreStart = {
-      http: httpStart,
       plugins: pluginsStart,
     };
 
@@ -98,6 +96,7 @@ export class Server {
       plugins: mapToObject(pluginsStart.contracts),
     });
 
+    await this.http.start();
     return coreStart;
   }
 

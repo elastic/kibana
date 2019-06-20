@@ -54,9 +54,9 @@ export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xp
           // most likely they do not have the ml_user role and therefore will be blocked from using
           // ML at all. However, we need to catch this error so the privilege check doesn't fail.
           if (error.status === 403) {
-            mlLog('info', 'Unable to determine whether upgrade is being performed due to insufficient user privileges');
+            mlLog.info('Unable to determine whether upgrade is being performed due to insufficient user privileges');
           } else {
-            mlLog('warning', 'Unable to determine whether upgrade is being performed');
+            mlLog.warn('Unable to determine whether upgrade is being performed');
           }
         }
 

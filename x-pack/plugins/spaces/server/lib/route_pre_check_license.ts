@@ -5,12 +5,16 @@
  */
 
 import Boom from 'boom';
+import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 
-export function routePreCheckLicense(server: any) {
-  const xpackMainPlugin = server.plugins.xpack_main;
+interface LicenseCheckDeps {
+  xpackMain: XPackMainPlugin;
+}
+
+export function routePreCheckLicense({ xpackMain }: LicenseCheckDeps) {
   const pluginId = 'spaces';
   return function forbidApiAccess(request: any) {
-    const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
+    const licenseCheckResults = xpackMain.info.feature(pluginId).getLicenseCheckResults();
     if (!licenseCheckResults.showSpaces) {
       return Boom.forbidden(licenseCheckResults.linksMessage);
     } else {
