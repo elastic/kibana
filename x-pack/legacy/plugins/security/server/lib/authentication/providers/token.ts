@@ -4,48 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
-import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
 
 /**
  * The state supported by the provider.
  */
-interface ProviderState {
-  /**
-   * Access token issued as the result of successful authentication and that should be provided with
-   * every request to Elasticsearch on behalf of the authenticated user. This token will eventually expire.
-   */
-  accessToken?: string;
-
-  /**
-   * Once access token expires the refresh token is used to get a new pair of access/refresh tokens
-   * without any user involvement. If not used this token will eventually expire as well.
-   */
-  refreshToken?: string;
-}
-
-/**
- * If request with access token fails with `401 Unauthorized` then this token is no
- * longer valid and we should try to refresh it. Another use case that we should
- * temporarily support (until elastic/elasticsearch#38866 is fixed) is when token
- * document has been removed and ES responds with `500 Internal Server Error`.
- * @param err Error returned from Elasticsearch.
- */
-function isAccessTokenExpiredError(err?: any) {
-  const errorStatusCode = getErrorStatusCode(err);
-  return (
-    errorStatusCode === 401 ||
-    (errorStatusCode === 500 &&
-      err &&
-      err.body &&
-      err.body.error &&
-      err.body.error.reason === 'token document is missing and must be present')
-  );
-}
+type ProviderState = TokenPair;
 
 /**
  * Provider that supports token-based request authentication.
@@ -77,7 +47,10 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     // if we still can't attempt auth, try authenticating via state (session token)
     if (authenticationResult.notHandled() && state) {
       authenticationResult = await this.authenticateViaState(request, state);
-      if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
+      if (
+        authenticationResult.failed() &&
+        Tokens.isAccessTokenExpiredError(authenticationResult.error)
+      ) {
         authenticationResult = await this.authenticateViaRefreshToken(request, state);
       }
     }
@@ -99,7 +72,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   public async deauthenticate(request: Legacy.Request, state?: ProviderState | null) {
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
-    if (!state || !state.accessToken || !state.refreshToken) {
+    if (!state) {
       this.debug('There are no access and refresh tokens to invalidate.');
       return DeauthenticationResult.notHandled();
     }
@@ -107,46 +80,14 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     this.debug('Token-based logout has been initiated by the user.');
 
     try {
-      // First invalidate the access token.
-      const {
-        invalidated_tokens: invalidatedAccessTokensCount,
-      } = await this.options.client.callWithInternalUser('shield.deleteAccessToken', {
-        body: { token: state.accessToken },
-      });
-
-      if (invalidatedAccessTokensCount === 0) {
-        this.debug('User access token was already invalidated.');
-      } else if (invalidatedAccessTokensCount === 1) {
-        this.debug('User access token has been successfully invalidated.');
-      } else {
-        this.debug(
-          `${invalidatedAccessTokensCount} user access tokens were invalidated, this is unexpected.`
-        );
-      }
-
-      // Then invalidate the refresh token.
-      const {
-        invalidated_tokens: invalidatedRefreshTokensCount,
-      } = await this.options.client.callWithInternalUser('shield.deleteAccessToken', {
-        body: { refresh_token: state.refreshToken },
-      });
-
-      if (invalidatedRefreshTokensCount === 0) {
-        this.debug('User refresh token was already invalidated.');
-      } else if (invalidatedRefreshTokensCount === 1) {
-        this.debug('User refresh token has been successfully invalidated.');
-      } else {
-        this.debug(
-          `${invalidatedRefreshTokensCount} user refresh tokens were invalidated, this is unexpected.`
-        );
-      }
-
-      const queryString = request.url.search || `?msg=LOGGED_OUT`;
-      return DeauthenticationResult.redirectTo(`${this.options.basePath}/login${queryString}`);
+      await this.options.tokens.invalidate(state);
     } catch (err) {
       this.debug(`Failed invalidating user's access token: ${err.message}`);
       return DeauthenticationResult.failed(err);
     }
+
+    const queryString = request.url.search || `?msg=LOGGED_OUT`;
+    return DeauthenticationResult.redirectTo(`${this.options.basePath}/login${queryString}`);
   }
 
   /**
@@ -209,16 +150,6 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
 
       this.debug('Get token API request to Elasticsearch successful');
 
-      // We validate that both access and refresh tokens exist in the response
-      // so other private methods in this class can rely on them both existing.
-      if (!accessToken) {
-        throw new Error('Unexpected response from get token API - no access token present');
-      }
-
-      if (!refreshToken) {
-        throw new Error('Unexpected response from get token API - no refresh token present');
-      }
-
       // Then attempt to query for the user details using the new token
       request.headers.authorization = `Bearer ${accessToken}`;
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
@@ -251,11 +182,6 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     { accessToken }: ProviderState
   ) {
     this.debug('Trying to authenticate via state.');
-
-    if (!accessToken) {
-      this.debug('Access token is not found in state.');
-      return AuthenticationResult.notHandled();
-    }
 
     try {
       request.headers.authorization = `Bearer ${accessToken}`;
@@ -291,44 +217,36 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   ) {
     this.debug('Trying to refresh access token.');
 
-    if (!refreshToken) {
-      this.debug('Refresh token is not found in state.');
-      return AuthenticationResult.notHandled();
+    let refreshedTokenPair: TokenPair | null;
+    try {
+      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+    } catch (err) {
+      return AuthenticationResult.failed(err);
+    }
+
+    // If refresh token is no longer valid, then we should clear session and redirect user to the
+    // login page to re-authenticate, or fail if redirect isn't possible.
+    if (refreshedTokenPair === null) {
+      if (canRedirectRequest(request)) {
+        this.debug('Clearing session since both access and refresh tokens are expired.');
+
+        // Set state to `null` to let `Authenticator` know that we want to clear current session.
+        return AuthenticationResult.redirectTo(this.getLoginPageURL(request), null);
+      }
+
+      return AuthenticationResult.failed(
+        Boom.badRequest('Both access and refresh tokens are expired.')
+      );
     }
 
     try {
-      // Token must be refreshed by the same user that obtained that token, the
-      // kibana system user.
-      const {
-        access_token: newAccessToken,
-        refresh_token: newRefreshToken,
-      } = await this.options.client.callWithInternalUser('shield.getAccessToken', {
-        body: { grant_type: 'refresh_token', refresh_token: refreshToken },
-      });
-
-      this.debug(`Request to refresh token via Elasticsearch's get token API successful`);
-
-      // We validate that both access and refresh tokens exist in the response
-      // so other private methods in this class can rely on them both existing.
-      if (!newAccessToken) {
-        throw new Error('Unexpected response from get token API - no access token present');
-      }
-
-      if (!newRefreshToken) {
-        throw new Error('Unexpected response from get token API - no refresh token present');
-      }
-
-      request.headers.authorization = `Bearer ${newAccessToken}`;
+      request.headers.authorization = `Bearer ${refreshedTokenPair.accessToken}`;
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
-
-      return AuthenticationResult.succeeded(user, {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      });
+      return AuthenticationResult.succeeded(user, refreshedTokenPair);
     } catch (err) {
-      this.debug(`Failed to refresh access token: ${err.message}`);
+      this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
@@ -336,15 +254,6 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
       // it's called with this request once again down the line (e.g. in the next authentication provider).
       delete request.headers.authorization;
-
-      // If refresh fails with `400` then refresh token is no longer valid and we should clear session
-      // and redirect user to the login page to re-authenticate.
-      if (getErrorStatusCode(err) === 400 && canRedirectRequest(request)) {
-        this.debug('Clearing session since both access and refresh tokens are expired.');
-
-        // Set state to `null` to let `Authenticator` know that we want to clear current session.
-        return AuthenticationResult.redirectTo(this.getLoginPageURL(request), null);
-      }
 
       return AuthenticationResult.failed(err);
     }
