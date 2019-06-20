@@ -40,7 +40,7 @@ const types = {
 
 export function PanelConfig(props) {
   const { model } = props;
-  const component = types[model.type];
+  const Component = types[model.type];
   const [uiRestrictions, setUIRestrictions] = useState(null);
 
   useEffect(
@@ -56,10 +56,10 @@ export function PanelConfig(props) {
     [props.visData$]
   );
 
-  if (component) {
+  if (Component) {
     return (
       <UIRestrictionsContext.Provider value={uiRestrictions}>
-        {React.createElement(component, props)}
+        <Component {...props} />
       </UIRestrictionsContext.Provider>
     );
   }

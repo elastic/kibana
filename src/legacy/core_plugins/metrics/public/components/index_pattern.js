@@ -111,10 +111,11 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               />
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
-              This setting controls the timespan used for matching documents.&nbsp; &quot;Entire
-              timerange&quot; will match all the documents selected in the timepicker.&nbsp;
-              &quot;Last value&quot; will match only the documents for the specified interval from
-              the end of the timerange.
+              {i18n.translate('tsvb.indexPattern.timeRange.hint', {
+                defaultMessage: `This setting controls the timespan used for matching documents. 
+                "Entire timerange" will match all the documents selected in the timepicker. 
+                "Last value" will match only the documents for the specified interval from the end of the timerange.`,
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -190,7 +191,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               value={model[dropBucketName]}
               name={dropBucketName}
               onChange={onChange}
-              disabled={isEntireTimeRangeActive(model, isTimeSeries) || disabled}
+              disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
             />
           </EuiFormRow>
         </EuiFlexItem>
