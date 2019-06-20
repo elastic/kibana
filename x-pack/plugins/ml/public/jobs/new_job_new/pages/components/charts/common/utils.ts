@@ -14,27 +14,6 @@ export function getCustomColor(specId: string, color: string): CustomSeriesColor
   return new Map([[lineDataSeriesColorValues, color]]);
 }
 
-export const seriesStyle = {
-  line: {
-    stroke: '',
-    strokeWidth: 2,
-    visible: true,
-    opacity: 1,
-  },
-  border: {
-    visible: false,
-    strokeWidth: 0,
-    stroke: '',
-  },
-  point: {
-    visible: false,
-    radius: 1,
-    stroke: '',
-    strokeWidth: 1,
-    opacity: 0,
-  },
-};
-
 export function getYRange(chartData: any) {
   let max: number = Number.MIN_VALUE;
   let min: number = Number.MAX_VALUE;

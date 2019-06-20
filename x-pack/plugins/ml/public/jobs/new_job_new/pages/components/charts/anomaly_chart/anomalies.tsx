@@ -17,7 +17,7 @@ import { getSeverityColor } from '../../../../../../../common/util/anomaly_utils
 import { ANOMALY_THRESHOLD } from '../../../../../../../common/constants/anomalies';
 
 interface Props {
-  anomalyData: Anomaly[];
+  anomalyData?: Anomaly[];
 }
 
 interface Severities {
@@ -57,7 +57,8 @@ function splitAnomalySeverities(anomalies: Anomaly[]) {
 }
 
 export const Anomalies: FC<Props> = ({ anomalyData }) => {
-  const severities: Severities = splitAnomalySeverities(anomalyData);
+  const anomalies = anomalyData === undefined ? [] : anomalyData;
+  const severities: Severities = splitAnomalySeverities(anomalies);
 
   return (
     <Fragment>

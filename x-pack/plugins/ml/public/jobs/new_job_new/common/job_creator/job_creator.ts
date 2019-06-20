@@ -11,8 +11,10 @@ import { Aggregation } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
+import { JOB_TYPE } from './util/constants';
 
 export class JobCreator {
+  protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: IndexPatternWithType;
   protected _savedSearch: SavedSearch;
   protected _indexPatternTitle: IndexPatternTitle = '';
@@ -44,6 +46,10 @@ export class JobCreator {
     this._subscribers = [];
   }
 
+  public get type(): JOB_TYPE {
+    return this._type;
+  }
+
   protected _addDetector(detector: Detector, agg: Aggregation) {
     this._detectors.push(detector);
     this._aggs.push(agg);
@@ -59,6 +65,10 @@ export class JobCreator {
   protected _removeDetector(index: number) {
     this._detectors.splice(index, 1);
     this._aggs.splice(index, 1);
+  }
+
+  public removeAllDetectors() {
+    this._detectors.length = 0;
   }
 
   public get detectors(): Detector[] {

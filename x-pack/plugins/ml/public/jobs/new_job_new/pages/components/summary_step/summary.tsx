@@ -38,12 +38,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [progress, setProgress] = useState(0);
 
   function setProgressWrapper(p: number) {
-    // console.log(p);
     setProgress(p);
   }
 
   useEffect(() => {
-    // console.log('subscribing to progress');
     jobCreator.subscribeToProgress(setProgressWrapper);
   }, []);
 
@@ -66,13 +64,13 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       {isCurrentStep && (
         <Fragment>
           <Fragment>
-            {/* {jobCreator.jobId}
+            {jobCreator.jobId}
             <br />
             {jobCreator.start} : {jobCreator.end}
             <br />
             {JSON.stringify(jobCreator.detectors, null, 2)}
             <br />
-            {jobCreator.bucketSpan} */}
+            {jobCreator.bucketSpan}
           </Fragment>
           {progress === 0 && (
             <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
@@ -92,13 +90,13 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       )}
       {isCurrentStep === false && (
         <Fragment>
-          {/* {jobCreator.jobId}
+          {jobCreator.jobId}
           <br />
           {jobCreator.start} : {jobCreator.end}
           <br />
           {JSON.stringify(jobCreator.detectors, null, 2)}
           <br />
-          {jobCreator.bucketSpan} */}
+          {jobCreator.bucketSpan}
         </Fragment>
       )}
     </Fragment>

@@ -4,22 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useRef, useState } from 'react';
-import {
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormHelpText,
-  EuiFormRow,
-  EuiSpacer,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiComboBox,
-  EuiComboBoxOptionProps,
-} from '@elastic/eui';
+import React, { Fragment, FC } from 'react';
+import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { Field, Aggregation, FieldId, AggId } from '../../../../../../common/types/fields';
+import { Field, Aggregation, FieldId, AggId } from '../../../../../../../../common/types/fields';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;
@@ -36,10 +24,8 @@ export interface DropDownOption {
   label: Label;
   options: DropDownLabel[];
 }
-// interface AggOption extends EuiComboBoxOptionProps {
-//   agg: Aggregation;
-//   field: Field;
-// }
+
+export type DropDownProps = DropDownLabel[] | EuiComboBoxOptionProps[];
 
 interface Props {
   fields: Field[];

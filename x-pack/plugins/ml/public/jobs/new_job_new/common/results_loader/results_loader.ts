@@ -11,11 +11,13 @@ import { mlResultsService } from '../../../../services/results_service';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { ANOMALY_SEVERITY } from '../../../../../common/constants/anomalies';
+import { getScoresByRecord } from './searches';
+import { JOB_TYPE } from '../job_creator/util/constants';
 
 export interface Results {
   progress: number;
-  model: ModelItem[];
-  anomalies: Anomaly[];
+  model: Record<number, ModelItem[]>;
+  anomalies: Record<number, Anomaly[]>;
 }
 
 export interface ModelItem {
@@ -91,10 +93,17 @@ export class ResultsLoader {
     }
     this._results.progress = progress;
 
-    const [model, anomalies] = await Promise.all([
-      this._loadModelData(0),
-      this._loadAnomalyData(0),
-    ]);
+    const getAnomalyData =
+      this._jobCreator.type === JOB_TYPE.SINGLE_METRIC
+        ? () => this._loadJobAnomalyData(0)
+        : () => this._loadDetectorsAnomalyData();
+
+    // const getModelData =
+    //   this._jobCreator.type === JOB_TYPE.SINGLE_METRIC
+    //     ? () => this._loadModelData(0)
+    //     : () => async () => {};
+
+    const [model, anomalies] = await Promise.all([this._loadModelData(0), getAnomalyData()]);
     this._results.model = model;
     this._results.anomalies = anomalies;
 
@@ -110,10 +119,17 @@ export class ResultsLoader {
     return this._results.progress;
   }
 
-  private async _loadModelData(dtrIndex: number): Promise<ModelItem[]> {
+  private _clearResults() {
+    this._results.model = {};
+    this._results.anomalies = {};
+    this._results.progress = 0;
+    this._lastModelTimeStamp = 0;
+  }
+
+  private async _loadModelData(dtrIndex: number): Promise<Record<number, ModelItem[]>> {
     const agg = this._jobCreator.getAggregation(dtrIndex);
     if (agg === null) {
-      return [emptyModelItem];
+      return { [dtrIndex]: [emptyModelItem] };
     }
     const resp = await mlResultsService.getModelPlotOutput(
       this._jobCreator.jobId,
@@ -125,17 +141,14 @@ export class ResultsLoader {
       agg.mlModelPlotAgg
     );
 
-    return this._createModel(resp);
+    return this._createModel(resp, dtrIndex);
   }
 
-  private _clearResults() {
-    this._results.model.length = 0;
-    this._results.anomalies.length = 0;
-    this._results.progress = 0;
-    this._lastModelTimeStamp = 0;
-  }
+  private _createModel(resp: any, dtrIndex: number): Record<number, ModelItem[]> {
+    if (this._results.model[dtrIndex] === undefined) {
+      this._results.model[dtrIndex] = [];
+    }
 
-  private _createModel(resp: any): ModelItem[] {
     // create ModelItem list from search results
     const model = Object.entries(resp.results).map(
       ([time, modelItems]) =>
@@ -151,15 +164,15 @@ export class ResultsLoader {
       // section of results next time.
       this._lastModelTimeStamp = model[model.length - 5].time;
       for (let i = 0; i < 5; i++) {
-        this._results.model.pop();
+        this._results.model[dtrIndex].pop();
       }
     }
 
     // return a new array from the old and new model
-    return this._results.model.concat(model);
+    return { [dtrIndex]: this._results.model[dtrIndex].concat(model) };
   }
 
-  private async _loadAnomalyData(dtrIndex: number): Promise<Anomaly[]> {
+  private async _loadJobAnomalyData(dtrIndex: number): Promise<Record<number, Anomaly[]>> {
     const resp = await mlResultsService.getScoresByBucket(
       [this._jobCreator.jobId],
       this._jobCreator.start,
@@ -173,9 +186,29 @@ export class ResultsLoader {
       return [];
     }
 
-    return Object.entries(results).map(
+    const anomalies: Record<number, Anomaly[]> = {};
+    anomalies[0] = Object.entries(results).map(
       ([time, value]) =>
         ({ time: +time, value, severity: getSeverityType(value as number) } as Anomaly)
     );
+    return anomalies;
+  }
+
+  private async _loadDetectorsAnomalyData(): Promise<Record<number, Anomaly[]>> {
+    const resp = await getScoresByRecord(
+      this._jobCreator.jobId,
+      this._jobCreator.start,
+      this._jobCreator.end,
+      `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+      null
+    );
+
+    const anomalies: Record<number, Anomaly[]> = {};
+    Object.entries(resp.results).forEach(([dtrIdx, results]) => {
+      anomalies[+dtrIdx] = results.map(
+        r => ({ ...r, severity: getSeverityType(r.value as number) } as Anomaly)
+      );
+    });
+    return anomalies;
   }
 }

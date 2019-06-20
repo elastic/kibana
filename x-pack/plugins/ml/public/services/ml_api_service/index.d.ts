@@ -5,7 +5,7 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
-import { DslName } from '../../../common/types/fields';
+import { DslName, AggFieldNamePair } from '../../../common/types/fields';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -58,8 +58,7 @@ declare interface Ml {
       end: number,
       intervalMs: number,
       query: object,
-      field: string | null,
-      aggName: DslName
+      aggFieldNamePairs: AggFieldNamePair[]
     ): Promise<any>;
     getAllJobAndGroupIds(): Promise<any>;
   };

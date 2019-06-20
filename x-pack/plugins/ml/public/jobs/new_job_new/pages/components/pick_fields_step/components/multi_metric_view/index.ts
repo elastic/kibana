@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ChartLoader, LineChartData, LineChartPoint } from './chart_loader';
+export { MultiMetricView } from './multi_metric_view';

@@ -7,10 +7,11 @@
 import React, { FC } from 'react';
 import { getSpecId, ScaleType, AreaSeries, CurveType } from '@elastic/charts';
 import { ModelItem } from '../../../../common/results_loader';
-import { getCustomColor, seriesStyle } from '../common/utils';
+import { getCustomColor } from '../common/utils';
+import { seriesStyle } from '../common/settings';
 
 interface Props {
-  modelData: ModelItem[];
+  modelData?: ModelItem[];
 }
 
 const SPEC_ID = 'model';
@@ -31,6 +32,7 @@ const areaSeriesStyle = {
 };
 
 export const ModelBounds: FC<Props> = ({ modelData }) => {
+  const model = modelData === undefined ? [] : modelData;
   return (
     <AreaSeries
       id={getSpecId(SPEC_ID)}
@@ -39,7 +41,7 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       xAccessor={'time'}
       yAccessors={['modelUpper']}
       y0Accessors={['modelLower']}
-      data={modelData}
+      data={model}
       stackAccessors={['time']}
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}

@@ -39,3 +39,13 @@ export interface NewJobCaps {
   fields: Field[];
   aggs: Aggregation[];
 }
+
+export interface AggFieldPair {
+  agg: Aggregation;
+  field: Field;
+}
+
+export interface AggFieldNamePair {
+  agg: string;
+  field: string;
+}

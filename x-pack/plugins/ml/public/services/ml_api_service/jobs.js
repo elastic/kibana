@@ -142,8 +142,7 @@ export const jobs = {
     end,
     intervalMs,
     query,
-    field,
-    aggName) {
+    aggFieldNamePairs) {
     return http({
       url: `${basePath}/jobs/new_job_line_chart`,
       method: 'POST',
@@ -154,8 +153,7 @@ export const jobs = {
         end,
         intervalMs,
         query,
-        field,
-        aggName,
+        aggFieldNamePairs,
       }
     });
   },

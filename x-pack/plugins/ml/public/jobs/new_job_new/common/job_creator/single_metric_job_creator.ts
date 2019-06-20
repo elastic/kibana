@@ -14,11 +14,7 @@ import { JOB_TYPE } from './util/constants';
 
 export class SingleMetricJobCreator extends JobCreator {
   private _field: Field | null = null;
-  private _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
-
-  public get type(): JOB_TYPE {
-    return this._type;
-  }
+  protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
   // only a single detector exists for this job type
   // therefore _addDetector and _editDetector merge into this

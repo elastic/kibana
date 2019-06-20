@@ -6,7 +6,8 @@
 
 import React, { FC } from 'react';
 import { LineSeries, getSpecId, ScaleType, CurveType } from '@elastic/charts';
-import { getCustomColor, seriesStyle } from '../common/utils';
+import { getCustomColor } from '../common/utils';
+import { seriesStyle } from '../common/settings';
 
 interface Props {
   lineChartData: any[];

@@ -6,9 +6,16 @@
 
 import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
-import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
+import { SplitField, AggFieldPair } from '../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
+
+type DetectorIndex = number;
+export interface LineChartPoint {
+  time: number;
+  value: number;
+}
+export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 
 export class ChartLoader {
   protected _indexPattern: IndexPatternWithType;
@@ -28,15 +35,13 @@ export class ChartLoader {
     }
   }
 
-  async loadLineChart(
+  async loadLineCharts(
     start: number,
     end: number,
-    agg: Aggregation,
-    field: Field,
-    intervalMs: number,
-    splitField: SplitField
-  ): Promise<any> {
-    // TODO change to proper interface for return type
+    aggFieldPairs: AggFieldPair[],
+    splitField: SplitField,
+    intervalMs: number
+  ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       const resp = await ml.jobs.newJobLineChart(
         this._indexPatternTitle,
@@ -45,13 +50,16 @@ export class ChartLoader {
         end,
         intervalMs,
         this._query,
-        field.name,
-        agg.dslName
+        aggFieldPairs.map(af => ({
+          agg: af.agg.dslName,
+          field: af.field.name,
+        }))
       );
       return resp.results;
     }
     return {};
   }
+
   async loadEventRateChart(start: number, end: number, intervalMs: number): Promise<any> {
     // TODO change to proper interface for return type
     if (this._timeFieldName !== '') {

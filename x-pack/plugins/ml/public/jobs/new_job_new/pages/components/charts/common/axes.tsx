@@ -14,6 +14,11 @@ interface Props {
   chartData?: any[];
 }
 
+// round to 2dp
+function tickFormatter(d: number): string {
+  return Math.round((d * 100) / 100).toString();
+}
+
 export const Axes: FC<Props> = ({ chartData }) => {
   const yDomain = chartData !== undefined ? getYRange(chartData) : undefined;
 
@@ -28,7 +33,7 @@ export const Axes: FC<Props> = ({ chartData }) => {
       <Axis
         id={getAxisId('left')}
         position={Position.Left}
-        tickFormat={d => Number(d).toFixed(2)}
+        tickFormat={tickFormatter}
         domain={yDomain}
       />
     </Fragment>

@@ -15,11 +15,7 @@ export class PopulationJobCreator extends JobCreator {
   // each detector has an optional by field
   private _splitField: SplitField = null;
   private _byFields: SplitField[] = [];
-  private _type: JOB_TYPE = JOB_TYPE.POPULATION;
-
-  public get type(): JOB_TYPE {
-    return this._type;
-  }
+  protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
   // add a by field to a specific detector
   public setByField(field: SplitField, index: number) {

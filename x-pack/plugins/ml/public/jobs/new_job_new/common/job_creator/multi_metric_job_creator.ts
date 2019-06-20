@@ -14,11 +14,7 @@ export class MultiMetricJobCreator extends JobCreator {
   // a multi metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
-  private _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
-
-  public get type(): JOB_TYPE {
-    return this._type;
-  }
+  protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
   // set the split field, applying it to each detector
   public setSplitField(field: SplitField) {
