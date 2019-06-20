@@ -87,7 +87,7 @@ export function StickyTransactionProperties({
               'xpack.apm.transactionDetails.percentOfTraceLabelExplanation',
               {
                 defaultMessage:
-                  '% of trace exceeds 100% because this transaction takes longer than root transaction.'
+                  'The % of trace exceeds 100% because this transaction takes longer than the root transaction.'
               }
             )}
           >
