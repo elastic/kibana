@@ -6,7 +6,7 @@
 
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
-import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { SavedObjectAttributes } from 'src/core/server/saved_objects';
 import { IndexPatternField } from './indexpattern';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
