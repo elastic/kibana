@@ -41,6 +41,7 @@ import { DevToolsSettings } from './dev_tools_settings';
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => Promise<void>;
   onClose: () => void;
+  refreshAutocompleteSettings: () => void;
   settings: DevToolsSettings;
 }
 
@@ -50,6 +51,8 @@ export function DevToolsSettingsModal(props: Props) {
   const [fields, setFields] = useState(props.settings.autocomplete.fields);
   const [indices, setIndices] = useState(props.settings.autocomplete.indices);
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
+  const [polling, setPolling] = useState(props.settings.polling);
+  const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -71,6 +74,8 @@ export function DevToolsSettingsModal(props: Props) {
         indices,
         templates,
       },
+      polling,
+      tripleQuotes,
     });
 
     setIsLoading(false);
@@ -130,12 +135,30 @@ export function DevToolsSettingsModal(props: Props) {
             <EuiFlexItem>
               <h4>
                 <FormattedMessage
+                  id="console.settingsPage.jsonSyntaxLabel"
+                  defaultMessage="JSON syntax"
+                />
+              </h4>
+              <EuiSwitch
+                checked={tripleQuotes}
+                data-test-subj="tripleQuotes"
+                id="tripleQuotes"
+                label={
+                  <FormattedMessage
+                    defaultMessage="Use tripple quotes in output pane"
+                    id="console.settingsPage.tripleQuotesMessage"
+                  />
+                }
+                onChange={e => setTripleQuotes(e.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <h4>
+                <FormattedMessage
                   id="console.settingsPage.autocompleteLabel"
                   defaultMessage="Autocomplete"
                 />
               </h4>
-            </EuiFlexItem>
-            <EuiFlexItem>
               <EuiSwitch
                 checked={fields}
                 data-test-subj="autocompleteFields"
@@ -170,15 +193,53 @@ export function DevToolsSettingsModal(props: Props) {
                 id="wrapLines"
                 label={
                   <FormattedMessage
-                    defaultMessage="Templatess"
+                    defaultMessage="Templates"
                     id="console.settingsPage.templates"
                   />
                 }
                 onChange={e => setTemplates(e.target.checked)}
               />
             </EuiFlexItem>
+            <EuiFlexItem>
+              <h4>
+                <FormattedMessage
+                  id="console.settingsPage.refreshingDataLabel"
+                  defaultMessage="Refreshing autocomplete suggestions"
+                />
+              </h4>
+              <FormattedMessage
+                id="console.settingsPage.refreshingDataDescription"
+                defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
+                  Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSwitch
+                checked={polling}
+                data-test-subj="autocompletePolling"
+                id="autocompletePolling"
+                label={
+                  <FormattedMessage
+                    defaultMessage="Automatically refresh autocomplete suggestions"
+                    id="console.settingsPage.pollingLabelText"
+                  />
+                }
+                onChange={e => setPolling(e.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="autocompletePolling"
+                id="autocompletePolling"
+                onClick={props.refreshAutocompleteSettings}
+              >
+                <FormattedMessage
+                  defaultMessage="Refresh autocomplete suggestions"
+                  id="console.settingsPage.refreshButtonLabel"
+                />
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGrid>
-
           <EuiSpacer />
         </EuiModalBody>
 

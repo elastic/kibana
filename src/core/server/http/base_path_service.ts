@@ -17,12 +17,9 @@
  * under the License.
  */
 import { Request } from 'hapi';
-import { KibanaRequest, toRawRequest } from './router';
+import { KibanaRequest, getIncomingMessage } from './router';
 
 import { modifyUrl } from '../../utils';
-
-const getIncomingMessage = (request: KibanaRequest | Request) =>
-  request instanceof KibanaRequest ? toRawRequest(request).raw.req : request.raw.req;
 
 export class BasePath {
   private readonly basePathCache = new WeakMap<ReturnType<typeof getIncomingMessage>, string>();

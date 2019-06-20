@@ -23,24 +23,63 @@ import ReactDOM from 'react-dom';
 import { DevToolsSettingsModal } from '../components/settings_modal';
 import { DevToolsSettings } from '../components/dev_tools_settings';
 
-export function showSettingsModal(
-  curSettings: DevToolsSettings,
-  onSaveSettings: (newSettings: DevToolsSettings) => Promise<{ id?: string } | { error: Error }>
-) {
+// @ts-ignore
+import mappings from '../mappings';
+// @ts-ignore
+import { getCurrentSettings, updateSettings } from '../settings';
+
+export function showSettingsModal() {
   const container = document.createElement('div');
+  const curSettings = getCurrentSettings();
+
+  const refreshAutocompleteSettings = () => {
+    mappings.retrieveAutoCompleteInfo();
+  };
+
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
   };
 
+  const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
+    return Object.keys(newSettings.autocomplete).filter(key => {
+      // @ts-ignore
+      return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
+    });
+  };
+
+  const fetchAutocompleteSettingsIfNeeded = (
+    newSettings: DevToolsSettings,
+    prevSettings: DevToolsSettings
+  ) => {
+    // We'll only retrieve settings if polling is on.
+    const isPollingChanged = prevSettings.polling !== newSettings.polling;
+    if (newSettings.polling) {
+      const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
+      if (autocompleteDiff.length > 0) {
+        mappings.retrieveAutoCompleteInfo(newSettings.autocomplete);
+      } else if (isPollingChanged) {
+        mappings.retrieveAutoCompleteInfo();
+      }
+    }
+  };
+
   const onSave = async (newSettings: DevToolsSettings) => {
-    onSaveSettings(newSettings);
+    const prevSettings = getCurrentSettings();
+    updateSettings(newSettings);
+    fetchAutocompleteSettingsIfNeeded(newSettings, prevSettings);
     closeModal();
   };
+
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <DevToolsSettingsModal settings={curSettings} onSaveSettings={onSave} onClose={closeModal} />
+      <DevToolsSettingsModal
+        settings={curSettings}
+        onSaveSettings={onSave}
+        onClose={closeModal}
+        refreshAutocompleteSettings={refreshAutocompleteSettings}
+      />
     </I18nContext>
   );
   ReactDOM.render(element, container);

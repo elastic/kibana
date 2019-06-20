@@ -25,4 +25,6 @@ export interface DevToolsSettings {
     indices: boolean;
     templates: boolean;
   };
+  polling: boolean;
+  tripleQuotes: boolean;
 }

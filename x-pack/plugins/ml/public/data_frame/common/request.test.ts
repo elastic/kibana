@@ -102,7 +102,7 @@ describe('Data Frame: Common', () => {
     const jobDetailsState: JobDetailsExposedState = {
       createIndexPattern: false,
       jobId: 'the-job-id',
-      targetIndex: 'the-target-index',
+      destinationIndex: 'the-destination-index',
       touched: true,
       valid: true,
     };
@@ -110,7 +110,7 @@ describe('Data Frame: Common', () => {
     const request = getDataFrameRequest('the-index-pattern-title', pivotState, jobDetailsState);
 
     expect(request).toEqual({
-      dest: { index: 'the-target-index' },
+      dest: { index: 'the-destination-index' },
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },

@@ -19,8 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { getCurrentSettings, updateSettings } from '../settings';
 import { showSettingsModal } from './settings_show_modal';
 
 // help
@@ -50,8 +48,7 @@ export function getTopNavConfig(toggleHistory: () => void) {
         defaultMessage: 'Settings',
       }),
       run: () => {
-        const curSettings = getCurrentSettings();
-        showSettingsModal(curSettings, updateSettings);
+        showSettingsModal();
       },
       testId: 'consoleSettingsButton',
     },
