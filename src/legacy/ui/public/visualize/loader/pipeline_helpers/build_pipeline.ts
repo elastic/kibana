@@ -34,14 +34,14 @@ interface SchemaConfigParams {
   useGeocentroid?: boolean;
 }
 
-interface SchemaConfig {
+export interface SchemaConfig {
   accessor: number;
   format: SchemaFormat | {};
   params: SchemaConfigParams;
   aggType: string;
 }
 
-interface Schemas {
+export interface Schemas {
   metric: SchemaConfig[];
   bucket?: any[];
   geo_centroid?: any[];
