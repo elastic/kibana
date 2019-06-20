@@ -11,7 +11,6 @@ import {
   getSpecId,
   ScaleType,
   Settings,
-  TooltipType,
   getAxisId,
   Position,
   timeFormatter,
@@ -58,10 +57,7 @@ export const MonitorBarSeries = ({
   return seriesHasYValues(downSeries) ? (
     <div style={{ height: 50, width: '100%' }}>
       <Chart>
-        <Settings
-          xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
-          tooltipType={TooltipType.VerticalCursor}
-        />
+        <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} />
         <Axis
           hide
           id={getAxisId('bottom')}
