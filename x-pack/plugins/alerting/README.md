@@ -1,10 +1,10 @@
 # Kibana alerting
 
-The Kibana alerting plugin provides a common place to setup alerts. It supports:
+The Kibana alerting plugin provides a common place to set up alerts. You can:
 
-- Registering types of alerts
-- List the registered types of alerts
-- CRUD on alerts
+- Register types of alerts
+- List the types of registered alerts
+- Perform CRUD actions on alerts
 
 ## Terminology
 
@@ -30,25 +30,25 @@ The following table describes the properties of the `options` object.
 |Property|Description|Type|
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
-|name|A user friendly name for the alert type. These will be displayed in dropdowns when chosing alert types.|string|
+|name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `execute` function or created as an alert saved object. In order to do this, provide a joi schema that we will use to validate the `params` attribute.|Joi schema|
 |execute|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
 ### Executor
 
-This is the primary function for an alert type, whenever the alert needs to execute, this function will perform the execution. It receives a variety of parameters, the following table describes the properties the executor receives.
+This is the primary function for an alert type. Whenever the alert needs to execute, this function will perform the execution. It receives a variety of parameters. The following table describes the properties the executor receives.
 
 **execute(options)**
 
 |Property|Description|
 |---|---|
-|services.callCluster(path, opts)|Use this to do elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, this will change in a future PR.|
+|services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>**NOTE**: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |scheduledRunAt|The date and time the alert type execution was scheduled to be called.|
 |previousScheduledRunAt|The previous date and time the alert type was scheduled to be called.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
-|state|State returned from previous execution. This is the alert level state, what is returned by the executor will be serialized and provided here at the next execution.|
+|state|State returned from previous execution. This is the alert level state. What the executor returns will be serialized and provided here at the next execution.|
 
 ### Example
 
@@ -104,7 +104,7 @@ server.plugins.alerting.registerType({
 
 ## Alerts
 
-Using an alert type requires an alert to be created which will contain parameters and actions for a given alert type.
+Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type.
 
 ### RESTful API
 
@@ -131,7 +131,7 @@ Params:
 
 Params:
 
-See saved objects API documentation for find, all the properties are the same except you cannot pass in `type`.
+See the saved objects API documentation for find. All the properties are the same except you cannot pass in `type`.
 
 #### `GET /api/alert/{id}`: Get alert
 
@@ -165,7 +165,7 @@ Payload:
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to fire actions. The id you give to the alert instance factory is a unique identifyer to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve state of previous instances with the same id. These instances support state persisting between alert type execution but will clear out once the alert instance stops firing.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to fire actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops firing.
 
 This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 
@@ -226,4 +226,4 @@ The templating system will take the alert and alert type as described above and 
 }
 ```
 
-There are limitations that we are aware of using only templates, we are gathering feedback and use cases for these. (for example passing an array of strings to an action).
+There are limitations that we are aware of using only templates, and we are gathering feedback and use cases for these. (for example passing an array of strings to an action).
