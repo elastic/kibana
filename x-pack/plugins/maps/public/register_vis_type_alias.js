@@ -13,7 +13,7 @@ Use the Maps app instead of Coordinate Map and Region Map.
 The Maps app offers more functionality and is easier to use.`;
 
 visualizations.types.visTypeAliasRegistry.add({
-  url: MAP_BASE_URL,
+  aliasUrl: MAP_BASE_URL,
   name: APP_ID,
   title: i18n.translate('xpack.maps.visTypeAlias.title', {
     defaultMessage: 'Maps'

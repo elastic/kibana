@@ -18,7 +18,7 @@
  */
 
 export interface VisTypeAlias {
-  url: string;
+  aliasUrl: string;
   name: string;
   title: string;
   icon: string;

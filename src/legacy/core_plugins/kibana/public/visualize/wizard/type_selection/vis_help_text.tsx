@@ -24,7 +24,7 @@ import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 interface VisHelpTextProps {
   name: string;
   title: string;
-  description: string;
+  description?: string;
   highlightMsg?: string;
 }
 

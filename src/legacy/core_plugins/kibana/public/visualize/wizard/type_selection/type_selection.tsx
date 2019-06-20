@@ -60,7 +60,7 @@ interface TypeSelectionProps {
 interface HighlightedType {
   name: string;
   title: string;
-  description: string;
+  description?: string;
   highlightMsg?: string;
 }
 
@@ -207,8 +207,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
     let stage = {};
     let highlightMsg;
-    const isVisTypeAlias = 'url' in visType;
-    if (!isVisTypeAlias && visType.stage === 'experimental') {
+    if (!('aliasUrl' in visType) && visType.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -222,7 +221,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         defaultMessage:
           'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
       });
-    } else if (isVisTypeAlias) {
+    } else if ('aliasUrl' in visType) {
       const aliasDescription = i18n.translate(
         'kbn.visualize.newVisWizard.visTypeAliasDescription',
         {
@@ -240,13 +239,14 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick = isVisTypeAlias
-      ? () => {
-          window.location = chrome.addBasePath(visType.url);
-        }
-      : () => this.props.onVisTypeSelected(visType);
+    const onClick =
+      'aliasUrl' in visType
+        ? () => {
+            window.location = chrome.addBasePath(visType.aliasUrl);
+          }
+        : () => this.props.onVisTypeSelected(visType);
 
-    const highlightedType = {
+    const highlightedType: HighlightedType = {
       title: visType.title,
       name: visType.name,
       description: visType.description,
@@ -264,13 +264,16 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         onBlur={() => this.setHighlightType(null)}
         className="visNewVisDialog__type"
         data-test-subj={`visType-${visType.name}`}
-        data-vis-stage={visType.stage}
+        data-vis-stage={!('aliasUrl' in visType) ? visType.stage : 'alias'}
         disabled={isDisabled}
         aria-describedby={`visTypeDescription-${visType.name}`}
         role="menuitem"
         {...stage}
       >
-        <VisTypeIcon icon={visType.icon} image={!isVisTypeAlias ? visType.image : undefined} />
+        <VisTypeIcon
+          icon={visType.icon}
+          image={!('aliasUrl' in visType) ? visType.image : undefined}
+        />
       </EuiKeyPadMenuItemButton>
     );
   };
