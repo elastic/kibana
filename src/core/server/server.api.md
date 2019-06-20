@@ -16,7 +16,6 @@ import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
-import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -160,7 +159,7 @@ export interface HttpServiceSetup extends HttpServerSetup {
 
 // @public (undocumented)
 export interface HttpServiceStart {
-    isListening: () => boolean;
+    isListening: (port: number) => boolean;
 }
 
 // @internal (undocumented)
@@ -175,8 +174,6 @@ export interface InternalCoreSetup {
 
 // @public (undocumented)
 export interface InternalCoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
     // (undocumented)
     plugins: PluginsServiceStart;
 }
@@ -501,6 +498,21 @@ export class SavedObjectsClient {
 // 
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
+
+// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+    // (undocumented)
+    client: SavedObjectsClientContract;
+    // (undocumented)
+    request: Request;
+}
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {

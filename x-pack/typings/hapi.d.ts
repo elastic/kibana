@@ -6,13 +6,13 @@
 
 import 'hapi';
 
-import { CloudPlugin } from '../plugins/cloud';
-import { EncryptedSavedObjectsPlugin } from '../plugins/encrypted_saved_objects';
-import { XPackMainPlugin } from '../plugins/xpack_main/xpack_main';
-import { SecurityPlugin } from '../plugins/security';
-import { ActionsPlugin, ActionsClient } from '../plugins/actions';
-import { TaskManager } from '../plugins/task_manager';
-import { AlertingPlugin, AlertsClient } from '../plugins/alerting';
+import { CloudPlugin } from '../legacy/plugins/cloud';
+import { EncryptedSavedObjectsPlugin } from '../legacy/plugins/encrypted_saved_objects';
+import { XPackMainPlugin } from '../legacy/plugins/xpack_main/xpack_main';
+import { SecurityPlugin } from '../legacy/plugins/security';
+import { ActionsPlugin, ActionsClient } from '../legacy/plugins/actions';
+import { TaskManager } from '../legacy/plugins/task_manager';
+import { AlertingPlugin, AlertsClient } from '../legacy/plugins/alerting';
 
 declare module 'hapi' {
   interface Server {

@@ -19,9 +19,7 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { QueryFilter } from 'ui/filter_manager/query_filter';
 import { Filter } from '@kbn/es-query';
-import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 /**
  * @typedef {Object} QueryFilter
@@ -30,51 +28,6 @@ import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
  */
 
 export class FilterUtils {
-  /**
-   *
-   * @param filter
-   * @returns {Boolean} True if the filter is of the special query type
-   * (e.g. goes in the query input bar), false otherwise (e.g. is in the filter bar).
-   */
-  public static isQueryFilter(filter: Filter) {
-    return filter.query && !filter.meta;
-  }
-
-  /**
-   *
-   * @param {SavedDashboard} dashboard
-   * @returns {Array.<Object>} An array of filters stored with the dashboard. Includes
-   * both query filters and filter bar filters.
-   */
-  public static getDashboardFilters(dashboard: SavedObjectDashboard): Filter[] {
-    return dashboard.searchSource.getOwnField('filter');
-  }
-
-  /**
-   * Grabs a saved query to use from the dashboard, or if none exists, creates a default one.
-   * @param {SavedDashboard} dashboard
-   * @returns {QueryFilter}
-   */
-  public static getQueryFilterForDashboard(dashboard: SavedObjectDashboard): QueryFilter | string {
-    if (dashboard.searchSource.getOwnField('query')) {
-      return dashboard.searchSource.getOwnField('query');
-    }
-
-    const dashboardFilters = this.getDashboardFilters(dashboard);
-    const dashboardQueryFilter = _.find(dashboardFilters, this.isQueryFilter);
-    return dashboardQueryFilter ? dashboardQueryFilter.query : '';
-  }
-
-  /**
-   * Returns the filters for the dashboard that should appear in the filter bar area.
-   * @param {SavedDashboard} dashboard
-   * @return {Array.<Object>} Array of filters that should appear in the filter bar for the
-   * given dashboard
-   */
-  public static getFilterBarsForDashboard(dashboard: SavedObjectDashboard) {
-    return _.reject(this.getDashboardFilters(dashboard), this.isQueryFilter);
-  }
-
   /**
    * Converts the time to a utc formatted string. If the time is not valid (e.g. it might be in a relative format like
    * 'now-15m', then it just returns what it was passed).
