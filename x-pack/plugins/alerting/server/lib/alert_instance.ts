@@ -12,7 +12,6 @@ interface ConstructorOptions {
 }
 
 export class AlertInstance {
-  private internalShouldFire: boolean = false;
   private fireOptions?: Record<string, any>;
   private meta: Record<string, any>;
   private state: Record<string, any>;
@@ -23,7 +22,7 @@ export class AlertInstance {
   }
 
   shouldFire() {
-    return this.internalShouldFire;
+    return this.fireOptions !== undefined;
   }
 
   getFireOptions() {
@@ -31,7 +30,6 @@ export class AlertInstance {
   }
 
   resetFire() {
-    this.internalShouldFire = false;
     this.fireOptions = undefined;
     return this;
   }
@@ -45,7 +43,9 @@ export class AlertInstance {
   }
 
   fire(actionGroup: string, context: Context = {}) {
-    this.internalShouldFire = true;
+    if (this.shouldFire()) {
+      throw new Error('Alert instance already fired, cannot fire twice');
+    }
     this.fireOptions = { actionGroup, context, state: this.state };
     return this;
   }
