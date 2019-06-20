@@ -27,7 +27,7 @@ export class Plugin {
       chrome: { setBreadcrumbs },
       notifications: { toasts },
       fatalError,
-      http: { prependBasePath },
+      http: { basePath: { prepend: prependBasePath } },
       injectedMetadata: { getInjectedVar },
       documentation: { elasticWebsiteUrl, docLinkVersion },
     } = coreStart;

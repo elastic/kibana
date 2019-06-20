@@ -17,27 +17,23 @@
  * under the License.
  */
 
-import { IRegistry } from './types';
+import { SavedObjectReference } from '../../../../legacy/server/saved_objects/routes/types';
 
-export const createRegistry = <T>(): IRegistry<T> => {
-  let data = new Map<string, T>();
-
-  const get = (id: string) => data.get(id);
-  const set = (id: string, obj: T) => {
-    data.set(id, obj);
+export interface SavedObjectAttributes {
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
   };
-  const reset = () => {
-    data = new Map<string, T>();
-  };
-  const length = () => data.size;
+}
 
-  const getAll = () => Array.from(data.values());
+export interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+  references: SavedObjectReference[];
+  attributes: Attributes;
+  id: string;
+  type: string;
+}
 
-  return {
-    get,
-    set,
-    reset,
-    length,
-    getAll,
-  };
-};
+export interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+  attributes: Attributes;
+  id: string;
+  type: string;
+}
