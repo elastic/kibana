@@ -618,9 +618,7 @@ export interface SavedObjectsMigrationVersion {
     [pluginName: string]: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsNamespace" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export type SavedObjectsNamespace = string | undefined;
 
 // @public (undocumented)

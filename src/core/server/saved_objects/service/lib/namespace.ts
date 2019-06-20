@@ -17,4 +17,8 @@
  * under the License.
  */
 
+/**
+ * Saved Objects Namespace.
+ * @public
+ */
 export type SavedObjectsNamespace = string | undefined;

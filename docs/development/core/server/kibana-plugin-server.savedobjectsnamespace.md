@@ -4,6 +4,8 @@
 
 ## SavedObjectsNamespace type
 
+Saved Objects Namespace.
+
 <b>Signature:</b>
 
 ```typescript
