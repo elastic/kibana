@@ -17,21 +17,5 @@
  * under the License.
  */
 
-import { useLayoutEffect, useState } from 'react';
-import { Observable } from 'rxjs';
-
-export function useObservable<T>(observable$: Observable<T>): T | undefined;
-export function useObservable<T>(observable$: Observable<T>, initialValue: T): T;
-export function useObservable<T>(observable$: Observable<T>, initialValue?: T): T | undefined {
-  const [value, update] = useState<T | undefined>(initialValue);
-
-  useLayoutEffect(
-    () => {
-      const s = observable$.subscribe(update);
-      return () => s.unsubscribe();
-    },
-    [observable$]
-  );
-
-  return value;
-}
+export * from './create_store';
+export * from './react';
