@@ -43,32 +43,34 @@ describe('metric_expression', () => {
       const { data, args } = sampleArgs();
 
       expect(shallow(<MetricChart data={data} args={args} />)).toMatchInlineSnapshot(`
-<EuiFlexGroup
-  alignItems="center"
-  className="lnsChart"
-  justifyContent="spaceAround"
->
-  <EuiFlexItem
-    grow={false}
+<AutoScale>
+  <EuiFlexGroup
+    alignItems="center"
+    className="lnsChart"
+    justifyContent="spaceAround"
   >
-    <div
-      style={
-        Object {
-          "fontSize": "60pt",
-          "fontWeight": 600,
-          "textAlign": "center",
+    <EuiFlexItem
+      grow={false}
+    >
+      <div
+        style={
+          Object {
+            "fontSize": "60pt",
+            "fontWeight": 600,
+            "textAlign": "center",
+          }
         }
-      }
-    >
-      1
-    </div>
-    <EuiText
-      textAlign="center"
-    >
-      My fanci metric chart
-    </EuiText>
-  </EuiFlexItem>
-</EuiFlexGroup>
+      >
+        1
+      </div>
+      <EuiText
+        textAlign="center"
+      >
+        My fanci metric chart
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</AutoScale>
 `);
     });
   });
