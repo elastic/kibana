@@ -17,15 +17,24 @@
  * under the License.
  */
 import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
+import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+
+export interface PluginsSetup {
+  data: ReturnType<DataPlugin['setup']>;
+}
+
+export interface PluginsStart {
+  data: ReturnType<DataPlugin['start']>;
+}
 
 export const npSetup = {
   core: (null as unknown) as InternalCoreSetup,
-  plugins: {} as Record<string, unknown>,
+  plugins: {} as PluginsSetup,
 };
 
 export const npStart = {
   core: (null as unknown) as InternalCoreStart,
-  plugins: {} as Record<string, unknown>,
+  plugins: {} as PluginsStart,
 };
 
 /**
@@ -34,15 +43,17 @@ export const npStart = {
  */
 export function __reset__() {
   npSetup.core = (null as unknown) as InternalCoreSetup;
+  npSetup.plugins = {} as any;
   npStart.core = (null as unknown) as InternalCoreStart;
+  npStart.plugins = {} as any;
 }
 
-export function __setup__(coreSetup: InternalCoreSetup, plugins: Record<string, unknown>) {
+export function __setup__(coreSetup: InternalCoreSetup, plugins: PluginsSetup) {
   npSetup.core = coreSetup;
   npSetup.plugins = plugins;
 }
 
-export function __start__(coreStart: InternalCoreStart, plugins: Record<string, unknown>) {
+export function __start__(coreStart: InternalCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
 }

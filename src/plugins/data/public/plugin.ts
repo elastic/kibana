@@ -30,5 +30,7 @@ export class Plugin {
     };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    return {};
+  }
 }
