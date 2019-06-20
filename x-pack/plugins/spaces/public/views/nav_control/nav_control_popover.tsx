@@ -171,8 +171,10 @@ export class NavControlPopover extends Component<Props, State> {
           },
         }
       ),
+      onClose: () => this.props.spacesManager.changeSelectedSpace(space),
     });
-    console.log(space);
-    // this.props.spacesManager.changeSelectedSpace(space);
+
+    setTimeout(() => this.props.spacesManager.changeSelectedSpace(space), 4000);
+    return true;
   };
 }
