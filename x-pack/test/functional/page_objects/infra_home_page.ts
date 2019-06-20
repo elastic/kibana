@@ -5,7 +5,6 @@
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
-import moment from 'moment-timezone';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
@@ -15,13 +14,12 @@ export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaul
   const browser = getService('browser');
 
   return {
-    async goToTime(time: number) {
+    async goToTime(time: string) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-
       await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
-      await datePickerInput.type([moment.tz(time, 'UTC').format('L LTS'), browser.keys.RETURN]);
+      await datePickerInput.type([time, browser.keys.RETURN]);
     },
 
     async getWaffleMap() {
