@@ -12,7 +12,7 @@ import {
   SocketMessageReader,
   SocketMessageWriter,
 } from 'vscode-jsonrpc';
-import { RequestMessage, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import {
   ClientCapabilities,
@@ -23,16 +23,12 @@ import {
   MessageType,
   WorkspaceFolder,
 } from 'vscode-languageserver-protocol/lib/main';
-import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
 import { LspOptions } from '../server_options';
-import { HttpMessageReader } from './http_message_reader';
-import { HttpMessageWriter } from './http_message_writer';
-import { HttpRequestEmitter } from './http_request_emitter';
-import { createRepliesMap } from './replies_map';
 import { Cancelable } from '../utils/cancelable';
+import { RequestCancelled } from '../../common/lsp_error_codes';
 
 export interface ILanguageServerHandler {
   lastAccess?: number;
@@ -49,12 +45,8 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   public initialized: boolean = false;
   private socket: any;
-  private conn: IConnection;
   private clientConnection: MessageConnection | null = null;
   private closed: boolean = false;
-  private sequenceNumber = 0;
-  private httpEmitter = new HttpRequestEmitter();
-  private replies = createRepliesMap();
   private readonly targetHost: string;
   private targetPort: number;
   private readonly logger: Logger;
@@ -67,41 +59,32 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     this.targetPort = targetPort;
     this.logger = logger;
     this.lspOptions = lspOptions;
-    this.conn = createConnection(
-      new HttpMessageReader(this.httpEmitter),
-      new HttpMessageWriter(this.replies, logger)
-    );
-  }
-  public handleRequest(request: LspRequest): Promise<ResponseMessage> {
-    return this.receiveRequest(request.method, request.params, request.isNotification);
   }
 
-  public receiveRequest(method: string, params: any, isNotification: boolean = false) {
-    if (this.error) {
-      return Promise.reject(this.error);
-    }
-    const message: RequestMessage = {
-      jsonrpc: '2.0',
-      id: this.sequenceNumber++,
-      method,
-      params,
+  public async handleRequest(request: LspRequest): Promise<ResponseMessage> {
+    const response: ResponseMessage = {
+      jsonrpc: '',
+      id: null,
+      error: { code: RequestCancelled, message: 'Server closed' },
     };
-    return new Promise<ResponseMessage>((resolve, reject) => {
-      if (this.lspOptions.verbose) {
-        this.logger.info(`emit message ${JSON.stringify(message)}`);
+    if (this.closed) {
+      response.error = { code: RequestCancelled, message: 'Server closed' };
+    } else {
+      const conn = await this.connect();
+      const params = Array.isArray(request.params) ? request.params : [request.params];
+      if (!request.isNotification) {
+        try {
+          response.result = await conn.sendRequest(request.method, ...params);
+        } catch (error) {
+          response.error = error;
+        }
       } else {
-        this.logger.debug(`emit message ${JSON.stringify(message)}`);
+        conn.sendNotification(request.method, ...params);
       }
-      if (isNotification) {
-        // for language server as jdt, notification won't have a response message.
-        this.httpEmitter.emit('message', message);
-        resolve();
-      } else {
-        this.replies.set(message.id as number, [resolve, reject]);
-        this.httpEmitter.emit('message', message);
-      }
-    });
+    }
+    return response;
   }
+
   public async initialize(
     clientCapabilities: ClientCapabilities,
     workspaceFolders: [WorkspaceFolder],
@@ -135,27 +118,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       });
   }
 
-  public listen() {
-    this.conn.onRequest((method: string, ...params) => {
-      if (this.lspOptions.verbose) {
-        this.logger.info('received request method: ' + method);
-      } else {
-        this.logger.debug('received request method: ' + method);
-      }
-
-      return this.connect().then(clientConn => {
-        if (this.lspOptions.verbose) {
-          this.logger.info(`proxy method:${method} to Language Server `);
-        } else {
-          this.logger.debug(`proxy method:${method} to Language Server `);
-        }
-
-        return clientConn.sendRequest(method, ...params);
-      });
-    });
-    this.conn.listen();
-  }
-
   public async shutdown() {
     const clientConn = await this.connect();
     this.logger.info(`sending shutdown request`);
@@ -170,9 +132,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     if (this.clientConnection) {
       this.logger.info('sending `shutdown` request to language server.');
       const clientConn = this.clientConnection;
-      clientConn.sendRequest('shutdown').then(() => {
-        this.conn.dispose();
-      });
+      clientConn.sendRequest('shutdown');
       this.logger.info('sending `exit` notification to language server.');
       // @ts-ignore
       clientConn.sendNotification(ExitNotification.type);
@@ -237,7 +197,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     if (this.clientConnection) {
       return Promise.resolve(this.clientConnection);
     }
-    this.closed = false;
     if (!this.connectingPromise) {
       this.connectingPromise = new Cancelable(resolve => {
         this.socket = new net.Socket();

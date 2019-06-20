@@ -8,6 +8,7 @@ import { ErrorCodes } from 'vscode-jsonrpc/lib/messages';
 
 export const ServerNotInitialized: number = ErrorCodes.ServerNotInitialized;
 export const UnknownErrorCode: number = ErrorCodes.UnknownErrorCode;
+export const RequestCancelled: number = ErrorCodes.RequestCancelled;
 export const UnknownFileLanguage: number = -42404;
 export const LanguageServerNotInstalled: number = -42403;
 export const LanguageDisabled: number = -42402;
