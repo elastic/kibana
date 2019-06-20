@@ -7,6 +7,7 @@
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
+import { get } from 'lodash';
 import { MonitorListStatusColumn } from '../monitor_list_status_column';
 import { Check } from '../../../../common/graphql/types';
 
@@ -18,8 +19,11 @@ export const CheckList = ({ checks }: CheckListProps) => (
   <EuiFlexGrid columns={3} style={{ paddingLeft: '40px' }}>
     {checks.map(check => {
       const momentTimestamp = moment(parseInt(check.timestamp, 10));
+      const location = get<string | null>(check, 'observer.geo.name', null);
+      const agentId = get<string>(check, 'agent.id', 'null');
+      const key = location + agentId + check.monitor.ip;
       return (
-        <Fragment key={check.observer.geo.name + check.agent.id + check.monitor.ip}>
+        <Fragment key={key}>
           <EuiFlexItem>
             <MonitorListStatusColumn
               absoluteTime={momentTimestamp.toLocaleString()}
@@ -28,7 +32,7 @@ export const CheckList = ({ checks }: CheckListProps) => (
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s">{check.observer.geo.name}</EuiText>
+            <EuiText size="s">{location ? location : 'TODOTHISISINCOMPLETEADDALINK'}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="secondary" size="s">
