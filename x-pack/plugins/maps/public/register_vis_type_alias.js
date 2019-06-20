@@ -8,10 +8,6 @@ import { visualizations } from 'plugins/visualizations';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
 
-const VIS_TYPE_DESCRIPTION = `Create and style maps with multiple layers and indices.
-Use the Maps app instead of Coordinate Map and Region Map.
-The Maps app offers more functionality and is easier to use.`;
-
 visualizations.types.visTypeAliasRegistry.add({
   aliasUrl: MAP_BASE_URL,
   name: APP_ID,
@@ -19,7 +15,9 @@ visualizations.types.visTypeAliasRegistry.add({
     defaultMessage: 'Maps'
   }),
   description: i18n.translate('xpack.maps.visTypeAlias.description', {
-    defaultMessage: VIS_TYPE_DESCRIPTION
+    defaultMessage: `Create and style maps with multiple layers and indices.
+Use the Maps app instead of Coordinate Map and Region Map.
+The Maps app offers more functionality and is easier to use.`
   }),
   icon: APP_ICON,
 });
