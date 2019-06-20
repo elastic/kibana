@@ -77,7 +77,7 @@ export class ClusterDocClient {
     this.log = initializerContext.logger.get('proxy');
   }
 
-  public async setup(esClient: ElasticsearchServiceSetup) {
+  public async setup(esClient: Partial<ElasticsearchServiceSetup>) {
     this.elasticsearch = esClient.dataClient$;
     this.configSubscription = this.config$.subscribe(config => {
       this.setConfig(config);
