@@ -116,7 +116,7 @@ export function embeddableStateChanged(changeData: {
       const originalPanelState = getPanel(getState(), panelId);
       const newPanelState: SavedDashboardPanel = {
         ...originalPanelState,
-        embeddableConfig: _.cloneDeep(embeddableState.customization),
+        embeddableConfig: _.cloneDeep(embeddableState.customization) || {},
       };
       dispatch(updatePanel(newPanelState));
     }
