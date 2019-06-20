@@ -35,6 +35,7 @@ export interface SavedObjectsService<Request = any> {
 }
 
 export {
+  SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
