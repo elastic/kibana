@@ -18,20 +18,22 @@
  */
 
 import 'abortcontroller-polyfill';
+import { RequestQuery } from 'hapi';
 import { Legacy } from 'kibana';
-import { search } from '../lib/search';
+import { search } from '../lib';
 
 export function registerSearchApi(server: Legacy.Server): void {
   server.route({
     path: '/api/search/{index}',
     method: 'POST',
     handler: async request => {
-      const body = request.payload;
       const { index } = request.params;
+      const strategy = (request.query as RequestQuery).strategy as string;
+      const body = request.payload;
       const controller = new AbortController();
       const { signal } = controller;
       request.events.once('disconnect', () => controller.abort());
-      return search(request, index, body, { signal });
+      return search(request, index, body, { strategy, signal });
     },
   });
 }

@@ -18,75 +18,21 @@
  */
 
 import { Request } from 'hapi';
-import { sortByOrder } from 'lodash';
-import { Legacy } from 'kibana';
 import { SearchOptions } from '../../common';
 
-export interface SearchStrategy {
-  // When looking up the search strategy for a given request, we order by priority before calling
-  // `isViable`. A higher number means a higher priority. The default search strategy priority is 10.
-  priority: number;
+export type SearchStrategy = (
+  request: Request,
+  index: string,
+  body: any,
+  options?: SearchOptions
+) => Promise<any>;
 
-  // A function to determine whether this search strategy is viable for the given request.
-  isViable: (request: Request, index: string, body: any) => Promise<boolean>;
+const searchStrategyRegistry: Map<string, SearchStrategy> = new Map<string, SearchStrategy>();
 
-  // The function to actually invoke the call to Elasticsearch.
-  search: (request: Request, index: string, body: any, options?: SearchOptions) => Promise<any>;
+export function registerSearchStrategy(name: string, searchStrategy: SearchStrategy) {
+  searchStrategyRegistry.set(name, searchStrategy);
 }
 
-const searchStrategies: SearchStrategy[] = [];
-
-/**
- * Registers the given search strategy. Order matters! Search strategies that are registered earlier will take
- * precedence over those that are registered later.
- * @param searchStrategy The search strategy to register
- */
-export function registerSearchStrategy(searchStrategy: SearchStrategy) {
-  searchStrategies.push(searchStrategy);
-}
-
-/**
- * Go through the list of registered search strategies, ordered by priority, and return the first
- * that is viable for the given request.
- * @param request The request that initiated this search
- * @param index The index pattern/title to search
- * @param body The Elasticsearch body
- */
-export function getSearchStrategy(request: Request, index: string, body: any) {
-  const orderedStrategies = sortByOrder(searchStrategies, 'priority', 'desc');
-  return orderedStrategies.reduce(
-    async (promise: Promise<SearchStrategy | null>, currentSearchStrategy) => {
-      const viableSearchStrategy = await promise;
-      if (viableSearchStrategy !== null) return viableSearchStrategy;
-      const isViable = await currentSearchStrategy.isViable(request, index, body);
-      return isViable ? currentSearchStrategy : null;
-    },
-    Promise.resolve(null)
-  );
-}
-
-/**
- * Registers the default search strategy, which simply sends the request to the `_search`
- * Elasticsearch endpoint.
- */
-export function registerDefaultSearchStrategy(server: Legacy.Server) {
-  registerSearchStrategy({
-    priority: 10,
-    isViable: async () => true,
-    search: async function defaultSearchStrategy(
-      request: Request,
-      index: string,
-      body: any,
-      { signal, onProgress = () => {} }: SearchOptions = {}
-    ) {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      try {
-        const response = await callWithRequest(request, 'search', { index, body }, { signal });
-        onProgress(response._shards);
-        return response;
-      } catch (e) {
-        return server.plugins.kibana.handleEsError(e);
-      }
-    },
-  });
+export function getSearchStrategy(name: string = 'default') {
+  return searchStrategyRegistry.get(name);
 }

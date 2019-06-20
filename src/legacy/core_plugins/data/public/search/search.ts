@@ -36,10 +36,11 @@ import { SearchOptions } from '../../common';
  * const response = await search('twitter', body, options);
  */
 export function search(index: string, body: any, options: SearchOptions = {}) {
-  const { signal, onProgress = () => {} } = options;
+  const { signal, onProgress = () => {}, strategy = 'default' } = options;
   const promise = kfetch({
     method: 'POST',
     pathname: `../api/search/${index}`,
+    query: { strategy },
     body: JSON.stringify(body),
     signal,
   });

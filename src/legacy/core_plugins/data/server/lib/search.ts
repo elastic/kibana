@@ -43,6 +43,9 @@ export async function search(
   body: any,
   options: SearchOptions = {}
 ) {
-  const searchStrategy = await getSearchStrategy(request, index, body);
-  return searchStrategy!.search(request, index, body, options);
+  const searchStrategy = await getSearchStrategy(options.strategy);
+  if (typeof searchStrategy !== 'function') {
+    throw new Error(`No search strategy registered with name ${options.strategy}`);
+  }
+  return searchStrategy(request, index, body, options);
 }

@@ -17,7 +17,23 @@
  * under the License.
  */
 
-export * from './register_default_search_strategy';
-export * from './get_index_pattern';
-export * from './search';
-export * from './search_strategy_registry';
+import { Request } from 'hapi';
+import { Legacy } from 'kibana';
+import { SearchOptions } from '../../common';
+import { registerSearchStrategy } from './search_strategy_registry';
+
+export function registerDefaultSearchStrategy(server: Legacy.Server) {
+  registerSearchStrategy('default', async function defaultSearchStrategy(
+    request: Request,
+    index: string,
+    body: any,
+    { signal, onProgress = () => {} }: SearchOptions = {}
+  ) {
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+    const promise = callWithRequest(request, 'search', { index, body }, { signal });
+    return promise.then(response => {
+      onProgress(response._shards);
+      return response;
+    }, server.plugins.kibana.handleEsError);
+  });
+}
