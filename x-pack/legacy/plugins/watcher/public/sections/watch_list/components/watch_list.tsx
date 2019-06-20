@@ -38,6 +38,7 @@ import {
   DeleteWatchesModal,
   WatchStatus,
   SectionError,
+  SectionLoading,
 } from '../../../components';
 import { loadWatches } from '../../../lib/api';
 import { watcherGettingStartedUrl } from '../../../lib/documentation_links';
@@ -156,6 +157,17 @@ const WatchListUi = () => {
       />
     </EuiPopover>
   );
+
+  if (isWatchesLoading) {
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.watcher.sections.watchList.loadingWatchesDescription"
+          defaultMessage="Loading watches…"
+        />
+      </SectionLoading>
+    );
+  }
 
   if (getPageErrorCode(error)) {
     return (
@@ -399,7 +411,6 @@ const WatchListUi = () => {
         sorting={true}
         selection={selectionConfig}
         isSelectable={true}
-        loading={isWatchesLoading}
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
@@ -417,55 +428,58 @@ const WatchListUi = () => {
     );
   }
 
-  return (
-    <EuiPageContent>
-      <DeleteWatchesModal
-        callback={(deleted?: string[]) => {
-          if (deleted) {
-            setDeletedWatches([...deletedWatches, ...watchesToDelete]);
-          }
-          setWatchesToDelete([]);
-        }}
-        watchesToDelete={watchesToDelete}
-      />
+  if (content) {
+    return (
+      <EuiPageContent>
+        <DeleteWatchesModal
+          callback={(deleted?: string[]) => {
+            if (deleted) {
+              setDeletedWatches([...deletedWatches, ...watchesToDelete]);
+            }
+            setWatchesToDelete([]);
+          }}
+          watchesToDelete={watchesToDelete}
+        />
 
-      <EuiTitle size="l">
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <h1 data-test-subj="appTitle">
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.header"
-                defaultMessage="Watcher"
-              />
-            </h1>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={watcherGettingStartedUrl}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
-                defaultMessage="Watcher docs"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiTitle>
+        <EuiTitle size="l">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <h1 data-test-subj="appTitle">
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchList.header"
+                  defaultMessage="Watcher"
+                />
+              </h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={watcherGettingStartedUrl}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
+                  defaultMessage="Watcher docs"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
 
-      <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
 
-      <EuiText color="subdued">
-        <p>{watcherDescriptionText}</p>
-      </EuiText>
+        <EuiText color="subdued">
+          <p>{watcherDescriptionText}</p>
+        </EuiText>
 
-      <EuiSpacer size="xl" />
+        <EuiSpacer size="xl" />
 
-      {content}
-    </EuiPageContent>
-  );
+        {content}
+      </EuiPageContent>
+    );
+  }
+  return null;
 };
 
 export const WatchList = injectI18n(WatchListUi);

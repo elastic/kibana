@@ -145,7 +145,7 @@ const WatchVisualizationUi = () => {
       if (isInitialRequest) {
         return setIsInitialRequest(false);
       }
-      reload();
+      reload(false);
     },
     [
       index,
