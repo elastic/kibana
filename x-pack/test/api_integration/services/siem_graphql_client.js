@@ -10,7 +10,7 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
-import introspectionQueryResultData from '../../../plugins/siem/public/graphql/introspection.json';
+import introspectionQueryResultData from '../../../legacy/plugins/siem/public/graphql/introspection.json';
 
 export function SiemGraphQLClientProvider({ getService }) {
   return new SiemGraphQLClientFactoryProvider({ getService })();
