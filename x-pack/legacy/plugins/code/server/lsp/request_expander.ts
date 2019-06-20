@@ -7,16 +7,18 @@
 import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
-
 import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
-import { DidChangeWorkspaceFoldersParams, InitializeResult } from 'vscode-languageserver-protocol';
-
+import {
+  ClientCapabilities,
+  DidChangeWorkspaceFoldersParams,
+  InitializeResult,
+} from 'vscode-languageserver-protocol';
 import { RequestCancelled, ServerNotInitialized } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
-import { ServerOptions } from '../server_options';
-import { promiseTimeout } from '../utils/timeout';
-import { Cancelable } from '../utils/cancelable';
 import { Logger } from '../log';
+import { ServerOptions } from '../server_options';
+import { Cancelable } from '../utils/cancelable';
+import { promiseTimeout } from '../utils/timeout';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 interface Job {
@@ -38,6 +40,11 @@ interface Workspace {
   initPromise?: Cancelable<any>;
 }
 
+export interface InitializeOptions {
+  clientCapabilities?: ClientCapabilities;
+  initialOptions?: object;
+}
+
 export const InitializingError = new ResponseError(ServerNotInitialized, 'Server is initializing');
 export const WorkspaceUnloadedError = new ResponseError(RequestCancelled, 'Workspace unloaded');
 
@@ -56,7 +63,7 @@ export class RequestExpander implements ILanguageServerHandler {
     readonly builtinWorkspace: boolean,
     readonly maxWorkspace: number,
     readonly serverOptions: ServerOptions,
-    readonly initialOptions?: object,
+    readonly initialOptions?: InitializeOptions,
     readonly log?: Logger
   ) {
     this.proxy = proxy;

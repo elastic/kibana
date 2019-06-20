@@ -13,7 +13,6 @@ import {
   SocketMessageWriter,
 } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
-
 import {
   ClientCapabilities,
   ExitNotification,
@@ -23,12 +22,12 @@ import {
   MessageType,
   WorkspaceFolder,
 } from 'vscode-languageserver-protocol/lib/main';
-
+import { RequestCancelled } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
 import { LspOptions } from '../server_options';
 import { Cancelable } from '../utils/cancelable';
-import { RequestCancelled } from '../../common/lsp_error_codes';
+import { InitializeOptions } from './request_expander';
 
 export interface ILanguageServerHandler {
   lastAccess?: number;
@@ -88,13 +87,20 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   public async initialize(
     clientCapabilities: ClientCapabilities,
     workspaceFolders: [WorkspaceFolder],
-    initOptions?: object
+    initOptions?: InitializeOptions
   ): Promise<InitializeResult> {
     if (this.error) {
       throw this.error;
     }
     const clientConn = await this.connect();
     const rootUri = workspaceFolders[0].uri;
+    if (
+      initOptions &&
+      initOptions.clientCapabilities &&
+      Object.keys(clientCapabilities).length === 0
+    ) {
+      clientCapabilities = initOptions.clientCapabilities;
+    }
     const params = {
       processId: null,
       workspaceFolders,
@@ -105,7 +111,9 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     return await clientConn
       .sendRequest(
         'initialize',
-        initOptions ? { ...params, initializationOptions: initOptions } : params
+        initOptions && initOptions.initialOptions
+          ? { ...params, initializationOptions: initOptions.initialOptions }
+          : params
       )
       .then(r => {
         this.logger.info(`initialized at ${rootUri}`);
