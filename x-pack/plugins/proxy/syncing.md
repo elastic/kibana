@@ -133,6 +133,14 @@ Until this happens, clients will not be able to route to these resources to prev
 
 Conflicts are handled by a `first-in wins` strategy -- if a later node also attempts to mark itself as being responsible for a resource, it will lose, and update its routing table to point to the existing node.
 
+### Initialization handshake
+
+When the system starts for the first time, all the nodes in the system will attempt to connect and initialize the system by updating the document adding themselves. This will either result in a successful update, or a conflict. Upon conflict, the node will stop trying to update the document, and then follow the adding a new node strategy.
+
+### Adding a new node
+
+When a new node wants to connect, it will get the document from the server and send a message to the oldest node on the list asking it to include it in the document, and then iterate on pulling down the document. When the node appears in the document it means that the node is now ready to be used.
+
 ## Issues
 
 - The amount of time it takes for a resource to be made available is the `updateInterval * n` where `n` is the number of clients. We can make the `updateInterval` smaller and allow clients to check more frequently, but with large numbers of nodes in a cluster this will cause delay before making a resource available for routing purposes.
