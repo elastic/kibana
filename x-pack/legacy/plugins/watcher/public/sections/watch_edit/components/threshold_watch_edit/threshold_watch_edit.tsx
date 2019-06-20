@@ -39,6 +39,36 @@ import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
 
+const expressionFieldsWithValidation = [
+  'aggField',
+  'termSize',
+  'termField',
+  'threshold0',
+  'threshold1',
+  'timeWindowSize',
+];
+
+const expressionFields = [
+  'aggType',
+  'aggField',
+  'termSize',
+  'termField',
+  'thresholdComparator',
+  'timeWindowSize',
+  'timeWindowUnit',
+  'triggerIntervalSize',
+  'triggerIntervalUnit',
+  'threshold',
+  'groupBy',
+];
+
+const expressionErrorMessage = i18n.translate(
+  'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
+  {
+    defaultMessage: 'Expression contains errors.',
+  }
+);
+
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
     defaultMessage: 'Select a field',
@@ -151,6 +181,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
     const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
     setIndexPatterns(titles);
   };
+
   const loadData = async () => {
     if (watch.index && watch.index.length > 0) {
       const allEsFields = await getFields(watch.index);
@@ -161,39 +192,33 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
     }
     getIndexPatterns();
   };
+
   useEffect(() => {
     loadData();
   }, []);
+
   const { errors } = watch.validate();
+
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
   const actionErrors = watch.actions.reduce((acc: any, action: any) => {
     const actionValidationErrors = action.validate();
     acc[action.id] = actionValidationErrors;
     return acc;
   }, {});
+
   const hasActionErrors = !!Object.keys(actionErrors).find(actionError => {
     return !!Object.keys(actionErrors[actionError]).find((actionErrorKey: string) => {
       return actionErrors[actionError][actionErrorKey].length >= 1;
     });
   });
-  const expressionErrorMessage = i18n.translate(
-    'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
-    {
-      defaultMessage: 'Expression contains errors.',
-    }
-  );
-  const expressionFields = [
-    'aggField',
-    'termSize',
-    'termField',
-    'threshold0',
-    'threshold1',
-    'timeWindowSize',
-  ];
+
   const hasExpressionErrors = !!Object.keys(errors).find(
-    errorKey => expressionFields.includes(errorKey) && errors[errorKey].length >= 1
+    errorKey => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
+
   const shouldShowThresholdExpression = watch.index && watch.index.length > 0 && watch.timeField;
+
   const andThresholdText = i18n.translate('xpack.watcher.sections.watchEdit.threshold.andLabel', {
     defaultMessage: 'AND',
   });
@@ -289,10 +314,14 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                   setWatchProperty('index', selected.map(aSelected => aSelected.value));
                   const indices = selected.map(s => s.value as string);
 
-                  // reset the time field if indices are deleted
+                  // reset time field and expression fields if indices are deleted
                   if (indices.length === 0) {
                     setTimeFieldOptions(getTimeFieldOptions([]));
                     setWatchProperty('timeFields', []);
+
+                    expressionFields.forEach(expressionField => {
+                      setWatchProperty(expressionField, null);
+                    });
                     return;
                   }
                   const currentEsFields = await getFields(indices);
@@ -504,6 +533,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                               value={watch.aggField}
                               onChange={e => {
                                 setWatchProperty('aggField', e.target.value);
+                                setAggFieldPopoverOpen(false);
                               }}
                               onBlur={() => {
                                 if (!watch.aggField) {
