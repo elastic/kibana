@@ -19,6 +19,7 @@
 
 import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
 import { i18n } from '@kbn/i18n';
+import { welcomeShowPanel } from '../components/welcome_show_panel';
 import storage from '../storage';
 
 // settings
@@ -33,14 +34,6 @@ export function SenseTopNavController(Private) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
 
   const controller = new KbnTopNavController([
-    {
-      key: 'welcome',
-      label: i18n.translate('console.topNav.welcomeTabLabel', {
-        defaultMessage: 'Welcome'
-      }),
-      template: `<sense-welcome></sense-welcome>`,
-      testId: 'consoleWelcomeButton',
-    },
     {
       key: 'history',
       label: i18n.translate('console.topNav.historyTabLabel', {
@@ -82,7 +75,7 @@ export function SenseTopNavController(Private) {
   ]);
 
   if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    controller.open('welcome');
+    welcomeShowPanel();
   }
 
   return controller;
