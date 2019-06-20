@@ -11,7 +11,7 @@ import { toCondensedCheck } from './to_condensed_check';
 import { CondensedCheckList } from './condensed_check_list';
 
 interface MonitorListDrawerProps {
-  summary: MonitorSummary | undefined;
+  summary?: MonitorSummary;
   dangerColor: string;
   successColor: string;
 }

@@ -89,7 +89,9 @@ export const MonitorListComponent = (props: Props) => {
             ...map,
             [id]: (
               <MonitorListDrawer
-                summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+                summary={
+                  items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
+                }
                 successColor={successColor}
                 dangerColor={dangerColor}
               />
