@@ -12,7 +12,11 @@ import { GraphQLError } from 'graphql';
 describe('EmptyState component', () => {
   it('renders child components when count is truthy', () => {
     const component = shallowWithIntl(
-      <EmptyStateComponent basePath="" data={{ getDocCount: { count: 1 } }} loading={false}>
+      <EmptyStateComponent
+        basePath=""
+        data={{ getStatesIndexStatus: { docCount: { count: 1 }, indexExists: true } }}
+        loading={false}
+      >
         <div>Foo</div>
         <div>Bar</div>
         <div>Baz</div>
@@ -20,6 +24,7 @@ describe('EmptyState component', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
   it(`doesn't render child components when count is falsey`, () => {
     const component = mountWithIntl(
       <EmptyStateComponent basePath="" data={undefined} loading={false}>
@@ -28,6 +33,7 @@ describe('EmptyState component', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
   it(`renders error message when an error occurs`, () => {
     const errors: GraphQLError[] = [
       {
@@ -49,6 +55,7 @@ describe('EmptyState component', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
   it('renders loading state if no errors or doc count', () => {
     const component = mountWithIntl(
       <EmptyStateComponent basePath="" loading={true}>
@@ -57,10 +64,28 @@ describe('EmptyState component', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
   it('renders empty state with appropriate base path', () => {
     const component = mountWithIntl(
-      <EmptyStateComponent basePath="foo" data={{ getDocCount: { count: 0 } }} loading={false}>
+      <EmptyStateComponent
+        basePath="foo"
+        data={{ getStatesIndexStatus: { docCount: { count: 0 }, indexExists: true } }}
+        loading={false}
+      >
         <div>If this is in the snapshot the test should fail</div>
+      </EmptyStateComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('notifies when index does not exist', () => {
+    const component = mountWithIntl(
+      <EmptyStateComponent
+        basePath="foo"
+        data={{ getStatesIndexStatus: { indexExists: false } }}
+        loading={false}
+      >
+        <div>This text should not render</div>
       </EmptyStateComponent>
     );
     expect(component).toMatchSnapshot();
