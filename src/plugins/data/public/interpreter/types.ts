@@ -20,7 +20,9 @@
 import { Registry } from '@kbn/interpreter/common';
 
 export interface InterpreterSetup {
-  functionsRegistry: Registry<any, any>;
-  renderersRegistry: Registry<any, any>;
-  typesRegistry: Registry<any, any>;
+  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+    functionsRegistry: Registry<any, any>;
+    renderersRegistry: Registry<any, any>;
+    typesRegistry: Registry<any, any>;
+  };
 }

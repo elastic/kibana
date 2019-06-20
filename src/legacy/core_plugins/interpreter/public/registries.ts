@@ -19,9 +19,14 @@
 
 import { npSetup } from 'ui/new_platform';
 
-export const functionsRegistry = npSetup.plugins.data.interpreter.functionsRegistry;
-export const renderersRegistry = npSetup.plugins.data.interpreter.renderersRegistry;
-export const typesRegistry = npSetup.plugins.data.interpreter.typesRegistry;
+export const functionsRegistry =
+  npSetup.plugins.data.interpreter.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+    .functionsRegistry;
+export const renderersRegistry =
+  npSetup.plugins.data.interpreter.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+    .renderersRegistry;
+export const typesRegistry =
+  npSetup.plugins.data.interpreter.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.typesRegistry;
 export const registries = {
   browserFunctions: functionsRegistry,
   renderers: renderersRegistry,

@@ -27,9 +27,11 @@ export const setup = (): InterpreterSetup => {
   const typesRegistry = new TypesRegistry();
 
   const api: InterpreterSetup = {
-    functionsRegistry,
-    renderersRegistry,
-    typesRegistry,
+    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      functionsRegistry,
+      renderersRegistry,
+      typesRegistry,
+    },
   };
 
   return api;
