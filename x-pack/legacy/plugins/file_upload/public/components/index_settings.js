@@ -6,19 +6,11 @@
 
 import React, { Fragment, Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiSpacer,
-  EuiSelect,
-  EuiCallOut
-} from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiSelect, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getExistingIndices, getExistingIndexPatterns }
-  from '../util/indexing_service';
+import { getExistingIndices, getExistingIndexPatterns } from '../util/indexing_service';
 
 export class IndexSettings extends Component {
-
   state = {
     indexNameError: '',
     indexDisabled: true,
@@ -47,9 +39,7 @@ export class IndexSettings extends Component {
       return this.state.indexNames;
     }
     const indices = await getExistingIndices();
-    const indexNames = indices
-      ? indices.map(({ name }) => name)
-      : [];
+    const indexNames = indices ? indices.map(({ name }) => name) : [];
     this.setState({ indexNames });
     return indexNames;
   }
@@ -59,9 +49,7 @@ export class IndexSettings extends Component {
       return this.state.indexPatterns;
     }
     const patterns = await getExistingIndexPatterns();
-    const indexPatterns = patterns
-      ? patterns.map(({ name }) => name)
-      : [];
+    const indexPatterns = patterns ? patterns.map(({ name }) => name) : [];
     this.setState({ indexPatterns });
     return indexPatterns;
   }
@@ -70,15 +58,15 @@ export class IndexSettings extends Component {
     const errorMessage = await this._isIndexNameAndPatternValid(name);
     return this.setState({
       indexName: name,
-      indexNameError: errorMessage
+      indexNameError: errorMessage,
     });
-  }
+  };
 
   _onIndexChange = async ({ target }) => {
     const name = target.value;
     await this._setIndexName(name);
     this.props.setIndexName(name);
-  }
+  };
 
   _isIndexNameAndPatternValid = async name => {
     const indexNames = await this._getIndexNames();
@@ -92,11 +80,11 @@ export class IndexSettings extends Component {
       );
     }
 
-    const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
+    const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
     if (
-      (name !== name.toLowerCase()) || // name should be lowercase
-      (name === '.' || name === '..')   || // name can't be . or ..
-      name.match(/^[-_+]/) !== null  || // name can't start with these chars
+      name !== name.toLowerCase() || // name should be lowercase
+      (name === '.' || name === '..') || // name can't be . or ..
+      name.match(/^[-_+]/) !== null || // name can't start with these chars
       name.match(reg) !== null // name can't contain these chars
     ) {
       return (
@@ -107,7 +95,7 @@ export class IndexSettings extends Component {
       );
     }
     return '';
-  }
+  };
 
   render() {
     const { setSelectedIndexType, indexTypes } = this.props;
@@ -115,7 +103,6 @@ export class IndexSettings extends Component {
 
     return (
       <Fragment>
-        <EuiSpacer size="m"/>
         <EuiFormRow
           label={
             <FormattedMessage
@@ -133,46 +120,6 @@ export class IndexSettings extends Component {
             onChange={({ target }) => setSelectedIndexType(target.value)}
           />
         </EuiFormRow>
-        <EuiSpacer size="m"/>
-        {indexDisabled
-          ? null
-          : (
-            <EuiCallOut
-              title={i18n.translate('xpack.fileUpload.indexSettings.indexNameGuidelines',
-                { defaultMessage: 'Index name guidelines' })}
-              iconType="pin"
-            >
-              <div>
-                <ul>
-                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.mustBeNewIndex',
-                    { defaultMessage: 'Must be a new index' })}
-                  </li>
-                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.lowercaseOnly',
-                    { defaultMessage: 'Lowercase only' })}
-                  </li>
-                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotInclude',
-                    { defaultMessage: 'Cannot include \\\\, /, *, ?, ", <, >, |, \
-                      " " (space character), , (comma), #'
-                    })}
-                  </li>
-                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotStartWith',
-                    { defaultMessage: 'Cannot start with -, _, +' })}
-                  </li>
-                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotBe',
-                    { defaultMessage: 'Cannot be . or ..' })}
-                  </li>
-                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.length',
-                    { defaultMessage:
-                      'Cannot be longer than 255 bytes (note it is bytes, \
-                      so multi-byte characters will count towards the 255 \
-                      limit faster)'
-                    })}
-                  </li>
-                </ul>
-              </div>
-            </EuiCallOut>
-          )}
-        <EuiSpacer size="s"/>
         <EuiFormRow
           label={
             <FormattedMessage
@@ -185,20 +132,64 @@ export class IndexSettings extends Component {
         >
           <EuiFieldText
             disabled={indexDisabled}
-            placeholder={i18n.translate('xpack.fileUpload.enterIndexName',
-              { defaultMessage: 'Enter Index Name' })}
+            placeholder={i18n.translate('xpack.fileUpload.enterIndexName', {
+              defaultMessage: 'Enter Index Name',
+            })}
             value={indexName}
             onChange={this._onIndexChange}
             isInvalid={indexNameError !== ''}
-            aria-label={i18n.translate('xpack.fileUpload.indexNameReqField',
-              { defaultMessage: 'Index name, required field' })}
+            aria-label={i18n.translate('xpack.fileUpload.indexNameReqField', {
+              defaultMessage: 'Index name, required field',
+            })}
           />
         </EuiFormRow>
-
-        <EuiSpacer size="s"/>
-
+        {indexDisabled ? null : (
+          <EuiCallOut
+            title={i18n.translate('xpack.fileUpload.indexSettings.indexNameGuidelines', {
+              defaultMessage: 'Index name guidelines',
+            })}
+            size="s"
+          >
+            <ul style={{ 'margin-bottom': 0 }}>
+              <li>
+                {i18n.translate('xpack.fileUpload.indexSettings.guidelines.mustBeNewIndex', {
+                  defaultMessage: 'Must be a new index',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.fileUpload.indexSettings.guidelines.lowercaseOnly', {
+                  defaultMessage: 'Lowercase only',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotInclude', {
+                  defaultMessage:
+                    'Cannot include \\\\, /, *, ?, ", <, >, |, \
+                    " " (space character), , (comma), #',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotStartWith', {
+                  defaultMessage: 'Cannot start with -, _, +',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotBe', {
+                  defaultMessage: 'Cannot be . or ..',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.fileUpload.indexSettings.guidelines.length', {
+                  defaultMessage:
+                    'Cannot be longer than 255 bytes (note it is bytes, \
+                    so multi-byte characters will count towards the 255 \
+                    limit faster)',
+                })}
+              </li>
+            </ul>
+          </EuiCallOut>
+        )}
       </Fragment>
     );
   }
 }
-
