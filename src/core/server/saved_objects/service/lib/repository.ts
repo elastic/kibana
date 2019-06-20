@@ -421,6 +421,10 @@ export class SavedObjectsRepository {
       throw new TypeError('options.fields must be an array');
     }
 
+    if (typeof namespace === 'symbol') {
+      throw new TypeError('options.namespace must not be a Symbol');
+    }
+
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
       size: perPage,
