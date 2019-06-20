@@ -18,10 +18,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EditorExample } from './help_example';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,18 +29,19 @@ import {
   EuiSpacer,
   EuiPanel,
 } from '@elastic/eui';
-import { helpShowPanel } from './help_show_panel';
+import { EditorExample } from './help_example';
 
-export function OpenHelpPanel(props) {
+interface Props {
+  onClose: () => void;
+}
+
+export function OpenHelpPanel(props: Props) {
   return (
     <EuiFlyout ownFocus onClose={props.onClose} data-test-subj="loadSearchForm">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            <FormattedMessage
-              id="console.helpPage.pageTitle"
-              defaultMessage="Help"
-            />
+            <FormattedMessage id="console.helpPage.pageTitle" defaultMessage="Help" />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -65,7 +63,7 @@ export function OpenHelpPanel(props) {
                 />
               </span>
               <EuiSpacer />
-              <EditorExample/>
+              <EditorExample />
               <h3>
                 <FormattedMessage
                   id="console.helpPage.keyboardCommandsTitle"
@@ -148,12 +146,7 @@ export function OpenHelpPanel(props) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-
       </EuiFlyoutBody>
     </EuiFlyout>
   );
 }
-
-helpShowPanel.propTypes = {
-  onClose: PropTypes.func.isRequired,
-};

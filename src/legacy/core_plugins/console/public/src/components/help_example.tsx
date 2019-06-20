@@ -18,10 +18,11 @@
  */
 
 import React, { useEffect } from 'react';
+// @ts-ignore
 import exampleText from 'raw-loader!./helpExample.txt';
-const SenseEditor = require('../sense_editor/editor');
 import $ from 'jquery';
-
+// @ts-ignore
+import SenseEditor from '../sense_editor/editor';
 export function EditorExample() {
   useEffect(() => {
     const el = $('#help-example');
@@ -35,5 +36,5 @@ export function EditorExample() {
     };
   }, []);
 
-  return (<div id="help-example" className="conHelp__example"/>);
+  return <div id="help-example" className="conHelp__example" />;
 }
