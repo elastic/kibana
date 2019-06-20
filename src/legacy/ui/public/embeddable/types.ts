@@ -17,27 +17,10 @@
  * under the License.
  */
 
-import { Filter, Filters, FilterMeta } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { RefreshInterval } from 'ui/timefilter/timefilter';
-// Should go away soon once everyone imports from kbn/es-query
-export { Filter, Filters, FilterMeta };
-
-export interface TimeRange {
-  to: string;
-  from: string;
-}
-
-export enum QueryLanguageType {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
-
-// It's a string sometimes in old version formats, before Kuery came along and there
-// was the language specifier.
-export interface Query {
-  language: QueryLanguageType;
-  query: string;
-}
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
 
 export interface EmbeddableCustomization {
   [key: string]: object | string;

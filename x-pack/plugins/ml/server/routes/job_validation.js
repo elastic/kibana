@@ -14,7 +14,7 @@ import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';
 
-export function jobValidationRoutes(server, commonRouteConfig) {
+export function jobValidationRoutes({ commonRouteConfig, config, elasticsearchPlugin, route, xpackMainPlugin }) {
 
   function calculateModelMemoryLimit(callWithRequest, payload) {
 
@@ -38,13 +38,13 @@ export function jobValidationRoutes(server, commonRouteConfig) {
       latestMs);
   }
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/validate/estimate_bucket_span',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       try {
-        return estimateBucketSpanFactory(callWithRequest, server)(request.payload)
+        return estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, xpackMainPlugin)(request.payload)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
           // this doesn't return a HTTP error but an object with an error message
@@ -65,11 +65,11 @@ export function jobValidationRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/validate/calculate_model_memory_limit',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return calculateModelMemoryLimit(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
     },
@@ -78,11 +78,11 @@ export function jobValidationRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/validate/cardinality',
     handler(request, reply) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return validateCardinality(callWithRequest, request.payload)
         .then(reply)
         .catch(resp => wrapError(resp));
@@ -92,14 +92,14 @@ export function jobValidationRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/validate/job',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       // pkg.branch corresponds to the version used in documentation links.
-      const version = server.config().get('pkg.branch');
-      return validateJob(callWithRequest, request.payload, version, server)
+      const version = config.get('pkg.branch');
+      return validateJob(callWithRequest, request.payload, version, elasticsearchPlugin, xpackMainPlugin)
         .catch(resp => wrapError(resp));
     },
     config: {

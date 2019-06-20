@@ -42,7 +42,7 @@ import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
@@ -200,7 +200,6 @@ function discoverController(
   const visualizeLoader = Private(VisualizeLoaderProvider);
   let visualizeHandler;
   const Vis = Private(VisProvider);
-  const docTitle = Private(DocTitleProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
