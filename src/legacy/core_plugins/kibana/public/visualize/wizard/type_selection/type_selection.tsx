@@ -48,8 +48,6 @@ interface VisTypeListEntry extends VisType {
 
 interface VisTypeAliasListEntry extends VisTypeAlias {
   highlighted: boolean;
-  stage?: string; // never used, just make typescript happy
-  image?: any; // never used, just make typescript happy
 }
 
 interface TypeSelectionProps {
@@ -209,8 +207,8 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
     let stage = {};
     let highlightMsg;
-    const isVisTypeAlias = !!visType.url;
-    if (visType.stage === 'experimental') {
+    const isVisTypeAlias = 'url' in visType;
+    if (!isVisTypeAlias && visType.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -272,7 +270,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         role="menuitem"
         {...stage}
       >
-        <VisTypeIcon icon={visType.icon} image={visType.image} />
+        <VisTypeIcon icon={visType.icon} image={!isVisTypeAlias ? visType.image : undefined} />
       </EuiKeyPadMenuItemButton>
     );
   };
