@@ -42,6 +42,15 @@ function setWrapMode(mode) {
   return true;
 }
 
+function setTripleQuotes(tripleQuotes) {
+  storage.set('triple_quotes', tripleQuotes);
+  return true;
+}
+
+export function getTripleQuotes() {
+  return storage.get('triple_quotes', true);
+}
+
 export function getAutocomplete() {
   return storage.get('autocomplete_settings', { fields: true, indices: true, templates: true });
 }
@@ -76,14 +85,16 @@ export function getCurrentSettings() {
   return {
     autocomplete: getAutocomplete(),
     wrapMode: getWrapMode(),
+    tripleQuotes: getTripleQuotes(),
     fontSize: parseFloat(getFontSize()),
     polling: Boolean(getPolling()),
   };
 }
 
-export function updateSettings({ fontSize, wrapMode, autocomplete, polling }) {
+export function updateSettings({ fontSize, wrapMode, tripleQuotes, autocomplete, polling }) {
   setFontSize(fontSize);
   setWrapMode(wrapMode);
+  setTripleQuotes(tripleQuotes);
   setAutocomplete(autocomplete);
   setPolling(polling);
   getInput().focus();
