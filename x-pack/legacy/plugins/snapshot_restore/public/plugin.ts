@@ -8,7 +8,6 @@ import { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
-import { AppCore, AppPlugins } from './app/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';
 
@@ -22,7 +21,14 @@ const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const { routing, http, chrome, notification, documentation } = core;
+    const {
+      i18n: { Context: I18nContext },
+      routing,
+      http,
+      chrome,
+      notification,
+      documentation,
+    } = core;
     const { management, uiMetric } = plugins;
 
     // Register management section
@@ -86,8 +92,13 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { notification } as AppCore,
-              { management: { sections: management.sections } } as AppPlugins
+              {
+                i18n: { Context: I18nContext },
+                notification,
+              },
+              {
+                management: { sections: management.sections },
+              }
             );
           }
         });

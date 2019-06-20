@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
@@ -15,6 +16,7 @@ import { HashRouter } from 'react-router-dom';
 import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface AppCore {
+  i18n: typeof npStart.core.i18n;
   notification: {
     fatalError: typeof fatalError;
     toastNotifications: typeof toastNotifications;
@@ -63,8 +65,13 @@ export function createShim(): { core: Core; plugins: Plugins } {
 
   let reactRouter: HashRouter | undefined;
 
+  const {
+    core: { i18n },
+  } = npStart;
+
   return {
     core: {
+      i18n,
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
           routes.when(path, config);

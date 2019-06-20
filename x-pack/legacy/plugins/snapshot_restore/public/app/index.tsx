@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { I18nContext } from 'ui/i18n';
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
@@ -35,6 +34,10 @@ export const useAppDependencies = () => {
 const getAppProviders = (deps: AppDependencies) => {
   // Create App dependencies context and get its provider
   const AppDependenciesProvider = setAppDependencies(deps);
+
+  const {
+    i18n: { Context: I18nContext },
+  } = deps.core;
 
   return ({ children }: { children: ReactNode }) => (
     <I18nContext>
