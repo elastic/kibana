@@ -29,6 +29,7 @@ import {
   ValidationError,
 } from './types';
 import { getAt, mapFormFields, unflattenObject } from './utils';
+import { toInt } from '../field_formatters';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
@@ -36,7 +37,10 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const {
     defaultValue = '',
     label = '',
+    helpText = '',
+    type = 'text',
     validations = [],
+    formatters = [],
     fieldsToValidateOnChange = [path],
     isValidationAsync = false,
   } = config;
@@ -50,6 +54,11 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const [isUpdating, setIsUpdating] = useState(false);
   const validateCounter = useRef(0);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Add default formatter for numeric field, if none provided
+  if (type === 'number' && !formatters.length) {
+    formatters.push(toInt);
+  }
 
   const validate: Field['validate'] = async (formData: any) => {
     setValidating(true);
@@ -164,6 +173,13 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     return isFieldValid;
   };
 
+  const runFormatters = (input: unknown): unknown => {
+    if (typeof input === 'string' && input.trim() === '') {
+      return input;
+    }
+    return formatters.reduce((output, formatter) => formatter(output), input);
+  };
+
   const onChange: Field['onChange'] = e => {
     if (isPristine) {
       setPristine(false);
@@ -181,7 +197,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     if ({}.hasOwnProperty.call(e.target, 'checked')) {
       setValue(e.target.checked);
     } else {
-      setValue(e.target.value);
+      setValue(runFormatters(e.target.value));
     }
   };
 
@@ -199,8 +215,11 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const field: Field = {
     path,
     label,
+    helpText,
     value,
     errors,
+    type,
+    form,
     isPristine,
     isValidating,
     isUpdating,
@@ -219,7 +238,7 @@ export const useForm = <T = FormData>({
   onSubmit,
   schema,
   defaultValues = {},
-  options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT },
+  options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT, stripEmptyFields: true },
 }: FormConfig<T>): { form: Form<T> } => {
   const [isSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -228,9 +247,26 @@ export const useForm = <T = FormData>({
 
   const fieldsToArray = () => Object.values(fieldsRefs.current);
 
+  const stripEmptyFields = (fields: FieldsMap): FieldsMap => {
+    if (options.stripEmptyFields) {
+      return Object.entries(fields).reduce(
+        (acc, [key, field]) => {
+          if (field.value !== '') {
+            acc[key] = field;
+          }
+          return acc;
+        },
+        {} as FieldsMap
+      );
+    }
+    return fields;
+  };
+
   const getFormData: Form['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
-      ? (unflattenObject(mapFormFields(fieldsRefs.current, field => field.value)) as T)
+      ? (unflattenObject(
+          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.value)
+        ) as T)
       : Object.entries(fieldsRefs.current).reduce(
           (acc, [key, field]) => ({ ...acc, [key]: field.value }),
           {}
@@ -238,7 +274,7 @@ export const useForm = <T = FormData>({
 
   const validateFields: Form['validateFields'] = async fieldNames => {
     const fieldsToValidate = fieldNames
-      ? fieldNames.map(name => fieldsRefs.current[name])
+      ? fieldNames.map(name => fieldsRefs.current[name]).filter(field => field !== undefined)
       : fieldsToArray();
 
     const formData = getFormData({ unflatten: false });
@@ -266,6 +302,13 @@ export const useForm = <T = FormData>({
     });
   };
 
+  /**
+   * Helper to remove all fields whose path starts with
+   * the pattern provided.
+   * Usefull for removing all the elements of an Array
+   * for example (e.g pattern = "colors." => "colors.0, colors.1" would be removed.)
+   * @param pattern The path pattern to match
+   */
   const removeFieldsStartingWith: Form['removeFieldsStartingWith'] = pattern => {
     Object.keys(fieldsRefs.current).forEach(key => {
       if (key.startsWith(pattern)) {

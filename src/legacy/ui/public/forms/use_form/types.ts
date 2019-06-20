@@ -53,16 +53,23 @@ export interface FormConfig<T = FormData> {
 
 export interface FormOptions {
   errorDisplayDelay: number;
+  /**
+   * Remove empty string field ("") from form data
+   */
+  stripEmptyFields: boolean;
 }
 
 export interface Field {
   readonly path: string;
   readonly label?: string;
+  readonly helpText?: string;
+  readonly type: string;
   readonly value: unknown;
   readonly errors: ValidationError[];
   readonly isPristine: boolean;
   readonly isValidating: boolean;
   readonly isUpdating: boolean;
+  readonly form: Form;
   onChange: (e: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
   validate: (formData: any) => Promise<boolean>;
   setErrors: (errors: ValidationError[]) => void;
@@ -70,13 +77,15 @@ export interface Field {
 }
 
 export interface FieldConfig<T = FormData> {
-  path?: string;
-  label?: string;
-  defaultValue?: unknown;
-  validations?: Array<ValidationConfig<T>>;
-  formatters?: FormatterFunc[];
-  fieldsToValidateOnChange?: string[];
-  isValidationAsync?: boolean;
+  readonly path?: string;
+  readonly label?: string;
+  readonly helpText?: string;
+  readonly type?: HTMLInputElement['type'];
+  readonly defaultValue?: unknown;
+  readonly validations?: Array<ValidationConfig<T>>;
+  readonly formatters?: FormatterFunc[];
+  readonly fieldsToValidateOnChange?: string[];
+  readonly isValidationAsync?: boolean;
 }
 
 export interface FieldsMap {
@@ -103,7 +112,7 @@ export type ValidationFunc<T = any> = (
 
 type FormData = Record<string, string>;
 
-type FormatterFunc = <T = string>(value: string) => T;
+type FormatterFunc = (value: any) => unknown;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...

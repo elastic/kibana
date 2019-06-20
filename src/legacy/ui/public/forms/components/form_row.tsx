@@ -19,20 +19,35 @@
 
 import React from 'react';
 
-import { EuiDescribedFormGroup } from '@elastic/eui';
-// import { Field } from './field';
+import { EuiDescribedFormGroup, EuiTitle } from '@elastic/eui';
+import { Field as FieldType } from 'ui/forms/use_form';
+import { Field } from './field';
 
 interface Props {
-  title?: string;
+  title: string;
   description?: string;
-  [key: string]: any;
+  field?: FieldType;
+  children?: React.ReactNode;
 }
 
-export const FormRow = ({ title, description, ...rest }: Props) => {
+export const FormRow = ({ title, description, field, children }: Props) => {
+  // If a string is provided, create a default Euititle of size "m"
+  const _title =
+    typeof title === 'string' ? (
+      <EuiTitle size="s">
+        <h4>{title}</h4>
+      </EuiTitle>
+    ) : (
+      title
+    );
+
+  if (!children && !field) {
+    throw new Error('You need to provide either children or a field to the FormRow');
+  }
+
   return (
-    <EuiDescribedFormGroup title={title} description={description} fullWidth {...rest}>
-      {/* <Field /> */}
-      <h2>Check 2xxxx..</h2>
+    <EuiDescribedFormGroup title={_title} description={description} fullWidth>
+      {children ? children : <Field field={field!} />}
     </EuiDescribedFormGroup>
   );
 };

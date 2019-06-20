@@ -18,20 +18,78 @@
  */
 
 import React from 'react';
-// import { EuiFormRow } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiFieldNumber,
+  EuiComboBox,
+  EuiComboBoxOptionProps,
+} from '@elastic/eui';
+import { Field as FieldType } from 'ui/forms/use_form';
 
 interface Props {
-  label?: string;
-  helpText?: string;
-  error?: string;
-  isInvalid?: boolean;
+  field: FieldType;
 }
 
-export const Field = ({ label = '', helpText = '', error = '', isInvalid = false }: Props) => {
-  return <h4>here...</h4>;
-  // return (
-  //   <EuiFormRow label={label} helpText={helpText} error={error} isInvalid={isInvalid} fullWidth>
-  //     <p>Field component...</p>
-  //   </EuiFormRow>
-  // );
+export const Field = ({ field }: Props) => {
+  const isInvalid = !field.isUpdating && field.form.isSubmitted && field.errors.length > 0;
+
+  const onAddValueToCombo = (value: string) => {
+    const newValue = [...(field.value as string[]), value];
+    field.setValue(newValue);
+  };
+
+  const onComboUpdate = (options: EuiComboBoxOptionProps[]) => {
+    field.setValue(options.map(option => option.label));
+  };
+
+  const renderField = () => {
+    switch (field.type) {
+      case 'number':
+        return (
+          <EuiFieldNumber
+            isInvalid={isInvalid}
+            value={field.value as string}
+            onChange={field.onChange}
+            // disabled={disabled === true}
+            isLoading={field.isValidating}
+            fullWidth
+          />
+        );
+      case 'comboBox':
+        return (
+          <EuiComboBox
+            noSuggestions
+            placeholder="Type and then hit ENTER"
+            selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
+            onCreateOption={onAddValueToCombo}
+            onChange={onComboUpdate}
+            // onSearchChange={this.onLeaderIndexPatternInputChange}
+            fullWidth
+          />
+        );
+      default:
+        return (
+          <EuiFieldText
+            isInvalid={isInvalid}
+            value={field.value as string}
+            onChange={field.onChange}
+            isLoading={field.isValidating}
+            fullWidth
+          />
+        );
+    }
+  };
+
+  return (
+    <EuiFormRow
+      label={field.label}
+      helpText={field.helpText}
+      error={!field.isUpdating && field.errors.length && field.errors[0].message}
+      isInvalid={isInvalid}
+      fullWidth
+    >
+      {renderField()}
+    </EuiFormRow>
+  );
 };

@@ -24,19 +24,17 @@ import { useField } from '../use_form/use_form';
 
 interface Props {
   path: string;
-  config?: FieldConfig;
-  type?: HTMLInputElement['type'];
+  config?: FieldConfig<any>;
   defaultValue?: unknown;
   form: Form<any>;
-  render?: (({ field }: { field: FieldType }) => JSX.Element) | 'input';
-  renderProps?: { [key: string]: any };
+  render?: (({ field }: { field: FieldType } & any) => JSX.Element) | 'input';
+  renderProps?: any;
   children?: (field: FieldType) => JSX.Element;
 }
 
 export const UseField = ({
   path,
   config,
-  type = 'text',
   form,
   defaultValue,
   render = 'input',
@@ -50,7 +48,7 @@ export const UseField = ({
   const _defaultValue =
     typeof defaultValue !== 'undefined' ? defaultValue : form.getDefaultValueField(path);
 
-  // Shallow copy of the config object
+  // Don't modify the config object
   const configCopy =
     typeof _defaultValue !== 'undefined'
       ? { ...config, defaultValue: _defaultValue }
@@ -74,9 +72,14 @@ export const UseField = ({
 
   if (render === 'input') {
     return (
-      <input type={type} onChange={field.onChange} value={field.value as string} {...renderProps} />
+      <input
+        type={field.type}
+        onChange={field.onChange}
+        value={field.value as string}
+        {...renderProps}
+      />
     );
   }
 
-  return render({ field });
+  return render({ field, ...renderProps });
 };
