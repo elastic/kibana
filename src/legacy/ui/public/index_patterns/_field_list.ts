@@ -22,10 +22,6 @@ import { IndexPattern } from 'ui/index_patterns/_index_pattern';
 import { Field, FieldSpec } from './_field';
 
 export class FieldList extends IndexedArray<Field> {
-  // makes typescript work, but breaks kibana
-  //public byType: Record<string, Field[]> = {};
-  //public byName: Record<string, Field> = {};
-
   constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable: boolean = false) {
     super({
       index: ['name'],
