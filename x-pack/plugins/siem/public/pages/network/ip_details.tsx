@@ -36,6 +36,8 @@ import { networkModel, networkSelectors, State } from '../../store';
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
+import { AnomalyTableProvider } from '../../lib/ml/components/anomaly_table_provider';
+import { networkToInfluencers } from '../../lib/ml/network_to_influencers';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
@@ -87,15 +89,25 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         ip={decodeIpv6(ip)}
                       >
                         {({ ipOverviewData, loading }) => (
-                          <IpOverview
-                            ip={decodeIpv6(ip)}
-                            data={ipOverviewData}
-                            loading={loading}
-                            type={networkModel.NetworkType.details}
-                            flowTarget={flowTarget}
+                          <AnomalyTableProvider
+                            influencers={networkToInfluencers(ip)}
                             startDate={from}
                             endDate={to}
-                          />
+                          >
+                            {({ isLoadingAnomaliesData, anomaliesData }) => (
+                              <IpOverview
+                                ip={decodeIpv6(ip)}
+                                data={ipOverviewData}
+                                anomaliesData={anomaliesData}
+                                loading={loading}
+                                isLoadingAnomaliesData={isLoadingAnomaliesData}
+                                type={networkModel.NetworkType.details}
+                                flowTarget={flowTarget}
+                                startDate={from}
+                                endDate={to}
+                              />
+                            )}
+                          </AnomalyTableProvider>
                         )}
                       </IpOverviewQuery>
 

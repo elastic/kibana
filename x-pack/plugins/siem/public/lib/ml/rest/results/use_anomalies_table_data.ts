@@ -4,70 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
-import { HostItem } from '../../../../../public/graphql/types';
+import { useState, useEffect, useContext } from 'react';
+import moment from 'moment-timezone';
 import { anomaliesTableData } from './anomalies_table_data';
-import { getTopSeverityJobs } from './get_top_severity';
-
-const stable: string[] = [];
-
-// TODO: Pass in parameters to call the anomalies table data such as the host name, date start, date end, etc...
-// TODO: Call the dependent hook of hasPrivileges to get that data or pass it directly into here or ignore this
-// if the user does not have privileges
+import { InfluencerInput, Anomalies } from '../../types/anomalies';
+import { KibanaConfigContext } from '../../../adapters/framework/kibana_framework_adapter';
 
 interface Args {
-  hostItem: HostItem | null | undefined;
+  influencers: InfluencerInput[] | null;
   endDate: number;
   startDate: number;
 }
 
-export const useAnomaliesTableData = ({ hostItem, startDate, endDate }: Args) => {
-  const [tableData, setTableData] = useState(stable);
-  const [loading, setLoading] = useState(true);
+type Return = [boolean, Anomalies | null];
 
-  const fetchFunc = async (hostName: string, earliestMs: number, latestMs: number) => {
-    const data = await anomaliesTableData({
-      earliestMs,
-      latestMs,
-      influencers: [
+export const influencersToString = (influencers: InfluencerInput[] | null): string =>
+  influencers == null
+    ? ''
+    : influencers.reduce((accum, item) => `${accum}${item.fieldName}:${item.fieldValue}`, '');
+
+export const useAnomaliesTableData = ({ influencers, startDate, endDate }: Args): Return => {
+  const [tableData, setTableData] = useState<Anomalies | null>(null);
+  const [loading, setLoading] = useState(true);
+  const config = useContext(KibanaConfigContext);
+
+  const fetchFunc = async (
+    influencersInput: InfluencerInput[] | null,
+    earliestMs: number,
+    latestMs: number
+  ) => {
+    if (influencersInput != null) {
+      const data = await anomaliesTableData(
         {
-          fieldName: 'host.hostname', // TODO: Remove this to only use host.name once the jobs are fixed
-          fieldValue: hostName,
+          jobIds: [],
+          criteriaFields: [],
+          aggregationInterval: 'auto',
+          threshold: 0,
+          earliestMs,
+          latestMs,
+          influencers: influencersInput,
+          dateFormatTz: config.dateFormatTz || moment.tz.guess(),
+          maxRecords: 500,
+          maxExamples: 10,
         },
         {
-          fieldName: 'host.name',
-          fieldValue: hostName,
-        },
-      ],
-    });
-    // TODO: Move this up and out of here
-    console.log('Retrieved the anomalies Table Data of:', data);
-    const reduced = getTopSeverityJobs(data.anomalies);
-    // TODO: Change out the hostname for the regular deal
-    console.log('[FINAL setTableData call]:', reduced);
-    setTableData(reduced);
-    setLoading(false);
+          'kbn-version': config.kbnVersion,
+        }
+      );
+      setTableData(data);
+      setLoading(false);
+    } else {
+      setTableData(null);
+      setLoading(true);
+    }
   };
 
   useEffect(
     () => {
-      if (
-        hostItem != null &&
-        hostItem.host != null &&
-        hostItem.host.name != null &&
-        hostItem.host.name[0]
-      ) {
-        console.log('Here we are with data in the useEffect and I have data');
-        fetchFunc(hostItem.host.name[0], startDate, endDate);
-      } else {
-        console.log('I have no data yet');
-      }
-
-      return () => {
-        console.log('[Here is where you would unsubscribe]');
-      };
+      fetchFunc(influencers, startDate, endDate);
     },
-    [hostItem, startDate, endDate]
+    [influencersToString(influencers), startDate, endDate]
   );
 
   return [loading, tableData];

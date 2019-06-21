@@ -6,6 +6,8 @@
 
 import chrome from 'ui/chrome';
 
+// TODO: Finish this and make it work
+
 const payLoad = {
   cluster: [
     'cluster:monitor/data_frame/get',
@@ -55,6 +57,5 @@ export const hasPrivileges = async () => {
       'kbn-xsrf': chrome.getXsrfToken(),
     },
   });
-  const json = await response.json();
-  console.log('my has privleges is yo -->', json);
+  return await response.json();
 };

@@ -6,16 +6,11 @@
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React, { useEffect, useContext } from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
-import {
-  KibanaConfigContext,
-  AppKibanaFrameworkAdapter,
-} from '../../../../lib/adapters/framework/kibana_framework_adapter';
-import { useAnomaliesTableData } from '../../../../lib/ml/rest/results/use_anomalies_table_data';
-import { anomaliesTableData } from '../../../../lib/ml/rest/results/anomalies_table_data';
+import { Anomalies } from '../../../../lib/ml/types/anomalies';
+import { AnomalyScores } from '../../../../lib/ml/components/anomaly_scores';
 import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
 
@@ -25,7 +20,6 @@ import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/f
 import { LoadingPanel } from '../../../loading';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
-import { AnomalyScores } from './anomaly_scores';
 
 interface DescriptionList {
   title: string;
@@ -35,6 +29,8 @@ interface DescriptionList {
 interface HostSummaryProps {
   data: HostItem;
   loading: boolean;
+  isLoadingAnomaliesData: boolean;
+  anomaliesData: Anomalies | null;
   startDate: number;
   endDate: number;
 }
@@ -54,15 +50,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 );
 
 export const HostOverview = React.memo<HostSummaryProps>(
-  ({ data, loading, startDate, endDate }) => {
-    const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
-    const [isLoading, reducedTableData] = useAnomaliesTableData({
-      hostItem: data,
-      startDate,
-      endDate,
-    });
-    console.log('Yo, I am being rendered and my tableData is:', reducedTableData);
-    console.log('Loading is:', isLoading);
+  ({ data, loading, startDate, endDate, isLoadingAnomaliesData, anomaliesData }) => {
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
         rowItems={getOr([], fieldName, fieldData)}
@@ -104,14 +92,13 @@ export const HostOverview = React.memo<HostSummaryProps>(
             ),
         },
         {
-          title: 'Top Anomaly Severity By Job',
+          title: 'Top Anomaly Severity By Job', // TODO: I18n this
           description: (
             <AnomalyScores
-              scores={reducedTableData}
+              anomalies={anomaliesData}
               startDate={startDate}
               endDate={endDate}
-              hostItem={data}
-              isLoading={isLoading}
+              isLoading={isLoadingAnomaliesData}
             />
           ),
         },

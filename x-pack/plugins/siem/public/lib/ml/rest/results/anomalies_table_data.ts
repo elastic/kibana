@@ -5,11 +5,12 @@
  */
 
 import chrome from 'ui/chrome';
+import { InfluencerInput, Anomalies } from '../../types/anomalies';
 
-export interface PayLoad {
+export interface Body {
   jobIds: string[];
   criteriaFields: string[];
-  influencers: Array<{}>;
+  influencers: InfluencerInput[];
   aggregationInterval: string;
   threshold: number;
   earliestMs: number;
@@ -19,24 +20,10 @@ export interface PayLoad {
   maxExamples: number;
 }
 
-const payload: PayLoad = {
-  jobIds: [],
-  criteriaFields: [],
-  influencers: [],
-  aggregationInterval: 'auto',
-  threshold: 0,
-  earliestMs: 0,
-  latestMs: 1560607707000,
-  dateFormatTz: 'America/Denver',
-  maxRecords: 500,
-  maxExamples: 10,
-};
-
-type Args = Partial<PayLoad>;
-
-export const anomaliesTableData = async (customPayLoad: Args = payload) => {
-  const body = { ...payload, ...customPayLoad };
-  console.log('getting jobs with body of:', customPayLoad);
+export const anomaliesTableData = async (
+  body: Body,
+  headers: Record<string, string | undefined>
+): Promise<Anomalies> => {
   const response = await fetch('/api/ml/results/anomalies_table_data', {
     method: 'POST',
     credentials: 'same-origin',
@@ -45,9 +32,8 @@ export const anomaliesTableData = async (customPayLoad: Args = payload) => {
       'kbn-system-api': 'true',
       'Content-Type': 'application/json',
       'kbn-xsrf': chrome.getXsrfToken(),
+      ...headers,
     },
   });
-  const json = await response.json();
-  console.log('my anomalies are -->', json);
-  return json;
+  return await response.json();
 };

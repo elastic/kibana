@@ -9,7 +9,8 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { useAnomaliesTableDataByNetwork } from '../../../../lib/ml/rest/results/use_anomalies_table_data_by_network';
+import { Anomalies } from '../../../../lib/ml/types/anomalies';
+import { AnomalyScores } from '../../../../lib/ml/components/anomaly_scores';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -26,7 +27,6 @@ import {
 import * as i18n from './translations';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
-import { AnomalyScoresByNetwork } from '../../hosts/host_overview/anomaly_scores_by_network';
 
 interface DescriptionList {
   title: string;
@@ -38,6 +38,8 @@ interface OwnProps {
   flowTarget: FlowTarget;
   ip: string;
   loading: boolean;
+  isLoadingAnomaliesData: boolean;
+  anomaliesData: Anomalies | null;
   startDate: number;
   endDate: number;
   type: networkModel.NetworkType;
@@ -62,16 +64,16 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 };
 
 export const IpOverview = pure<IpOverviewProps>(
-  ({ ip, data, loading, flowTarget, startDate, endDate }) => {
-    console.log('[ip][startDate]', startDate);
-    console.log('[ip][endDate]', endDate);
-    const [isLoading, reducedTableData] = useAnomaliesTableDataByNetwork({
-      ip,
-      startDate,
-      endDate,
-    });
-    console.log('[ip][isLoading]', isLoading);
-    console.log('[ip][tableData]', reducedTableData);
+  ({
+    ip,
+    data,
+    loading,
+    flowTarget,
+    startDate,
+    endDate,
+    isLoadingAnomaliesData,
+    anomaliesData,
+  }) => {
     const typeData: Overview = data[flowTarget]!;
     const descriptionLists: Readonly<DescriptionList[][]> = [
       [
@@ -89,14 +91,13 @@ export const IpOverview = pure<IpOverviewProps>(
             : getEmptyTagValue(),
         },
         {
-          title: 'Top Anomaly Severity By Job Rendering',
+          title: 'Top Anomaly Severity By Job', // TODO: I18n this
           description: (
-            <AnomalyScoresByNetwork
-              scores={reducedTableData}
+            <AnomalyScores
+              anomalies={anomaliesData}
               startDate={startDate}
               endDate={endDate}
-              ip={ip}
-              isLoading={isLoading}
+              isLoading={isLoadingAnomaliesData}
             />
           ),
         },

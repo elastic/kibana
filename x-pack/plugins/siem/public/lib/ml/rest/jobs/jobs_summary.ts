@@ -8,8 +8,8 @@ import chrome from 'ui/chrome';
 
 const payload = { jobIds: [] };
 
+// TODO: Finish this, call it, and use it
 export const jobsSummary = async (jobIds = payload) => {
-  console.log('getting jobs');
   const response = await fetch('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     credentials: 'same-origin',
@@ -19,5 +19,5 @@ export const jobsSummary = async (jobIds = payload) => {
     },
   });
   const json = await response.json();
-  console.log('my jobs are -->', json);
+  return json;
 };

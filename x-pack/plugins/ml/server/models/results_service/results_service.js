@@ -77,8 +77,6 @@ export function resultsServiceProvider(callWithRequest) {
         }
       });
     }
-    console.trace();
-    console.log('My criteria fields are:', criteriaFields);
     // Add in term queries for each of the specified criteria.
     criteriaFields.forEach((criteria) => {
       boolCriteria.push({

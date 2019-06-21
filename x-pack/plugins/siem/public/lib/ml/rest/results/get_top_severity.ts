@@ -5,11 +5,10 @@
  */
 
 import { toArray } from 'lodash/fp';
+import { Anomaly } from '../../types/anomalies';
 
-export const getTopSeverityJobs = anomalies => {
-  console.log('My anomalies before reduction are:', anomalies);
-  const reduced = anomalies.reduce((accum, item) => {
-    console.log('item is:', item);
+export const getTopSeverityJobs = (anomalies: Anomaly[]): Anomaly[] => {
+  const reduced = anomalies.reduce<Record<string, Anomaly>>((accum, item) => {
     const jobId = item.jobId;
     const severity = item.severity;
     if (accum[jobId] == null || (accum[jobId] != null && accum[jobId].severity < severity)) {
@@ -17,12 +16,5 @@ export const getTopSeverityJobs = anomalies => {
     }
     return accum;
   }, {});
-  console.log('My anomalies before the array is:', reduced, typeof reduced);
-  const myArray = toArray(reduced);
-  const sortedArray = myArray.sort((anomalyA, anomalyB) => {
-    console.log('XX -->', anomalyA, anomalyB);
-    return anomalyB.severity - anomalyA.severity;
-  });
-  console.log('My anomalies reduced in an array is now:', sortedArray);
-  return sortedArray;
+  return toArray(reduced).sort((anomalyA, anomalyB) => anomalyB.severity - anomalyA.severity);
 };
