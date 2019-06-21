@@ -86,14 +86,3 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
 
 // eslint-disable-next-line import/no-default-export
 export default authenticationsTests;
-
-/**
- "The activePage parameter defines the page of results you want to fetch"
- activePage: Float!
- "The cursorStart parameter defines the start of the results to be displayed"
- cursorStart: Float!
- "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
- fakePossibleCount: Float!
- "The querySize parameter is the number of items to be returned"
- querySize: Float!
- **/
