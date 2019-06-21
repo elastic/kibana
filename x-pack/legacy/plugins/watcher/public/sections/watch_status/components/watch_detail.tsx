@@ -178,7 +178,7 @@ export const WatchDetail = () => {
     : [...baseColumns, actionColumn];
 
   return (
-    <Fragment>
+    <div data-test-subj="watchDetailSection">
       {selectedErrorAction && (
         <EuiFlyout
           size="s"
@@ -224,6 +224,7 @@ export const WatchDetail = () => {
         columns={columns}
         pagination={PAGINATION}
         sorting={true}
+        data-test-subj="watchActionStatusTable"
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
@@ -231,6 +232,6 @@ export const WatchDetail = () => {
           />
         }
       />
-    </Fragment>
+    </div>
   );
 };

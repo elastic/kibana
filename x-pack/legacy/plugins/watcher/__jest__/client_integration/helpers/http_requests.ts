@@ -39,6 +39,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     );
   };
 
+  const setLoadWatchHistoryItemResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { watchHistoryItem: {} };
+    server.respondWith('GET', `${API_ROOT}/history/:id`, mockResponse(defaultResponse, response));
+  };
+
   const setDeleteWatchResponse = (response?: HttpResponse, error?: any) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
@@ -90,10 +95,38 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     );
   };
 
+  const setDeactivateWatchResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { watchStatus: {} };
+    server.respondWith(
+      'PUT',
+      `${API_ROOT}/watch/:id/deactivate`,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
+  const setActivateWatchResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { watchStatus: {} };
+    server.respondWith(
+      'PUT',
+      `${API_ROOT}/watch/:id/activate`,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
+  const setAcknowledgeWatchResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { watchStatus: {} };
+    server.respondWith(
+      'PUT',
+      `${API_ROOT}/watch/:id/action/:actionId/acknowledge`,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
   return {
     setLoadWatchesResponse,
     setLoadWatchResponse,
     setLoadWatchHistoryResponse,
+    setLoadWatchHistoryItemResponse,
     setDeleteWatchResponse,
     setSaveWatchResponse,
     setLoadExecutionResultResponse,
@@ -101,6 +134,9 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadEsFieldsResponse,
     setLoadSettingsResponse,
     setLoadWatchVisualizeResponse,
+    setDeactivateWatchResponse,
+    setActivateWatchResponse,
+    setAcknowledgeWatchResponse,
   };
 };
 

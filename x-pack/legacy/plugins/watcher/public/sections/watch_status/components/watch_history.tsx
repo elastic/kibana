@@ -124,8 +124,7 @@ export const WatchHistory = () => {
         const formattedDate = startTime.format();
         return (
           <EuiLink
-            className="indTable__link euiTableCellContent"
-            data-test-subj={`watchIdColumn-${formattedDate}`}
+            data-test-subj={`watchStartTimeColumn-${formattedDate}`}
             onClick={() => setDetailWatchId(item.id)}
           >
             {formattedDate}
@@ -253,6 +252,7 @@ export const WatchHistory = () => {
                   defaultMessage="No current status to show"
                 />
               }
+              data-test-subj="watchActionsTable"
             />
             <EuiSpacer />
             <EuiTitle size="xs">
@@ -272,7 +272,7 @@ export const WatchHistory = () => {
   }
 
   return (
-    <Fragment>
+    <div data-test-subj="watchHistorySection">
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSelect
@@ -306,6 +306,6 @@ export const WatchHistory = () => {
         }
       />
       {flyout}
-    </Fragment>
+    </div>
   );
 };
