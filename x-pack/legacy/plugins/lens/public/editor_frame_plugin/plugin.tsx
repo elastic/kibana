@@ -8,7 +8,10 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
-  import { DataSetup, ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
+import {
+  DataSetup,
+  ExpressionRenderer,
+} from '../../../../../../src/legacy/core_plugins/data/public';
 import { data } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
