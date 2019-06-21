@@ -17,19 +17,22 @@
  * under the License.
  */
 
-export {
-  TypesService,
-  visFactory,
-  DefaultEditorSize,
-  // types
-  TypesSetup,
-  Vis,
-  VisParams,
-  VisProvider,
-  VisState,
-  // VisualizationController,
-  // VisType,
-  VisTypeAlias,
-  VisTypesRegistry,
-  Status,
-} from './types_service';
+export interface VisTypeAlias {
+  aliasUrl: string;
+  name: string;
+  title: string;
+  icon: string;
+  description: string;
+}
+
+const registry: VisTypeAlias[] = [];
+
+export const visTypeAliasRegistry = {
+  get: () => [...registry],
+  add: (newVisTypeAlias: VisTypeAlias) => {
+    if (registry.find(visTypeAlias => visTypeAlias.name === newVisTypeAlias.name)) {
+      throw new Error(`${newVisTypeAlias.name} already registered`);
+    }
+    registry.push(newVisTypeAlias);
+  },
+};
