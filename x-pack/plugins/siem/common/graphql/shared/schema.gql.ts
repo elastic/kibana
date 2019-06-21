@@ -33,14 +33,12 @@ export const sharedSchema = gql`
   input PaginationInputPaginated {
     "The activePage parameter defines the page of results you want to fetch"
     activePage: Float!
-    "The querySize parameter is the number of items to be returned"
-    querySize: Float!
     "The cursorStart parameter defines the start of the results to be displayed"
     cursorStart: Float!
-    "The nextCursor parameter is next cursorStart"
-    nextCursor: Float!
     "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
     fakePossibleCount: Float!
+    "The querySize parameter is the number of items to be returned"
+    querySize: Float!
   }
 
   enum Direction {

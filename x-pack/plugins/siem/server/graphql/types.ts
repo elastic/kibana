@@ -1526,8 +1526,6 @@ export interface PaginationInputPaginated {
   querySize: number;
   /** The cursorStart parameter defines the start of the results to be displayed */
   cursorStart: number;
-  /** The nextCursor parameter is next cursorStart */
-  nextCursor: number;
   /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
   fakePossibleCount: number;
 }

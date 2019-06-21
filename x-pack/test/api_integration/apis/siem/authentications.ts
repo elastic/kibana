@@ -39,7 +39,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
             },
             pagination: {
               limit: 1,
-              cursor: null,
+              activePage: 0,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
@@ -48,7 +48,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);
-          expect(authentications.pageInfo.fakeTotalCount).to.equal(50);
+          expect(authentications.pageInfo.fakeTotalCount).to.equal(5);
         });
     });
 
@@ -64,8 +64,8 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 2,
-              cursor: '1',
+              limit: 1,
+              activePage: 2,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },

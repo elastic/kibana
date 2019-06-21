@@ -2386,16 +2386,6 @@
             "defaultValue": null
           },
           {
-            "name": "nextCursor",
-            "description": "The nextCursor parameter is next cursorStart",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
             "name": "fakePossibleCount",
             "description": "The fakePossibleCount parameter determines the total count in order to show 5 additional pages",
             "type": {
