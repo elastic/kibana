@@ -29,14 +29,13 @@ import {
   Logger,
   CoreSetup,
   KibanaRequest,
-  SslConfig,
-  HttpServerSetup,
+  HttpServiceSetup,
 } from '../../../../src/core/server';
 
 import { RouteState, RoutingNode, RoutingTable, ClusterDocClient } from './cluster_doc';
 
 export interface ProxyServiceSetup {
-  httpSetup: HttpServerSetup;
+  httpSetup: Omit<HttpServiceSetup, 'createNewServer'>;
 }
 
 export interface ProxyServiceStart {
@@ -114,10 +113,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
       },
     });
 
-    const httpSetup = await core.http.createNewServer({
-      port: config.port,
-      ssl,
-    });
+    const httpSetup = await core.http.createNewServer(config.port, ssl);
 
     const setup: ProxyServiceSetup = {
       httpSetup,
@@ -149,7 +145,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
       ca: tlsCa,
     });
 
-    const ssl = new SslConfig({
+    const ssl = {
       enabled: true,
       redirectHttpFromPort: this.port,
       certificate: tlsCert.toString(),
@@ -159,7 +155,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
       keyPassphrase: undefined,
       supportedProtocols: config.supportedProtocols,
       requestCert: true,
-    });
+    };
     return ssl;
   }
 

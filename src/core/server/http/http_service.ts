@@ -28,10 +28,11 @@ import { CoreContext } from '../core_context';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
+import { SslConfig, SslConfigType } from './ssl_config';
 
 /** @public */
 export interface HttpServiceSetup extends HttpServerSetup {
-  createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+  createNewServer: (port: number, ssl: SslConfigType) => Promise<HttpServerSetup>;
 }
 /** @public */
 export interface HttpServiceStart {
@@ -129,8 +130,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     return !this.coreContext.env.isDevClusterMaster && config.autoListen;
   }
 
-  private async createServer(cfg: Partial<HttpConfig>) {
-    const { port } = cfg;
+  private async createServer(port: number, ssl: SslConfigType) {
     const config = await this.config$.pipe(first()).toPromise();
 
     if (!port) {
@@ -141,6 +141,10 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     if (this.secondaryServers.has(port) || config.port === port) {
       throw new Error(`port ${port} is already in use`);
     }
+    const cfg: Partial<HttpConfig> = {
+      port,
+      ssl: new SslConfig(ssl),
+    };
 
     for (const [key, val] of Object.entries(cfg)) {
       httpConfig.schema.validateKey(key, val);

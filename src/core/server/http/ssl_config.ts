@@ -60,7 +60,7 @@ export const sslSchema = schema.object(
   }
 );
 
-type SslConfigType = TypeOf<typeof sslSchema>;
+export type SslConfigType = TypeOf<typeof sslSchema>;
 
 export class SslConfig {
   public enabled: boolean;

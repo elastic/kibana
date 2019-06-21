@@ -77,7 +77,6 @@ export {
   SessionStorage,
 } from './http';
 export { HttpServerSetup } from './http/http_server';
-export { SslConfig } from './http/ssl_config';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
