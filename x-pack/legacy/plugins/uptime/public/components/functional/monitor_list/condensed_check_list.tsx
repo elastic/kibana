@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiText, EuiHealth, EuiToolTip, EuiBadge } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiHealth,
+  EuiToolTip,
+  EuiBadge,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import { CondensedCheck, CondensedCheckStatus } from './types';
 import { MonitorListStatusColumn } from '../monitor_list_status_column';
+import { LocationLink } from './location_link';
 
 const getBadgeColor = (status: string, successColor: string, dangerColor: string) => {
   switch (status) {
@@ -20,6 +28,17 @@ const getBadgeColor = (status: string, successColor: string, dangerColor: string
       return 'secondary';
     default:
       return undefined;
+  }
+};
+
+const getHealthColor = (dangerColor: string, status: string, successColor: string) => {
+  switch (status) {
+    case 'up':
+      return successColor;
+    case 'down':
+      return dangerColor;
+    default:
+      return 'primary';
   }
 };
 
@@ -38,34 +57,31 @@ export const CondensedCheckList = ({
     {condensedChecks.map(({ childStatuses, location, status, timestamp }: CondensedCheck) => (
       <React.Fragment key={location || 'null'}>
         <EuiFlexItem>
-          <MonitorListStatusColumn
-            absoluteTime={moment(parseInt(timestamp, 10)).toLocaleString()}
-            relativeTime={moment(parseInt(timestamp, 10)).from()}
-            status={status}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {/* TODO: this is incomplete */}
-          <EuiText size="s">{location || 'TODO HANDLE MISSING LOCATION'}</EuiText>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <MonitorListStatusColumn
+                absoluteTime={moment(parseInt(timestamp, 10)).toLocaleString()}
+                relativeTime={moment(parseInt(timestamp, 10)).from()}
+                status={status}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <LocationLink location={location} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
             position="right"
             title="Check statuses"
-            content={childStatuses.map(({ status: checkStatus, ip }: CondensedCheckStatus) => (
-              <div key={ip || 'null'}>
-                <EuiHealth
-                  color={
-                    checkStatus === 'up'
-                      ? successColor
-                      : checkStatus === 'down'
-                      ? dangerColor
-                      : '#FF00FF'
-                  }
-                />
-                {ip || 'DNS issue'}
-              </div>
-            ))}
+            content={childStatuses.map(({ status: checkStatus, ip }: CondensedCheckStatus) =>
+              ip ? (
+                <div key={ip}>
+                  <EuiHealth color={getHealthColor(successColor, checkStatus, dangerColor)} />
+                  {ip}
+                </div>
+              ) : null
+            )}
           >
             <EuiBadge color={getBadgeColor(status, successColor, dangerColor)}>{`${
               childStatuses.length

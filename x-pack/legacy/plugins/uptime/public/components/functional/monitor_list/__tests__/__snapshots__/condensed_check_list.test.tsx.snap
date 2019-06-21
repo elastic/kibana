@@ -1,0 +1,212 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CondensedCheckList component renders checks 1`] = `
+<EuiFlexGrid
+  columns={3}
+  style={
+    Object {
+      "paddingLeft": "40px",
+    }
+  }
+>
+  <EuiFlexItem>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <MonitorListStatusColumn
+          absoluteTime="2019-06-21 15:29:26"
+          relativeTime="a few moments ago"
+          status="mixed"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <LocationLink
+          location="us-east-1"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiToolTip
+      content={
+        Array [
+          <div>
+            <EuiHealth
+              color="danger"
+            />
+            127.0.0.1
+          </div>,
+          <div>
+            <EuiHealth
+              color="primary"
+            />
+            127.0.0.2
+          </div>,
+        ]
+      }
+      delay="regular"
+      position="right"
+      title="Check statuses"
+    >
+      <EuiBadge
+        color="secondary"
+        iconSide="left"
+      >
+        2 checks
+      </EuiBadge>
+    </EuiToolTip>
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <MonitorListStatusColumn
+          absoluteTime="2019-06-21 15:29:26"
+          relativeTime="a few moments ago"
+          status="up"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <LocationLink
+          location="us-west-1"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiToolTip
+      content={
+        Array [
+          <div>
+            <EuiHealth
+              color="danger"
+            />
+            127.0.0.1
+          </div>,
+          <div>
+            <EuiHealth
+              color="danger"
+            />
+            127.0.0.2
+          </div>,
+        ]
+      }
+      delay="regular"
+      position="right"
+      title="Check statuses"
+    >
+      <EuiBadge
+        color="primary"
+        iconSide="left"
+      >
+        2 checks
+      </EuiBadge>
+    </EuiToolTip>
+  </EuiFlexItem>
+</EuiFlexGrid>
+`;
+
+exports[`CondensedCheckList component renders null in place of child status with missing ip 1`] = `
+<EuiFlexGrid
+  columns={3}
+  style={
+    Object {
+      "paddingLeft": "40px",
+    }
+  }
+>
+  <EuiFlexItem>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <MonitorListStatusColumn
+          absoluteTime="2019-06-21 15:29:26"
+          relativeTime="a few moments ago"
+          status="mixed"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <LocationLink
+          location="us-east-1"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiToolTip
+      content={
+        Array [
+          null,
+          <div>
+            <EuiHealth
+              color="primary"
+            />
+            127.0.0.2
+          </div>,
+        ]
+      }
+      delay="regular"
+      position="right"
+      title="Check statuses"
+    >
+      <EuiBadge
+        color="secondary"
+        iconSide="left"
+      >
+        2 checks
+      </EuiBadge>
+    </EuiToolTip>
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <MonitorListStatusColumn
+          absoluteTime="2019-06-21 15:29:26"
+          relativeTime="a few moments ago"
+          status="up"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <LocationLink
+          location="us-west-1"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiToolTip
+      content={
+        Array [
+          <div>
+            <EuiHealth
+              color="danger"
+            />
+            127.0.0.1
+          </div>,
+          <div>
+            <EuiHealth
+              color="danger"
+            />
+            127.0.0.2
+          </div>,
+        ]
+      }
+      delay="regular"
+      position="right"
+      title="Check statuses"
+    >
+      <EuiBadge
+        color="primary"
+        iconSide="left"
+      >
+        2 checks
+      </EuiBadge>
+    </EuiToolTip>
+  </EuiFlexItem>
+</EuiFlexGrid>
+`;
