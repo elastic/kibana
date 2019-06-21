@@ -3,24 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ServerRoute } from 'hapi';
 
 export { Request, Server, ServerRoute } from 'hapi';
-export { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ClientPluginInitializerContext {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerPluginInitializerContext {}
-
-export interface HttpServiceSetup {
-  route(route: ServerRoute | ServerRoute[]): void;
-}
-
-export interface CoreSetup {
-  http: HttpServiceSetup;
-}
 
 // the contract with the registry
 export type IntegrationList = IntegrationListItem[];

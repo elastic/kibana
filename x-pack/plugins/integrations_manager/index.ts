@@ -6,17 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
+import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 import { Feature } from '../xpack_main/server/lib/feature_registry';
-import {
-  CoreSetup,
-  LegacyPluginInitializer,
-  LegacyPluginOptions,
-  Server,
-  ServerPluginInitializerContext,
-} from './common/types';
-import { Plugin as ServerPlugin } from './server/plugin';
-import manifest from './kibana.json';
 import { PLUGIN_ID } from './common/constants';
+import { Server } from './common/types';
+import manifest from './kibana.json';
+import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ICON = 'merge';
@@ -85,7 +80,7 @@ const pluginOptions: LegacyPluginOptions = {
         route: server.route.bind(server),
       },
     };
-    const initializerContext: ServerPluginInitializerContext = {};
+    const initializerContext: PluginInitializerContext = {};
     new ServerPlugin(initializerContext).setup(coreSetup);
   },
   postInit: undefined,
