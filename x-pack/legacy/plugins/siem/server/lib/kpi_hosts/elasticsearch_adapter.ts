@@ -8,20 +8,21 @@ import { getOr } from 'lodash/fp';
 
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
-
+import { buildHostsQuery } from './query_hosts.dsl';
 import { buildAuthQuery } from './query_authentication.dsl';
-import { buildGeneralQuery } from './query_general.dsl';
+import { buildUniqueIpsQuery } from './query_unique_ips.dsl';
 import {
   KpiHostsAdapter,
   KpiHostsESMSearchBody,
   KpiHostsGeneralHit,
   KpiHostsAuthHit,
-  KpiHostsMappedData,
   KpiHostHistogram,
   KpiHostGeneralHistogramCount,
   KpiHostAuthHistogramCount,
+  KpiHostDetailsOptions,
+  KpiHostDetailsData,
 } from './types';
-import { KpiHostHistogramData } from '../../graphql/types';
+import { KpiHostHistogramData, KpiHostsData } from '../../graphql/types';
 
 const formatGeneralHistogramData = (
   data: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>
@@ -51,19 +52,20 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
   public async getKpiHosts(
     request: FrameworkRequest,
     options: RequestBasicOptions
-  ): Promise<KpiHostsMappedData> {
-    const generalQuery: KpiHostsESMSearchBody[] = buildGeneralQuery(options);
+  ): Promise<KpiHostsData> {
+    const hostsQuery: KpiHostsESMSearchBody[] = buildHostsQuery(options);
+    const uniqueIpsQuery: KpiHostsESMSearchBody[] = buildUniqueIpsQuery(options);
     const authQuery: KpiHostsESMSearchBody[] = buildAuthQuery(options);
     const response = await this.framework.callWithRequest<
       KpiHostsGeneralHit | KpiHostsAuthHit,
       TermAggregation
     >(request, 'msearch', {
-      body: [...generalQuery, ...authQuery],
+      body: [...uniqueIpsQuery, ...authQuery, ...hostsQuery],
     });
 
     const hostsHistogram = getOr(
       null,
-      'responses.0.aggregations.hosts_histogram.buckets',
+      'responses.2.aggregations.hosts_histogram.buckets',
       response
     );
     const authSuccessHistogram = getOr(
@@ -87,8 +89,65 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       response
     );
     return {
-      hosts: getOr(null, 'responses.0.aggregations.hosts.value', response),
+      hosts: getOr(null, 'responses.2.aggregations.hosts.value', response),
       hostsHistogram: formatGeneralHistogramData(hostsHistogram),
+      authSuccess: getOr(
+        null,
+        'responses.1.aggregations.authentication_success.doc_count',
+        response
+      ),
+      authSuccessHistogram: formatAuthHistogramData(authSuccessHistogram),
+      authFailure: getOr(
+        null,
+        'responses.1.aggregations.authentication_failure.doc_count',
+        response
+      ),
+      authFailureHistogram: formatAuthHistogramData(authFailureHistogram),
+      uniqueSourceIps: getOr(null, 'responses.0.aggregations.unique_source_ips.value', response),
+      uniqueSourceIpsHistogram: formatGeneralHistogramData(uniqueSourceIpsHistogram),
+      uniqueDestinationIps: getOr(
+        null,
+        'responses.0.aggregations.unique_destination_ips.value',
+        response
+      ),
+      uniqueDestinationIpsHistogram: formatGeneralHistogramData(uniqueDestinationIpsHistogram),
+    };
+  }
+
+  public async getKpiHostDetails(
+    request: FrameworkRequest,
+    options: KpiHostDetailsOptions
+  ): Promise<KpiHostDetailsData> {
+    const uniqueIpsQuery: KpiHostsESMSearchBody[] = buildUniqueIpsQuery(options);
+    const authQuery: KpiHostsESMSearchBody[] = buildAuthQuery(options);
+    const response = await this.framework.callWithRequest<
+      KpiHostsGeneralHit | KpiHostsAuthHit,
+      TermAggregation
+    >(request, 'msearch', {
+      body: [...uniqueIpsQuery, ...authQuery],
+    });
+
+    const authSuccessHistogram = getOr(
+      null,
+      'responses.1.aggregations.authentication_success_histogram.buckets',
+      response
+    );
+    const authFailureHistogram = getOr(
+      null,
+      'responses.1.aggregations.authentication_failure_histogram.buckets',
+      response
+    );
+    const uniqueSourceIpsHistogram = getOr(
+      null,
+      'responses.0.aggregations.unique_source_ips_histogram.buckets',
+      response
+    );
+    const uniqueDestinationIpsHistogram = getOr(
+      null,
+      'responses.0.aggregations.unique_destination_ips_histogram.buckets',
+      response
+    );
+    return {
       authSuccess: getOr(
         null,
         'responses.1.aggregations.authentication_success.doc_count',

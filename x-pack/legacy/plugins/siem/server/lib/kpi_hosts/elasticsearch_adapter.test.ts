@@ -17,8 +17,8 @@ import {
   mockResult,
 } from './mock';
 import * as authQueryDsl from './query_authentication.dsl';
-import * as generalQueryDsl from './query_general.dsl';
-import { KpiHostsMappedData } from './types';
+import * as generalQueryDsl from './query_unique_ips.dsl';
+import { KpiHostsData } from '../../graphql/types';
 
 describe('Hosts Kpi elasticsearch_adapter', () => {
   const mockCallWithRequest = jest.fn();
@@ -30,10 +30,10 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
     getIndexPatternsService: jest.fn(),
     getSavedObjectsService: jest.fn(),
   };
-  let mockBuildQuery: jest.SpyInstance;
+  let mockUniqueIpsQuery: jest.SpyInstance;
   let mockBuildAuthQuery: jest.SpyInstance;
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
-  let data: KpiHostsMappedData;
+  let data: KpiHostsData;
 
   describe('getKpiHosts - call stack', () => {
     beforeAll(async () => {
@@ -41,8 +41,8 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
-      mockBuildQuery = jest
-        .spyOn(generalQueryDsl, 'buildGeneralQuery')
+      mockUniqueIpsQuery = jest
+        .spyOn(generalQueryDsl, 'buildUniqueIpsQuery')
         .mockReturnValue(mockGeneralQuery);
       mockBuildAuthQuery = jest
         .spyOn(authQueryDsl, 'buildAuthQuery')
@@ -54,12 +54,12 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
 
     afterAll(() => {
       mockCallWithRequest.mockReset();
-      mockBuildQuery.mockRestore();
+      mockUniqueIpsQuery.mockRestore();
       mockBuildAuthQuery.mockRestore();
     });
 
     test('should build general query with correct option', () => {
-      expect(mockBuildQuery).toHaveBeenCalledWith(mockOptions);
+      expect(mockUniqueIpsQuery).toHaveBeenCalledWith(mockOptions);
     });
 
     test('should build auth query with correct option', () => {

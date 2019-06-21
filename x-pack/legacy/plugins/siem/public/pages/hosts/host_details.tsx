@@ -18,7 +18,11 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
+import {
+  EventsTable,
+  UncommonProcessTable,
+  KpiHostDetailsComponent,
+} from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
@@ -36,6 +40,7 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 
 const type = hostsModel.HostsType.details;
 
@@ -43,6 +48,7 @@ const HostOverviewManage = manageQuery(HostOverview);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const EventsTableManage = manageQuery(EventsTable);
+const KpiHostDetailsManage = manageQuery(KpiHostDetailsComponent);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
@@ -94,6 +100,26 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           />
                         )}
                       </HostOverviewByNameQuery>
+
+                      <EuiHorizontalRule />
+
+                      <KpiHostDetailsQuery
+                        sourceId="default"
+                        hostName={hostName}
+                        skip={isInitializing}
+                        startDate={from}
+                        endDate={to}
+                      >
+                        {({ kpiHostDetails, loading, id, refetch }) => (
+                          <KpiHostDetailsManage
+                            id={id}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            data={kpiHostDetails}
+                            loading={loading}
+                          />
+                        )}
+                      </KpiHostDetailsQuery>
 
                       <EuiHorizontalRule />
 

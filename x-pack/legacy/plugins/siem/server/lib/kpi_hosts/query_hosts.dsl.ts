@@ -8,7 +8,7 @@ import { RequestBasicOptions } from '../framework';
 
 import { KpiHostsESMSearchBody } from './types';
 
-export const buildGeneralQuery = ({
+export const buildHostsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
@@ -50,42 +50,6 @@ export const buildGeneralQuery = ({
             count: {
               cardinality: {
                 field: 'host.name',
-              },
-            },
-          },
-        },
-        unique_source_ips: {
-          cardinality: {
-            field: 'source.ip',
-          },
-        },
-        unique_source_ips_histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: '6',
-          },
-          aggs: {
-            count: {
-              cardinality: {
-                field: 'source.ip',
-              },
-            },
-          },
-        },
-        unique_destination_ips: {
-          cardinality: {
-            field: 'destination.ip',
-          },
-        },
-        unique_destination_ips_histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: '6',
-          },
-          aggs: {
-            count: {
-              cardinality: {
-                field: 'destination.ip',
               },
             },
           },
