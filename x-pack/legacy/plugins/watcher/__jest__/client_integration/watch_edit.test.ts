@@ -11,7 +11,7 @@ import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/constants';
 import defaultWatchJson from '../../public/models/watch/default_watch.json';
 import { getWatch } from '../../test/fixtures';
-import { getRandomString } from '../../../../test_utils';
+import { getRandomString } from '../../../../../test_utils';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 

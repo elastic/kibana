@@ -10,7 +10,7 @@ import { setup as watchCreateJsonSetup } from './watch_create_json.helpers';
 import { setup as watchCreateThresholdSetup } from './watch_create_threshold.helpers';
 import { setup as watchEditSetup } from './watch_edit.helpers';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../../test_utils';
 
 export { setupEnvironment } from './setup_environment';
 
