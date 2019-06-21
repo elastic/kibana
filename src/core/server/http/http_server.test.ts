@@ -62,6 +62,13 @@ test('listening after started', async () => {
   await server.start();
 
   expect(server.isListening()).toBe(true);
+  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "http server running",
+  ],
+]
+`);
 });
 
 test('200 OK with body', async () => {
@@ -580,11 +587,10 @@ test('returns server and connection options on start', async () => {
     ...config,
     port: 12345,
   };
-  const { options, server: innerServer } = await server.setup(configWithPort);
+  const { server: innerServer } = await server.setup(configWithPort);
 
   expect(innerServer).toBeDefined();
   expect(innerServer).toBe((server as any).server);
-  expect(options).toMatchSnapshot();
 });
 
 test('registers registerOnPostAuth interceptor several times', async () => {
