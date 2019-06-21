@@ -14,22 +14,26 @@ interface MonitorListDrawerProps {
   summary?: MonitorSummary;
   dangerColor: string;
   successColor: string;
+  /**
+   * The number of checks the component should fully render
+   * before squashing them to single rows with condensed details.
+   */
+  condensedCheckLimit: number;
 }
 
+/**
+ * The elements shown when the user expands the monitor list rows.
+ */
 export const MonitorListDrawer = ({
+  condensedCheckLimit,
   dangerColor,
   successColor,
   summary,
 }: MonitorListDrawerProps) => {
-  if (
-    !summary ||
-    (!summary.state || !summary.state.checks) ||
-    !Array.isArray(summary.state.checks)
-  ) {
+  if (!summary || !summary.state.checks) {
     return null;
   }
-  // TODO: extract this value to a constants file
-  if (summary.state.checks.length < 12) {
+  if (summary.state.checks.length < condensedCheckLimit) {
     return <CheckList checks={summary.state.checks} />;
   } else {
     return (
