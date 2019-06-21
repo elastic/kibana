@@ -29,20 +29,38 @@ export function takePercySnapshot() {
     handleAgentCommunication: false
   });
 
-  function canvasToImage(canvas) {
-    var image = document.createElement('img');
-    var canvasImageBase64 = canvas.toDataURL();
-
-    image.src = canvasImageBase64;
-    image.style = 'max-width: 100%';
-    canvas.setAttribute('data-percy-modified', true);
-    canvas.parentElement.appendChild(image);
-    canvas.style = 'display: none';
+  function queryAll(selector) {
+    return Array.from(document.querySelectorAll(selector));
   }
 
-  Array.from(window.document.querySelectorAll('canvas')).forEach(function (selector) {return canvasToImage(selector);});
+  function canvasToImage(canvas) {
+    var image = document.createElement('img');
+    image.src = canvas.toDataURL();
+    image.style = 'max-width: 100%';
+    image.setAttribute('data-percy-canvas-image', 'true');
 
-  return agent.domSnapshot(window.document);
+    canvas.setAttribute('data-percy-modified-style', canvas.getAttribute('style'));
+    canvas.setAttribute('style', 'display: none;');
+
+    canvas.parentElement.appendChild(image);
+  }
+
+  queryAll('canvas').forEach(function (element) {
+    canvasToImage(element);
+  });
+
+  var snapshot = agent.domSnapshot(document);
+
+  queryAll('[data-percy-canvas-image]').forEach(function (element) {
+    element.remove();
+  });
+
+  queryAll('[data-percy-modified-style]').forEach(function (element) {
+    element.setAttribute('style', element.getAttribute('data-percy-modified-style'));
+    element.removeAttribute('style');
+  });
+
+  return snapshot;
 }
 
 export var takePercySnapshotWithAgent = `
