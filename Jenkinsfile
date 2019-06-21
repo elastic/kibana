@@ -27,19 +27,29 @@ pipeline {
       }
     }
     stage('Static Analysis') {
-
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
     }
     stage('Unit Test') {
-
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
     }
     stage('Component Integration Tests') {
-
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
     }
     stage('Functional Tests') {
-
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
     }
     stage('Finish') {
-      
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
     }
   }
 }
