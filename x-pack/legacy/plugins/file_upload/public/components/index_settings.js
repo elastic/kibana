@@ -8,9 +8,11 @@ import React, { Fragment, Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiSelect, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getExistingIndices, getExistingIndexPatterns } from '../util/indexing_service';
+import { getExistingIndices, getExistingIndexPatterns }
+  from '../util/indexing_service';
 
 export class IndexSettings extends Component {
+
   state = {
     indexNameError: '',
     indexDisabled: true,
@@ -39,7 +41,9 @@ export class IndexSettings extends Component {
       return this.state.indexNames;
     }
     const indices = await getExistingIndices();
-    const indexNames = indices ? indices.map(({ name }) => name) : [];
+    const indexNames = indices
+      ? indices.map(({ name }) => name)
+      : [];
     this.setState({ indexNames });
     return indexNames;
   }
@@ -49,7 +53,9 @@ export class IndexSettings extends Component {
       return this.state.indexPatterns;
     }
     const patterns = await getExistingIndexPatterns();
-    const indexPatterns = patterns ? patterns.map(({ name }) => name) : [];
+    const indexPatterns = patterns
+      ? patterns.map(({ name }) => name)
+      : [];
     this.setState({ indexPatterns });
     return indexPatterns;
   }
@@ -58,15 +64,15 @@ export class IndexSettings extends Component {
     const errorMessage = await this._isIndexNameAndPatternValid(name);
     return this.setState({
       indexName: name,
-      indexNameError: errorMessage,
+      indexNameError: errorMessage
     });
-  };
+  }
 
   _onIndexChange = async ({ target }) => {
     const name = target.value;
     await this._setIndexName(name);
     this.props.setIndexName(name);
-  };
+  }
 
   _isIndexNameAndPatternValid = async name => {
     const indexNames = await this._getIndexNames();
@@ -80,11 +86,11 @@ export class IndexSettings extends Component {
       );
     }
 
-    const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
+    const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
     if (
-      name !== name.toLowerCase() || // name should be lowercase
-      (name === '.' || name === '..') || // name can't be . or ..
-      name.match(/^[-_+]/) !== null || // name can't start with these chars
+      (name !== name.toLowerCase()) || // name should be lowercase
+      (name === '.' || name === '..')   || // name can't be . or ..
+      name.match(/^[-_+]/) !== null  || // name can't start with these chars
       name.match(reg) !== null // name can't contain these chars
     ) {
       return (
@@ -95,7 +101,7 @@ export class IndexSettings extends Component {
       );
     }
     return '';
-  };
+  }
 
   render() {
     const { setSelectedIndexType, indexTypes } = this.props;

@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
 export class JsonImportProgress extends Component {
+
   state = {
     indexDataJson: null,
     indexPatternJson: null,
@@ -24,7 +25,7 @@ export class JsonImportProgress extends Component {
     this._formatIndexPatternResponse({ ...this.state, ...this.props });
     if (prevState.importStage !== this.props.importStage) {
       this.setState({
-        importStage: this.props.importStage,
+        importStage: this.props.importStage
       });
     }
   }
@@ -34,25 +35,29 @@ export class JsonImportProgress extends Component {
     if (indexName && !this.state.indexName) {
       this.setState({ indexName });
     }
-  };
+  }
 
   // Format json responses
   _formatIndexDataResponse = ({ indexDataResp, indexDataJson }) => {
     if (indexDataResp && !indexDataJson) {
       this.setState({ indexDataJson: JSON.stringify(indexDataResp, null, 2) });
     }
-  };
+  }
 
   _formatIndexPatternResponse = ({ indexPatternResp, indexPatternJson }) => {
     if (indexPatternResp && !indexPatternJson) {
-      this.setState({ indexPatternJson: JSON.stringify(indexPatternResp, null, 2) });
+      this.setState(
+        { indexPatternJson: JSON.stringify(indexPatternResp, null, 2) }
+      );
     }
   };
 
   render() {
     const { complete } = this.props;
     const { indexPatternJson, indexDataJson, indexName, importStage } = this.state;
-    const importMessage = complete ? importStage : `${importStage}: ${indexName}`;
+    const importMessage = complete
+      ? importStage
+      : `${importStage}: ${indexName}`;
 
     return (
       <Fragment>

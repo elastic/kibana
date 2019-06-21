@@ -9,7 +9,9 @@ import { GeojsonFileSource } from '../../../shared/layers/sources/client_file_so
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ImportEditor = ({ clearSource, isIndexingTriggered, ...props }) => {
+export const ImportEditor = ({
+  clearSource, isIndexingTriggered, ...props
+}) => {
   const editorProperties = getEditorProperties({ isIndexingTriggered, ...props });
   const editor = GeojsonFileSource.renderEditor(editorProperties);
   return (
@@ -31,13 +33,8 @@ export const ImportEditor = ({ clearSource, isIndexingTriggered, ...props }) => 
 };
 
 function getEditorProperties({
-  inspectorAdapters,
-  onRemove,
-  viewLayer,
-  isIndexingTriggered,
-  onIndexReady,
-  importSuccessHandler,
-  importErrorHandler,
+  inspectorAdapters, onRemove, viewLayer,
+  isIndexingTriggered, onIndexReady, importSuccessHandler, importErrorHandler
 }) {
   return {
     onPreviewSource: viewLayer,
