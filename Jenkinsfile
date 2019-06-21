@@ -24,7 +24,7 @@ pipeline {
         dir("${env.BASE_DIR}"){
             sh './.ci/run.sh'
         }
-        stash allowEmpty: true, name: 'source', useDefaultExcludes: true
+        stash allowEmpty: true, name: 'source', useDefaultExcludes: true, exclude: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/resources/status/*这*'
       }
     }
     stage('Static Analysis') {
