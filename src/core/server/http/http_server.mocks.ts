@@ -19,6 +19,8 @@
 import { Request, ResponseToolkit } from 'hapi';
 import { merge } from 'lodash';
 
+import { KibanaRequest } from './router';
+
 type DeepPartial<T> = T extends any[]
   ? DeepPartialArray<T[number]>
   : T extends object
@@ -52,6 +54,7 @@ function createRawResponseToolkitMock(customization: DeepPartial<ResponseToolkit
 }
 
 export const httpServerMock = {
+  createKibanaRequest: () => KibanaRequest.from(createRawRequestMock()),
   createRawRequest: createRawRequestMock,
   createRawResponseToolkit: createRawResponseToolkitMock,
 };
