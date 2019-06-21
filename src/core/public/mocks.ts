@@ -34,6 +34,7 @@ export { injectedMetadataServiceMock } from './injected_metadata/injected_metada
 export { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 export { notificationServiceMock } from './notifications/notifications_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export { overlayServiceMock } from './overlays/overlay_service.mock';
 
 function createCoreSetupMock() {
   const mock: jest.Mocked<CoreSetup> = {

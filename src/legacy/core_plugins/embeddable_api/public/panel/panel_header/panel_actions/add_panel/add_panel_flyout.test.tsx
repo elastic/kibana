@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { getModalContents } from '../../../../np_core.test.mocks';
+import '../../../../np_core.test.mocks';
 
 import React from 'react';
 import {
@@ -36,6 +35,8 @@ import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { EmbeddableFactory } from '../../../../embeddables';
+import { coreStartMock } from '../../../../np_core.test.mocks';
+import { OverlayStart } from 'src/core/public';
 
 const onClose = jest.fn();
 let container: Container;
@@ -79,7 +80,8 @@ test('create new calls factory.adds a panel to the container', async done => {
 
   await nextTick();
 
-  (getModalContents().props as ContactCardInitializerProps).onCreate({
+  const overlayMock = (coreStartMock.overlays as unknown) as jest.Mocked<OverlayStart>;
+  ((overlayMock.openModal.mock.calls[0][0] as any).props as ContactCardInitializerProps).onCreate({
     firstName: 'Dany',
     lastName: 'Targaryan',
   });
