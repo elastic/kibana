@@ -146,7 +146,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
           form.setInputValue('watchTimeFieldSelect', '');
 
-          expect(form.getErrorsMessages()).toContain('A time field is required');
+          expect(form.getErrorsMessages()).toContain('A time field is required.');
         });
 
         test('should not allow empty interval size field', () => {
@@ -154,7 +154,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
           form.setInputValue('triggerIntervalSizeInput', '');
 
-          expect(form.getErrorsMessages()).toContain('Interval size is required');
+          expect(form.getErrorsMessages()).toContain('Interval size is required.');
         });
 
         test('should not allow negative interval size field', () => {
@@ -162,7 +162,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
           form.setInputValue('triggerIntervalSizeInput', '-1');
 
-          expect(form.getErrorsMessages()).toContain('Interval size cannot be a negative number');
+          expect(form.getErrorsMessages()).toContain('Interval size cannot be a negative number.');
         });
 
         test('should disable the Create button with invalid fields', () => {

@@ -144,7 +144,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.timeFieldIsRequiredValidationText',
           {
-            defaultMessage: 'A time field is required',
+            defaultMessage: 'A time field is required.',
           }
         )
       );
@@ -154,7 +154,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.intervalSizeIsRequiredValidationMessage',
           {
-            defaultMessage: 'Interval size is required',
+            defaultMessage: 'Interval size is required.',
           }
         )
       );
@@ -164,7 +164,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.intervalSizeNegativeNumberValidationMessage',
           {
-            defaultMessage: 'Interval size cannot be a negative number',
+            defaultMessage: 'Interval size cannot be a negative number.',
           }
         )
       );
