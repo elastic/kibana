@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { authenticationsQuery } from '../../../../plugins/siem/public/containers/authentications/index.gql_query';
-import { GetAuthenticationsQuery } from '../../../../plugins/siem/public/graphql/types';
+import { authenticationsQuery } from '../../../../legacy/plugins/siem/public/containers/authentications/index.gql_query';
+import { GetAuthenticationsQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -38,8 +38,10 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 1,
               activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 5,
+              querySize: 1,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
@@ -64,8 +66,10 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 1,
               activePage: 2,
+              cursorStart: 1,
+              fakePossibleCount: 5,
+              querySize: 2,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
@@ -82,3 +86,14 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
 
 // eslint-disable-next-line import/no-default-export
 export default authenticationsTests;
+
+/**
+ "The activePage parameter defines the page of results you want to fetch"
+ activePage: Float!
+ "The cursorStart parameter defines the start of the results to be displayed"
+ cursorStart: Float!
+ "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
+ fakePossibleCount: Float!
+ "The querySize parameter is the number of items to be returned"
+ querySize: Float!
+ **/
