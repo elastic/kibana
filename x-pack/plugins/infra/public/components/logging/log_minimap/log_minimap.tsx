@@ -36,10 +36,11 @@ interface LogMinimapProps {
   // searchSummaryBuckets?: SearchSummaryBucket[];
   target: number | null;
   width: number;
+  onScroll: (offset: number) => void;
 }
 
 interface LogMinimapState {
-  prevTarget: number | null;
+  target: number | null;
   drag: DragRecord | null;
   svgPosition: ClientRect;
 }
@@ -48,7 +49,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   constructor(props: LogMinimapProps) {
     super(props);
     this.state = {
-      prevTarget: props.target,
+      target: props.target,
       drag: null,
       svgPosition: {
         width: 0,
@@ -61,11 +62,8 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     };
   }
 
-  public static getDerivedStateFromProps(
-    { target }: LogMinimapProps,
-    { prevTarget }: LogMinimapState
-  ) {
-    if (target !== prevTarget) return { drag: null };
+  public static getDerivedStateFromProps({ target }: LogMinimapProps, { drag }: LogMinimapState) {
+    if (!drag) return { target };
     return null;
   }
 
@@ -103,22 +101,25 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       this.handleClick(event);
       return;
     }
-    const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
-    const startYPosition = drag.startY - svgPosition.top;
-    const endYPosition = event.clientY - svgPosition.top;
-    const startTime = getTime(startYPosition);
-    const endTime = getTime(endYPosition);
-    const timeDifference = endTime - startTime;
-    const newTime = (this.props.target || 0) - timeDifference;
-    this.props.jumpToTarget({
-      tiebreaker: 0,
-      time: newTime,
-    });
+    // const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
+    // const startYPosition = drag.startY - svgPosition.top;
+    // const endYPosition = event.clientY - svgPosition.top;
+    // const startTime = getTime(startYPosition);
+    // const endTime = getTime(endYPosition);
+    // const timeDifference = endTime - startTime;
+    // const newTime = (this.props.target || 0) - timeDifference;
+    this.setState({ drag: null, target: this.props.target });
+    // this.props.jumpToTarget({
+    //   tiebreaker: 0,
+    //   time: newTime,
+    // });
   };
 
   private handleDragMove = (event: MouseEvent) => {
     const { drag } = this.state;
     if (!drag) return;
+    const offset = (drag.currentY || 0) - event.clientY;
+    this.props.onScroll(offset);
     this.setState({
       drag: {
         ...drag,
@@ -128,7 +129,8 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   };
 
   public getYScale = () => {
-    const { height, intervalSize, target } = this.props;
+    const { target } = this.state;
+    const { height, intervalSize } = this.props;
     const domainStart = target ? target - intervalSize / 2 : 0;
     const domainEnd = target ? target + intervalSize / 2 : 0;
     return scaleLinear()
@@ -156,7 +158,6 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     } = this.props;
     const { drag } = this.state;
     const [minTime, maxTime] = this.getYScale().domain();
-
     const minimapTransform = !drag || !drag.currentY ? null : drag.currentY - drag.startY;
 
     return (

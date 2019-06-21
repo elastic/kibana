@@ -20,40 +20,36 @@ interface DensityChartProps {
   height: number;
 }
 
-export const DensityChart: React.SFC<DensityChartProps> = ({
-  buckets,
-  start,
-  end,
-  width,
-  height,
-}) => {
-  if (start >= end || height <= 0 || width <= 0 || buckets.length <= 0) {
-    return null;
+export const DensityChart: React.SFC<DensityChartProps> = React.memo(
+  ({ buckets, start, end, width, height }) => {
+    if (start >= end || height <= 0 || width <= 0 || buckets.length <= 0) {
+      return null;
+    }
+
+    const yScale = scaleTime()
+      .domain([start, end])
+      .range([0, height]);
+
+    const xMax = max(buckets.map(bucket => bucket.entriesCount)) || 0;
+    const xScale = scaleLinear()
+      .domain([0, xMax])
+      .range([0, width / 2]);
+
+    const path = area<SummaryBucket>()
+      .x0(xScale(0))
+      .x1(bucket => xScale(bucket.entriesCount))
+      .y(bucket => yScale((bucket.start + bucket.end) / 2))
+      .curve(curveMonotoneY);
+    const pathData = path(buckets);
+
+    return (
+      <g transform={`translate(${width / 2}, 0)`}>
+        <PositiveAreaPath d={pathData || ''} />
+        <NegativeAreaPath transform="scale(-1, 1)" d={pathData || ''} />
+      </g>
+    );
   }
-
-  const yScale = scaleTime()
-    .domain([start, end])
-    .range([0, height]);
-
-  const xMax = max(buckets.map(bucket => bucket.entriesCount)) || 0;
-  const xScale = scaleLinear()
-    .domain([0, xMax])
-    .range([0, width / 2]);
-
-  const path = area<SummaryBucket>()
-    .x0(xScale(0))
-    .x1(bucket => xScale(bucket.entriesCount))
-    .y(bucket => yScale((bucket.start + bucket.end) / 2))
-    .curve(curveMonotoneY);
-  const pathData = path(buckets);
-
-  return (
-    <g transform={`translate(${width / 2}, 0)`}>
-      <PositiveAreaPath d={pathData || ''} />
-      <NegativeAreaPath transform="scale(-1, 1)" d={pathData || ''} />
-    </g>
-  );
-};
+);
 
 const PositiveAreaPath = euiStyled.path`
   fill: ${props =>
