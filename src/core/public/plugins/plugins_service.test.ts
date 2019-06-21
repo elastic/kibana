@@ -87,6 +87,7 @@ beforeEach(() => {
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract() as jest.Mocked<UiSettingsClient>,
   };
   mockStartContext = {
     ...omit(mockStartDeps, 'injectedMetadata'),
