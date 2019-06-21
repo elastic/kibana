@@ -101,7 +101,7 @@ export const getGroupings = async (
 
   const response = await search<GroupingAggregation>(params);
   if (response.hits.total.value === 0) {
-    return EMPTY_RESPONSE;
+    return { ...EMPTY_RESPONSE, series: [] };
   }
   if (!response.aggregations) {
     throw new Error('Aggregations should be present.');

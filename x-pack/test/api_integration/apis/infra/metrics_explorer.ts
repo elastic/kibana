@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { first } from 'lodash';
+import moment from 'moment';
 import { DATES } from './constants';
 import { MetricsExplorerResponse } from '../../../../legacy/plugins/infra/server/routes/metrics_explorer/types';
 import { KbnTestProvider } from './types';
@@ -181,6 +182,42 @@ const metricsExplorerTest: KbnTestProvider = ({ getService }) => {
       expect(body.pageInfo).to.eql({
         afterKey: 'system.fsstat',
         total: 12,
+      });
+    });
+
+    it('should work when there is no data returned', async () => {
+      const postBody = {
+        timerange: {
+          field: '@timestamp',
+          to: moment().valueOf(),
+          from: moment()
+            .subtract(15, 'm')
+            .valueOf(),
+          interval: '>=1m',
+        },
+        indexPattern: 'metricbeat-*',
+        groupBy: 'event.dataset',
+        limit: 3,
+        afterKey: 'system.cpu',
+        metrics: [
+          {
+            aggregation: 'count',
+            rate: false,
+          },
+        ],
+      };
+      const response = await supertest
+        .post('/api/infra/metrics_explorer')
+        .set('kbn-xsrf', 'xxx')
+        .send(postBody)
+        .expect(200);
+      const body: MetricsExplorerResponse = response.body;
+      expect(body).to.have.property('series');
+      expect(body.series).length(0);
+      expect(body).to.have.property('pageInfo');
+      expect(body.pageInfo).to.eql({
+        afterKey: null,
+        total: 0,
       });
     });
   });
