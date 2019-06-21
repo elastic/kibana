@@ -5,20 +5,14 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/public';
+import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
-    // eslint-disable-next-line no-console
-    console.log(`Security plugin set up`);
-    return {
-      foo: 'bar',
-    };
+    core.http.intercept(new UnauthorizedResponseInterceptor(core.http.basePath));
   }
 
-  public start() {
-    // eslint-disable-next-line no-console
-    console.log(`Security plugin started`);
-  }
+  public start() {}
 }
 
 export type SecurityPluginSetup = ReturnType<SecurityPlugin['setup']>;
