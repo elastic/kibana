@@ -15,9 +15,10 @@ const REACT_APP_ROOT_ID = `react-${PLUGIN_ID}-root`;
 const template = `<div id="${REACT_APP_ROOT_ID}" class="integrationsManagerReactRoot"></div>`;
 const getRootEl = () => document.getElementById(REACT_APP_ROOT_ID);
 
-main(new Plugin());
+main();
 
-async function main(plugin: Plugin): Promise<void> {
+async function main(): Promise<void> {
+  const plugin = new Plugin();
   plugin.setup(npSetup.core);
 
   // @ts-ignore
