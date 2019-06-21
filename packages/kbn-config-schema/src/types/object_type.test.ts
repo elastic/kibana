@@ -211,3 +211,37 @@ test('individual keys can validated', () => {
     `"bar is not a valid part of this schema"`
   );
 });
+
+test('allow unknown keys when allowUnknowns = true', () => {
+  const type = schema.object(
+    {
+      foo: schema.string({ defaultValue: 'test' }),
+    },
+    {},
+    true
+  );
+
+  expect(
+    type.validate({
+      bar: 'baz',
+    })
+  ).toEqual({
+    foo: 'test',
+    bar: 'baz',
+  });
+});
+
+test('does not allow unknown keys when allowUnknowns = false', () => {
+  const type = schema.object(
+    {
+      foo: schema.string({ defaultValue: 'test' }),
+    },
+    {},
+    false
+  );
+  expect(() =>
+    type.validate({
+      bar: 'baz',
+    })
+  ).toThrowErrorMatchingSnapshot();
+});

@@ -34,7 +34,11 @@ export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeO
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: Record<string, AnySchema>;
 
-  constructor(props: P, options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {}) {
+  constructor(
+    props: P,
+    options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {},
+    allowUnknowns = false
+  ) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
@@ -44,7 +48,8 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .object()
       .keys(schemaKeys)
       .optional()
-      .default();
+      .default()
+      .unknown(allowUnknowns);
 
     super(schema, options);
     this.props = schemaKeys;

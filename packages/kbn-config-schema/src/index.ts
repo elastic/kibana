@@ -96,9 +96,10 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
 
 function object<P extends Props>(
   props: P,
-  options?: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }>
+  options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {},
+  allowUnknowns: boolean = false
 ): ObjectType<P> {
-  return new ObjectType(props, options);
+  return new ObjectType(props, options, allowUnknowns);
 }
 
 function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {
