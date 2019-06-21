@@ -15,6 +15,7 @@ import { MonitorListStatusColumn } from '../monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { Criteria, Pagination, ExpandedRowMapItem } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
+import { CLIENT_DEFAULTS } from '../../../../common/constants';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -89,6 +90,7 @@ export const MonitorListComponent = (props: Props) => {
             ...map,
             [id]: (
               <MonitorListDrawer
+                condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
                 summary={
                   items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
                 }
