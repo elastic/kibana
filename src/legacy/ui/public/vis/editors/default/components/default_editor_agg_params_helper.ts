@@ -63,6 +63,7 @@ function getAggParamsToRender(
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
     let indexedFields: FieldParamType[] = [];
+    let fields;
 
     if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
       return;
@@ -72,11 +73,11 @@ function getAggParamsToRender(
       const availableFields = (param as FieldParamType).getAvailableFields(
         agg.getIndexPattern().fields
       );
-      const fields = aggTypeFieldFilters.filter(availableFields, param.type, agg, vis);
+      fields = aggTypeFieldFilters.filter(availableFields, param.type, agg, vis);
       indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
     }
 
-    if (!indexedFields.length && index > 0) {
+    if (fields && !indexedFields.length && index > 0) {
       // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).
       return;
     }

@@ -24,6 +24,7 @@ import { AggParamEditorProps, AggParamCommonProps } from './default_editor_agg_p
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
+  subAggParams: any;
   onChange(agg: AggConfig, paramName: string, value?: T): void;
 }
 

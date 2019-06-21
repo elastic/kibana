@@ -49,8 +49,9 @@ const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
 interface DefaultEditorAggParamsProps {
   agg: AggConfig;
-  aggIndex: number;
-  aggIsTooLow: boolean;
+  aggIndex?: number;
+  aggIsTooLow?: boolean;
+  className?: string;
   config: any;
   groupName: string;
   formIsTouched: boolean;
@@ -65,8 +66,9 @@ interface DefaultEditorAggParamsProps {
 
 function DefaultEditorAggParams({
   agg,
-  aggIndex,
-  aggIsTooLow,
+  aggIndex = 0,
+  aggIsTooLow = false,
+  className,
   config,
   groupName,
   formIsTouched,
@@ -150,10 +152,8 @@ function DefaultEditorAggParams({
 
   useEffect(
     () => {
-      // when all invalid controls were touched
-      if (isReactFormTouched) {
-        setTouched(true);
-      }
+      // when all invalid controls were touched or they are untouched
+      setTouched(!!isReactFormTouched);
     },
     [isReactFormTouched]
   );
@@ -171,12 +171,19 @@ function DefaultEditorAggParams({
             payload: validity,
           });
         }}
-        setTouched={() => {
+        // setTouched can be called from sub-agg which passes a parameter
+        setTouched={(isTouched: boolean = true) => {
           onChangeAggParams({
             type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
             paramName: paramInstance.aggParam.name,
-            payload: true,
+            payload: isTouched,
           });
+        }}
+        subAggParams={{
+          onAggParamsChange,
+          onAggTypeChange,
+          formIsTouched,
+          vis,
         }}
         {...paramInstance}
       />
@@ -185,6 +192,7 @@ function DefaultEditorAggParams({
 
   return (
     <EuiForm
+      className={className}
       isInvalid={!!errors.length}
       error={errors}
       data-test-subj={`visAggEditorParams${agg.id}`}

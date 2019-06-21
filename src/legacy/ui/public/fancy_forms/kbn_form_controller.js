@@ -32,7 +32,6 @@ export function decorateFormController($delegate, $injector) {
       super(...superArgs);
 
       const onSubmit = (event) => {
-        this.$submitted = true;
         this._markInvalidTouched(event);
       };
 

@@ -18,3 +18,4 @@
  */
 
 export { AggParamEditorProps } from './components/default_editor_agg_param_props';
+export { DefaultEditorAggParams } from './components/default_editor_agg_params';
