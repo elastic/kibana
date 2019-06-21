@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
 import {
   EsProvider,
   EsSupertestWithoutAuthProvider,
@@ -47,6 +48,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       chance: kibanaAPITestsConfig.get('services.chance'),
       security: SecurityServiceProvider,
       spaces: SpacesServiceProvider,
+      retry: xPackFunctionalTestsConfig.get('services.retry'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
@@ -57,6 +59,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
       ],
     },
     esTestCluster: {
