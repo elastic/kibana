@@ -192,5 +192,41 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         source: 'action:test.index-record',
       });
     });
+
+    it(`should return 404 when action doesn't exist`, async () => {
+      await supertest
+        .post('/api/action/1/_fire')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: { foo: true },
+        })
+        .expect(404)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object [action/1] not found',
+          });
+        });
+    });
+
+    it('should return 400 when payload is empty and invalid', async () => {
+      await supertest
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({})
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'child "params" fails because ["params" is required]',
+            validation: {
+              source: 'payload',
+              keys: ['params'],
+            },
+          });
+        });
+    });
   });
 }
