@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import './page.test.mocks';
 import { Page } from './page';
 
 describe('Data Frame: Job List <Page />', () => {
