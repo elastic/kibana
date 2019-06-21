@@ -12,7 +12,7 @@ import { UMBreadcrumb } from '../../../breadcrumbs';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
-import { createLogMonitorPageView, createLogOverviewPageView } from '../telemetry';
+import { getTelemetryMonitorPageLogger, getTelemetryOverviewPageLogger } from '../telemetry';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
@@ -107,8 +107,8 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               isInfraAvailable,
               isLogsAvailable,
               kibanaBreadcrumbs,
-              logMonitorPageLoad: createLogMonitorPageView(this.xsrfHeader),
-              logOverviewPageLoad: createLogOverviewPageView(this.xsrfHeader),
+              logMonitorPageLoad: getTelemetryMonitorPageLogger(this.xsrfHeader),
+              logOverviewPageLoad: getTelemetryOverviewPageLogger(this.xsrfHeader),
               renderGlobalHelpControls,
               routerBasename,
               setBadge: chrome.badge.set,

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createLogMonitorPageView } from './log_monitor';
-export { createLogOverviewPageView } from './log_overview';
+export { getTelemetryMonitorPageLogger } from './log_monitor';
+export { getTelemetryOverviewPageLogger } from './log_overview';

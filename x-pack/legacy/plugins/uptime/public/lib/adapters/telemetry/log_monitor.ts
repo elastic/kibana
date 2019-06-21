@@ -6,6 +6,10 @@
 
 import axios from 'axios';
 
-export const createLogMonitorPageView = (xsrf: string) => async () => {
+/**
+ * Generates a function to log a page load of the monitor page for Kibana telemetry.
+ * @returns a function that can log page loads
+ */
+export const getTelemetryMonitorPageLogger = (xsrf: string) => async () => {
   await axios.post('/api/uptime/logMonitor', undefined, { headers: { 'kbn-xsrf': xsrf } });
 };
