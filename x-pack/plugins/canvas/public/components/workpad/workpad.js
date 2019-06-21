@@ -45,6 +45,9 @@ export class Workpad extends React.PureComponent {
       setGrid,
     } = this.props;
 
+    window.onmousemove = null;
+    window.onmouseup = null;
+
     // handle keypress events for editor and presentation events
     // this exists in both contexts
     if (action === 'REFRESH') {
