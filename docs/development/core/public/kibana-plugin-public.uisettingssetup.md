@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type UiSettingsSetup = UiSettingsClient;
+export declare type UiSettingsSetup = PublicMethodsOf<UiSettingsClient>;
 ```

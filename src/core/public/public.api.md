@@ -459,10 +459,10 @@ export class UiSettingsClient {
     }
 
 // @public (undocumented)
-export type UiSettingsSetup = UiSettingsClient;
+export type UiSettingsSetup = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
-export type UiSettingsStart = UiSettingsClient;
+export type UiSettingsStart = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
 export interface UiSettingsState {
