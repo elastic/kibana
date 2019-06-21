@@ -16,3 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+export { ExpandPanelAction, EXPAND_PANEL_ACTION } from './expand_panel_action';

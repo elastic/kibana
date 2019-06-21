@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/public';
 import { EmbeddablePlugin, CONTEXT_MENU_TRIGGER } from '../../../embeddable_api/public';
-import { ExpandPanelAction, EXPAND_PANEL_ACTION } from '../actions/expand_panel_action';
+import { ExpandPanelAction, EXPAND_PANEL_ACTION } from '../actions';
 import { DashboardContainerFactory } from '../embeddable';
 
 export class Plugin {
