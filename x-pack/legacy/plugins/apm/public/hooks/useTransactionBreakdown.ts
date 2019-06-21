@@ -36,7 +36,7 @@ export function useTransactionBreakdown() {
 
   const receivedDataDuringLifetime = useRef(false);
 
-  if (data && data.length) {
+  if (data && data.total.length) {
     receivedDataDuringLifetime.current = true;
   }
 

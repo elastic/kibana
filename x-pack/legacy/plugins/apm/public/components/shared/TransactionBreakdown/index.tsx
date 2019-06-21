@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiPanel
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
@@ -38,8 +37,10 @@ const NoTransactionsTitle = styled.span`
   font-weight: bold;
 `;
 
-const TransactionBreakdown: React.FC = () => {
-  const [showChart, setShowChart] = useState(false);
+const TransactionBreakdown: React.FC<{
+  openByDefault?: boolean;
+}> = ({ openByDefault }) => {
+  const [showChart, setShowChart] = useState(!!openByDefault);
 
   const {
     data,
@@ -47,23 +48,65 @@ const TransactionBreakdown: React.FC = () => {
     receivedDataDuringLifetime
   } = useTransactionBreakdown();
 
+  const total = data ? data.total : undefined;
+  const timeseriesPerSubtype = data ? data.timeseries_per_subtype : undefined;
+
+  const legends = useMemo(
+    () => {
+      const names = total ? total.map(kpi => kpi.name).sort() : [];
+
+      return names.map((name, index) => {
+        return {
+          name,
+          color: COLORS[index % COLORS.length]
+        };
+      }, {});
+    },
+    [total]
+  );
+
   const kpis = useMemo(
     () => {
-      return data
-        ? sortBy(data, 'name').map((breakdown, index) => {
-            return {
-              ...breakdown,
-              color: COLORS[index % COLORS.length]
-            };
-          })
-        : null;
+      if (!total) {
+        return null;
+      }
+
+      return legends.map(legend => {
+        const { color } = legend;
+
+        const breakdown = total.find(
+          b => b.name === legend.name
+        ) as typeof total[0];
+
+        return {
+          ...breakdown,
+          color
+        };
+      });
     },
-    [data]
+    [total, legends]
   );
 
   const loading = status === FETCH_STATUS.LOADING || status === undefined;
 
-  const hasHits = data && data.length > 0;
+  const hasHits = data && data.total.length > 0;
+  const timeseries = useMemo(
+    () => {
+      if (!timeseriesPerSubtype) {
+        return [];
+      }
+      return legends.map(legend => {
+        const series = timeseriesPerSubtype[legend.name];
+
+        return {
+          name: legend.name,
+          values: series,
+          color: legend.color
+        };
+      });
+    },
+    [timeseriesPerSubtype, legends]
+  );
 
   return receivedDataDuringLifetime ? (
     <EuiPanel>
@@ -114,7 +157,7 @@ const TransactionBreakdown: React.FC = () => {
         )}
         {showChart && hasHits ? (
           <EuiFlexItem>
-            <TransactionBreakdownGraph />
+            <TransactionBreakdownGraph timeseries={timeseries} />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

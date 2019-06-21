@@ -27,6 +27,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
+import { ChartsTimeContextProvider } from '../../../context/ChartsTimeContext';
 
 interface Props {
   urlParams: IUrlParams;
@@ -114,16 +115,18 @@ export function TransactionOverview({
         </EuiFormRow>
       ) : null}
 
-      <TransactionBreakdown />
+      <ChartsTimeContextProvider>
+        <TransactionBreakdown openByDefault={true} />
 
-      <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
 
-      <TransactionCharts
-        hasMLJob={hasMLJob}
-        charts={transactionOverviewCharts}
-        location={location}
-        urlParams={urlParams}
-      />
+        <TransactionCharts
+          hasMLJob={hasMLJob}
+          charts={transactionOverviewCharts}
+          location={location}
+          urlParams={urlParams}
+        />
+      </ChartsTimeContextProvider>
 
       <EuiSpacer size="s" />
 

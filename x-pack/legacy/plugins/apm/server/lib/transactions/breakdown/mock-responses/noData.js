@@ -5,11 +5,11 @@
  */
 
 export const noDataResponse = {
-  took: 11,
+  took: 1,
   timed_out: false,
   _shards: {
-    total: 85,
-    successful: 85,
+    total: 1,
+    successful: 1,
     skipped: 0,
     failed: 0
   },
@@ -22,6 +22,9 @@ export const noDataResponse = {
     hits: []
   },
   aggregations: {
+    by_date: {
+      buckets: []
+    },
     types: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,

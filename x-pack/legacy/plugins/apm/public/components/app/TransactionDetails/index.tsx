@@ -18,6 +18,7 @@ import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
+import { ChartsTimeContextProvider } from '../../../context/ChartsTimeContext';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -42,16 +43,20 @@ export function TransactionDetails() {
         </EuiTitle>
       </ApmHeader>
 
-      <TransactionBreakdown />
+      <ChartsTimeContextProvider>
+        <EuiPanel>
+          <TransactionBreakdown />
+        </EuiPanel>
 
-      <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
 
-      <TransactionCharts
-        hasMLJob={false}
-        charts={transactionDetailsChartsData}
-        urlParams={urlParams}
-        location={location}
-      />
+        <TransactionCharts
+          hasMLJob={false}
+          charts={transactionDetailsChartsData}
+          urlParams={urlParams}
+          location={location}
+        />
+      </ChartsTimeContextProvider>
 
       <EuiHorizontalRule size="full" margin="l" />
 
