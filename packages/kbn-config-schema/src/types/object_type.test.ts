@@ -231,6 +231,25 @@ test('allow unknown keys when allowUnknowns = true', () => {
   });
 });
 
+test('allowUnknowns = true affects only own keys', () => {
+  const type = schema.object(
+    {
+      foo: schema.object({ bar: schema.string() }),
+    },
+    {},
+    true
+  );
+
+  expect(() =>
+    type.validate({
+      foo: {
+        bar: 'bar',
+        baz: 'baz',
+      },
+    })
+  ).toThrowErrorMatchingSnapshot();
+});
+
 test('does not allow unknown keys when allowUnknowns = false', () => {
   const type = schema.object(
     {

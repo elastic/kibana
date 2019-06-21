@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`allow works only for own keys 1`] = `"[foo.baz]: definition for this key is missing"`;
+
 exports[`called with wrong type 1`] = `"expected a plain object value, but found [string] instead."`;
 
 exports[`called with wrong type 2`] = `"expected a plain object value, but found [number] instead."`;
