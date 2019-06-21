@@ -35,11 +35,7 @@ export class QueryTemplatePaginated<
     fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>
   ) => PromiseApolloQueryResult;
 
-  private fetchMoreOptions!: (
-    newActivePage: number,
-    newCursor: string,
-    tiebreaker?: string
-  ) => FetchMoreOptionsArgs<TData, TVariables>;
+  private fetchMoreOptions!: (newActivePage: number) => FetchMoreOptionsArgs<TData, TVariables>;
 
   public constructor(props: T) {
     super(props);
@@ -52,15 +48,12 @@ export class QueryTemplatePaginated<
   };
 
   public setFetchMoreOptions = (
-    val: (
-      newActivePage: number,
-      newCursor: string,
-      tiebreaker?: string
-    ) => FetchMoreOptionsArgs<TData, TVariables>
+    val: (newActivePage: number) => FetchMoreOptionsArgs<TData, TVariables>
   ) => {
     this.fetchMoreOptions = val;
   };
 
-  public wrappedLoadMore = (newActivePage: number, newCursor: string, tiebreaker?: string) =>
-    this.fetchMore(this.fetchMoreOptions(newActivePage, newCursor, tiebreaker));
+  public wrappedLoadMore = (newActivePage: number) => {
+    return this.fetchMore(this.fetchMoreOptions(newActivePage));
+  };
 }

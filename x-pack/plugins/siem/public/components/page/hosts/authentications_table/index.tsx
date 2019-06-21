@@ -30,11 +30,10 @@ const tableType = hostsModel.HostsTableType.authentications;
 
 interface OwnProps {
   data: AuthenticationsEdges[];
+  fakeTotalCount: number;
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
+  loadPage: (newActivePage: number) => void;
   totalCount: number;
-  loadPage: (newActivePage: number, cursor: string) => void;
   type: hostsModel.HostsType;
 }
 
@@ -81,21 +80,18 @@ const rowItems: ItemsPerRow[] = [
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
+    fakeTotalCount,
     data,
-    hasNextPage,
     limit,
     loading,
     loadPage,
     totalCount,
-    nextCursor,
-    updateLimitPagination,
+    type,
     updateTableActivePage,
     updateTableLimit,
-    type,
   }) => (
     <PaginatedTable
       columns={getAuthenticationColumnsCurated(type)}
-      hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
       headerUnit={i18n.UNIT(totalCount)}
@@ -103,9 +99,9 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       limit={limit}
       loading={loading}
       loadingTitle={i18n.AUTHENTICATIONS}
-      loadPage={newActivePage => loadPage(newActivePage, nextCursor)}
+      loadPage={newActivePage => loadPage(newActivePage)}
       pageOfItems={data}
-      totalCount={totalCount}
+      totalCount={fakeTotalCount}
       updateLimitPagination={newLimit =>
         updateTableLimit({
           hostsType: type,

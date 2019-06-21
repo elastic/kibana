@@ -20,7 +20,7 @@ import * as i18n from './translations';
 import { AuthenticationTable, getAuthenticationColumnsCurated } from '.';
 
 describe('Authentication Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -34,12 +34,11 @@ describe('Authentication Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <AuthenticationTable
-            loading={false}
             data={mockData.Authentications.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Authentications.pageInfo)!}
+            loading={false}
+            loadPage={loadPage}
             totalCount={mockData.Authentications.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Authentications.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>

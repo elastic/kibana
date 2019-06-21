@@ -110,20 +110,19 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           totalCount,
                           loading,
                           pageInfo,
-                          loadMore,
+                          loadPage,
                           id,
                           refetch,
                         }) => (
                           <AuthenticationTableManage
+                            data={authentications}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
+                            loading={loading}
+                            loadPage={loadPage}
                             refetch={refetch}
                             setQuery={setQuery}
-                            loading={loading}
-                            data={authentications}
                             totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
                             type={type}
                           />
                         )}

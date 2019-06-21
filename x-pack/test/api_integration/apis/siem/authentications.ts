@@ -48,7 +48,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);
-          expect(authentications.pageInfo.endCursor!.value).to.equal('1');
+          expect(authentications.pageInfo.fakeTotalCount).to.equal(50);
         });
     });
 

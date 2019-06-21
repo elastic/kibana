@@ -17,6 +17,8 @@ import {
   updateHostsLimit,
   updateHostsSort,
   updateUncommonProcessesLimit,
+  updateTableActivePage,
+  updateTableLimit,
 } from './actions';
 import { HostsModel } from './model';
 
@@ -54,6 +56,32 @@ export const initialHostsState: HostsState = {
 };
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
+  .case(updateTableActivePage, (state, { activePage, hostsType, tableType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [tableType]: {
+          ...state[hostsType].queries[tableType],
+          activePage,
+        },
+      },
+    },
+  }))
+  .case(updateTableLimit, (state, { limit, hostsType, tableType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [tableType]: {
+          ...state[hostsType].queries[tableType],
+          limit,
+        },
+      },
+    },
+  }))
   .case(updateAuthenticationsLimit, (state, { limit, hostsType }) => ({
     ...state,
     [hostsType]: {

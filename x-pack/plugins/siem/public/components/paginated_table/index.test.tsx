@@ -17,14 +17,15 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return { ...r, memo: (x: any) => x };
 });
 
 describe('Load More Table Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
-  let loadPage: jest.Mock<any>;
-  let updateLimitPagination: jest.Mock<any>;
-  let updateActivePage: jest.Mock<any>;
+  let loadPage: jest.Mock<number>;
+  let updateLimitPagination: jest.Mock<number>;
+  let updateActivePage: jest.Mock<number>;
   beforeEach(() => {
     loadPage = jest.fn();
     updateLimitPagination = jest.fn();
@@ -304,6 +305,7 @@ describe('Load More Table Component', () => {
     });
 
     test('should call updateActivePage with 0 when an update prop changes', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ourProps: BasicTableProps<any> = {
         columns: getHostsColumns(),
         headerCount: 1,
@@ -327,6 +329,7 @@ describe('Load More Table Component', () => {
       // so we make a component to pass it the props context
       // ComponentWithContext will pass the changed props to Component
       // https://github.com/airbnb/enzyme/issues/1853#issuecomment-443475903
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ComponentWithContext = (props: BasicTableProps<any>) => {
         return (
           <ThemeProvider theme={theme}>

@@ -25,7 +25,7 @@ export interface AuthenticationArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadPage: (newActivePage: number, cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
   refetch: inputsModel.Refetch;
 }
 
@@ -79,12 +79,10 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
         {({ data, loading, fetchMore, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number, newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
               pagination: {
-                ...generateTablePaginationOptions(activePage, limit),
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
+                ...generateTablePaginationOptions(newActivePage, limit),
               },
             },
             updateQuery: (prev, { fetchMoreResult }) => {

@@ -318,11 +318,9 @@ export interface CursorType {
 }
 
 export interface PageInfoPaginated {
-  activePage?: number | null;
+  activePage: number;
 
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
+  fakeTotalCount: number;
 }
 
 export interface EventsData {
@@ -1493,14 +1491,16 @@ export interface TimerangeInput {
 }
 
 export interface PaginationInputPaginated {
-  /** The active page parameter defines the page of results you want to fetch */
-  activePage?: number | null;
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: string | null;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: string | null;
+  /** The activePage parameter defines the page of results you want to fetch */
+  activePage: number;
+  /** The querySize parameter is the number of items to be returned */
+  querySize: number;
+  /** The cursorStart parameter defines the start of the results to be displayed */
+  cursorStart: number;
+  /** The nextCursor parameter is next cursorStart */
+  nextCursor: number;
+  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
+  fakePossibleCount: number;
 }
 
 export interface PaginationInput {
@@ -2218,17 +2218,9 @@ export namespace GetAuthenticationsQuery {
   export type PageInfo = {
     __typename?: 'PageInfoPaginated';
 
-    activePage?: number | null;
+    activePage: number;
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    fakeTotalCount: number;
   };
 }
 

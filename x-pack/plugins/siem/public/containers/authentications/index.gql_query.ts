@@ -58,10 +58,7 @@ export const authenticationsQuery = gql`
         }
         pageInfo {
           activePage
-          endCursor {
-            value
-          }
-          hasNextPage
+          fakeTotalCount
         }
       }
     }

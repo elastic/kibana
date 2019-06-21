@@ -2357,13 +2357,7 @@
         "inputFields": [
           {
             "name": "activePage",
-            "description": "The active page parameter defines the page of results you want to fetch",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "limit",
-            "description": "The limit parameter allows you to configure the maximum amount of items to be returned",
+            "description": "The activePage parameter defines the page of results you want to fetch",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -2372,15 +2366,43 @@
             "defaultValue": null
           },
           {
-            "name": "cursor",
-            "description": "The cursor parameter defines the next result you want to fetch",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "name": "querySize",
+            "description": "The querySize parameter is the number of items to be returned",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           },
           {
-            "name": "tiebreaker",
-            "description": "The tiebreaker parameter allow to be more precise to fetch the next item",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "name": "cursorStart",
+            "description": "The cursorStart parameter defines the start of the results to be displayed",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "nextCursor",
+            "description": "The nextCursor parameter is next cursorStart",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "fakePossibleCount",
+            "description": "The fakePossibleCount parameter determines the total count in order to show 5 additional pages",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           }
         ],
@@ -2992,23 +3014,23 @@
             "name": "activePage",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "endCursor",
+            "name": "fakeTotalCount",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "CursorType", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hasNextPage",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }
