@@ -22,14 +22,9 @@ import { AggParamEditorProps, DefaultEditorAggParams } from 'ui/vis/editors/defa
 
 function OrderAggParamEditor({
   agg,
-  aggParam,
   config,
-  editorConfig,
-  indexedFields,
   value,
-  showValidation,
   responseValueAggs,
-  visName,
   setValue,
   setValidity,
   setTouched,

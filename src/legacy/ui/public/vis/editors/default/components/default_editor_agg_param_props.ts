@@ -37,6 +37,7 @@ export interface AggParamCommonProps<T> {
   value: T;
   responseValueAggs: AggConfig[] | null;
   visName: string;
+  subAggParams: any;
   setValidity(isValid: boolean): void;
   setTouched(): void;
 }
