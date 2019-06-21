@@ -18,6 +18,7 @@
  */
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import ReactMarkdown from 'react-markdown';
 import React from 'react';
 
 export interface PanelErrorProps {
@@ -30,7 +31,7 @@ export function PanelError({ error }: PanelErrorProps) {
       <EuiText color="subdued" size="xs">
         <EuiIcon type="alert" color="danger" />
         <EuiSpacer size="s" />
-        {error}
+        {typeof error === 'string' ? <ReactMarkdown source={error} /> : error}
       </EuiText>
     </div>
   );
