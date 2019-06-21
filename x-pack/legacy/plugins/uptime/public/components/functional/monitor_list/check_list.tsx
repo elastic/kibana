@@ -10,6 +10,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import { MonitorListStatusColumn } from '../monitor_list_status_column';
 import { Check } from '../../../../common/graphql/types';
+import { LocationLink } from './location_link';
 
 interface CheckListProps {
   checks: Check[];
@@ -32,7 +33,7 @@ export const CheckList = ({ checks }: CheckListProps) => (
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s">{location ? location : 'TODOTHISISINCOMPLETEADDALINK'}</EuiText>
+            <LocationLink location={location} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="secondary" size="s">
