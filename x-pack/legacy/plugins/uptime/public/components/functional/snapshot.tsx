@@ -5,16 +5,10 @@
  */
 
 import {
-  // @ts-ignore missing type
-  EuiAreaSeries,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore missing type
-  EuiHistogramSeries,
-  // @ts-ignore missing type
   EuiPanel,
-  // @ts-ignore missing type
   EuiStat,
   EuiTitle,
 } from '@elastic/eui';
@@ -26,7 +20,7 @@ import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { UptimeAppColors } from '../../uptime_app';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { snapshotQuery } from '../../queries';
-import { SnapshotHistogram } from './snapshot_histogram';
+import { SnapshotHistogram } from './charts';
 import { SnapshotLoading } from './snapshot_loading';
 
 interface SnapshotQueryResult {
@@ -34,26 +28,47 @@ interface SnapshotQueryResult {
 }
 
 interface SnapshotProps {
+  /**
+   * The date/time for the start of the timespan.
+   */
+  absoluteStartDate: number;
+  /**
+   * The date/time for the end of the timespan.
+   */
+  absoluteEndDate: number;
+  /**
+   * Valid colors to be used by the component and its children.
+   */
   colors: UptimeAppColors;
 }
 
 type Props = UptimeGraphQLQueryProps<SnapshotQueryResult> & SnapshotProps;
 
-export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) =>
+/**
+ * This component visualizes a KPI and histogram chart to help users quickly
+ * glean the status of their uptime environment.
+ * @param props the props required by the component
+ */
+export const SnapshotComponent = ({
+  absoluteStartDate,
+  absoluteEndDate,
+  colors: { danger, success },
+  data,
+}: Props) =>
   data && data.snapshot ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={4}>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.endpointStatusTitle"
+              defaultMessage="Current status"
+            />
+          </h5>
+        </EuiTitle>
         <EuiPanel paddingSize="s">
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.uptime.snapshot.endpointStatusTitle"
-                    defaultMessage="Current status"
-                  />
-                </h5>
-              </EuiTitle>
               <EuiSpacer size="s" />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -94,18 +109,19 @@ export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) 
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={8}>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.statusOverTimeTitle"
+              defaultMessage="Status over time"
+            />
+          </h5>
+        </EuiTitle>
         <EuiPanel paddingSize="s" style={{ height: 170 }}>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.uptime.snapshot.statusOverTimeTitle"
-                defaultMessage="Status over time"
-              />
-            </h5>
-          </EuiTitle>
-          <EuiSpacer size="s" />
           {data.snapshot.histogram && (
             <SnapshotHistogram
+              absoluteStartDate={absoluteStartDate}
+              absoluteEndDate={absoluteEndDate}
               dangerColor={danger}
               histogram={data.snapshot.histogram}
               successColor={success}
@@ -140,6 +156,10 @@ export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) 
     <SnapshotLoading />
   );
 
+/**
+ * This component visualizes a KPI and histogram chart to help users quickly
+ * glean the status of their uptime environment.
+ */
 export const Snapshot = withUptimeGraphQL<SnapshotQueryResult, SnapshotProps>(
   SnapshotComponent,
   snapshotQuery
