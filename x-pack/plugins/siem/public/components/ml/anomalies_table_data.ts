@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { InfluencerInput, Anomalies } from '../../types/anomalies';
+import { Anomalies, InfluencerInput } from './types';
 
 export interface Body {
   jobIds: string[];

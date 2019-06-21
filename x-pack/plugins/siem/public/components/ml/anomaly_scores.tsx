@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { EuiLink, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
-import { DraggableWrapper, DragEffects } from '../../../components/drag_and_drop/draggable_wrapper';
-import { IS_OPERATOR } from '../../../components/timeline/data_providers/data_provider';
-import { escapeDataProviderId } from '../../../components/drag_and_drop/helpers';
-import { getEmptyTagValue } from '../../../components/empty_value';
-import { Spacer } from '../../../components/page';
-import { Provider } from '../../../components/timeline/data_providers/provider';
-import { getTopSeverityJobs } from '../rest/results/get_top_severity';
-import { Anomalies, Anomaly } from '../types/anomalies';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { getEmptyTagValue } from '../empty_value';
+import { Spacer } from '../page';
+import { Provider } from '../timeline/data_providers/provider';
+import { Anomalies, Anomaly } from './types';
+import { getTopSeverityJobs } from './get_top_severity';
+import { DraggableWrapper, DragEffects } from '../drag_and_drop/draggable_wrapper';
 
 interface Args {
   startDate: number;

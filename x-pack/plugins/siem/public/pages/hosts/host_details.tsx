@@ -36,8 +36,8 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { AnomalyTableProvider } from '../../lib/ml/components/anomaly_table_provider';
-import { hostToInfluencers } from '../../lib/ml/host_to_influencers';
+import { AnomalyTableProvider } from '../../components/ml/anomaly_table_provider';
+import { hostToInfluencers } from '../../components/ml/host_to_influencers';
 
 const type = hostsModel.HostsType.details;
 
@@ -86,31 +86,27 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ hostOverview, loading, id, refetch }) => {
-                          return (
-                            <AnomalyTableProvider
-                              influencers={hostToInfluencers(hostOverview)}
-                              startDate={from}
-                              endDate={to}
-                            >
-                              {({ isLoadingAnomaliesData, anomaliesData }) => {
-                                return (
-                                  <HostOverviewManage
-                                    id={id}
-                                    refetch={refetch}
-                                    setQuery={setQuery}
-                                    data={hostOverview}
-                                    anomaliesData={anomaliesData}
-                                    isLoadingAnomaliesData={isLoadingAnomaliesData}
-                                    loading={loading}
-                                    startDate={from}
-                                    endDate={to}
-                                  />
-                                );
-                              }}
-                            </AnomalyTableProvider>
-                          );
-                        }}
+                        {({ hostOverview, loading, id, refetch }) => (
+                          <AnomalyTableProvider
+                            influencers={hostToInfluencers(hostOverview)}
+                            startDate={from}
+                            endDate={to}
+                          >
+                            {({ isLoadingAnomaliesData, anomaliesData }) => (
+                              <HostOverviewManage
+                                id={id}
+                                refetch={refetch}
+                                setQuery={setQuery}
+                                data={hostOverview}
+                                anomaliesData={anomaliesData}
+                                isLoadingAnomaliesData={isLoadingAnomaliesData}
+                                loading={loading}
+                                startDate={from}
+                                endDate={to}
+                              />
+                            )}
+                          </AnomalyTableProvider>
+                        )}
                       </HostOverviewByNameQuery>
 
                       <EuiHorizontalRule />

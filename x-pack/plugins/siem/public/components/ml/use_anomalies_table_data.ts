@@ -7,8 +7,11 @@
 import { useState, useEffect, useContext } from 'react';
 import moment from 'moment-timezone';
 import { anomaliesTableData } from './anomalies_table_data';
-import { InfluencerInput, Anomalies } from '../../types/anomalies';
-import { KibanaConfigContext } from '../../../adapters/framework/kibana_framework_adapter';
+import { InfluencerInput, Anomalies } from './types';
+import {
+  KibanaConfigContext,
+  AppKibanaFrameworkAdapter,
+} from '../../lib/adapters/framework/kibana_framework_adapter';
 
 interface Args {
   influencers: InfluencerInput[] | null;
@@ -22,6 +25,16 @@ export const influencersToString = (influencers: InfluencerInput[] | null): stri
   influencers == null
     ? ''
     : influencers.reduce((accum, item) => `${accum}${item.fieldName}:${item.fieldValue}`, '');
+
+export const getTimeZone = (config: Partial<AppKibanaFrameworkAdapter>): string => {
+  if (config.dateFormatTz !== 'Browser' && config.dateFormatTz != null) {
+    return config.dateFormatTz;
+  } else if (config.dateFormatTz === 'Browser' && config.timezone != null) {
+    return config.timezone;
+  } else {
+    return moment.tz.guess();
+  }
+};
 
 export const useAnomaliesTableData = ({ influencers, startDate, endDate }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
@@ -43,7 +56,7 @@ export const useAnomaliesTableData = ({ influencers, startDate, endDate }: Args)
           earliestMs,
           latestMs,
           influencers: influencersInput,
-          dateFormatTz: config.dateFormatTz || moment.tz.guess(),
+          dateFormatTz: getTimeZone(config),
           maxRecords: 500,
           maxExamples: 10,
         },

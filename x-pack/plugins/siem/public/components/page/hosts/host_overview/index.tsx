@@ -9,8 +9,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Anomalies } from '../../../../lib/ml/types/anomalies';
-import { AnomalyScores } from '../../../../lib/ml/components/anomaly_scores';
 import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
 
@@ -20,6 +18,8 @@ import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/f
 import { LoadingPanel } from '../../../loading';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
+import { AnomalyScores } from '../../../ml/anomaly_scores';
+import { Anomalies } from '../../../ml/types';
 
 interface DescriptionList {
   title: string;

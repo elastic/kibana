@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostItem } from '../../../public/graphql/types';
-import { InfluencerInput } from './types/anomalies';
+import { InfluencerInput } from './types';
+import { HostItem } from '../../graphql/types';
 
 export const hostToInfluencers = (hostItem: HostItem): InfluencerInput[] | null => {
   if (hostItem.host != null && hostItem.host.name != null) {

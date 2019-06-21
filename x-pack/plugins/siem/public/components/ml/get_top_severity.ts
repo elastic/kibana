@@ -5,7 +5,7 @@
  */
 
 import { toArray } from 'lodash/fp';
-import { Anomaly } from '../../types/anomalies';
+import { Anomaly } from './types';
 
 export const getTopSeverityJobs = (anomalies: Anomaly[]): Anomaly[] => {
   const reduced = anomalies.reduce<Record<string, Anomaly>>((accum, item) => {

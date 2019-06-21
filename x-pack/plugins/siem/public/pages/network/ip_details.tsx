@@ -36,8 +36,8 @@ import { networkModel, networkSelectors, State } from '../../store';
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-import { AnomalyTableProvider } from '../../lib/ml/components/anomaly_table_provider';
-import { networkToInfluencers } from '../../lib/ml/network_to_influencers';
+import { AnomalyTableProvider } from '../../components/ml/anomaly_table_provider';
+import { networkToInfluencers } from '../../components/ml/network_to_influencers';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);

@@ -9,8 +9,6 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Anomalies } from '../../../../lib/ml/types/anomalies';
-import { AnomalyScores } from '../../../../lib/ml/components/anomaly_scores';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -27,6 +25,8 @@ import {
 import * as i18n from './translations';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
+import { Anomalies } from '../../../ml/types';
+import { AnomalyScores } from '../../../ml/anomaly_scores';
 
 interface DescriptionList {
   title: string;

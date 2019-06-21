@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfluencerInput } from './types/anomalies';
+import { InfluencerInput } from './types';
 
 export const networkToInfluencers = (ip: string): InfluencerInput[] => {
   const influencers: InfluencerInput[] = [

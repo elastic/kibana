@@ -5,8 +5,8 @@
  */
 
 import * as React from 'react';
-import { useAnomaliesTableData } from '../rest/results/use_anomalies_table_data';
-import { InfluencerInput, Anomalies } from '../types/anomalies';
+import { InfluencerInput, Anomalies } from './types';
+import { useAnomaliesTableData } from './use_anomalies_table_data';
 
 interface ChildrenArgs {
   isLoadingAnomaliesData: boolean;
