@@ -5,9 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-
-export const ES_ARCHIVER_ACTION_ID = '19cfba7c-711a-4170-8590-9a99a281e85c';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -18,7 +17,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   const esTestIndexName = '.kibaka-alerting-test-data';
 
-  describe('actions', () => {
+  describe('fire', () => {
     beforeEach(() => esArchiver.load('actions/basic'));
     afterEach(() => esArchiver.unload('actions/basic'));
 
@@ -53,9 +52,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
     after(() => es.indices.delete({ index: esTestIndexName }));
 
-    it('decrypts attributes and joins on actionTypeConfig when firing', async () => {
+    it('decrypts attributes and joins on actionTypeConfig when calling fire API', async () => {
       await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -110,7 +109,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       });
     });
 
-    it('encrypted attributes still available after update', async () => {
+    it('fire still works with encrypted attributes after updating an action', async () => {
       const { body: updatedAction } = await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
@@ -139,7 +138,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         },
       });
       await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
