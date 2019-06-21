@@ -17,7 +17,7 @@
  * under the License.
  */
 
-let { postSnapshot } = require('@percy/agent/dist/utils/sdk-utils');
+import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
 
 import { Test } from 'mocha';
 
