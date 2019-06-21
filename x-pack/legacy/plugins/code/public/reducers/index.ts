@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers, ReducersMapObject } from 'redux';
 
 import { blame, BlameState } from './blame';
 import { commit, CommitState } from './commit';
@@ -16,13 +16,11 @@ import { route, RouteState } from './route';
 import { search, SearchState } from './search';
 import { setup, SetupState } from './setup';
 import { shortcuts, ShortcutsState } from './shortcuts';
-import { RepoState, RepoStatus, status, StatusState } from './status';
+import { status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
 import { RevisionState, revision } from './revision';
 import { RepositoryState, repository } from './repository';
 import { fileTree, FileTreeState } from './file_tree';
-
-export { RepoState, RepoStatus };
 
 export interface RootState {
   blame: BlameState;
@@ -60,5 +58,4 @@ const reducers = {
   symbol,
 };
 
-// @ts-ignore
-export const rootReducer = combineReducers<RootState>(reducers);
+export const rootReducer = combineReducers<RootState>(reducers as ReducersMapObject);

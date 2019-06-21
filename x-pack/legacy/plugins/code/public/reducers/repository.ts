@@ -19,19 +19,19 @@ const initialState: RepositoryState = {
   repoNotFound: false,
 };
 
-export const repository = handleActions(
+export const repository = handleActions<RepositoryState, Repository>(
   {
-    [String(loadRepo)]: (state: RepositoryState, action: Action<any>) =>
+    [String(loadRepo)]: state =>
       produce<RepositoryState>(state, draft => {
         draft.repository = undefined;
         draft.repoNotFound = false;
       }),
-    [String(loadRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
+    [String(loadRepoSuccess)]: (state, action: Action<Repository>) =>
       produce<RepositoryState>(state, draft => {
         draft.repository = action.payload;
         draft.repoNotFound = false;
       }),
-    [String(loadRepoFailed)]: (state: RepositoryState, action: Action<any>) =>
+    [String(loadRepoFailed)]: state =>
       produce<RepositoryState>(state, draft => {
         draft.repository = undefined;
         draft.repoNotFound = true;

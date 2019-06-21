@@ -5,7 +5,7 @@
  */
 
 import produce from 'immer';
-import { handleActions } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../../model/commit';
 import {
   fetchMoreCommits,
@@ -14,6 +14,7 @@ import {
   fetchTreeCommits,
   fetchTreeCommitsFailed,
   fetchTreeCommitsSuccess,
+  TreeCommitPayload,
 } from '../actions';
 
 export interface RevisionState {
@@ -32,34 +33,36 @@ const initialState: RevisionState = {
   commitsFullyLoaded: {},
 };
 
-export const revision = handleActions(
+type RevisionPayload = ReferenceInfo[] & CommitInfo[] & TreeCommitPayload;
+
+export const revision = handleActions<RevisionState, RevisionPayload>(
   {
-    [String(fetchRepoCommitsSuccess)]: (state: RevisionState, action: any) =>
+    [String(fetchRepoCommitsSuccess)]: (state, action: Action<CommitInfo[]>) =>
       produce<RevisionState>(state, draft => {
-        draft.treeCommits[''] = action.payload;
+        draft.treeCommits[''] = action.payload!;
         draft.loadingCommits = false;
       }),
-    [String(fetchMoreCommits)]: (state: RevisionState, action: any) =>
+    [String(fetchMoreCommits)]: state =>
       produce<RevisionState>(state, draft => {
         draft.loadingCommits = true;
       }),
-    [String(fetchRepoBranchesSuccess)]: (state: RevisionState, action: any) =>
-      produce<RevisionState>(state, (draft: RevisionState) => {
-        const references = action.payload as ReferenceInfo[];
+    [String(fetchRepoBranchesSuccess)]: (state, action: Action<ReferenceInfo[]>) =>
+      produce<RevisionState>(state, draft => {
+        const references = action.payload!;
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
       }),
-    [String(fetchTreeCommits)]: (state: RevisionState) =>
+    [String(fetchTreeCommits)]: state =>
       produce<RevisionState>(state, draft => {
         draft.loadingCommits = true;
       }),
-    [String(fetchTreeCommitsFailed)]: (state: RevisionState) =>
+    [String(fetchTreeCommitsFailed)]: state =>
       produce<RevisionState>(state, draft => {
         draft.loadingCommits = false;
       }),
-    [String(fetchTreeCommitsSuccess)]: (state: RevisionState, action: any) =>
+    [String(fetchTreeCommitsSuccess)]: (state, action: Action<TreeCommitPayload>) =>
       produce<RevisionState>(state, draft => {
-        const { path, commits, append } = action.payload;
+        const { path, commits, append } = action.payload!;
         if (commits.length === 0) {
           draft.commitsFullyLoaded[path] = true;
         } else if (append) {

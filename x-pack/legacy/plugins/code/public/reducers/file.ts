@@ -5,7 +5,7 @@
  */
 
 import produce from 'immer';
-import { handleActions } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import {
   fetchFileFailed,
   FetchFileResponse,
@@ -23,22 +23,24 @@ const initialState: FileState = {
   isNotFound: false,
 };
 
-export const file = handleActions(
+type FilePayload = FetchFileResponse & boolean;
+
+export const file = handleActions<FileState, FilePayload>(
   {
-    [String(fetchFileSuccess)]: (state: FileState, action: any) =>
+    [String(fetchFileSuccess)]: (state, action: Action<FetchFileResponse>) =>
       produce<FileState>(state, draft => {
-        draft.file = action.payload as FetchFileResponse;
+        draft.file = action.payload;
         draft.isNotFound = false;
       }),
-    [String(fetchFileFailed)]: (state: FileState, action: any) =>
+    [String(fetchFileFailed)]: state =>
       produce<FileState>(state, draft => {
         draft.file = undefined;
       }),
-    [String(setNotFound)]: (state: FileState, action: any) =>
+    [String(setNotFound)]: (state, action: Action<boolean>) =>
       produce<FileState>(state, draft => {
-        draft.isNotFound = action.payload;
+        draft.isNotFound = action.payload!;
       }),
-    [String(routeChange)]: (state: FileState, action: any) =>
+    [String(routeChange)]: state =>
       produce<FileState>(state, draft => {
         draft.isNotFound = false;
       }),

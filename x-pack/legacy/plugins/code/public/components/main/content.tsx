@@ -22,9 +22,9 @@ import {
   WorkerReservedProgress,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse } from '../../actions';
+import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { RepoState, RepoStatus, RootState } from '../../reducers';
+import { RootState } from '../../reducers';
 import {
   currentTreeSelector,
   hasMoreCommitsSelector,
@@ -261,7 +261,7 @@ class CodeContent extends React.PureComponent<Props> {
       <CloneStatus
         repoName={`${org}/${repo}`}
         progress={progress ? progress : 0}
-        cloneProgress={cloneProgress}
+        cloneProgress={cloneProgress!}
       />
     );
   }

@@ -18,6 +18,7 @@ import {
   fetchRootRepoTreeSuccess,
   fetchRootRepoTreeFailed,
   dirNotFound,
+  FetchRepoTreePayload,
 } from '../actions';
 
 function mergeNode(a: FileTree, b: FileTree): FileTree {
@@ -75,14 +76,16 @@ const initialState: FileTreeState = {
   notFoundDirs: [],
 };
 
-export const fileTree = handleActions<FileTreeState, any>(
+type FileTreePayload = FetchRepoTreePayload & RepoTreePayload & FileTree & string;
+
+export const fileTree = handleActions<FileTreeState, FileTreePayload>(
   {
-    [String(fetchRepoTree)]: (state: FileTreeState, action: any) =>
+    [String(fetchRepoTree)]: (state, action: Action<FetchRepoTreePayload>) =>
       produce(state, draft => {
         draft.fileTreeLoadingPaths.push(action.payload!.path);
       }),
-    [String(fetchRepoTreeSuccess)]: (state: FileTreeState, action: Action<RepoTreePayload>) =>
-      produce<FileTreeState>(state, (draft: FileTreeState) => {
+    [String(fetchRepoTreeSuccess)]: (state, action: Action<RepoTreePayload>) =>
+      produce<FileTreeState>(state, draft => {
         draft.notFoundDirs = draft.notFoundDirs.filter(dir => dir !== action.payload!.path);
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(
           p => p !== action.payload!.path && p !== ''
@@ -105,32 +108,32 @@ export const fileTree = handleActions<FileTreeState, any>(
           }
         }
       }),
-    [String(fetchRootRepoTreeSuccess)]: (state: FileTreeState, action: Action<any>) =>
-      produce<FileTreeState>(state, (draft: FileTreeState) => {
+    [String(fetchRootRepoTreeSuccess)]: (state, action: Action<FileTree>) =>
+      produce<FileTreeState>(state, draft => {
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(p => p !== '/' && p !== '');
         draft.tree = mergeNode(draft.tree, action.payload!);
       }),
-    [String(fetchRootRepoTreeFailed)]: (state: FileTreeState, action: Action<any>) =>
-      produce<FileTreeState>(state, (draft: FileTreeState) => {
+    [String(fetchRootRepoTreeFailed)]: state =>
+      produce<FileTreeState>(state, draft => {
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(p => p !== '/' && p !== '');
       }),
-    [String(dirNotFound)]: (state: FileTreeState, action: any) =>
-      produce<FileTreeState>(state, (draft: FileTreeState) => {
-        draft.notFoundDirs.push(action.payload);
+    [String(dirNotFound)]: (state, action: Action<string>) =>
+      produce<FileTreeState>(state, draft => {
+        draft.notFoundDirs.push(action.payload!);
       }),
-    [String(resetRepoTree)]: (state: FileTreeState) =>
-      produce<FileTreeState>(state, (draft: FileTreeState) => {
+    [String(resetRepoTree)]: state =>
+      produce<FileTreeState>(state, draft => {
         draft.tree = initialState.tree;
         draft.openedPaths = initialState.openedPaths;
       }),
-    [String(fetchRepoTreeFailed)]: (state: FileTreeState, action: Action<any>) =>
+    [String(fetchRepoTreeFailed)]: (state, action: Action<FileTree>) =>
       produce(state, draft => {
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(
           p => p !== action.payload!.path && p !== ''
         );
       }),
-    [String(openTreePath)]: (state: FileTreeState, action: Action<any>) =>
-      produce<FileTreeState>(state, (draft: FileTreeState) => {
+    [String(openTreePath)]: (state, action: Action<string>) =>
+      produce<FileTreeState>(state, draft => {
         let path = action.payload!;
         const openedPaths = state.openedPaths;
         const pathSegs = path.split('/');
@@ -143,8 +146,8 @@ export const fileTree = handleActions<FileTreeState, any>(
           path = pathSegs.join('/');
         }
       }),
-    [String(closeTreePath)]: (state: FileTreeState, action: Action<any>) =>
-      produce<FileTreeState>(state, (draft: FileTreeState) => {
+    [String(closeTreePath)]: (state, action: Action<string>) =>
+      produce<FileTreeState>(state, draft => {
         const path = action.payload!;
         const isSubFolder = (p: string) => p.startsWith(path + '/');
         draft.openedPaths = state.openedPaths.filter(p => !(p === path || isSubFolder(p)));
