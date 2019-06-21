@@ -88,7 +88,9 @@ If we split this combined document into two separate ones, we can see that the r
 
 The heartbeat doc will receive frequent updates as the notes are required to note that they are available to the system. In this case, the document will be stored locally, but we will still use partial updates to note that a node is available by updating it's unique time. To handle the culling of nodes that have timed out, each node will run a `painless` script query asking elasticsearch to remove entries that haven't been updated since the timeout threshold. This query is bound to conflict, but since it's just dropping nodes that have timed out, we only need one of these updates to succeed at a given time.
 
-Upon proxy request, the routing table will be retrieved from elasticsearch and compared with the liveness table. If the node that is responsible for a given resource is still alive, the request will be made, otherwise an error will be returned
+Upon proxy request, the routing table will be retrieved from elasticsearch and compared with the liveness table. If the node that is responsible for a given resource is still alive, the request will be made, otherwise an error will be returned.
+
+The heartbeat doc consists of key/value pairs, where the key is the name of the node, and the value is a monotonically increasing integer. Every time the node checks in, it'll increase this integer by one. On every second heartbeat loop, we will check to see what has been updated. If a node hasn't updated it's integer in two cycles, we will move it to a new `Closing` state. If, on the next pass, it is stil closing, then we will drop that node and it's resources. If it has updated again, we will move the resources back into the `Started` state.
 
 ## Sync Order Traversal
 
