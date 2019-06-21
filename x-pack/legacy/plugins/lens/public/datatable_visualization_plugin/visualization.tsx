@@ -49,6 +49,7 @@ export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualiz
                 })}
               >
                 <EuiFieldText
+                  data-test-subj="lnsDatatable-columnLabel"
                   value={label || ''}
                   onChange={e => {
                     const newColumns = [...state.columns];
@@ -75,7 +76,7 @@ export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualiz
                 <EuiFlexGroup>
                   <EuiFlexItem grow={true}>
                     <NativeRenderer
-                      data-test-subj="lnsDatatable_xDimensionPanel"
+                      data-test-subj="lnsDatatable_dimensionPanel"
                       render={datasource.renderDimensionPanel}
                       nativeProps={{
                         columnId: id,
@@ -89,7 +90,7 @@ export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualiz
                     <EuiButtonIcon
                       size="s"
                       color="warning"
-                      data-test-subj={`lns_datasourceDimensionPanel_remove_${id}`}
+                      data-test-subj={`lnsDatatable_dimensionPanelRemove_${id}`}
                       iconType="trash"
                       onClick={() => {
                         datasource.removeColumnInTableSpec(id);
@@ -113,7 +114,7 @@ export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualiz
 
         <div>
           <EuiButton
-            data-test-subj="lnsDatatable_yDimensionPanel_add"
+            data-test-subj="lnsDatatable_dimensionPanel_add"
             onClick={() => {
               const newColumns = [...state.columns];
               newColumns.push({
@@ -198,11 +199,13 @@ export const datatableVisualization: Visualization<
                   function: 'lens_datatable_columns',
                   arguments: {
                     columnIds: state.columns.map(({ id }) => id),
-                    labels: state.columns.map(({ id, label }) =>
-                      label || datasource.getOperationForColumnId(id)
-                        ? datasource.getOperationForColumnId(id)!.label
-                        : ''
-                    ),
+                    labels: state.columns.map(({ id, label }) => {
+                      if (label) {
+                        return label;
+                      }
+                      const operation = datasource.getOperationForColumnId(id);
+                      return operation ? operation.label : '';
+                    }),
                   },
                 },
               ],
