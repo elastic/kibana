@@ -18,11 +18,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { EuiFormLabel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
 
-function OrderAggParamEditor({
+function SubMetricParamEditor({
   agg,
+  aggParam,
   config,
   value,
   responseValueAggs,
@@ -31,6 +34,17 @@ function OrderAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
+  const metricTitle = i18n.translate('common.ui.aggTypes.metrics.metricTitle', {
+    defaultMessage: 'Metric',
+  });
+  const bucketTitle = i18n.translate('common.ui.aggTypes.metrics.bucketTitle', {
+    defaultMessage: 'Bucket',
+  });
+  const type = aggParam.name;
+
+  const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
+  const aggGroup = type === 'customMetric' ? 'metrics' : 'buckets';
+
   useEffect(
     () => {
       return () => {
@@ -39,47 +53,40 @@ function OrderAggParamEditor({
     },
     [value]
   );
-  useEffect(
-    () => {
-      if (responseValueAggs) {
-        const orderBy = agg.params.orderBy;
-        if (orderBy && orderBy === 'custom') {
-          const paramDef = agg.type.params.byName.orderAgg;
-          setValue(value || paramDef.makeOrderAgg(agg));
-        } else {
-          setValue(null);
-        }
-      }
-    },
-    [agg.params.orderBy, responseValueAggs]
-  );
+
+  useEffect(() => {
+    setValue(agg.params[type] || agg.type.params.byName[type].makeAgg(agg));
+  }, []);
 
   // to force update when sub-agg params are changed
   const [state, setState] = useState(true);
 
-  if (!agg.params.orderAgg) {
+  if (!agg.params[type]) {
     return null;
   }
 
   return (
-    <DefaultEditorAggParams
-      agg={value}
-      groupName="metrics"
-      config={config}
-      className="visEditorAgg__subAgg"
-      formIsTouched={subAggParams.formIsTouched}
-      indexPattern={agg.getIndexPattern()}
-      responseValueAggs={responseValueAggs}
-      vis={subAggParams.vis}
-      onAggParamsChange={(...rest) => {
-        setState(!state);
-        subAggParams.onAggParamsChange(...rest);
-      }}
-      onAggTypeChange={subAggParams.onAggTypeChange}
-      setValidity={setValidity}
-      setTouched={setTouched}
-    />
+    <>
+      <EuiFormLabel>{aggTitle}</EuiFormLabel>
+      <DefaultEditorAggParams
+        agg={agg.params[type]}
+        groupName={aggGroup}
+        config={config}
+        className="visEditorAgg__subAgg"
+        formIsTouched={subAggParams.formIsTouched}
+        indexPattern={agg.getIndexPattern()}
+        responseValueAggs={responseValueAggs}
+        vis={subAggParams.vis}
+        onAggParamsChange={(...rest) => {
+          setState(!state);
+          subAggParams.onAggParamsChange(...rest);
+        }}
+        onAggTypeChange={subAggParams.onAggTypeChange}
+        setValidity={setValidity}
+        setTouched={setTouched}
+      />
+    </>
   );
 }
 
-export { OrderAggParamEditor };
+export { SubMetricParamEditor };
