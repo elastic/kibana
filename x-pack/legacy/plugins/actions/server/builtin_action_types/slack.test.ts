@@ -6,14 +6,17 @@
 
 import { ActionType, Services } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
-import { validateActionTypeParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-
+import { validateActionTypeParams } from '../lib';
+import { validateActionTypeConfig } from '../lib';
+import { setIncomingWebhookImpl } from './slack';
 import { registerBuiltInActionTypes } from './index';
+import { MockIncomingWebhook } from './incoming_webhook.mock';
+import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 
-const ACTION_TYPE_ID = 'kibana.server-log';
+const ACTION_TYPE_ID = 'kibana.slack';
+
 const NO_OP_FN = () => {};
 
 const services: Services = {
@@ -27,6 +30,7 @@ function getServices(): Services {
 }
 
 let actionTypeRegistry: ActionTypeRegistry;
+let actionType: ActionType;
 
 const mockEncryptedSavedObjectsPlugin = {
   getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
@@ -39,10 +43,12 @@ beforeAll(() => {
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
   });
   registerBuiltInActionTypes(actionTypeRegistry);
+  setIncomingWebhookImpl(MockIncomingWebhook);
+  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 
-beforeEach(() => {
-  services.log = NO_OP_FN;
+afterAll(() => {
+  setIncomingWebhookImpl();
 });
 
 describe('action is registered', () => {
@@ -53,33 +59,20 @@ describe('action is registered', () => {
 
 describe('get()', () => {
   test('returns action type', () => {
-    const actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-    expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('server-log');
+    const returnedActionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+    expect(returnedActionType.id).toEqual(ACTION_TYPE_ID);
+    expect(returnedActionType.name).toEqual('slack');
   });
 });
 
-describe('validateActionTypeParams()', () => {
-  let actionType: ActionType;
-
-  beforeAll(() => {
-    actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+describe('validateParams()', () => {
+  test('ensure action type is valid', () => {
     expect(actionType).toBeTruthy();
   });
 
   test('should validate and pass when params is valid', () => {
     expect(validateActionTypeParams(actionType, { message: 'a message' })).toEqual({
       message: 'a message',
-      tags: ['info', 'alerting'],
-    });
-    expect(
-      validateActionTypeParams(actionType, {
-        message: 'a message',
-        tags: ['info', 'blorg'],
-      })
-    ).toEqual({
-      message: 'a message',
-      tags: ['info', 'blorg'],
     });
   });
 
@@ -95,54 +88,54 @@ describe('validateActionTypeParams()', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"params invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
     );
+  });
+});
 
+describe('validateActionTypeConfig()', () => {
+  test('should validate and pass when params is valid', () => {
+    validateActionTypeConfig(actionType, {
+      webhookUrl: 'https://example.com',
+    });
+  });
+
+  test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateActionTypeParams(actionType, { message: 'x', tags: 2 });
+      validateActionTypeConfig(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"tags\\" fails because [\\"tags\\" must be an array]"`
+      `"The following actionTypeConfig attributes are invalid: webhookUrl [any.required]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { message: 'x', tags: [2] });
+      validateActionTypeConfig(actionType, { webhookUrl: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"tags\\" fails because [\\"tags\\" at position 0 fails because [\\"0\\" must be a string]]"`
+      `"The following actionTypeConfig attributes are invalid: webhookUrl [string.base]"`
     );
   });
 });
 
 describe('execute()', () => {
-  test('calls the executor with proper params', async () => {
-    const mockLog = jest.fn().mockResolvedValueOnce({ success: true });
-
-    services.log = mockLog;
-    const actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-    await actionType.executor({
-      services: {
-        log: mockLog,
-        callCluster: async (path: string, opts: any) => {},
-        savedObjectsClient: SavedObjectsClientMock.create(),
-      },
-      config: {},
-      params: { message: 'message text here', tags: ['tag1', 'tag2'] },
+  test('calls the mock executor with success', async () => {
+    const response = await actionType.executor({
+      services,
+      config: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
     });
-    expect(mockLog).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        "tag1",
-        "tag2",
-      ],
-      "message text here",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
+    expect(response).toMatchInlineSnapshot(`
+Object {
+  "text": "mockIncomingWebhook success: this invocation should succeed",
 }
 `);
+  });
+
+  test('calls the mock executor with failure', async () => {
+    await expect(
+      actionType.executor({
+        services,
+        config: { webhookUrl: 'http://example.com' },
+        params: { message: 'failure: this invocation should fail' },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"mockIncomingWebhook failure: this invocation should fail"`
+    );
   });
 });
