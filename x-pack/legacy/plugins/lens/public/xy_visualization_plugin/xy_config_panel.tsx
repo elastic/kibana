@@ -166,16 +166,33 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           defaultMessage: 'Split series',
         })}
       >
-        <NativeRenderer
-          data-test-subj="lnsXY_splitDimensionPanel"
-          render={datasource.renderDimensionPanel}
-          nativeProps={{
-            columnId: state.splitSeriesAccessors[0],
-            dragDropContext: props.dragDropContext,
-            filterOperations: op => op.isBucketed === true,
-            suggestedPriority: 0,
-          }}
-        />
+        <>
+          {state.splitSeriesAccessors.map(columnId => (
+            <NativeRenderer
+              data-test-subj="lnsXY_splitDimensionPanel"
+              render={datasource.renderDimensionPanel}
+              nativeProps={{
+                columnId,
+                dragDropContext: props.dragDropContext,
+                filterOperations: op => op.isBucketed === true,
+                suggestedPriority: 0,
+              }}
+            />
+          ))}
+          <EuiButton
+            data-test-subj="lnsXY_splitSeriesDimensionPanel_add"
+            onClick={() =>
+              setState({
+                ...state,
+                splitSeriesAccessors: [
+                  ...state.splitSeriesAccessors,
+                  datasource.generateColumnId(),
+                ],
+              })
+            }
+            iconType="plusInCircle"
+          />
+        </>
       </EuiFormRow>
 
       <EuiFormRow

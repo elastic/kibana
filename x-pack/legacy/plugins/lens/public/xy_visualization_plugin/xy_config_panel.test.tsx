@@ -376,6 +376,26 @@ describe('XYConfigPanel', () => {
     });
   });
 
+  test('allows adding split dimensions', () => {
+    const setState = jest.fn();
+    const state = testState();
+    const component = mount(
+      <XYConfigPanel
+        dragDropContext={dragDropContext}
+        datasource={{ ...mockDatasource(), generateColumnId: () => 'zed' }}
+        setState={setState}
+        state={{ ...state, splitSeriesAccessors: ['a', 'b', 'c'] }}
+      />
+    );
+
+    (testSubj(component, 'lnsXY_splitSeriesDimensionPanel_add').onClick as Function)();
+
+    expect(setState).toHaveBeenCalledTimes(1);
+    expect(setState.mock.calls[0][0]).toMatchObject({
+      splitSeriesAccessors: ['a', 'b', 'c', 'zed'],
+    });
+  });
+
   test('allows toggling the y axis gridlines', () => {
     const toggleYGridlines = (showGridlines: boolean) => {
       const setState = jest.fn();
