@@ -33,31 +33,24 @@ export function takePercySnapshot() {
     return Array.from(document.querySelectorAll(selector));
   }
 
-  function canvasToImage(canvas) {
+  // convert canvas elements into static images
+  var replacements = queryAll('canvas').map(function (canvas) {
     var image = document.createElement('img');
     image.src = canvas.toDataURL();
-    image.style = 'max-width: 100%';
-    image.setAttribute('data-percy-canvas-image', 'true');
-
-    canvas.setAttribute('data-percy-modified-style', canvas.getAttribute('style'));
-    canvas.setAttribute('style', 'display: none;');
-
-    canvas.parentElement.appendChild(image);
-  }
-
-  queryAll('canvas').forEach(function (element) {
-    canvasToImage(element);
+    image.style.cssText = window.getComputedStyle(canvas).cssText;
+    canvas.parentElement.replaceChild(image, canvas);
+    return {
+      canvas: canvas,
+      image: image
+    };
   });
 
+  // take dom snapshot
   var snapshot = agent.domSnapshot(document);
 
-  queryAll('[data-percy-canvas-image]').forEach(function (element) {
-    element.remove();
-  });
-
-  queryAll('[data-percy-modified-style]').forEach(function (element) {
-    element.setAttribute('style', element.getAttribute('data-percy-modified-style'));
-    element.removeAttribute('style');
+  // restore replaced canvases
+  replacements.forEach(function (replacement) {
+    replacement.canvas.parent.replaceChild(replacement.image, replacement.canvas);
   });
 
   return snapshot;
