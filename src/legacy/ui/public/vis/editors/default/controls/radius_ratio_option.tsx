@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -51,16 +52,20 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
 
   return (
     <EuiFormRow fullWidth={true} label={label}>
-      <EuiRange
-        compressed
-        fullWidth={true}
-        min={1}
-        max={100}
-        value={editorStateParams.radiusRatio || DEFAULT_VALUE}
-        onChange={e => setValue(editorStateParams, PARAM_NAME, parseFloat(e.target.value))}
-        showRange
-        showValue
-      />
+      {
+        // @ts-ignore: valueAppend does not exist in EuiRange prop types
+        <EuiRange
+          compressed
+          fullWidth={true}
+          min={1}
+          max={100}
+          value={editorStateParams.radiusRatio || DEFAULT_VALUE}
+          onChange={e => setValue(editorStateParams, PARAM_NAME, parseFloat(e.target.value))}
+          showRange
+          showValue
+          valueAppend="%"
+        />
+      }
     </EuiFormRow>
   );
 }
