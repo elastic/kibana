@@ -30,13 +30,12 @@ import { FetchNowProvider } from './fetch_now';
  * @param Promise
  * @constructor
  */
-export function FetchSoonProvider(Private, Promise) {
+export function FetchSoonProvider(Private, Promise, config) {
 
   const fetchNow = Private(FetchNowProvider);
 
-  const debouncedFetchNow = _.debounce(() => {
-    fetchNow(searchRequestQueue.getPending());
-  }, {
+  const fetch = () => fetchNow(searchRequestQueue.getPending());
+  const debouncedFetch = _.debounce(fetch, {
     wait: 10,
     maxWait: 50
   });
@@ -48,7 +47,7 @@ export function FetchSoonProvider(Private, Promise) {
    */
   this.fetchSearchRequests = (requests) => {
     requests.forEach(req => req._setFetchRequested());
-    debouncedFetchNow();
+    config.get('courier:batchSearches') ? debouncedFetch() : fetch();
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
