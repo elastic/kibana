@@ -8,27 +8,22 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { getIntegrationInfoByKey } from '../data';
 import { IntegrationInfo } from '../../common/types';
 
-interface MatchPackage {
-  match: {
-    params: {
-      pkgkey: string;
-    };
-  };
-}
-
-export function Detail({ match }: MatchPackage) {
-  const { pkgkey } = match.params;
+export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
-
   useEffect(
     () => {
-      getIntegrationInfoByKey(pkgkey).then(({ data }) => setInfo(data));
+      getIntegrationInfoByKey(props.package).then(setInfo);
     },
-    [pkgkey]
+    [props.package]
   );
 
   // don't have designs for loading/empty states
   if (!info) return null;
+
+  return <InfoPanel {...info} />;
+}
+
+function InfoPanel(info: IntegrationInfo) {
   const { description, name, version } = info;
 
   return (
