@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
 import { InternalCoreSetup } from 'src/core/server';
-import { metricPlugin } from './server/np/';
+import { metricsPlugin } from './server/np/';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -31,9 +31,8 @@ export default function(kibana: any) {
     require: ['kibana', 'elasticsearch'],
 
     uiExports: {
-      visTypes: ['plugins/metrics/kbn_vis_types'],
-      interpreter: ['plugins/metrics/tsvb_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      hacks: ['plugins/metrics/np'],
     },
 
     config(Joi: any) {
@@ -48,7 +47,7 @@ export default function(kibana: any) {
       const initializerContext = {} as PluginInitializerContext;
       const core = { http: { server } } as InternalCoreSetup;
 
-      metricPlugin(initializerContext).setup(core);
+      metricsPlugin(initializerContext).setup(core);
     },
   });
 }

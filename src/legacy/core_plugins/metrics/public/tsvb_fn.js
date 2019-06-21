@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MetricsRequestHandlerProvider } from './kbn_vis_types/request_handler';
@@ -75,5 +74,3 @@ export const tsvb = () => ({
     };
   },
 });
-
-functionsRegistry.register(tsvb);

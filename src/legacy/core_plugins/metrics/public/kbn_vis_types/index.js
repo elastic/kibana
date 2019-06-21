@@ -25,10 +25,6 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
 import { PANEL_TYPES } from '../../common/panel_types';
 
-// register the provider with the visTypes registry so that other know it exists
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-VisTypesRegistryProvider.register(MetricsVisProvider);
-
 export function MetricsVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const ReactEditorController = Private(ReactEditorControllerProvider).handler;

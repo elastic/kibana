@@ -17,9 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { MetricsPlugin } from './plugin';
+// @ts-ignore
+import { functionsRegistry } from 'plugins/interpreter/registries';
+// @ts-ignore
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+// @ts-ignore
+import { tsvb } from '../tsvb_fn';
+// @ts-ignore
+import { MetricsVisProvider } from '../kbn_vis_types';
 
-export function metricsPlugin(initializerContext: PluginInitializerContext) {
-  return new MetricsPlugin();
+export class Plugin {
+  public setup() {
+    functionsRegistry.register(tsvb);
+    // register the provider with the visTypes registry so that other know it exists
+    VisTypesRegistryProvider.register(MetricsVisProvider);
+  }
 }

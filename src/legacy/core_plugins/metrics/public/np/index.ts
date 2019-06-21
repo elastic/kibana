@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { MetricsPlugin } from './plugin';
+import { Plugin } from './plugin';
 
-export function metricsPlugin(initializerContext: PluginInitializerContext) {
-  return new MetricsPlugin();
-}
+new Plugin().setup();
