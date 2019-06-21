@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const PACKETS = i18n.translate('xpack.siem.kpiIpDetails.source.packetsTitle', {
-  defaultMessage: 'packets',
+  defaultMessage: 'Packets',
 });
 
 export const BYTES = i18n.translate('xpack.siem.kpiIpDetails.source.bytesTitle', {
-  defaultMessage: 'bytes',
+  defaultMessage: 'Bytes',
 });
 
 export const IN = i18n.translate('xpack.siem.kpiIpDetails.source.inTitle', {
@@ -23,9 +23,9 @@ export const OUT = i18n.translate('xpack.siem.kpiIpDetails.source.outTitle', {
 });
 
 export const CONNECTIONS = i18n.translate('xpack.siem.kpiIpDetails.source.connectionsTitle', {
-  defaultMessage: 'connections',
+  defaultMessage: 'Connections',
 });
 
 export const HOSTS = i18n.translate('xpack.siem.kpiIpDetails.source.hostsTitle', {
-  defaultMessage: 'hosts',
+  defaultMessage: 'Hosts',
 });

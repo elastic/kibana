@@ -31,18 +31,6 @@ const formatHistogramData = (
     : null;
 };
 
-const getConnections = (sourceConnection: number | null, destinationConnection: number | null) => {
-  if (sourceConnection != null && destinationConnection !== null)
-    return sourceConnection + destinationConnection;
-  else if (sourceConnection === null || destinationConnection !== null) {
-    return destinationConnection;
-  } else if (sourceConnection !== null || destinationConnection === null) {
-    return sourceConnection;
-  } else {
-    return null;
-  }
-};
-
 export class ElasticsearchKpiIpDetailsAdapter implements KpiIpDetailsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
@@ -58,12 +46,7 @@ export class ElasticsearchKpiIpDetailsAdapter implements KpiIpDetailsAdapter {
         body: [...generalQuery],
       }
     );
-    const sourceConnection = getOr(null, 'responses.0.aggregations.source.doc_count', response);
-    const destinationConnection = getOr(
-      null,
-      'responses.0.aggregations.destination.doc_count',
-      response
-    );
+
     const sourcePacketsHistogram = getOr(
       null,
       'responses.0.aggregations.source.packetsHistogram.buckets',
@@ -86,7 +69,7 @@ export class ElasticsearchKpiIpDetailsAdapter implements KpiIpDetailsAdapter {
     );
 
     return {
-      connections: getConnections(sourceConnection, destinationConnection),
+      connections: getOr(null, 'responses.0.aggregations.connections.value', response),
       hosts: getOr(null, 'responses.0.aggregations.destination.hosts.value', response),
       sourcePackets: getOr(null, 'responses.0.aggregations.source.packets.value', response),
       sourcePacketsHistogram: formatHistogramData(sourcePacketsHistogram),

@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { GetKpiIpDetailsQuery } from '../../../../plugins/siem/public/graphql/types';
-import { kpiIpDetailsQuery } from '../../../../plugins/siem/public/containers/kpi_ip_details/index.gql_query';
+import { GetKpiIpDetailsQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { kpiIpDetailsQuery } from '../../../../legacy/plugins/siem/public/containers/kpi_ip_details/index.gql_query';
 import { KbnTestProvider } from './types';
 
 const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
@@ -17,7 +17,7 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
       const expected = {
-        connections: 113,
+        connections: null,
         hosts: 1,
         sourcePackets: 1,
         sourcePacketsHistogram: [
@@ -141,7 +141,7 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
       const expected = {
-        connections: 1,
+        connections: null,
         hosts: 1,
         sourcePackets: 0,
         sourcePacketsHistogram: null,

@@ -35,6 +35,7 @@ export const mockRequest = {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1557445721842, to: 1557532121842 },
       filterQuery: '',
+      ip: '10.142.0.10',
     },
     query:
       'fragment KpiIpDetailsChartFields on KpiIpDetailsHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiIpDetailsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!, $ip: String!) {\n  source(id: $sourceId) {\n    id\n    KpiIpDetails(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex, ip: $ip) {\n      connections\n      hosts\n      sourcePackets\n      sourcePacketsHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      sourceByte\n      sourceByteHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      destinationPackets\n      destinationPacketsHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      destinationByte\n      destinationByteHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
@@ -62,6 +63,9 @@ export const mockResponse = {
         hits: [],
       },
       aggregations: {
+        connections: {
+          value: 13368,
+        },
         destination: {
           doc_count: 6454,
           packetsHistogram: {
