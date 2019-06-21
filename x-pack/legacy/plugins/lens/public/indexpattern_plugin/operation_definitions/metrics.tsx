@@ -75,11 +75,11 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>(
 
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>(
   'max',
-  i18n.translate('xpack.lens.indexPattern.min', {
+  i18n.translate('xpack.lens.indexPattern.max', {
     defaultMessage: 'Maximum',
   }),
   name =>
-    i18n.translate('xpack.lens.indexPattern.minOf', {
+    i18n.translate('xpack.lens.indexPattern.maxOf', {
       defaultMessage: 'Maximum of {name}',
       values: { name },
     })
@@ -87,11 +87,11 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>(
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>(
   'avg',
-  i18n.translate('xpack.lens.indexPattern.min', {
+  i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',
   }),
   name =>
-    i18n.translate('xpack.lens.indexPattern.minOf', {
+    i18n.translate('xpack.lens.indexPattern.avgOf', {
       defaultMessage: 'Average of {name}',
       values: { name },
     })
@@ -99,11 +99,11 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>(
 
 export const sumOperation = buildMetricOperation<SumIndexPatternColumn>(
   'sum',
-  i18n.translate('xpack.lens.indexPattern.min', {
+  i18n.translate('xpack.lens.indexPattern.sum', {
     defaultMessage: 'Sum',
   }),
   name =>
-    i18n.translate('xpack.lens.indexPattern.minOf', {
+    i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
       values: { name },
     })
