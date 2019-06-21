@@ -30,6 +30,9 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
         const options = req.payload;
         // First we get the groupings from a composite aggregation
         const response = await getGroupings(search, options);
+        if (response.pageInfo.total === 0) {
+          return response;
+        }
         // Then we take the results and fill in the data from TSVB with the
         // user's custom metrics
         const seriesWithMetrics = await Promise.all(
