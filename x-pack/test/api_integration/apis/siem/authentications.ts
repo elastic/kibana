@@ -40,7 +40,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
             pagination: {
               activePage: 0,
               cursorStart: 0,
-              fakePossibleCount: 5,
+              fakePossibleCount: 3,
               querySize: 1,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -50,7 +50,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);
-          expect(authentications.pageInfo.fakeTotalCount).to.equal(5);
+          expect(authentications.pageInfo.fakeTotalCount).to.equal(3);
         });
     });
 
