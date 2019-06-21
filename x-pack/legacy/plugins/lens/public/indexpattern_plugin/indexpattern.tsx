@@ -11,7 +11,7 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import uuid from 'uuid';
-import { Datasource, DataType } from '../../public';
+import { Datasource, DataType } from '..';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
