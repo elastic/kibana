@@ -49,7 +49,7 @@ export function execInProjects(
       title: project.name,
     })),
     {
-      concurrent: Math.min(4, (os.cpus() || []).length / 2 || 1) || false,
+      concurrent: Math.min(4, Math.round((os.cpus() || []).length / 2) || 1) || false,
       exitOnError: false,
     }
   );
