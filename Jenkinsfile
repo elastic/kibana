@@ -19,12 +19,27 @@ pipeline {
           for (String x: readFile('env.txt').split("\r?\n")) {
             println "# ENV VAR: ${x}"
           }
-        }
+        } 
         dir("${env.BASE_DIR}"){
             sh './.ci/run.sh'
-            stash allowEmpty: true, name: 'source', useDefaultExcludes: false
         }
+        stash allowEmpty: true, name: 'source', useDefaultExcludes: true
       }
+    }
+    stage('Static Analysis') {
+
+    }
+    stage('Unit Test') {
+
+    }
+    stage('Component Integration Tests') {
+
+    }
+    stage('Functional Tests') {
+
+    }
+    stage('Finish') {
+      
     }
   }
 }
