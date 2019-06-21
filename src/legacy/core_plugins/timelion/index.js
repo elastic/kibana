@@ -34,6 +34,9 @@ export default function (kibana) {
         ui: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),
+        graphiteUrls: Joi.array().items(
+          Joi.string().uri({ scheme: ['http', 'https'] }),
+        ).default([]),
       }).default();
     },
 
@@ -160,11 +163,20 @@ export default function (kibana) {
           name: i18n.translate('timelion.uiSettings.graphiteURLLabel', {
             defaultMessage: 'Graphite URL'
           }),
-          value: 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+          value: (server) => {
+            const urls = server.config().get('timelion.graphiteUrls');
+            if (urls.length === 0) {
+              return null;
+            } else {
+              return urls[0];
+            }
+          },
           description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
             defaultMessage: '{experimentalLabel} The URL of your graphite host',
             values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` }
           }),
+          type: 'select',
+          options: (server) => (server.config().get('timelion.graphiteUrls')),
           category: ['timelion'],
         },
         'timelion:quandl.key': {
