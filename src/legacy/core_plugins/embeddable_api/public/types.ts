@@ -24,15 +24,6 @@ export interface Trigger {
   actionIds: string[];
 }
 
-// TODO: use the official base Registry interface when available
-export interface IRegistry<T> {
-  get(id: string): T | undefined;
-  length(): number;
-  set(id: string, item: T): void;
-  reset(): void;
-  getAll(): T[];
-}
-
 export interface PropertySpec {
   displayName: string;
   accessPath: string;
@@ -48,18 +39,4 @@ export interface OutputSpec {
 export enum ViewMode {
   EDIT = 'edit',
   VIEW = 'view',
-}
-export interface TimeRange {
-  to: string;
-  from: string;
-}
-
-export enum QueryLanguageType {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
-
-export interface Query {
-  language: QueryLanguageType;
-  query: string;
 }
