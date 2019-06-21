@@ -103,7 +103,7 @@ class PdfMaker {
           [ img ],
         ],
       },
-      layout: 'simpleBorder'
+      layout: title ? 'simpleBorder' : 'noBorder'
     };
 
     contents.push(wrappedImg);
