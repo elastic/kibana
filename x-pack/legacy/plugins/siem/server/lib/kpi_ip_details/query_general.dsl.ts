@@ -74,6 +74,11 @@ export const buildGeneralQuery = ({
     },
     {
       aggs: {
+        connection: {
+          cardinality: {
+            field: 'network.community_id',
+          },
+        },
         ...getAggs('source', ip),
         ...getAggs('destination', ip),
       },
