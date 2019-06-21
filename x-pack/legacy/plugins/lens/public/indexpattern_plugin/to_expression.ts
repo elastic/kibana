@@ -40,8 +40,8 @@ export function toExpression(state: IndexPatternPrivateState) {
 
     return `esaggs
       index="${state.currentIndexPatternId}"
-      metricsAtAllLevels="false"
-      partialRows="false"
+      metricsAtAllLevels=false
+      partialRows=false
       aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 
