@@ -16,13 +16,20 @@ import { HighlightedInterval } from './highlighted_interval';
 import { TimeRuler } from './time_ruler';
 import { SummaryBucket } from './types';
 
+interface Interval {
+  end: number;
+  start: number;
+}
+
+interface DragRecord {
+  startY: number;
+  currentY: number | null;
+}
+
 interface LogMinimapProps {
   className?: string;
   height: number;
-  highlightedInterval: {
-    end: number;
-    start: number;
-  } | null;
+  highlightedInterval: Interval | null;
   jumpToTarget: (params: LogEntryTime) => any;
   intervalSize: number;
   summaryBuckets: SummaryBucket[];
@@ -31,9 +38,39 @@ interface LogMinimapProps {
   width: number;
 }
 
-export class LogMinimap extends React.Component<LogMinimapProps> {
-  public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
-    const svgPosition = event.currentTarget.getBoundingClientRect();
+interface LogMinimapState {
+  prevTarget: number | null;
+  drag: DragRecord | null;
+  svgPosition: ClientRect;
+}
+
+export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
+  constructor(props: LogMinimapProps) {
+    super(props);
+    this.state = {
+      prevTarget: props.target,
+      drag: null,
+      svgPosition: {
+        width: 0,
+        height: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      },
+    };
+  }
+
+  public static getDerivedStateFromProps(
+    { target }: LogMinimapProps,
+    { prevTarget }: LogMinimapState
+  ) {
+    if (target !== prevTarget) return { drag: null };
+    return null;
+  }
+
+  public handleClick = (event: MouseEvent) => {
+    const { svgPosition } = this.state;
     const clickedYPosition = event.clientY - svgPosition.top;
     const clickedTime = Math.floor(this.getYScale().invert(clickedYPosition));
 
@@ -43,9 +80,55 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
     });
   };
 
+  private handleMouseDown: React.MouseEventHandler<SVGSVGElement> = event => {
+    const { clientY } = event;
+    const svgPosition = event.currentTarget.getBoundingClientRect();
+    this.setState({
+      drag: {
+        startY: clientY,
+        currentY: null,
+      },
+      svgPosition,
+    });
+    window.addEventListener('mousemove', this.handleDragMove);
+    window.addEventListener('mouseup', this.handleMouseUp);
+  };
+
+  private handleMouseUp = (event: MouseEvent) => {
+    window.removeEventListener('mousemove', this.handleDragMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
+
+    const { drag, svgPosition } = this.state;
+    if (!drag || !drag.currentY) {
+      this.handleClick(event);
+      return;
+    }
+    const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
+    const startYPosition = drag.startY - svgPosition.top;
+    const endYPosition = event.clientY - svgPosition.top;
+    const startTime = getTime(startYPosition);
+    const endTime = getTime(endYPosition);
+    const timeDifference = endTime - startTime;
+    const newTime = (this.props.target || 0) - timeDifference;
+    this.props.jumpToTarget({
+      tiebreaker: 0,
+      time: newTime,
+    });
+  };
+
+  private handleDragMove = (event: MouseEvent) => {
+    const { drag } = this.state;
+    if (!drag) return;
+    this.setState({
+      drag: {
+        ...drag,
+        currentY: event.clientY,
+      },
+    });
+  };
+
   public getYScale = () => {
     const { height, intervalSize, target } = this.props;
-
     const domainStart = target ? target - intervalSize / 2 : 0;
     const domainEnd = target ? target + intervalSize / 2 : 0;
     return scaleLinear()
@@ -58,7 +141,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
 
     const [minTime] = this.getYScale().domain();
 
-    return ((time - minTime) * height) / intervalSize;
+    return ((time - minTime) * height) / intervalSize; //
   };
 
   public render() {
@@ -71,8 +154,10 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
       // searchSummaryBuckets,
       width,
     } = this.props;
-
+    const { drag } = this.state;
     const [minTime, maxTime] = this.getYScale().domain();
+
+    const minimapTransform = !drag || !drag.currentY ? null : drag.currentY - drag.startY;
 
     return (
       <svg
@@ -81,18 +166,21 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
         preserveAspectRatio="none"
         viewBox={`0 0 ${width} ${height}`}
         width={width}
-        onClick={this.handleClick}
+        onMouseDown={this.handleMouseDown}
       >
-        <MinimapBackground x={width / 2} y="0" width={width / 2} height={height} />
-        <DensityChart
-          buckets={summaryBuckets}
-          start={minTime}
-          end={maxTime}
-          width={width}
-          height={height}
-        />
-        <MinimapBorder x1={width / 2} y1={0} x2={width / 2} y2={height} />
-        <TimeRuler start={minTime} end={maxTime} width={width} height={height} tickCount={12} />
+        <g transform={minimapTransform ? `translate(0, ${minimapTransform})` : undefined}>
+          <MinimapBackground x={width / 2} y="0" width={width / 2} height={height} />
+          <DensityChart
+            buckets={summaryBuckets}
+            start={minTime}
+            end={maxTime}
+            width={width}
+            height={height}
+          />
+
+          <MinimapBorder x1={width / 2} y1={0} x2={width / 2} y2={height} />
+          <TimeRuler start={minTime} end={maxTime} width={width} height={height} tickCount={12} />
+        </g>
         {highlightedInterval ? (
           <HighlightedInterval
             end={highlightedInterval.end}
