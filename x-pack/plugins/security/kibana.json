@@ -1,0 +1,8 @@
+{
+  "id": "security",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "security"],
+  "server": false,
+  "ui": true
+}
