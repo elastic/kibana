@@ -26,7 +26,7 @@ export function Home() {
         <h3>Available Integrations</h3>
       </EuiText>
       <EuiSpacer />
-      <IntegrationListGrid list={list} />
+      {list ? <IntegrationListGrid list={list} /> : null}
     </EuiPanel>
   );
 }
