@@ -7,7 +7,7 @@ pipeline {
     BASE_DIR = "."
     CI = true
     HOME = "${JENKINS_HOME}"
-    LC_ALL = en_US.UTF-8
+    LC_ALL = "en_US.UTF-8"
     // PR_SOURCE_BRANCH = "${ghprbSourceBranch}"
     // PR_TARGET_BRANCH = "${ghprbTargetBranch}"
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
