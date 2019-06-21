@@ -79,12 +79,13 @@ export const AnomalyScores = React.memo<Args>(({ anomalies, startDate, endDate, 
   }
   const topScores = getTopSeverityJobs(anomalies.anomalies);
   const items = topScores.map((score, index) => {
-    const id = escapeDataProviderId(`anomaly-scores-${score.jobId}`);
+    const key = `${score.jobId}-${score.severity}-${score.entityName}-${score.entityValue}`;
+    const id = escapeDataProviderId(`anomaly-scores-${key}`);
     return (
-      <EuiToolTip key={score.jobId} title={score.jobId} content={formatToolTip(score)}>
+      <EuiToolTip key={key} title={score.jobId} content={formatToolTip(score)}>
         <EuiLink href={createLink(score, startDate, endDate)} target="_blank">
           <DraggableWrapper
-            key={score.jobId}
+            key={key}
             dataProvider={{
               and: [],
               enabled: true,

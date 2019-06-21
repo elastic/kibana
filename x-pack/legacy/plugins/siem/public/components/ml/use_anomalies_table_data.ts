@@ -74,6 +74,7 @@ export const useAnomaliesTableData = ({ influencers, startDate, endDate }: Args)
 
   useEffect(
     () => {
+      setLoading(true);
       fetchFunc(influencers, startDate, endDate);
     },
     [influencersToString(influencers), startDate, endDate]
