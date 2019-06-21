@@ -162,6 +162,23 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
       )}
 
       <EuiFormRow
+        label={i18n.translate('xpack.lens.xyChart.splitSeries', {
+          defaultMessage: 'Split series',
+        })}
+      >
+        <NativeRenderer
+          data-test-subj="lnsXY_splitDimensionPanel"
+          render={datasource.renderDimensionPanel}
+          nativeProps={{
+            columnId: state.splitSeriesAccessors[0],
+            dragDropContext: props.dragDropContext,
+            filterOperations: op => op.isBucketed === true,
+            suggestedPriority: 0,
+          }}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
         label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
           defaultMessage: 'X Axis',
         })}

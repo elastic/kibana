@@ -44,6 +44,9 @@ export function WorkspacePanel({
     );
 
     const suggestions = getSuggestions(
+      activeDatasource.getPublicAPI(datasourceState, newState =>
+        dispatch({ type: 'UPDATE_DATASOURCE_STATE', newState })
+      ),
       datasourceSuggestions,
       visualizationMap,
       activeVisualizationId,

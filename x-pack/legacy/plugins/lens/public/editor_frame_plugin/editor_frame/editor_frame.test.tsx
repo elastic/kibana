@@ -446,7 +446,6 @@ Object {
         setDatasourceState(updatedState);
       });
 
-      expect(mockDatasource.getPublicAPI).toHaveBeenCalledTimes(2);
       expect(mockDatasource.getPublicAPI).toHaveBeenLastCalledWith(
         updatedState,
         expect.any(Function)

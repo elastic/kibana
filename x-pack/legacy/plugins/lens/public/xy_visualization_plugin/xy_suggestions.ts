@@ -6,7 +6,13 @@
 
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
+import {
+  SuggestionRequest,
+  VisualizationSuggestion,
+  TableColumn,
+  TableSuggestion,
+  DatasourcePublicAPI,
+} from '../types';
 import { State } from './types';
 
 const columnSortOrder = {
@@ -35,10 +41,13 @@ export function getSuggestions(
         columns.some(col => col.operation.dataType === 'number') &&
         !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
     )
-    .map(table => getSuggestionForColumns(table));
+    .map(table => getSuggestionForColumns(opts.datasource, table));
 }
 
-function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestion<State> {
+function getSuggestionForColumns(
+  datasource: DatasourcePublicAPI,
+  table: TableSuggestion
+): VisualizationSuggestion<State> {
   const [buckets, values] = partition(
     prioritizeColumns(table.columns),
     col => col.operation.isBucketed
@@ -46,10 +55,10 @@ function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestio
 
   if (buckets.length >= 1) {
     const [x, splitBy] = buckets;
-    return getSuggestion(table.datasourceSuggestionId, x, values, splitBy);
+    return getSuggestion(datasource, table.datasourceSuggestionId, x, values, splitBy);
   } else {
     const [x, ...yValues] = values;
-    return getSuggestion(table.datasourceSuggestionId, x, yValues);
+    return getSuggestion(datasource, table.datasourceSuggestionId, x, yValues);
   }
 }
 
@@ -63,6 +72,7 @@ function prioritizeColumns(columns: TableColumn[]) {
 }
 
 function getSuggestion(
+  datasource: DatasourcePublicAPI,
   datasourceSuggestionId: number,
   xValue: TableColumn,
   yValues: TableColumn[],
@@ -83,7 +93,8 @@ function getSuggestion(
       title,
       legend: { isVisible: true, position: Position.Right },
       seriesType: isDate ? 'line' : 'bar',
-      splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
+      splitSeriesAccessors:
+        splitBy && isDate ? [splitBy.columnId] : [datasource.generateColumnId()],
       stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
       x: {
         accessor: xValue.columnId,

@@ -145,6 +145,7 @@ export interface VisualizationProps<T = unknown> {
 
 export interface SuggestionRequest<T = unknown> {
   // It is up to the Visualization to rank these tables
+  datasource: DatasourcePublicAPI;
   tables: TableSuggestion[];
   state?: T; // State is only passed if the visualization is active
 }

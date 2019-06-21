@@ -53,7 +53,9 @@ Object {
     "position": "right",
   },
   "seriesType": "line",
-  "splitSeriesAccessors": Array [],
+  "splitSeriesAccessors": Array [
+    "test-id1",
+  ],
   "stackAccessors": Array [],
   "title": "Empty XY Chart",
   "x": Object {

@@ -5,10 +5,16 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import { TableColumn, VisualizationSuggestion } from '../types';
+import { TableColumn, VisualizationSuggestion, DatasourcePublicAPI } from '../types';
 import { State } from './types';
+import { createMockDatasource } from '../editor_frame_plugin/mocks';
 
 describe('xy_suggestions', () => {
+  const datasource: DatasourcePublicAPI = {
+    ...createMockDatasource().getPublicAPI({}, jest.fn()),
+    generateColumnId: jest.fn(() => 'testcol'),
+  };
+
   function numCol(columnId: string): TableColumn {
     return {
       columnId,
@@ -68,6 +74,7 @@ describe('xy_suggestions', () => {
 
     expect(
       getSuggestions({
+        datasource,
         tables: [
           { datasourceSuggestionId: 0, isMultiRow: true, columns: [dateCol('a')] },
           { datasourceSuggestionId: 1, isMultiRow: true, columns: [strCol('foo'), strCol('bar')] },
@@ -80,6 +87,7 @@ describe('xy_suggestions', () => {
 
   test('suggests a basic x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
+      datasource,
       tables: [
         {
           datasourceSuggestionId: 0,
@@ -93,7 +101,9 @@ describe('xy_suggestions', () => {
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
   "seriesType": "line",
-  "splitSeriesAccessors": Array [],
+  "splitSeriesAccessors": Array [
+    "testcol",
+  ],
   "stackAccessors": Array [],
   "x": "date",
   "y": Array [
@@ -105,6 +115,7 @@ Object {
 
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
+      datasource,
       tables: [
         {
           datasourceSuggestionId: 1,
@@ -133,6 +144,7 @@ Object {
 
   test('supports multiple suggestions', () => {
     const [s1, s2, ...rest] = getSuggestions({
+      datasource,
       tables: [
         {
           datasourceSuggestionId: 0,
@@ -152,7 +164,9 @@ Object {
 Array [
   Object {
     "seriesType": "line",
-    "splitSeriesAccessors": Array [],
+    "splitSeriesAccessors": Array [
+      "testcol",
+    ],
     "stackAccessors": Array [],
     "x": "date",
     "y": Array [
@@ -161,7 +175,9 @@ Array [
   },
   Object {
     "seriesType": "bar",
-    "splitSeriesAccessors": Array [],
+    "splitSeriesAccessors": Array [
+      "testcol",
+    ],
     "stackAccessors": Array [],
     "x": "country",
     "y": Array [
@@ -174,6 +190,7 @@ Array [
 
   test('handles two numeric values', () => {
     const [suggestion] = getSuggestions({
+      datasource,
       tables: [
         {
           datasourceSuggestionId: 1,
@@ -186,7 +203,9 @@ Array [
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
   "seriesType": "bar",
-  "splitSeriesAccessors": Array [],
+  "splitSeriesAccessors": Array [
+    "testcol",
+  ],
   "stackAccessors": Array [],
   "x": "quantity",
   "y": Array [
@@ -198,6 +217,7 @@ Object {
 
   test('handles unbucketed suggestions', () => {
     const [suggestion] = getSuggestions({
+      datasource,
       tables: [
         {
           datasourceSuggestionId: 1,
@@ -221,7 +241,9 @@ Object {
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
   "seriesType": "bar",
-  "splitSeriesAccessors": Array [],
+  "splitSeriesAccessors": Array [
+    "testcol",
+  ],
   "stackAccessors": Array [],
   "x": "mybool",
   "y": Array [

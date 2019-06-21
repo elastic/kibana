@@ -34,7 +34,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           showGridlines: false,
           title: 'Y',
         },
-        splitSeriesAccessors: [],
+        splitSeriesAccessors: [datasource.generateColumnId()],
         stackAccessors: [],
       }
     );

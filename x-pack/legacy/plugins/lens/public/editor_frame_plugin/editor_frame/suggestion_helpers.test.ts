@@ -5,19 +5,25 @@
  */
 
 import { getSuggestions } from './suggestion_helpers';
-import { createMockVisualization } from '../mocks';
-import { TableSuggestion } from '../../types';
+import { createMockVisualization, createMockDatasource } from '../mocks';
+import { TableSuggestion, DatasourcePublicAPI } from '../../types';
 
 const generateSuggestion = (datasourceSuggestionId: number = 1, state = {}) => ({
   state,
   table: { datasourceSuggestionId, columns: [], isMultiRow: false },
 });
 
+const mockDatasource: DatasourcePublicAPI = {
+  ...createMockDatasource().getPublicAPI({}, jest.fn()),
+  generateColumnId: () => 'splitcolid',
+};
+
 describe('suggestion helpers', () => {
   it('should return suggestions array', () => {
     const mockVisualization = createMockVisualization();
     const suggestedState = {};
     const suggestions = getSuggestions(
+      mockDatasource,
       [generateSuggestion()],
       {
         vis1: {
@@ -38,6 +44,7 @@ describe('suggestion helpers', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const suggestions = getSuggestions(
+      mockDatasource,
       [generateSuggestion()],
       {
         vis1: {
@@ -64,6 +71,7 @@ describe('suggestion helpers', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const suggestions = getSuggestions(
+      mockDatasource,
       [generateSuggestion()],
       {
         vis1: {
@@ -94,6 +102,7 @@ describe('suggestion helpers', () => {
     const table1: TableSuggestion = { datasourceSuggestionId: 0, columns: [], isMultiRow: true };
     const table2: TableSuggestion = { datasourceSuggestionId: 1, columns: [], isMultiRow: true };
     getSuggestions(
+      mockDatasource,
       [{ state: {}, table: table1 }, { state: {}, table: table2 }],
       {
         vis1: mockVisualization1,
@@ -114,6 +123,7 @@ describe('suggestion helpers', () => {
     const tableState1 = {};
     const tableState2 = {};
     const suggestions = getSuggestions(
+      mockDatasource,
       [generateSuggestion(1, tableState1), generateSuggestion(1, tableState2)],
       {
         vis1: {
@@ -143,6 +153,7 @@ describe('suggestion helpers', () => {
     const mockVisualization2 = createMockVisualization();
     const currentState = {};
     getSuggestions(
+      mockDatasource,
       [generateSuggestion(1), generateSuggestion(2)],
       {
         vis1: mockVisualization1,

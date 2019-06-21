@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Visualization, DatasourceSuggestion } from '../../types';
+import { Visualization, DatasourceSuggestion, DatasourcePublicAPI } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -24,6 +24,7 @@ export interface Suggestion {
  * action with `toSwitchAction` and dispatching it
  */
 export function getSuggestions(
+  datasource: DatasourcePublicAPI,
   datasourceTableSuggestions: DatasourceSuggestion[],
   visualizationMap: Record<string, Visualization>,
   activeVisualizationId: string | null,
@@ -36,6 +37,7 @@ export function getSuggestions(
       .map(([visualizationId, visualization]) => {
         return visualization
           .getSuggestions({
+            datasource,
             tables: datasourceTables,
             state: visualizationId === activeVisualizationId ? visualizationState : undefined,
           })
