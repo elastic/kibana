@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './brush_event.test.mocks';
+
 jest.mock('ui/chrome',
   () => ({
     getBasePath: () => `/some/base/path`,
