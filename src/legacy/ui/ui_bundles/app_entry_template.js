@@ -39,6 +39,7 @@ import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
+import 'fast-text-encoding';
 
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
