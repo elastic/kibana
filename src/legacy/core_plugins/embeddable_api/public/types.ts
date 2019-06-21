@@ -24,15 +24,6 @@ export interface Trigger {
   actionIds: string[];
 }
 
-// TODO: use the official base Registry interface when available
-export interface IRegistry<T> {
-  get(id: string): T | undefined;
-  length(): number;
-  set(id: string, item: T): void;
-  reset(): void;
-  getAll(): T[];
-}
-
 export interface PropertySpec {
   displayName: string;
   accessPath: string;
