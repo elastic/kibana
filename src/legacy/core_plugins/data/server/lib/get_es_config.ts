@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export * from './get_es_config';
-export * from './get_index_pattern';
-export * from './register_default_search_strategy';
-export * from './search';
-export * from './search_strategy_registry';
+import { first, map } from 'rxjs/operators';
+import KbnServer, { Server } from '../../../../server/kbn_server';
+
+export function getEsShardTimeout(server: Server) {
+  const kbnServer = (server as unknown) as KbnServer;
+  const shardTimeout$ = kbnServer.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(
+    first(),
+    map(config => config.shardTimeout.asMilliseconds())
+  );
+  return shardTimeout$.toPromise();
+}
