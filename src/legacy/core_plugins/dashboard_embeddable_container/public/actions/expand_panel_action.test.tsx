@@ -19,11 +19,7 @@
 
 import '../np_core.test.mocks';
 
-import {
-  isErrorEmbeddable,
-  createRegistry,
-  EmbeddableFactory,
-} from '../../../embeddable_api/public';
+import { isErrorEmbeddable, EmbeddableFactory } from '../../../embeddable_api/public';
 import { ExpandPanelAction } from './expand_panel_action';
 import {
   ContactCardEmbeddable,
@@ -35,7 +31,7 @@ import {
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
-const embeddableFactories = createRegistry<EmbeddableFactory>();
+const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
 
 let container: DashboardContainer;

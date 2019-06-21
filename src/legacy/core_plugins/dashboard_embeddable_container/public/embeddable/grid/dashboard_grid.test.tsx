@@ -26,7 +26,7 @@ import sizeMe from 'react-sizeme';
 
 import { skip } from 'rxjs/operators';
 
-import { createRegistry, EmbeddableFactory } from '../../../../embeddable_api/public';
+import { EmbeddableFactory } from '../../../../embeddable_api/public';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -39,7 +39,7 @@ import { getSampleDashboardInput } from '../../test_helpers';
 let dashboardContainer: DashboardContainer | undefined;
 
 function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   dashboardContainer = new DashboardContainer(
     getSampleDashboardInput({

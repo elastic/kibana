@@ -34,7 +34,6 @@ import {
   isErrorEmbeddable,
   EmbeddableFactory,
   IEmbeddable,
-  IRegistry,
 } from '../../../embeddable_api/public/index';
 
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
@@ -76,7 +75,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    embeddableFactories: IRegistry<EmbeddableFactory>,
+    embeddableFactories: Map<string, EmbeddableFactory>,
     parent?: Container
   ) {
     super(

@@ -28,7 +28,6 @@ import {
   triggerRegistry,
   CONTEXT_MENU_TRIGGER,
   attachAction,
-  createRegistry,
   EmbeddableFactory,
 } from '../../../embeddable_api/public';
 import { DashboardContainer } from './dashboard_container';
@@ -50,7 +49,7 @@ import {
 } from '../../../embeddable_api/public/test_samples';
 
 test('DashboardContainer initializes embeddables', async done => {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(
     getSampleDashboardInput({
@@ -83,7 +82,7 @@ test('DashboardContainer initializes embeddables', async done => {
 });
 
 test('DashboardContainer.addNewEmbeddable', async () => {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(getSampleDashboardInput(), embeddableFactories);
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
@@ -106,7 +105,7 @@ test('DashboardContainer.addNewEmbeddable', async () => {
 });
 
 test('Container view mode change propagates to existing children', async () => {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(
     getSampleDashboardInput({
@@ -128,7 +127,7 @@ test('Container view mode change propagates to existing children', async () => {
 });
 
 test('Container view mode change propagates to new children', async () => {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(getSampleDashboardInput(), embeddableFactories);
   const embeddable = await container.addNewEmbeddable<
@@ -154,7 +153,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     actionId: editModeAction.id,
   });
 
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(
     getSampleDashboardInput({ viewMode: ViewMode.VIEW }),

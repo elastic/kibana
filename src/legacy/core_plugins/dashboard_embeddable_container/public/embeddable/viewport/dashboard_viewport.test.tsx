@@ -32,7 +32,7 @@ import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '../../../../embeddable_api/public/test_samples';
-import { EmbeddableFactory, createRegistry } from '../../../../embeddable_api/public';
+import { EmbeddableFactory } from '../../../../embeddable_api/public';
 
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer } from '../dashboard_container';
@@ -41,7 +41,7 @@ import { getSampleDashboardInput } from '../../test_helpers';
 let dashboardContainer: DashboardContainer | undefined;
 
 function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportProps {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   dashboardContainer = new DashboardContainer(
     getSampleDashboardInput({

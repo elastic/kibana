@@ -22,12 +22,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   Action,
-  actionRegistry,
   IEmbeddable,
-  CONTEXT_MENU_TRIGGER,
-  triggerRegistry,
   ActionContext,
-  attachAction,
   IncompatibleActionError,
 } from '../../../embeddable_api/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
@@ -98,10 +94,3 @@ export class ExpandPanelAction extends Action {
     });
   }
 }
-
-actionRegistry.set(EXPAND_PANEL_ACTION, new ExpandPanelAction());
-
-attachAction(triggerRegistry, {
-  triggerId: CONTEXT_MENU_TRIGGER,
-  actionId: EXPAND_PANEL_ACTION,
-});

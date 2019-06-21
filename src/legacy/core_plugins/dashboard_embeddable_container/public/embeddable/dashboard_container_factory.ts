@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
+import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_finder';
+import { SavedObjectAttributes } from 'target/types/server';
 import {
   ContainerOutput,
   embeddableFactories,
@@ -36,9 +37,24 @@ export class DashboardContainerFactory extends EmbeddableFactory<
 > {
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
+  private allowEditing: boolean;
+
+  constructor({
+    savedObjectMetaData,
+    capabilities,
+  }: {
+    savedObjectMetaData?: SavedObjectMetaData<SavedObjectAttributes>;
+    capabilities: {
+      showWriteControls: boolean;
+      createNew: boolean;
+    };
+  }) {
+    super({ savedObjectMetaData });
+    this.allowEditing = capabilities.createNew && capabilities.showWriteControls;
+  }
 
   public isEditable() {
-    return capabilities.get().dashboard.save as boolean;
+    return this.allowEditing;
   }
 
   public getDisplayName() {
@@ -62,5 +78,3 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     return new DashboardContainer(initialInput, embeddableFactories, parent);
   }
 }
-
-embeddableFactories.set(DASHBOARD_CONTAINER_TYPE, new DashboardContainerFactory());
