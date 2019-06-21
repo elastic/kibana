@@ -55,7 +55,7 @@ export const MetricsExplorerCharts = injectI18n(
       );
     }
 
-    if (!data || data.series.length === 0) {
+    if (!data || data.pageInfo.total === 0) {
       return (
         <NoData
           titleText={intl.formatMessage({
