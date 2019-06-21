@@ -19,7 +19,7 @@
 
 import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfig, Vis } from 'ui/vis';
+import { AggConfig, Vis, VisState } from 'ui/vis';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
@@ -34,6 +34,7 @@ interface ParamInstanceBase {
   config: any;
   editorConfig: EditorConfig;
   responseValueAggs: AggConfig[] | null;
+  state: VisState;
 }
 
 export interface ParamInstance extends ParamInstanceBase {
@@ -45,7 +46,7 @@ export interface ParamInstance extends ParamInstanceBase {
 }
 
 function getAggParamsToRender(
-  { agg, config, editorConfig, responseValueAggs }: ParamInstanceBase,
+  { agg, config, editorConfig, responseValueAggs, state }: ParamInstanceBase,
   vis: Vis
 ) {
   const params = {
@@ -94,6 +95,7 @@ function getAggParamsToRender(
         indexedFields,
         paramEditor: param.editorComponent,
         responseValueAggs,
+        state,
         value: agg.params[param.name],
         visName: vis.type.name,
       } as ParamInstance);
@@ -112,9 +114,6 @@ function getError(agg: AggConfig, aggIsTooLow: boolean) {
         values: { schema: agg.schema.title },
       })
     );
-  }
-  if (agg.error) {
-    errors.push(agg.error);
   }
   if (agg.schema.deprecate) {
     errors.push(

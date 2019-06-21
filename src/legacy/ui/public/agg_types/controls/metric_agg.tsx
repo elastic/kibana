@@ -18,8 +18,10 @@
  */
 
 import React, { useEffect } from 'react';
+import { findLast } from 'lodash';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AggConfig } from 'ui/vis';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { safeMakeLabel, isCompatibleAggregation } from '../agg_utils';
 
@@ -30,6 +32,7 @@ const EMPTY_VALUE = 'EMPTY_VALUE';
 function MetricAggParamEditor({
   agg,
   value,
+  state,
   showValidation,
   setValue,
   setValidity,
@@ -62,6 +65,57 @@ function MetricAggParamEditor({
       }
     },
     [responseValueAggs]
+  );
+
+  useEffect(
+    () => {
+      // check buckets
+      const lastBucket: AggConfig = findLast(
+        state ? state.aggs : [],
+        aggr => aggr.type && aggr.type.type === 'buckets'
+      );
+      const bucketHasType = lastBucket && lastBucket.type;
+      const bucketIsHistogram =
+        bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
+      const canUseAggregation = lastBucket && bucketIsHistogram;
+
+      // remove errors on all buckets
+      if (state) {
+        state.aggs.forEach((aggr: AggConfig) => {
+          if (aggr.error) {
+            delete aggr.error;
+          }
+        });
+      }
+
+      if (canUseAggregation) {
+        lastBucket.params.min_doc_count = lastBucket.type.name === 'histogram' ? 1 : 0;
+      } else {
+        if (lastBucket) {
+          lastBucket.error = i18n.translate(
+            'common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage',
+            {
+              defaultMessage:
+                'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
+              values: { type: agg.type.title },
+              description: 'Date Histogram and Histogram should not be translated',
+            }
+          );
+        }
+      }
+
+      return () => {
+        const lastBckt = findLast(
+          state ? state.aggs : [],
+          (aggr: AggConfig) => aggr.type && aggr.type.type === 'buckets'
+        );
+
+        if (lastBckt && lastBckt.error) {
+          delete lastBckt.error;
+        }
+      };
+    },
+    [value, responseValueAggs]
   );
 
   const options = responseValueAggs

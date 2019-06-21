@@ -21,6 +21,7 @@ import { AggParam } from '../../../../agg_types';
 import { AggConfig } from '../../../agg_config';
 import { FieldParamType } from '../../../../agg_types/param_types';
 import { EditorConfig } from '../../config/types';
+import { VisState } from '../../../vis';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it
@@ -34,6 +35,7 @@ export interface AggParamCommonProps<T> {
   editorConfig: EditorConfig;
   indexedFields?: FieldParamType[];
   showValidation: boolean;
+  state?: VisState;
   value: T;
   responseValueAggs: AggConfig[] | null;
   visName: string;
