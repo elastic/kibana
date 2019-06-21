@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
@@ -50,6 +50,13 @@ export const MetricsExplorerChart = injectI18n(
     onTimeChange,
   }: Props) => {
     const { metrics } = options;
+    const dateFormatter = useMemo(
+      () =>
+        series.rows.length > 0
+          ? niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp])
+          : (value: number) => `${value}`,
+      [series.rows]
+    );
     const handleTimeChange = (from: number, to: number) => {
       onTimeChange(moment(from).toISOString(), moment(to).toISOString());
     };
@@ -97,10 +104,7 @@ export const MetricsExplorerChart = injectI18n(
                 id={getAxisId('timestamp')}
                 position={Position.Bottom}
                 showOverlappingTicks={true}
-                tickFormat={useCallback(
-                  niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp]),
-                  [series, series.rows]
-                )}
+                tickFormat={dateFormatter}
               />
               <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
               <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
