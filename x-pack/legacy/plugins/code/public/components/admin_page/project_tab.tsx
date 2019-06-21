@@ -31,7 +31,7 @@ import { capabilities } from 'ui/capabilities';
 import { Repository } from '../../../model';
 import { closeToast, importRepo } from '../../actions';
 import { RepoStatus, RootState } from '../../reducers';
-import { ToastType } from '../../reducers/repository';
+import { ToastType } from '../../reducers/repository_management';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
@@ -267,12 +267,12 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  projects: state.repository.repositories,
+  projects: state.repositoryManagement.repositories,
   status: state.status.status,
-  importLoading: state.repository.importLoading,
-  toastMessage: state.repository.toastMessage,
-  toastType: state.repository.toastType,
-  showToast: state.repository.showToast,
+  importLoading: state.repositoryManagement.importLoading,
+  toastMessage: state.repositoryManagement.toastMessage,
+  toastType: state.repositoryManagement.toastType,
+  showToast: state.repositoryManagement.showToast,
 });
 
 const mapDispatchToProps = {
