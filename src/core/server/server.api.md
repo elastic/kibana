@@ -422,7 +422,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
 // @public (undocumented)
 export interface SavedObjectAttributes {
     // (undocumented)
-    [key: string]: SavedObjectAttributes | string | number | boolean | null;
+    [key: string]: SavedObjectAttributes | string | number | boolean | null | undefined;
 }
 
 // @public
