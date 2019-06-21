@@ -21,7 +21,7 @@ export const App = () => {
   );
 };
 
-// Exoprt this so we can test it with a different router.
+// Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
     <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}indices`}/>
