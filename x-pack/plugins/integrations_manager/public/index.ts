@@ -8,7 +8,7 @@ import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { Plugin, PluginStart } from './plugin';
+import { Plugin, PluginInitializerContext, PluginStart } from './plugin';
 import { PLUGIN_ID } from '../common/constants';
 
 const REACT_APP_ROOT_ID = `react-${PLUGIN_ID}-root`;
@@ -18,7 +18,8 @@ const getRootEl = () => document.getElementById(REACT_APP_ROOT_ID);
 main();
 
 async function main(): Promise<void> {
-  const plugin = new Plugin();
+  const initializerContext: PluginInitializerContext = {};
+  const plugin = new Plugin(initializerContext);
   plugin.setup(npSetup.core);
 
   // @ts-ignore

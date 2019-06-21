@@ -10,10 +10,14 @@ import { HashRouter, Switch } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { routes } from './routes';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginInitializerContext {}
+
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 
 export class Plugin {
+  constructor(initializerContext: PluginInitializerContext) {}
   // called when plugin is setting up during Kibana's startup sequence
   public setup(core: CoreSetup) {}
   // called after all plugins are set up
