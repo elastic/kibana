@@ -55,6 +55,7 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
 
 const mockSavedObjectsClient = {
   create: jest.fn(),
+  error: jest.fn(),
 };
 
 jest.mock('ui/chrome', () => {
@@ -117,8 +118,21 @@ describe('saved query service', () => {
       expect(response).toEqual({ id: '1234', attributes: savedQueryAttributesWithFilters });
     });
 
-    it('should throw an error when saved objects client returns error', () => {
-      throw new Error('implement me');
+    it('should throw an error when saved objects client returns error', async () => {
+      mockSavedObjectsClient.create.mockReturnValue({
+        error: {
+          error: '123',
+          message: 'An Error',
+        },
+      });
+
+      let error = null;
+      try {
+        await saveQuery(savedQueryAttributes);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).not.toBe(null);
     });
   });
 });
