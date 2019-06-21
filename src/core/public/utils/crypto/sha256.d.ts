@@ -16,14 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Sha256 } from '../../utils/';
-export async function createLogKey(type: string, optionalIdentifier?: string) {
-  const baseKey = `kibana.history.${type}`;
 
-  if (!optionalIdentifier) {
-    return baseKey;
-  }
-
-  const protectedIdentifier = new Sha256().update(optionalIdentifier, 'utf8').digest('base64');
-  return `${baseKey}-${protectedIdentifier}`;
+export class Sha256 {
+  public update(json: string | Buffer, encoding?: string): Sha256;
+  public digest(encoding: string): string;
 }
