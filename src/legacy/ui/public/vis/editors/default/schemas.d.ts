@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { uiModules } from '../../../modules';
-import { DefaultEditorAggAdd } from './components/default_editor_agg_add';
-import { wrapInI18nContext } from 'ui/i18n';
+import { AggParam } from '../../../agg_types';
 
-uiModules
-  .get('kibana')
-  .directive('visEditorAggAdd', reactDirective =>
-    reactDirective(wrapInI18nContext(DefaultEditorAggAdd), [
-      ['group', { watchDepth: 'collection' }],
-      ['schemas', { watchDepth: 'collection' }],
-      ['stats', { watchDepth: 'reference' }],
-      'groupName',
-      'addSchema'
-    ])
-  );
+export interface Schema {
+  aggFilter: string | string[];
+  deprecate: boolean;
+  editor: boolean | string;
+  group: 'metrics' | 'buckets';
+  max: number;
+  min: number;
+  name: string;
+  params: AggParam[];
+  title: string;
+}
