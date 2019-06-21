@@ -222,25 +222,10 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     }
 
     if (node.state === RouteState.Initializing) {
-      this.log.warn(
-        `${node.node} is still starting retry ${retryCount}/${this.maxRetry} in ${
-          this.requestBackoff
-        }`
-      );
-      if (retryCount <= this.maxRetry) {
-        return await new Promise((resolve, reject) => {
-          setTimeout(async () => {
-            try {
-              const reply = await this.proxyRequest(req, resource, ++retryCount);
-              resolve(reply);
-            } catch (err) {
-              reject(err);
-            }
-          }, this.requestBackoff);
-        });
-      } else {
-        throw new Error(`maxRetries exceeded and node has not yet initialized`);
-      }
+      throw new Error(`Node ${node.node} is initializing`);
+    }
+    if (node.state === RouteState.Closing) {
+      throw new Error(`Node ${node.node} is closing.`);
     }
 
     url.hostname = node.node;

@@ -34,6 +34,7 @@ export enum RouteState {
   Initializing,
   Started,
   Closed,
+  Closing,
 }
 
 export interface RoutingNode {
@@ -54,6 +55,8 @@ export class ClusterDocClient {
   private updateTimer: null | NodeJS.Timer = null;
   private configSubscription?: Subscription;
   private maxRetry: number = 0;
+  private runCull: boolean = false;
+  private nodeCache: NodeList = {};
 
   private readonly minUpdateShuffle = 0;
   private readonly maxUpdateShuffle = 1000;
@@ -195,19 +198,27 @@ export class ClusterDocClient {
     return reply._source as NodeList;
   }
 
+  /**
+   * Node heartbeats are monotonically increasing integers
+   * @param remove [boolean] should this node be deleted
+   */
   private async updateHeartbeat(remove: boolean = false) {
     const client = await this.getESClient();
     const body = {};
     if (remove) {
       body[this.nodeName] = {
-        script: `if (ctx['_source'].containsKey(resource)) { ctx['source'].remove(resource);}`,
+        script: `if (ctx['_source'].containsKey(resource)) { ctx['_source'].remove(resource);}`,
         params: {
           resource: this.nodeName,
         },
       };
     } else {
-      const currentTime = new Date().getTime();
-      body[this.nodeName] = currentTime;
+      body[this.nodeName] = {
+        script: `ctx['_source'].put(resource, ctx['_source'].getOrDefault(resource, 0) + 1)`,
+        params: {
+          resource: this.nodeName,
+        },
+      };
     }
     const params = {
       id: this.heartbeatDoc,
@@ -229,8 +240,20 @@ export class ClusterDocClient {
     const client = await this.getESClient();
     const body = {
       script: `for (node in ctx['_source'].entrySet()) {
-        if (!nodes.contains(node.getValue().get('node'))) {
-          ctx['_source'].remove(node.getKey());
+        data = node.getValue();
+        key = node.getKey();
+        if (!nodes.contains(data.get('node'))) {
+          if (data.get('state') == 3) {
+            ctx['_source'].remove(key);
+          } else {
+            data.put('state', 3)
+            ctx['_source'].put(key, data)
+          }
+        } else {
+          if (data.get('state') == 3) {
+            data.put('state', 1)
+            ctx['_source'].put(key, data)
+          }
         }
       }`,
       params: {
@@ -256,13 +279,13 @@ export class ClusterDocClient {
     const threshold = new Date().getTime() - this.timeoutThreshold;
     const body = {
       script: `for (node in ctx['_source'].entrySet()) {
-        if (node.getValue() < threshold) {
+        if (node.getValue() == nodeList[key]) {
           key = node.getKey();
-          ctx['source'].remove(key);
+          ctx['_source'].remove(key)
         }
       }`,
       params: {
-        threshold,
+        nodeList: this.nodeCache,
       },
     };
     const params = {
@@ -279,7 +302,15 @@ export class ClusterDocClient {
   private async mainLoop() {
     try {
       await this.updateHeartbeat();
-      await this.cullDeadNodes();
+      // we only want to run the cull every other pass so we'll fiddle with
+      // a boolean like a real programmer
+      if (this.runCull) {
+        this.runCull = false;
+        await this.cullDeadNodes();
+      } else {
+        this.nodeCache = await this.getHeartbeats();
+        this.runCull = true;
+      }
     } catch (err) {
       this.log.warn('Unable to update heartbeat', err);
     } finally {
