@@ -26,7 +26,7 @@ const partialFormattedCache = new WeakMap();
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
 export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any) {
-  function convert(hit: any, val: any, fieldName: string) {
+  function convert(hit: Record<string, any>, val: any, fieldName: string) {
     const field = indexPattern.fields.byName[fieldName];
     if (!field) return defaultFormat.convert(val, 'html');
     const parsedUrl = {
@@ -36,7 +36,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     return field.format.getConverterFor('html')(val, field, hit, parsedUrl);
   }
 
-  function formatHit(hit: any) {
+  function formatHit(hit: Record<string, any>) {
     const cached = formattedCache.get(hit);
     if (cached) {
       return cached;
@@ -47,10 +47,10 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     const partials = partialFormattedCache.get(hit) || {};
     partialFormattedCache.set(hit, partials);
 
-    const cache = {} as any;
+    const cache: Record<string, any> = {};
     formattedCache.set(hit, cache);
 
-    _.forOwn(indexPattern.flattenHit(hit), function(val: any, fieldName: any) {
+    _.forOwn(indexPattern.flattenHit(hit), function(val: any, fieldName?: string) {
       // sync the formatted and partial cache
       if (!fieldName) {
         return;
@@ -63,7 +63,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     return cache;
   }
 
-  formatHit.formatField = function(hit: any, fieldName: string) {
+  formatHit.formatField = function(hit: Record<string, any>, fieldName: string) {
     let partials = partialFormattedCache.get(hit);
     if (partials && partials[fieldName] != null) {
       return partials[fieldName];
@@ -74,8 +74,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
       partialFormattedCache.set(hit, partials);
     }
 
-    const val: any =
-      fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+    const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
     return convert(hit, val, fieldName);
   };
 
