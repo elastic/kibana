@@ -34,8 +34,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
-    create: () => Observable<ConfigSchema>;
-    createIfExists: () => Observable<ConfigSchema | undefined>;
+    create: <T = ConfigSchema>() => Observable<T>;
+    createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };
 }
 

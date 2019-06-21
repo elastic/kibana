@@ -23,6 +23,7 @@ import { ToastsApi } from './toasts_api';
 
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
+import { UiSettingsSetup } from '../../ui_settings';
 
 async function getCurrentToasts(toasts: ToastsApi) {
   return await toasts
@@ -33,7 +34,7 @@ async function getCurrentToasts(toasts: ToastsApi) {
 
 function uiSettingsMock() {
   const mock = uiSettingsServiceMock.createSetupContract();
-  (mock.get as jest.Mock<typeof mock['get']>).mockImplementation(() => (config: string) => {
+  (mock.get as jest.Mock<UiSettingsSetup['get']>).mockImplementation(() => (config: string) => {
     switch (config) {
       case 'notifications:lifetime:info':
         return 5000;

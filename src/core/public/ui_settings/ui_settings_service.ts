@@ -65,7 +65,7 @@ export class UiSettingsService {
 }
 
 /** @public */
-export type UiSettingsSetup = UiSettingsClient;
+export type UiSettingsSetup = PublicMethodsOf<UiSettingsClient>;
 
 /** @public */
-export type UiSettingsStart = UiSettingsClient;
+export type UiSettingsStart = PublicMethodsOf<UiSettingsClient>;

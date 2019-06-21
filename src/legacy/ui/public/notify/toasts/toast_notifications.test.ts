@@ -18,13 +18,13 @@
  */
 
 import sinon from 'sinon';
-import { ToastsApi } from '../../../../../core/public';
+import { ToastsApi, UiSettingsSetup } from '../../../../../core/public';
 import { uiSettingsServiceMock, i18nServiceMock } from '../../../../../core/public/mocks';
 import { ToastNotifications } from './toast_notifications';
 
 function toastDeps() {
   const uiSettingsMock = uiSettingsServiceMock.createSetupContract();
-  (uiSettingsMock.get as jest.Mock<typeof uiSettingsMock['get']>).mockImplementation(
+  (uiSettingsMock.get as jest.Mock<UiSettingsSetup['get']>).mockImplementation(
     () => (config: string) => {
       switch (config) {
         case 'notifications:lifetime:info':
