@@ -7,7 +7,7 @@
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepositoryUri } from '../../../model';
 
-// Coorespond to model/search/Document
+// Correspond to model/search/Document
 export const DocumentSchema = {
   repoUri: {
     type: 'keyword',
