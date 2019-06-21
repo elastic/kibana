@@ -139,7 +139,7 @@ function DateRangesParamEditor({
 
         return (
           <Fragment key={id}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               <EuiFlexItem>
                 <EuiFieldText
                   aria-label={i18n.translate('common.ui.aggTypes.dateRanges.fromColumnLabel', {
@@ -191,7 +191,7 @@ function DateRangesParamEditor({
         <EuiFormErrorText>
           <FormattedMessage
             id="common.ui.aggTypes.dateRanges.errorMessage"
-            defaultMessage="Every range should have at least one valid date"
+            defaultMessage="Each range should have at least one valid date."
           />
         </EuiFormErrorText>
       )}
