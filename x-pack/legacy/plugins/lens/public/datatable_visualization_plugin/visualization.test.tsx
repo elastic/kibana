@@ -110,7 +110,7 @@ describe('Datatable Visualization', () => {
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           datasource={createMockDatasource().publicAPIMock}
           setState={setState}
-          state={{ columns: [{ id: 'saved', label: 'label' }] }}
+          state={{ columns: [{ id: 'saved', label: '' }, { id: 'second', label: '' }] }}
         />
       );
 
@@ -122,7 +122,7 @@ describe('Datatable Visualization', () => {
       });
 
       expect(setState).toHaveBeenCalledWith({
-        columns: [],
+        columns: [{ id: 'second', label: '' }],
       });
     });
 

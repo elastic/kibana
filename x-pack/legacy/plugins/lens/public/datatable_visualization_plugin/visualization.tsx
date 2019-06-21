@@ -36,101 +36,99 @@ export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualiz
   const { state, datasource, setState } = props;
 
   return (
-    <div>
-      <EuiForm className="lnsConfigPanel">
-        {state.columns.map(({ id, label }, index) => {
-          const operation = datasource.getOperationForColumnId(id);
-          return (
-            <>
-              <EuiFormRow
-                key={id}
-                label={i18n.translate('xpack.lens.datatable.columnLabel', {
-                  defaultMessage: 'Column',
+    <EuiForm className="lnsConfigPanel">
+      {state.columns.map(({ id, label }, index) => {
+        const operation = datasource.getOperationForColumnId(id);
+        return (
+          <>
+            <EuiFormRow
+              key={id}
+              label={i18n.translate('xpack.lens.datatable.columnLabel', {
+                defaultMessage: 'Column',
+              })}
+            >
+              <EuiFieldText
+                data-test-subj="lnsDatatable-columnLabel"
+                value={label || ''}
+                onChange={e => {
+                  const newColumns = [...state.columns];
+                  newColumns[index] = { ...newColumns[index], label: e.target.value };
+                  setState({
+                    ...state,
+                    columns: newColumns,
+                  });
+                }}
+                placeholder={
+                  operation
+                    ? operation.label
+                    : i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
+                        defaultMessage: 'Title',
+                      })
+                }
+                aria-label={i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
+                  defaultMessage: 'Title',
                 })}
-              >
-                <EuiFieldText
-                  data-test-subj="lnsDatatable-columnLabel"
-                  value={label || ''}
-                  onChange={e => {
-                    const newColumns = [...state.columns];
-                    newColumns[index] = { ...newColumns[index], label: e.target.value };
-                    setState({
-                      ...state,
-                      columns: newColumns,
-                    });
-                  }}
-                  placeholder={
-                    operation
-                      ? operation.label
-                      : i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
-                          defaultMessage: 'Title',
-                        })
-                  }
-                  aria-label={i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
-                    defaultMessage: 'Title',
-                  })}
-                />
-              </EuiFormRow>
+              />
+            </EuiFormRow>
 
-              <EuiFormRow>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={true}>
-                    <NativeRenderer
-                      data-test-subj="lnsDatatable_dimensionPanel"
-                      render={datasource.renderDimensionPanel}
-                      nativeProps={{
-                        columnId: id,
-                        dragDropContext: props.dragDropContext,
-                        filterOperations: () => true,
-                      }}
-                    />
-                  </EuiFlexItem>
+            <EuiFormRow>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  <NativeRenderer
+                    data-test-subj="lnsDatatable_dimensionPanel"
+                    render={datasource.renderDimensionPanel}
+                    nativeProps={{
+                      columnId: id,
+                      dragDropContext: props.dragDropContext,
+                      filterOperations: () => true,
+                    }}
+                  />
+                </EuiFlexItem>
 
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      size="s"
-                      color="warning"
-                      data-test-subj={`lnsDatatable_dimensionPanelRemove_${id}`}
-                      iconType="trash"
-                      onClick={() => {
-                        datasource.removeColumnInTableSpec(id);
-                        const newColumns = [...state.columns];
-                        newColumns.splice(index);
-                        setState({
-                          ...state,
-                          columns: newColumns,
-                        });
-                      }}
-                      aria-label={i18n.translate('xpack.lens.datasource.removeColumnAriaLabel', {
-                        defaultMessage: 'Remove',
-                      })}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </>
-          );
-        })}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    size="s"
+                    color="warning"
+                    data-test-subj={`lnsDatatable_dimensionPanelRemove_${id}`}
+                    iconType="trash"
+                    onClick={() => {
+                      datasource.removeColumnInTableSpec(id);
+                      const newColumns = [...state.columns];
+                      newColumns.splice(index, 1);
+                      setState({
+                        ...state,
+                        columns: newColumns,
+                      });
+                    }}
+                    aria-label={i18n.translate('xpack.lens.datatable.removeColumnAriaLabel', {
+                      defaultMessage: 'Remove',
+                    })}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </>
+        );
+      })}
 
-        <div>
-          <EuiButton
-            data-test-subj="lnsDatatable_dimensionPanel_add"
-            onClick={() => {
-              const newColumns = [...state.columns];
-              newColumns.push({
-                id: datasource.generateColumnId(),
-                label: '',
-              });
-              setState({
-                ...state,
-                columns: newColumns,
-              });
-            }}
-            iconType="plusInCircle"
-          />
-        </div>
-      </EuiForm>
-    </div>
+      <div>
+        <EuiButton
+          data-test-subj="lnsDatatable_dimensionPanel_add"
+          onClick={() => {
+            const newColumns = [...state.columns];
+            newColumns.push({
+              id: datasource.generateColumnId(),
+              label: '',
+            });
+            setState({
+              ...state,
+              columns: newColumns,
+            });
+          }}
+          iconType="plusInCircle"
+        />
+      </div>
+    </EuiForm>
   );
 }
 
@@ -159,7 +157,12 @@ export const datatableVisualization: Visualization<
     VisualizationSuggestion<DatatableVisualizationState>
   > {
     return tables.map(table => {
-      const title = 'Table: ' + table.columns.map(col => col.operation.label).join(' & ');
+      const title = i18n.translate('xpack.lens.datatable.visualizationOf', {
+        defaultMessage: 'Table: ${operations}',
+        values: {
+          operations: table.columns.map(col => col.operation.label).join(' & '),
+        },
+      });
 
       return {
         title,

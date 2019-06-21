@@ -23,18 +23,20 @@ export function toExpression(state: IndexPatternPrivateState) {
     return operationDefinition.toEsAggsConfig(column, columnId);
   }
 
-  const columnEntries = state.columnOrder.map(colId => [colId, state.columns[colId]]);
+  const columnEntries = state.columnOrder.map(
+    colId => [colId, state.columns[colId]] as [string, IndexPatternColumn]
+  );
 
   if (columnEntries.length) {
     const aggs = columnEntries.map(([colId, col]) => {
-      return getEsAggsConfig(col as IndexPatternColumn, colId as string);
+      return getEsAggsConfig(col, colId);
     });
 
     const idMap = columnEntries.reduce(
       (currentIdMap, [colId], index) => {
         return {
           ...currentIdMap,
-          [`col-${index}-${colId}`]: colId as string,
+          [`col-${index}-${colId}`]: colId,
         };
       },
       {} as Record<string, string>
