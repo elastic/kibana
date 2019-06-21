@@ -18,7 +18,7 @@
  */
 
 var readFileSync = require('fs').readFileSync;
-var agentJsFilename = require('@percy/agent').agentJsFilename;
+let { agentJsFilename } = require('@percy/agent/dist/utils/sdk-utils');
 
 export function takePercySnapshot() {
   if (!window.PercyAgent) {
@@ -28,6 +28,20 @@ export function takePercySnapshot() {
   var agent = new window.PercyAgent({
     handleAgentCommunication: false
   });
+
+  function canvasToImage(selectorOrEl) {
+    let canvas = typeof selectorOrEl === "object" ? selectorOrEl : document.querySelector(selector);
+    let image = document.createElement('img');
+    let canvasImageBase64 = canvas.toDataURL();
+
+    image.src = canvasImageBase64;
+    image.style = "max-width: 100%";
+    canvas.setAttribute('data-percy-modified', true);
+    canvas.parentElement.appendChild(image);
+    canvas.style = 'display: none';
+  }
+  
+  window.document.querySelector('canvas').forEach(selector => canvasToImage(selector));
 
   return agent.domSnapshot(window.document);
 }
