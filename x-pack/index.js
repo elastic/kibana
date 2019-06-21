@@ -43,6 +43,8 @@ import { fileUpload } from './legacy/plugins/file_upload';
 import { telemetry } from './legacy/plugins/telemetry';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { snapshotRestore } from './legacy/plugins/snapshot_restore';
+import { actions } from './legacy/plugins/actions';
+import { alerting } from './legacy/plugins/alerting';
 
 module.exports = function (kibana) {
   return [
@@ -85,5 +87,7 @@ module.exports = function (kibana) {
     fileUpload(kibana),
     encryptedSavedObjects(kibana),
     snapshotRestore(kibana),
+    actions(kibana),
+    alerting(kibana),
   ];
 };
