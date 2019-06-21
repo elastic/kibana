@@ -91,6 +91,8 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
@@ -139,7 +141,6 @@ export interface InternalCoreSetup {
  * @public
  */
 export interface InternalCoreStart {
-  http: HttpServiceStart;
   plugins: PluginsServiceStart;
 }
 
