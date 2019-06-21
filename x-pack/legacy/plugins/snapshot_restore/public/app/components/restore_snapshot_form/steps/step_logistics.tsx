@@ -170,29 +170,47 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   helpText={
                     <FormattedMessage
                       id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesHelpText"
-                      defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored"
-                      // defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored. {selectOrDeselectAllLink}"
+                      defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored. {selectOrDeselectAllLink}"
                       values={{
                         count: restoreIndices && restoreIndices.length,
-                        // selectOrDeselectAllLink: (
-                        //   <EuiLink
-                        //     onClick={() => {
-                        //       const newOptions = indicesOptions.map(option => ({
-                        //         ...option,
-                        //         checked: undefined,
-                        //       }));
-                        //       console.log(newOptions);
-                        //       setIndicesOptions(newOptions);
-                        //       updateRestoreSettings({ indices: [] });
-                        //       setCachedRestoreSettings({
-                        //         ...cachedRestoreSettings,
-                        //         indices: [],
-                        //       });
-                        //     }}
-                        //   >
-                        //     De-select all
-                        //   </EuiLink>
-                        // ),
+                        selectOrDeselectAllLink:
+                          restoreIndices && restoreIndices.length > 0 ? (
+                            <EuiLink
+                              onClick={() => {
+                                indicesOptions.forEach(option => {
+                                  option.checked = undefined;
+                                });
+                                updateRestoreSettings({ indices: [] });
+                                setCachedRestoreSettings({
+                                  ...cachedRestoreSettings,
+                                  indices: [],
+                                });
+                              }}
+                            >
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.restoreForm.stepLogistics.deselectAllIndicesLink"
+                                defaultMessage="De-select all"
+                              />
+                            </EuiLink>
+                          ) : (
+                            <EuiLink
+                              onClick={() => {
+                                indicesOptions.forEach(option => {
+                                  option.checked = 'on';
+                                });
+                                updateRestoreSettings({ indices: [...snapshotIndices] });
+                                setCachedRestoreSettings({
+                                  ...cachedRestoreSettings,
+                                  indices: [...snapshotIndices],
+                                });
+                              }}
+                            >
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.restoreForm.stepLogistics.selectAllIndicesLink"
+                                defaultMessage="Select all"
+                              />
+                            </EuiLink>
+                          ),
                       }}
                     />
                   }
