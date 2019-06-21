@@ -29,11 +29,11 @@ import {
   Logger,
   CoreSetup,
   KibanaRequest,
-} from 'src/core/server';
-import { SslConfig } from 'src/core/server/http/ssl_config';
-import { HttpServerSetup } from 'src/core/server/http/http_server';
+  SslConfig,
+  HttpServerSetup,
+} from '../../../../src/core/server';
 
-import { RouteState, RoutingNode, ClusterDocClient } from './cluster_doc';
+import { RouteState, RoutingNode, RoutingTable, ClusterDocClient } from './cluster_doc';
 
 export interface ProxyServiceSetup {
   httpSetup: HttpServerSetup;
@@ -212,16 +212,12 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
 
   // @TODO update to allow passing of request parametsrs
   public async proxyRequest(req: KibanaRequest, resource?: string, retryCount = 0): Promise<any> {
-    if (!this.clusterDocClient.validState) {
-      const err = new Error('Proxy is in an invalid state and cannot be used');
-      throw Boom.boomify(err, { statusCode: 500 });
-    }
     const method = req.route.method;
     const url = new URL(req.url.toString());
-    const headers = req.getFilteredHeaders([]);
+    const headers = req.headers;
     const body = req.body;
     resource = resource || url.pathname;
-    const node = this.clusterDocClient.getNodeForResource(resource);
+    const node = await this.clusterDocClient.getNodeForResource(resource);
 
     if (!node || node.state === RouteState.Closed) {
       const msg = `No node was found for resource ${resource}`;
@@ -269,7 +265,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     }
   }
 
-  public getAllocation(): Observable<[string, RoutingNode]> {
-    return this.clusterDocClient.getRoutingTable();
+  public async getAllocation() {
+    return await this.clusterDocClient.getRoutingTable();
   }
 }
