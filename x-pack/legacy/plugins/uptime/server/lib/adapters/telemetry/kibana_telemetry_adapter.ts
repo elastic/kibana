@@ -28,6 +28,7 @@ export class KibanaTelemetryAdapter {
         this.collector = {};
         return { last_24_hours: { hits: { ...report } } };
       },
+      isReady: () => true,
     });
   }
 
