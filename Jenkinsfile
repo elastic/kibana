@@ -2,7 +2,7 @@
 // @Library('apm@current') _
 
 pipeline {
-  agent { label 'linux || immutable' }
+  agent any
   environment {
     BASE_DIR = "."
     CI = true
@@ -14,15 +14,23 @@ pipeline {
   }
   stages {
     stage('Kickoff') {
+      agent { label 'master || immutable' }
       steps {
-        sh 'env > env.txt' 
-        script {
-          for (String x: readFile('env.txt').split("\r?\n")) {
-            println "# ENV VAR: ${x}"
-          }
-        } 
+        // sh 'env > env.txt' 
+        // script {
+        //   for (String x: readFile('env.txt').split("\r?\n")) {
+        //     println "# ENV VAR: ${x}"
+        //   }
+        // } 
+        stash allowEmpty: true, name: 'source-before-install', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**'
+      }
+    }
+    stage('Build OSS') {
+      agent { label 'linux || immutable' }
+      steps {
+        unstash 'source-before-install'
         dir("${env.BASE_DIR}"){
-            sh './.ci/run.sh'
+          sh './.ci/run.sh'
         }
         stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**  '
       }
