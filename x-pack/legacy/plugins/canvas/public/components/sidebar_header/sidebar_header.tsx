@@ -323,39 +323,39 @@ export class SidebarHeader extends Component<Props, State> {
       ? []
       : [
           {
-            menuItem: { name: 'Align elements', className: topBorderClassName, panel: 2 },
+            menuItem: { name: 'Align elements', className: 'canvasContextMenu', panel: 2 },
             panel: {
               id: 2,
               title: 'Alignment',
               items: [
                 {
                   name: 'Left',
-                  icon: 'arrowLeft',
+                  icon: 'editorItemAlignLeft',
                   onClick: close(alignLeft),
                 },
                 {
                   name: 'Center',
-                  icon: 'sortDown',
+                  icon: 'editorItemAlignCenter',
                   onClick: close(alignCenter),
                 },
                 {
                   name: 'Right',
-                  icon: 'arrowRight',
+                  icon: 'editorItemAlignRight',
                   onClick: close(alignRight),
                 },
                 {
                   name: 'Top',
-                  icon: 'arrowUp',
+                  icon: 'editorItemAlignTop',
                   onClick: close(alignTop),
                 },
                 {
                   name: 'Middle',
-                  icon: 'indexOpen',
+                  icon: 'editorItemAlignMiddle',
                   onClick: close(alignMiddle),
                 },
                 {
                   name: 'Bottom',
-                  icon: 'arrowDown',
+                  icon: 'editorItemAlignBottom',
                   onClick: close(alignBottom),
                 },
               ],
@@ -371,13 +371,21 @@ export class SidebarHeader extends Component<Props, State> {
       ? []
       : [
           {
-            menuItem: { name: 'Distribute elements', className: topBorderClassName, panel: 3 },
+            menuItem: { name: 'Distribute elements', className: 'canvasContextMenu', panel: 3 },
             panel: {
               id: 3,
               title: 'Distribution',
               items: [
-                { name: 'Horizontal', icon: 'arrowLeft', onClick: close(distributeHorizontally) },
-                { name: 'Vertical', icon: 'arrowUp', onClick: close(distributeVertically) },
+                {
+                  name: 'Horizontal',
+                  icon: 'editorDistributeHorizontal',
+                  onClick: close(distributeHorizontally),
+                },
+                {
+                  name: 'Vertical',
+                  icon: 'editorDistributeVertical',
+                  onClick: close(distributeVertically),
+                },
               ],
             },
           },
