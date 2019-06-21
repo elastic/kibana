@@ -23,7 +23,7 @@ pipeline {
         dir("${env.BASE_DIR}"){
             sh './.ci/run.sh'
         }
-        stash allowEmpty: true, name: 'source', useDefaultExcludes: true
+        // stash allowEmpty: true, name: 'source', useDefaultExcludes: true
       }
     }
     stage('Static Analysis') {
