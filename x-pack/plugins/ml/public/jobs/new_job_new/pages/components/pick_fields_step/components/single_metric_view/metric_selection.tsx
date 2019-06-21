@@ -13,7 +13,7 @@ import {
 } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
-import { AggSelect, DropDownLabel } from '../agg_select';
+import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AnomalyChart } from '../../../charts/anomaly_chart';
@@ -22,8 +22,6 @@ interface Props {
   isActive: boolean;
   setIsValid: (na: boolean) => void;
 }
-
-type SelectProps = DropDownLabel[] | EuiComboBoxOptionProps[];
 
 const DTR_IDX = 0;
 
@@ -43,7 +41,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const jobCreator = jc as SingleMetricJobCreator;
 
   const { fields, aggs } = newJobCapsService;
-  const [selectedOptions, setSelectedOptions] = useState<SelectProps>([{ label: '' }]);
+  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
   const [aggFieldPair, setAggFieldPair] = useState<AggFieldPair | null>(null);
   const [lineChartsData, setLineChartData] = useState<LineChartData>([]);
   const [modelData, setModelData] = useState<ModelItem[]>([]);
@@ -128,10 +126,10 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       {isActive && (
         <Fragment>
           <AggSelect
-            aggs={aggs}
             fields={fields}
             changeHandler={detectorChangeHandler}
             selectedOptions={selectedOptions}
+            removeOptions={[]}
           />
           {lineChartsData[DTR_IDX] !== undefined && (
             <Fragment>

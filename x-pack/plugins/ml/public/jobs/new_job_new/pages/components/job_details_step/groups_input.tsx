@@ -8,7 +8,6 @@ import React, { Fragment, FC, useContext } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
-  // EuiFieldText,
   EuiComboBox,
   EuiComboBoxOptionProps,
 } from '@elastic/eui';

@@ -5,8 +5,12 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
+import { SplitField } from '../split_field';
+import { Influencers } from '../influencers';
 
 interface Props {
   isActive: boolean;
@@ -33,5 +37,26 @@ export const MultiMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
     [jobCreatorUpdated]
   );
 
-  return <Fragment>{isActive && <BucketSpan />}</Fragment>;
+  return (
+    <Fragment>
+      {isActive && (
+        <Fragment>
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem>
+              <SplitField />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Influencers />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem>
+              <BucketSpan />
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+        </Fragment>
+      )}
+    </Fragment>
+  );
 };

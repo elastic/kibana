@@ -98,6 +98,17 @@ export class JobCreator {
     }
   }
 
+  public removeInfluencer(influencer: string) {
+    const idx = this._influencers.indexOf(influencer);
+    if (idx !== -1) {
+      this._influencers.splice(idx, 1);
+    }
+  }
+
+  public removeAllInfluencers() {
+    this._influencers.length = 0;
+  }
+
   public get influencers(): string[] {
     return this._influencers;
   }

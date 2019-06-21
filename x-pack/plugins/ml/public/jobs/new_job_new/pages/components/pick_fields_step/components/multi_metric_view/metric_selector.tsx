@@ -6,45 +6,45 @@
 
 import React, { FC } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { Field, Aggregation } from '../../../../../../../../common/types/fields';
+import { Field, Aggregation, AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
 
 interface Props {
-  aggs: Aggregation[];
   fields: Field[];
   detectorChangeHandler: (options: DropDownLabel[]) => void;
   selectedOptions: DropDownProps;
-  addDetector: () => void;
+  addDetector?: () => void;
   maxWidth: number;
+  removeOptions: AggFieldPair[];
 }
 
 export const MetricSelector: FC<Props> = ({
-  aggs,
   fields,
   detectorChangeHandler,
   selectedOptions,
   addDetector,
   maxWidth,
+  removeOptions,
 }) => {
   return (
     <EuiFlexGroup style={{ maxWidth }}>
       <EuiFlexItem>
         <EuiFormRow label="Add metric">
           <AggSelect
-            aggs={aggs}
             fields={fields}
             changeHandler={detectorChangeHandler}
             selectedOptions={selectedOptions}
+            removeOptions={removeOptions}
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      {/* <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiButton onClick={addDetector} disabled={selectedOptions[0].label === ''}>
             Add
           </EuiButton>
         </EuiFormRow>
-      </EuiFlexItem>
+      </EuiFlexItem> */}
     </EuiFlexGroup>
   );
 };

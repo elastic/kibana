@@ -98,11 +98,7 @@ export class ResultsLoader {
         ? () => this._loadJobAnomalyData(0)
         : () => this._loadDetectorsAnomalyData();
 
-    // const getModelData =
-    //   this._jobCreator.type === JOB_TYPE.SINGLE_METRIC
-    //     ? () => this._loadModelData(0)
-    //     : () => async () => {};
-
+    // TODO - load more that one model
     const [model, anomalies] = await Promise.all([this._loadModelData(0), getAnomalyData()]);
     this._results.model = model;
     this._results.anomalies = anomalies;

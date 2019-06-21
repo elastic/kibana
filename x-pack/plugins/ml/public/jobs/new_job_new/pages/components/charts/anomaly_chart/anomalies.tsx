@@ -67,30 +67,35 @@ export const Anomalies: FC<Props> = ({ anomalyData }) => {
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={severities.low}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.LOW)}
+        hideTooltips={true}
       />
       <LineAnnotation
         annotationId={getAnnotationId('warning')}
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={severities.warning}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.WARNING)}
+        hideTooltips={true}
       />
       <LineAnnotation
         annotationId={getAnnotationId('minor')}
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={severities.minor}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.MINOR)}
+        hideTooltips={true}
       />
       <LineAnnotation
         annotationId={getAnnotationId('major')}
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={severities.major}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.MAJOR)}
+        hideTooltips={true}
       />
       <LineAnnotation
         annotationId={getAnnotationId('critical')}
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={severities.critical}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.CRITICAL)}
+        hideTooltips={true}
       />
     </Fragment>
   );
