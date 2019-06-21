@@ -19,7 +19,7 @@
 
 import { get, identity } from 'lodash';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getType } = require('@kbn/interpreter/common');
+const { getType } = require('@kbn/interpreter/src/common');
 
 export function serializeProvider(types: any) {
   return {

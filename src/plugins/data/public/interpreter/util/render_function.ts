@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Registry } from '@kbn/interpreter/common';
+import { Registry } from '@kbn/interpreter/src/common';
 
 function RenderFunction(this: any, config: any) {
   // This must match the name of the function that is used to create the `type: render` object

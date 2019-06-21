@@ -18,12 +18,12 @@
  */
 
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter/src/common';
 import { createError } from './create_error';
 
 export { createError };
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getType, getByAlias, castProvider } = require('@kbn/interpreter/common');
+const { getType, getByAlias, castProvider } = require('@kbn/interpreter/src/common');
 
 export function interpreterProvider(config: any) {
   const { functions, types } = config;

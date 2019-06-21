@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Registry } from '@kbn/interpreter/common';
+import { Registry } from '@kbn/interpreter/src/common';
 
 export interface InterpreterSetup {
   __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {

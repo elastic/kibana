@@ -19,10 +19,10 @@
 
 /* eslint-disable max-classes-per-file */
 import { get } from 'lodash';
-import { Registry } from '@kbn/interpreter/common';
+import { Registry } from '@kbn/interpreter/src/common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Fn, getType } = require('@kbn/interpreter/common');
+const { Fn, getType } = require('@kbn/interpreter/src/common');
 
 export class FunctionsRegistry extends Registry<any, any> {
   wrapper(obj: any) {
