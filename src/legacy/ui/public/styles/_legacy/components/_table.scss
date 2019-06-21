@@ -1,4 +1,4 @@
-@import '../../../../../core_plugins/kibana/public/discover/doc_table/doc_table_source_mixin.scss';
+@import '../../../../../core_plugins/kibana/public/discover/mixins';
 
 .table {
   // Nesting
@@ -8,6 +8,7 @@
 }
 
 kbn-table, .kbn-table, tbody[kbn-rows] {
+  @include dscDocSourceStyle;
   // sub tables should not have a leading border
   .table .table {
     margin-bottom: 0;
@@ -20,9 +21,6 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
       font-weight: $euiFontWeightBold;
     }
   }
-
-  @include style_doc_source;
-
 }
 
 table {

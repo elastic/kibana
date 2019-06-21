@@ -3,7 +3,7 @@
 *  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
 *  row in the Context Log.
 */
-@mixin style_doc_source {
+@mixin dscDocSourceStyle {
   dl.source {
     margin-bottom: 0;
     line-height:2em;

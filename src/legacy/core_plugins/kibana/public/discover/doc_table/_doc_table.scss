@@ -1,4 +1,3 @@
-@import './_doc_table_source_mixin.scss';
 /**
  * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
  */
@@ -27,6 +26,7 @@ doc-table {
 }
 
 .kbnDocTable {
+  @include dscDocSourceStyle;
   font-size: $euiFontSizeXS;
 
   th {
@@ -37,7 +37,6 @@ doc-table {
       font-size: 1.1em;
     }
   }
-  @include style_doc_source;
 }
 
 .kbnDocTable__row {
