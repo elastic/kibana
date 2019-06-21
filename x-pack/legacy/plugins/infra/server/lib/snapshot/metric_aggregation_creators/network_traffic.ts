@@ -39,7 +39,7 @@ export const networkTraffic = (
         [`${id}_interfaces`]: {
           terms: { field: interfaceField },
           aggregations: {
-            [`${id}_interface_max`]: { max: { metricField } },
+            [`${id}_interface_max`]: { max: { field: metricField } },
           },
         },
         [`${id}_sum_of_interfaces`]: {
