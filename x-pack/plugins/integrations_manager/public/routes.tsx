@@ -17,10 +17,23 @@ export const LIST_VIEW = '/';
 
 export const DETAIL_VIEW = '/detail/:pkgkey';
 
+interface DetailMatch {
+  match: {
+    params: {
+      pkgkey: string;
+    };
+  };
+}
+
 export const linkToDetailView = ({ name, version }: { name: string; version: string }) =>
   generatePath(DETAIL_VIEW, { pkgkey: `${name}-${version}` });
 
 export const routes = [
-  <Route exact={true} path={LIST_VIEW} component={Home} breadcrumb="Home" key="home" />,
-  <Route exact={true} path={DETAIL_VIEW} component={Detail} breadcrumb="Detail" key="detail" />,
+  <Route key="home" path={LIST_VIEW} exact={true} component={Home} />,
+  <Route
+    key="detail"
+    path={DETAIL_VIEW}
+    exact={true}
+    render={(props: DetailMatch) => <Detail package={props.match.params.pkgkey} />}
+  />,
 ];

@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 import chrome from 'ui/chrome';
+import { IntegrationInfo, IntegrationList } from '../common/types';
 import { API_INTEGRATIONS_INFO, API_INTEGRATIONS_LIST } from '../common/constants';
 
 export const fetch = axios.create({
@@ -19,10 +20,14 @@ export const fetch = axios.create({
   timeout: 30 * 1000,
 });
 
-export async function getIntegrationsList() {
-  return fetch(API_INTEGRATIONS_LIST);
+export async function getIntegrationsList(): Promise<IntegrationList> {
+  const response = await fetch(API_INTEGRATIONS_LIST);
+  const list: IntegrationList = response.data;
+  return list;
 }
 
-export async function getIntegrationInfoByKey(pkgkey: string) {
-  return fetch(API_INTEGRATIONS_INFO.replace('{pkgkey}', pkgkey));
+export async function getIntegrationInfoByKey(pkgkey: string): Promise<IntegrationInfo> {
+  const response = await fetch(API_INTEGRATIONS_INFO.replace('{pkgkey}', pkgkey));
+  const info: IntegrationInfo = response.data;
+  return info;
 }
