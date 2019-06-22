@@ -118,8 +118,8 @@ export function isFullLicense() {
   return (licenseType === LICENSE_TYPE.FULL);
 }
 
-export function xpackFeature($injector) {
-  const xpackInfo = xpackInfoService($injector);
+export function xpackFeature($injector, initialInfo) {
+  const xpackInfo = xpackInfoService($injector, initialInfo);
 
   return {
     isAvailable(feature) {

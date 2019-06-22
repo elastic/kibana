@@ -4,27 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import {
   xpackFeature,
 } from '../check_license';
 
-// todo fix this
-/*
-function Private() {
-  return {
-    get(str) {
-      if (str === 'features.watcher.isAvailable') {
-        return true;
-      } else {
-        return false;
-      }
+const initialInfo = {
+  features: {
+    watcher: {
+      isAvailable: true
     }
-  };
-}
-*/
+  }
+};
 
 const $injector = { get: () => ({}) };
 
@@ -32,7 +23,7 @@ describe('ML - check license', () => {
 
   describe('xpackFeatureProvider', () => {
     it('returns true for enabled feature', () => {
-      const xpackFeatureService = xpackFeature($injector);
+      const xpackFeatureService = xpackFeature($injector, initialInfo);
       const result = xpackFeatureService.isAvailable('watcher');
       expect(result).to.be(true);
     });
