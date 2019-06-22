@@ -10,6 +10,8 @@ import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -35,86 +37,96 @@ interface Props {
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
   onTimeChange: (start: string, end: string) => void;
+  uiCapabilities: UICapabilities;
 }
 
-export const MetricsExplorerChart = injectI18n(
-  ({
-    source,
-    options,
-    series,
-    title,
-    onFilter,
-    height = 200,
-    width = '100%',
-    timeRange,
-    onTimeChange,
-  }: Props) => {
-    const { metrics } = options;
-    const handleTimeChange = (from: number, to: number) => {
-      onTimeChange(moment(from).toISOString(), moment(to).toISOString());
-    };
-    const dateFormatter = useCallback(
-      niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp]),
-      [series, series.rows]
-    );
-    const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
-    return (
-      <React.Fragment>
-        {options.groupBy ? (
-          <EuiTitle size="xs">
-            <EuiFlexGroup alignItems="center">
-              <ChartTitle>
-                <EuiToolTip content={title}>
-                  <span>{title}</span>
-                </EuiToolTip>
-              </ChartTitle>
+export const MetricsExplorerChart = injectUICapabilities(
+  injectI18n(
+    ({
+      source,
+      options,
+      series,
+      title,
+      onFilter,
+      height = 200,
+      width = '100%',
+      timeRange,
+      onTimeChange,
+      uiCapabilities,
+    }: Props) => {
+      const { metrics } = options;
+      const handleTimeChange = (from: number, to: number) => {
+        onTimeChange(moment(from).toISOString(), moment(to).toISOString());
+      };
+      const dateFormatter = useCallback(
+        niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp]),
+        [series, series.rows]
+      );
+      const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
+      return (
+        <React.Fragment>
+          {options.groupBy ? (
+            <EuiTitle size="xs">
+              <EuiFlexGroup alignItems="center">
+                <ChartTitle>
+                  <EuiToolTip content={title}>
+                    <span>{title}</span>
+                  </EuiToolTip>
+                </ChartTitle>
+                <EuiFlexItem grow={false}>
+                  <MetricsExplorerChartContextMenu
+                    timeRange={timeRange}
+                    options={options}
+                    series={series}
+                    onFilter={onFilter}
+                    source={source}
+                    uiCapabilities={uiCapabilities}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTitle>
+          ) : (
+            <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <MetricsExplorerChartContextMenu
-                  timeRange={timeRange}
                   options={options}
                   series={series}
-                  onFilter={onFilter}
                   source={source}
+                  timeRange={timeRange}
+                  uiCapabilities={uiCapabilities}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiTitle>
-        ) : (
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <MetricsExplorerChartContextMenu
-                options={options}
-                series={series}
-                source={source}
-                timeRange={timeRange}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        <div style={{ height, width }}>
-          {series.rows.length > 0 ? (
-            <Chart>
-              {metrics.map((metric, id) => (
-                <MetricLineSeries key={id} metric={metric} id={id} series={series} />
-              ))}
-              <Axis
-                id={getAxisId('timestamp')}
-                position={Position.Bottom}
-                showOverlappingTicks={true}
-                tickFormat={dateFormatter}
-              />
-              <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
-              <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
-            </Chart>
-          ) : options.metrics.length > 0 ? (
-            <MetricsExplorerEmptyChart />
-          ) : (
-            <MetricsExplorerNoMetrics />
           )}
-        </div>
-      </React.Fragment>
-    );
-  }
+          <div style={{ height, width }}>
+            {series.rows.length > 0 ? (
+              <Chart>
+                {metrics.map((metric, id) => (
+                  <MetricLineSeries key={id} metric={metric} id={id} series={series} />
+                ))}
+                <Axis
+                  id={getAxisId('timestamp')}
+                  position={Position.Bottom}
+                  showOverlappingTicks={true}
+                  tickFormat={dateFormatter}
+                />
+                <Axis
+                  id={getAxisId('values')}
+                  position={Position.Left}
+                  tickFormat={yAxisFormater}
+                />
+                <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
+              </Chart>
+            ) : options.metrics.length > 0 ? (
+              <MetricsExplorerEmptyChart />
+            ) : (
+              <MetricsExplorerNoMetrics />
+            )}
+          </div>
+        </React.Fragment>
+      );
+    }
+  )
 );
 
 const ChartTitle = euiStyled.div`
