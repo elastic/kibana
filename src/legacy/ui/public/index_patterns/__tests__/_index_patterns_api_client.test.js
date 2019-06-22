@@ -44,4 +44,32 @@ describe('IndexPatternsApiClient', () => {
       query: {},
     });
   });
+
+  it('uses the right URI to fetch fields for wildcard', async function () {
+    const fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => ({}));
+    const indexPatternsApiClient = new IndexPatternsApiClient();
+    await indexPatternsApiClient.getFieldsForWildcard();
+
+    expect(fetchSpy).toHaveBeenCalledWith('/api/index_patterns/_fields_for_wildcard', {
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      method: 'GET',
+      prependBasePath: true,
+      query: {},
+    });
+  });
+
+  it('uses the right URI to fetch fields for wildcard given a type', async function () {
+    const fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => ({}));
+    const indexPatternsApiClient = new IndexPatternsApiClient();
+    await indexPatternsApiClient.getFieldsForWildcard({ type: 'rollup' });
+
+    expect(fetchSpy).toHaveBeenCalledWith('/api/index_patterns/rollup/_fields_for_wildcard', {
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      method: 'GET',
+      prependBasePath: true,
+      query: {},
+    });
+  });
 });
