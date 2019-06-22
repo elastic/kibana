@@ -52,3 +52,7 @@ export {
 export {
   Progress
 } from './progress';
+
+export {
+  getEnabledKibanaPluginIds,
+} from './kibana_plugins';

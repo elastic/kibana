@@ -35,6 +35,7 @@ import {
   createIndexDocRecordsStream,
   migrateKibanaIndex,
   Progress,
+  getEnabledKibanaPluginIds,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -51,6 +52,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
+  const kibanaPluginIds = await getEnabledKibanaPluginIds(kibanaUrl);
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -72,7 +74,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }),
+    createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }),
     createIndexDocRecordsStream(client, stats, progress),
   ]);
 
@@ -92,7 +94,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
 
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
-    await migrateKibanaIndex({ client, log, kibanaUrl });
+    await migrateKibanaIndex({ client, log, kibanaPluginIds });
   }
 
   return result;
