@@ -20,8 +20,8 @@ export interface ReferenceInfo {
 }
 
 export enum ReferenceType {
-  BRANCH,
-  TAG,
-  REMOTE_BRANCH,
-  OTHER,
+  BRANCH = 'BRANCH',
+  TAG = 'TAG',
+  REMOTE_BRANCH = 'REMOTE_BRANCH',
+  OTHER = 'OTHER',
 }
