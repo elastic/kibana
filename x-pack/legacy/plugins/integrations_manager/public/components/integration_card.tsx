@@ -7,18 +7,16 @@ import React from 'react';
 import { EuiButtonEmpty, EuiCard } from '@elastic/eui';
 import { Link } from 'react-router-dom';
 import { linkToDetailView } from '../routes';
-import { IntegrationListItem } from '../../common/types';
+import { IntegrationListItem, IntegrationInfo } from '../../common/types';
 
-export function IntegrationCard({ description, name, version }: IntegrationListItem) {
-  return (
-    <EuiCard
-      title={name}
-      description={description}
-      footer={
-        <EuiButtonEmpty>
-          <Link to={linkToDetailView({ name, version })}>More Details</Link>
-        </EuiButtonEmpty>
-      }
-    />
+type IntegrationCardProps = IntegrationListItem | IntegrationInfo;
+
+export function IntegrationCard({ description, name, version }: IntegrationCardProps) {
+  const footer = (
+    <EuiButtonEmpty>
+      <Link to={linkToDetailView({ name, version })}>More Details</Link>
+    </EuiButtonEmpty>
   );
+
+  return <EuiCard title={name} description={description} footer={footer} />;
 }
