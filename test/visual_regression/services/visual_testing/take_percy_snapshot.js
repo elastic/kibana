@@ -50,7 +50,7 @@ export function takePercySnapshot() {
 
   // restore replaced canvases
   for (const { image, canvas } of replacements) {
-    image.parent.replaceChild(canvas, image);
+    image.parentElement.replaceChild(canvas, image);
   }
 
   return snapshot;
