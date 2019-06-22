@@ -9,7 +9,7 @@ import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/vis/map/service_settings';
 
 uiRoutes.addSetupWork(function ($injector, serviceSettings) {
-  const tileMapPluginInfo = xpackInfoService($injector).get('features.tilemap');
+  const tileMapPluginInfo = xpackInfoService().get('features.tilemap');
 
   if (!tileMapPluginInfo) {
     return;

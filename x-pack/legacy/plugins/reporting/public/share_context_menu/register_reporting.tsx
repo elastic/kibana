@@ -15,8 +15,8 @@ import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_actio
 import { unhashUrl } from 'ui/state_management/state_hashing';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 
-function reportingProvider($injector: any, dashboardConfig: any) {
-  const xpackInfo = xpackInfoService($injector);
+function reportingProvider(dashboardConfig: any) {
+  const xpackInfo = xpackInfoService();
   const getShareActions = ({
     objectType,
     objectId,

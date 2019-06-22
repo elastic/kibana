@@ -12,10 +12,9 @@ import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_conv
 const XPACK_INFO_KEY = 'xpackMain.info';
 
 export class XPackInfo {
-  constructor(initialInfo = {}, $injector) {
+  constructor(initialInfo = {}) {
     this.inProgressRefreshPromise = null;
     this.setAll(initialInfo);
-    this.$injector = $injector;
   }
 
   get = (path, defaultValue = undefined) => {
@@ -73,6 +72,6 @@ export class XPackInfo {
   };
 }
 
-export function xpackInfoService($injector, initialInfo) {
+export function xpackInfoService(initialInfo) {
   return new XPackInfo(initialInfo || chrome.getInjected('xpackInitialInfo'));
 }

@@ -17,8 +17,8 @@ routes
     template: template,
     requireUICapability: 'dev_tools.show',
     resolve: {
-      licenseCheckResults($injector) {
-        const xpackInfo = xpackInfoService($injector);
+      licenseCheckResults() {
+        const xpackInfo = xpackInfoService();
         return {
           showPage: xpackInfo.get('features.grokdebugger.enableLink'),
           message: xpackInfo.get('features.grokdebugger.message')

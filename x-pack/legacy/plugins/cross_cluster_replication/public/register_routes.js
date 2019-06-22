@@ -36,8 +36,8 @@ if (chrome.getInjected('ccrUiEnabled')) {
   routes.when(`${BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
     template,
     resolve: {
-      license($injector) {
-        const xpackInfo = xpackInfoService($injector);
+      license() {
+        const xpackInfo = xpackInfoService();
         return {
           isAvailable: () => xpackInfo.get('features.crossClusterReplication.isAvailable'),
           isActive: () => xpackInfo.get('features.crossClusterReplication.isActive'),

@@ -10,8 +10,8 @@ import { npStart } from 'ui/new_platform';
 import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 
 uiModules.get('xpack/graph')
-  .run($injector => {
-    const xpackInfo = xpackInfoService($injector);
+  .run(() => {
+    const xpackInfo = xpackInfoService();
 
     const navLinkUpdates = {};
     navLinkUpdates.hidden = true;

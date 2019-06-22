@@ -60,7 +60,7 @@ uiModules
     return service;
   });
 
-function profileVizController($scope, $http, $injector, HighlightService) {
+function profileVizController($scope, $http, HighlightService) {
   $scope.title = 'Search Profile';
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];
@@ -76,7 +76,7 @@ function profileVizController($scope, $http, $injector, HighlightService) {
   };
   $scope.markers = [];
   $scope.query = defaultQuery;
-  $scope.licenseEnabled = xpackInfoService($injector).get('features.searchprofiler.enableAppLink');
+  $scope.licenseEnabled = xpackInfoService().get('features.searchprofiler.enableAppLink');
 
   $scope.aceLoaded = (_editor) => {
     $scope.ace = _editor;

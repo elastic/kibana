@@ -13,8 +13,8 @@ import 'plugins/reporting/views/management/jobs';
 
 routes.defaults(/\/management/, {
   resolve: {
-    reportingManagementSection: function ($injector) {
-      const xpackInfo = xpackInfoService($injector);
+    reportingManagementSection: function () {
+      const xpackInfo = xpackInfoService();
       const kibanaManagementSection = management.getSection('kibana');
       const showReportingLinks = xpackInfo.get('features.reporting.management.showLinks');
 

@@ -21,8 +21,8 @@ import { toastNotifications } from 'ui/notify';
 
 routes.defaults(/^\/management\/security(\/|$)/, {
   resolve: {
-    showLinks(kbnUrl, Promise, $injector) {
-      const xpackInfo = xpackInfoService($injector);
+    showLinks(kbnUrl, Promise) {
+      const xpackInfo = xpackInfoService();
       if (!xpackInfo.get('features.security.showLinks')) {
         toastNotifications.addDanger({
           title: xpackInfo.get('features.security.linksMessage')
@@ -34,8 +34,8 @@ routes.defaults(/^\/management\/security(\/|$)/, {
   }
 }).defaults(/\/management/, {
   resolve: {
-    securityManagementSection: function (ShieldUser, $injector) {
-      const showSecurityLinks = xpackInfoService($injector).get('features.security.showLinks');
+    securityManagementSection: function (ShieldUser) {
+      const showSecurityLinks = xpackInfoService().get('features.security.showLinks');
 
       function deregisterSecurity() {
         management.deregister('security');

@@ -29,8 +29,8 @@ routes.when('/management/kibana/reporting', {
     }
   ],
   controllerAs: 'jobsCtrl',
-  controller($scope, kbnUrl, $injector) {
-    const xpackInfo = xpackInfoService($injector);
+  controller($scope, kbnUrl) {
+    const xpackInfo = xpackInfoService();
 
     $scope.$$postDigest(() => {
       const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
