@@ -20,6 +20,7 @@ import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { TEXT_FILE_LIMIT } from '../../common/file';
+import { ReferenceType } from '../../model/commit';
 
 export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   async function repoExists(req: hapi.Request, repoUri: string) {
@@ -206,7 +207,11 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
         const repository = await gitOps.openRepo(uri);
         const references = await repository.getReferences(Reference.TYPE.DIRECT);
         const referenceInfos = await Promise.all(references.map(referenceInfo));
-        return referenceInfos.filter(info => info !== null);
+        return referenceInfos.filter(
+          info =>
+            info !== null &&
+            (info.type === ReferenceType.REMOTE_BRANCH || info.type === ReferenceType.TAG)
+        );
       } catch (e) {
         if (e.isBoom) {
           return e;
