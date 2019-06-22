@@ -164,4 +164,16 @@ export const jobs = {
       method: 'GET',
     });
   },
+
+  getLookBackProgress(jobId, start, end) {
+    return http({
+      url: `${basePath}/jobs/look_back_progress`,
+      method: 'POST',
+      data: {
+        jobId,
+        start,
+        end,
+      }
+    });
+  },
 };

@@ -61,6 +61,11 @@ declare interface Ml {
       aggFieldNamePairs: AggFieldNamePair[]
     ): Promise<any>;
     getAllJobAndGroupIds(): Promise<any>;
+    getLookBackProgress(
+      jobId: string,
+      start: number,
+      end: number
+    ): Promise<{ progress: number; isRunning: boolean }>;
   };
 }
 

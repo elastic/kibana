@@ -239,4 +239,19 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
+  route({
+    method: 'POST',
+    path: '/api/ml/jobs/look_back_progress',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { getLookBackProgress } = jobServiceProvider(callWithRequest);
+      const { jobId, start, end } = request.payload;
+      return getLookBackProgress(jobId, start, end)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

@@ -74,9 +74,9 @@ export class JobRunner {
         this._percentageComplete = 0;
 
         const check = async () => {
-          const isRunning = await this.isRunning();
+          const { isRunning, progress } = await this.getProgress();
 
-          this._percentageComplete = await this.getProgress();
+          this._percentageComplete = progress;
           this._progress$.next(this._percentageComplete);
 
           if (isRunning) {
@@ -97,10 +97,8 @@ export class JobRunner {
     }
   }
 
-  public async getProgress(): Promise<Progress> {
-    const lrts = await this.getLatestRecordTimeStamp();
-    const progress = (lrts - this._start) / (this._end - this._start);
-    return progress > 0 ? Math.round(progress * 100) : 0;
+  public async getProgress(): Promise<{ progress: Progress; isRunning: boolean }> {
+    return await ml.jobs.getLookBackProgress(this._jobId, this._start, this._end);
   }
 
   public subscribeToProgress(func: ProgressSubscriber) {
@@ -108,30 +106,7 @@ export class JobRunner {
   }
 
   public async isRunning(): Promise<boolean> {
-    const state = await this.getDatafeedState();
-    this._datafeedState = state;
-    return (
-      state === DATAFEED_STATE.STARTED ||
-      state === DATAFEED_STATE.STARTING ||
-      state === DATAFEED_STATE.STOPPING
-    );
-  }
-
-  public async getDatafeedState(): Promise<DATAFEED_STATE> {
-    const stats = await ml.getDatafeedStats({ datafeedId: this._datafeedId });
-    if (stats.datafeeds.length) {
-      return stats.datafeeds[0].state;
-    }
-    return DATAFEED_STATE.STOPPED;
-  }
-
-  public async getLatestRecordTimeStamp(): Promise<number> {
-    const stats = await ml.getJobStats({ jobId: this._jobId });
-
-    if (stats.jobs.length) {
-      const time = stats.jobs[0].data_counts.latest_record_timestamp;
-      return time === undefined ? 0 : time;
-    }
-    return 0;
+    const { isRunning } = await this.getProgress();
+    return isRunning;
   }
 }
