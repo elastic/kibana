@@ -14,9 +14,10 @@ const XPACK_INFO_KEY = 'xpackMain.info';
 export function xpackInfoService($injector) {
 
   class XPackInfo {
-    constructor(initialInfo = {}) {
+    constructor(initialInfo = {}, $injector) {
       this.inProgressRefreshPromise = null;
       this.setAll(initialInfo);
+      this.$injector = $injector;
     }
 
     get = (path, defaultValue = undefined) => {
@@ -44,7 +45,7 @@ export function xpackInfoService($injector) {
 
       // store the promise in a shared location so that calls to
       // refresh() before this is complete will get the same promise
-      const $http = $injector.get('$http');
+      const $http = this.$injector.get('$http');
       this.inProgressRefreshPromise = (
         $http.get(chrome.addBasePath('/api/xpack/v1/info'))
           .catch((err) => {
@@ -74,5 +75,5 @@ export function xpackInfoService($injector) {
     };
   }
 
-  return new XPackInfo(chrome.getInjected('xpackInitialInfo'));
+  return new XPackInfo(chrome.getInjected('xpackInitialInfo'), $injector);
 }
