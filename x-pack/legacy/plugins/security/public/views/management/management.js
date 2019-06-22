@@ -22,10 +22,9 @@ import { toastNotifications } from 'ui/notify';
 routes.defaults(/^\/management\/security(\/|$)/, {
   resolve: {
     showLinks(kbnUrl, Promise) {
-      const xpackInfo = xpackInfoService();
-      if (!xpackInfo.get('features.security.showLinks')) {
+      if (!xpackInfoService.get('features.security.showLinks')) {
         toastNotifications.addDanger({
-          title: xpackInfo.get('features.security.linksMessage')
+          title: xpackInfoService.get('features.security.linksMessage')
         });
         kbnUrl.redirect('/management');
         return Promise.halt();
@@ -35,7 +34,7 @@ routes.defaults(/^\/management\/security(\/|$)/, {
 }).defaults(/\/management/, {
   resolve: {
     securityManagementSection: function (ShieldUser) {
-      const showSecurityLinks = xpackInfoService().get('features.security.showLinks');
+      const showSecurityLinks = xpackInfoService.get('features.security.showLinks');
 
       function deregisterSecurity() {
         management.deregister('security');

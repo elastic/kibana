@@ -30,8 +30,6 @@ routes.when('/management/kibana/reporting', {
   ],
   controllerAs: 'jobsCtrl',
   controller($scope, kbnUrl) {
-    const xpackInfo = xpackInfoService();
-
     $scope.$$postDigest(() => {
       const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
       if (!node) {
@@ -41,9 +39,9 @@ routes.when('/management/kibana/reporting', {
       render(
         <I18nContext>
           <ReportListing
-            badLicenseMessage={xpackInfo.get('features.reporting.management.message')}
-            showLinks={xpackInfo.get('features.reporting.management.showLinks')}
-            enableLinks={xpackInfo.get('features.reporting.management.enableLinks')}
+            badLicenseMessage={xpackInfoService.get('features.reporting.management.message')}
+            showLinks={xpackInfoService.get('features.reporting.management.showLinks')}
+            enableLinks={xpackInfoService.get('features.reporting.management.enableLinks')}
             redirect={kbnUrl.redirect}
           />
         </I18nContext>,

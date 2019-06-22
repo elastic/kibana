@@ -14,5 +14,5 @@ uiModules.get('xpack/logstash')
     const kbnUrlService = $injector.get('kbnUrl');
     const $timeout = $injector.get('$timeout');
 
-    return new LogstashLicenseService(xpackInfoService(), kbnUrlService, $timeout);
+    return new LogstashLicenseService(xpackInfoService, kbnUrlService, $timeout);
   });

@@ -11,15 +11,13 @@ import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 
 uiModules.get('xpack/graph')
   .run(() => {
-    const xpackInfo = xpackInfoService();
-
     const navLinkUpdates = {};
     navLinkUpdates.hidden = true;
-    const showAppLink = xpackInfo.get('features.graph.showAppLink', false);
+    const showAppLink = xpackInfoService.get('features.graph.showAppLink', false);
     navLinkUpdates.hidden = !showAppLink;
     if (showAppLink) {
-      navLinkUpdates.disabled = !xpackInfo.get('features.graph.enableAppLink', false);
-      navLinkUpdates.tooltip = xpackInfo.get('features.graph.message');
+      navLinkUpdates.disabled = !xpackInfoService.get('features.graph.enableAppLink', false);
+      navLinkUpdates.tooltip = xpackInfoService.get('features.graph.message');
     }
 
     npStart.core.chrome.navLinks.update('graph', navLinkUpdates);

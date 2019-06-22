@@ -18,10 +18,9 @@ routes
     requireUICapability: 'dev_tools.show',
     resolve: {
       licenseCheckResults() {
-        const xpackInfo = xpackInfoService();
         return {
-          showPage: xpackInfo.get('features.grokdebugger.enableLink'),
-          message: xpackInfo.get('features.grokdebugger.message')
+          showPage: xpackInfoService.get('features.grokdebugger.enableLink'),
+          message: xpackInfoService.get('features.grokdebugger.message')
         };
       }
     },

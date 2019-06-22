@@ -106,9 +106,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const $route = $injector.get('$route');
     const role = $route.current.locals.role;
 
-    const xpackInfo = xpackInfoService();
-    const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
-    const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
+    const allowDocumentLevelSecurity = xpackInfoService.get('features.security.allowRoleDocumentLevelSecurity');
+    const allowFieldLevelSecurity = xpackInfoService.get('features.security.allowRoleFieldLevelSecurity');
     if (role.elasticsearch.indices.length === 0) {
       const emptyOption = {
         names: [],

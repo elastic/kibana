@@ -44,7 +44,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly routes: UIRoutes,
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
-    private readonly xpackInfoService: (() => any) | null,
+    private readonly xpackInfoService: any | null,
     public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
@@ -61,7 +61,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
     let xpackInfo: any;
     try {
-      xpackInfo = this.xpackInfoService && this.xpackInfoService();
+      // todo
+      xpackInfo = this.xpackInfoService;
     } catch (e) {
       xpackInfo = false;
     }

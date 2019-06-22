@@ -33,7 +33,7 @@ uiModules.get('kibana')
 
     // We assume that all license types offer Reporting, and that we only need to check if the
     // license is active or expired.
-    const isLicenseActive = xpackInfoService().getLicense().isActive;
+    const isLicenseActive = xpackInfoService.getLicense().isActive;
 
     async function showCompletionNotification(job) {
       const reportObjectTitle = job._source.payload.title;

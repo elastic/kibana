@@ -9,7 +9,7 @@
 import { postSaveService } from './post_save_service';
 import { i18n } from '@kbn/i18n';
 import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
-import { xpackFeature } from 'plugins/ml/license/check_license';
+import { xpackFeatureAvailable } from 'plugins/ml/license/check_license';
 import template from './post_save_options.html';
 
 import { uiModules } from 'ui/modules';
@@ -26,7 +26,7 @@ module.directive('mlPostSaveOptions', function () {
     },
     template,
     link: function ($scope) {
-      $scope.watcherEnabled = xpackFeature().isAvailable('watcher');
+      $scope.watcherEnabled = xpackFeatureAvailable('watcher');
       $scope.status = postSaveService.status;
       $scope.STATUS = postSaveService.STATUS;
 

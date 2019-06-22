@@ -14,5 +14,5 @@ uiModules.get('xpack/watcher')
     const kbnUrlService = $injector.get('kbnUrl');
     const $timeout = $injector.get('$timeout');
 
-    return new LicenseService(xpackInfoService(), kbnUrlService, $timeout, $http);
+    return new LicenseService(xpackInfoService, kbnUrlService, $timeout, $http);
   });

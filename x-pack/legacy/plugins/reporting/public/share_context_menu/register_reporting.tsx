@@ -16,7 +16,6 @@ import { unhashUrl } from 'ui/state_management/state_hashing';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 
 function reportingProvider(dashboardConfig: any) {
-  const xpackInfo = xpackInfoService();
   const getShareActions = ({
     objectType,
     objectId,
@@ -71,7 +70,7 @@ function reportingProvider(dashboardConfig: any) {
     };
 
     const shareActions = [];
-    if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
+    if (xpackInfoService.get('features.reporting.printablePdf.showLinks', false)) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
         defaultMessage: 'PDF Reports',
       });
@@ -80,8 +79,8 @@ function reportingProvider(dashboardConfig: any) {
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfo.get('features.reporting.printablePdf.message'),
-          disabled: !xpackInfo.get('features.reporting.printablePdf.enableLinks', false)
+          toolTipContent: xpackInfoService.get('features.reporting.printablePdf.message'),
+          disabled: !xpackInfoService.get('features.reporting.printablePdf.enableLinks', false)
             ? true
             : false,
           ['data-test-subj']: 'pdfReportMenuItem',
@@ -103,15 +102,17 @@ function reportingProvider(dashboardConfig: any) {
       });
     }
 
-    if (xpackInfo.get('features.reporting.png.showLinks', false)) {
+    if (xpackInfoService.get('features.reporting.png.showLinks', false)) {
       const panelTitle = 'PNG Reports';
 
       shareActions.push({
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfo.get('features.reporting.png.message'),
-          disabled: !xpackInfo.get('features.reporting.png.enableLinks', false) ? true : false,
+          toolTipContent: xpackInfoService.get('features.reporting.png.message'),
+          disabled: !xpackInfoService.get('features.reporting.png.enableLinks', false)
+            ? true
+            : false,
           ['data-test-subj']: 'pngReportMenuItem',
           sortOrder: 10,
         },

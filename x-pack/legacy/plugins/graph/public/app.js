@@ -59,10 +59,10 @@ import settingsTemplate from './templates/settings.html';
 const app = uiModules.get('app/graph');
 
 function checkLicense(Promise, kbnBaseUrl) {
-  const xpackInfo = xpackInfoService();
-  const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
+  const licenseAllowsToShowThisPage = xpackInfoService.get('features.graph.showAppLink') &&
+    xpackInfoService.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
-    const message = xpackInfo.get('features.graph.message');
+    const message = xpackInfoService.get('features.graph.message');
     const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
     window.location.href = newUrl;
     return Promise.halt();
@@ -160,8 +160,7 @@ app.controller('graphuiPlugin', function (
   Private,
   Promise,
   confirmModal,
-  kbnBaseUrl,
-  config
+  kbnBaseUrl
 ) {
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)

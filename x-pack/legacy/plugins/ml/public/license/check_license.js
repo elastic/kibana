@@ -95,7 +95,7 @@ function setLicenseExpired(features) {
 }
 
 function getFeatures() {
-  return xpackInfoService().get('features.ml');
+  return xpackInfoService.get('features.ml');
 }
 
 function redirectToKibana(features, kbnBaseUrl) {
@@ -118,12 +118,5 @@ export function isFullLicense() {
   return (licenseType === LICENSE_TYPE.FULL);
 }
 
-export function xpackFeature(initialInfo) {
-  const xpackInfo = xpackInfoService(initialInfo);
-
-  return {
-    isAvailable(feature) {
-      return xpackInfo.get(`features.${feature}.isAvailable`, false);
-    }
-  };
-}
+// TODO
+export const xpackFeatureAvailable = feature => xpackInfoService.get(`features.${feature}.isAvailable`, false);

@@ -19,13 +19,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const module = uiModules.get('xpack_main', []);
 
 module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
-  const xpackInfo = xpackInfoService();
   const debounce = Private(DebounceProvider);
   const isUnauthenticated = Path.isUnauthenticated();
   let isLicenseExpirationBannerShown = false;
 
   const notifyIfLicenseIsExpired = debounce(() => {
-    const license = xpackInfo.get('license');
+    const license = xpackInfoService.get('license');
     if (license.isActive) {
       return;
     }
@@ -88,7 +87,7 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
       // cached info, so we need to refresh it.
       // Intentionally swallowing this error
       // because nothing catches it and it's an ugly console error.
-      xpackInfo.refresh($injector).then(
+      xpackInfoService.refresh($injector).then(
         () => notifyIfLicenseIsExpired(),
         () => {}
       );

@@ -11,14 +11,12 @@ import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 
 uiModules.get('xpack/ml').run(() => {
-  const xpackInfo = xpackInfoService();
-
-  const showAppLink = xpackInfo.get('features.ml.showLinks', false);
+  const showAppLink = xpackInfoService.get('features.ml.showLinks', false);
 
   const navLinkUpdates = {
     // hide by default, only show once the xpackInfo is initialized
     hidden: !showAppLink,
-    disabled: !showAppLink || (showAppLink && !xpackInfo.get('features.ml.isAvailable', false))
+    disabled: !showAppLink || (showAppLink && !xpackInfoService.get('features.ml.isAvailable', false))
   };
 
   npStart.core.chrome.navLinks.update('ml', navLinkUpdates);

@@ -13,7 +13,6 @@ import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_actio
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 
 function reportingProvider() {
-  const xpackInfo = xpackInfoService();
   const getShareActions = ({
     objectType,
     objectId,
@@ -33,7 +32,7 @@ function reportingProvider() {
     };
 
     const shareActions = [];
-    if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
+    if (xpackInfoService.get('features.reporting.csv.showLinks', false)) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
@@ -42,8 +41,10 @@ function reportingProvider() {
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfo.get('features.reporting.csv.message'),
-          disabled: !xpackInfo.get('features.reporting.csv.enableLinks', false) ? true : false,
+          toolTipContent: xpackInfoService.get('features.reporting.csv.message'),
+          disabled: !xpackInfoService.get('features.reporting.csv.enableLinks', false)
+            ? true
+            : false,
           ['data-test-subj']: 'csvReportMenuItem',
         },
         panel: {

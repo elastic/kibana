@@ -37,11 +37,10 @@ if (chrome.getInjected('ccrUiEnabled')) {
     template,
     resolve: {
       license() {
-        const xpackInfo = xpackInfoService();
         return {
-          isAvailable: () => xpackInfo.get('features.crossClusterReplication.isAvailable'),
-          isActive: () => xpackInfo.get('features.crossClusterReplication.isActive'),
-          getReason: () => xpackInfo.get('features.crossClusterReplication.message'),
+          isAvailable: () => xpackInfoService.get('features.crossClusterReplication.isAvailable'),
+          isActive: () => xpackInfoService.get('features.crossClusterReplication.isActive'),
+          getReason: () => xpackInfoService.get('features.crossClusterReplication.message'),
         };
       }
     },

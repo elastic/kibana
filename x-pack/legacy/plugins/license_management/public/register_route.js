@@ -92,15 +92,14 @@ routes
 
         $scope.$$postDigest(() => {
           const elem = document.getElementById('licenseReactRoot');
-          const xPackInfo = xpackInfoService();
-          const initialState = { license: xPackInfo.get('license') };
+          const initialState = { license: xpackInfoService.get('license') };
           const kbnUrlWrapper = {
             change(url) {
               kbnUrl.change(url);
               $rootScope.$digest();
             }
           };
-          const services = { autoLogout, xPackInfo, kbnUrl: kbnUrlWrapper };
+          const services = { autoLogout, xpackInfoService, kbnUrl: kbnUrlWrapper };
           const store = licenseManagementStore(initialState, services);
           renderReact(elem, store);
           manageAngularLifecycle($scope, $route, elem);

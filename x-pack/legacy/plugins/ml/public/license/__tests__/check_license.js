@@ -5,8 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+import { xpackInfoService } from '../../../../xpack_main/public/services/xpack_info';
 import {
-  xpackFeature,
+  xpackFeatureAvailable,
 } from '../check_license';
 
 const initialInfo = {
@@ -18,17 +19,17 @@ const initialInfo = {
 };
 
 describe('ML - check license', () => {
-
+//todo move to before all
   describe('xpackFeatureProvider', () => {
     it('returns true for enabled feature', () => {
-      const xpackFeatureService = xpackFeature().setAll(initialInfo);
-      const result = xpackFeatureService.isAvailable('watcher');
+      xpackInfoService.setAll(initialInfo);
+      const result = xpackFeatureAvailable('watcher');
       expect(result).to.be(true);
     });
 
     it('returns false for disabled feature', () => {
-      const xpackFeatureService = xpackFeature().setAll(initialInfo);
-      const result = xpackFeatureService.isAvailable('noSuchFeature');
+      xpackInfoService.setAll(initialInfo);
+      const result = xpackFeatureAvailable('noSuchFeature');
       expect(result).to.be(false);
     });
   });

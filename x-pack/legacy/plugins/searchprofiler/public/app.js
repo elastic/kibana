@@ -76,7 +76,7 @@ function profileVizController($scope, $http, HighlightService) {
   };
   $scope.markers = [];
   $scope.query = defaultQuery;
-  $scope.licenseEnabled = xpackInfoService().get('features.searchprofiler.enableAppLink');
+  $scope.licenseEnabled = xpackInfoService.get('features.searchprofiler.enableAppLink');
 
   $scope.aceLoaded = (_editor) => {
     $scope.ace = _editor;

@@ -14,14 +14,13 @@ import 'plugins/reporting/views/management/jobs';
 routes.defaults(/\/management/, {
   resolve: {
     reportingManagementSection: function () {
-      const xpackInfo = xpackInfoService();
       const kibanaManagementSection = management.getSection('kibana');
-      const showReportingLinks = xpackInfo.get('features.reporting.management.showLinks');
+      const showReportingLinks = xpackInfoService.get('features.reporting.management.showLinks');
 
       kibanaManagementSection.deregister('reporting');
       if (showReportingLinks) {
-        const enableReportingLinks = xpackInfo.get('features.reporting.management.enableLinks');
-        const tooltipMessage = xpackInfo.get('features.reporting.management.message');
+        const enableReportingLinks = xpackInfoService.get('features.reporting.management.enableLinks');
+        const tooltipMessage = xpackInfoService.get('features.reporting.management.message');
 
         let url;
         let tooltip;
