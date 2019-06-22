@@ -38,8 +38,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = Split Chart');
-      await PageObjects.visualize.clickBucket('Split Chart');
+      log.debug('Bucket = Split chart');
+      await PageObjects.visualize.clickBucket('Split chart');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Field = extension');
