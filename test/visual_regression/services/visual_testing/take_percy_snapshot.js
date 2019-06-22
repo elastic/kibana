@@ -17,15 +17,15 @@
  * under the License.
  */
 
-var readFileSync = require('fs').readFileSync;
-var agentJsFilename = require('@percy/agent/dist/utils/sdk-utils').agentJsFilename;
+import { readFileSync } from 'fs';
+import { agentJsFilename } from '@percy/agent/dist/utils/sdk-utils';
 
 export function takePercySnapshot() {
   if (!window.PercyAgent) {
     return false;
   }
 
-  var agent = new window.PercyAgent({
+  const agent = new window.PercyAgent({
     handleAgentCommunication: false
   });
 
@@ -34,8 +34,8 @@ export function takePercySnapshot() {
   }
 
   // convert canvas elements into static images
-  var replacements = queryAll('canvas').map(function (canvas) {
-    var image = document.createElement('img');
+  const replacements = queryAll('canvas').map(canvas => {
+    const image = document.createElement('img');
     image.src = canvas.toDataURL();
     image.style.cssText = window.getComputedStyle(canvas).cssText;
     canvas.parentElement.replaceChild(image, canvas);
@@ -46,17 +46,17 @@ export function takePercySnapshot() {
   });
 
   // take dom snapshot
-  var snapshot = agent.domSnapshot(document);
+  const snapshot = agent.domSnapshot(document);
 
   // restore replaced canvases
-  replacements.forEach(function (replacement) {
+  replacements.forEach(replacement => {
     replacement.canvas.parent.replaceChild(replacement.image, replacement.canvas);
   });
 
   return snapshot;
 }
 
-export var takePercySnapshotWithAgent = `
+export const takePercySnapshotWithAgent = `
   ${readFileSync(agentJsFilename(), 'utf8')}
 
   return (${takePercySnapshot.toString()})();
