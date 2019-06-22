@@ -77,6 +77,7 @@ export function resultsServiceProvider(callWithRequest) {
         }
       });
     }
+
     // Add in term queries for each of the specified criteria.
     criteriaFields.forEach((criteria) => {
       boolCriteria.push({
