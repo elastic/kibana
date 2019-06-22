@@ -5,7 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/url';
 import { LogstashLicenseService } from './logstash_license_service';
 
@@ -14,5 +14,5 @@ uiModules.get('xpack/logstash')
     const kbnUrlService = $injector.get('kbnUrl');
     const $timeout = $injector.get('$timeout');
 
-    return new LogstashLicenseService(xpackInfoService, kbnUrlService, $timeout);
+    return new LogstashLicenseService(xpackInfo, kbnUrlService, $timeout);
   });

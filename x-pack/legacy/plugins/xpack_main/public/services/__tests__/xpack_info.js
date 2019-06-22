@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 const XPACK_INFO_KEY = 'xpackMain.info';
 
@@ -20,9 +20,9 @@ describe('xpack_info service', () => {
         bar: 17
       }
     };
-    xpackInfoService.setAll(updatedXPackInfo);
+    xpackInfo.setAll(updatedXPackInfo);
     expect(sessionStorage.getItem(XPACK_INFO_KEY)).to.be(JSON.stringify(updatedXPackInfo));
-    expect(xpackInfoService.get('foo.bar')).to.be(17);
+    expect(xpackInfo.get('foo.bar')).to.be(17);
   });
 
   it ('clears the stored xpack info', () => {
@@ -31,16 +31,16 @@ describe('xpack_info service', () => {
         bar: 17
       }
     };
-    xpackInfoService.setAll(updatedXPackInfo);
-    expect(xpackInfoService.get('foo.bar')).not.to.be(null);
+    xpackInfo.setAll(updatedXPackInfo);
+    expect(xpackInfo.get('foo.bar')).not.to.be(null);
 
-    xpackInfoService.clear();
+    xpackInfo.clear();
     expect(sessionStorage.getItem(XPACK_INFO_KEY)).to.be(null);
-    expect(xpackInfoService.get('foo.bar')).to.be(undefined);
+    expect(xpackInfo.get('foo.bar')).to.be(undefined);
   });
 
   it ('defaults to the provided default value if the requested path is not found', () => {
-    xpackInfoService.setAll({ foo: 'bar' });
-    expect(xpackInfoService.get('foo.baz', 17)).to.be(17);
+    xpackInfo.setAll({ foo: 'bar' });
+    expect(xpackInfo.get('foo.baz', 17)).to.be(17);
   });
 });

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 // @ts-ignore: implicit any for JS file
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
 import chrome from 'ui/chrome';
 import { ShareActionProps } from 'ui/share/share_action';
@@ -70,7 +70,7 @@ function reportingProvider(dashboardConfig: any) {
     };
 
     const shareActions = [];
-    if (xpackInfoService.get('features.reporting.printablePdf.showLinks', false)) {
+    if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
         defaultMessage: 'PDF Reports',
       });
@@ -79,8 +79,8 @@ function reportingProvider(dashboardConfig: any) {
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfoService.get('features.reporting.printablePdf.message'),
-          disabled: !xpackInfoService.get('features.reporting.printablePdf.enableLinks', false)
+          toolTipContent: xpackInfo.get('features.reporting.printablePdf.message'),
+          disabled: !xpackInfo.get('features.reporting.printablePdf.enableLinks', false)
             ? true
             : false,
           ['data-test-subj']: 'pdfReportMenuItem',
@@ -102,17 +102,15 @@ function reportingProvider(dashboardConfig: any) {
       });
     }
 
-    if (xpackInfoService.get('features.reporting.png.showLinks', false)) {
+    if (xpackInfo.get('features.reporting.png.showLinks', false)) {
       const panelTitle = 'PNG Reports';
 
       shareActions.push({
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfoService.get('features.reporting.png.message'),
-          disabled: !xpackInfoService.get('features.reporting.png.enableLinks', false)
-            ? true
-            : false,
+          toolTipContent: xpackInfo.get('features.reporting.png.message'),
+          disabled: !xpackInfo.get('features.reporting.png.enableLinks', false) ? true : false,
           ['data-test-subj']: 'pngReportMenuItem',
           sortOrder: 10,
         },

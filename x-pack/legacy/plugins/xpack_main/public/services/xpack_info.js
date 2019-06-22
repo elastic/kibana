@@ -72,5 +72,4 @@ export class XPackInfo {
   };
 }
 
-export const xpackInfoService = new XPackInfo(chrome.getInjected('xpackInitialInfo'));
-
+export const xpackInfo = new XPackInfo(chrome.getInjected('xpackInitialInfo'));

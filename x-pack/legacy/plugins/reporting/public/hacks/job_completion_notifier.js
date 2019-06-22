@@ -13,7 +13,7 @@ import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { JobStatuses } from '../constants/job_statuses';
 import { Path } from 'plugins/xpack_main/services/path';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
 import {
   EuiButton,
@@ -33,7 +33,7 @@ uiModules.get('kibana')
 
     // We assume that all license types offer Reporting, and that we only need to check if the
     // license is active or expired.
-    const isLicenseActive = xpackInfoService.getLicense().isActive;
+    const isLicenseActive = xpackInfo.getLicense().isActive;
 
     async function showCompletionNotification(job) {
       const reportObjectTitle = job._source.payload.title;

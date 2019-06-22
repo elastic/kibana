@@ -5,11 +5,12 @@
  */
 
 import uiRoutes from 'ui/routes';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/vis/map/service_settings';
 
+//todo extra var
 uiRoutes.addSetupWork(function ($injector, serviceSettings) {
-  const tileMapPluginInfo = xpackInfoService.get('features.tilemap');
+  const tileMapPluginInfo = xpackInfo.get('features.tilemap');
 
   if (!tileMapPluginInfo) {
     return;

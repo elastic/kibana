@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { xpackInfoService } from '../../../xpack_main/public/services/xpack_info';
+import { xpackInfo } from '../../../xpack_main/public/services/xpack_info';
 import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
 import { LICENSE_TYPE } from '../../common/constants/license';
 
@@ -95,7 +95,7 @@ function setLicenseExpired(features) {
 }
 
 function getFeatures() {
-  return xpackInfoService.get('features.ml');
+  return xpackInfo.get('features.ml');
 }
 
 function redirectToKibana(features, kbnBaseUrl) {
@@ -119,4 +119,4 @@ export function isFullLicense() {
 }
 
 // TODO
-export const xpackFeatureAvailable = feature => xpackInfoService.get(`features.${feature}.isAvailable`, false);
+export const xpackFeatureAvailable = feature => xpackInfo.get(`features.${feature}.isAvailable`, false);

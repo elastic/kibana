@@ -7,7 +7,7 @@
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import 'plugins/reporting/views/management/jobs';
 
@@ -15,12 +15,12 @@ routes.defaults(/\/management/, {
   resolve: {
     reportingManagementSection: function () {
       const kibanaManagementSection = management.getSection('kibana');
-      const showReportingLinks = xpackInfoService.get('features.reporting.management.showLinks');
+      const showReportingLinks = xpackInfo.get('features.reporting.management.showLinks');
 
       kibanaManagementSection.deregister('reporting');
       if (showReportingLinks) {
-        const enableReportingLinks = xpackInfoService.get('features.reporting.management.enableLinks');
-        const tooltipMessage = xpackInfoService.get('features.reporting.management.message');
+        const enableReportingLinks = xpackInfo.get('features.reporting.management.enableLinks');
+        const tooltipMessage = xpackInfo.get('features.reporting.management.message');
 
         let url;
         let tooltip;

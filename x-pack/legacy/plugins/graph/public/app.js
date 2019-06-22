@@ -29,7 +29,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
@@ -59,10 +59,10 @@ import settingsTemplate from './templates/settings.html';
 const app = uiModules.get('app/graph');
 
 function checkLicense(Promise, kbnBaseUrl) {
-  const licenseAllowsToShowThisPage = xpackInfoService.get('features.graph.showAppLink') &&
-    xpackInfoService.get('features.graph.enableAppLink');
+  const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
+    xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
-    const message = xpackInfoService.get('features.graph.message');
+    const message = xpackInfo.get('features.graph.message');
     const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
     window.location.href = newUrl;
     return Promise.halt();

@@ -17,7 +17,7 @@ import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
 
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
@@ -106,8 +106,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const $route = $injector.get('$route');
     const role = $route.current.locals.role;
 
-    const allowDocumentLevelSecurity = xpackInfoService.get('features.security.allowRoleDocumentLevelSecurity');
-    const allowFieldLevelSecurity = xpackInfoService.get('features.security.allowRoleFieldLevelSecurity');
+    const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
+    const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     if (role.elasticsearch.indices.length === 0) {
       const emptyOption = {
         names: [],

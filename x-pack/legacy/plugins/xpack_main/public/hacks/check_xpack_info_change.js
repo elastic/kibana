@@ -12,7 +12,7 @@ import chrome from 'ui/chrome';
 import { banners } from 'ui/notify';
 import { DebounceProvider } from 'ui/debounce';
 import { Path } from 'plugins/xpack_main/services/path';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { xpackInfoSignature } from 'plugins/xpack_main/services/xpack_info_signature';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -24,7 +24,7 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
   let isLicenseExpirationBannerShown = false;
 
   const notifyIfLicenseIsExpired = debounce(() => {
-    const license = xpackInfoService.get('license');
+    const license = xpackInfo.get('license');
     if (license.isActive) {
       return;
     }
@@ -87,7 +87,7 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
       // cached info, so we need to refresh it.
       // Intentionally swallowing this error
       // because nothing catches it and it's an ugly console error.
-      xpackInfoService.refresh($injector).then(
+      xpackInfo.refresh($injector).then(
         () => notifyIfLicenseIsExpired(),
         () => {}
       );

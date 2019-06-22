@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
+// todo rename
 export const logstashSecurityService = {
   isSecurityEnabled() {
-    return Boolean(xpackInfoService.get(`features.security`));
+    return Boolean(xpackInfo.get(`features.security`));
   }
 };

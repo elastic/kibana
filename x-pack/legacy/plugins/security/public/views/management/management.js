@@ -11,7 +11,7 @@ import 'plugins/security/views/management/roles_grid/roles';
 import 'plugins/security/views/management/edit_user/edit_user';
 import 'plugins/security/views/management/edit_role/index';
 import routes from 'ui/routes';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import '../../services/shield_user';
 import { ROLES_PATH, USERS_PATH } from './management_urls';
 
@@ -22,9 +22,9 @@ import { toastNotifications } from 'ui/notify';
 routes.defaults(/^\/management\/security(\/|$)/, {
   resolve: {
     showLinks(kbnUrl, Promise) {
-      if (!xpackInfoService.get('features.security.showLinks')) {
+      if (!xpackInfo.get('features.security.showLinks')) {
         toastNotifications.addDanger({
-          title: xpackInfoService.get('features.security.linksMessage')
+          title: xpackInfo.get('features.security.linksMessage')
         });
         kbnUrl.redirect('/management');
         return Promise.halt();
@@ -34,7 +34,7 @@ routes.defaults(/^\/management\/security(\/|$)/, {
 }).defaults(/\/management/, {
   resolve: {
     securityManagementSection: function (ShieldUser) {
-      const showSecurityLinks = xpackInfoService.get('features.security.showLinks');
+      const showSecurityLinks = xpackInfo.get('features.security.showLinks');
 
       function deregisterSecurity() {
         management.deregister('security');

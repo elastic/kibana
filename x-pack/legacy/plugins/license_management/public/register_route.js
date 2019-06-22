@@ -16,7 +16,7 @@ import { App } from './app.container';
 import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import template from './main.html';
 import { licenseManagementStore } from './store';
@@ -92,14 +92,14 @@ routes
 
         $scope.$$postDigest(() => {
           const elem = document.getElementById('licenseReactRoot');
-          const initialState = { license: xpackInfoService.get('license') };
+          const initialState = { license: xpackInfo.get('license') };
           const kbnUrlWrapper = {
             change(url) {
               kbnUrl.change(url);
               $rootScope.$digest();
             }
           };
-          const services = { autoLogout, xpackInfoService, kbnUrl: kbnUrlWrapper };
+          const services = { autoLogout, xpackInfo, kbnUrl: kbnUrlWrapper };
           const store = licenseManagementStore(initialState, services);
           renderReact(elem, store);
           manageAngularLifecycle($scope, $route, elem);

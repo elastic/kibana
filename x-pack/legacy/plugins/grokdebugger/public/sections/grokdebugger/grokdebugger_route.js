@@ -7,7 +7,7 @@
 import routes from 'ui/routes';
 import 'ui/capabilities/route_setup';
 import { toastNotifications } from 'ui/notify';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import template from './grokdebugger_route.html';
 import './directives/grokdebugger';
 
@@ -19,8 +19,8 @@ routes
     resolve: {
       licenseCheckResults() {
         return {
-          showPage: xpackInfoService.get('features.grokdebugger.enableLink'),
-          message: xpackInfoService.get('features.grokdebugger.message')
+          showPage: xpackInfo.get('features.grokdebugger.enableLink'),
+          message: xpackInfo.get('features.grokdebugger.message')
         };
       }
     },

@@ -5,14 +5,15 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/url';
 import { LicenseService } from './license_service';
 
 uiModules.get('xpack/watcher')
   .factory('xpackWatcherLicenseService', ($injector, $http) => {
+    //todo cleanup
     const kbnUrlService = $injector.get('kbnUrl');
     const $timeout = $injector.get('$timeout');
 
-    return new LicenseService(xpackInfoService, kbnUrlService, $timeout, $http);
+    return new LicenseService(xpackInfo, kbnUrlService, $timeout, $http);
   });

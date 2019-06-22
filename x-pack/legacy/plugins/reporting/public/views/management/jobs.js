@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import routes from 'ui/routes';
 import template from 'plugins/reporting/views/management/jobs.html';
@@ -39,9 +39,9 @@ routes.when('/management/kibana/reporting', {
       render(
         <I18nContext>
           <ReportListing
-            badLicenseMessage={xpackInfoService.get('features.reporting.management.message')}
-            showLinks={xpackInfoService.get('features.reporting.management.showLinks')}
-            enableLinks={xpackInfoService.get('features.reporting.management.enableLinks')}
+            badLicenseMessage={xpackInfo.get('features.reporting.management.message')}
+            showLinks={xpackInfo.get('features.reporting.management.showLinks')}
+            enableLinks={xpackInfo.get('features.reporting.management.enableLinks')}
             redirect={kbnUrl.redirect}
           />
         </I18nContext>,

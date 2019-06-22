@@ -8,7 +8,7 @@ import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
 
 import template from './main.html';
@@ -38,9 +38,9 @@ if (chrome.getInjected('ccrUiEnabled')) {
     resolve: {
       license() {
         return {
-          isAvailable: () => xpackInfoService.get('features.crossClusterReplication.isAvailable'),
-          isActive: () => xpackInfoService.get('features.crossClusterReplication.isActive'),
-          getReason: () => xpackInfoService.get('features.crossClusterReplication.message'),
+          isAvailable: () => xpackInfo.get('features.crossClusterReplication.isAvailable'),
+          isActive: () => xpackInfo.get('features.crossClusterReplication.isActive'),
+          getReason: () => xpackInfo.get('features.crossClusterReplication.message'),
         };
       }
     },

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 // @ts-ignore: implicit any for JS file
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
 import { ShareActionProps } from 'ui/share/share_action';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
@@ -32,7 +32,7 @@ function reportingProvider() {
     };
 
     const shareActions = [];
-    if (xpackInfoService.get('features.reporting.csv.showLinks', false)) {
+    if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
@@ -41,10 +41,8 @@ function reportingProvider() {
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfoService.get('features.reporting.csv.message'),
-          disabled: !xpackInfoService.get('features.reporting.csv.enableLinks', false)
-            ? true
-            : false,
+          toolTipContent: xpackInfo.get('features.reporting.csv.message'),
+          disabled: !xpackInfo.get('features.reporting.csv.enableLinks', false) ? true : false,
           ['data-test-subj']: 'csvReportMenuItem',
         },
         panel: {
