@@ -7,14 +7,17 @@ Array [
       Object {
         "ip": "192.178.123.21",
         "status": "up",
+        "timestamp": "123",
       },
       Object {
         "ip": "192.178.123.22",
         "status": "down",
+        "timestamp": "124",
       },
       Object {
         "ip": "192.178.123.23",
         "status": "up",
+        "timestamp": "113",
       },
     ],
     "location": "us-east-1",
@@ -31,14 +34,17 @@ Array [
       Object {
         "ip": "192.178.123.21",
         "status": "up",
+        "timestamp": "123",
       },
       Object {
         "ip": "192.178.123.22",
         "status": "down",
+        "timestamp": "124",
       },
       Object {
         "ip": "192.178.123.23",
         "status": "up",
+        "timestamp": "113",
       },
     ],
     "location": "us-east-1",
@@ -50,14 +56,17 @@ Array [
       Object {
         "ip": "192.178.123.21",
         "status": "up",
+        "timestamp": "121",
       },
       Object {
         "ip": "192.178.123.22",
         "status": "down",
+        "timestamp": "132",
       },
       Object {
         "ip": "192.178.123.23",
         "status": "up",
+        "timestamp": "115",
       },
     ],
     "location": "us-west-1",
@@ -74,14 +83,17 @@ Array [
       Object {
         "ip": "192.178.123.21",
         "status": "up",
+        "timestamp": "123",
       },
       Object {
         "ip": "192.178.123.22",
         "status": "up",
+        "timestamp": "124",
       },
       Object {
         "ip": "192.178.123.23",
         "status": "up",
+        "timestamp": "113",
       },
     ],
     "location": "us-east-1",

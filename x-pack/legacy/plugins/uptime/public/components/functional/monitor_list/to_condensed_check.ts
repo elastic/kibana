@@ -32,11 +32,11 @@ export const toCondensedCheck = (checks: Check[]) => {
     } = check;
     let condensedCheck: CondensedCheck | undefined;
     if ((condensedCheck = condensedChecks.get(location))) {
-      condensedCheck.childStatuses.push({ ip, status });
+      condensedCheck.childStatuses.push({ ip, status, timestamp });
       inferCondensedFields(condensedCheck, status, timestamp);
     } else {
       condensedChecks.set(location, {
-        childStatuses: [{ ip, status }],
+        childStatuses: [{ ip, status, timestamp }],
         location,
         status,
         timestamp,

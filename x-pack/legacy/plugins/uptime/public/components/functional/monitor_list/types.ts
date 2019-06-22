@@ -14,6 +14,7 @@ export interface CondensedCheck {
 export interface CondensedCheckStatus {
   ip?: string | null;
   status: string;
+  timestamp: string;
 }
 
 export interface Criteria {
