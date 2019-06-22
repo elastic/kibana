@@ -20,7 +20,7 @@ const app = uiModules.get('xpack/logstash');
 app.directive('pipelineEdit', function ($injector) {
   const pipelineService = $injector.get('pipelineService');
   const licenseService = $injector.get('logstashLicenseService');
-  const securityService = $injector.get('logstashSecurityService');
+  const securityService = $injector.get('logstashSecurityService'); //todo, no reason to use injector
   const kbnUrl = $injector.get('kbnUrl');
   const shieldUser = $injector.get('ShieldUser');
   const $route = $injector.get('$route');

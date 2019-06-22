@@ -5,9 +5,9 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
-import { LogstashSecurityService } from './logstash_security_service';
+import { logstashSecurityService } from './logstash_security_service';
 
 uiModules.get('xpack/logstash')
 // todo - access directly from logstash service
-  .factory('logstashSecurityService', () => new LogstashSecurityService(xpackInfoService));
+// only consumed by pipeline edit
+  .factory('logstashSecurityService', () => logstashSecurityService);
