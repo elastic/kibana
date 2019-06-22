@@ -31,18 +31,32 @@ exports[`CondensedCheckList component renders checks 1`] = `
     <EuiToolTip
       content={
         Array [
-          <div>
-            <EuiHealth
-              color="danger"
-            />
-            127.0.0.1
-          </div>,
-          <div>
-            <EuiHealth
-              color="primary"
-            />
-            127.0.0.2
-          </div>,
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiHealth
+                color="danger"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              127.0.0.1
+            </EuiFlexItem>
+            <EuiFlexItem>
+              a few moments ago
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiHealth
+                color="primary"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              127.0.0.2
+            </EuiFlexItem>
+            <EuiFlexItem>
+              a few moments ago
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ]
       }
       delay="regular"
@@ -79,18 +93,32 @@ exports[`CondensedCheckList component renders checks 1`] = `
     <EuiToolTip
       content={
         Array [
-          <div>
-            <EuiHealth
-              color="danger"
-            />
-            127.0.0.1
-          </div>,
-          <div>
-            <EuiHealth
-              color="danger"
-            />
-            127.0.0.2
-          </div>,
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiHealth
+                color="danger"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              127.0.0.1
+            </EuiFlexItem>
+            <EuiFlexItem>
+              a few moments ago
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiHealth
+                color="danger"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              127.0.0.2
+            </EuiFlexItem>
+            <EuiFlexItem>
+              a few moments ago
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ]
       }
       delay="regular"
@@ -140,12 +168,19 @@ exports[`CondensedCheckList component renders null in place of child status with
       content={
         Array [
           null,
-          <div>
-            <EuiHealth
-              color="primary"
-            />
-            127.0.0.2
-          </div>,
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiHealth
+                color="primary"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              127.0.0.2
+            </EuiFlexItem>
+            <EuiFlexItem>
+              a few moments ago
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ]
       }
       delay="regular"
@@ -182,18 +217,32 @@ exports[`CondensedCheckList component renders null in place of child status with
     <EuiToolTip
       content={
         Array [
-          <div>
-            <EuiHealth
-              color="danger"
-            />
-            127.0.0.1
-          </div>,
-          <div>
-            <EuiHealth
-              color="danger"
-            />
-            127.0.0.2
-          </div>,
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiHealth
+                color="danger"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              127.0.0.1
+            </EuiFlexItem>
+            <EuiFlexItem>
+              a few moments ago
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiHealth
+                color="danger"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              127.0.0.2
+            </EuiFlexItem>
+            <EuiFlexItem>
+              a few moments ago
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ]
       }
       delay="regular"

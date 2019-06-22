@@ -25,10 +25,12 @@ describe('CondensedCheckList component', () => {
           {
             ip: '127.0.0.1',
             status: 'up',
+            timestamp: '123',
           },
           {
             ip: '127.0.0.2',
             status: 'down',
+            timestamp: '122',
           },
         ],
         location: 'us-east-1',
@@ -40,10 +42,12 @@ describe('CondensedCheckList component', () => {
           {
             ip: '127.0.0.1',
             status: 'up',
+            timestamp: '120',
           },
           {
             ip: '127.0.0.2',
             status: 'up',
+            timestamp: '121',
           },
         ],
         location: 'us-west-1',

@@ -74,13 +74,17 @@ export const CondensedCheckList = ({
           <EuiToolTip
             position="right"
             title="Check statuses"
-            content={childStatuses.map(({ status: checkStatus, ip }: CondensedCheckStatus) =>
-              ip ? (
-                <div key={ip}>
-                  <EuiHealth color={getHealthColor(successColor, checkStatus, dangerColor)} />
-                  {ip}
-                </div>
-              ) : null
+            content={childStatuses.map(
+              ({ status: checkStatus, ip, timestamp: condensedTimestamp }: CondensedCheckStatus) =>
+                ip ? (
+                  <EuiFlexGroup key={ip}>
+                    <EuiFlexItem>
+                      <EuiHealth color={getHealthColor(successColor, checkStatus, dangerColor)} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>{ip}</EuiFlexItem>
+                    <EuiFlexItem>{moment(parseInt(condensedTimestamp, 10)).fromNow()}</EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : null
             )}
           >
             <EuiBadge color={getBadgeColor(status, successColor, dangerColor)}>{`${
