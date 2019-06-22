@@ -9,6 +9,4 @@ import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 import { LogstashSecurityService } from './logstash_security_service';
 
 uiModules.get('xpack/logstash')
-  .factory('logstashSecurityService', () => {
-    return new LogstashSecurityService(xpackInfoService());
-  });
+  .factory('logstashSecurityService', () => new LogstashSecurityService(xpackInfoService()));

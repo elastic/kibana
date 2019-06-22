@@ -72,6 +72,6 @@ export class XPackInfo {
   };
 }
 
-export function xpackInfoService(initialInfo) {
-  return new XPackInfo(initialInfo || chrome.getInjected('xpackInitialInfo'));
+export function xpackInfoService() {
+  return new XPackInfo(chrome.getInjected('xpackInitialInfo'));
 }
