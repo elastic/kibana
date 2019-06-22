@@ -22,6 +22,8 @@ import { mocksSource } from '../../containers/source/mock';
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
+type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
+
 let localSource: Array<{
   request: {};
   result: {
@@ -72,6 +74,7 @@ jest.mock('ui/documentation_links', () => ({
     siem: 'http://www.example.com',
   },
 }));
+
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
 const originalError = console.error;
@@ -79,10 +82,19 @@ const originalError = console.error;
 describe('Ip Details', () => {
   beforeAll(() => {
     console.error = jest.fn();
+    (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => {
+          return null;
+        },
+      })
+    );
   });
 
   afterAll(() => {
     console.error = originalError;
+    delete (global as GlobalWithFetch).fetch;
   });
   const state: State = mockGlobalState;
 
