@@ -4,42 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ChildProcess } from 'child_process';
+import getPort from 'get-port';
+import { Logger, MarkupKind } from 'vscode-languageserver-protocol';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { ILanguageServerLauncher } from './language_server_launcher';
+import { AbstractLauncher } from './abstract_launcher';
 import { LanguageServerProxy } from './proxy';
-import { RequestExpander } from './request_expander';
+import { InitializeOptions, RequestExpander } from './request_expander';
 
-export class GoLauncher implements ILanguageServerLauncher {
-  private isRunning: boolean = false;
-  constructor(
+const GO_LANG_DETACH_PORT = 2091;
+
+export class GoServerLauncher extends AbstractLauncher {
+  public constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
-  ) {}
-  public get running(): boolean {
-    return this.isRunning;
+  ) {
+    super('go', targetHost, options, loggerFactory);
   }
 
-  public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
-    const port = 2091;
+  async getPort() {
+    if (!this.options.lsp.detach) {
+      return await getPort();
+    }
+    return GO_LANG_DETACH_PORT;
+  }
 
-    const log = this.loggerFactory.getLogger(['code', `go@${this.targetHost}:${port}`]);
-    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
-
-    log.info('Detach mode, expected langserver launch externally');
-    proxy.onConnected(() => {
-      this.isRunning = true;
-    });
-    proxy.onDisconnected(() => {
-      this.isRunning = false;
-      if (!proxy.isClosed) {
-        log.warn('language server disconnected, reconnecting');
-        setTimeout(() => proxy.connect(), 1000);
-      }
-    });
-
-    await proxy.connect();
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
+  createExpander(
+    proxy: LanguageServerProxy,
+    builtinWorkspace: boolean,
+    maxWorkspace: number
+  ): RequestExpander {
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
+      clientCapabilities: {
+        textDocument: {
+          hover: {
+            contentFormat: [MarkupKind.Markdown, MarkupKind.PlainText],
+          },
+        },
+      },
+    } as InitializeOptions);
+  }
+  // TODO(henrywong): Once go langugage server ready to release, we should support this mode.
+  async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
+    throw new Error('Go language server currently only support detach mode');
   }
 }
