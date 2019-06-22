@@ -10,19 +10,22 @@ export { Request, Server, ServerRoute } from 'hapi';
 export type IntegrationList = IntegrationListItem[];
 
 // registry /list
+// https://github.com/elastic/integrations-registry/blob/master/docs/api/list.json
 export interface IntegrationListItem {
+  description: string;
+  download: string;
+  icon: string;
   name: string;
   version: string;
-  description: string;
-  icon: string;
 }
 
 // registry /package/{name}
-// https://github.com/elastic/integrations-registry/blob/8306aa1abe83eab71c7677e4e964ebf66dc3880b/main.go#L180-L190
+// https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
 export interface IntegrationInfo {
   name: string;
   version: string;
   description: string;
+  icon: string;
   requirement: {
     kibana: {
       min: string;
