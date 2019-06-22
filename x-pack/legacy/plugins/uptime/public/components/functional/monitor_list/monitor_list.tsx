@@ -6,6 +6,8 @@
 
 import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import React, { useState } from 'react';
 import moment from 'moment';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
@@ -13,7 +15,7 @@ import { monitorStatesQuery } from '../../../queries/monitor_states_query';
 import { MonitorSummary, MonitorSummaryResult } from '../../../../common/graphql/types';
 import { MonitorListStatusColumn } from '../monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
-import { Criteria, Pagination, ExpandedRowMapItem } from './types';
+import { Criteria, Pagination, ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 
@@ -46,14 +48,10 @@ export const MonitorListComponent = (props: Props) => {
     sortDirection,
     sortField,
   } = props;
-  if (!data || !data.monitorStates) return null;
-
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
-  const {
-    summaries: items,
-    totalSummaryCount: { count },
-  } = data.monitorStates;
+  const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
+  const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
   const pagination: Pagination = {
     pageIndex,
@@ -85,7 +83,7 @@ export const MonitorListComponent = (props: Props) => {
         loading={loading}
         isExpandable
         itemId="monitor_id"
-        itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMapItem, id: string) => {
+        itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
           return {
             ...map,
             [id]: (
@@ -100,8 +98,12 @@ export const MonitorListComponent = (props: Props) => {
             ),
           };
         }, {})}
-        items={items || []}
+        items={items}
         onChange={onChange}
+        noItemsMessage={i18n.translate('xpack.uptime.monitorList.noItemMessage', {
+          defaultMessage: 'No uptime monitors found',
+          description: 'This message is shown if the monitors table is rendered but has no items.',
+        })}
         pagination={pagination}
         sorting={sorting}
         columns={[
@@ -113,7 +115,17 @@ export const MonitorListComponent = (props: Props) => {
             render: (id: string) => {
               return (
                 <EuiButtonIcon
-                  aria-label="TODODONOTMERGEWITHOUTSETTINGTHIS"
+                  aria-label={i18n.translate(
+                    'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
+                    {
+                      defaultMessage: 'Expand row for monitor with ID {id}',
+                      description:
+                        'The user can click a button on this table and expand further details.',
+                      values: {
+                        id,
+                      },
+                    }
+                  )}
                   iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
                   onClick={() => {
                     if (drawerIds.find(i => id === i)) {
@@ -129,7 +141,7 @@ export const MonitorListComponent = (props: Props) => {
           {
             field: 'state.monitor.status',
             name: 'Status',
-            render: (status: string, { state: { timestamp, summary } }: MonitorSummary) => {
+            render: (status: string, { state: { timestamp } }: MonitorSummary) => {
               const wrappedTimestamp = moment(timestamp);
               return (
                 <MonitorListStatusColumn

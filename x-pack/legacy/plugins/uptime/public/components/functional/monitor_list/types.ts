@@ -27,7 +27,7 @@ export interface Criteria {
   };
 }
 
-export interface ExpandedRowMapItem {
+export interface ExpandedRowMap {
   [key: string]: JSX.Element;
 }
 
