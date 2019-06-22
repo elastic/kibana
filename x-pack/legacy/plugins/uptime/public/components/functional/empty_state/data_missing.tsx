@@ -14,7 +14,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
+import React from 'react';
 
 interface DataMissingProps {
   basePath: string;
@@ -34,27 +34,25 @@ export const DataMissing = ({ basePath, headingMessage }: DataMissingProps) => (
             </EuiTitle>
           }
           body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                  defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                  values={{
-                    configureHeartbeatLink: (
-                      <EuiLink
-                        target="_blank"
-                        href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
-                      >
-                        <FormattedMessage
-                          id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                          defaultMessage="Configure Heartbeat"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                values={{
+                  configureHeartbeatLink: (
+                    <EuiLink
+                      target="_blank"
+                      href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
+                    >
+                      <FormattedMessage
+                        id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                        defaultMessage="Configure Heartbeat"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
           }
         />
       </EuiPanel>
