@@ -29,29 +29,29 @@ export function takePercySnapshot() {
     handleAgentCommunication: false
   });
 
-  function queryAll(selector) {
-    return Array.from(document.querySelectorAll(selector));
-  }
+  const queryAll = selector => [
+    ...document.querySelectorAll(selector)
+  ];
+
+  // array of canvas/image replacements
+  const replacements = [];
 
   // convert canvas elements into static images
-  const replacements = queryAll('canvas').map(canvas => {
+  for (const canvas of queryAll('canvas')) {
     const image = document.createElement('img');
     image.src = canvas.toDataURL();
     image.style.cssText = window.getComputedStyle(canvas).cssText;
     canvas.parentElement.replaceChild(image, canvas);
-    return {
-      canvas: canvas,
-      image: image
-    };
-  });
+    replacements.push({ canvas, image });
+  }
 
-  // take dom snapshot
+  // cache the dom snapshot containing the images
   const snapshot = agent.domSnapshot(document);
 
   // restore replaced canvases
-  replacements.forEach(replacement => {
-    replacement.image.parent.replaceChild(replacement.canvas, replacement.image);
-  });
+  for (const { image, canvas } of replacements) {
+    image.parent.replaceChild(canvas, image);
+  }
 
   return snapshot;
 }
