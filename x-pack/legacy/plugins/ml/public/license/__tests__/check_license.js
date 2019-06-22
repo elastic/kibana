@@ -17,19 +17,19 @@ const initialInfo = {
   }
 };
 
-const $injector = { get: () => ({}) };
+// const $injector = { get: () => ({}) };
 
 describe('ML - check license', () => {
 
   describe('xpackFeatureProvider', () => {
     it('returns true for enabled feature', () => {
-      const xpackFeatureService = xpackFeature($injector, initialInfo);
+      const xpackFeatureService = xpackFeature(initialInfo);
       const result = xpackFeatureService.isAvailable('watcher');
       expect(result).to.be(true);
     });
 
     it('returns false for disabled feature', () => {
-      const xpackFeatureService = xpackFeature($injector);
+      const xpackFeatureService = xpackFeature(initialInfo);
       const result = xpackFeatureService.isAvailable('noSuchFeature');
       expect(result).to.be(false);
     });

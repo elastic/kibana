@@ -36,14 +36,14 @@ export class XPackInfo {
     sessionStorage.removeItem(XPACK_INFO_KEY);
   };
 
-  refresh = () => {
+  refresh = $injector => {
     if (this.inProgressRefreshPromise) {
       return this.inProgressRefreshPromise;
     }
 
     // store the promise in a shared location so that calls to
     // refresh() before this is complete will get the same promise
-    const $http = this.$injector.get('$http');
+    const $http = $injector.get('$http');
     this.inProgressRefreshPromise = (
       $http.get(chrome.addBasePath('/api/xpack/v1/info'))
         .catch((err) => {
@@ -74,5 +74,5 @@ export class XPackInfo {
 }
 
 export function xpackInfoService($injector, initialInfo) {
-  return new XPackInfo(initialInfo || chrome.getInjected('xpackInitialInfo'), $injector);
+  return new XPackInfo(initialInfo || chrome.getInjected('xpackInitialInfo'));
 }

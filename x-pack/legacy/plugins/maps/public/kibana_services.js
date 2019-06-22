@@ -42,5 +42,5 @@ uiModules.get('app/maps').run(($injector) => {
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
   filterBarQueryFilter = Private(FilterBarQueryFilterProvider);
-  xpackInfo = xpackInfoService($injector);
+  xpackInfo = xpackInfoService();
 });

@@ -15,7 +15,7 @@ import template from './post_save_options.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlPostSaveOptions', function ($injector) {
+module.directive('mlPostSaveOptions', function () {
   return {
     restrict: 'AE',
     replace: false,
@@ -26,7 +26,7 @@ module.directive('mlPostSaveOptions', function ($injector) {
     },
     template,
     link: function ($scope) {
-      $scope.watcherEnabled = xpackFeature($injector).isAvailable('watcher');
+      $scope.watcherEnabled = xpackFeature().isAvailable('watcher');
       $scope.status = postSaveService.status;
       $scope.STATUS = postSaveService.STATUS;
 

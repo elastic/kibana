@@ -92,7 +92,7 @@ routes
 
         $scope.$$postDigest(() => {
           const elem = document.getElementById('licenseReactRoot');
-          const xPackInfo = xpackInfoService($injector);
+          const xPackInfo = xpackInfoService();
           const initialState = { license: xPackInfo.get('license') };
           const kbnUrlWrapper = {
             change(url) {
