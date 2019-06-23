@@ -22,15 +22,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 // @ts-ignore
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
   EuiButton,
-  EuiPanel,
-  EuiSpacer,
+  EuiText,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 import { EditorExample } from './help_example';
 
@@ -41,7 +39,7 @@ interface Props {
 
 export function WelcomePanel(props: Props) {
   return (
-    <EuiFlyout ownFocus onClose={props.onClose} data-test-subj="loadSearchForm">
+    <EuiFlyout onClose={props.onClose} data-test-subj="welcomePanel" size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -53,94 +51,85 @@ export function WelcomePanel(props: Props) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiPanel>
-          <EuiFlexGroup className="euiText" direction="column">
-            <EuiFlexItem>
-              <h4>
-                <FormattedMessage
-                  id="console.welcomePage.quickIntroTitle"
-                  defaultMessage="Quick intro to the UI"
-                />
-              </h4>
-              <div>
-                <FormattedMessage
-                  id="console.welcomePage.quickIntroDescription"
-                  defaultMessage="The Console UI is split into two panes: an editor pane (left) and a response pane (right).
+        <EuiText>
+          <h4>
+            <FormattedMessage
+              id="console.welcomePage.quickIntroTitle"
+              defaultMessage="Quick intro to the UI"
+            />
+          </h4>
+          <p>
+            <FormattedMessage
+              id="console.welcomePage.quickIntroDescription"
+              defaultMessage="The Console UI is split into two panes: an editor pane (left) and a response pane (right).
                 Use the editor to type requests and submit them to Elasticsearch. The results will be displayed in
                 the response pane on the right side."
-                />
-              </div>
-              <div>
-                <FormattedMessage
-                  id="console.welcomePage.supportedRequestFormatTitle"
-                  defaultMessage="Console understands requests in a compact format, similar to cURL:"
-                />
-              </div>
-              <EditorExample />
-              <div>
-                <FormattedMessage
-                  id="console.welcomePage.supportedRequestFormatDescription"
-                  defaultMessage="While typing a request, Console will make suggestions which you can then accept by hitting Enter/Tab.
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="console.welcomePage.supportedRequestFormatTitle"
+              defaultMessage="Console understands requests in a compact format, similar to cURL:"
+            />
+          </p>
+          <EditorExample />
+          <p>
+            <FormattedMessage
+              id="console.welcomePage.supportedRequestFormatDescription"
+              defaultMessage="While typing a request, Console will make suggestions which you can then accept by hitting Enter/Tab.
               These suggestions are made based on the request structure as well as your indices and types."
-                />
-              </div>
-              <h4>
-                <FormattedMessage
-                  id="console.welcomePage.quickTipsTitle"
-                  defaultMessage="A few quick tips, while I have your attention"
-                />
-              </h4>
-              <ul>
-                <li>
-                  <FormattedMessage
-                    id="console.welcomePage.quickTips.submitRequestDescription"
-                    defaultMessage="Submit requests to ES using the green triangle button."
-                  />
-                </li>
-                <li>
-                  <FormattedMessage
-                    id="console.welcomePage.quickTips.useWrenchMenuDescription"
-                    defaultMessage="Use the wrench menu for other useful things."
-                  />
-                </li>
-                <li>
-                  <FormattedMessage
-                    id="console.welcomePage.quickTips.cUrlFormatForRequestsDescription"
-                    defaultMessage="You can paste requests in cURL format and they will be translated to the Console syntax."
-                  />
-                </li>
-                <li>
-                  <FormattedMessage
-                    id="console.welcomePage.quickTips.resizeEditorDescription"
-                    defaultMessage="You can resize the editor and output panes by dragging the separator between them."
-                  />
-                </li>
-                <li>
-                  <FormattedMessage
-                    id="console.welcomePage.quickTips.keyboardShortcutsDescription"
-                    defaultMessage="Study the keyboard shortcuts under the Help button. Good stuff in there!"
-                  />
-                </li>
-              </ul>
-
-              <div>
-                <EuiButton
-                  fill={true}
-                  fullWidth={false}
-                  data-test-subj="help-close-button"
-                  onClick={props.onDismiss}
-                >
-                  <FormattedMessage
-                    id="console.welcomePage.closeButtonLabel"
-                    defaultMessage="Dismiss"
-                  />
-                </EuiButton>
-              </div>
-              <EuiSpacer />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+            />
+          </p>
+          <h4>
+            <FormattedMessage
+              id="console.welcomePage.quickTipsTitle"
+              defaultMessage="A few quick tips, while I have your attention"
+            />
+          </h4>
+          <ul>
+            <li>
+              <FormattedMessage
+                id="console.welcomePage.quickTips.submitRequestDescription"
+                defaultMessage="Submit requests to ES using the green triangle button."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="console.welcomePage.quickTips.useWrenchMenuDescription"
+                defaultMessage="Use the wrench menu for other useful things."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="console.welcomePage.quickTips.cUrlFormatForRequestsDescription"
+                defaultMessage="You can paste requests in cURL format and they will be translated to the Console syntax."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="console.welcomePage.quickTips.resizeEditorDescription"
+                defaultMessage="You can resize the editor and output panes by dragging the separator between them."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="console.welcomePage.quickTips.keyboardShortcutsDescription"
+                defaultMessage="Study the keyboard shortcuts under the Help button. Good stuff in there!"
+              />
+            </li>
+          </ul>
+        </EuiText>
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButton
+          fill={true}
+          fullWidth={false}
+          data-test-subj="help-close-button"
+          onClick={props.onDismiss}
+        >
+          <FormattedMessage id="console.welcomePage.closeButtonLabel" defaultMessage="Dismiss" />
+        </EuiButton>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }

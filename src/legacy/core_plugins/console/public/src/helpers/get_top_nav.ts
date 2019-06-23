@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { showSettingsModal } from './settings_show_modal';
 
 // help
-import { helpShowPanel } from '../components/help_show_panel';
+import { showHelpPanel } from '../components/help_show_panel';
 
 export function getTopNavConfig(toggleHistory: () => void) {
   return [
@@ -61,7 +61,7 @@ export function getTopNavConfig(toggleHistory: () => void) {
         defaultMessage: 'Help',
       }),
       run: () => {
-        helpShowPanel();
+        showHelpPanel();
       },
       testId: 'consoleHelpButton',
     },
