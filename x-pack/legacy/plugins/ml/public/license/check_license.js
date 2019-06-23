@@ -118,5 +118,6 @@ export function isFullLicense() {
   return (licenseType === LICENSE_TYPE.FULL);
 }
 
-// TODO
-export const xpackFeatureAvailable = feature => xpackInfo.get(`features.${feature}.isAvailable`, false);
+export function xpackFeatureAvailable(feature) {
+  return xpackInfo.get(`features.${feature}.isAvailable`, false);
+}

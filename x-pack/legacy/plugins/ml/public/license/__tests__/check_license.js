@@ -19,16 +19,17 @@ const initialInfo = {
 };
 
 describe('ML - check license', () => {
-//todo move to before all
   describe('xpackFeatureProvider', () => {
-    it('returns true for enabled feature', () => {
+    beforeEach(() => {
       xpackInfo.setAll(initialInfo);
+    });
+
+    it('returns true for enabled feature', () => {
       const result = xpackFeatureAvailable('watcher');
       expect(result).to.be(true);
     });
 
     it('returns false for disabled feature', () => {
-      xpackInfo.setAll(initialInfo);
       const result = xpackFeatureAvailable('noSuchFeature');
       expect(result).to.be(false);
     });

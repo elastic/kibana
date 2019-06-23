@@ -13,6 +13,6 @@ uiModules.get('xpack/logstash')
   .factory('logstashLicenseService', $injector => {
     const kbnUrlService = $injector.get('kbnUrl');
     const $timeout = $injector.get('$timeout');
-
+    // todo
     return new LogstashLicenseService(xpackInfo, kbnUrlService, $timeout);
   });

@@ -61,7 +61,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
     let xpackInfo: any;
     try {
-      // todo
       xpackInfo = this.xpackInfoService;
     } catch (e) {
       xpackInfo = false;

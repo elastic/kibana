@@ -8,7 +8,6 @@ import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-// todo
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 export let indexPatternService;

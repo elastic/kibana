@@ -9,4 +9,6 @@ import 'ui/url';
 import { LicenseService } from './license_service';
 
 uiModules.get('xpack/watcher')
-  .service('xpackWatcherLicenseService', LicenseService);
+  .factory('xpackWatcherLicenseService', (kbnUrl, $timeout, $http) =>
+    new LicenseService(kbnUrl, $timeout, $http)
+  );
