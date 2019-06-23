@@ -139,7 +139,9 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
 
             // we have someone on the other side. Add to history
             history.addToHistory(esPath, esMethod, esData);
-            addedToHistoryCb();
+            if (addedToHistoryCb) {
+              addedToHistoryCb();
+            }
 
             let value = xhr.responseText;
             const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
@@ -213,7 +215,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
   input.commands.addCommand({
     name: 'send to elasticsearch',
     bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    exec: sendCurrentRequestToES
+    exec: () => sendCurrentRequestToES()
   });
   input.commands.addCommand({
     name: 'open documentation',

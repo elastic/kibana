@@ -20,11 +20,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
-import { OpenHelpPanel } from './help_panel';
+import { HelpPanel } from './help_panel';
 
 let isOpen = false;
 
-export function helpShowPanel() {
+export function showHelpPanel() {
   if (isOpen) {
     return;
   }
@@ -40,7 +40,7 @@ export function helpShowPanel() {
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <OpenHelpPanel onClose={onClose} />
+      <HelpPanel onClose={onClose} />
     </I18nContext>
   );
   ReactDOM.render(element, container);

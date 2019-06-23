@@ -18,13 +18,15 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldNumber,
-  EuiFlexGrid,
+  EuiFormRow,
+  EuiCheckboxGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
@@ -34,9 +36,10 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 import { DevToolsSettings } from './dev_tools_settings';
+
+export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => Promise<void>;
@@ -54,6 +57,43 @@ export function DevToolsSettingsModal(props: Props) {
   const [polling, setPolling] = useState(props.settings.polling);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [isLoading, setIsLoading] = useState(false);
+
+  const autoCompleteCheckboxes = [
+    {
+      id: 'fields',
+      label: i18n.translate('console.settingsPage.fieldsLabelText', {
+        defaultMessage: 'Fields',
+      }),
+      stateSetter: setFields,
+    },
+    {
+      id: 'indices',
+      label: i18n.translate('console.settingsPage.indicesAndAliasesLabelText', {
+        defaultMessage: 'Indices & Aliases',
+      }),
+      stateSetter: setIndices,
+    },
+    {
+      id: 'templates',
+      label: i18n.translate('console.settingsPage.templatesLabelText', {
+        defaultMessage: 'Templates',
+      }),
+      stateSetter: setTemplates,
+    },
+  ];
+
+  const checkboxIdToSelectedMap = {
+    fields,
+    indices,
+    templates,
+  };
+
+  const onAutocompleteChange = (optionId: AutocompleteOptions) => {
+    const option = _.find(autoCompleteCheckboxes, item => item.id === optionId);
+    if (option) {
+      option.stateSetter(!checkboxIdToSelectedMap[optionId]);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -90,156 +130,125 @@ export function DevToolsSettingsModal(props: Props) {
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Settings" />
+            <FormattedMessage
+              id="console.settingsPage.pageTitle"
+              defaultMessage="Console Settings"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
-        <EuiModalBody className="euiText euiText--medium euiText--constrainedWidth">
-          <EuiFlexGrid columns={1}>
-            <EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="console.settingsPage.fontSizeLabel"
-                      defaultMessage="Font Size"
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFieldNumber
-                  autoFocus
-                  data-test-subj="fontSizeInput"
-                  value={fontSize}
-                  onChange={e => {
-                    setFontSize((e.target.value as unknown) as number);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSwitch
-                checked={wrapMode}
-                data-test-subj="settingsWrapLines"
-                id="wrapLines"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Wrap Long Lines"
-                    id="console.settingsPage.wrapLongLinesLabelText"
-                  />
-                }
-                onChange={e => setWrapMode(e.target.checked)}
+        <EuiModalBody>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="console.settingsPage.fontSizeLabel"
+                defaultMessage="Font Size"
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <h4>
+            }
+          >
+            <EuiFieldNumber
+              autoFocus
+              data-test-subj="setting-font-size-input"
+              value={fontSize}
+              onChange={e => {
+                setFontSize((e.target.value as unknown) as number);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <EuiSwitch
+              checked={wrapMode}
+              data-test-subj="settingsWrapLines"
+              id="wrapLines"
+              label={
                 <FormattedMessage
-                  id="console.settingsPage.jsonSyntaxLabel"
-                  defaultMessage="JSON syntax"
+                  defaultMessage="Wrap long lines"
+                  id="console.settingsPage.wrapLongLinesLabelText"
                 />
-              </h4>
-              <EuiSwitch
-                checked={tripleQuotes}
-                data-test-subj="tripleQuotes"
-                id="tripleQuotes"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Use tripple quotes in output pane"
-                    id="console.settingsPage.tripleQuotesMessage"
-                  />
-                }
-                onChange={e => setTripleQuotes(e.target.checked)}
+              }
+              onChange={e => setWrapMode(e.target.checked)}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="console.settingsPage.jsonSyntaxLabel"
+                defaultMessage="JSON syntax"
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <h4>
+            }
+          >
+            <EuiSwitch
+              checked={tripleQuotes}
+              data-test-subj="tripleQuotes"
+              id="tripleQuotes"
+              label={
                 <FormattedMessage
-                  id="console.settingsPage.autocompleteLabel"
-                  defaultMessage="Autocomplete"
+                  defaultMessage="Use triple quotes in output pane"
+                  id="console.settingsPage.tripleQuotesMessage"
                 />
-              </h4>
-              <EuiSwitch
-                checked={fields}
-                data-test-subj="autocompleteFields"
-                id="wrapLines"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Fields"
-                    id="console.settingsPage.fieldsLabelText"
-                  />
-                }
-                onChange={e => setFields(e.target.checked)}
+              }
+              onChange={e => setTripleQuotes(e.target.checked)}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            labelType="legend"
+            label={
+              <FormattedMessage
+                id="console.settingsPage.autocompleteLabel"
+                defaultMessage="Autocomplete"
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSwitch
-                checked={indices}
-                data-test-subj="autocompleteIndices"
-                id="wrapLines"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Indices &amp; Aliases"
-                    id="console.settingsPage.indicesAndAliasesLabelText"
-                  />
-                }
-                onChange={e => setIndices(e.target.checked)}
+            }
+          >
+            <EuiCheckboxGroup
+              options={autoCompleteCheckboxes}
+              idToSelectedMap={checkboxIdToSelectedMap}
+              onChange={(e: any) => {
+                onAutocompleteChange(e as AutocompleteOptions);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="console.settingsPage.refreshingDataLabel"
+                defaultMessage="Refreshing autocomplete suggestions"
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSwitch
-                checked={templates}
-                data-test-subj="autocompleteTemplates"
-                id="wrapLines"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Templates"
-                    id="console.settingsPage.templates"
-                  />
-                }
-                onChange={e => setTemplates(e.target.checked)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <h4>
-                <FormattedMessage
-                  id="console.settingsPage.refreshingDataLabel"
-                  defaultMessage="Refreshing autocomplete suggestions"
-                />
-              </h4>
+            }
+            helpText={
               <FormattedMessage
                 id="console.settingsPage.refreshingDataDescription"
                 defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
                   Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSwitch
-                checked={polling}
-                data-test-subj="autocompletePolling"
-                id="autocompletePolling"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Automatically refresh autocomplete suggestions"
-                    id="console.settingsPage.pollingLabelText"
-                  />
-                }
-                onChange={e => setPolling(e.target.checked)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="autocompletePolling"
-                id="autocompletePolling"
-                onClick={props.refreshAutocompleteSettings}
-              >
+            }
+          >
+            <EuiSwitch
+              checked={polling}
+              data-test-subj="autocompletePolling"
+              id="autocompletePolling"
+              label={
                 <FormattedMessage
-                  defaultMessage="Refresh autocomplete suggestions"
-                  id="console.settingsPage.refreshButtonLabel"
+                  defaultMessage="Automatically refresh autocomplete suggestions"
+                  id="console.settingsPage.pollingLabelText"
                 />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGrid>
+              }
+              onChange={e => setPolling(e.target.checked)}
+            />
+          </EuiFormRow>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="autocompletePolling"
+              id="autocompletePolling"
+              onClick={props.refreshAutocompleteSettings}
+            >
+              <FormattedMessage
+                defaultMessage="Refresh autocomplete suggestions"
+                id="console.settingsPage.refreshButtonLabel"
+              />
+            </EuiButton>
+          </EuiFlexItem>
           <EuiSpacer />
         </EuiModalBody>
 
@@ -250,11 +259,11 @@ export function DevToolsSettingsModal(props: Props) {
 
           <EuiButton
             fill
-            data-test-subj="saveSettingsButton"
+            data-test-subj="settings-save-button"
             onClick={saveSettings}
             isLoading={isLoading}
           >
-            <FormattedMessage id="console.settingsPage.confirmButtonLabel" defaultMessage="Save" />
+            <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

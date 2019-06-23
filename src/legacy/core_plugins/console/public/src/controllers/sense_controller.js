@@ -41,7 +41,7 @@ module.run(function ($rootScope) {
 });
 
 function showWelcomeMessageIfNeeded() {
-  if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
+  if (true || storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
     welcomeShowPanel();
   }
 }
