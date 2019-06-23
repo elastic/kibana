@@ -129,9 +129,18 @@ export class MonitoringViewBaseController {
     // needed for chart pages
     this.onBrush = ({ xaxis }) => {
       const { to, from } = xaxis;
+      const fromTime = moment(from);
+      const minSecondsRange = 40;
+      let toTime = moment(to);
+
+      //Limit range to no less than minSecondsRange, because of: https://github.com/elastic/kibana/issues/36738
+      if (toTime.unix() - fromTime.unix() < minSecondsRange) {
+        toTime = fromTime.clone().add(minSecondsRange, 'seconds');
+      }
+
       timefilter.setTime({
-        from: moment(from),
-        to: moment(to),
+        from: fromTime,
+        to: toTime,
         mode: 'absolute'
       });
     };
