@@ -21,10 +21,13 @@ export class JobRunner {
   private _start: number = 0;
   private _end: number = 0;
   private _datafeedState: DATAFEED_STATE = DATAFEED_STATE.STOPPED;
-  private _refreshInterval = REFRESH_INTERVAL_MS;
+  private _refreshInterval: number = REFRESH_INTERVAL_MS;
 
   private _progress$: BehaviorSubject<Progress>;
   private _percentageComplete: Progress = 0;
+  private _stopRefreshPoll: {
+    stop: boolean;
+  };
 
   constructor(jobCreator: JobCreator) {
     this._jobId = jobCreator.jobId;
@@ -32,6 +35,7 @@ export class JobRunner {
     this._start = jobCreator.start;
     this._end = jobCreator.end;
     this._percentageComplete = 0;
+    this._stopRefreshPoll = jobCreator.stopAllRefreshPolls;
 
     this._progress$ = new BehaviorSubject(this._percentageComplete);
     // link the _subscribers list from the JobCreator
@@ -79,7 +83,7 @@ export class JobRunner {
           this._percentageComplete = progress;
           this._progress$.next(this._percentageComplete);
 
-          if (isRunning) {
+          if (isRunning === true && this._stopRefreshPoll.stop === false) {
             setTimeout(async () => {
               await check();
             }, this._refreshInterval);

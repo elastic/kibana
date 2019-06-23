@@ -27,6 +27,9 @@ export class JobCreator {
   protected _end: number = 0;
   protected _subscribers: ProgressSubscriber[];
   protected _aggs: Aggregation[] = [];
+  private _stopAllRefreshPolls: {
+    stop: boolean;
+  };
 
   constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
     this._indexPattern = indexPattern;
@@ -44,6 +47,7 @@ export class JobCreator {
 
     this._datafeed_config.query = query;
     this._subscribers = [];
+    this._stopAllRefreshPolls = { stop: false };
   }
 
   public get type(): JOB_TYPE {
@@ -269,5 +273,13 @@ export class JobCreator {
 
   public get datafeedConfig(): Datafeed {
     return this._datafeed_config;
+  }
+
+  public get stopAllRefreshPolls(): { stop: boolean } {
+    return this._stopAllRefreshPolls;
+  }
+
+  public forceStopRefreshPolls() {
+    this._stopAllRefreshPolls.stop = true;
   }
 }

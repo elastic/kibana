@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, Fragment } from 'react';
+import React, { FC, useContext, useEffect, Fragment } from 'react';
 
 import { EuiPage, EuiPageBody, EuiPageContentBody, EuiSpacer } from '@elastic/eui';
 import { Wizard } from './wizard';
@@ -58,6 +58,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   );
 
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval);
+
+  useEffect(() => {
+    return () => {
+      jobCreator.forceStopRefreshPolls();
+    };
+  });
 
   return (
     <Fragment>
