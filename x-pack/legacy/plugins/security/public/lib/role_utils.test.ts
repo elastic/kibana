@@ -134,7 +134,7 @@ describe('role', () => {
   });
 
   describe('prepareRoleClone', () => {
-    it('should return a copy of the role with metadata and transient_metadata removed, creating a new role name', () => {
+    it('should return a copy of the role, with a blank role name', () => {
       const role: Role = {
         name: 'my_role',
         elasticsearch: {
@@ -167,36 +167,15 @@ describe('role', () => {
         },
       };
 
+      const { name: originalName, ...originalRest } = role;
+
       const result = prepareRoleClone(role);
-      expect(result.name).toEqual('copy_of_my_role');
-      expect(role.name).toEqual('my_role');
+      const { name, ...rest } = result;
 
-      expect(result.elasticsearch).toEqual({
-        cluster: ['all'],
-        indices: [{ names: ['index*'], privileges: ['all'] }],
-        run_as: ['user'],
-      });
+      expect(originalName).toEqual('my_role');
+      expect(name).toEqual('');
 
-      expect(result.kibana).toEqual([
-        {
-          spaces: ['*'],
-          base: ['all'],
-          feature: {},
-        },
-        {
-          spaces: ['default'],
-          base: ['foo'],
-          feature: {},
-        },
-        {
-          spaces: ['marketing'],
-          base: ['read'],
-          feature: {},
-        },
-      ]);
-
-      expect(result.metadata).toBeUndefined();
-      expect(result.transient_metadata).toBeUndefined();
+      expect(rest).toEqual(originalRest);
     });
   });
 });

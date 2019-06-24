@@ -23,7 +23,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Role } from '../../../../../common/model/role';
-import { isRoleEnabled, isReadOnlyRole } from '../../../../lib/role_utils';
+import { isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { RolesApi } from '../../../../lib/roles_api';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
@@ -242,6 +242,7 @@ class RolesGridPageUI extends Component<Props, State> {
 
               return (
                 <EuiButtonIcon
+                  aria-label={title}
                   data-test-subj={`edit-role-action-${role.name}`}
                   title={title}
                   color={'primary'}
@@ -252,6 +253,7 @@ class RolesGridPageUI extends Component<Props, State> {
             },
           },
           {
+            available: (role: Role) => !isReservedRole(role),
             render: (role: Role) => {
               const title = intl.formatMessage(
                 {
@@ -265,6 +267,7 @@ class RolesGridPageUI extends Component<Props, State> {
 
               return (
                 <EuiButtonIcon
+                  aria-label={title}
                   data-test-subj={`clone-role-action-${role.name}`}
                   title={title}
                   color={'primary'}

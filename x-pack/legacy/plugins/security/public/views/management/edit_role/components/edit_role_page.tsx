@@ -65,6 +65,8 @@ class EditRolePageUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.validator = new RoleValidator({ shouldValidate: false });
+
     let role: Role;
     if (props.action === 'clone') {
       role = prepareRoleClone(props.role);
@@ -76,7 +78,12 @@ class EditRolePageUI extends Component<Props, State> {
       role,
       formError: null,
     };
-    this.validator = new RoleValidator({ shouldValidate: false });
+  }
+
+  public componentWillMount() {
+    if (this.props.action === 'clone' && isReservedRole(this.props.role)) {
+      this.backToRoleList();
+    }
   }
 
   public render() {
