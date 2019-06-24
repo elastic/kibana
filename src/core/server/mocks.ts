@@ -28,17 +28,13 @@ export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
 export { SavedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 
-export function pluginInitializerContextConfigMock<T>(defaultValue: T) {
-  return (value?: Partial<T>) => {
-    const config: T = Object.assign({}, defaultValue, value);
-
-    const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
-      create: jest.fn().mockReturnValue(of(config)),
-      createIfExists: jest.fn().mockReturnValue(of(config)),
-    };
-
-    return mock;
+export function pluginInitializerContextConfigMock<T>(config: T) {
+  const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
+    create: jest.fn().mockReturnValue(of(config)),
+    createIfExists: jest.fn().mockReturnValue(of(config)),
   };
+
+  return mock;
 }
 
 function pluginInitializerContextMock<T>(config: T) {
@@ -51,25 +47,31 @@ function pluginInitializerContextMock<T>(config: T) {
         prod: false,
       },
     },
-    config: pluginInitializerContextConfigMock(config)() as jest.Mocked<
-      PluginInitializerContext<T>['config']
-    >,
-  };
-
-  return mock.config;
-}
-
-function createCoreSetupMock() {
-  const mock: jest.Mocked<CoreSetup> = {
-    elasticsearch: elasticsearchServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(),
+    config: pluginInitializerContextConfigMock<T>(config),
   };
 
   return mock;
 }
 
+function createCoreSetupMock() {
+  const mock = {
+    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
+  };
+
+  // This line is a noop but gives TS warnings if our mock doesn't satisfy the CoreSetup type
+  ((): CoreSetup => mock)();
+
+  return mock;
+}
+
 function createCoreStartMock() {
-  return {} as jest.Mocked<CoreStart>;
+  const mock = {};
+
+  // This line is a noop but gives TS warnings if our mock doesn't satisfy the CoreStart type
+  ((): CoreStart => mock)();
+
+  return mock;
 }
 
 export const coreMock = {

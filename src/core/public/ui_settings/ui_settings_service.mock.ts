@@ -41,7 +41,6 @@ const createSetupContractMock = () => {
   setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
 
-  // we have to suppress type errors until decide how to mock es6 class
   return setupContract;
 };
 
@@ -53,7 +52,7 @@ const createMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockReturnValue((createSetupContractMock() as unknown) as UiSettingsSetup);
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
