@@ -21,7 +21,7 @@ import { detectLanguage } from '../utils/detect_language';
 import { LoggerFactory } from '../utils/log_factory';
 import { InstallManager } from './install_manager';
 import { ILanguageServerLauncher } from './language_server_launcher';
-import { LanguageServerDefinition, LanguageServers } from './language_servers';
+import { enabledLanguageServers, LanguageServerDefinition } from './language_servers';
 import { ILanguageServerHandler } from './proxy';
 
 export interface LanguageServerHandlerMap {
@@ -56,7 +56,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     readonly repoConfigController: RepositoryConfigController
   ) {
     this.log = loggerFactory.getLogger([]);
-    this.languageServers = LanguageServers.map(def => ({
+    this.languageServers = enabledLanguageServers(installManager.server).map(def => ({
       definition: def,
       builtinWorkspaceFolders: def.builtinWorkspaceFolders,
       languages: def.languages,
