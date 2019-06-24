@@ -19,6 +19,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       require.resolve('./test_suites/task_manager'),
       require.resolve('./test_suites/encrypted_saved_objects'),
+      require.resolve('./test_suites/actions'),
     ],
     services: {
       retry: kibanaFunctionalConfig.get('services.retry'),
@@ -29,7 +30,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: integrationConfig.get('esTestCluster'),
     apps: integrationConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
+      directory: path.resolve(__dirname, '../functional/es_archives')
     },
     screenshots: integrationConfig.get('screenshots'),
     junit: {

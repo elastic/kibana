@@ -21,7 +21,7 @@
             class="euiLink"
             data-test-subj="docTableRowAction"
             ng-href="{{ getContextAppHref() }}"
-            ng-if="indexPattern.isTimeBased() && !indexPattern.isTimeNanosBased()"
+            ng-if="indexPattern.isTimeBased()"
             i18n-id="kbn.docTable.tableRow.viewSurroundingDocumentsLinkText"
             i18n-default-message="View surrounding documents"
           ></a>
@@ -30,7 +30,7 @@
           <a
             class="euiLink"
             data-test-subj="docTableRowAction"
-            ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{uriEncodedId}}"
+            ng-href="#/doc/{{indexPattern.id}}/{{row._index}}?id={{uriEncodedId}}"
             i18n-id="kbn.docTable.tableRow.viewSingleDocumentLinkText"
             i18n-default-message="View single document"
           ></a>

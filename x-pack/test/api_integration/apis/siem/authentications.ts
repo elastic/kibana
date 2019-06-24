@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { authenticationsQuery } from '../../../../plugins/siem/public/containers/authentications/index.gql_query';
-import { GetAuthenticationsQuery } from '../../../../plugins/siem/public/graphql/types';
+import { authenticationsQuery } from '../../../../legacy/plugins/siem/public/containers/authentications/index.gql_query';
+import { GetAuthenticationsQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
