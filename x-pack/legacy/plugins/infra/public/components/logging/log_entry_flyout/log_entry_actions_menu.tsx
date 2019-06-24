@@ -21,6 +21,8 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
 
   const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
 
+  const traceLink = useMemo(() => getTraceLink(logItem), [logItem]);
+
   const menuItems = useMemo(
     () => [
       <EuiContextMenuItem
@@ -33,6 +35,18 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         <FormattedMessage
           id="xpack.infra.logEntryActionsMenu.uptimeActionLabel"
           defaultMessage="View monitor status"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        data-test-subj="logEntryActionsMenuItem traceLogEntryActionsMenuItem"
+        disabled={!traceLink}
+        href={traceLink}
+        icon="apmTrace"
+        key="traceLink"
+      >
+        <FormattedMessage
+          id="xpack.infra.logEntryActionsMenu.traceActionLabel"
+          defaultMessage="View in APM"
         />
       </EuiContextMenuItem>,
     ],
@@ -89,5 +103,20 @@ const getUptimeLink = (logItem: InfraLogItem) => {
   return url.format({
     pathname: chrome.addBasePath('/app/uptime'),
     hash: `/?search=(${searchExpressions.join(' OR ')})`,
+  });
+};
+
+const getTraceLink = (logItem: InfraLogItem) => {
+  const traceIdEntry = logItem.fields.find(
+    ({ field, value }) => value != null && field === 'trace.id'
+  );
+
+  if (!traceIdEntry) {
+    return undefined;
+  }
+
+  return url.format({
+    pathname: chrome.addBasePath('/app/apm'),
+    hash: `/traces/${traceIdEntry.value}`,
   });
 };
