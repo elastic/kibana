@@ -22,6 +22,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     afterEach(() => esArchiver.unload('actions/basic'));
 
     before(async () => {
+      await es.indices.delete({ index: esTestIndexName, ignore: [404] });
       await es.indices.create({
         index: esTestIndexName,
         body: {

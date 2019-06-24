@@ -26,9 +26,7 @@ export async function execute({
   params,
   encryptedSavedObjectsPlugin,
 }: ExecuteOptions) {
-  const { savedObjectsClient } = services;
-  // Ensure user can read the action and has access to it
-  await savedObjectsClient.get('action', actionId);
+  // TODO: Ensure user can read the action before processing
   const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', actionId, {
     namespace,
   });
