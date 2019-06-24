@@ -28,7 +28,7 @@ export default function(kibana: any) {
   return new kibana.Plugin({
     id: 'metrics',
 
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
 
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
