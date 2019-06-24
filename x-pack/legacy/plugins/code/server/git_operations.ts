@@ -582,6 +582,7 @@ export function commitInfo(commit: Commit): CommitInfo {
     parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
   };
 }
+const REMOTE_PREFIX = 'origin/';
 
 export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | null> {
   const repository = ref.owner();
@@ -593,9 +594,13 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | nul
     return null;
   }
   let type: ReferenceType;
+  let name = ref.shorthand();
   if (ref.isTag()) {
     type = ReferenceType.TAG;
   } else if (ref.isRemote()) {
+    if (name.startsWith(REMOTE_PREFIX)) {
+      name = name.substr(REMOTE_PREFIX.length);
+    }
     type = ReferenceType.REMOTE_BRANCH;
   } else if (ref.isBranch()) {
     type = ReferenceType.BRANCH;
@@ -603,7 +608,7 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | nul
     type = ReferenceType.OTHER;
   }
   return {
-    name: ref.shorthand(),
+    name,
     reference: ref.name(),
     commit,
     type,
