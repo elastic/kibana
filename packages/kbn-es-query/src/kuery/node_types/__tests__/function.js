@@ -31,7 +31,6 @@ describe('kuery node types', function () {
 
     let indexPattern;
 
-
     beforeEach(() => {
       indexPattern = indexPatternResponse;
     });

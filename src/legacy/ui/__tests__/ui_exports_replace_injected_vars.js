@@ -61,6 +61,7 @@ describe('UiExports', function () {
     });
 
     await root.setup();
+    await root.start();
 
     kbnServer = getKbnServer(root);
 

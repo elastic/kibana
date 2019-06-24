@@ -21,18 +21,23 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { getVisualizeLoader } from 'ui/visualize/loader';
-import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { Legacy } from 'kibana';
+import { capabilities } from 'ui/capabilities';
 import {
   EmbeddableInstanceConfiguration,
   OnEmbeddableStateChanged,
 } from 'ui/embeddable/embeddable_factory';
 import { VisTypesRegistry } from 'ui/registry/vis_types';
-import { VisualizationAttributes } from '../../../../../server/saved_objects/service/saved_objects_client';
+import { SavedObjectAttributes } from 'src/core/server';
+import { VisualizeEmbeddable } from './visualize_embeddable';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
+
+export interface VisualizationAttributes extends SavedObjectAttributes {
+  visState: string;
+}
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationAttributes> {
   private savedVisualizations: SavedVisualizations;
@@ -89,6 +94,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
   ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
+    const editable: boolean = capabilities.get().visualize.save as boolean;
 
     const loader = await getVisualizeLoader();
     const savedObject = await this.savedVisualizations.get(visId);
@@ -104,6 +110,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
       onEmbeddableStateChanged,
       savedVisualization: savedObject,
       editUrl,
+      editable,
       loader,
       indexPatterns,
     });

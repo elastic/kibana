@@ -13,8 +13,9 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
 
   describe('useremail', function () {
+    this.tags('smoke');
     before(async () => {
-      await esArchiver.load('discover');
+      await esArchiver.load('security/discover');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });

@@ -1,0 +1,23 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+@import './app/sections/remote_cluster_list/components/connection_status/index';
+
+// Index management plugin styles
+
+// Prefix all styles with "remoteClusters" to avoid conflicts.
+// Examples
+//   remoteClustersChart
+//   remoteClustersChart__legend
+//   remoteClustersChart__legend--small
+//   remoteClustersChart__legend-isLoading
+
+/**
+ * 1. Override EuiFormRow styles. Otherwise the switch will jump around when toggled on and off,
+ *    as the 'Reset to defaults' link is added to and removed from the DOM.
+ * 2. Fix the positioning.
+ */
+
+.remoteClusterSkipIfUnavailableSwitch {
+  justify-content: flex-start !important; /* 1 */
+  padding-top: $euiSizeS !important;
+}

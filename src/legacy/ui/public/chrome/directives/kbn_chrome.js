@@ -20,19 +20,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import url from 'url';
 
 import { uiModules } from '../../modules';
-import {
-  getUnhashableStatesProvider,
-  unhashUrl,
-} from '../../state_management/state_hashing';
+import template from './kbn_chrome.html';
+
 import {
   notify,
   GlobalBannerList,
   banners,
 } from '../../notify';
-import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
+
 import { I18nContext } from '../../i18n';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -42,7 +39,7 @@ export function kbnChromeProvider(chrome, internals) {
     .directive('kbnChrome', () => {
       return {
         template() {
-          const $content = $(require('./kbn_chrome.html'));
+          const $content = $(template);
           const $app = $content.find('.application');
 
           if (internals.rootController) {
@@ -58,41 +55,13 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, Private, $location) {
-          const getUnhashableStates = Private(getUnhashableStatesProvider);
-          const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
-
-          function updateSubUrls() {
-            const urlWithHashes = window.location.href;
-            const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-            internals.trackPossibleSubUrl(urlWithStates);
-          }
-
-          function onRouteChange($event) {
-            if (subUrlRouteFilter($event)) {
-              updateSubUrls();
-            }
-          }
-
-          $rootScope.$on('$locationChangeStart', (e, newUrl) => {
-            // This handler fixes issue #31238 where browser back navigation
-            // fails due to angular 1.6 parsing url encoded params wrong.
-            const absUrlHash = url.parse($location.absUrl()).hash.slice(1);
-            const decodedAbsUrlHash = decodeURIComponent(absUrlHash);
-            const hash = url.parse(newUrl).hash.slice(1);
-            const decodedHash = decodeURIComponent(hash);
-            if (absUrlHash !== hash && decodedHash === decodedAbsUrlHash) {
-              // replace the urlencoded hash with the version that angular sees.
-              $location.url(absUrlHash).replace();
-            }
-          });
-
-          $rootScope.$on('$routeChangeSuccess', onRouteChange);
-          $rootScope.$on('$routeUpdate', onRouteChange);
-          updateSubUrls(); // initialize sub urls
-
+        controller($scope, $location) {
           // Notifications
           $scope.notifList = notify._notifs;
+
+          $scope.getFirstPathSegment = () => {
+            return $location.path().split('/')[1];
+          };
 
           // Non-scope based code (e.g., React)
 

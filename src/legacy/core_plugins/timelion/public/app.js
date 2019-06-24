@@ -19,7 +19,10 @@
 
 import _ from 'lodash';
 
-import { DocTitleProvider } from 'ui/doc_title';
+import { i18n } from '@kbn/i18n';
+
+import { capabilities } from 'ui/capabilities';
+import { docTitle } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
@@ -39,6 +42,11 @@ import 'ui/directives/saved_object_finder';
 import 'ui/listen';
 import 'ui/kbn_top_nav';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+
+import rootTemplate from 'plugins/timelion/index.html';
+import saveTemplate from 'plugins/timelion/partials/save_sheet.html';
+import loadTemplate from 'plugins/timelion/partials/load_sheet.html';
+import sheetTemplate from 'plugins/timelion/partials/sheet_options.html';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -64,13 +72,28 @@ require('ui/routes').enable();
 
 require('ui/routes')
   .when('/:id?', {
-    template: require('plugins/timelion/index.html'),
+    template: rootTemplate,
     reloadOnSearch: false,
     k7Breadcrumbs: ($injector, $route) => $injector.invoke(
       $route.current.params.id
         ? getSavedSheetBreadcrumbs
         : getCreateBreadcrumbs
     ),
+    badge: uiCapabilities => {
+      if (uiCapabilities.timelion.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n.translate('timelion.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n.translate('timelion.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save Timelion sheets',
+        }),
+        iconType: 'glasses'
+      };
+    },
     resolve: {
       savedSheet: function (redirectWhenMissing, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
@@ -101,11 +124,8 @@ app.controller('timelion', function (
   AppState,
   config,
   confirmModal,
-  courier,
   kbnUrl,
-  Notifier,
-  Private,
-  i18n,
+  Private
 ) {
 
   // Keeping this at app scope allows us to keep the current page when the user
@@ -116,123 +136,13 @@ app.controller('timelion', function (
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
 
-  const notify = new Notifier({
-    location
-  });
-
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
   const timezone = Private(timezoneProvider)();
-  const docTitle = Private(DocTitleProvider);
 
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;
 
-  $scope.topNavMenu = [{
-    key: 'new',
-    label: i18n('timelion.topNavMenu.newSheetButtonLabel', {
-      defaultMessage: 'New',
-    }),
-    description: i18n('timelion.topNavMenu.newSheetButtonAriaLabel', {
-      defaultMessage: 'New Sheet',
-    }),
-    run: function () { kbnUrl.change('/'); },
-    testId: 'timelionNewButton',
-  }, {
-    key: 'add',
-    label: i18n('timelion.topNavMenu.addChartButtonLabel', {
-      defaultMessage: 'Add',
-    }),
-    description: i18n('timelion.topNavMenu.addChartButtonAriaLabel', {
-      defaultMessage: 'Add a chart',
-    }),
-    run: function () { $scope.newCell(); },
-    testId: 'timelionAddChartButton',
-  }, {
-    key: 'save',
-    label: i18n('timelion.topNavMenu.saveSheetButtonLabel', {
-      defaultMessage: 'Save',
-    }),
-    description: i18n('timelion.topNavMenu.saveSheetButtonAriaLabel', {
-      defaultMessage: 'Save Sheet',
-    }),
-    template: require('plugins/timelion/partials/save_sheet.html'),
-    testId: 'timelionSaveButton',
-  }, {
-    key: 'delete',
-    label: i18n('timelion.topNavMenu.deleteSheetButtonLabel', {
-      defaultMessage: 'Delete',
-    }),
-    description: i18n('timelion.topNavMenu.deleteSheetButtonAriaLabel', {
-      defaultMessage: 'Delete current sheet',
-    }),
-    disableButton: function () {
-      return !savedSheet.id;
-    },
-    run: function () {
-      const title = savedSheet.title;
-      function doDelete() {
-        savedSheet.delete().then(() => {
-          toastNotifications.addSuccess(i18n(
-            'timelion.topNavMenu.delete.modal.successNotificationText',
-            {
-              defaultMessage: `Deleted '{title}'`,
-              values: { title },
-            }
-          ));
-          kbnUrl.change('/');
-        }).catch(error => fatalError(error, location));
-      }
-
-      const confirmModalOptions = {
-        onConfirm: doDelete,
-        confirmButtonText: i18n('timelion.topNavMenu.delete.modal.confirmButtonLabel', {
-          defaultMessage: 'Delete',
-        }),
-        title: i18n('timelion.topNavMenu.delete.modalTitle', {
-          defaultMessage: `Delete Timelion sheet '{title}'?`,
-          values: { title }
-        }),
-      };
-
-      confirmModal(
-        i18n('timelion.topNavMenu.delete.modal.warningText', {
-          defaultMessage: `You can't recover deleted sheets.`,
-        }),
-        confirmModalOptions
-      );
-    },
-    testId: 'timelionDeleteButton',
-  }, {
-    key: 'open',
-    label: i18n('timelion.topNavMenu.openSheetButtonLabel', {
-      defaultMessage: 'Open',
-    }),
-    description: i18n('timelion.topNavMenu.openSheetButtonAriaLabel', {
-      defaultMessage: 'Open Sheet',
-    }),
-    template: require('plugins/timelion/partials/load_sheet.html'),
-    testId: 'timelionOpenButton',
-  }, {
-    key: 'options',
-    label: i18n('timelion.topNavMenu.optionsButtonLabel', {
-      defaultMessage: 'Options',
-    }),
-    description: i18n('timelion.topNavMenu.optionsButtonAriaLabel', {
-      defaultMessage: 'Options',
-    }),
-    template: require('plugins/timelion/partials/sheet_options.html'),
-    testId: 'timelionOptionsButton',
-  }, {
-    key: 'help',
-    label: i18n('timelion.topNavMenu.helpButtonLabel', {
-      defaultMessage: 'Help',
-    }),
-    description: i18n('timelion.topNavMenu.helpButtonAriaLabel', {
-      defaultMessage: 'Help',
-    }),
-    template: '<timelion-help></timelion-help>',
-    testId: 'timelionDocsButton',
-  }];
+  $scope.topNavMenu = getTopNavMenu();
 
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {
@@ -250,6 +160,133 @@ app.controller('timelion', function (
       rows: savedSheet.timelion_rows,
       interval: savedSheet.timelion_interval
     };
+  }
+
+  function getTopNavMenu() {
+
+    const newSheetAction = {
+      key: 'new',
+      label: i18n.translate('timelion.topNavMenu.newSheetButtonLabel', {
+        defaultMessage: 'New',
+      }),
+      description: i18n.translate('timelion.topNavMenu.newSheetButtonAriaLabel', {
+        defaultMessage: 'New Sheet',
+      }),
+      run: function () { kbnUrl.change('/'); },
+      testId: 'timelionNewButton',
+    };
+
+    const addSheetAction = {
+      key: 'add',
+      label: i18n.translate('timelion.topNavMenu.addChartButtonLabel', {
+        defaultMessage: 'Add',
+      }),
+      description: i18n.translate('timelion.topNavMenu.addChartButtonAriaLabel', {
+        defaultMessage: 'Add a chart',
+      }),
+      run: function () { $scope.newCell(); },
+      testId: 'timelionAddChartButton',
+    };
+
+    const saveSheetAction = {
+      key: 'save',
+      label: i18n.translate('timelion.topNavMenu.saveSheetButtonLabel', {
+        defaultMessage: 'Save',
+      }),
+      description: i18n.translate('timelion.topNavMenu.saveSheetButtonAriaLabel', {
+        defaultMessage: 'Save Sheet',
+      }),
+      template: saveTemplate,
+      testId: 'timelionSaveButton',
+    };
+
+    const deleteSheetAction = {
+      key: 'delete',
+      label: i18n.translate('timelion.topNavMenu.deleteSheetButtonLabel', {
+        defaultMessage: 'Delete',
+      }),
+      description: i18n.translate('timelion.topNavMenu.deleteSheetButtonAriaLabel', {
+        defaultMessage: 'Delete current sheet',
+      }),
+      disableButton: function () {
+        return !savedSheet.id;
+      },
+      run: function () {
+        const title = savedSheet.title;
+        function doDelete() {
+          savedSheet.delete().then(() => {
+            toastNotifications.addSuccess(i18n.translate(
+              'timelion.topNavMenu.delete.modal.successNotificationText',
+              {
+                defaultMessage: `Deleted '{title}'`,
+                values: { title },
+              }
+            ));
+            kbnUrl.change('/');
+          }).catch(error => fatalError(error, location));
+        }
+
+        const confirmModalOptions = {
+          onConfirm: doDelete,
+          confirmButtonText: i18n.translate('timelion.topNavMenu.delete.modal.confirmButtonLabel', {
+            defaultMessage: 'Delete',
+          }),
+          title: i18n.translate('timelion.topNavMenu.delete.modalTitle', {
+            defaultMessage: `Delete Timelion sheet '{title}'?`,
+            values: { title }
+          }),
+        };
+
+        confirmModal(
+          i18n.translate('timelion.topNavMenu.delete.modal.warningText', {
+            defaultMessage: `You can't recover deleted sheets.`,
+          }),
+          confirmModalOptions
+        );
+      },
+      testId: 'timelionDeleteButton',
+    };
+
+    const openSheetAction = {
+      key: 'open',
+      label: i18n.translate('timelion.topNavMenu.openSheetButtonLabel', {
+        defaultMessage: 'Open',
+      }),
+      description: i18n.translate('timelion.topNavMenu.openSheetButtonAriaLabel', {
+        defaultMessage: 'Open Sheet',
+      }),
+      template: loadTemplate,
+      testId: 'timelionOpenButton',
+    };
+
+    const optionsAction = {
+      key: 'options',
+      label: i18n.translate('timelion.topNavMenu.optionsButtonLabel', {
+        defaultMessage: 'Options',
+      }),
+      description: i18n.translate('timelion.topNavMenu.optionsButtonAriaLabel', {
+        defaultMessage: 'Options',
+      }),
+      template: sheetTemplate,
+      testId: 'timelionOptionsButton',
+    };
+
+    const helpAction = {
+      key: 'help',
+      label: i18n.translate('timelion.topNavMenu.helpButtonLabel', {
+        defaultMessage: 'Help',
+      }),
+      description: i18n.translate('timelion.topNavMenu.helpButtonAriaLabel', {
+        defaultMessage: 'Help',
+      }),
+      template: '<timelion-help></timelion-help>',
+      testId: 'timelionDocsButton',
+    };
+
+    if (capabilities.get().timelion.save) {
+      return [newSheetAction, addSheetAction, saveSheetAction, deleteSheetAction, openSheetAction, optionsAction, helpAction];
+    }
+    return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];
   }
 
   const init = function () {
@@ -342,8 +379,11 @@ app.controller('timelion', function (
 
         const err = new Error(resp.message);
         err.stack = resp.stack;
-        notify.error(err);
-
+        toastNotifications.addError(err, {
+          title: i18n.translate('timelion.searchErrorTitle', {
+            defaultMessage: 'Timelion request error',
+          }),
+        });
       });
   };
 
@@ -356,12 +396,13 @@ app.controller('timelion', function (
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
       if (id) {
-        toastNotifications.addSuccess(
-          i18n('timelion.saveSheet.successNotificationText', {
+        toastNotifications.addSuccess({
+          title: i18n.translate('timelion.saveSheet.successNotificationText', {
             defaultMessage: `Saved sheet '{title}'`,
             values: { title: savedSheet.title },
-          })
-        );
+          }),
+          'data-test-subj': 'timelionSaveSuccessToast',
+        });
 
         if (savedSheet.id !== $routeParams.id) {
           kbnUrl.change('/{{id}}', { id: savedSheet.id });
@@ -381,7 +422,7 @@ app.controller('timelion', function (
       savedExpression.save().then(function (id) {
         if (id) {
           toastNotifications.addSuccess(
-            i18n('timelion.saveExpression.successNotificationText', {
+            i18n.translate('timelion.saveExpression.successNotificationText', {
               defaultMessage: `Saved expression '{title}'`,
               values: { title: savedExpression.title },
             }),

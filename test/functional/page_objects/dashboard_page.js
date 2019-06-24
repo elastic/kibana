@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -55,7 +54,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': defaultIndex,
       });
       await this.selectDefaultIndex(defaultIndex);
-      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 
@@ -219,7 +217,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newDashboardLink button is only visible when dashboard listing table is displayed
+      // newItemButton button is only visible when dashboard listing table is displayed
       // (at least one dashboard).
       const exists = await testSubjects.exists('newItemButton');
       if (exists) {
@@ -349,6 +347,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
+    async pressEnterKey() {
+      log.debug('DashboardPage.pressEnterKey');
+      await PageObjects.common.pressEnterKey();
+    }
+
     /**
      *
      * @param dashboardTitle {String}
@@ -373,6 +376,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (saveOptions.waitDialogIsClosed) {
         await testSubjects.waitForDeleted(modalDialog);
       }
+    }
+
+    /**
+     * @param dashboardTitle {String}
+     */
+    async enterDashboardTitleAndPressEnter(dashboardTitle) {
+      await testSubjects.click('dashboardSaveMenuItem');
+      const modalDialog = await testSubjects.find('savedObjectSaveModal');
+
+      log.debug('entering new title');
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
+
+      await this.pressEnterKey();
+      await testSubjects.waitForDeleted(modalDialog);
     }
 
     async selectDashboard(dashName) {
@@ -585,6 +602,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('ensure that you can click on hide title checkbox');
       await this.openOptions();
       return await testSubjects.click('dashboardPanelTitlesCheckbox');
+    }
+
+    async expectMissingSaveOption() {
+      await testSubjects.missingOrFail('dashboardSaveMenuItem');
     }
 
     async getNotLoadedVisualizations(vizList) {

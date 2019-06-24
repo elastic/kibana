@@ -30,7 +30,7 @@ import { createLegacyClass } from './utils/legacy_class';
 
 const location = 'EventEmitter';
 
-export function EventsProvider(Private, Promise) {
+export function EventsProvider(Promise) {
   createLegacyClass(Events).inherits(SimpleEmitter);
   function Events() {
     Events.Super.call(this);

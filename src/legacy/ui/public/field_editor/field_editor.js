@@ -40,9 +40,12 @@ import {
 } from 'ui/notify';
 
 import {
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCode,
+  EuiCodeEditor,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFieldText,
@@ -56,7 +59,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
@@ -77,6 +79,9 @@ import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+// This loads Ace editor's "groovy" mode, used below to highlight the script.
+import 'brace/mode/groovy';
 
 export class FieldEditorComponent extends PureComponent {
   static propTypes = {
@@ -135,7 +140,7 @@ export class FieldEditorComponent extends PureComponent {
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type);
+    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
       ...fieldFormats.byFieldType[field.type],
@@ -290,7 +295,7 @@ export class FieldEditorComponent extends PureComponent {
               values={{
                 language: <EuiCode>{field.lang}</EuiCode>,
                 painlessLink: (
-                  <EuiLink target="_window" href={getDocLink('scriptedFields.painless')}>
+                  <EuiLink target="_blank" href={getDocLink('scriptedFields.painless')}>
                     <FormattedMessage
                       id="common.ui.fieldEditor.warningLabel.painlessLinkLabel"
                       defaultMessage="Painless"
@@ -317,7 +322,9 @@ export class FieldEditorComponent extends PureComponent {
     const { intl } = this.props;
 
     return (
-      <EuiFormRow label={intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' })}>
+      <EuiFormRow
+        label={intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' })}
+      >
         <EuiSelect
           value={field.type}
           disabled={!field.scripted}
@@ -328,6 +335,57 @@ export class FieldEditorComponent extends PureComponent {
           }}
         />
       </EuiFormRow>
+    );
+  }
+
+  /**
+   * renders a warning and a table of conflicting indices
+   * in case there are indices with different types
+   */
+  renderTypeConflict() {
+    const { intl } = this.props;
+    const { field = {} } = this.state;
+    if (!field.conflictDescriptions || typeof field.conflictDescriptions !== 'object') {
+      return null;
+    }
+
+    const columns = [{
+      field: 'type',
+      name: intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' }),
+      width: '100px',
+    }, {
+      field: 'indices',
+      name: intl.formatMessage({ id: 'common.ui.fieldEditor.indexNameLabel', defaultMessage: 'Index names' })
+    }];
+
+    const items = Object
+      .entries(field.conflictDescriptions)
+      .map(([type, indices]) => ({
+        type,
+        indices: Array.isArray(indices) ? indices.join(', ') : 'Index names unavailable'
+      }));
+
+    return (
+      <div>
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={<FormattedMessage id="common.ui.fieldEditor.fieldTypeConflict" defaultMessage="Field type conflict"/>}
+          size="s"
+        >
+          <FormattedMessage
+            id="common.ui.fieldEditor.multiTypeLabelDesc"
+            defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
+          The indices per type are as follows:"
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+        />
+        <EuiSpacer size="m" />
+      </div>
     );
   }
 
@@ -404,11 +462,11 @@ export class FieldEditorComponent extends PureComponent {
     );
   }
 
-  onScriptChange = (e) => {
+  onScriptChange = (value) => {
     this.setState({
       hasScriptError: false
     });
-    this.onFieldChange('script', e.target.value);
+    this.onFieldChange('script', value);
   }
 
   renderScript() {
@@ -426,15 +484,18 @@ export class FieldEditorComponent extends PureComponent {
     return field.scripted ? (
       <Fragment>
         <EuiFormRow
+          fullWidth
           label={intl.formatMessage({ id: 'common.ui.fieldEditor.scriptLabel', defaultMessage: 'Script' })}
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
-          <EuiTextArea
+          <EuiCodeEditor
             value={field.script}
             data-test-subj="editorFieldScript"
             onChange={this.onScriptChange}
-            isInvalid={isInvalid}
+            mode="groovy"
+            width="100%"
+            height="300px"
           />
         </EuiFormRow>
 
@@ -662,7 +723,7 @@ export class FieldEditorComponent extends PureComponent {
     }
 
     if (!fieldFormatId) {
-      indexPattern.fieldFormatMap[field.name] = {};
+      indexPattern.fieldFormatMap[field.name] = undefined;
     } else {
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
@@ -719,6 +780,7 @@ export class FieldEditorComponent extends PureComponent {
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
+          {this.renderTypeConflict()}
           {this.renderFormat()}
           {this.renderPopularity()}
           {this.renderScript()}

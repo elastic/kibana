@@ -28,6 +28,8 @@ import { DashboardPageProvider } from './dashboard_page';
 // @ts-ignore not TS yet
 import { DiscoverPageProvider } from './discover_page';
 // @ts-ignore not TS yet
+import { ErrorPageProvider } from './error_page';
+// @ts-ignore not TS yet
 import { HeaderPageProvider } from './header_page';
 // @ts-ignore not TS yet
 import { HomePageProvider } from './home_page';
@@ -55,6 +57,7 @@ export const pageObjects = {
   context: ContextPageProvider,
   dashboard: DashboardPageProvider,
   discover: DiscoverPageProvider,
+  error: ErrorPageProvider,
   header: HeaderPageProvider,
   home: HomePageProvider,
   monitoring: MonitoringPageProvider,

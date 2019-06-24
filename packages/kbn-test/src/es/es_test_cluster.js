@@ -62,7 +62,7 @@ export function createEsTestCluster(options = {}) {
       return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
-    async start(esArgs = []) {
+    async start(esArgs = [], esEnvVars) {
       let installPath;
 
       if (esFrom === 'source') {
@@ -80,12 +80,14 @@ export function createEsTestCluster(options = {}) {
       }
 
       await cluster.start(installPath, {
+        password: config.password,
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
           'discovery.type=single-node',
           ...esArgs,
         ],
+        esEnvVars,
       });
     }
 

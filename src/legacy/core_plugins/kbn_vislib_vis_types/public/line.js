@@ -18,17 +18,18 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import pointSeriesTemplate from './editors/point_series.html';
 
-export default function PointSeriesVisType(Private, i18n) {
+export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'line',
-    title: i18n('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
+    title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
     icon: 'visLine',
-    description: i18n('kbnVislibVisTypes.line.lineDescription', { defaultMessage: 'Emphasize trends' }),
+    description: i18n.translate('kbnVislibVisTypes.line.lineDescription', { defaultMessage: 'Emphasize trends' }),
     visConfig: {
       defaults: {
         type: 'line',
@@ -47,6 +48,7 @@ export default function PointSeriesVisType(Private, i18n) {
             },
             labels: {
               show: true,
+              filter: true,
               truncate: 100
             },
             title: {}
@@ -136,7 +138,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-axis' }),
           min: 1,
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           defaults: [
@@ -146,7 +148,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'radius',
-          title: i18n('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot Size' }),
+          title: i18n.translate('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot size' }),
           min: 0,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits']
@@ -154,7 +156,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -162,7 +164,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n('kbnVislibVisTypes.line.groupTitle', { defaultMessage: 'Split Series' }),
+          title: i18n.translate('kbnVislibVisTypes.line.groupTitle', { defaultMessage: 'Split series' }),
           min: 0,
           max: 3,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -170,7 +172,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'split',
-          title: i18n('kbnVislibVisTypes.line.splitTitle', { defaultMessage: 'Split Chart' }),
+          title: i18n.translate('kbnVislibVisTypes.line.splitTitle', { defaultMessage: 'Split chart' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

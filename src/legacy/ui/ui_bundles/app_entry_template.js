@@ -33,6 +33,7 @@ import 'dll/set_csp_nonce';
 __webpack_nonce__ = window.__kbnNonce__;
 
 // import global polyfills
+import Symbol_observable from 'symbol-observable';
 import '@babel/polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
@@ -56,10 +57,14 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
       }
     });
 
-    const coreStart = coreSystem.setup();
+    coreSystem
+      .setup()
+      .then((coreSetup) => {
+        if (i18nError) {
+          coreSetup.fatalErrors.add(i18nError);
+        }
 
-    if (i18nError) {
-      coreStart.fatalErrors.add(i18nError);
-    }
+        return coreSystem.start();
+      });
   });
 `;

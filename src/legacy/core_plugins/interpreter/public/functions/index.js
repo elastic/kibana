@@ -22,7 +22,8 @@ import { esaggs } from './esaggs';
 import { kibana } from './kibana';
 import { kibanaContext } from './kibana_context';
 import { visualization } from './visualization';
+import { visDimension } from './vis_dimension';
 
 export const functions = [
-  clog, esaggs, kibana, kibanaContext, visualization
+  clog, esaggs, kibana, kibanaContext, visualization, visDimension,
 ];

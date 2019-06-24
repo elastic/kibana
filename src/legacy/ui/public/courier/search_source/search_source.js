@@ -81,7 +81,6 @@ import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { KbnError, OutdatedKuerySyntaxError } from '../../errors';
 
 const FIELDS = [
   'type',
@@ -111,7 +110,7 @@ function parseInitialFields(initialFields) {
 }
 
 function isIndexPattern(val) {
-  return Boolean(val && typeof val.toIndexList === 'function');
+  return Boolean(val && typeof val.title === 'string');
 }
 
 export function SearchSourceProvider(Promise, Private, config) {
@@ -580,15 +579,8 @@ export function SearchSourceProvider(Promise, Private, config) {
             _.set(flatData.body, '_source.includes', remainingFields);
           }
 
-          try {
-            const esQueryConfigs = getEsQueryConfig(config);
-            flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
-          } catch (e) {
-            if (e.message === 'OutdatedKuerySyntaxError') {
-              throw new OutdatedKuerySyntaxError();
-            }
-            throw new KbnError(e.message, KbnError);
-          }
+          const esQueryConfigs = getEsQueryConfig(config);
+          flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
 
           if (flatData.highlightAll != null) {
             if (flatData.highlightAll && flatData.body.query) {

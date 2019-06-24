@@ -6,13 +6,14 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['uptime']);
   const archive = 'uptime/full_heartbeat';
 
-  describe('monitor page', () => {
+  describe('monitor page', async function() {
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load(archive);
     });
@@ -20,8 +21,9 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
     it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.loadDataAndGoToMonitorPage(
         '2019-01-28 12:40:08.078',
+        '2019-01-29 12:40:08.078',
         'auto-http-0X131221E73F825974',
-        'https://www.google.com/'
+        'auto-http-0X131221E73F825974'
       );
     });
   });

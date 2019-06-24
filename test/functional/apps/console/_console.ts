@@ -31,13 +31,14 @@ GET _search
 
 `.trim();
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
+    this.tags('smoke');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');

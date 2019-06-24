@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -40,7 +40,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to create ${type}, missing action:saved_objects/${type}/create`,
+      message: `Unable to create ${type}`,
     });
   };
 
@@ -58,9 +58,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     expect(resp.body).to.eql({
       id: resp.body.id,
-      migrationVersion: {
-        visualization: '7.1.0',
-      },
+      migrationVersion: resp.body.migrationVersion,
       type: spaceAwareType,
       updated_at: resp.body.updated_at,
       version: resp.body.version,

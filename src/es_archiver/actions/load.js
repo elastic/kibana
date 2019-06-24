@@ -34,6 +34,7 @@ import {
   createCreateIndexStream,
   createIndexDocRecordsStream,
   migrateKibanaIndex,
+  Progress,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -66,24 +67,27 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
     { objectMode: true }
   );
 
+  const progress = new Progress('load progress');
+  progress.activate(log);
+
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }),
-    createIndexDocRecordsStream(client, stats),
+    createIndexDocRecordsStream(client, stats, progress),
   ]);
 
+  progress.deactivate();
   const result = stats.toJSON();
 
-  const indicesToRefresh = Object
-    .entries(result)
-    .filter(([, stats]) => !stats.deleted)
-    .map(([index, { docs }]) => {
+  for (const [index, { docs }] of Object.entries(result)) {
+    if (!docs && docs.indexed > 0) {
       log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
-      return index;
-    });
+    }
+  }
 
   await client.indices.refresh({
-    index: indicesToRefresh
+    index: '_all',
+    allowNoIndices: true,
   });
 
   // If we affected the Kibana index, we need to ensure it's migrated...

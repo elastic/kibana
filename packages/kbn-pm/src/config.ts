@@ -27,7 +27,7 @@ export interface IProjectPathOptions {
 /**
  * Returns all the paths where plugins are located
  */
-export function getProjectPaths(rootPath: string, options: IProjectPathOptions) {
+export function getProjectPaths(rootPath: string, options: IProjectPathOptions = {}) {
   const skipKibanaPlugins = Boolean(options['skip-kibana-plugins']);
   const ossOnly = Boolean(options.oss);
 
@@ -47,7 +47,7 @@ export function getProjectPaths(rootPath: string, options: IProjectPathOptions) 
 
   if (!ossOnly) {
     projectPaths.push(resolve(rootPath, 'x-pack'));
-    projectPaths.push(resolve(rootPath, 'x-pack/plugins/*'));
+    projectPaths.push(resolve(rootPath, 'x-pack/legacy/plugins/*'));
   }
 
   if (!skipKibanaPlugins) {

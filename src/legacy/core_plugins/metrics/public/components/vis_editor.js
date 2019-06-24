@@ -19,16 +19,23 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import chrome from 'ui/chrome';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
-import VisEditorVisualization from './vis_editor_visualization';
-import Visualization from './visualization';
-import VisPicker from './vis_picker';
-import PanelConfig from './panel_config';
-import brushHandler from '../lib/create_brush_handler';
-import { fetchIndexPatternFields } from '../lib/fetch_fields';
+import { isEqual, isEmpty, debounce } from 'lodash';
+import { fromKueryExpression } from '@kbn/es-query';
+import { VisEditorVisualization } from './vis_editor_visualization';
+import { Visualization } from './visualization';
+import { VisPicker } from './vis_picker';
+import { PanelConfig } from './panel_config';
+import { brushHandler } from '../lib/create_brush_handler';
+import { fetchFields } from '../lib/fetch_fields';
+import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
-class VisEditor extends Component {
+const VIS_STATE_DEBOUNCE_DELAY = 200;
+const queryOptions = chrome.getUiSettingsClient().get('query:allowLeadingWildcards');
+
+export class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
@@ -37,10 +44,11 @@ class VisEditor extends Component {
       model: props.visParams,
       dirty: false,
       autoApply: true,
-      visFields: props.visFields
+      visFields: props.visFields,
+      extractedIndexPatterns: [''],
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
-    this.visDataSubject = new Rx.Subject();
+    this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
@@ -52,32 +60,66 @@ class VisEditor extends Component {
     return this.props.config.get(...args);
   };
 
-  handleUiState = (field, value) =>  {
+  handleUiState = (field, value) => {
     this.props.vis.uiStateVal(field, value);
   };
 
-  handleChange = async (partialModel) => {
-    const nextModel = { ...this.state.model, ...partialModel };
-    this.props.vis.params = nextModel;
-    if (this.state.autoApply) {
-      this.props.vis.updateState();
+  updateVisState = debounce(() => {
+    this.props.vis.params = this.state.model;
+    this.props.vis.updateState();
+  }, VIS_STATE_DEBOUNCE_DELAY);
+
+  isValidKueryQuery = filterQuery => {
+    if (filterQuery && filterQuery.language === 'kuery') {
+      try {
+        fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
+      } catch (error) {
+        return false;
+      }
     }
+    return true;
+  };
+
+  handleChange = async partialModel => {
+    if (isEmpty(partialModel)) {
+      return;
+    }
+    const hasTypeChanged = partialModel.type && this.state.model.type !== partialModel.type;
+    const nextModel = {
+      ...this.state.model,
+      ...partialModel,
+    };
+    let dirty = true;
+    if (this.state.autoApply || hasTypeChanged) {
+      this.updateVisState();
+
+      dirty = false;
+    }
+
+    if (this.props.isEditorMode) {
+      const extractedIndexPatterns = extractIndexPatterns(nextModel);
+      if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
+        fetchFields(extractedIndexPatterns).then(visFields =>
+          this.setState({
+            visFields,
+            extractedIndexPatterns,
+          })
+        );
+      }
+    }
+
     this.setState({
+      dirty,
       model: nextModel,
-      dirty: !this.state.autoApply
-    });
-    const { params, fields } = this.props.vis;
-    fetchIndexPatternFields(params, fields).then(visFields => {
-      this.setState({ visFields });
     });
   };
 
   handleCommit = () => {
-    this.props.vis.updateState();
+    this.updateVisState();
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = (event) => {
+  handleAutoApplyToggle = event => {
     this.setState({ autoApply: event.target.checked });
   };
 
@@ -107,7 +149,7 @@ class VisEditor extends Component {
 
     if (model) {
       return (
-        <div className="tvbEditor">
+        <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
             <VisPicker model={model} onChange={this.handleChange} />
           </div>
@@ -149,10 +191,14 @@ class VisEditor extends Component {
   componentDidUpdate() {
     this.props.renderComplete();
   }
+
+  componentWillUnmount() {
+    this.updateVisState.cancel();
+  }
 }
 
 VisEditor.defaultProps = {
-  visData: {}
+  visData: {},
 };
 
 VisEditor.propTypes = {
@@ -165,5 +211,3 @@ VisEditor.propTypes = {
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
 };
-
-export default VisEditor;

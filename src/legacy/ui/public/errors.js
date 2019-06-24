@@ -19,7 +19,6 @@
 
 import angular from 'angular';
 import { createLegacyClass } from './utils/legacy_class';
-import { documentationLinks } from './documentation_links';
 
 const canStack = (function () {
   const err = new Error();
@@ -158,18 +157,6 @@ export class DuplicateField extends KbnError {
 }
 
 /**
- * when a mapping already exists for a field the user is attempting to add
- * @param {String} name - the field name
- */
-export class IndexPatternAlreadyExists extends KbnError {
-  constructor(name) {
-    super(
-      `An index pattern of "${name}" already exists`,
-      IndexPatternAlreadyExists);
-  }
-}
-
-/**
  * A saved object was not found
  */
 export class SavedObjectNotFound extends KbnError {
@@ -185,41 +172,6 @@ export class SavedObjectNotFound extends KbnError {
 
     this.savedObjectType = type;
     this.savedObjectId = id;
-  }
-}
-
-/**
- * Tried to call a method that relies on SearchSource having an indexPattern assigned
- */
-export class IndexPatternMissingIndices extends KbnError {
-  constructor(message) {
-    const defaultMessage = 'IndexPattern\'s configured pattern does not match any indices';
-
-    super(
-      (message && message.length) ? `No matching indices found: ${message}` : defaultMessage,
-      IndexPatternMissingIndices);
-  }
-}
-
-/**
- * Tried to call a method that relies on SearchSource having an indexPattern assigned
- */
-export class NoDefinedIndexPatterns extends KbnError {
-  constructor() {
-    super(
-      'Define at least one index pattern to continue',
-      NoDefinedIndexPatterns);
-  }
-}
-
-/**
- * Tried to load a route besides management/kibana/index but you don't have a default index pattern!
- */
-export class NoDefaultIndexPattern extends KbnError {
-  constructor() {
-    super(
-      'Please specify a default index pattern',
-      NoDefaultIndexPattern);
   }
 }
 
@@ -288,12 +240,5 @@ export class StackedBarChartConfig extends VislibError {
 export class NoResults extends VislibError {
   constructor() {
     super('No results found');
-  }
-}
-
-export class OutdatedKuerySyntaxError extends KbnError {
-  constructor() {
-    const link = `[docs](${documentationLinks.query.kueryQuerySyntax})`;
-    super(`It looks like you're using an outdated Kuery syntax. See what changed in the ${link}!`);
   }
 }

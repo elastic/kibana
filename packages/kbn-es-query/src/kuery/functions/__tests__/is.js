@@ -199,6 +199,52 @@ describe('kuery functions', function () {
         expect(result.bool.should[0]).to.have.key('script');
       });
 
+      it('should support date fields without a dateFormat provided', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2018-04-03T19:04:17',
+                    lte: '2018-04-03T19:04:17',
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.eql(expected);
+      });
+
+      it('should support date fields with a dateFormat provided', function () {
+        const config = { dateFormatTZ: 'America/Phoenix' };
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2018-04-03T19:04:17',
+                    lte: '2018-04-03T19:04:17',
+                    time_zone: 'America/Phoenix',
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
+        const result = is.toElasticsearchQuery(node, indexPattern, config);
+        expect(result).to.eql(expected);
+      });
+
     });
   });
 });

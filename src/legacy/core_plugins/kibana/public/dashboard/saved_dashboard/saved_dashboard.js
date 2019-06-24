@@ -18,6 +18,7 @@
  */
 
 import angular from 'angular';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
@@ -30,7 +31,7 @@ import {
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedDashboard', function (Private, config, i18n) {
+module.factory('SavedDashboard', function (Private) {
   // SavedDashboard constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
   const SavedObject = Private(SavedObjectProvider);
@@ -49,7 +50,7 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
 
       // default values that will get assigned if the doc is new
       defaults: {
-        title: i18n('kbn.dashboard.savedDashboard.newDashboardTitle', { defaultMessage: 'New Dashboard' }),
+        title: i18n.translate('kbn.dashboard.savedDashboard.newDashboardTitle', { defaultMessage: 'New Dashboard' }),
         hits: 0,
         description: '',
         panelsJSON: '[]',
@@ -69,7 +70,6 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
       // object, clear it. It was a mistake
       clearSavedIndexPattern: true
     });
-
 
     this.showInRecentlyAccessed = true;
   }
@@ -111,6 +111,16 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
   SavedDashboard.prototype.getFullPath = function () {
     return `/app/kibana#${createDashboardEditUrl(this.id)}`;
   };
+
+  SavedDashboard.prototype.getQuery = function () {
+    return this.searchSource.getOwnField('query') ||
+      { query: '', language: 'kuery' };
+  };
+
+  SavedDashboard.prototype.getFilters = function () {
+    return this.searchSource.getOwnField('filter') || [];
+  };
+
 
   return SavedDashboard;
 });

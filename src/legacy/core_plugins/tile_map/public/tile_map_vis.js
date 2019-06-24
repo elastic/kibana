@@ -29,7 +29,7 @@ import { Status } from 'ui/vis/update_status';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
-VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
+VisTypesRegistryProvider.register(function TileMapVisType(Private, config) {
 
   const VisFactory = Private(VisFactoryProvider);
   const CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
@@ -112,7 +112,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           group: 'buckets',
           name: 'segment',
           title: i18n.translate('tileMap.vis.map.editorConfig.schemas.geoCoordinatesTitle', {
-            defaultMessage: 'Geo Coordinates',
+            defaultMessage: 'Geo coordinates',
           }),
           aggFilter: 'geohash_grid',
           min: 1,

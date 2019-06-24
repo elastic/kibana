@@ -50,32 +50,24 @@ import {
   EuiShowFor,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { HelpExtension } from 'ui/chrome';
+import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
+
+import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
-import { i18n } from '@kbn/i18n';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import chrome, { NavLink } from 'ui/chrome';
-import { HelpExtension } from 'ui/chrome';
-import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
-import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
-import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
-import { NavControlSide } from '../';
-import { ChromeBreadcrumb } from '../../../../../../../core/public';
-
-interface Props {
-  appTitle?: string;
-  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
-  homeHref: string;
-  isVisible: boolean;
-  navLinks$: Rx.Observable<NavLink[]>;
-  recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
-  forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<HelpExtension>;
-  navControls: ChromeHeaderNavControlsRegistry;
-  intl: InjectedIntl;
-}
+import {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeNavLink,
+  ChromeRecentlyAccessedHistoryItem,
+  ChromeNavControl,
+} from '../../../../../../../core/public';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -83,11 +75,11 @@ const TRUNCATE_LIMIT: number = 64;
 const TRUNCATE_AT: number = 58;
 
 function extendRecentlyAccessedHistoryItem(
-  navLinks: NavLink[],
-  recentlyAccessed: RecentlyAccessedHistoryItem
+  navLinks: ChromeNavLink[],
+  recentlyAccessed: ChromeRecentlyAccessedHistoryItem
 ) {
   const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
-  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
+  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase || nl.baseUrl));
 
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {
@@ -109,10 +101,10 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: NavLink) {
+function extendNavLink(navLink: ChromeNavLink) {
   return {
     ...navLink,
-    href: navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
+    href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
   };
 }
 
@@ -139,10 +131,28 @@ function truncateRecentItemLabel(label: string): string {
   return label;
 }
 
+interface Props {
+  appTitle?: string;
+  badge$: Rx.Observable<ChromeBadge | undefined>;
+  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
+  homeHref: string;
+  isVisible$: Rx.Observable<boolean>;
+  navLinks$: Rx.Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  forceAppSwitcherNavigation$: Rx.Observable<boolean>;
+  helpExtension$: Rx.Observable<HelpExtension>;
+  navControlsLeft$: Rx.Observable<ReadonlyArray<ChromeNavControl>>;
+  navControlsRight$: Rx.Observable<ReadonlyArray<ChromeNavControl>>;
+  intl: InjectedIntl;
+}
+
 interface State {
-  navLinks: Array<ReturnType<typeof extendNavLink>>;
-  recentlyAccessed: Array<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
+  isVisible: boolean;
+  navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
+  recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
   forceNavigation: boolean;
+  navControlsLeft: ReadonlyArray<ChromeNavControl>;
+  navControlsRight: ReadonlyArray<ChromeNavControl>;
 }
 
 class HeaderUI extends Component<Props, State> {
@@ -153,25 +163,41 @@ class HeaderUI extends Component<Props, State> {
     super(props);
 
     this.state = {
+      isVisible: true,
       navLinks: [],
       recentlyAccessed: [],
       forceNavigation: false,
+      navControlsLeft: [],
+      navControlsRight: [],
     };
   }
 
   public componentDidMount() {
     this.subscription = Rx.combineLatest(
+      this.props.isVisible$,
+      this.props.forceAppSwitcherNavigation$,
       this.props.navLinks$,
       this.props.recentlyAccessed$,
-      this.props.forceAppSwitcherNavigation$
+      this.props.navControlsLeft$,
+      this.props.navControlsRight$
     ).subscribe({
-      next: ([navLinks, recentlyAccessed, forceNavigation]) => {
+      next: ([
+        isVisible,
+        forceNavigation,
+        navLinks,
+        recentlyAccessed,
+        navControlsLeft,
+        navControlsRight,
+      ]) => {
         this.setState({
+          isVisible,
           forceNavigation,
           navLinks: navLinks.map(navLink => extendNavLink(navLink)),
           recentlyAccessed: recentlyAccessed.map(ra =>
             extendRecentlyAccessedHistoryItem(navLinks, ra)
           ),
+          navControlsLeft,
+          navControlsRight,
         });
       },
     });
@@ -211,41 +237,35 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$, intl } = this.props;
-    const { navLinks, recentlyAccessed } = this.state;
+    const { appTitle, badge$, breadcrumbs$, helpExtension$, intl } = this.props;
+    const { isVisible, navLinks, recentlyAccessed, navControlsLeft, navControlsRight } = this.state;
 
     if (!isVisible) {
       return null;
     }
 
-    const leftNavControls = navControls.bySide[NavControlSide.Left];
-    const rightNavControls = navControls.bySide[NavControlSide.Right];
-
-    let navLinksArray = navLinks.map(navLink =>
-      navLink.hidden
-        ? null
-        : {
-            key: navLink.id,
-            label: navLink.title,
-            href: navLink.href,
-            iconType: navLink.euiIconType,
-            icon:
-              !navLink.euiIconType && navLink.icon ? (
-                <EuiImage
-                  size="s"
-                  alt=""
-                  aria-hidden={true}
-                  url={chrome.addBasePath(`/${navLink.icon}`)}
-                />
-              ) : (
-                undefined
-              ),
-            isActive: navLink.active,
-            'data-test-subj': 'navDrawerAppsMenuLink',
-          }
-    );
-    // filter out the null items
-    navLinksArray = navLinksArray.filter(item => item !== null);
+    const navLinksArray = navLinks
+      .filter(navLink => !navLink.hidden)
+      .map(navLink => ({
+        key: navLink.id,
+        label: navLink.title,
+        href: navLink.href,
+        isDisabled: navLink.disabled,
+        isActive: navLink.active,
+        iconType: navLink.euiIconType,
+        icon:
+          !navLink.euiIconType && navLink.icon ? (
+            <EuiImage
+              size="s"
+              alt=""
+              aria-hidden={true}
+              url={chrome.addBasePath(`/${navLink.icon}`)}
+            />
+          ) : (
+            undefined
+          ),
+        'data-test-subj': 'navDrawerAppsMenuLink',
+      }));
 
     const recentLinksArray = [
       {
@@ -281,17 +301,19 @@ class HeaderUI extends Component<Props, State> {
 
             <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
 
-            <HeaderNavControls navControls={leftNavControls} />
+            <HeaderNavControls side="left" navControls={navControlsLeft} />
           </EuiHeaderSection>
 
           <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
+
+          <HeaderBadge badge$={badge$} />
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
               <HeaderHelpMenu helpExtension$={helpExtension$} />
             </EuiHeaderSectionItem>
 
-            <HeaderNavControls navControls={rightNavControls} />
+            <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
         </EuiHeader>
 
@@ -304,7 +326,7 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  private onNavClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  private onNavClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     const anchor = findClosestAnchor((event as any).nativeEvent.target);
     if (!anchor) {
       return;

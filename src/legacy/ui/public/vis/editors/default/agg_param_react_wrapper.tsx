@@ -17,40 +17,38 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { AggParam } from '../../../agg_types';
-import { AggConfig } from '../../agg_config';
-import { AggParamEditorProps } from './agg_param_editor_props';
+import { AggParamEditorProps, AggParamCommonProps } from './agg_param_editor_props';
 
-interface AggParamReactWrapperProps<T> {
-  agg: AggConfig;
-  aggParam: AggParam;
+interface AggParamReactWrapperProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
-  value: T;
-  isInvalid: boolean;
-  onChange(value: T): void;
-  setValidity(isValid: boolean): void;
+  onChange(value?: T): void;
 }
 
 function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
-  const {
-    agg,
-    aggParam,
-    paramEditor: ParamEditor,
-    onChange,
-    value,
-    isInvalid,
-    setValidity,
-  } = props;
+  const { agg, aggParam, paramEditor: ParamEditor, onChange, setValidity, ...rest } = props;
+
+  useEffect(
+    () => {
+      if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
+        setValidity(true);
+      }
+    },
+    [agg, agg.params.field]
+  );
+
+  if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
+    return null;
+  }
+
   return (
     <ParamEditor
-      value={value}
-      setValue={onChange}
-      aggParam={aggParam}
       agg={agg}
-      isInvalid={isInvalid}
+      aggParam={aggParam}
       setValidity={setValidity}
+      setValue={onChange}
+      {...rest}
     />
   );
 }

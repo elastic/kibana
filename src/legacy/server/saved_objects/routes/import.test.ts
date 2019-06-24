@@ -36,13 +36,7 @@ describe('POST /api/saved_objects/_import', () => {
 
   beforeEach(() => {
     server = createMockServer();
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
 
     const prereqs = {
       getSavedObjectsClient: {
@@ -53,7 +47,9 @@ describe('POST /api/saved_objects/_import', () => {
       },
     };
 
-    server.route(createImportRoute(prereqs, server));
+    server.route(
+      createImportRoute(prereqs, server, ['index-pattern', 'visualization', 'dashboard'])
+    );
   });
 
   test('formats successful response', async () => {
@@ -81,6 +77,47 @@ describe('POST /api/saved_objects/_import', () => {
       successCount: 0,
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+  });
+
+  test('defaults migrationVersion to empty object', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_import',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: 'my-pattern',
+          attributes: {
+            title: 'my-pattern-*',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({
+      success: true,
+      successCount: 1,
+    });
+    expect(savedObjectsClient.bulkCreate.mock.calls).toHaveLength(1);
+    const firstBulkCreateCallArray = savedObjectsClient.bulkCreate.mock.calls[0][0];
+    expect(firstBulkCreateCallArray).toHaveLength(1);
+    expect(firstBulkCreateCallArray[0].migrationVersion).toEqual({});
   });
 
   test('imports an index pattern and dashboard', async () => {
@@ -180,11 +217,96 @@ describe('POST /api/saved_objects/_import', () => {
         {
           id: 'my-pattern',
           type: 'index-pattern',
+          title: 'my-pattern-*',
           error: {
             type: 'conflict',
           },
         },
       ],
     });
+  });
+
+  test('imports a visualization with missing references', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_import',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'my-pattern-*',
+          type: 'index-pattern',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({
+      success: false,
+      successCount: 0,
+      errors: [
+        {
+          id: 'my-vis',
+          type: 'visualization',
+          title: 'my-vis',
+          error: {
+            type: 'missing_references',
+            references: [
+              {
+                type: 'index-pattern',
+                id: 'my-pattern-*',
+              },
+            ],
+            blocking: [
+              {
+                type: 'dashboard',
+                id: 'my-dashboard',
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "fields": Array [
+            "id",
+          ],
+          "id": "my-pattern-*",
+          "type": "index-pattern",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 });

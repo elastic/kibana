@@ -28,6 +28,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     async getQueryField() {
@@ -39,7 +41,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTimespan() {
-      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
       return await el.getVisibleText();
     }
 
@@ -58,6 +60,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         const name = await this.getCurrentQueryName();
         expect(name).to.be(searchName);
       });
+    }
+
+    async waitUntilSearchingHasFinished() {
+      const spinner = await testSubjects.find('loadingSpinner');
+      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
     async getColumnHeaders() {
@@ -234,6 +241,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await testSubjects.click(`fieldVisualize-${field}`);
       });
+    }
+
+    async expectFieldListItemVisualize(field) {
+      await testSubjects.existOrFail(`fieldVisualize-${field}`);
+    }
+
+    async expectMissingFieldListItemVisualize(field) {
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
     }
 
     async clickFieldListPlusFilter(field, value) {

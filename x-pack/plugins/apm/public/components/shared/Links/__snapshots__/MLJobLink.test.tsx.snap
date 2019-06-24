@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`MLJobLink should render component 1`] = `
-<EuiLink
-  color="primary"
-  href="/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
-  type="button"
-/>
-`;

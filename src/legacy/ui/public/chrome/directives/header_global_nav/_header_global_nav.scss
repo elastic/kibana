@@ -15,6 +15,7 @@
   // SASSTODO: Find an actual solution
   .euiFlyout {
     top: $euiHeaderChildSize;
+    height: calc(100% - #{$euiHeaderChildSize});
   }
 }
 
@@ -27,4 +28,9 @@
 
 .chrHeaderHelpMenu__version {
   text-transform: none;
+}
+
+.chrHeaderBadge__wrapper {
+  align-self: center;
+  margin-right: $euiSize;
 }

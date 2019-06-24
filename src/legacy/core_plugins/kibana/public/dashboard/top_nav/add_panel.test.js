@@ -25,6 +25,18 @@ import {
   DashboardAddPanel,
 } from './add_panel';
 
+jest.mock('ui/capabilities',
+  () => ({
+    capabilities: {
+      get: () => ({
+        visualize: {
+          show: true,
+          save: true
+        }
+      })
+    }
+  }), { virtual: true });
+
 jest.mock('ui/notify',
   () => ({
     toastNotifications: {

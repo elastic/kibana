@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
+<EuiPopover
+  anchorPosition="downRight"
+  button={
+    <EuiButtonEmpty
+      color="primary"
+      iconSide="left"
+      onClick={[Function]}
+      size="xs"
+      type="button"
+    >
+      <FormattedMessage
+        defaultMessage="Lucene"
+        id="data.query.queryBar.luceneLanguageName"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  }
+  className="eui-displayBlock"
+  closePopover={[Function]}
+  hasArrow={true}
+  id="popover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+>
+  <EuiPopoverTitle>
+    <FormattedMessage
+      defaultMessage="Syntax options"
+      id="data.query.queryBar.syntaxOptionsTitle"
+      values={Object {}}
+    />
+  </EuiPopoverTitle>
+  <div
+    style={
+      Object {
+        "width": "350px",
+      }
+    }
+  >
+    <EuiText>
+      <p>
+        <FormattedMessage
+          defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
+          id="data.query.queryBar.syntaxOptionsDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                color="primary"
+                href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/kuery-query.html"
+                target="_blank"
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="Kibana Query Language"
+                  id="data.query.queryBar.kqlFullLanguageName"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Kibana Query Language"
+            id="data.query.queryBar.kqlFullLanguageName"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiSwitch
+          checked={false}
+          data-test-subj="languageToggle"
+          id="queryEnhancementOptIn"
+          label={
+            <FormattedMessage
+              defaultMessage="Off"
+              id="data.query.queryBar.kqlOffLabel"
+              values={Object {}}
+            />
+          }
+          name="popswitch"
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </div>
+</EuiPopover>
+`;
+
+exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
+<EuiPopover
+  anchorPosition="downRight"
+  button={
+    <EuiButtonEmpty
+      color="primary"
+      iconSide="left"
+      onClick={[Function]}
+      size="xs"
+      type="button"
+    >
+      <FormattedMessage
+        defaultMessage="KQL"
+        id="data.query.queryBar.kqlLanguageName"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  }
+  className="eui-displayBlock"
+  closePopover={[Function]}
+  hasArrow={true}
+  id="popover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+>
+  <EuiPopoverTitle>
+    <FormattedMessage
+      defaultMessage="Syntax options"
+      id="data.query.queryBar.syntaxOptionsTitle"
+      values={Object {}}
+    />
+  </EuiPopoverTitle>
+  <div
+    style={
+      Object {
+        "width": "350px",
+      }
+    }
+  >
+    <EuiText>
+      <p>
+        <FormattedMessage
+          defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
+          id="data.query.queryBar.syntaxOptionsDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                color="primary"
+                href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/kuery-query.html"
+                target="_blank"
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="Kibana Query Language"
+                  id="data.query.queryBar.kqlFullLanguageName"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Kibana Query Language"
+            id="data.query.queryBar.kqlFullLanguageName"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiSwitch
+          checked={true}
+          data-test-subj="languageToggle"
+          id="queryEnhancementOptIn"
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="data.query.queryBar.kqlOnLabel"
+              values={Object {}}
+            />
+          }
+          name="popswitch"
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </div>
+</EuiPopover>
+`;

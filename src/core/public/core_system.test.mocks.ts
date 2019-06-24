@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { basePathServiceMock } from './base_path/base_path_service.mock';
+import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -25,6 +25,8 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
+import { overlayServiceMock } from './overlays/overlay_service.mock';
+import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 export const MockLegacyPlatformService = legacyPlatformServiceMock.create();
@@ -71,12 +73,6 @@ jest.doMock('./http', () => ({
   HttpService: HttpServiceConstructor,
 }));
 
-export const MockBasePathService = basePathServiceMock.create();
-export const BasePathServiceConstructor = jest.fn().mockImplementation(() => MockBasePathService);
-jest.doMock('./base_path', () => ({
-  BasePathService: BasePathServiceConstructor,
-}));
-
 export const MockUiSettingsService = uiSettingsServiceMock.create();
 export const UiSettingsServiceConstructor = jest
   .fn()
@@ -89,4 +85,24 @@ export const MockChromeService = chromeServiceMock.create();
 export const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
 jest.doMock('./chrome', () => ({
   ChromeService: ChromeServiceConstructor,
+}));
+
+export const MockOverlayService = overlayServiceMock.create();
+export const OverlayServiceConstructor = jest.fn().mockImplementation(() => MockOverlayService);
+jest.doMock('./overlays', () => ({
+  OverlayService: OverlayServiceConstructor,
+}));
+
+export const MockPluginsService = pluginsServiceMock.create();
+export const PluginsServiceConstructor = jest.fn().mockImplementation(() => MockPluginsService);
+jest.doMock('./plugins', () => ({
+  PluginsService: PluginsServiceConstructor,
+}));
+
+export const MockApplicationService = applicationServiceMock.create();
+export const ApplicationServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockApplicationService);
+jest.doMock('./application', () => ({
+  ApplicationService: ApplicationServiceConstructor,
 }));

@@ -1,0 +1,147 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Load More Events Table Component rendering it renders the events table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "_id": "aXSdmmoB9v5HJNSHzQ0Y",
+        "_index": "filebeat-8.0.0-2019.04.20-000003",
+        "destination": Object {
+          "ip": Array [
+            "10.0.0.111",
+          ],
+          "port": Array [
+            37140,
+          ],
+        },
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": Array [
+            "suricata.eve",
+          ],
+          "id": null,
+          "module": Array [
+            "suricata",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "host": Object {
+          "id": Array [
+            "aa7ca589f1b8220002f2fc61c64cfbf1",
+          ],
+          "ip": null,
+          "name": Array [
+            "siem-kibana",
+          ],
+        },
+        "message": Array [
+          "Generic Protocol Command Decode",
+        ],
+        "source": Object {
+          "ip": Array [
+            "10.47.2.208",
+          ],
+          "port": Array [
+            110,
+          ],
+        },
+        "suricata": Object {
+          "eve": Object {
+            "alert": Object {
+              "signature": Array [
+                "SURICATA SMTP no server welcome message",
+              ],
+              "signature_id": Array [
+                2220006,
+              ],
+            },
+            "flow_id": Array [
+              1026250231579890,
+            ],
+            "proto": null,
+          },
+        },
+        "timestamp": "2019-05-09T17:15:47.987Z",
+        "user": null,
+        "zeek": null,
+      },
+      Object {
+        "_id": "aHSdmmoB9v5HJNSHzQ0Y",
+        "_index": "filebeat-8.0.0-2019.04.20-000003",
+        "destination": Object {
+          "ip": Array [
+            "10.225.222.243",
+          ],
+          "port": Array [
+            8080,
+          ],
+        },
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": Array [
+            "suricata.eve",
+          ],
+          "id": null,
+          "module": Array [
+            "suricata",
+          ],
+          "severity": Array [
+            1,
+          ],
+        },
+        "host": Object {
+          "id": Array [
+            "aa7ca589f1b8220002f2fc61c64cfbf1",
+          ],
+          "ip": null,
+          "name": Array [
+            "siem-kibana",
+          ],
+        },
+        "message": Array [
+          "A Network Trojan was detected",
+        ],
+        "source": Object {
+          "ip": Array [
+            "10.47.6.59",
+          ],
+          "port": Array [
+            41155,
+          ],
+        },
+        "suricata": Object {
+          "eve": Object {
+            "alert": Object {
+              "signature": Array [
+                "ET TROJAN Generic - POST To .php w/Extended ASCII Characters",
+              ],
+              "signature_id": Array [
+                2017259,
+              ],
+            },
+            "flow_id": Array [
+              2102212323729057,
+            ],
+            "proto": null,
+          },
+        },
+        "timestamp": "2019-05-09T17:15:47.604Z",
+        "user": null,
+        "zeek": null,
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="1546878704036"
+  tiebreaker="10624"
+  totalCount={15546}
+  type="page"
+/>
+`;

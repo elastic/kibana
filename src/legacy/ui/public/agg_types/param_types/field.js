@@ -19,16 +19,12 @@
 
 import { sortBy } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
-import '../directives/scroll_bottom';
-import '../filter/comma_list';
-import editorHtml from '../controls/field.html';
+import { FieldParamEditor } from '../controls/field';
 import { BaseParamType } from './base';
-import '../../filters/sort_prefix_first';
-import '../../filters/field_type';
 import { IndexedArray } from '../../indexed_array';
 import { toastNotifications } from '../../notify';
 import { createLegacyClass } from '../../utils/legacy_class';
-import { propFilter } from '../../filters/_prop_filter';
+import { propFilter } from '../filter';
 import { i18n } from '@kbn/i18n';
 
 const filterByType = propFilter('type');
@@ -39,7 +35,8 @@ export function FieldParamType(config) {
 
 createLegacyClass(FieldParamType).inherits(BaseParamType);
 
-FieldParamType.prototype.editor = editorHtml;
+FieldParamType.prototype.editorComponent = FieldParamEditor;
+FieldParamType.prototype.required = true;
 FieldParamType.prototype.scriptable = true;
 FieldParamType.prototype.filterFieldTypes = '*';
 // retain only the fields with the aggregatable property if the onlyAggregatable option is true

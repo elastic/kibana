@@ -17,9 +17,18 @@
  * under the License.
  */
 
+jest.mock('../../../../core/server/saved_objects/export', () => ({
+  getSortedObjectsForExport: jest.fn(),
+}));
+
 import Hapi from 'hapi';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import * as exportMock from '../../../../core/server/saved_objects/export';
 import { createMockServer } from './_mock_server';
 import { createExportRoute } from './export';
+
+const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;
@@ -45,17 +54,11 @@ describe('POST /api/saved_objects/_export', () => {
       },
     };
 
-    server.route(createExportRoute(prereqs, server));
+    server.route(createExportRoute(prereqs, server, ['index-pattern', 'search']));
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
   });
 
   test('formats successful response', async () => {
@@ -63,19 +66,30 @@ describe('POST /api/saved_objects/_export', () => {
       method: 'POST',
       url: '/api/saved_objects/_export',
       payload: {
-        type: 'index-pattern',
+        type: 'search',
+        includeReferencesDeep: true,
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      saved_objects: [
-        {
-          id: '1',
-          type: 'index-pattern',
-          references: [],
-        },
-      ],
-    });
+    getSortedObjectsForExport.mockResolvedValueOnce([
+      {
+        id: '1',
+        type: 'index-pattern',
+        attributes: {},
+        references: [],
+      },
+      {
+        id: '2',
+        type: 'search',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '1',
+          },
+        ],
+      },
+    ]);
 
     const { payload, statusCode, headers } = await server.inject(request);
     const objects = payload.split('\n').map(row => JSON.parse(row));
@@ -86,22 +100,45 @@ describe('POST /api/saved_objects/_export', () => {
     expect(objects).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
+  Object {
+    "attributes": Object {},
+    "id": "2",
+    "references": Array [
+      Object {
+        "id": "1",
+        "name": "ref_0",
+        "type": "index-pattern",
+      },
+    ],
+    "type": "search",
+  },
 ]
 `);
-    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+    expect(getSortedObjectsForExport).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
-        "perPage": 10000,
-        "sortField": "_id",
-        "sortOrder": "asc",
-        "type": Array [
-          "index-pattern",
+        "exportSizeLimit": 10000,
+        "includeReferencesDeep": true,
+        "objects": undefined,
+        "savedObjectsClient": Object {
+          "bulkCreate": [MockFunction],
+          "bulkGet": [MockFunction],
+          "create": [MockFunction],
+          "delete": [MockFunction],
+          "errors": Object {},
+          "find": [MockFunction],
+          "get": [MockFunction],
+          "update": [MockFunction],
+        },
+        "types": Array [
+          "search",
         ],
       },
     ],
