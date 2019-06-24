@@ -25,6 +25,7 @@ import { uiModules } from '../../../modules';
 import aggGroupTemplate from './agg_group.html';
 import { move } from '../../../utils/collection';
 import { aggGroupNameMaps } from './agg_group_names';
+import { AggConfig } from '../../agg_config';
 
 import '../../draggable/draggable_container';
 import '../../draggable/draggable_item';
@@ -67,11 +68,6 @@ uiModules
             stats.max += schema.max;
             stats.deprecate = schema.deprecate;
           });
-
-          $scope.availableSchema = $scope.schemas.filter(function (schema) {
-            const count = _.where($scope.group, { schema }).length;
-            if (count < schema.max) return true;
-          });
         });
 
         function reorderFinished() {
@@ -89,6 +85,16 @@ uiModules
           $scope.dragging = false;
           reorderFinished();
         });
+
+        $scope.addSchema = function (schema) {
+          const aggConfig = new AggConfig($scope.state.aggs, {
+            schema,
+            id: AggConfig.nextId($scope.state.aggs),
+          });
+          aggConfig.brandNew = true;
+
+          $scope.state.aggs.push(aggConfig);
+        };
       }
     };
 

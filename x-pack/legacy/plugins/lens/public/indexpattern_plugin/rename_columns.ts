@@ -19,13 +19,13 @@ export const renameColumns: ExpressionFunction<
 > = {
   name: 'lens_rename_columns',
   type: 'kibana_datatable',
-  help: i18n.translate('lens.functions.renameColumns.help', {
+  help: i18n.translate('xpack.lens.functions.renameColumns.help', {
     defaultMessage: 'A helper to rename the columns of a datatable',
   }),
   args: {
     idMap: {
       types: ['string'],
-      help: i18n.translate('lens.functions.renameColumns.idMap.help', {
+      help: i18n.translate('xpack.lens.functions.renameColumns.idMap.help', {
         defaultMessage:
           'A JSON encoded object in which keys are the old column ids and values are the corresponding new ones. All other columns ids are kept.',
       }),
