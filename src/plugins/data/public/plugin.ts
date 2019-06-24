@@ -18,15 +18,17 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { setup } from './interpreter/setup';
+import { ExpressionsService } from './expressions/expressions_service';
 
 export class DataPublicPlugin implements Plugin<{}> {
+  expressions = new ExpressionsService();
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    const interpreter = setup();
+    const expressions = this.expressions.setup();
     return {
-      interpreter,
+      expressions,
     };
   }
 

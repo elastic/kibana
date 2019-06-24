@@ -17,22 +17,22 @@
  * under the License.
  */
 
-import { FunctionsRegistry, TypesRegistry } from '../../common/interpreter/registries';
-import { InterpreterSetup } from './types';
-import { RenderFunctionsRegistry } from './util/render_function';
+import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './interpreter';
 
-export const setup = (): InterpreterSetup => {
-  const functionsRegistry = new FunctionsRegistry();
-  const renderersRegistry = new RenderFunctionsRegistry();
-  const typesRegistry = new TypesRegistry();
+export class ExpressionsService {
+  private functions = new FunctionsRegistry();
+  private renderers = new RenderFunctionsRegistry();
+  private types = new TypesRegistry();
 
-  const api: InterpreterSetup = {
-    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
-      functionsRegistry,
-      renderersRegistry,
-      typesRegistry,
-    },
-  };
+  public setup() {
+    const { functions, renderers, types } = this;
 
-  return api;
-};
+    return {
+      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+        functions,
+        renderers,
+        types,
+      },
+    };
+  }
+}

@@ -25,15 +25,15 @@ export const mockNewPlatformBackdoor = () => {
       core: {},
       plugins: {
         data: {
-          interpreter: {
+          expressions: {
             __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
-              functionsRegistry: {
+              functions: {
                 register: () => {},
               },
-              renderersRegistry: {
+              renderers: {
                 register: () => {},
               },
-              typesRegistry: {
+              types: {
                 register: () => {},
               },
             },
