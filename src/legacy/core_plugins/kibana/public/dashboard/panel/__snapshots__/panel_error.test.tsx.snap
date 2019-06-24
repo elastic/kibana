@@ -60,7 +60,7 @@ exports[`PanelError renders plain string 1`] = `
 </div>
 `;
 
-exports[`PanelError renders string with markdown 1`] = `
+exports[`PanelError renders string with markdown link 1`] = `
 <div
   class="dshPanel__error panel-content"
 >
