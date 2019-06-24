@@ -15,9 +15,6 @@ import { TaskManagerContract } from '../../legacy/plugins/task_manager';
 import { AlertingPlugin, AlertsClient } from '../../legacy/plugins/alerting';
 
 declare module 'hapi' {
-  interface Server {
-    taskManager?: TaskManagerContract;
-  }
   interface Request {
     getActionsClient?: () => ActionsClient;
     getAlertsClient?: () => AlertsClient;
@@ -29,5 +26,6 @@ declare module 'hapi' {
     encrypted_saved_objects?: EncryptedSavedObjectsPlugin;
     actions?: ActionsPlugin;
     alerting?: AlertingPlugin;
+    taskManager?: TaskManagerContract;
   }
 }

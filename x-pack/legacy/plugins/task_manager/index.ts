@@ -69,8 +69,11 @@ export function taskManager(kibana: any) {
           taskManagerInstance
         ),
       };
+
+      // Decorating the server should be removed soon, developers should use server.plugins.taskManager instead
       // @ts-ignore
       server.decorate('server', 'taskManager', taskManagerInstance);
+
       server.expose(exposedFunctions);
     },
   });
