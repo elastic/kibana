@@ -23,14 +23,14 @@ const zoomOutBtn = (zoomInfo) => {
   }
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem className="monRhythmChart__zoom">
       <EuiTextAlign textAlign="right">
         <EuiButtonEmpty
-          color="text"
-          size="xs"
+          color="primary"
+          size="s"
           onClick={zoomInfo.zoomOutHandler}
         >
-          <i className="fa fa-search-minus" /> Zoom Out
+          <i className="fa fa-search-minus" /> Zoom out
         </EuiButtonEmpty>
       </EuiTextAlign>
     </EuiFlexItem>
@@ -58,7 +58,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
     .concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
