@@ -42,7 +42,6 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
-import { SavedObjectsNamespace } from './namespace';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -789,7 +788,7 @@ export class SavedObjectsRepository {
     return omit(savedObject, 'namespace');
   }
 
-  private assertValidNamespace(namespace: SavedObjectsNamespace) {
+  private assertValidNamespace(namespace: unknown) {
     const typeofNamespace = typeof namespace;
     if (typeofNamespace !== 'undefined' && typeofNamespace !== 'string') {
       throw new TypeError(
