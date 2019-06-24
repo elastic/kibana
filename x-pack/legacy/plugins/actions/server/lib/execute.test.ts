@@ -60,13 +60,6 @@ test('successfully executes', async () => {
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await execute(executeParams);
 
-  expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-  expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "1",
-]
-`);
   expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
   expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mock.calls[0])
     .toMatchInlineSnapshot(`

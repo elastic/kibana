@@ -13,7 +13,7 @@ import { fireRoute } from './fire';
 
 const getServices = jest.fn();
 
-const { server, actionTypeRegistry } = createMockServer();
+const { server, actionTypeRegistry, savedObjectsClient } = createMockServer();
 fireRoute({ server, actionTypeRegistry, getServices });
 
 beforeEach(() => jest.resetAllMocks());
@@ -43,6 +43,13 @@ it('fires an action with proper parameters', async () => {
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
 
+  expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+  expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  "1",
+]
+`);
   expect(execute).toHaveBeenCalledTimes(1);
   const executeCall = execute.mock.calls[0][0];
   expect(executeCall.params).toEqual({
