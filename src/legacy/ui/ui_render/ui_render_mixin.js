@@ -54,7 +54,6 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
-  server.exposeStaticDir('/node_modules/@elastic/charts/dist/{path*}', fromRoot('node_modules/@elastic/charts/dist'));
   server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
   server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
   server.exposeStaticDir('/node_modules/@elastic/charts/dist/{path*}', fromRoot('node_modules/@elastic/charts/dist'));
