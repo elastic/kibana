@@ -112,7 +112,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, config) {
           group: 'buckets',
           name: 'segment',
           title: i18n.translate('tileMap.vis.map.editorConfig.schemas.geoCoordinatesTitle', {
-            defaultMessage: 'Geo Coordinates',
+            defaultMessage: 'Geo coordinates',
           }),
           aggFilter: 'geohash_grid',
           min: 1,
