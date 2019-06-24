@@ -39,6 +39,7 @@ import {
   NumberOptions,
   NumberType,
   ObjectType,
+  ObjectTypeOptions,
   Props,
   RecordOfOptions,
   RecordOfType,
@@ -94,12 +95,8 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
 }
 
-function object<P extends Props>(
-  props: P,
-  options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {},
-  allowUnknowns: boolean = false
-): ObjectType<P> {
-  return new ObjectType(props, options, allowUnknowns);
+function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
+  return new ObjectType(props, options);
 }
 
 function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {

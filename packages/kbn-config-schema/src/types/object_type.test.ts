@@ -214,11 +214,8 @@ test('individual keys can validated', () => {
 
 test('allow unknown keys when allowUnknowns = true', () => {
   const type = schema.object(
-    {
-      foo: schema.string({ defaultValue: 'test' }),
-    },
-    {},
-    true
+    { foo: schema.string({ defaultValue: 'test' }) },
+    { allowUnknowns: true }
   );
 
   expect(
@@ -233,11 +230,8 @@ test('allow unknown keys when allowUnknowns = true', () => {
 
 test('allowUnknowns = true affects only own keys', () => {
   const type = schema.object(
-    {
-      foo: schema.object({ bar: schema.string() }),
-    },
-    {},
-    true
+    { foo: schema.object({ bar: schema.string() }) },
+    { allowUnknowns: true }
   );
 
   expect(() =>
@@ -252,11 +246,8 @@ test('allowUnknowns = true affects only own keys', () => {
 
 test('does not allow unknown keys when allowUnknowns = false', () => {
   const type = schema.object(
-    {
-      foo: schema.string({ defaultValue: 'test' }),
-    },
-    {},
-    false
+    { foo: schema.string({ defaultValue: 'test' }) },
+    { allowUnknowns: false }
   );
   expect(() =>
     type.validate({
