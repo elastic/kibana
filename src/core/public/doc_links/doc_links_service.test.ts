@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { DocLinksService } from './doc_links_service';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
-/*
-  WARNING: The links in this file are validated during the docs build. This is accomplished with some regex magic that
-  looks for these particular constants. As a result, we should not add new constants or change the existing ones.
-  If you absolutely must make a change, talk to Clinton Gormley first so he can update his Perl scripts.
- */
-export const DOC_LINK_VERSION = npStart.core.docLinks.DOC_LINK_VERSION;
-export const ELASTIC_WEBSITE_URL = npStart.core.docLinks.ELASTIC_WEBSITE_URL;
-
-export const documentationLinks = npStart.core.docLinks.links;
+describe('DocLinksService#start()', () => {
+  it('templates the doc links with the branch information from injectedMetadata', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
+    const service = new DocLinksService();
+    const start = service.start({ injectedMetadata });
+    expect(start.DOC_LINK_VERSION).toEqual('test-branch');
+    expect(start.links.kibana).toEqual(
+      'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
+    );
+  });
+});
