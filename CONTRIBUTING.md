@@ -173,9 +173,9 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-### Running Elasticsearch
+### Running Elasticsearch Locally
 
-There are a few options when it comes to running Elasticsearch:
+There are a few options when it comes to running Elasticsearch locally:
 
 #### Nightly snapshot (recommended)
 
@@ -213,6 +213,26 @@ node scripts/makelogs --auth <username>:<password>
 > The default username and password combination are `elastic:changeme`
 
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
+### Running Elasticsearch Remotely
+
+You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (**Elasticians: you do! Check with your team about where to find credentials**)
+
+You'll need to [create a `kibana.dev.yml`](#customizing-configkibanadevyml) and add the following to it:
+
+```
+elasticsearch.hosts:
+  - {{ url }}
+elasticsearch.username: {{ username }}
+elasticsearch.password: {{ password }}
+elasticsearch.ssl.verificationMode: none
+```
+
+If many other users will be interacting with your remote cluster, you'll want to add the following to avoid causing conflicts:
+
+```
+kibana.index: '.{YourGitHubHandle}-kibana'
+xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
+```
 
 ### Running Kibana
 

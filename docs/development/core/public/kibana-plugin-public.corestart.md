@@ -22,4 +22,5 @@ export interface CoreStart
 |  [i18n](./kibana-plugin-public.corestart.i18n.md) | <code>I18nStart</code> | [I18nStart](./kibana-plugin-public.i18nstart.md) |
 |  [notifications](./kibana-plugin-public.corestart.notifications.md) | <code>NotificationsStart</code> | [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |
 |  [overlays](./kibana-plugin-public.corestart.overlays.md) | <code>OverlayStart</code> | [OverlayStart](./kibana-plugin-public.overlaystart.md) |
+|  [uiSettings](./kibana-plugin-public.corestart.uisettings.md) | <code>UiSettingsStart</code> | [UiSettingsStart](./kibana-plugin-public.uisettingsstart.md) |
 
