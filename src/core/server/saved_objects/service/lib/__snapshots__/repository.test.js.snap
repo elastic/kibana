@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be a string 1`] = `"namespace is required, and must be a string"`;
+exports[`SavedObjectsRepository #bulkCreate doesn't support namespaces which aren't undefined or strings 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo-namespace))"`;
 
-exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be defined 1`] = `"namespace is required, and must be a string"`;
+exports[`SavedObjectsRepository #bulkGet doesn't support namespaces which aren't undefined or strings 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo))"`;
+
+exports[`SavedObjectsRepository #create doesn't support namespaces which aren't undefined or strings 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo-namespace))"`;
+
+exports[`SavedObjectsRepository #delete doesn't support namespaces which aren't undefined or strings 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo-namespace))"`;
+
+exports[`SavedObjectsRepository #deleteByNamespace doesn't support Symbol namespaces 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(namespace-1))"`;
+
+exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be a string 1`] = `"Expected namespace to be either a string or undefined. Found object (namespace-1,namespace-2)"`;
+
+exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be defined 1`] = `"namespace is required"`;
+
+exports[`SavedObjectsRepository #find doesn't support namespaces which aren't undefined or strings 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo))"`;
+
+exports[`SavedObjectsRepository #get doesn't support Symbol namespaces 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo-namespace))"`;
+
+exports[`SavedObjectsRepository #incrementCounter doesn't supports namespaces which aren't undefined or strings 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo-namespace))"`;
+
+exports[`SavedObjectsRepository #update doesn't support namespaces which aren't undefined or strings 1`] = `"Expected namespace to be either a string or undefined. Found symbol (Symbol(foo-namespace))"`;

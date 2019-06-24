@@ -42,6 +42,7 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
+import { SavedObjectsNamespace } from './namespace';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -145,6 +146,8 @@ export class SavedObjectsRepository {
   ): Promise<SavedObject<T>> {
     const { id, migrationVersion, overwrite, namespace, references } = options;
 
+    this.assertValidNamespace(namespace);
+
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
@@ -200,6 +203,9 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { namespace, overwrite = false } = options;
+
+    this.assertValidNamespace(namespace);
+
     const time = this._getCurrentTime();
     const bulkCreateParams: object[] = [];
 
@@ -314,6 +320,8 @@ export class SavedObjectsRepository {
 
     const { namespace } = options;
 
+    this.assertValidNamespace(namespace);
+
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
@@ -345,9 +353,11 @@ export class SavedObjectsRepository {
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
   async deleteByNamespace(namespace: string): Promise<any> {
-    if (!namespace || typeof namespace !== 'string') {
-      throw new TypeError(`namespace is required, and must be a string`);
+    if (!namespace) {
+      throw new TypeError(`namespace is required`);
     }
+
+    this.assertValidNamespace(namespace);
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
@@ -421,9 +431,7 @@ export class SavedObjectsRepository {
       throw new TypeError('options.fields must be an array');
     }
 
-    if (typeof namespace === 'symbol') {
-      throw new TypeError('options.namespace must not be a Symbol');
-    }
+    this.assertValidNamespace(namespace);
 
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
@@ -487,6 +495,8 @@ export class SavedObjectsRepository {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { namespace } = options;
+
+    this.assertValidNamespace(namespace);
 
     if (objects.length === 0) {
       return { saved_objects: [] };
@@ -564,6 +574,8 @@ export class SavedObjectsRepository {
 
     const { namespace } = options;
 
+    this.assertValidNamespace(namespace);
+
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
@@ -612,6 +624,8 @@ export class SavedObjectsRepository {
     }
 
     const { version, namespace, references = [] } = options;
+
+    this.assertValidNamespace(namespace);
 
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
@@ -671,6 +685,8 @@ export class SavedObjectsRepository {
     }
 
     const { migrationVersion, namespace } = options;
+
+    this.assertValidNamespace(namespace);
 
     const time = this._getCurrentTime();
 
@@ -771,5 +787,16 @@ export class SavedObjectsRepository {
   private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+
+  private assertValidNamespace(namespace: SavedObjectsNamespace) {
+    const typeofNamespace = typeof namespace;
+    if (typeofNamespace !== 'undefined' && typeofNamespace !== 'string') {
+      throw new TypeError(
+        `Expected namespace to be either a string or undefined. Found ${typeofNamespace} (${String(
+          namespace
+        )})`
+      );
+    }
   }
 }

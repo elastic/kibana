@@ -549,7 +549,7 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
+    it(`doesn't support namespaces which aren't undefined or strings`, async () => {
       expect(savedObjectsRepository.create(
         'index-pattern',
         {
@@ -1006,7 +1006,7 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
+    it(`doesn't support namespaces which aren't undefined or strings`, async () => {
       expect(savedObjectsRepository.bulkCreate(
         [{ type: 'globaltype', id: 'one', attributes: { title: 'Test One' } }],
         {
@@ -1094,7 +1094,7 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
+    it(`doesn't support namespaces which aren't undefined or strings`, async () => {
       expect(savedObjectsRepository.delete('globaltype', 'logstash-*', {
         namespace: Symbol('foo-namespace'),
       })).rejects.toThrowErrorMatchingSnapshot();
@@ -1321,7 +1321,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster.mock.calls[0][1]).toHaveProperty('rest_total_hits_as_int', true);
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
+    it(`doesn't support namespaces which aren't undefined or strings`, async () => {
       expect(savedObjectsRepository.find({ type: 'foo', namespace: Symbol('foo') }))
         .rejects.toThrowErrorMatchingSnapshot();
     });
@@ -1694,7 +1694,7 @@ describe('SavedObjectsRepository', () => {
       ]);
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
+    it(`doesn't support namespaces which aren't undefined or strings`, async () => {
       expect(savedObjectsRepository.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'invalidtype' },
@@ -1917,7 +1917,7 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
+    it(`doesn't support namespaces which aren't undefined or strings`, async () => {
       expect(savedObjectsRepository.update(
         'index-pattern',
         'foo',
@@ -2133,7 +2133,7 @@ describe('SavedObjectsRepository', () => {
       ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
+    it(`doesn't supports namespaces which aren't undefined or strings`, async () => {
       expect(
         savedObjectsRepository.incrementCounter('globaltype', 'foo', 'counter', {
           namespace: Symbol('foo-namespace'),
