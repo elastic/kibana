@@ -23,7 +23,6 @@ import { AggConfig } from '../../vis';
 
 function OrderAggParamEditor({
   agg,
-  config,
   value,
   responseValueAggs,
   setValue,
@@ -65,7 +64,6 @@ function OrderAggParamEditor({
     <DefaultEditorAggParams
       agg={value}
       groupName="metrics"
-      config={config}
       className="visEditorAgg__subAgg"
       formIsTouched={subAggParams.formIsTouched}
       indexPattern={agg.getIndexPattern()}

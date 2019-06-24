@@ -26,7 +26,6 @@ uiModules
   .directive('visEditorAggParams', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
     ['agg', { watchDepth: 'reference' }],
     ['aggParams', { watchDepth: 'collection' }],
-    ['config', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
     ['responseValueAggs', { watchDepth: 'collection' }],
     ['state', { watchDepth: 'reference' }],

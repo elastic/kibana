@@ -26,7 +26,6 @@ import { AggConfig } from '../../vis';
 function SubMetricParamEditor({
   agg,
   aggParam,
-  config,
   value,
   responseValueAggs,
   setValue,
@@ -70,7 +69,6 @@ function SubMetricParamEditor({
       <DefaultEditorAggParams
         agg={agg.params[type]}
         groupName={aggGroup}
-        config={config}
         className="visEditorAgg__subAgg"
         formIsTouched={subAggParams.formIsTouched}
         indexPattern={agg.getIndexPattern()}

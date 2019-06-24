@@ -32,7 +32,6 @@ import { SubAggParamsProp } from './default_editor_agg_params';
 export interface AggParamCommonProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
-  config: any;
   editorConfig: EditorConfig;
   indexedFields?: FieldParamType[];
   showValidation: boolean;

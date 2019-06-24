@@ -31,7 +31,6 @@ import { AggTypeState, AggParamsState } from './default_editor_agg_params_state'
 
 interface ParamInstanceBase {
   agg: AggConfig;
-  config: any;
   editorConfig: EditorConfig;
   responseValueAggs: AggConfig[] | null;
   state: VisState;
@@ -46,7 +45,7 @@ export interface ParamInstance extends ParamInstanceBase {
 }
 
 function getAggParamsToRender(
-  { agg, config, editorConfig, responseValueAggs, state }: ParamInstanceBase,
+  { agg, editorConfig, responseValueAggs, state }: ParamInstanceBase,
   vis: Vis
 ) {
   const params = {
@@ -90,7 +89,6 @@ function getAggParamsToRender(
       params[type].push({
         agg,
         aggParam: param,
-        config,
         editorConfig,
         indexedFields,
         paramEditor: param.editorComponent,

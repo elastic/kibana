@@ -61,7 +61,6 @@ interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   aggIndex?: number;
   aggIsTooLow?: boolean;
   className?: string;
-  config: any;
   groupName: string;
   indexPattern: IndexPattern;
   responseValueAggs: AggConfig[] | null;
@@ -75,7 +74,6 @@ function DefaultEditorAggParams({
   aggIndex = 0,
   aggIsTooLow = false,
   className,
-  config,
   groupName,
   formIsTouched,
   indexPattern,
@@ -95,7 +93,7 @@ function DefaultEditorAggParams({
     indexPattern,
     agg
   );
-  const params = getAggParamsToRender({ agg, config, editorConfig, responseValueAggs, state }, vis);
+  const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state }, vis);
   const allParams = [...params.basic, ...params.advanced];
   const [aggParams, onChangeAggParams] = useReducer(
     aggParamsReducer,
