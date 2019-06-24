@@ -20,7 +20,7 @@
 import { Transform } from 'stream';
 
 import { get, once } from 'lodash';
-import { cleanKibanaIndices } from './kibana_index';
+import { deleteKibanaIndices, cleanKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
@@ -45,12 +45,17 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
     // previous indices are removed so we're starting w/ a clean slate for
     // migrations. This only needs to be done once per archive load operation.
     const cleanKibanaIndicesOnce = once(cleanKibanaIndices);
+    const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
-        if (isKibana) {
+        if (isKibana && !isPre7Mapping) {
           await cleanKibanaIndicesOnce({ client, stats, log, kibanaPluginIds });
         } else {
+          if (isKibana) {
+            await deleteKibanaIndicesOnce({ client, stats, log });
+          }
+
           await client.indices.create({
             method: 'PUT',
             index,
