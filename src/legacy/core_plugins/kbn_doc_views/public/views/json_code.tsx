@@ -16,19 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// @ts-ignore
+import { EuiCodeEditor } from '@elastic/eui';
+import React from 'react';
 
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
-import { JsonCode } from './json_code';
+export interface JsonCodeProps {
+  hit: any;
+}
 
-DocViewsRegistryProvider.register(function (reactDirective) {
-  const reactDir = reactDirective(JsonCode, ['hit']);
-  //required, else the react component won't get any of the assigned scope props,
-  reactDir.scope = {
-    hit: '=',
-  };
-  return {
-    title: 'JSON',
-    order: 20,
-    directive: reactDir,
-  };
-});
+export function JsonCode(props: JsonCodeProps) {
+  return (
+    <div className="dshPanel__error panel-content">
+      <EuiCodeEditor
+        id="json-ace"
+        value={JSON.stringify(props.hit, null, 2)}
+        mode="json"
+        isReadOnly
+        aria-label="Read only json view of elasticsearch document hit"
+        width="100%"
+        advanced={{
+          highlightActiveLine: false,
+        }}
+        rendererOptions={{
+          showPrintMargin: false,
+          maxLines: 4294967296,
+        }}
+      />
+    </div>
+  );
+}
