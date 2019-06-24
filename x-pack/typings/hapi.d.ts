@@ -26,6 +26,6 @@ declare module 'hapi' {
     encrypted_saved_objects?: EncryptedSavedObjectsPlugin;
     actions?: ActionsPlugin;
     alerting?: AlertingPlugin;
-    taskManager?: TaskManagerContract;
+    task_manager?: TaskManagerContract;
   }
 }

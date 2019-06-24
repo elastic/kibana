@@ -48,7 +48,7 @@ export function init(server: Legacy.Server) {
     };
   }
 
-  const taskManager = server.plugins.taskManager!;
+  const taskManager = server.plugins.task_manager!;
   const actionTypeRegistry = new ActionTypeRegistry({
     getServices,
     taskManager: taskManager!,

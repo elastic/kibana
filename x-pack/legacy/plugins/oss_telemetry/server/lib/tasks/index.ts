@@ -9,7 +9,7 @@ import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_TELEMETRY_TASK_NUM_WORKERS } from '.
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 
 export function registerTasks(server: HapiServer) {
-  const taskManager = server.plugins.taskManager;
+  const taskManager = server.plugins.task_manager;
 
   taskManager.registerTaskDefinitions({
     [VIS_TELEMETRY_TASK]: {
@@ -26,7 +26,7 @@ export function registerTasks(server: HapiServer) {
 }
 
 export function scheduleTasks(server: HapiServer) {
-  const taskManager = server.plugins.taskManager;
+  const taskManager = server.plugins.task_manager;
   const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
   kbnServer.afterPluginsInit(async () => {

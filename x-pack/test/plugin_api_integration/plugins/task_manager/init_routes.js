@@ -7,7 +7,7 @@
 import Joi from 'joi';
 
 export function initRoutes(server) {
-  const taskManager = server.plugins.taskManager;
+  const taskManager = server.plugins.task_manager;
 
   server.route({
     path: '/api/sample_tasks',

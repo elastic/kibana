@@ -52,7 +52,8 @@ export function taskManager(kibana: any) {
       const { plugins } = createShim(server);
       const config = server.config();
       const services = {
-        log: (msg: any) => server.log(msg),
+        log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) =>
+          server.log(tags, data, timestamp),
         elasticsearch: plugins.elasticsearch,
       };
       const taskManagerInstance = new TaskManager(
