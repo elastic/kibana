@@ -5,7 +5,23 @@
         <div data-transclude-slots>
           <!-- Search. -->
           <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
-            <query-bar
+            <search-bar
+              query="query"
+              app-name="'maps'"
+              screen-title="'maps'"
+              on-query-submit="updateQueryAndDispatch"
+              index-patterns="indexPatterns"
+              filters="filters"
+              on-filters-updated="onFiltersUpdated"
+              show-filter-bar="showFilterBar()"
+              show-date-picker="showDatePicker"
+              date-range-from="time.from"
+              date-range-to="time.to"
+              is-refresh-paused="refreshConfig.isPaused"
+              refresh-interval="refreshConfig.interval"
+              on-refresh-change="onRefreshChange"
+            ></search-bar>
+            <!-- <query-bar
               query="query"
               app-name="'maps'"
               on-submit="updateQueryAndDispatch"
@@ -16,7 +32,7 @@
               is-refresh-paused="refreshConfig.isPaused"
               refresh-interval="refreshConfig.interval"
               on-refresh-change="onRefreshChange"
-            ></query-bar>
+            ></query-bar> -->
 
             <div class="eui-hideFor--xs eui-hideFor--s">
               <div class="euiSpacer euiSpacer--s"></div>

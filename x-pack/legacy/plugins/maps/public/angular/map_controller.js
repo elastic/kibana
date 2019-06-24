@@ -100,6 +100,20 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
   });
+  /*
+    Saved Queries required moving the query bar state caching to the search bar. Using the search bar instead of the query bar in Maps requires obscuring the filter functionality within the app.
+    The following is a hack, implemented to enable use of the search bar instead of the query bar.
+  */
+  $scope.filters = [];
+  $scope.onFiltersUpdated = function () {
+    return;
+  };
+  $scope.showFilterBar = function () {
+    return false;
+  };
+
+  /* END HACK */
+
   $scope.refreshConfig = getInitialRefreshConfig({
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
