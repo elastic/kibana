@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   SingleMetricJobCreator,
@@ -15,8 +14,9 @@ import { Results, ModelItem, Anomaly } from '../../../../../common/results_loade
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { Field, Aggregation, AggFieldPair } from '../../../../../../../../common/types/fields';
+import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AnomalyChart } from '../../../charts/anomaly_chart';
+import { JobProgress } from '../job_progress';
 
 interface Props {
   isActive: boolean;
@@ -40,7 +40,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   }
   const jobCreator = jc as SingleMetricJobCreator;
 
-  const { fields, aggs } = newJobCapsService;
+  const { fields } = newJobCapsService;
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
   const [aggFieldPair, setAggFieldPair] = useState<AggFieldPair | null>(null);
   const [lineChartsData, setLineChartData] = useState<LineChartData>([]);
@@ -132,30 +132,29 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
             removeOptions={[]}
           />
           {lineChartsData[DTR_IDX] !== undefined && (
-            <Fragment>
-              <AnomalyChart
-                lineChartData={lineChartsData[DTR_IDX]}
-                modelData={modelData}
-                anomalyData={anomalyData}
-                progress={progress}
-                height="300px"
-                width="100%"
-              />
-            </Fragment>
+            <AnomalyChart
+              lineChartData={lineChartsData[DTR_IDX]}
+              modelData={modelData}
+              anomalyData={anomalyData}
+              height="300px"
+              width="100%"
+            />
           )}
         </Fragment>
       )}
       {isActive === false && (
         <Fragment>
           {lineChartsData[DTR_IDX] !== undefined && (
-            <AnomalyChart
-              lineChartData={lineChartsData[DTR_IDX]}
-              modelData={modelData}
-              anomalyData={anomalyData}
-              progress={progress}
-              height="300px"
-              width="100%"
-            />
+            <Fragment>
+              <AnomalyChart
+                lineChartData={lineChartsData[DTR_IDX]}
+                modelData={modelData}
+                anomalyData={anomalyData}
+                height="300px"
+                width="100%"
+              />
+              <JobProgress progress={progress} />
+            </Fragment>
           )}
         </Fragment>
       )}

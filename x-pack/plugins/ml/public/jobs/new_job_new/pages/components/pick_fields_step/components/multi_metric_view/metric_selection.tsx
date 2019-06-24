@@ -5,28 +5,19 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-import {
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiButton,
-  EuiPanel,
-  EuiComboBoxOptionProps,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
-import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
+import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { Field, Aggregation, AggFieldPair } from '../../../../../../../../common/types/fields';
+import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AnomalyChart } from '../../../charts/anomaly_chart';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { DetectorTitle } from '../detector_title';
+import { JobProgress } from '../job_progress';
 
 interface Props {
   isActive: boolean;
@@ -178,7 +169,6 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
                         lineChartData={lineChartsData[i]}
                         modelData={modelData[i]}
                         anomalyData={anomalyData[i]}
-                        progress={progress}
                         height={chartSettings.height}
                         width={chartSettings.width}
                       />
@@ -200,30 +190,32 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       {isActive === false && (
         <Fragment>
           {lineChartsData && (
-            <EuiFlexGrid columns={chartSettings.cols as any}>
-              {aggFieldPairList.map((af, i) => (
-                <EuiFlexItem key={i}>
-                  {lineChartsData[i] !== undefined && (
-                    <Fragment>
-                      <DetectorTitle
-                        index={i}
-                        agg={aggFieldPairList[i].agg}
-                        field={aggFieldPairList[i].field}
-                        splitField={splitField}
-                      />
-                      <AnomalyChart
-                        lineChartData={lineChartsData[i]}
-                        modelData={modelData[i]}
-                        anomalyData={anomalyData[i]}
-                        progress={progress}
-                        height={chartSettings.height}
-                        width={chartSettings.width}
-                      />
-                    </Fragment>
-                  )}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
+            <Fragment>
+              <EuiFlexGrid columns={chartSettings.cols as any}>
+                {aggFieldPairList.map((af, i) => (
+                  <EuiFlexItem key={i}>
+                    {lineChartsData[i] !== undefined && (
+                      <Fragment>
+                        <DetectorTitle
+                          index={i}
+                          agg={aggFieldPairList[i].agg}
+                          field={aggFieldPairList[i].field}
+                          splitField={splitField}
+                        />
+                        <AnomalyChart
+                          lineChartData={lineChartsData[i]}
+                          modelData={modelData[i]}
+                          anomalyData={anomalyData[i]}
+                          height={chartSettings.height}
+                          width={chartSettings.width}
+                        />
+                      </Fragment>
+                    )}
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGrid>
+              <JobProgress progress={progress} />
+            </Fragment>
           )}
         </Fragment>
       )}

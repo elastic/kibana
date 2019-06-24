@@ -5,7 +5,6 @@
  */
 
 import React, { FC } from 'react';
-import { EuiProgress } from '@elastic/eui';
 import { Chart, Settings, TooltipType } from '@elastic/charts';
 import { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from './anomalies';
@@ -18,7 +17,6 @@ interface Props {
   lineChartData: any[];
   modelData: ModelItem[];
   anomalyData: Anomaly[];
-  progress: number;
   height: string;
   width: string;
 }
@@ -27,7 +25,6 @@ export const AnomalyChart: FC<Props> = ({
   lineChartData,
   modelData,
   anomalyData,
-  progress,
   height,
   width,
 }) => {
@@ -42,9 +39,6 @@ export const AnomalyChart: FC<Props> = ({
         <ModelBounds modelData={modelData} />
         <Line lineChartData={lineChartData} />
       </Chart>
-      {progress > 0 && progress < 100 && (
-        <EuiProgress value={progress} color="primary" size="xs" max={100} />
-      )}
     </div>
   );
 };
