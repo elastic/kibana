@@ -6,6 +6,7 @@
 
 //import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
+import './timeseries_chart.test.mocks';
 import moment from 'moment-timezone';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
