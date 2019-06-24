@@ -95,8 +95,7 @@ export class UpdateSourceEditor extends Component {
       }
     }
   }
-
-  _onTooltipPropertiesSelect = (propertyNames) => {
+  _onTooltipPropertiesChange = (propertyNames) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
@@ -172,7 +171,7 @@ export class UpdateSourceEditor extends Component {
       <Fragment>
         <TooltipSelector
           tooltipProperties={this.props.tooltipProperties}
-          onChange={this._onTooltipPropertiesSelect}
+          onChange={this._onTooltipPropertiesChange}
           fields={this.state.fields}
         />
 
@@ -199,7 +198,7 @@ export class UpdateSourceEditor extends Component {
             })
             }
             value={this.props.tooltipProperties}
-            onChange={this._onFilterByMapBoundsChange}
+            onChange={this._onTooltipPropertiesChange}
             fields={this.state.tooltipFields}
           />
         </EuiFormRow>
