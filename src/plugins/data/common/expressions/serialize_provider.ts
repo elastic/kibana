@@ -18,8 +18,15 @@
  */
 
 import { get, identity } from 'lodash';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getType } = require('@kbn/interpreter/src/common');
+
+export function getType(node: any) {
+  if (node == null) return 'null';
+  if (typeof node === 'object') {
+    if (!node.type) throw new Error('Objects must have a type property');
+    return node.type;
+  }
+  return typeof node;
+}
 
 export function serializeProvider(types: any) {
   return {

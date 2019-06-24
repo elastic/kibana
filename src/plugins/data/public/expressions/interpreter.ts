@@ -24,7 +24,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { clone, get, mapValues, includes } from 'lodash';
+import { clone, mapValues, includes } from 'lodash';
+import { Type } from '../../common/expressions/interpreter';
 
 export class Registry<ItemSpec, Item> {
   _prop: string;
@@ -149,57 +150,6 @@ export function Fn(this: any, config: any) {
   this.accepts = (type: any) => {
     if (!this.context.types) return true; // If you don't tell us about context, we'll assume you don't care what you get
     return includes(this.context.types, type); // Otherwise, check it
-  };
-}
-
-export function getType(node: any) {
-  if (node == null) return 'null';
-  if (typeof node === 'object') {
-    if (!node.type) throw new Error('Objects must have a type property');
-    return node.type;
-  }
-  return typeof node;
-}
-
-function Type(this: any, config: any) {
-  // Required
-  this.name = config.name;
-
-  // Optional
-  this.help = config.help || ''; // A short help text
-
-  // Optional type validation, useful for checking function output
-  this.validate = config.validate || function validate() {};
-
-  // Optional
-  this.create = config.create;
-
-  // Optional serialization (used when passing context around client/server)
-  this.serialize = config.serialize;
-  this.deserialize = config.deserialize;
-
-  const getToFn = (type: any) => get(config, ['to', type]) || get(config, ['to', '*']);
-  const getFromFn = (type: any) => get(config, ['from', type]) || get(config, ['from', '*']);
-
-  this.castsTo = (type: any) => typeof getToFn(type) === 'function';
-  this.castsFrom = (type: any) => typeof getFromFn(type) === 'function';
-
-  this.to = (node: any, toTypeName: any, types: any) => {
-    const typeName = getType(node);
-    if (typeName !== this.name) {
-      throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
-    } else if (!this.castsTo(toTypeName)) {
-      throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
-    }
-
-    return (getToFn(toTypeName) as any)(node, types);
-  };
-
-  this.from = (node: any, types: any) => {
-    const typeName = getType(node);
-    if (!this.castsFrom(typeName)) throw new Error(`Can not cast '${this.name}' from ${typeName}`);
-
-    return (getFromFn(typeName) as any)(node, types);
   };
 }
 

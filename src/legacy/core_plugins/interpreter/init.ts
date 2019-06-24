@@ -17,22 +17,25 @@
  * under the License.
  */
 
-// @ts-ignore
-import { register, registryFactory } from '@kbn/interpreter/common';
+/* eslint-disable max-classes-per-file */
 
 // @ts-ignore
-import { Registry } from '@kbn/interpreter/common';
+import { register, registryFactory, Registry } from '@kbn/interpreter/common';
 
 // @ts-ignore
 import { routes } from './server/routes';
 
+// @ts-ignore
+import { typeSpecs as types } from '../../../plugins/data/common/expressions/expression_types';
+
+import { Type } from './common';
 import { Legacy } from '../../../../kibana';
 
-// @ts-ignore
-import { typeSpecs as types } from '../../../plugins/data/common/interpreter/expression_types';
-
-// @ts-ignore
-import { TypesRegistry } from './common';
+export class TypesRegistry extends Registry<any, any> {
+  wrapper(obj: any) {
+    return new (Type as any)(obj);
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Fn } = require('@kbn/interpreter/common');

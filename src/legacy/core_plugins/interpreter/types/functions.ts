@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../plugins/data/common/interpreter/types/functions';
+export * from '../../../../plugins/data/common/expressions/types/functions';

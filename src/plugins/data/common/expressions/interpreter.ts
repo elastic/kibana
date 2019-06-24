@@ -17,20 +17,18 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
 import { get } from 'lodash';
-import { Registry } from '@kbn/interpreter/src/common';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Fn, getType } = require('@kbn/interpreter/src/common');
-
-export class FunctionsRegistry extends Registry<any, any> {
-  wrapper(obj: any) {
-    return new Fn(obj);
+function getType(node: any) {
+  if (node == null) return 'null';
+  if (typeof node === 'object') {
+    if (!node.type) throw new Error('Objects must have a type property');
+    return node.type;
   }
+  return typeof node;
 }
 
-function Type(this: any, config: any) {
+export function Type(this: any, config: any) {
   // Required
   this.name = config.name;
 
@@ -70,10 +68,4 @@ function Type(this: any, config: any) {
 
     return (getFromFn(typeName) as any)(node, types);
   };
-}
-
-export class TypesRegistry extends Registry<any, any> {
-  wrapper(obj: any) {
-    return new (Type as any)(obj);
-  }
 }

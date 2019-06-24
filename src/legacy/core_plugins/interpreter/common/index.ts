@@ -34,10 +34,10 @@ export {
   PointSeriesColumnName,
   Render,
   Style,
-} from '../../../../plugins/data/common/interpreter/expression_types';
+} from '../../../../plugins/data/common/expressions/expression_types';
 export const API_ROUTE = '/api/interpreter';
-export * from '../../../../plugins/data/common/interpreter/serialize_provider';
-export { TypesRegistry } from '../../../../plugins/data/common/interpreter/registries';
+export * from '../../../../plugins/data/common/expressions/serialize_provider';
+export { Type } from '../../../../plugins/data/common/expressions/interpreter';
 export {
   interpreterProvider,
-} from '../../../../plugins/data/common/interpreter/interpreter_provider';
+} from '../../../../plugins/data/common/expressions/interpreter_provider';
