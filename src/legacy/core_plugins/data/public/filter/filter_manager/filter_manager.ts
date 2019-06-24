@@ -36,49 +36,24 @@ import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
 import { PartitionedFilters } from './partitioned_filters';
-import { FilterStateManager } from './filter_state_manager';
 
-// const COMPARATOR_OPTIONS = { negate: true, disabled: true };
+import { IndexPatterns } from '../../index_patterns';
 
 export class FilterManager {
-  filterState: FilterStateManager;
-  indexPatterns: any;
-  filters: Filter[] = [];
-  updated$: Subject<any> = new Subject();
-  fetch$: Subject<any> = new Subject();
-  updateSubscription$: Subscription | undefined;
+  private indexPatterns: IndexPatterns;
+  private filters: Filter[] = [];
+  private updated$: Subject<any> = new Subject();
+  private fetch$: Subject<any> = new Subject();
+  private updateSubscription$: Subscription | undefined;
 
-  constructor(indexPatterns: any, filterState: FilterStateManager) {
+  constructor(indexPatterns: IndexPatterns) {
     this.indexPatterns = indexPatterns;
-    this.filterState = filterState;
-
-    this.watchFilterState();
   }
 
   destroy() {
     if (this.updateSubscription$) {
       this.updateSubscription$.unsubscribe();
     }
-  }
-
-  private watchFilterState() {
-    this.updateSubscription$ = this.filterState
-      .getStateUpdated$()
-      .subscribe((partitionedFilters: PartitionedFilters) => {
-        if (!this.haveFiltersChanged(partitionedFilters)) return;
-
-        // ensure we don't mutate the filters passed in
-        const newPartitionedFilters = _.cloneDeep(partitionedFilters);
-
-        FilterManager.setFiltersStore(newPartitionedFilters.appFilters, FilterStateStore.APP_STATE);
-        FilterManager.setFiltersStore(
-          newPartitionedFilters.globalFilters,
-          FilterStateStore.GLOBAL_STATE
-        );
-
-        const newFilters = this.mergeIncomingFilters(newPartitionedFilters);
-        this.handleStateUpdate(newFilters);
-      });
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
@@ -102,13 +77,6 @@ export class FilterManager {
     return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
   }
 
-  private haveFiltersChanged(partitionedFilters: PartitionedFilters) {
-    return (
-      !_.isEqual(partitionedFilters.appFilters || [], this.getAppFilters()) ||
-      !_.isEqual(partitionedFilters.globalFilters || [], this.getGlobalFilters())
-    );
-  }
-
   private filtersUpdated(newFilters: Filter[]): boolean {
     return !_.isEqual(this.filters, newFilters);
   }
@@ -119,15 +87,6 @@ export class FilterManager {
       globalFilters,
       appFilters,
     };
-  }
-
-  private static setFiltersStore(filters: Filter[], store: FilterStateStore) {
-    _.map(filters, (filter: Filter) => {
-      // Override status only for filters that didn't have state in the first place.
-      if (filter.$state === undefined) {
-        filter.$state = { store };
-      }
-    });
   }
 
   private handleStateUpdate(newFilters: Filter[]) {
@@ -149,7 +108,6 @@ export class FilterManager {
 
     this.filters = newFilters;
     if (filtersUpdated) {
-      this.filterState.updateAppState(FilterManager.partitionFilters(newFilters));
       this.updated$.next();
       // Fired together with updated$, because historically (~4 years ago) there was a fetch optimization, that didn't call fetch for very specific cases.
       // This optimization seems irrelevant at the moment, but I didn't want to change the logic of all consumers.
@@ -241,5 +199,14 @@ export class FilterManager {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
     if (timeFilter) changeTimeFilter(timeFilter);
     return this.addFilters(filters.filter(filter => filter !== timeFilter));
+  }
+
+  public static setFiltersStore(filters: Filter[], store: FilterStateStore) {
+    _.map(filters, (filter: Filter) => {
+      // Override status only for filters that didn't have state in the first place.
+      if (filter.$state === undefined) {
+        filter.$state = { store };
+      }
+    });
   }
 }

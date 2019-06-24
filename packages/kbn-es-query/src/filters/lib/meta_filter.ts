@@ -43,8 +43,6 @@ export interface Filter {
   query?: object;
 }
 
-export type Filters = Filter[];
-
 export interface LatLon {
   lat: number;
   lon: number;

@@ -19,6 +19,10 @@
 
 export class StubIndexPatterns {
   async get(index: any) {
-    return;
+    return {
+      fields: {
+        byName: {},
+      },
+    };
   }
 }

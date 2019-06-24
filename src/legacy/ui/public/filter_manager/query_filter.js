@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { FilterManager, FilterStateManager } from 'plugins/data';
+import { FilterStateManager } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 
-export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState, globalState) {
-  const filterStateManager = new FilterStateManager(globalState, getAppState);
-  const filterManager = new FilterManager(indexPatterns, filterStateManager);
+export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
+  const filterManager = data.filter.filterManager;
+  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
   const queryFilter = {};
   queryFilter.getUpdates$ = filterManager.getUpdates$.bind(filterManager);

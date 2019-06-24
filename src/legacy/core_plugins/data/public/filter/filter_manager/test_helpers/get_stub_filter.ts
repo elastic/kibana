@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter, RangeFilter, FilterStateStore } from '@kbn/es-query';
 
 export function getFilter(
   store: FilterStateStore,
@@ -31,6 +31,7 @@ export function getFilter(
       store,
     },
     meta: {
+      index: 'logstash-*',
       disabled,
       negate: negated,
       alias: null,
@@ -38,6 +39,30 @@ export function getFilter(
     query: {
       match: {
         [queryKey]: queryValue,
+      },
+    },
+  };
+}
+
+export function getRangeFilter(
+  store: FilterStateStore,
+  disabled: boolean,
+  negated: boolean
+): RangeFilter {
+  return {
+    $state: {
+      store,
+    },
+    meta: {
+      index: 'logstash-*',
+      disabled,
+      negate: negated,
+      alias: null,
+    },
+    range: {
+      time: {
+        gt: 1388559600000,
+        lt: 1388646000000,
       },
     },
   };

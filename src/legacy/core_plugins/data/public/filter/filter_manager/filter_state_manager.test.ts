@@ -19,31 +19,53 @@
 
 import sinon from 'sinon';
 
-import { FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 import { Subscription } from 'rxjs';
 import { FilterStateManager } from './filter_state_manager';
-import { PartitionedFilters } from './partitioned_filters';
 
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
+import { FilterManager } from './filter_manager';
+import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
+
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: {
+        recentlyAccessed: false,
+      },
+    },
+  },
+  npSetup: {
+    core: {
+      uiSettings: {
+        get: () => true,
+      },
+    },
+  },
+}));
 
 describe('filter_state_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
 
   let subscription: Subscription | undefined;
-  let updateListener: sinon.SinonSpy<any[], any>;
-
+  let filterManager: FilterManager;
   let filterManagerState: FilterStateManager;
 
   beforeEach(() => {
-    updateListener = sinon.stub();
     appStateStub = new StubState();
     globalStateStub = new StubState();
-    filterManagerState = new FilterStateManager(globalStateStub, () => {
-      return appStateStub;
-    });
+    const indexPatterns = new StubIndexPatterns();
+    filterManager = new FilterManager(indexPatterns);
+    filterManagerState = new FilterStateManager(
+      globalStateStub,
+      () => {
+        return appStateStub;
+      },
+      filterManager
+    );
   });
 
   afterEach(() => {
@@ -52,60 +74,51 @@ describe('filter_state_manager', () => {
     }
   });
 
-  test('should return observable', () => {
-    subscription = filterManagerState.getStateUpdated$().subscribe(updateListener);
-    expect(subscription).toBeInstanceOf(Subscription);
-  });
-
-  test('should update on app state change', done => {
-    subscription = filterManagerState
-      .getStateUpdated$()
-      .subscribe((partitionedFiltres: PartitionedFilters) => {
-        expect(partitionedFiltres.appFilters).toHaveLength(1);
-        expect(partitionedFiltres.globalFilters).toHaveLength(0);
-        done();
-      });
-    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-    appStateStub.filters.push(f1);
-  });
-
-  test('should update on global state change', done => {
-    subscription = filterManagerState
-      .getStateUpdated$()
-      .subscribe((partitionedFiltres: PartitionedFilters) => {
-        expect(partitionedFiltres.appFilters).toHaveLength(0);
-        expect(partitionedFiltres.globalFilters).toHaveLength(1);
-        done();
-      });
-    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-    globalStateStub.filters.push(f1);
-  });
-
-  test('should update state when requested', () => {
-    appStateStub.save = sinon.stub();
-    globalStateStub.save = sinon.stub();
-
-    // push a filter to global state
+  test('should update filter manager global filters', done => {
     const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
     globalStateStub.filters.push(f1);
 
-    // push a filter to app state
-    const f2 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-    appStateStub.filters.push(f2);
+    setTimeout(() => {
+      expect(filterManager.getGlobalFilters()).toHaveLength(1);
+      done();
+    }, 100);
+  });
 
-    // update state to be empty
+  test('should update filter manager app filters', done => {
+    expect(filterManager.getAppFilters()).toHaveLength(0);
 
-    filterManagerState.updateAppState({
-      globalFilters: [],
-      appFilters: [],
-    });
+    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+    appStateStub.filters.push(f1);
 
-    // expect save to be called
+    setTimeout(() => {
+      expect(filterManager.getAppFilters()).toHaveLength(1);
+      done();
+    }, 100);
+  });
+
+  test('should update URL when filter manager filters are set', async () => {
+    appStateStub.save = sinon.stub();
+    globalStateStub.save = sinon.stub();
+
+    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+
+    await filterManager.setFilters([f1, f2]);
+
     sinon.assert.calledOnce(appStateStub.save);
     sinon.assert.calledOnce(globalStateStub.save);
+  });
 
-    // expect filters to be empty
-    expect(appStateStub.filters).toHaveLength(0);
-    expect(globalStateStub.filters).toHaveLength(0);
+  test('should update URL when filter manager filters are added', async () => {
+    appStateStub.save = sinon.stub();
+    globalStateStub.save = sinon.stub();
+
+    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+
+    await filterManager.addFilters([f1, f2]);
+
+    sinon.assert.calledOnce(appStateStub.save);
+    sinon.assert.calledOnce(globalStateStub.save);
   });
 });

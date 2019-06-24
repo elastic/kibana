@@ -25,7 +25,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
 
-import { getFilter } from './test_helpers/get_stub_filter';
+import { getFilter, getRangeFilter } from './test_helpers/get_stub_filter';
 import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { StubState } from './test_helpers/stub_state';
 
@@ -43,6 +43,13 @@ jest.mock(
 );
 
 jest.mock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: {
+        recentlyAccessed: false,
+      },
+    },
+  },
   npSetup: {
     core: {
       uiSettings: {
@@ -52,7 +59,7 @@ jest.mock('ui/new_platform', () => ({
   },
 }));
 
-describe('new_filter_manager', () => {
+describe('filter_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
 
@@ -69,10 +76,14 @@ describe('new_filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManagerState = new FilterStateManager(globalStateStub, () => {
-      return appStateStub;
-    });
-    filterManager = new FilterManager(indexPatterns, filterManagerState);
+    filterManager = new FilterManager(indexPatterns);
+    filterManagerState = new FilterStateManager(
+      globalStateStub,
+      () => {
+        return appStateStub;
+      },
+      filterManager
+    );
   });
 
   afterEach(async () => {
@@ -359,6 +370,11 @@ describe('new_filter_manager', () => {
       expect(filterManager.getFilters()).toHaveLength(1);
     });
 
-    test('TODO: should set timepicker and add filters', () => {});
+    test('should set timerange and add filters', async () => {
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      const f2 = getRangeFilter(FilterStateStore.GLOBAL_STATE, false, false);
+      await filterManager.addFiltersAndChangeTimeFilter([f1, f2]);
+      expect(filterManager.getFilters()).toHaveLength(2);
+    });
   });
 });

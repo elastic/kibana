@@ -17,26 +17,35 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
-import { Observable, Subject } from 'rxjs';
 import { State } from 'ui/state_management/state';
-import { PartitionedFilters } from './partitioned_filters';
+import { FilterManager } from './filter_manager';
 
+/**
+ * FilterStateManager is responsible for watching for filter changes
+ * and synching with FilterManager, as well as syncing FilterManager changes
+ * back to the URL.
+ **/
 export class FilterStateManager {
+  filterManager: FilterManager;
   globalState: State;
   getAppState: () => State;
   prevGlobalFilters: Filter[] | undefined;
   prevAppFilters: Filter[] | undefined;
-  stateUpdated$: Subject<PartitionedFilters> = new Subject();
   interval: NodeJS.Timeout | undefined;
 
-  constructor(globalState: State, getAppState: () => State) {
+  constructor(globalState: State, getAppState: () => State, filterManager: FilterManager) {
     this.getAppState = getAppState;
     this.globalState = globalState;
+    this.filterManager = filterManager;
 
     this.watchFilterState();
+
+    this.filterManager.getUpdates$().subscribe(() => {
+      this.updateAppState();
+    });
   }
 
   destroy() {
@@ -60,14 +69,16 @@ export class FilterStateManager {
       )
         return;
 
-      this.stateUpdated$.next({
-        appFilters: appState.filters || [],
-        globalFilters: this.globalState.filters || [],
-      });
+      const newGlobalFilters = _.cloneDeep(this.globalState.filters);
+      const newAppFilters = _.cloneDeep(appState.filters);
+      FilterManager.setFiltersStore(newAppFilters, FilterStateStore.APP_STATE);
+      FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE);
+
+      this.filterManager.setFilters(newGlobalFilters.concat(newAppFilters));
 
       // store new filter changes
-      this.prevGlobalFilters = _.cloneDeep(this.globalState.filters);
-      this.prevAppFilters = _.cloneDeep(appState.filters);
+      this.prevGlobalFilters = newGlobalFilters;
+      this.prevAppFilters = newAppFilters;
     }, 10);
   }
 
@@ -77,12 +88,9 @@ export class FilterStateManager {
     this.globalState.save();
   }
 
-  public getStateUpdated$(): Observable<PartitionedFilters> {
-    return this.stateUpdated$.asObservable();
-  }
-
-  public updateAppState(partitionedFilters: PartitionedFilters) {
+  private updateAppState() {
     // Update Angular state before saving State objects (which save it to URL)
+    const partitionedFilters = this.filterManager.getPartitionedFilters();
     const appState = this.getAppState();
     appState.filters = partitionedFilters.appFilters;
     this.globalState.filters = partitionedFilters.globalFilters;
