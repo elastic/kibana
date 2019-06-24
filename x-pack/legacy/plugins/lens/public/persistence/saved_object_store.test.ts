@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LensSavedObjectStore } from './lens_store';
+import { SavedObjectIndexStore } from './saved_object_store';
 
 describe('LensStore', () => {
   function testStore(testId?: string) {
@@ -16,7 +16,7 @@ describe('LensStore', () => {
 
     return {
       client,
-      store: new LensSavedObjectStore(client),
+      store: new SavedObjectIndexStore(client),
     };
   }
 

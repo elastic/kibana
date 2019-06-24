@@ -15,13 +15,13 @@ import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
-import { LensStore, LensDocument } from '../../persistence/lens_store';
+import { SavedObjectStore, Document } from '../../persistence/saved_object_store';
 import { save } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface EditorFrameProps {
-  doc?: LensDocument;
-  store: LensStore;
+  doc?: Document;
+  store: SavedObjectStore;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
   redirectTo: (path: string) => void;
@@ -144,7 +144,7 @@ export function EditorFrame(props: EditorFrameProps) {
                   store: props.store,
                 })
               }
-              disabled={state.saving}
+              disabled={state.saving || !state.datasource.activeId || !state.visualization.activeId}
             >
               {i18n.translate('xpack.lens.editorFrame.Save', {
                 defaultMessage: 'Save',

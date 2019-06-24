@@ -6,7 +6,7 @@
 
 import { SavedObjectAttributes } from 'target/types/server';
 
-export interface LensDocument {
+export interface Document {
   id?: string;
   type?: string;
   visualizationType: string | null;
@@ -29,24 +29,24 @@ interface SavedObectStore {
 
 const DOC_TYPE = 'lens';
 
-export interface LensDocumentSaver {
-  save: (vis: LensDocument) => Promise<{ id: string }>;
+export interface DocumentSaver {
+  save: (vis: Document) => Promise<{ id: string }>;
 }
 
-export interface LensDocumentLoader {
-  load: (id: string) => Promise<LensDocument>;
+export interface DocumentLoader {
+  load: (id: string) => Promise<Document>;
 }
 
-export type LensStore = LensDocumentLoader & LensDocumentSaver;
+export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
-export class LensSavedObjectStore {
+export class SavedObjectIndexStore implements SavedObjectStore {
   private client: SavedObectStore;
 
   constructor(client: SavedObectStore) {
     this.client = client;
   }
 
-  async save(vis: LensDocument) {
+  async save(vis: Document) {
     const { id, type, ...rest } = vis;
     const attributes = {
       ...rest,
@@ -62,7 +62,7 @@ export class LensSavedObjectStore {
     };
   }
 
-  async load(id: string): Promise<LensDocument> {
+  async load(id: string): Promise<Document> {
     const { type, attributes } = await this.client.get(DOC_TYPE, id);
 
     return {
@@ -70,6 +70,6 @@ export class LensSavedObjectStore {
       id,
       type,
       state: JSON.parse(((attributes as unknown) as { state: string }).state as string),
-    } as LensDocument;
+    } as Document;
   }
 }

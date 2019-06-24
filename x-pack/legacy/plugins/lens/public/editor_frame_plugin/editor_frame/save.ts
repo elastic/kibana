@@ -5,7 +5,7 @@
  */
 
 import { Action, EditorFrameState } from './state_management';
-import { LensDocument } from '../../persistence/lens_store';
+import { Document } from '../../persistence/saved_object_store';
 
 export async function save({
   datasource,
@@ -19,7 +19,7 @@ export async function save({
   dispatch: (value: Action) => void;
   redirectTo: (path: string) => void;
   state: EditorFrameState;
-  store: { save: (doc: LensDocument) => Promise<{ id: string }> };
+  store: { save: (doc: Document) => Promise<{ id: string }> };
   visualization?: { getPersistableState: (state: unknown) => unknown };
 }) {
   dispatch({ type: 'SAVING' });

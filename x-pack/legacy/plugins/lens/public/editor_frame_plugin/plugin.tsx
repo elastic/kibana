@@ -17,7 +17,7 @@ import {
 import { data } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
-import { LensSavedObjectStore } from '../persistence/lens_store';
+import { SavedObjectIndexStore } from '../persistence';
 import { InitializableComponent } from './initializable_component';
 
 export interface EditorFrameSetupPlugins {
@@ -34,7 +34,7 @@ export class EditorFramePlugin {
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
 
-    const store = new LensSavedObjectStore(chrome.getSavedObjectsClient());
+    const store = new SavedObjectIndexStore(chrome.getSavedObjectsClient());
 
     function unmount() {
       if (domElement) {

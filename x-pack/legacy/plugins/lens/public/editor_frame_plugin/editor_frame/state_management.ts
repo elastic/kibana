@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EditorFrameProps } from '../editor_frame';
-import { LensDocument } from '../../persistence/lens_store';
+import { Document } from '../../persistence/saved_object_store';
 
 export interface EditorFrameState {
   persistedId?: string;
@@ -52,7 +52,7 @@ export type Action =
     }
   | {
       type: 'VISUALIZATION_LOADED';
-      doc: LensDocument;
+      doc: Document;
     }
   | {
       type: 'SWITCH_VISUALIZATION';
