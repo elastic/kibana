@@ -17,7 +17,7 @@ The *Grid aggregation* source uses {ref}/search-aggregations-bucket-geotilegrid-
 You can symbolize grid aggregation metrics as:
 
 *Points*:: Creates a <<vector-layer, vector layer>> with a point for each gridded cell.
-The point location is the weighted centroid for all Geo-points in the gridded cell.
+The point location is the weighted centroid for all geo-points in the gridded cell.
 
 *Grid rectangles*:: Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
 
