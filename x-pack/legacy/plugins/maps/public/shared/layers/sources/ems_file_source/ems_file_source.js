@@ -130,7 +130,8 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   canFormatFeatureProperties() {
-    return true;
+    //tooltipProperties may be empty, as this was not introduced until 7.2
+    return this._descriptor.tooltipProperties && this._descriptor.tooltipProperties.length > 0;
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
