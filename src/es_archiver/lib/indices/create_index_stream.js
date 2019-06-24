@@ -26,6 +26,11 @@ import { deleteIndex } from './delete_index';
 export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
   const skipDocsFromIndices = new Set();
 
+  // If we're trying to import Kibana index docs, we need to ensure that
+  // previous indices are removed so we're starting w/ a clean slate for
+  // migrations. This only needs to be done once per archive load operation.
+  const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
+
   async function handleDoc(stream, record) {
     if (skipDocsFromIndices.has(record.value.index)) {
       return;
@@ -40,11 +45,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
     // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
     const isPre7Mapping = mappings && Object.keys(mappings).length > 0 && !mappings.properties;
     const isKibana = index.startsWith('.kibana');
-
-    // If we're trying to import Kibana index docs, we need to ensure that
-    // previous indices are removed so we're starting w/ a clean slate for
-    // migrations. This only needs to be done once per archive load operation.
-    const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
