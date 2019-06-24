@@ -106,25 +106,6 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       }),
     };
 
-    if (vislibCharts.includes(vis.type.name)) {
-      const visState = vis.getCurrentState();
-      const visConfig = visState.params;
-      const curSeriesParams = (visConfig.seriesParams || []).find(
-        (param: any) => param.data.id === agg.id
-      );
-      if (curSeriesParams) {
-        const usedValueAxis = (visConfig.valueAxes || []).find(
-          (valueAxis: any) => valueAxis.id === curSeriesParams.valueAxis
-        );
-        if (get(usedValueAxis, 'scale.mode') === 'percentage') {
-          return { id: 'percent' };
-        }
-      }
-      if (get(visConfig, 'gauge.percentageMode') === true) {
-        return { id: 'percent' };
-      }
-    }
-
     return formats[agg.type.name] ? formats[agg.type.name]() : format;
   };
 
@@ -172,10 +153,6 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
-    if (!agg.enabled) {
-      cnt++;
-      return;
-    }
     let skipMetrics = false;
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
     if (typeof schemaName === 'object') {
@@ -469,6 +446,28 @@ export const buildVislibDimensions = async (
       intervalParam.write(xAgg, output);
       dimensions.x.params.interval = output.params.interval;
     }
+  }
+  if (vislibCharts.includes(vis.type.name)) {
+    const visState = vis.getCurrentState();
+    const visConfig = visState.params;
+    const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+    dimensions.y.forEach(yDimension => {
+      const yAgg = responseAggs[yDimension.accessor];
+      const seriesParam = (visConfig.seriesParams || []).find(
+        (param: any) => param.data.id === yAgg.id
+      );
+      if (seriesParam) {
+        const usedValueAxis = (visConfig.valueAxes || []).find(
+          (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
+        );
+        if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+          yDimension.format = { id: 'percent' };
+        }
+      }
+      if (get(visConfig, 'gauge.percentageMode') === true) {
+        yDimension.format = { id: 'percent' };
+      }
+    });
   }
 
   return dimensions;
