@@ -7,9 +7,14 @@
 import _ from 'lodash';
 import React, { useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import classNames from 'classnames';
-import { IndexPatternColumn, FieldBasedIndexPatternColumn, OperationType } from '../indexpattern';
+import {
+  IndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  OperationType,
+  BaseIndexPatternColumn,
+} from '../indexpattern';
 import { hasField, sortByField } from '../state_helpers';
 
 export interface FieldSelectProps {
@@ -52,6 +57,12 @@ export function FieldSelect({
     [selectedColumn, invalidOperationType]
   );
 
+  function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
+    return invalidOperationType
+      ? col.operationType === invalidOperationType
+      : !selectedColumn || col.operationType === selectedColumn.operationType;
+  }
+
   const fieldOptions = [];
   const fieldLessColumn = filteredColumns.find(column => !hasField(column));
   if (fieldLessColumn) {
@@ -61,9 +72,9 @@ export function FieldSelect({
       }),
       value: fieldLessColumn.operationId,
       className: classNames({
-        'lnsConfigPanel__fieldOption--incompatible': invalidOperationType
-          ? fieldLessColumn.operationType !== invalidOperationType
-          : selectedColumn && fieldLessColumn.operationType !== selectedColumn.operationType,
+        'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
+          fieldLessColumn
+        ),
       }),
     });
   }
@@ -77,9 +88,7 @@ export function FieldSelect({
         .map(col => ({
           label: col.sourceField,
           value: col.operationId,
-          compatible: invalidOperationType
-            ? col.operationType === invalidOperationType
-            : !selectedColumn || col.operationType === selectedColumn.operationType,
+          compatible: isCompatibleWithCurrentOperation(col),
         }))
         .sort(({ compatible: a }, { compatible: b }) => {
           if (a && !b) {

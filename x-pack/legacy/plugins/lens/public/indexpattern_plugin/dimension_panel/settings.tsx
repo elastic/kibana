@@ -7,13 +7,13 @@
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPopover,
   EuiFlexItem,
   EuiFlexGroup,
   EuiSideNav,
   EuiCallOut,
-  EuiButton,
   EuiFormRow,
   EuiFieldText,
   EuiLink,
@@ -21,9 +21,36 @@ import {
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
-import { operationDefinitionMap, getOperations, getOperationDisplay } from '../operations';
-import { hasField, getColumnOrder, deleteColumn, changeColumn } from '../state_helpers';
+import { operationDefinitionMap, getOperationDisplay } from '../operations';
+import { hasField, deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
+
+const operationPanels = getOperationDisplay();
+
+function getOperationTypes(
+  filteredColumns: IndexPatternColumn[],
+  selectedColumn?: IndexPatternColumn
+) {
+  const columnsFromField = selectedColumn
+    ? filteredColumns.filter(col => {
+        return (
+          (!hasField(selectedColumn) && !hasField(col)) ||
+          (hasField(selectedColumn) &&
+            hasField(col) &&
+            col.sourceField === selectedColumn.sourceField)
+        );
+      })
+    : filteredColumns;
+  const possibleOperationTypes = filteredColumns.map(col => ({
+    operationType: col.operationType,
+    compatibleWithCurrentField: false,
+  }));
+  const validOperationTypes = columnsFromField.map(col => ({
+    operationType: col.operationType,
+    compatibleWithCurrentField: true,
+  }));
+  return _.uniq([...validOperationTypes, ...possibleOperationTypes], 'operationType');
+}
 
 export interface SettingsProps extends IndexPatternDimensionPanelProps {
   selectedColumn?: IndexPatternColumn;
@@ -34,83 +61,50 @@ export function Settings(props: SettingsProps) {
   const { selectedColumn, filteredColumns, state, columnId, setState } = props;
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [invalidOperationType, setInvalidOperationType] = useState<OperationType | null>(null);
+
   const ParamEditor =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType].paramEditor;
-  const possibleOperationTypes = filteredColumns.map(col => col.operationType);
-  const operations = getOperations().filter(op => possibleOperationTypes.includes(op));
-  const operationPanels = getOperationDisplay();
-  const functionsFromField = selectedColumn
-    ? filteredColumns.filter(col => {
-        return (
-          (!hasField(selectedColumn) && !hasField(col)) ||
-          (hasField(selectedColumn) &&
-            hasField(col) &&
-            col.sourceField === selectedColumn.sourceField)
-        );
-      })
-    : filteredColumns;
-
-  const supportedOperations = operations.filter(op =>
-    functionsFromField.some(col => col.operationType === op)
-  );
-
-  const unsupportedOperations = operations.filter(
-    op => !functionsFromField.some(col => col.operationType === op)
-  );
-
-  function operationNavItem(op: OperationType) {
-    return {
-      name: operationPanels[op].displayName,
-      id: op as string,
-      className: classNames('lnsConfigPanel__operation', {
-        'lnsConfigPanel__operation--selected': Boolean(
-          invalidOperationType === op ||
-            (!invalidOperationType && selectedColumn && selectedColumn.operationType === op)
-        ),
-        'lnsConfigPanel__operation--unsupported': !functionsFromField.some(
-          col => col.operationType === op
-        ),
-      }),
-      onClick() {
-        if (!selectedColumn || !functionsFromField.some(col => col.operationType === op)) {
-          setInvalidOperationType(op);
-          return;
-        }
-        if (invalidOperationType) {
-          setInvalidOperationType(null);
-        }
-        if (selectedColumn.operationType === op) {
-          return;
-        }
-        const newColumn: IndexPatternColumn = filteredColumns.find(
-          col =>
-            col.operationType === op &&
-            (!('sourceField' in col) ||
-              !('sourceField' in selectedColumn) ||
-              col.sourceField === selectedColumn.sourceField)
-        )!;
-
-        const newColumns = {
-          ...state.columns,
-          [columnId]: newColumn,
-        };
-
-        setState({
-          ...state,
-          columnOrder: getColumnOrder(newColumns),
-          columns: newColumns,
-        });
-      },
-    };
-  }
 
   const sideNavItems = [
     {
       name: '',
       id: '0',
-      items: supportedOperations
-        .map(operationNavItem)
-        .concat(unsupportedOperations.map(operationNavItem)),
+      items: getOperationTypes(filteredColumns, selectedColumn).map(
+        ({ operationType, compatibleWithCurrentField }) => ({
+          name: operationPanels[operationType].displayName,
+          id: operationType as string,
+          className: classNames('lnsConfigPanel__operation', {
+            'lnsConfigPanel__operation--selected': Boolean(
+              invalidOperationType === operationType ||
+                (!invalidOperationType &&
+                  selectedColumn &&
+                  selectedColumn.operationType === operationType)
+            ),
+            'lnsConfigPanel__operation--unsupported': !compatibleWithCurrentField,
+          }),
+          'data-test-subj': `lns-indexPatternDimension-${operationType}`,
+          onClick() {
+            if (!selectedColumn || !compatibleWithCurrentField) {
+              setInvalidOperationType(operationType);
+              return;
+            }
+            if (invalidOperationType) {
+              setInvalidOperationType(null);
+            }
+            if (selectedColumn.operationType === operationType) {
+              return;
+            }
+            const newColumn: IndexPatternColumn = filteredColumns.find(
+              col =>
+                col.operationType === operationType &&
+                (!hasField(col) ||
+                  !hasField(selectedColumn) ||
+                  col.sourceField === selectedColumn.sourceField)
+            )!;
+            setState(changeColumn(state, columnId, newColumn));
+          },
+        })
+      ),
     },
   ];
 
@@ -125,6 +119,7 @@ export function Settings(props: SettingsProps) {
           onClick={() => {
             setSettingsOpen(true);
           }}
+          data-test-subj="indexPattern-configure-dimension"
         >
           {selectedColumn
             ? selectedColumn.label
@@ -145,7 +140,8 @@ export function Settings(props: SettingsProps) {
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>
           <FieldSelect
-            {...props}
+            filteredColumns={filteredColumns}
+            selectedColumn={selectedColumn}
             invalidOperationType={invalidOperationType}
             onDeleteColumn={() => {
               setState(deleteColumn(state, columnId));
@@ -164,11 +160,18 @@ export function Settings(props: SettingsProps) {
             <EuiFlexItem grow={true} className="lnsConfigPanel__summaryPopoverRight">
               {invalidOperationType && selectedColumn && (
                 <EuiCallOut
-                  title="Operation not applicable to field"
+                  title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
+                    defaultMessage: 'Operation not applicable to field',
+                  })}
                   color="danger"
                   iconType="cross"
                 >
-                  <p>Please choose another field</p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.indexPattern.invalidOperationDescription"
+                      defaultMessage="Please choose another field"
+                    />
+                  </p>
                 </EuiCallOut>
               )}
               {!invalidOperationType && ParamEditor && (
