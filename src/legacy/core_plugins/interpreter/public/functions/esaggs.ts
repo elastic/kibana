@@ -52,6 +52,15 @@ interface Arguments {
 
 type Return = Promise<KibanaDatatable>;
 
+function getFormatter(aggConfig: any) {
+  if (aggConfig.params && aggConfig.params.field && aggConfig.params.field.format) {
+    return aggConfig.params.field.format.toJSON();
+  }
+  if (aggConfig.type && aggConfig.type.getFormat()) {
+    return aggConfig.type.getFormat().toJSON();
+  }
+}
+
 export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name,
   type: 'kibana_datatable',
@@ -118,9 +127,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       columns: response.columns.map((column: any) => ({
         id: column.id,
         name: column.name,
-        formatterMapping: column.aggConfig.params.field
-          ? column.aggConfig.params.field.format.toJSON()
-          : column.aggConfig.type.getFormat().toJSON(),
+        formatterMapping: getFormatter(column.aggConfig),
       })),
     };
 

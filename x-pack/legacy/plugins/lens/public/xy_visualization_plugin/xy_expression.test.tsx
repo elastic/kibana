@@ -17,8 +17,8 @@ import { xyChart, XYChart } from './xy_expression';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, XConfig, xConfig, YConfig, yConfig } from './types';
-import { getFormat } from '../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
-import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
+import { getFormat } from '../../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/common';
 
 function sampleArgs() {
   const data: KibanaDatatable = {
