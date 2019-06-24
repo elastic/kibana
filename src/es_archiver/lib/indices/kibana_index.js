@@ -159,3 +159,21 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }
 
   stats.deletedIndex('.kibana');
 }
+
+export async function createDefaultSpace({ index, client }) {
+  await client.index({
+    index,
+    type: '_doc',
+    id: 'space:default',
+    body: {
+      type: 'space',
+      updated_at: new Date().toISOString(),
+      space: {
+        name: 'Default Space',
+        description: 'This is the default space',
+        disabledFeatures: [],
+        _reserved: true,
+      },
+    },
+  });
+}

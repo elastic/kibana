@@ -20,7 +20,7 @@
 import { Transform } from 'stream';
 
 import { get, once } from 'lodash';
-import { deleteKibanaIndices, cleanKibanaIndices } from './kibana_index';
+import { deleteKibanaIndices, cleanKibanaIndices, createDefaultSpace } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
@@ -74,6 +74,10 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
               aliases
             },
           });
+
+          if (isKibana && kibanaPluginIds.includes('spaces')) {
+            await createDefaultSpace({ client, index });
+          }
         }
 
         stats.createdIndex(index, { settings });
