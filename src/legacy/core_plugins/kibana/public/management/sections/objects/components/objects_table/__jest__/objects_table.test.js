@@ -531,7 +531,7 @@ describe('ObjectsTable', () => {
 
       await component.instance().delete();
 
-      expect(defaultProps.indexPatterns.cache.clearAll).toHaveBeenCalled();
+      expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
       expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[0].type, mockSavedObjects[0].id);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[1].type, mockSavedObjects[1].id);

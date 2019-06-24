@@ -81,6 +81,7 @@ export class IndexPattern implements StaticIndexPattern {
   public timeFieldName: string | undefined;
   public formatHit: any;
   public flattenHit: any;
+  public metaFields: string[];
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClient;
@@ -128,6 +129,7 @@ export class IndexPattern implements StaticIndexPattern {
     this.getConfig = getConfig;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
+    this.metaFields = this.getConfig('metaFields');
 
     this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));

@@ -25,7 +25,6 @@ import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 import { SavedObjectsClient, SimpleSavedObject } from '../saved_objects';
 import { UiSettingsClient } from '../../../../../target/types/public/ui_settings';
-import { SavedObjectAttributes } from '../../../../../target/types/server/saved_objects/service';
 
 const indexPatternCache = createIndexPatternCache();
 const apiClient = new IndexPatternsApiClient();
@@ -35,7 +34,7 @@ export class IndexPatterns {
 
   private config: UiSettingsClient;
   private savedObjectsClient: SavedObjectsClient;
-  private savedObjectsCache?: Array<SimpleSavedObject<SavedObjectAttributes>> | null;
+  private savedObjectsCache?: Array<SimpleSavedObject<{}>> | null;
 
   constructor(config: UiSettingsClient, savedObjectsClient: SavedObjectsClient) {
     this.config = config;
@@ -64,13 +63,17 @@ export class IndexPatterns {
       await this.loadSavedObjects();
     }
     if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => _.get(obj, 'title'));
+      return this.savedObjectsCache.map(obj => _.get(obj, 'attributes.title'));
     }
   };
 
-  clearCache = () => {
+  clearCache = (id?: string) => {
     this.savedObjectsCache = null;
-    indexPatternCache.clearAll();
+    if (id) {
+      indexPatternCache.clear(id);
+    } else {
+      indexPatternCache.clearAll();
+    }
   };
 
   getDefault = async () => {

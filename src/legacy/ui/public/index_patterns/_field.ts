@@ -184,4 +184,6 @@ export class Field implements FieldType {
   }
 }
 
-Object.defineProperties(Field.prototype, {});
+Field.prototype.routes = {
+  edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
+};

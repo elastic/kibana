@@ -17,30 +17,33 @@
  * under the License.
  */
 
-export function createIndexPatternCache() {
-  const vals: any = {};
-  const cache: any = {};
+export interface PatternCache {
+  get: (id: string) => any;
+  set: (id: string, value: any) => any;
+  clear: (id: string) => void;
+  clearAll: () => void;
+}
 
-  cache.get = function(id: string) {
-    return vals[id];
-  };
-
-  cache.set = function(id: string, prom: any) {
-    vals[id] = prom;
-    return prom;
-  };
-
-  cache.clear = cache.delete = function(id: string) {
-    delete vals[id];
-  };
-
-  cache.clearAll = function() {
-    for (const id in vals) {
-      if (vals.hasOwnProperty(id)) {
-        delete vals[id];
+export function createIndexPatternCache(): PatternCache {
+  const vals: Record<string, any> = {};
+  const cache: PatternCache = {
+    get: (id: string) => {
+      return vals[id];
+    },
+    set: (id: string, prom: any) => {
+      vals[id] = prom;
+      return prom;
+    },
+    clear: (id: string) => {
+      delete vals[id];
+    },
+    clearAll: () => {
+      for (const id in vals) {
+        if (vals.hasOwnProperty(id)) {
+          delete vals[id];
+        }
       }
-    }
+    },
   };
-
   return cache;
 }
