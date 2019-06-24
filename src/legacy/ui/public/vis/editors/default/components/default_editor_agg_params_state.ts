@@ -99,13 +99,12 @@ function aggParamsReducer(
 }
 
 function initAggParamsState(params: ParamInstance[]): AggParamsState {
-  const state = {};
+  const state: AggParamsState = {};
   params.forEach((param: ParamInstance) => {
-    // @ts-ignore
     state[param.aggParam.name] = {
       validity: true,
       touched: false,
-    } as AggParamsItem;
+    };
   });
 
   return state;

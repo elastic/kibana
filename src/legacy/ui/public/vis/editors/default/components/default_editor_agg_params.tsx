@@ -21,9 +21,9 @@ import React, { useReducer, useEffect } from 'react';
 
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { aggTypes, AggType } from 'ui/agg_types';
+import { aggTypes, AggType, AggParam } from 'ui/agg_types';
 import { AggConfig, Vis, VisState } from 'ui/vis';
+import { IndexPattern } from 'ui/index_patterns';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 import { DefaultEditorAggParam } from './default_editor_agg_param';
 import {
@@ -47,20 +47,25 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
-interface DefaultEditorAggParamsProps {
+type EditorParamConfigType = EditorParamConfig & {
+  [key: string]: any;
+};
+export interface SubAggParamsProp {
+  formIsTouched: boolean;
+  vis: Vis;
+  onAggParamsChange: (agg: AggConfig, paramName: string, value: any) => void;
+  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
+}
+interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   agg: AggConfig;
   aggIndex?: number;
   aggIsTooLow?: boolean;
   className?: string;
   config: any;
   groupName: string;
-  formIsTouched: boolean;
-  indexPattern: any;
+  indexPattern: IndexPattern;
   responseValueAggs: AggConfig[] | null;
   state?: VisState;
-  vis: Vis;
-  onAggParamsChange: (agg: AggConfig, paramName: string, value: any) => void;
-  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   setTouched: (isTouched: boolean) => void;
   setValidity: (isValid: boolean) => void;
 }
@@ -108,7 +113,9 @@ function DefaultEditorAggParams({
     () => {
       Object.keys(editorConfig).forEach(param => {
         const paramConfig = editorConfig[param];
-        const paramOptions = agg.type.params.find((paramOption: any) => paramOption.name === param);
+        const paramOptions = agg.type.params.find(
+          (paramOption: AggParam) => paramOption.name === param
+        );
 
         const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
         const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
@@ -117,7 +124,7 @@ function DefaultEditorAggParams({
         if (hasFixedValue || hasDefault) {
           let newValue;
           let property = FIXED_VALUE_PROP;
-          let typedParamConfig: EditorParamConfig = paramConfig as FixedParam;
+          let typedParamConfig: EditorParamConfigType = paramConfig as FixedParam;
 
           if (hasDefault) {
             property = DEFAULT_PROP;
@@ -125,10 +132,8 @@ function DefaultEditorAggParams({
           }
 
           if (paramOptions && paramOptions.deserialize) {
-            // @ts-ignore
             newValue = paramOptions.deserialize(typedParamConfig[property]);
           } else {
-            // @ts-ignore
             newValue = typedParamConfig[property];
           }
           onAggParamsChange(agg, param, newValue);
@@ -218,7 +223,7 @@ function DefaultEditorAggParams({
         }
       />
 
-      {params.basic.map((param: any) => {
+      {params.basic.map((param: ParamInstance) => {
         const model = aggParams[param.aggParam.name] || {
           touched: false,
           validity: true,
@@ -239,7 +244,7 @@ function DefaultEditorAggParams({
             )}
             paddingSize="none"
           >
-            {params.advanced.map((param: any) => {
+            {params.advanced.map((param: ParamInstance) => {
               const model = aggParams[param.aggParam.name] || {
                 touched: false,
                 validity: true,
