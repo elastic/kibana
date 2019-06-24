@@ -95,8 +95,8 @@
   </div>
 
   <div class="schemaEditors visEditorSidebar__aggParamFormRow"></div>
-  <!-- should be rendered after link function run  -->
-  <new-vis-editor-agg-params
+  <!-- should be rendered after link function run, i.e. onAggTypeChange is defined  -->
+  <vis-editor-agg-params
     ng-if="onAggTypeChange"
     ng-show="editorOpen"
     agg="agg"
@@ -116,15 +116,7 @@
     on-agg-params-change="onAggParamsChange"
     set-touched="setTouched"
     set-validity="setValidity">
-  </new-vis-editor-agg-params>
-
-  <!-- <vis-editor-agg-params
-    id="visAggEditorParams{{agg.id}}"
-    agg="agg"
-    group-name="groupName"
-    ng-show="editorOpen"
-    index-pattern="vis.indexPattern">
-  </vis-editor-agg-params> -->
+  </vis-editor-agg-params>
 </div>
 
 <vis-editor-agg-add
