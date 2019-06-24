@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
-/*
-  WARNING: The links in this file are validated during the docs build. This is accomplished with some regex magic that
-  looks for these particular constants. As a result, we should not add new constants or change the existing ones.
-  If you absolutely must make a change, talk to Clinton Gormley first so he can update his Perl scripts.
- */
-export const DOC_LINK_VERSION = npStart.core.docLinks.DOC_LINK_VERSION;
-export const ELASTIC_WEBSITE_URL = npStart.core.docLinks.ELASTIC_WEBSITE_URL;
+const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinksServiceMock.createStartContract();
 
-export const documentationLinks = npStart.core.docLinks.links;
+export { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL };
+export const documentationLinks = links;
