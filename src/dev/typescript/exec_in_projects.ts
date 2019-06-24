@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import os from 'os';
+
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import execa from 'execa';
@@ -47,7 +49,7 @@ export function execInProjects(
       title: project.name,
     })),
     {
-      concurrent: true,
+      concurrent: Math.min(4, Math.round((os.cpus() || []).length / 2) || 1) || false,
       exitOnError: false,
     }
   );

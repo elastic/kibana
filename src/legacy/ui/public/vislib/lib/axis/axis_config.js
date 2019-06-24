@@ -30,8 +30,9 @@ const defaults = {
     type: 'linear',
     expandLastBucket: true,
     inverted: false,
-    setYExtents: null,
     defaultYExtents: null,
+    boundsMargin: 0,
+    setYExtents: null,
     min: null,
     max: null,
     mode: SCALE_MODES.NORMAL
