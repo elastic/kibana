@@ -5,17 +5,16 @@
  */
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'maps']);
+  const PageObjects = getPageObjects(['maps']);
   const visualTesting = getService('visualTesting');
 
-  describe('vector_styling', () => {
+  describe('vector styling', () => {
     describe('symbolize as icon', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('vector styling icon demo');
       });
 
       it('should symbolize points as icons with expected color, size, and orientation', async () => {
-        await PageObjects.common.sleep(2000);
         await visualTesting.snapshot();
       });
 

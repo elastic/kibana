@@ -28,7 +28,7 @@ export async function createMbMapInstance({ node, initialView, scrollZoom }) {
         sprite: makiUrl
       },
       scrollZoom,
-      preserveDrawingBuffer: true // chrome.getInjected('preserveDrawingBuffer', false)
+      preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
     };
     if (initialView) {
       options.zoom = initialView.zoom;
