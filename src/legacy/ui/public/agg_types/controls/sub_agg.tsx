@@ -52,7 +52,6 @@ function SubAggParamEditor({
     [value, responseValueAggs]
   );
 
-  // to force update when sub-agg params are changed
   const [state, setState] = useState(true);
 
   if (agg.params.metricAgg !== 'custom' || !agg.params.customMetric) {
@@ -70,6 +69,7 @@ function SubAggParamEditor({
       responseValueAggs={responseValueAggs}
       vis={subAggParams.vis}
       onAggParamsChange={(...rest) => {
+        // to force update when sub-agg params are changed
         setState(!state);
         subAggParams.onAggParamsChange(...rest);
       }}

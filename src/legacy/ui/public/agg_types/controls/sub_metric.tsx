@@ -58,7 +58,6 @@ function SubMetricParamEditor({
     setValue(agg.params[type] || agg.type.params.byName[type].makeAgg(agg));
   }, []);
 
-  // to force update when sub-agg params are changed
   const [state, setState] = useState(true);
 
   if (!agg.params[type]) {
@@ -78,6 +77,7 @@ function SubMetricParamEditor({
         responseValueAggs={responseValueAggs}
         vis={subAggParams.vis}
         onAggParamsChange={(...rest) => {
+          // to force update when sub-agg params are changed
           setState(!state);
           subAggParams.onAggParamsChange(...rest);
         }}

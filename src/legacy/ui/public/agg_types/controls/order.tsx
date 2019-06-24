@@ -25,7 +25,7 @@ import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
 
 function OrderParamEditor({
   aggParam,
-  value = {} as SelectValueProp,
+  value,
   showValidation,
   setValue,
   setValidity,
@@ -53,7 +53,7 @@ function OrderParamEditor({
     >
       <EuiSelect
         options={aggParam.options.raw}
-        value={value.value}
+        value={value && value.value}
         onChange={ev => setValue(aggParam.options.byValue[ev.target.value])}
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}
