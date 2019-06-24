@@ -28,7 +28,7 @@ import 'brace/theme/textmate';
 import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
 import {
-  loadRepository,
+  useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
 } from '../../../../services/http';
 import { textService } from '../../../../services/text';
@@ -61,7 +61,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const { error, data: repositoryDetails } = loadRepository(repositoryName);
+  const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
 

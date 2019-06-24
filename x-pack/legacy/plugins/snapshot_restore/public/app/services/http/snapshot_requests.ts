@@ -8,7 +8,7 @@ import { MINIMUM_TIMEOUT_MS, UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } fro
 import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
-export const loadSnapshots = () =>
+export const useLoadSnapshots = () =>
   useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}snapshots`),
     method: 'get',
@@ -16,7 +16,7 @@ export const loadSnapshots = () =>
     timeout: MINIMUM_TIMEOUT_MS,
   });
 
-export const loadSnapshot = (repositoryName: string, snapshotId: string) =>
+export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>
   useRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(

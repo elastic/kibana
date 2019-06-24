@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 
 // import { SectionError, SectionLoading } from '../../../components';
 import { UIM_RECOVERY_LIST_LOAD } from '../../../constants';
-// import { loadSnapshots } from '../../../services/http';
+// import { useLoadSnapshots } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 
 export const RecoveryList: React.FunctionComponent = () => {

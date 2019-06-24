@@ -16,7 +16,7 @@ import {
 import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
-export const loadRepositories = () => {
+export const useLoadRepositories = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
@@ -25,7 +25,7 @@ export const loadRepositories = () => {
   });
 };
 
-export const loadRepository = (name: Repository['name']) => {
+export const useLoadRepository = (name: Repository['name']) => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
     method: 'get',
@@ -42,7 +42,7 @@ export const verifyRepository = (name: Repository['name']) => {
   });
 };
 
-export const loadRepositoryTypes = () => {
+export const useLoadRepositoryTypes = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repository_types`),
     method: 'get',

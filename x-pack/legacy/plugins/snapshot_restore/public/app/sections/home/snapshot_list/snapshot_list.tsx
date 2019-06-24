@@ -14,7 +14,7 @@ import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { documentationLinksService } from '../../../services/documentation';
-import { loadSnapshots } from '../../../services/http';
+import { useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { uiMetricService } from '../../../services/ui_metric';
 
@@ -44,7 +44,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     loading,
     data: { snapshots = [], repositories = [], errors = {} },
     request: reload,
-  } = loadSnapshots();
+  } = useLoadSnapshots();
 
   const openSnapshotDetailsUrl = (
     repositoryNameToOpen: string,

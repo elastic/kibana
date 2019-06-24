@@ -30,7 +30,7 @@ import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
 } from '../../../../constants';
-import { loadSnapshot } from '../../../../services/http';
+import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
@@ -61,7 +61,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
-  const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
+  const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 

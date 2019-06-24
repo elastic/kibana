@@ -12,7 +12,7 @@ import { BASE_PATH, Section } from '../../constants';
 import { SectionError, SectionLoading, RestoreSnapshotForm } from '../../components';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
-import { loadSnapshot, executeRestore } from '../../services/http';
+import { useLoadSnapshot, executeRestore } from '../../services/http';
 
 interface MatchParams {
   repositoryName: string;
@@ -40,7 +40,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   const [snapshotDetails, setSnapshotDetails] = useState<SnapshotDetails | {}>({});
 
   // Load snapshot
-  const { error: snapshotError, loading: loadingSnapshot, data: snapshotData } = loadSnapshot(
+  const { error: snapshotError, loading: loadingSnapshot, data: snapshotData } = useLoadSnapshot(
     repositoryName,
     snapshotId
   );

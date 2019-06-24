@@ -11,7 +11,7 @@ import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import { RepositoryAdd, RepositoryEdit, RestoreSnapshot, SnapshotRestoreHome } from './sections';
-import { loadPermissions } from './services/http';
+import { useLoadPermissions } from './services/http';
 import { useAppDependencies } from './index';
 
 export const App: React.FunctionComponent = () => {
@@ -29,7 +29,7 @@ export const App: React.FunctionComponent = () => {
       hasPermission: true,
       missingClusterPrivileges: [],
     },
-  } = loadPermissions();
+  } = useLoadPermissions();
 
   if (loadingPermissions) {
     return (
