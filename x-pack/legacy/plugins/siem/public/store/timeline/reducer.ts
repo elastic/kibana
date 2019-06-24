@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { defaultsDeep, pickBy, isNil } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
@@ -83,6 +83,7 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import { timelineDefaults } from './model';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -101,21 +102,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       // for now simplification, we do not need the line below
       // ...state.timelineById,
       [id]: {
-        ...timeline,
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        isLive: false,
-        isLoading: true,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
+        ...defaultsDeep(timelineDefaults, pickBy(v => !isNil(v), timeline)),
         id: timeline.savedObjectId || '',
-        dateRange: {
-          start: 0,
-          end: 0,
-        },
         show: true,
-        width: DEFAULT_TIMELINE_WIDTH,
-        isSaving: false,
       },
     },
   }))
