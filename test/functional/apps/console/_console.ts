@@ -46,8 +46,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      const obj = await browser.getCoverage();
-      log.debug(`code coverage: ${JSON.stringify(obj)}`);
+      await browser.loadTestCoverage();
     });
 
     it('should show the default request', async () => {

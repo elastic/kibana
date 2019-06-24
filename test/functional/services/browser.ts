@@ -19,6 +19,7 @@
 
 import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
+import request from 'request';
 
 import { modifyUrl } from '../../../src/core/utils';
 
@@ -495,8 +496,26 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return this.getScrollLeft();
     }
 
-    public async getCoverage(): Promise<void> {
+    public async getTestCoverage(): Promise<void> {
       return await driver.executeScript('return window.__coverage__;');
+    }
+
+    public async loadTestCoverage(): Promise<void> {
+      const obj = await this.getTestCoverage();
+      await request(
+        {
+          url: `http://localhost:6969/coverage/client`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(obj),
+        },
+        (error, response, body) => {
+          // eslint-disable-next-line no-console
+          console.log(error);
+        }
+      );
     }
   }
 

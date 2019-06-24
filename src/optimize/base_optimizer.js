@@ -344,6 +344,15 @@ export default class BaseOptimizer {
       module: {
         rules: [
           {
+            test: /\.js$|\.jsx$|\.tsx$/,
+            use: {
+              loader: 'istanbul-instrumenter-loader',
+              options: { esModules: true }
+            },
+            enforce: 'post',
+            exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
+          },
+          {
             test: /\.less$/,
             use: [
               ...getStyleLoaderExtractor(),
