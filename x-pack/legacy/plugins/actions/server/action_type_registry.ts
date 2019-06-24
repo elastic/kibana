@@ -7,19 +7,19 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ActionType, Services } from './types';
-import { TaskManager } from '../../task_manager';
+import { TaskManagerContract } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
 interface ConstructorOptions {
   getServices: (basePath: string) => Services;
-  taskManager: TaskManager;
+  taskManager: TaskManagerContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 }
 
 export class ActionTypeRegistry {
   private readonly getServices: (basePath: string) => Services;
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 

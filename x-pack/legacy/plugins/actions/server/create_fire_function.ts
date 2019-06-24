@@ -5,10 +5,10 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { TaskManager } from '../../task_manager';
+import { TaskManagerContract } from '../../task_manager';
 
 interface CreateFireFunctionOptions {
-  taskManager: TaskManager;
+  taskManager: TaskManagerContract;
   internalSavedObjectsRepository: SavedObjectsClientContract;
 }
 

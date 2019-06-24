@@ -8,20 +8,20 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AlertType, Services } from './types';
-import { TaskManager } from '../../task_manager';
+import { TaskManagerContract } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
 
 interface ConstructorOptions {
   getServices: (basePath: string) => Services;
-  taskManager: TaskManager;
+  taskManager: TaskManagerContract;
   fireAction: ActionsPlugin['fire'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
 }
 
 export class AlertTypeRegistry {
   private readonly getServices: (basePath: string) => Services;
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerContract;
   private readonly fireAction: ActionsPlugin['fire'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly internalSavedObjectsRepository: SavedObjectsClientContract;

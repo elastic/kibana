@@ -7,12 +7,12 @@
 import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
-import { TaskManager } from '../../task_manager';
+import { TaskManagerContract } from '../../task_manager';
 import { validateAlertTypeParams } from './lib';
 
 interface ConstructorOptions {
   log: Log;
-  taskManager: TaskManager;
+  taskManager: TaskManagerContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
   basePath: string;
@@ -54,7 +54,7 @@ interface UpdateOptions {
 export class AlertsClient {
   private readonly log: Log;
   private readonly basePath: string;
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerContract;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
 

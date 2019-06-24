@@ -8,6 +8,10 @@ import { Root } from 'joi';
 import { Legacy } from 'kibana';
 import { createShim } from './shim';
 import { TaskManager } from './task_manager';
+import { TaskManagerContract } from './types';
+
+export { TaskManagerContract };
+export { TaskInstance, ConcreteTaskInstance } from './task';
 
 export function taskManager(kibana: any) {
   return new kibana.Plugin({
@@ -56,8 +60,18 @@ export function taskManager(kibana: any) {
         config,
         this.kbnServer.afterPluginsInit
       );
+      const exposedFunctions: TaskManagerContract = {
+        fetch: taskManagerInstance.fetch.bind(taskManagerInstance),
+        remove: taskManagerInstance.remove.bind(taskManagerInstance),
+        schedule: taskManagerInstance.schedule.bind(taskManagerInstance),
+        addMiddleware: taskManagerInstance.addMiddleware.bind(taskManagerInstance),
+        registerTaskDefinitions: taskManagerInstance.registerTaskDefinitions.bind(
+          taskManagerInstance
+        ),
+      };
       // @ts-ignore
       server.decorate('server', 'taskManager', taskManagerInstance);
+      server.expose(exposedFunctions);
     },
   });
 }

@@ -6,4 +6,4 @@
 
 import { TaskManager as TaskManagerClass } from './task_manager';
 
-export type TaskManager = PublicMethodsOf<TaskManagerClass>;
+export type TaskManagerContract = PublicMethodsOf<TaskManagerClass>;
