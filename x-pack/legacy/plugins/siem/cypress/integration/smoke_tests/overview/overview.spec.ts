@@ -35,7 +35,7 @@ describe('Overview Page', () => {
     cy.get(STAT_AUDITD.domId, { timeout: OVERVIEW_TIMEOUT });
 
     HOST_STATS.forEach(stat => {
-      cy.get(stat.domId, { timeout: OVERVIEW_TIMEOUT })
+      cy.get(stat.domId)
         .invoke('text')
         .should(statValue => {
           expect(statValue).to.eq(stat.value);
@@ -43,7 +43,7 @@ describe('Overview Page', () => {
     });
 
     NETWORK_STATS.forEach(stat => {
-      cy.get(stat.domId, { timeout: OVERVIEW_TIMEOUT })
+      cy.get(stat.domId)
         .invoke('text')
         .should(statValue => {
           expect(statValue).to.eq(stat.value);
