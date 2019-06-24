@@ -17,14 +17,79 @@
  * under the License.
  */
 
+/**
+ * @todo
+ * This whole file needs major refactoring. `Registry` class does not do anything
+ * useful. "Wrappers" like `RenderFunction` basically just set default props on the objects.
+ */
+
 /* eslint-disable max-classes-per-file */
-import { Ast, Registry } from '@kbn/interpreter/src/common';
+import { Ast } from '@kbn/interpreter/src/common';
 import { get } from 'lodash';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Fn, getType } = require('@kbn/interpreter/src/common');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { clone } = require('lodash');
 
-export { Ast, Registry };
+export { Ast };
+
+export class Registry<ItemSpec, Item> {
+  _prop: string;
+  _indexed: any;
+
+  constructor(prop: string = 'name') {
+    if (typeof prop !== 'string') throw new Error('Registry property name must be a string');
+    this._prop = prop;
+    this._indexed = new Object();
+  }
+
+  wrapper(obj: ItemSpec) {
+    return obj;
+  }
+
+  register(fn: () => ItemSpec) {
+    if (typeof fn !== 'function') throw new Error(`Register requires an function`);
+
+    const obj = fn() as any;
+
+    if (typeof obj !== 'object' || !obj[this._prop]) {
+      throw new Error(`Registered functions must return an object with a ${this._prop} property`);
+    }
+
+    this._indexed[obj[this._prop].toLowerCase()] = this.wrapper(obj);
+  }
+
+  toJS(): Record<string, any> {
+    return Object.keys(this._indexed).reduce(
+      (acc, key) => {
+        acc[key] = this.get(key);
+        return acc;
+      },
+      {} as any
+    );
+  }
+
+  toArray(): Item[] {
+    return Object.keys(this._indexed).map(key => this.get(key)!);
+  }
+
+  get(name: string): Item | null {
+    if (name === undefined) {
+      return null;
+    }
+    const lowerCaseName = name.toLowerCase();
+    return this._indexed[lowerCaseName] ? clone(this._indexed[lowerCaseName]) : null;
+  }
+
+  getProp(): string {
+    return this._prop;
+  }
+
+  reset() {
+    this._indexed = new Object();
+  }
+}
 
 function RenderFunction(this: any, config: any) {
   // This must match the name of the function that is used to create the `type: render` object
