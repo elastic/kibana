@@ -94,13 +94,6 @@ export class ClusterDocClient {
       clearTimeout(this.updateTimer);
     }
     await this.updateHeartbeat(true);
-
-    if (this.configSubscription === undefined) {
-      return;
-    }
-
-    this.configSubscription.unsubscribe();
-    this.configSubscription = undefined;
   }
 
   public async getNodeForResource(resource: string) {

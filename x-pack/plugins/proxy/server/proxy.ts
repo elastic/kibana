@@ -174,12 +174,6 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
 
   public async stop() {
     await this.clusterDocClient.stop();
-    if (this.configSubscription === undefined) {
-      return;
-    }
-
-    this.configSubscription.unsubscribe();
-    this.configSubscription = undefined;
   }
 
   public async assignResource(
