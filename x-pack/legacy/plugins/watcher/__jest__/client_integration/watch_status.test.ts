@@ -114,7 +114,7 @@ describe.skip('<WatchStatus />', () => {
       });
 
       test('should show execution history details on click', async () => {
-        const { actions, exists, find } = testBed;
+        const { actions, exists } = testBed;
 
         const watchHistoryItem = {
           ...watchHistory1,
