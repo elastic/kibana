@@ -25,13 +25,20 @@ import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
   const skipDocsFromIndices = new Set();
+  const remapKibanaIndexDocs = new Set();
 
   async function handleDoc(stream, record) {
     if (skipDocsFromIndices.has(record.value.index)) {
       return;
     }
 
-    stream.push(record);
+    stream.push({
+      ...record,
+      value: {
+        ...record.value,
+        index: remapKibanaIndexDocs.has(record.value.index) ? '.kibana' : record.value.index
+      }
+    });
   }
 
   async function handleIndex(record) {
@@ -50,6 +57,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
     async function attemptToCreate(attemptNumber = 1) {
       try {
         if (isKibana && !isPre7Mapping) {
+          remapKibanaIndexDocs.add(index);
           await cleanKibanaIndicesOnce({ client, stats, log, kibanaPluginIds });
         } else {
           if (isKibana) {
