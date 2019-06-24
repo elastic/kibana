@@ -116,8 +116,15 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   };
 
   private handleDragMove = (event: MouseEvent) => {
-    const { drag } = this.state;
+    const { drag, svgPosition } = this.state;
     if (!drag) return;
+    // const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
+    // const startYPosition = drag.startY - svgPosition.top;
+    // const currentYPosition = event.clientY - svgPosition.top;
+    // const startTime = getTime(startYPosition);
+    // const currentTime = getTime(currentYPosition);
+    // const timeDifference = currentTime - startTime;
+    // const newTime = (this.state.target || 0) - timeDifference;
     const offset = (drag.currentY || 0) - event.clientY;
     this.props.onScroll(offset);
     this.setState({

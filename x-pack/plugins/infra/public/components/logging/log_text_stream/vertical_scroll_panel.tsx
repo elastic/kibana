@@ -42,7 +42,7 @@ interface MeasurableChild {
   getOffsetRect(): Rect | null;
 }
 
-const SCROLL_THROTTLE_INTERVAL = 250;
+const SCROLL_THROTTLE_INTERVAL = 2000;
 export const ASSUMED_SCROLLBAR_WIDTH = 20;
 
 export class VerticalScrollPanel<Child> extends React.PureComponent<
@@ -226,7 +226,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
         data-test-subj={dataTestSubj}
         style={{ height, width: width + scrollbarOffset }}
         scrollbarOffset={scrollbarOffset}
-        onScroll={this.handleScroll()}
+        onScroll={this.handleScroll}
         innerRef={
           /* workaround for missing RefObject support in styled-components typings */
           this.scrollRef as any
