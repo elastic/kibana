@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { wait } from './lib';
 import { API_BASE_PATH, NODE_SEED } from './constants';
 
 export default function ({ getService }) {
@@ -95,28 +96,42 @@ export default function ({ getService }) {
     });
 
     describe('List', () => {
-      // FLAKY: https://github.com/elastic/kibana/issues/39486
-      it.skip('should return an array of remote clusters', async () => {
+      it('should return an array of remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
-        const { body } = await supertest
-          .get(uri)
-          .expect(200);
+        let totalRuns = 0;
+        const maxWaitTime = 10000;
+        const timeBetweenRuns = 1000;
+        const maxNumberOfRuns = Math.ceil(maxWaitTime / timeBetweenRuns);
 
-        expect(body).to.eql([
-          {
-            name: 'test_cluster',
-            seeds: [
-              NODE_SEED
-            ],
-            isConnected: true,
-            connectedNodesCount: 1,
-            maxConnectionsPerCluster: 3,
-            initialConnectTimeout: '30s',
-            skipUnavailable: false,
-            isConfiguredByNode: false,
+        const expectClusterConnected = async () => {
+          const { body } = await supertest.get(uri);
+
+          totalRuns++;
+
+          if ((!body.length || !body[0].isConnected) && totalRuns < maxNumberOfRuns) {
+            // The API to connect a remote clusters is not synchronous so we need to retry several times to avoid any flakiness.
+            // We will wait up to 10 seconds for the connection to occur.
+            return wait().then(expectClusterConnected);
           }
-        ]);
+
+          expect(body).to.eql([
+            {
+              name: 'test_cluster',
+              seeds: [
+                NODE_SEED
+              ],
+              isConnected: true,
+              connectedNodesCount: 1,
+              maxConnectionsPerCluster: 3,
+              initialConnectTimeout: '30s',
+              skipUnavailable: false,
+              isConfiguredByNode: false,
+            }
+          ]);
+        };
+
+        await expectClusterConnected();
       });
     });
 
