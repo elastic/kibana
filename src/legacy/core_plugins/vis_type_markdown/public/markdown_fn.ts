@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
 
-const name = 'esaggs';
+const name = 'markdownvis';
 
 interface Arguments {
   markdown: string;
