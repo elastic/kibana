@@ -100,7 +100,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
   /**
    * Readonly copy of incoming request headers.
-   * @mark
+   * @remarks
    * This property will contain a `filtered` copy of request headers.
    */
   public readonly headers: Headers;
