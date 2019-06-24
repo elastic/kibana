@@ -105,3 +105,18 @@ export const CTAGS: LanguageServerDefinition = {
 };
 export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
 export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO, CTAGS];
+
+export function enabledLanguageServers(server: any) {
+  const devMode: boolean = server.config().get('env.dev');
+
+  function isEnabled(lang: LanguageServerDefinition, defaultEnabled: boolean) {
+    const name = lang.name;
+    const enabled = server.config().get(`xpack.code.lsp.${name}.enabled`);
+    return enabled === undefined ? defaultEnabled : enabled;
+  }
+  const results = LanguageServers.filter(lang => isEnabled(lang, true));
+  if (devMode) {
+    return results.concat(LanguageServersDeveloping.filter(lang => isEnabled(lang, devMode)));
+  }
+  return results;
+}
