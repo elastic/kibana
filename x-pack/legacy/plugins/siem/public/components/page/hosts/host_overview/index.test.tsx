@@ -46,6 +46,7 @@ describe('Host Summary Component', () => {
             data={mockData.Hosts.edges[0].node}
             anomaliesData={mockAnomalies}
             isLoadingAnomaliesData={false}
+            narrowDateRange={jest.fn()}
           />
         </TestProviders>
       );

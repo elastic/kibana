@@ -57,3 +57,5 @@ export interface Anomalies {
   anomalies: Anomaly[];
   interval: string;
 }
+
+export type NarrowDateRange = (score: Anomaly, interval: string) => void;

@@ -19,7 +19,7 @@ import { LoadingPanel } from '../../../loading';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
 import { AnomalyScores } from '../../../ml/anomaly_scores';
-import { Anomalies } from '../../../ml/types';
+import { Anomalies, NarrowDateRange } from '../../../ml/types';
 
 interface DescriptionList {
   title: string;
@@ -33,6 +33,7 @@ interface HostSummaryProps {
   anomaliesData: Anomalies | null;
   startDate: number;
   endDate: number;
+  narrowDateRange: NarrowDateRange;
 }
 
 const DescriptionList = styled(EuiDescriptionList)`
@@ -50,7 +51,15 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 );
 
 export const HostOverview = React.memo<HostSummaryProps>(
-  ({ data, loading, startDate, endDate, isLoadingAnomaliesData, anomaliesData }) => {
+  ({
+    data,
+    loading,
+    startDate,
+    endDate,
+    isLoadingAnomaliesData,
+    anomaliesData,
+    narrowDateRange,
+  }) => {
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
         rowItems={getOr([], fieldName, fieldData)}
@@ -92,13 +101,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
             ),
         },
         {
-          title: 'Top Anomaly Severity By Job', // TODO: I18n this
+          title: 'Max Anomaly Score By Job', // TODO: I18n this
           description: (
             <AnomalyScores
               anomalies={anomaliesData}
               startDate={startDate}
               endDate={endDate}
               isLoading={isLoadingAnomaliesData}
+              narrowDateRange={narrowDateRange}
             />
           ),
         },

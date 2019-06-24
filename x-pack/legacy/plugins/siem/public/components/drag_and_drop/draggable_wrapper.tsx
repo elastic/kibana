@@ -14,7 +14,7 @@ import {
   Droppable,
 } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
@@ -23,8 +23,23 @@ import { TruncatableText } from '../truncatable_text';
 
 import { getDraggableId, getDroppableId } from './helpers';
 
-// As right now, we do not know what we want there, we will keep it as a placeholder
-export const DragEffects = styled.div``;
+const dropInEffect = keyframes`
+  0% {
+      transform: scale(1);
+    }
+
+   50% {	
+    transform: scale(1.15);	
+  }
+
+   100% {	
+    transform: scale(1);	
+  }
+`;
+
+export const DragEffects = styled.div`
+  animation: ${dropInEffect} 250ms;
+`;
 
 const ProviderContainer = styled.div`
   &:hover {

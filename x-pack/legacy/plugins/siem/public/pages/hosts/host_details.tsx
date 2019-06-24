@@ -13,6 +13,7 @@ import { pure } from 'recompose';
 import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { ActionCreator } from 'typescript-fsa';
 import { ESTermQuery } from '../../../common/typed_json';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
@@ -38,6 +39,9 @@ import { HostsKql } from './kql';
 import * as i18n from './translations';
 import { AnomalyTableProvider } from '../../components/ml/anomaly_table_provider';
 import { hostToInfluencers } from '../../components/ml/host_to_influencers';
+import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
+import { scoreIntervalToDateTime } from '../../components/ml/score_interval_to_datetime';
 
 const type = hostsModel.HostsType.details;
 
@@ -48,6 +52,11 @@ const EventsTableManage = manageQuery(EventsTable);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
 }
 
 type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
@@ -58,6 +67,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
       params: { hostName },
     },
     filterQueryExpression,
+    setAbsoluteRangeDatePicker,
   }) => (
     <WithSource sourceId="default">
       {({ indicesExist, indexPattern }) =>
@@ -103,6 +113,14 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                                 loading={loading}
                                 startDate={from}
                                 endDate={to}
+                                narrowDateRange={(score, interval) => {
+                                  const fromTo = scoreIntervalToDateTime(score, interval);
+                                  setAbsoluteRangeDatePicker({
+                                    id: 'global',
+                                    from: fromTo.from,
+                                    to: fromTo.to,
+                                  });
+                                }}
                               />
                             )}
                           </AnomalyTableProvider>
@@ -228,7 +246,12 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
+export const HostDetails = connect(
+  makeMapStateToProps,
+  {
+    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  }
+)(HostDetailsComponent);
 
 export const getBreadcrumbs = (hostId: string): Breadcrumb[] => [
   {

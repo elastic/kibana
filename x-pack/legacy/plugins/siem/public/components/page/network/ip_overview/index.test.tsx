@@ -16,6 +16,7 @@ import { createStore, networkModel, State } from '../../../../store';
 import { IpOverview } from './index';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../ml/mock';
+import { NarrowDateRange } from '../../../ml/types';
 
 describe('IP Overview Component', () => {
   const state: State = mockGlobalState;
@@ -40,6 +41,7 @@ describe('IP Overview Component', () => {
       endDate: new Date('2019-06-18T06:00:00.000Z').valueOf(),
       anomaliesData: mockAnomalies,
       isLoadingAnomaliesData: false,
+      narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
     };
 
     test('it renders the default IP Overview', () => {

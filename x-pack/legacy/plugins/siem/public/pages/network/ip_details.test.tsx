@@ -18,6 +18,8 @@ import { FlowTarget } from '../../graphql/types';
 import { createStore, State } from '../../store';
 import { cloneDeep } from 'lodash/fp';
 import { mocksSource } from '../../containers/source/mock';
+import { InputsModelId } from '../../store/inputs/constants';
+import { ActionCreator } from 'typescript-fsa';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -67,6 +69,11 @@ const getMockProps = (ip: string) => ({
     hash: '',
   },
   match: { params: { ip }, isExact: true, path: '', url: '' },
+  setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>,
 });
 
 jest.mock('ui/documentation_links', () => ({

@@ -4,122 +4,72 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiLink, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import React, { useState } from 'react';
+import { EuiLoadingSpinner, EuiPopover, EuiDescriptionList } from '@elastic/eui';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../empty_value';
-import { Spacer } from '../page';
-import { Provider } from '../timeline/data_providers/provider';
-import { Anomalies, Anomaly } from './types';
+import { Anomalies, Anomaly, NarrowDateRange } from './types';
 import { getTopSeverityJobs } from './get_top_severity';
-import { DraggableWrapper, DragEffects } from '../drag_and_drop/draggable_wrapper';
+import { DraggableScore } from './draggable_score';
+import { createDescriptionsList } from './create_descriptions_list';
 
 interface Args {
   startDate: number;
   endDate: number;
   anomalies: Anomalies | null;
   isLoading: boolean;
+  narrowDateRange: NarrowDateRange;
 }
 
-export const getScoreString = (score: number): string => {
-  if (score < 1) {
-    return '< 1';
-  } else {
-    return String(score.toFixed(0));
-  }
-};
+export const createJobKey = (score: Anomaly): string =>
+  `${score.jobId}-${score.severity}-${score.entityName}-${score.entityValue}`;
 
-export const formatToolTip = (score: Anomaly) => (
-  <div>
-    <div>{score.entityName}</div>
-    <div>{score.entityValue}</div>
-  </div>
-);
-
-export const createEntitiesFromScore = (score: Anomaly) => {
-  const influencers = score.influencers.reduce((accum, item, index) => {
-    if (index === 0) {
-      return `${Object.keys(item)[0]}:'${Object.values(item)[0]}'`;
+export const AnomalyScores = React.memo<Args>(
+  ({ anomalies, startDate, endDate, isLoading, narrowDateRange }): JSX.Element => {
+    if (isLoading) {
+      return <EuiLoadingSpinner size="m" />;
+    } else if (
+      anomalies == null ||
+      anomalies.anomalies.length === 0 ||
+      startDate == null ||
+      endDate == null
+    ) {
+      return getEmptyTagValue();
     } else {
-      return `${accum},${Object.keys(item)[0]}:'${Object.values(item)[0]}'`;
-    }
-  }, '');
-
-  if (!influencers.includes(score.entityName)) {
-    return `${influencers},${score.entityName}:'${score.entityValue}'`;
-  } else {
-    return influencers;
-  }
-};
-
-export const createLink = (score: Anomaly, startDate: number, endDate: number): string => {
-  const startDateIso = new Date(startDate).toISOString();
-  const endDateIso = new Date(endDate).toISOString();
-
-  const JOB_PREFIX = `ml#/timeseriesexplorer?_g=(ml:(jobIds:!(${score.jobId}))`;
-  const REFRESH_INTERVAL = `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${startDateIso}',mode:absolute,to:'${endDateIso}'))`;
-  const INTERVAL_SELECTION = `&_a=(mlSelectInterval:(display:Auto,val:auto),mlSelectSeverity:(color:%23d2e9f7,display:warning,val:0),mlTimeSeriesExplorer:(detectorIndex:0,`;
-  const ENTITIES = `entities:(${createEntitiesFromScore(score)})))`;
-
-  return `${JOB_PREFIX}${REFRESH_INTERVAL}${INTERVAL_SELECTION}${ENTITIES}`;
-};
-
-export const AnomalyScores = React.memo<Args>(({ anomalies, startDate, endDate, isLoading }) => {
-  if (isLoading) {
-    return <EuiLoadingSpinner size="m" />;
-  }
-  if (
-    anomalies == null ||
-    anomalies.anomalies.length === 0 ||
-    startDate == null ||
-    endDate == null
-  ) {
-    return getEmptyTagValue();
-  }
-  const topScores = getTopSeverityJobs(anomalies.anomalies);
-  const items = topScores.map((score, index) => {
-    const key = `${score.jobId}-${score.severity}-${score.entityName}-${score.entityValue}`;
-    const id = escapeDataProviderId(`anomaly-scores-${key}`);
-    return (
-      <EuiToolTip key={key} title={score.jobId} content={formatToolTip(score)}>
-        <EuiLink href={createLink(score, startDate, endDate)} target="_blank">
-          <DraggableWrapper
-            key={key}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: score.entityName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: score.entityName,
-                value: score.entityValue,
-                operator: IS_OPERATOR,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>
-                  {index !== 0 && (
-                    <>
-                      {','}
-                      <Spacer />
-                    </>
+      return (
+        <>
+          {getTopSeverityJobs(anomalies.anomalies).map((score, index) => {
+            const jobKey = createJobKey(score);
+            const [isOpen, setIsOpen] = useState(false);
+            return (
+              <EuiPopover
+                key={jobKey}
+                id="anomaly-score-popover"
+                isOpen={isOpen}
+                onClick={() => setIsOpen(!isOpen)}
+                closePopover={() => setIsOpen(!isOpen)}
+                button={
+                  <DraggableScore
+                    id={escapeDataProviderId(`anomaly-scores-${jobKey}`)}
+                    index={index}
+                    score={score}
+                  />
+                }
+              >
+                <EuiDescriptionList
+                  listItems={createDescriptionsList(
+                    score,
+                    startDate,
+                    endDate,
+                    anomalies.interval,
+                    narrowDateRange
                   )}
-                  {getScoreString(score.severity)}
-                </>
-              )
-            }
-          />
-        </EuiLink>
-      </EuiToolTip>
-    );
-  });
-  return <span>{items}</span>;
-});
+                />
+              </EuiPopover>
+            );
+          })}
+        </>
+      );
+    }
+  }
+);

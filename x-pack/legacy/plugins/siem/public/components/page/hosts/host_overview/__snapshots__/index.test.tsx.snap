@@ -196,6 +196,7 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
     endDate={1560837600000}
     isLoadingAnomaliesData={false}
     loading={false}
+    narrowDateRange={[MockFunction]}
     startDate={1560578400000}
   />
 </Component>

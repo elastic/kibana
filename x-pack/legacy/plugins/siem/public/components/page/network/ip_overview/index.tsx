@@ -25,7 +25,7 @@ import {
 import * as i18n from './translations';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
-import { Anomalies } from '../../../ml/types';
+import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/anomaly_scores';
 
 interface DescriptionList {
@@ -43,6 +43,7 @@ interface OwnProps {
   startDate: number;
   endDate: number;
   type: networkModel.NetworkType;
+  narrowDateRange: NarrowDateRange;
 }
 
 export type IpOverviewProps = OwnProps;
@@ -73,6 +74,7 @@ export const IpOverview = pure<IpOverviewProps>(
     endDate,
     isLoadingAnomaliesData,
     anomaliesData,
+    narrowDateRange,
   }) => {
     const typeData: Overview = data[flowTarget]!;
     const descriptionLists: Readonly<DescriptionList[][]> = [
@@ -91,13 +93,14 @@ export const IpOverview = pure<IpOverviewProps>(
             : getEmptyTagValue(),
         },
         {
-          title: 'Top Anomaly Severity By Job', // TODO: I18n this
+          title: 'Max Anomaly Score By Job', // TODO: I18n this
           description: (
             <AnomalyScores
               anomalies={anomaliesData}
               startDate={startDate}
               endDate={endDate}
               isLoading={isLoadingAnomaliesData}
+              narrowDateRange={narrowDateRange}
             />
           ),
         },
