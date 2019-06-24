@@ -7,7 +7,7 @@ To get up and running with Canvas, use the following tutorial where you'll creat
 [float]
 === Before you begin
 
-For this tutorial, you'll use the {kibana-ref}/add-sample-data.html[Sample eCommerce orders data].
+For this tutorial, you'll need to add the {kibana-ref}/add-sample-data.html[Sample eCommerce orders data].
 
 [float]
 === Create and personalize your workpad
@@ -18,11 +18,7 @@ Your first step to working with Canvas is to create a workpad.
 
 . Click *Create workpad*.
 
-. To personalize the workpad and page, use the editor on the right.
-
-.. Enter a *Name* for your workpad. For example, `Welcome to Canvas`.
-
-.. Change the page *Background color* to light gray.
+. To add a *Name* for your workpad, use the editor on the right. For example, `My Canvas Workpad`.
 
 [float]
 === Customize your workpad with images
@@ -36,13 +32,18 @@ The default Elastic logo image appears on your page.
 . To replace the Elastic logo with your own image, select the image, then use the editor on the right.
 
 . To move the image, click and drag it to your preferred location.
-+
+
+[role="screenshot"]
+image::images/canvas-image-element.png[]
+
 You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
 
-[float]
-=== Customize your workpad with text
+TIP: Want to delete an element? Select the element, then press the delete button on your keyboard.
 
-To express your data with words, add your own text.
+[float]
+=== Customize your data with metrics
+
+Customize your data by connecting it to the Sample eCommerce orders data.
 
 . Click *Add element*, then click *Metric*. 
 +
@@ -52,7 +53,9 @@ By default, the *Metric* element is connected to a demo data source, which enabl
 
 .. Click *Change your data source*, then click *Elasticsearch SQL*.
 
-.. In the *Elasticsearch SQL query* field, enter `SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"`.
+.. In the *Elasticsearch SQL query* field, enter the following query:
++
+`SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"`
 +
 The query selects the total price field and sets it to the sum_total_price field. These fields are pulled from the kibana_sample_data_ecommerce index that you installed.
 
@@ -66,7 +69,7 @@ At this point, the element displays an error.
 
 .. Under *Number*, select *Value* from the function drop-down list, then select *sum_total_price* from the column drop-down list.
 
-.. Change the *Label* to 'Total sales'.
+.. Change the *Label* to `Total sales`.
 +
 You'll notice that the error is gone, but the number could use some formatting.
 
@@ -83,12 +86,10 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 [role="screenshot"]
 image::images/canvas-metric-element.png[]
 
-TIP: Want to delete an element? Click the back button on your browser.
-
 [float]
-=== Show off your data
+=== Show off your data with charts
 
-To show what your data can do, add charts, graphs, progress monitors, and more.
+To show what your data can do, add charts, graphs, progress monitors, and more to your workpad.
 
 . Click *Add element*, then click *Area chart*. 
 
@@ -96,7 +97,9 @@ To show what your data can do, add charts, graphs, progress monitors, and more.
 
 .. Click *Change your data source*, then click *Elasticsearch SQL*.
 
-.. To obtain the taxless total price by date, enter `SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date` into the *Elasticsearch SQL query* field.
+.. To obtain the taxless total price by date, enter the following into the *Elasticsearch SQL query* field:
++
+`SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date`
 +
 Although you used the Elasticsearch SQL data source for the metric and area chart elements, each element can display a different data source. Pages and workpads often contain multiple data sources.
 
@@ -111,12 +114,12 @@ Although you used the Elasticsearch SQL data source for the metric and area char
 .. From the *Y-axis* drop-down lists, select *Value*, then select *taxless_total_price*.
 
 [role="screenshot"]
-image::images/canvas-area-chart.png[]
+image::images/canvas-chart-element.png[]
 
 [float]
 === Show how your data changes over time
 
-To focus your data on a specific time range, apply a time filter. 
+To focus your data on a specific time range, add a time filter to your workpad. 
 
 . Click *Add element*, then click *Time filter*.
 
@@ -125,11 +128,11 @@ To focus your data on a specific time range, apply a time filter.
 .. Click *Display*
 
 .. To use the date time field from the sample data, enter `order_date` in the *Column* field, then click *Set*.
-+
-To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the metrics dynamically update.
 
 [role="screenshot"]
-image::images/canvas-time-filter.png[]
+image::images/canvas-timefilter-element.png[]
+
+To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the metrics dynamically update.
 
 Your workpad is now complete! Use the icons in the upper left corner to:
 
