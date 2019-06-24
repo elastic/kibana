@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import monitorList from './fixtures/monitor_list';
 import monitorListDownFiltered from './fixtures/monitor_list_down_filtered';
 import monitorListUpFiltered from './fixtures/monitor_list_up_filtered';
-import { monitorListQueryString } from '../../../../../plugins/uptime/public/queries';
+import { monitorListQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 
 export default function ({ getService }) {
   describe('monitorList query', () => {
