@@ -95,7 +95,7 @@ describe('<RolesGridPage />', () => {
     expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
   });
 
-  it('renders both an edit action for all non-reserved roles, and a clone action for all roles', async () => {
+  it('renders role actions as appropriate', async () => {
     const wrapper = mountWithIntl(<RolesGridPage />);
     const initialIconCount = wrapper.find(EuiIcon).length;
 
@@ -116,9 +116,6 @@ describe('<RolesGridPage />', () => {
     ).toHaveLength(1);
     expect(
       wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-disabled-role"]')
-    ).toHaveLength(1);
-    expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-reserved-role"]')
     ).toHaveLength(1);
   });
 });

@@ -249,11 +249,11 @@ describe('<EditRolePage />', () => {
     });
 
     it('can render when cloning an existing role', () => {
-      // @ts-ignore
       const role: Role = {
         metadata: {
-          _reserved: true,
+          _reserved: false,
         },
+        name: '',
         elasticsearch: {
           cluster: ['all', 'manage'],
           indices: [
@@ -537,11 +537,11 @@ describe('<EditRolePage />', () => {
     });
 
     it('can render when cloning an existing role', () => {
-      // @ts-ignore
       const role: Role = {
         metadata: {
-          _reserved: true,
+          _reserved: false,
         },
+        name: '',
         elasticsearch: {
           cluster: ['all', 'manage'],
           indices: [
