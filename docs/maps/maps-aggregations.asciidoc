@@ -28,7 +28,7 @@ The point location is the weighted centroid for all geo-points in the gridded ce
 [[maps-top-hits-aggregation]]
 === Most recent entities
 
-Most recent entities uses {es} {ref}/search-aggregations-bucket-terms-aggregation[terms aggregation] to group your documents by entity.
+Most recent entities uses {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by entity.
 Then, {ref}/search-aggregations-metrics-top-hits-aggregation[top hits metric aggregation] accumulates the most recent document(s) for each entry.
 
 Set up most recent entities on a *Documents* source by enabling "Show most recent documents by entity"
