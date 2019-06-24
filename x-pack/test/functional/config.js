@@ -27,7 +27,6 @@ import {
   CodeHomePageProvider,
   RollupPageProvider,
   UptimePageProvider,
-  MachineLearningPageProvider,
 } from './page_objects';
 
 import {
@@ -61,6 +60,7 @@ import {
   UptimeProvider,
   InfraSourceConfigurationFlyoutProvider,
   InfraLogStreamProvider,
+  MachineLearningProvider,
 } from './services';
 
 import {
@@ -151,6 +151,7 @@ export default async function ({ readConfigFile }) {
       rollup: RollupPageProvider,
       infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
       infraLogStream: InfraLogStreamProvider,
+      ml: MachineLearningProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -175,7 +176,6 @@ export default async function ({ readConfigFile }) {
       code: CodeHomePageProvider,
       uptime: UptimePageProvider,
       rollup: RollupPageProvider,
-      machineLearning: MachineLearningPageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),

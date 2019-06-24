@@ -7,9 +7,9 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['machineLearning']);
+  const ml = getService('ml');
 
   // eslint-disable-next-line ban/ban
   describe.only('page navigation', () => {
@@ -22,41 +22,41 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     });
 
     it('loads the home page', async () => {
-      await PageObjects.machineLearning.navigateTo();
+      await ml.navigateTo();
     });
 
     it('loads the job management page', async () => {
-      await PageObjects.machineLearning.navigateToJobManagement();
-      await PageObjects.machineLearning.assertJobStatsBarExists();
-      await PageObjects.machineLearning.assertJobTableExists();
-      await PageObjects.machineLearning.assertCreateNewJobButtonExists();
+      await ml.navigateToJobManagement();
+      await ml.assertJobStatsBarExists();
+      await ml.assertJobTableExists();
+      await ml.assertCreateNewJobButtonExists();
     });
 
     it('loads the anomaly explorer page', async () => {
-      await PageObjects.machineLearning.navigateToAnomalyExplorert();
-      await PageObjects.machineLearning.assertAnomalyExplorerEmptyListMessageExists();
+      await ml.navigateToAnomalyExplorert();
+      await ml.assertAnomalyExplorerEmptyListMessageExists();
     });
 
     it('loads the single metric viewer page', async () => {
-      await PageObjects.machineLearning.navigateToSingleMetricViewer();
-      await PageObjects.machineLearning.assertSingleMetricViewerEmptyListMessageExsist();
+      await ml.navigateToSingleMetricViewer();
+      await ml.assertSingleMetricViewerEmptyListMessageExsist();
     });
 
     it('loads the data frame page', async () => {
-      await PageObjects.machineLearning.navigateToDataFrames();
-      await PageObjects.machineLearning.assertDataFrameEmptyListMessageExists();
+      await ml.navigateToDataFrames();
+      await ml.assertDataFrameEmptyListMessageExists();
     });
 
     it('loads the data visualizer page', async () => {
-      await PageObjects.machineLearning.navigateToDataVisualizer();
-      await PageObjects.machineLearning.assertDataVisualizerImportDataCardExists();
-      await PageObjects.machineLearning.assertDataVisualizerIndexDataCardExists();
+      await ml.navigateToDataVisualizer();
+      await ml.assertDataVisualizerImportDataCardExists();
+      await ml.assertDataVisualizerIndexDataCardExists();
     });
 
     it('loads the settings page', async () => {
-      await PageObjects.machineLearning.navigateToSettings();
-      await PageObjects.machineLearning.assertSettingsCalendarLinkExists();
-      await PageObjects.machineLearning.assertSettingsFilterlistLinkExists();
+      await ml.navigateToSettings();
+      await ml.assertSettingsCalendarLinkExists();
+      await ml.assertSettingsFilterlistLinkExists();
     });
   });
 }

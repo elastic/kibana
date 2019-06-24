@@ -22,4 +22,3 @@ export { UpgradeAssistantProvider } from './upgrade_assistant';
 export { CodeHomePageProvider } from './code_page';
 export { RollupPageProvider } from './rollup_page';
 export { UptimePageProvider } from './uptime_page';
-export { MachineLearningPageProvider } from './machine_learning';

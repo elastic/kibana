@@ -6,9 +6,9 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
-export function MachineLearningPageProvider({
-  getPageObjects,
+export function MachineLearningProvider({
   getService,
+  getPageObjects,
 }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
