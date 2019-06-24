@@ -18,11 +18,11 @@
  */
 
 // @ts-ignore
-import { tsvb } from '../tsvb_fn';
+import { tsvb } from './tsvb_fn';
 // @ts-ignore
-import { MetricsVisProvider } from '../kbn_vis_types';
-import { TypesService } from '../../../visualizations/public/types/types_service';
-import { InterpreterService } from '../interpreter';
+import { MetricsVisProvider } from './kbn_vis_type';
+import { TypesService } from '../../visualizations/public/types';
+import { InterpreterService } from './interpreter';
 
 export class Plugin {
   private readonly visTypes: TypesService;
@@ -39,3 +39,5 @@ export class Plugin {
     this.visTypes.setup().VisTypesRegistryProvider.register(MetricsVisProvider);
   }
 }
+
+new Plugin().setup();

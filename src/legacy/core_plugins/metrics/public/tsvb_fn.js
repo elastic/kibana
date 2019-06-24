@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { MetricsRequestHandlerProvider } from './kbn_vis_types/request_handler';
+import { MetricsRequestHandlerProvider } from './request_handler';
 import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';

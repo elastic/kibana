@@ -21,7 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
-import { fetchIndexPatternFields } from '../lib/fetch_fields';
+import { fetchIndexPatternFields } from './lib/fetch_fields';
 
 function ReactEditorControllerProvider(config) {
   class ReactEditorController {

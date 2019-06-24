@@ -23,7 +23,7 @@ import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
-import { PANEL_TYPES } from '../../common/panel_types';
+import { PANEL_TYPES } from '../common/panel_types';
 
 export function MetricsVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -72,11 +72,11 @@ export function MetricsVisProvider(Private) {
         show_legend: 1,
         show_grid: 1,
       },
-      component: require('../components/vis_editor').VisEditor,
+      component: require('./components/vis_editor').VisEditor,
     },
     editor: ReactEditorController,
     editorConfig: {
-      component: require('../components/vis_editor').VisEditor,
+      component: require('./components/vis_editor').VisEditor,
     },
     options: {
       showQueryBar: false,

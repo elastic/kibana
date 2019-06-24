@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { validateInterval } from '../lib/validate_interval';
+import { validateInterval } from './lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
