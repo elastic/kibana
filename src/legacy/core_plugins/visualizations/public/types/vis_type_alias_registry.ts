@@ -17,16 +17,22 @@
  * under the License.
  */
 
-import { getDocLink } from '../../documentation_links';
-import { uiModules } from '../../modules';
+export interface VisTypeAlias {
+  aliasUrl: string;
+  name: string;
+  title: string;
+  icon: string;
+  description: string;
+}
 
-const module = uiModules.get('kibana');
+const registry: VisTypeAlias[] = [];
 
-module.directive('documentationHref', function () {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attributes) {
-      element.attr('href', getDocLink(attributes.documentationHref));
+export const visTypeAliasRegistry = {
+  get: () => [...registry],
+  add: (newVisTypeAlias: VisTypeAlias) => {
+    if (registry.find(visTypeAlias => visTypeAlias.name === newVisTypeAlias.name)) {
+      throw new Error(`${newVisTypeAlias.name} already registered`);
     }
-  };
-});
+    registry.push(newVisTypeAlias);
+  },
+};
