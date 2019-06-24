@@ -33,6 +33,8 @@ export class Plugin {
     plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVisProvider);
   }
 
+  public start() {}
+
   public stop() {}
 }
 
