@@ -21,4 +21,4 @@
  * Saved Objects Namespace.
  * @public
  */
-export type SavedObjectsNamespace = string | undefined | symbol;
+export type SavedObjectsNamespace = string | undefined;

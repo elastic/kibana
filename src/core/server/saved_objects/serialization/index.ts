@@ -25,7 +25,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import uuid from 'uuid';
-import { SavedObjectsNamespace } from '../';
+import { SavedObjectsNamespace } from 'src/core/server/saved_objects';
 import { SavedObjectsSchema } from '../schema';
 import { decodeVersion, encodeVersion } from '../version';
 import {
@@ -78,12 +78,6 @@ export type SanitizedSavedObjectDoc = SavedObjectDoc & Referencable;
 function assertNonEmptyString(value: string, name: string) {
   if (!value || typeof value !== 'string') {
     throw new TypeError(`Expected "${value}" to be a ${name}`);
-  }
-}
-
-function assertNotSymbol(value: unknown, name: string) {
-  if (typeof value === 'symbol') {
-    throw new TypeError(`Expected "${String(value)}" to be a ${name}`);
   }
 }
 
@@ -175,7 +169,6 @@ export class SavedObjectsSerializer {
    * @param {string} id - The id of the saved object
    */
   public generateRawId(namespace: SavedObjectsNamespace, type: string, id?: string) {
-    assertNotSymbol(namespace, 'namespace');
     const namespacePrefix =
       namespace && !this.schema.isNamespaceAgnostic(type) ? `${String(namespace)}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
@@ -184,7 +177,6 @@ export class SavedObjectsSerializer {
   private trimIdPrefix(namespace: SavedObjectsNamespace, type: string, id: string) {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
-    assertNotSymbol(namespace, 'namespace');
 
     const namespacePrefix =
       namespace && !this.schema.isNamespaceAgnostic(type) ? `${String(namespace)}:` : '';
