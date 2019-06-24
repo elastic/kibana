@@ -48,7 +48,7 @@ export interface ProxyServiceStart {
   unassignResource: (resource: string) => Promise<void>;
   proxyResource: (resource: string) => (req: KibanaRequest) => Promise<any>;
   proxyRequest: (req: KibanaRequest, resource: string) => Promise<any>;
-  getAllocation: () => Observable<[string, RoutingNode]>;
+  getAllocation: () => Promise<RoutingTable>;
 }
 
 export const ProxyConfig = {
