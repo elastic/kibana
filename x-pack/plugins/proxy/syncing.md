@@ -92,6 +92,13 @@ Upon proxy request, the routing table will be retrieved from elasticsearch and c
 
 The heartbeat doc consists of key/value pairs, where the key is the name of the node, and the value is a monotonically increasing integer. Every time the node checks in, it'll increase this integer by one. On every second heartbeat loop, we will check to see what has been updated. If a node hasn't updated it's integer in two cycles, we will move it to a new `Closing` state. If, on the next pass, it is stil closing, then we will drop that node and it's resources. If it has updated again, we will move the resources back into the `Started` state.
 
+### Issues
+
+- Using `painless` makes this system hard to test; there is no REPL nor syntax-checker available, so testing can only be accomplished via integration tests
+- There still exists potential for `conflict` on updates; we are no longer maintanining a local document state so we have removed a major source for it, but two nodes attempting to update at the same time will still generate a conflict. Ideally the conflict is modestly irrelevant since the potential exists when running generic updates to cull deadnotes
+- The complexity of this system to detect and remove dead nodes is much higher than the original system.
+- Additional latency is involved since the routing document must be retrieved upon each request
+
 ## Sync Order Traversal
 
 _note: this solution has been deprecated in favor of real time document retrieval_
@@ -159,3 +166,4 @@ When a new node wants to connect, it will get the document from the server and s
 
 - The amount of time it takes for a resource to be made available is the `updateInterval * n` where `n` is the number of clients. We can make the `updateInterval` smaller and allow clients to check more frequently, but with large numbers of nodes in a cluster this will cause delay before making a resource available for routing purposes.
 - Processing the document from elasticsearch will take longer as we will have to check the validity of resources against the lowest document version available.
+- This system relies on properly synchronized clocks across the nodes.
