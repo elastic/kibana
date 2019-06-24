@@ -17,11 +17,17 @@
  * under the License.
  */
 
-import { DataPlugin } from './index';
+import { PluginInitializerContext, CoreSetup } from '../../../../../src/core/public';
+import { DataPublicPlugin } from './index';
+
+const initializerContext: PluginInitializerContext = {};
+
+// core shim
+const coreSetup = {} as CoreSetup;
 
 /**
- * We export data here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
+ * We export data here so that users importing from '../core_plugins/data/setup'
+ * will receive the response value of the `setup` contract, mimicking the
+ * data that will eventually be injected by the new platform.
  */
-export const data = new DataPlugin().setup();
+export const data = new DataPublicPlugin(initializerContext).setup(coreSetup);

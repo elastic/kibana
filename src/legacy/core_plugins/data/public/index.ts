@@ -23,29 +23,41 @@
 // of the ExpressionExectorService
 // @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
+
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../../../src/core/public';
+
+// Services
 import { ExpressionsService, ExpressionsSetup } from './expressions';
 import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
-export class DataPlugin {
+/** @public */
+export interface DataPluginSetup {
+  expressions: ExpressionsSetup;
+  indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
+  search: SearchSetup;
+  query: QuerySetup;
+}
+
+export class DataPublicPlugin implements Plugin<DataPluginSetup, void> {
   // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService;
-  private readonly filter: FilterService;
-  private readonly indexPatterns: IndexPatternsService;
-  private readonly search: SearchService;
-  private readonly query: QueryService;
+  private readonly expressions = new ExpressionsService();
+  private readonly filter = new FilterService();
+  private readonly indexPatterns = new IndexPatternsService();
+  private readonly search = new SearchService();
+  private readonly query = new QueryService();
 
-  constructor() {
-    this.indexPatterns = new IndexPatternsService();
-    this.filter = new FilterService();
-    this.query = new QueryService();
-    this.search = new SearchService();
-    this.expressions = new ExpressionsService();
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(): DataSetup {
+  public setup(core: CoreSetup): DataPluginSetup {
     // TODO: this is imported here to avoid circular imports.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getInterpreter } = require('plugins/interpreter/interpreter');
@@ -66,6 +78,8 @@ export class DataPlugin {
     };
   }
 
+  public start(core: CoreStart) {}
+
   public stop() {
     this.expressions.stop();
     this.indexPatterns.stop();
@@ -75,19 +89,8 @@ export class DataPlugin {
   }
 }
 
-/** @public */
-export interface DataSetup {
-  expressions: ExpressionsSetup;
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  search: SearchSetup;
-  query: QuerySetup;
-}
-
 /** @public types */
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
-
-/** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
 export { Query } from './query';
 export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';
