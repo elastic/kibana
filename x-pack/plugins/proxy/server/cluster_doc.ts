@@ -17,6 +17,13 @@ import {
 } from '../../../../src/core/server';
 
 import { ProxyPluginType } from './proxy';
+import {
+  unassignResource,
+  updateHeartbeat,
+  removeHeartbeat,
+  cullDeadResources,
+  cullDeadNodes,
+} from './painless-queries';
 
 interface LivenessNode {
   lastUpdate: number;
@@ -144,7 +151,7 @@ export class ClusterDocClient {
   public async unassignResource(resource: string) {
     const client = await this.getESClient();
     const body = {
-      script: `if (ctx['source'].containsKey(resource)) { ctx['source'].remove(resource); }`,
+      script: unassignResource,
       params: {
         resource,
       },
@@ -187,6 +194,7 @@ export class ClusterDocClient {
   }
 
   private async getHeartbeats() {
+    console.log('getting heartbeats');
     const client = await this.getESClient();
     const params = {
       id: this.heartbeatDoc,
@@ -203,18 +211,20 @@ export class ClusterDocClient {
    * @param remove [boolean] should this node be deleted
    */
   private async updateHeartbeat(remove: boolean = false) {
+    console.log('update heartbeats');
     const client = await this.getESClient();
-    const body = {};
+    console.log('got client');
+    let body = {};
     if (remove) {
-      body[this.nodeName] = {
-        script: `if (ctx['_source'].containsKey(resource)) { ctx['_source'].remove(resource);}`,
+      body = {
+        script: removeHeartbeat,
         params: {
           resource: this.nodeName,
         },
       };
     } else {
-      body[this.nodeName] = {
-        script: `ctx['_source'].put(resource, ctx['_source'].getOrDefault(resource, 0) + 1)`,
+      body = {
+        script: updateHeartbeat,
         params: {
           resource: this.nodeName,
         },
@@ -237,25 +247,10 @@ export class ClusterDocClient {
    * @param nodes
    */
   private async cullDeadResources(nodes: string[]) {
+    console.log('removing dead resources');
     const client = await this.getESClient();
     const body = {
-      script: `for (node in ctx['_source'].entrySet()) {
-        data = node.getValue();
-        key = node.getKey();
-        if (!nodes.contains(data.get('node'))) {
-          if (data.get('state') == 3) {
-            ctx['_source'].remove(key);
-          } else {
-            data.put('state', 3)
-            ctx['_source'].put(key, data)
-          }
-        } else {
-          if (data.get('state') == 3) {
-            data.put('state', 1)
-            ctx['_source'].put(key, data)
-          }
-        }
-      }`,
+      script: cullDeadResources,
       params: {
         nodes,
       },
@@ -275,15 +270,11 @@ export class ClusterDocClient {
    * same way, we ignore conflicts here -- one of them will win eventually
    */
   private async cullDeadNodes() {
+    console.log('removing dead nodes');
     const client = await this.getESClient();
     const threshold = new Date().getTime() - this.timeoutThreshold;
     const body = {
-      script: `for (node in ctx['_source'].entrySet()) {
-        if (node.getValue() == nodeList[key]) {
-          key = node.getKey();
-          ctx['_source'].remove(key)
-        }
-      }`,
+      script: cullDeadNodes,
       params: {
         nodeList: this.nodeCache,
       },
@@ -299,14 +290,35 @@ export class ClusterDocClient {
     await this.cullDeadResources(Object.keys(nodes));
   }
 
+  /**
+   * The logic for this loop works as such:
+   * Since a node has to miss _two_ heartbeat updates in a row, the logic for how
+   * this works is controlled by a flag.
+   *
+   * It will always update the current node's heartbeat, and then on even loop
+   * runs (total count of loop is even) it'll cache the current node list (as it
+   * appears after the heartbeat is updated), and then flip the cull flag
+   *
+   * On odd loops, it'll then remove dead nodes which can be determined by looking
+   * at which nodes haven't updated since we cached the node list. Once they've
+   * missed this single check-in, the resource that node represents is moved into
+   * "closing". If on the next odd loop, that resource is still not in the heartbeat
+   * document, we remove the resource from the list
+   *
+   * Even loops: update heartbeat, cache current node list, flip cull flag to true
+   * Odd loops: update heartbeat, cull nodes, cull resources, flip cull flag to false
+   *
+   */
   private async mainLoop() {
+    console.log('CALLING MAIN LOOP', this.runCull);
     try {
       await this.updateHeartbeat();
       // we only want to run the cull every other pass so we'll fiddle with
       // a boolean like a real programmer
       if (this.runCull) {
-        this.runCull = false;
+        console.log('running cull');
         await this.cullDeadNodes();
+        this.runCull = false;
       } else {
         this.nodeCache = await this.getHeartbeats();
         this.runCull = true;
