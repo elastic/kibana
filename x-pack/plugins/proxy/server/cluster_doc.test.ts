@@ -23,7 +23,7 @@ import {
   removeHeartbeat,
   cullDeadResources,
   cullDeadNodes,
-} from './painless-queries';
+} from './painless_queries';
 import { JsonLayout } from '../../../../src/core/server/logging/layouts/json_layout';
 
 const logger = loggingServiceMock.create();

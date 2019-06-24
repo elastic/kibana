@@ -132,9 +132,9 @@ test('creates and sets up proxy server', async () => {
   expect(clusterDocClient.setup.mock.calls.length).toBe(1);
   expect(httpService.createNewServer.mock.calls.length).toBe(1);
   expect(mockReadFile.mock.calls.length).toBe(3);
-  const passedConfig = httpService.createNewServer.mock.calls[0][0];
-  expect(passedConfig.ssl).toBeTruthy();
-  expect(passedConfig.ssl!.certificate).toBe('foo');
+  const passedConfig = httpService.createNewServer.mock.calls[0][1];
+  expect(passedConfig).toBeTruthy();
+  expect(passedConfig.certificate).toBe('foo');
 
   const proxyStart = await proxy.start();
 
@@ -265,52 +265,4 @@ test('proxy resource', async () => {
     expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(1);
     expect(err.message).toBe('Unable to complete request to beep for /foo/bar because robots');
   }
-});
-
-test('proxy resource retry', async () => {
-  const clusterDocClient = {
-    setup: jest.fn(),
-    start: jest.fn(),
-    assignResource: jest.fn(),
-    unassignResource: jest.fn(),
-    getNodeForResource: jest.fn(() => ({
-      type: 'code',
-      state: RouteState.Initializing,
-      node: 'beep',
-    })),
-    stop: noop,
-  };
-
-  mockClusterDocClient.mockImplementation(() => clusterDocClient);
-  const elasticClient = elasticsearchServiceMock.createSetupContract();
-  const httpService = httpServiceMock.createSetupContract();
-
-  const core = {
-    elasticsearch: elasticClient,
-    http: httpService,
-  };
-
-  mockReadFile.mockImplementation((x, cb) => cb(null, Buffer.from('foo')));
-
-  const proxy = new ProxyService({ config: configService({}), env, logger });
-  await proxy.setup(core, {});
-  const proxyStart = await proxy.start();
-  await proxyStart.assignResource('/foo/bar', 'code', RouteState.Started, proxy.nodeName);
-  const agent = proxyStart.proxyResource('/foo/bar');
-  const r = httpServerMock.createRawRequest({
-    headers: {},
-    url: new URL('https://beep/foo/bar'),
-    path: '/foo/bar',
-    method: 'get',
-  });
-  const req = KibanaRequest.from(r);
-
-  try {
-    await agent(req);
-  } catch (err) {
-    expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(3);
-    expect(err.message).toBe('maxRetries exceeded and node has not yet initialized');
-  }
-
-  await proxy.stop();
 });

@@ -23,7 +23,7 @@ import {
   removeHeartbeat,
   cullDeadResources,
   cullDeadNodes,
-} from './painless-queries';
+} from './painless_queries';
 
 interface LivenessNode {
   lastUpdate: number;
