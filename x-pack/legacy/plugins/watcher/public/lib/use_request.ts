@@ -61,7 +61,7 @@ export const useRequest = ({
   // Tied to every render and bound to each request.
   let isOutdatedRequest = false;
 
-  const createRequest = async () => {
+  const createRequest = async (isInitialRequest = true) => {
     // Set a neutral state for a non-request.
     if (!path) {
       setError(null);
@@ -71,8 +71,12 @@ export const useRequest = ({
     }
 
     setError(null);
-    setData(initialData);
-    setIsLoading(true);
+
+    // Only set loading state to true and initial data on the first request
+    if (isInitialRequest) {
+      setIsLoading(true);
+      setData(initialData);
+    }
 
     const { data: responseData, error: responseError } = await sendRequest({
       path,
@@ -99,7 +103,8 @@ export const useRequest = ({
       createRequest();
 
       if (interval) {
-        const intervalRequest = setInterval(createRequest, interval);
+        const intervalRequest = setInterval(createRequest.bind(null, false), interval);
+
         return () => {
           cancelOutdatedRequest();
           clearInterval(intervalRequest);
