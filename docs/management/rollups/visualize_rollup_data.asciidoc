@@ -6,7 +6,7 @@ beta[]
 
 You can visualize your rolled up data in a variety of charts, tables, maps, and 
 more. Most visualizations support rolled up data, with the exception of 
-Timelion, Visual Builder, and Vega visualizations. 
+Timelion, TSVB, and Vega visualizations. 
 
 You create an index pattern for rolled up data the same way you do for any data, 
 in *Management > Kibana > Index patterns*. Clicking *Create index pattern* includes 

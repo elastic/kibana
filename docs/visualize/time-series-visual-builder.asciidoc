@@ -1,84 +1,72 @@
-[[time-series-visual-builder]]
-== Time Series Visual Builder
+[[TSVB]]
+== Visualize your data with TSVB
 
-Time Series Visual Builder is a time series data visualizer with an emphasis
-on allowing you to use the full power of Elasticsearch aggregation framework.
-Time Series Visual Builder allows you to combine an infinite number of
-aggregations and pipeline aggregations to display complex data in a meaningful way.
+TSVB is a time series data visualizer that allows you to use the full power of 
+Elasticsearch aggregation framework. With TSVB, you can combine an infinite 
+number of aggregations and pipeline aggregations to display complex data in a 
+meaningful way.
 
-image:images/tsvb-screenshot.png["Time Series Visual Builder Interface"]
+image:images/tsvb-screenshot.png["TSVB Interface"]
 
+[float]
 [[time-series-visualizations]]
-=== Featured Visualizations
+=== TSVB visualizations
 
-Time Series Visual Build comes with 6 different visualization types. You can
-switch between each visualization type using the tabbed picker at the top of the
-interface.
-
+TSVB comes with 6 different visualizations. To switch between the 
+visualizations, use the tabbed picker at the top of the interface.
 
 ==== Time Series
 
-A histogram visualization that supports area, line, bar, and steps along with
-multiple y-axis. You can fully customize the colors, points, line thickness
-and fill opacity. This visualization also supports time shifting to compare two
-time periods. This visualization also supports annotations which can be loaded from
-a separate index based on a query.
+A histogram visualization that supports area, line, bar, and steps along with 
+multiple y-axis. Fully customize the colors, points, line thickness, and fill 
+opacity. Compare two time periods by using time shifting, and use annotations 
+that are loaded from a separate index based on a query.
 
 image:images/tsvb-screenshot.png["Time Series Visualization"]
 
-
 ==== Metric
 
-A visualization for displaying the latest number in a series. This visualization
-supports 2 metrics; a primary metric and a secondary metric. The labels and
-backgrounds can be fully customizable based on a set of rules.
+A visualization that displays the latest number in a series. With the Metric 
+visualization, you can use a primary and secondary metric, and customize the 
+labels and backgrounds based on a set of rules.
 
 image:images/tsvb-metric.png["Metric Visualization"]
 
-
 ==== Top N
 
-This is a horizontal bar chart where the y-axis is based on a series of metrics
-and the x-axis is the latest value in those series; sorted in descending order.
-The color of the bars are fully customizable based on set of rules.
+A horizontal bar chart where the y-axis is based on a series of metrics, and the 
+x-axis is the latest value in the series. The values are displayed in descending 
+order, and you can customize the color of the bars based on a set of rules.
 
 image:images/tsvb-top-n.png["Top N Visualization"]
 
-
 ==== Gauge
 
-This is a single value gauge visualization based on the latest value in a series.
-The face of the gauge can either be a half-circle gauge or full-circle. You
+A single value gauge visualization based on the latest value in a series.
+The face of the gauge displays as a half-circle or full-circle. You
 can customize the thicknesses of the inner and outer lines to achieve a desired
-design aesthetic. The color of the gauge and the text are fully customizable based
-on a set of rules.
+design aesthetic, and customize the gauge and text color based on a set of rules.
 
 image:images/tsvb-gauge.png["Gauge Visualization"]
 
-
 ==== Markdown
 
-This visualization allows you to enter Markdown text and embed Mustache
-template syntax to customize the Markdown with data based on a set of series.
+To customize the Markdown with data based on a set of series, enter Markdown 
+text and embed Mustache template syntax.
 
 image:images/tsvb-markdown.png["Markdown Visualization"]
 
-
 ==== Table
 
-A table visualization allows you to display data from multiple time series.
-You define which field group to show in the rows and what columns of data to display.
+Display data from multiple time series by defining the field group to show in 
+the rows, and the columns of data to display.
 
 image:images/tsvb-table.png["Table Visualization"]
 
-
 [[time-series-interface]]
-=== Interface Overview
+=== Using the visualization interface
 
-The user interface for each visualization is compose of a "Data" tab and "Panel
-Options". The only exception to that is the Time Series and Markdown visualizations;
-the Time Series has a third tab for annotations and the Markdown has a third tab for
-the editor.
+Choose how you want to display your data using the interface options.
 
 ==== Data Tab
 
