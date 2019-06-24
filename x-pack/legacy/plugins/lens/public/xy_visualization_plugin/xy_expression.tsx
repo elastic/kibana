@@ -17,6 +17,7 @@ import {
   BarSeries,
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
+import { i18n } from '@kbn/i18n';
 import { XYArgs } from './types';
 import { KibanaDatatable } from '../types';
 import { RenderFunction } from './plugin';
@@ -35,38 +36,54 @@ export interface XYRender {
 export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
-  help: 'An X/Y chart',
+  help: i18n.translate('xpack.lens.xyChart.help', {
+    defaultMessage: 'An X/Y chart',
+  }),
   args: {
     seriesType: {
       types: ['string'],
       options: ['bar', 'line', 'area'],
-      help: 'The type of chart to display.',
+      help: i18n.translate('xpack.lens.xyChart.seriesType.help', {
+        defaultMessage: 'The type of chart to display.',
+      }),
     },
     title: {
       types: ['string'],
-      help: 'The char title.',
+      help: i18n.translate('xpack.lens.xyChart.chartTitle.help', {
+        defaultMessage: 'The chart title.',
+      }),
     },
     legend: {
       types: ['lens_xy_legendConfig'],
-      help: 'Configure the chart legend.',
+      help: i18n.translate('xpack.lens.xyChart.legend.help', {
+        defaultMessage: 'Configure the chart legend.',
+      }),
     },
     y: {
       types: ['lens_xy_yConfig'],
-      help: 'The y axis configuration',
+      help: i18n.translate('xpack.lens.xyChart.yConfig.help', {
+        defaultMessage: 'The y axis configuration',
+      }),
     },
     x: {
       types: ['lens_xy_xConfig'],
-      help: 'The x axis configuration',
+      help: i18n.translate('xpack.lens.xyChart.xConfig.help', {
+        defaultMessage: 'The x axis configuration',
+      }),
     },
     splitSeriesAccessors: {
       types: ['string'],
       multi: true,
-      help: 'The columns used to split the series.',
+      help: i18n.translate('xpack.lens.xyChart.splitSeriesAccessors.help', {
+        defaultMessage: 'The columns used to split the series.',
+      }),
     },
     stackAccessors: {
       types: ['string'],
       multi: true,
-      help: 'The columns used to stack the series.',
+      help: i18n.translate('xpack.lens.xyChart.stackAccessors.help', {
+        defaultMessage: 'The columns used to stack the series.',
+      }),
     },
   },
   context: {
@@ -93,7 +110,9 @@ export interface XYChartProps {
 export const xyChartRenderer: RenderFunction<XYChartProps> = {
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
-  help: 'X/Y Chart Renderer',
+  help: i18n.translate('xpack.lens.xyChart.renderer.help', {
+    defaultMessage: 'X/Y Chart Renderer',
+  }),
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {

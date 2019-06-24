@@ -5,6 +5,7 @@
  */
 
 import { Position } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import {
   ExpressionFunction,
   ArgumentType,
@@ -33,12 +34,16 @@ export const legendConfig: ExpressionFunction<
   args: {
     isVisible: {
       types: ['boolean'],
-      help: 'Specifies whether or not the legend is visible.',
+      help: i18n.translate('xpack.lens.xyChart.isVisible.help', {
+        defaultMessage: 'Specifies whether or not the legend is visible.',
+      }),
     },
     position: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: 'Specifies the legend position.',
+      help: i18n.translate('xpack.lens.xyChart.position.help', {
+        defaultMessage: 'Specifies the legend position.',
+      }),
     },
   },
   fn: function fn(_context: unknown, args: LegendConfig) {
@@ -58,16 +63,22 @@ interface AxisConfig {
 const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } = {
   title: {
     types: ['string'],
-    help: 'The axis title',
+    help: i18n.translate('xpack.lens.xyChart.title.help', {
+      defaultMessage: 'The axis title',
+    }),
   },
   showGridlines: {
     types: ['boolean'],
-    help: 'Show / hide axis grid lines.',
+    help: i18n.translate('xpack.lens.xyChart.showGridlines.help', {
+      defaultMessage: 'Show / hide axis grid lines.',
+    }),
   },
   position: {
     types: ['string'],
     options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-    help: 'The position of the axis',
+    help: i18n.translate('xpack.lens.xyChart.axisPosition.help', {
+      defaultMessage: 'The position of the axis',
+    }),
   },
 };
 
@@ -89,7 +100,9 @@ export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConf
     ...axisConfig,
     accessors: {
       types: ['string'],
-      help: 'The columns to display on the y axis.',
+      help: i18n.translate('xpack.lens.xyChart.accessors.help', {
+        defaultMessage: 'The columns to display on the y axis.',
+      }),
       multi: true,
     },
   },
@@ -119,7 +132,9 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
     ...axisConfig,
     accessor: {
       types: ['string'],
-      help: 'The column to display on the x axis.',
+      help: i18n.translate('xpack.lens.xyChart.accessor.help', {
+        defaultMessage: 'The column to display on the x axis.',
+      }),
     },
   },
   fn: function fn(_context: unknown, args: XConfig) {

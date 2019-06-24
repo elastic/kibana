@@ -11,19 +11,15 @@ import { MetricConfigPanel } from './metric_config_panel';
 import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '../types';
 import { State } from './types';
 import { NativeRendererProps } from '../native_renderer';
+import { createMockDatasource } from '../editor_frame_plugin/mocks';
 
 describe('MetricConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
 
   function mockDatasource(): DatasourcePublicAPI {
     return {
-      duplicateColumn: () => [],
-      getOperationForColumnId: () => null,
+      ...createMockDatasource().publicAPIMock,
       generateColumnId: () => 'TESTID',
-      getTableSpec: () => [],
-      moveColumnTo: () => {},
-      removeColumnInTableSpec: () => [],
-      renderDimensionPanel: () => {},
     };
   }
 

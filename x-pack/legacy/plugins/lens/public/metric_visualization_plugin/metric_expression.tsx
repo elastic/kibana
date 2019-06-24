@@ -81,7 +81,7 @@ export const metricChartRenderer: RenderFunction<MetricChartProps> = {
 
 export function MetricChart({ data, args }: MetricChartProps) {
   const { title, accessor } = args;
-  const row = data.rows[0] as { [k: string]: number };
+  const row = data.rows[0];
   // TODO: Use field formatters here...
   const value = Number(Number(row[accessor]).toFixed(3)).toString();
 

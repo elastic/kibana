@@ -12,7 +12,7 @@ import {
   functionsRegistry,
   // @ts-ignore untyped dependency
 } from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { ExpressionFunction } from '../../../../../src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { metricChart, metricChartRenderer } from './metric_expression';
 
 // TODO these are intermediary types because interpreter is not typed yet
