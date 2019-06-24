@@ -17,20 +17,22 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { i18n } from '@kbn/i18n';
 import { ReactEditorControllerProvider } from './editor_controller';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+import { visFactory } from '../../visualizations/public';
 
 import { PANEL_TYPES } from '../common/panel_types';
 
-export function MetricsVisProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-  const ReactEditorController = Private(ReactEditorControllerProvider).handler;
-  const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
+const uiSettings = chrome.getUiSettingsClient();
 
-  return VisFactory.createReactVisualization({
+export function MetricsVis() {
+  const ReactEditorController = new ReactEditorControllerProvider(uiSettings).handler;
+  const metricsRequestHandler = new MetricsRequestHandlerProvider(uiSettings).handler;
+
+  return visFactory.createReactVisualization({
     name: 'metrics',
     title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
     description: i18n.translate('tsvb.kbnVisTypes.metricsDescription', {

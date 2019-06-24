@@ -22,7 +22,7 @@ import { functionsRegistry } from 'plugins/interpreter/registries';
 // @ts-ignore
 import { tsvb } from './tsvb_fn';
 // @ts-ignore
-import { MetricsVisProvider } from './kbn_vis_type';
+import { MetricsVis } from './kbn_vis_type';
 import { visualizations } from '../../visualizations/public';
 
 export class Plugin {
@@ -30,7 +30,7 @@ export class Plugin {
   public setup(core, plugins) {
     plugins.data.expressions.functionsRegistry.register(tsvb);
     // register the provider with the visTypes registry so that other know it exists
-    plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVisProvider);
+    plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVis);
   }
 
   public start() {}
