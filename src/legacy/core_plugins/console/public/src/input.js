@@ -129,9 +129,11 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404);
 
           if (isSuccess) {
-            if (xhr.status !== 404) {
+            if (xhr.status !== 404 && settings.getPolling()) {
               // If the user has submitted a request against ES, something in the fields, indices, aliases,
-              // or templates may have changed, so we'll need to update this data.
+              // or templates may have changed, so we'll need to update this data. Assume that if
+              // the user disables polling they're trying to optimize performance or otherwise
+              // preserve resources, so they won't want this request sent either.
               mappings.retrieveAutoCompleteInfo();
             }
 
@@ -141,7 +143,8 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             let value = xhr.responseText;
             const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
 
-            if (mode === null || mode === 'application/json') {
+            // Apply triple quotes to output.
+            if (settings.getTripleQuotes() && (mode === null || mode === 'application/json')) {
               // assume json - auto pretty
               try {
                 value = utils.expandLiteralStrings(value);

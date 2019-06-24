@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { errorListQueryString } from '../../../../../plugins/uptime/public/queries';
+import { errorListQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import errorList from './fixtures/error_list';
 import errorListFilteredById from './fixtures/error_list_filtered_by_id';
 import errorListFilteredByPort from './fixtures/error_list_filtered_by_port';
