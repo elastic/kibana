@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFieldSearch,
-  EuiText,
-  EuiGlobalToastList,
-} from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
