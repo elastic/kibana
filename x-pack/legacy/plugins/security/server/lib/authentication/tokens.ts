@@ -69,11 +69,9 @@ export class Tokens {
       // with updated cookie, then user will have only that old cookie with expired access token and refresh token
       // that has been used already.
       //
-      // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
-      // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
-      // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
-      // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
-      // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
+      // Even though the issue is solved to large extent by a predefined 60s window during which ES allows to use the
+      // same refresh token multiple times yielding the same refreshed access/refresh token pair it's still possible
+      // to hit the case when refresh token is no longer valid.
       if (getErrorStatusCode(err) === 400) {
         this.debug('Refresh token is either expired or already used.');
         return null;
@@ -93,8 +91,8 @@ export class Tokens {
     this.debug('Invalidating access/refresh token pair.');
 
     let invalidationError;
-    let invalidatedTokensCount;
     if (refreshToken) {
+      let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (await this.options.client.callWithInternalUser(
           'shield.deleteAccessToken',
@@ -110,7 +108,7 @@ export class Tokens {
         this.debug('Refresh token was already invalidated.');
       } else if (invalidatedTokensCount === 1) {
         this.debug('Refresh token has been successfully invalidated.');
-      } else {
+      } else if (invalidatedTokensCount > 1) {
         this.debug(
           `${invalidatedTokensCount} refresh tokens were invalidated, this is unexpected.`
         );
@@ -118,6 +116,7 @@ export class Tokens {
     }
 
     if (accessToken) {
+      let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (await this.options.client.callWithInternalUser(
           'shield.deleteAccessToken',
@@ -132,7 +131,7 @@ export class Tokens {
         this.debug('Access token was already invalidated.');
       } else if (invalidatedTokensCount === 1) {
         this.debug('Access token has been successfully invalidated.');
-      } else {
+      } else if (invalidatedTokensCount > 1) {
         this.debug(`${invalidatedTokensCount} access tokens were invalidated, this is unexpected.`);
       }
     }

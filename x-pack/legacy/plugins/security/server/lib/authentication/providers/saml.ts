@@ -413,8 +413,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(err);
     }
 
-    // If refresh token is no longer valid, then we should clear session and redirect user to the
-    // login page to re-authenticate, or fail if redirect isn't possible.
+    // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
+    // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
+    // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
+    // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
+    // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
     if (refreshedTokenPair === null) {
       if (canRedirectRequest(request)) {
         this.debug('Both access and refresh tokens are expired. Re-initiating SAML handshake.');

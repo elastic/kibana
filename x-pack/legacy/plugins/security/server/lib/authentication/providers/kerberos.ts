@@ -235,8 +235,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(err);
     }
 
-    // If refresh token is no longer valid, then we should clear session and redirect user to the
-    // login page to re-authenticate, or fail if redirect isn't possible.
+    // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
     if (refreshedTokenPair === null) {
       this.debug('Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.');
       return this.authenticateViaSPNEGO(request, state);
