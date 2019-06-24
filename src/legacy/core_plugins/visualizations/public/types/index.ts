@@ -19,14 +19,17 @@
 
 export {
   TypesService,
+  visFactory,
+  DefaultEditorSize,
   // types
   TypesSetup,
   Vis,
   VisParams,
   VisProvider,
   VisState,
-  VisualizationController,
-  VisType,
+  // VisualizationController,
+  // VisType,
+  VisTypeAlias,
   VisTypesRegistry,
   Status,
 } from './types_service';

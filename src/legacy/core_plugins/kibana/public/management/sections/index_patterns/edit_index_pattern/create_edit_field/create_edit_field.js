@@ -19,7 +19,7 @@
 
 import { Field } from 'ui/index_patterns/_field';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -104,7 +104,6 @@ uiRoutes
     controllerAs: 'fieldSettings',
     controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, config) {
       const getConfig = (...args) => config.get(...args);
-      const docTitle = Private(DocTitleProvider);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
 
