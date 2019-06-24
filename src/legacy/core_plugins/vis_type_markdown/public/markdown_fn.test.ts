@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaMarkdown } from './markdown_fn';
 

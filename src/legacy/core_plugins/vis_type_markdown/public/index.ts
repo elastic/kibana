@@ -26,13 +26,15 @@ import { kibanaMarkdown } from './markdown_fn';
 import { functionsRegistry } from '../../interpreter/public/registries';
 import { visualizations, VisualizationsSetup } from '../../visualizations/public';
 
-class MarkdownVisTypePlugin {
+class VisTypeMarkdownPlugin {
   constructor() {}
 
   public setup(visualizationsSetup: VisualizationsSetup) {
     visualizationsSetup.types.VisTypesRegistryProvider.register(() => markdownVis);
     functionsRegistry.register(kibanaMarkdown);
   }
+
+  public start() {}
 
   public stop() {}
 }
@@ -42,4 +44,4 @@ class MarkdownVisTypePlugin {
  * will automatically receive the response value of the `setup` contract, mimicking
  * the data that will eventually be injected by the new platform.
  */
-new MarkdownVisTypePlugin().setup(visualizations);
+new VisTypeMarkdownPlugin().setup(visualizations);

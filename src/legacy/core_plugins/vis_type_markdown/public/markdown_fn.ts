@@ -18,32 +18,57 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
 
-export const kibanaMarkdown = () => ({
-  name: 'markdownVis',
+const name = 'esaggs';
+
+interface Arguments {
+  markdown: string;
+  fontSize: number;
+  openLinksInNewTab: boolean;
+}
+
+type Return = Promise<Render<any>>;
+
+export const kibanaMarkdown = (): ExpressionFunction<
+  typeof name,
+  KibanaDatatable,
+  Arguments,
+  Return
+> => ({
+  name,
   type: 'render',
   context: {
     types: [],
   },
-  help: i18n.translate('markdownVisType.function.help', {
-    defaultMessage: 'Markdown visualization'
+  help: i18n.translate('visTypeMarkdown.function.help', {
+    defaultMessage: 'Markdown visualization',
   }),
   args: {
     markdown: {
-      type: ['string'],
+      types: ['string'],
       aliases: ['_'],
       required: true,
+      help: i18n.translate('visTypeMarkdown.function.markdown.help', {
+        defaultMessage: 'Markdown to render',
+      }),
     },
     fontSize: {
       types: ['number'],
       default: 12,
+      help: i18n.translate('visTypeMarkdown.function.fontSize.help', {
+        defaultMessage: 'Sets the font size',
+      }),
     },
     openLinksInNewTab: {
       types: ['boolean'],
       default: false,
-    }
+      help: i18n.translate('visTypeMarkdown.function.openLinksInNewTab.help', {
+        defaultMessage: 'Opens links in new tab',
+      }),
+    },
   },
-  fn(context, args) {
+  async fn(context, args) {
     return {
       type: 'render',
       as: 'visualization',
@@ -52,8 +77,7 @@ export const kibanaMarkdown = () => ({
         visConfig: {
           ...args,
         },
-      }
+      },
     };
-  }
+  },
 });
-

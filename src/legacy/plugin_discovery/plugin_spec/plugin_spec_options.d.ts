@@ -25,6 +25,7 @@ export interface UiExports {
   styleSheetPaths?: string;
   visTypes?: string[];
   interpreter?: string[];
+  hacks?: string[];
 }
 
 export interface PluginSpecOptions {

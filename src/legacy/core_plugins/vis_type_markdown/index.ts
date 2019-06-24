@@ -24,11 +24,11 @@ import { LegacyPluginApi } from '../../plugin_discovery/types';
 // eslint-disable-next-line import/no-default-export
 export default function MarkdownVisTypePlugin(kibana: LegacyPluginApi) {
   const config: Legacy.PluginSpecOptions = {
-    id: 'markdown_vis_type',
+    id: 'vis_type_markdown',
     require: ['data', 'visualizations'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      visTypes: ['plugins/markdown_vis_type/index'],
+      hacks: ['plugins/vis_type_markdown/index'],
     },
   };
 
