@@ -7,11 +7,11 @@
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { parseTimestamp } from './parse_timestamp';
 
 interface MonitorListStatusColumnProps {
-  absoluteTime: string;
-  relativeTime: string;
   status: string;
+  timestamp: string;
 }
 
 const getHealthColor = (status: string): string => {
@@ -47,26 +47,28 @@ const getHealthMessage = (status: string): string | null => {
 };
 
 export const MonitorListStatusColumn = ({
-  absoluteTime,
-  relativeTime,
   status,
-}: MonitorListStatusColumnProps) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
-    <EuiFlexItem>
-      <EuiHealth color={getHealthColor(status)} style={{ display: 'block' }}>
-        {getHealthMessage(status)}
-      </EuiHealth>
-      <EuiToolTip
-        content={
-          <EuiText color="ghost" size="xs">
-            {absoluteTime}
+  timestamp: tsString,
+}: MonitorListStatusColumnProps) => {
+  const timestamp = parseTimestamp(tsString);
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexItem>
+        <EuiHealth color={getHealthColor(status)} style={{ display: 'block' }}>
+          {getHealthMessage(status)}
+        </EuiHealth>
+        <EuiToolTip
+          content={
+            <EuiText color="ghost" size="xs">
+              {timestamp.toLocaleString()}
+            </EuiText>
+          }
+        >
+          <EuiText size="xs" color="subdued">
+            {timestamp.fromNow()}
           </EuiText>
-        }
-      >
-        <EuiText size="xs" color="subdued">
-          {relativeTime}
-        </EuiText>
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

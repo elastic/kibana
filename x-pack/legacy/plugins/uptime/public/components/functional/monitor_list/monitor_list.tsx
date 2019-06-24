@@ -9,11 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React, { useState } from 'react';
-import moment from 'moment';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
 import { MonitorSummary, MonitorSummaryResult } from '../../../../common/graphql/types';
-import { MonitorListStatusColumn } from '../monitor_list_status_column';
+import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { Criteria, Pagination, ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
@@ -142,14 +141,7 @@ export const MonitorListComponent = (props: Props) => {
             field: 'state.monitor.status',
             name: 'Status',
             render: (status: string, { state: { timestamp } }: MonitorSummary) => {
-              const wrappedTimestamp = moment(timestamp);
-              return (
-                <MonitorListStatusColumn
-                  absoluteTime={wrappedTimestamp.toLocaleString()}
-                  relativeTime={wrappedTimestamp.fromNow()}
-                  status={status}
-                />
-              );
+              return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
             },
           },
           {

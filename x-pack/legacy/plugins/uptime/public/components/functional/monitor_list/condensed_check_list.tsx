@@ -15,7 +15,7 @@ import {
 import moment from 'moment';
 import React from 'react';
 import { CondensedCheck, CondensedCheckStatus } from './types';
-import { MonitorListStatusColumn } from '../monitor_list_status_column';
+import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { LocationLink } from './location_link';
 
 const getBadgeColor = (status: string, successColor: string, dangerColor: string) => {
@@ -59,11 +59,7 @@ export const CondensedCheckList = ({
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <MonitorListStatusColumn
-                absoluteTime={moment(parseInt(timestamp, 10)).toLocaleString()}
-                relativeTime={moment(parseInt(timestamp, 10)).from()}
-                status={status}
-              />
+              <MonitorListStatusColumn status={status} timestamp={timestamp} />
             </EuiFlexItem>
             <EuiFlexItem>
               <LocationLink location={location} />

@@ -13,9 +13,8 @@ exports[`CondensedCheckList component renders checks 1`] = `
     <EuiFlexGroup>
       <EuiFlexItem>
         <MonitorListStatusColumn
-          absoluteTime="2019-06-21 15:29:26"
-          relativeTime="a few moments ago"
           status="mixed"
+          timestamp="123"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -75,9 +74,8 @@ exports[`CondensedCheckList component renders checks 1`] = `
     <EuiFlexGroup>
       <EuiFlexItem>
         <MonitorListStatusColumn
-          absoluteTime="2019-06-21 15:29:26"
-          relativeTime="a few moments ago"
           status="up"
+          timestamp="125"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -149,9 +147,8 @@ exports[`CondensedCheckList component renders null in place of child status with
     <EuiFlexGroup>
       <EuiFlexItem>
         <MonitorListStatusColumn
-          absoluteTime="2019-06-21 15:29:26"
-          relativeTime="a few moments ago"
           status="mixed"
+          timestamp="123"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -199,9 +196,8 @@ exports[`CondensedCheckList component renders null in place of child status with
     <EuiFlexGroup>
       <EuiFlexItem>
         <MonitorListStatusColumn
-          absoluteTime="2019-06-21 15:29:26"
-          relativeTime="a few moments ago"
           status="up"
+          timestamp="125"
         />
       </EuiFlexItem>
       <EuiFlexItem>
