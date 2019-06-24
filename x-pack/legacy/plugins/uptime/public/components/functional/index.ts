@@ -17,5 +17,5 @@ export { MonitorPageTitle } from './monitor_page_title';
 export { MonitorStatusBar } from './monitor_status_bar';
 export { PingList } from './ping_list';
 export { Snapshot } from './snapshot';
-export { SnapshotHistogram } from './snapshot_histogram';
+export { SnapshotHistogram } from './charts';
 export { SnapshotLoading } from './snapshot_loading';
