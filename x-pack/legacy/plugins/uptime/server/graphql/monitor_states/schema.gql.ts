@@ -10,13 +10,19 @@ export const monitorStatesSchema = gql`
   "Represents a monitor's statuses for a period of time."
   type SummaryHistogramPoint {
     "The time at which these data were collected."
-    timestamp: String!
-    "The number of documents at the given time period."
-    count: Int!
+    timestamp: UnsignedInteger!
     "The number of _up_ documents."
     up: Int!
     "The number of _down_ documents."
     down: Int!
+  }
+
+  "Monitor status data over time."
+  type SummaryHistogram {
+    "The number of documents used to assemble the histogram."
+    count: Int!
+    "The individual histogram data points."
+    points: [SummaryHistogramPoint!]!
   }
 
   type Agent {
@@ -106,7 +112,7 @@ export const monitorStatesSchema = gql`
   type MonitorSummary {
     monitor_id: String!
     state: State!
-    histogram: [SummaryHistogramPoint!]!
+    histogram: SummaryHistogram!
   }
 
   type MonitorSummaryResult {

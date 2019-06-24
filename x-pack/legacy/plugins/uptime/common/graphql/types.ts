@@ -508,7 +508,7 @@ export interface MonitorSummary {
 
   state: State;
 
-  histogram: SummaryHistogramPoint[];
+  histogram: SummaryHistogram;
 }
 
 export interface State {
@@ -584,12 +584,16 @@ export interface StateUrl {
 
   scheme?: string | null;
 }
+
+export interface SummaryHistogram {
+  count: number;
+
+  points: SummaryHistogramPoint[];
+}
 /** Represents a monitor's statuses for a period of time. */
 export interface SummaryHistogramPoint {
   /** The time at which these data were collected. */
-  timestamp: string;
-  /** The number of documents at the given time period. */
-  count: number;
+  timestamp: UnsignedInteger;
   /** The number of _up_ documents. */
   up: number;
   /** The number of _down_ documents. */

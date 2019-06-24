@@ -24,6 +24,14 @@ export const monitorStatesQuery = gql`
       }
       summaries {
         monitor_id
+        histogram {
+          count
+          points {
+            timestamp
+            up
+            down
+          }
+        }
         state {
           agent {
             id

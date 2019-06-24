@@ -7,7 +7,7 @@
 import { get, set } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter } from './adapter_types';
-import { MonitorSummary, DocCount, SummaryHistogramPoint } from '../../../../common/graphql/types';
+import { MonitorSummary, DocCount, SummaryHistogram } from '../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { getHistogramInterval } from '../../helper';
 
@@ -86,7 +86,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeStart: string,
     dateRangeEnd: string,
     monitorIds: string[]
-  ): Promise<{ [key: string]: SummaryHistogramPoint[] }> {
+  ): Promise<{ [key: string]: SummaryHistogram }> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -141,8 +141,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const result = await this.database.search(request, params);
 
     const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
-    const ret = buckets.reduce((map: { [key: string]: any }, item: any) => {
-      const histograms = get(item, 'histogram.buckets', []).map((histogram: any) => {
+    return buckets.reduce((map: { [key: string]: any }, item: any) => {
+      const points = get(item, 'histogram.buckets', []).map((histogram: any) => {
         const status = get(histogram, 'status.buckets', []).reduce(
           (statuses: { up: number; down: number }, bucket: any) => {
             if (bucket.key === 'up') {
@@ -162,12 +162,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
       map[item.key] = {
         count: item.doc_count,
-        histograms,
+        points,
       };
       return map;
     }, {});
-
-    return ret;
   }
 
   public async getSummaryCount(request: any): Promise<DocCount> {

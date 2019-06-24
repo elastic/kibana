@@ -11,18 +11,25 @@ import { get } from 'lodash';
 import React, { useState } from 'react';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
-import { MonitorSummary, MonitorSummaryResult } from '../../../../common/graphql/types';
+import {
+  MonitorSummary,
+  MonitorSummaryResult,
+  SummaryHistogramPoint,
+} from '../../../../common/graphql/types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { Criteria, Pagination, ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
+import { MonitorBarSeries } from '../charts';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
 }
 
 interface MonitorListProps {
+  absoluteStartDate: number;
+  absoluteEndDate: number;
   dangerColor: string;
   successColor: string;
   pageIndex: number;
@@ -36,6 +43,8 @@ type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
 
 export const MonitorListComponent = (props: Props) => {
   const {
+    absoluteStartDate,
+    absoluteEndDate,
     dangerColor,
     successColor,
     data,
@@ -166,6 +175,18 @@ export const MonitorListComponent = (props: Props) => {
             field: 'state.checks',
             name: 'Checks',
             render: (checks: any[]) => <EuiBadge>{checks.length}</EuiBadge>,
+          },
+          {
+            field: 'histogram.points',
+            name: 'Downtime history',
+            render: (histogramSeries: SummaryHistogramPoint[]) => (
+              <MonitorBarSeries
+                absoluteStartDate={absoluteStartDate}
+                absoluteEndDate={absoluteEndDate}
+                dangerColor={dangerColor}
+                histogramSeries={histogramSeries}
+              />
+            ),
           },
         ]}
       />
