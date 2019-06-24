@@ -62,7 +62,7 @@ function DefaultEditorAggSelect({
     />
   );
 
-  let aggHelpLink = null;
+  let aggHelpLink = '';
   if (has(agg, 'type.name')) {
     aggHelpLink = get(documentationLinks, ['aggs', agg.type.name]);
   }
