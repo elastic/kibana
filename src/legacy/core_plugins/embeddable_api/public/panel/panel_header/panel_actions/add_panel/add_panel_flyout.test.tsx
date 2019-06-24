@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { coreStartMock } from '../../../../np_core.test.mocks';
+import '../../../../ui_capabilities.test.mocks';
+import { coreStartMock } from '../../../../../../../../core/public/ui_new_platform.test.mocks';
 
 import React from 'react';
 import {

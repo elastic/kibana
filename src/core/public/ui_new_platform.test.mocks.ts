@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from './mocks';
 
 export const coreSetupMock = coreMock.createSetup();
 export const coreStartMock = coreMock.createStart();
@@ -28,11 +28,3 @@ jest.doMock('ui/new_platform', () => {
     npSetup: { core: coreSetupMock },
   };
 });
-
-jest.doMock('ui/capabilities', () => ({
-  uiCapabilities: {
-    visualize: {
-      save: true,
-    },
-  },
-}));

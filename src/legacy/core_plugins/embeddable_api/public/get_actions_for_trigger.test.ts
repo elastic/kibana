@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './np_core.test.mocks';
+import './ui_capabilities.test.mocks';
 
 import {
   HelloWorldAction,
