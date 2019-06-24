@@ -18,16 +18,26 @@
  */
 
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './interpreter';
+import { ExpressionType } from '../../common/expressions/types';
 
 export class ExpressionsService {
-  private functions = new FunctionsRegistry();
-  private renderers = new RenderFunctionsRegistry();
-  private types = new TypesRegistry();
+  private readonly functions = new FunctionsRegistry();
+  private readonly renderers = new RenderFunctionsRegistry();
+  private readonly types = new TypesRegistry();
 
   public setup() {
     const { functions, renderers, types } = this;
 
     return {
+      registerFunction: (fn: any) => {
+        this.functions.register(fn);
+      },
+      registerRenderer: (renderer: any) => {
+        this.renderers.register(renderer);
+      },
+      registerType: (type: () => ExpressionType<any, any>) => {
+        this.types.register(type);
+      },
       __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
         functions,
         renderers,
