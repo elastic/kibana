@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import { getDocLink } from '../../documentation_links';
-import { uiModules } from '../../modules';
+import { DocLinksService } from './doc_links_service';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
-const module = uiModules.get('kibana');
-
-module.directive('documentationHref', function () {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attributes) {
-      element.attr('href', getDocLink(attributes.documentationHref));
-    }
-  };
+describe('DocLinksService#start()', () => {
+  it('templates the doc links with the branch information from injectedMetadata', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
+    const service = new DocLinksService();
+    const start = service.start({ injectedMetadata });
+    expect(start.DOC_LINK_VERSION).toEqual('test-branch');
+    expect(start.links.kibana).toEqual(
+      'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
+    );
+  });
 });
