@@ -163,7 +163,7 @@ describe('docViews', function () {
     });
 
   });
-
+/**
   describe('JSON', function () {
     beforeEach(function () {
       initView(docViews.byName.JSON);
@@ -186,4 +186,5 @@ describe('docViews', function () {
       expect(code).to.equal($scope.hitJson);
     });
   });
+  */
 });
