@@ -17,15 +17,20 @@ import { i18n } from '@kbn/i18n';
 
 const TransactionBreakdownHeader: React.FC<{
   showChart: boolean;
+  hideShowChartButton: boolean;
   onToggleClick: () => void;
-}> = ({ showChart, onToggleClick }) => {
+}> = ({ showChart, onToggleClick, hideShowChartButton }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>Transactions breakdown</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
+                  defaultMessage: 'Time spent by span type'
+                })}
+              </EuiFlexItem>
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
@@ -45,21 +50,23 @@ const TransactionBreakdownHeader: React.FC<{
           </h3>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType={showChart ? 'arrowDown' : 'arrowRight'}
-          onClick={() => onToggleClick()}
-        >
-          {showChart
-            ? i18n.translate('xpack.apm.transactionBreakdown.hideChart', {
-                defaultMessage: 'Hide chart'
-              })
-            : i18n.translate('xpack.apm.transactionBreakdown.showChart', {
-                defaultMessage: 'Show chart'
-              })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      {!hideShowChartButton && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType={showChart ? 'arrowDown' : 'arrowRight'}
+            onClick={() => onToggleClick()}
+          >
+            {showChart
+              ? i18n.translate('xpack.apm.transactionBreakdown.hideChart', {
+                  defaultMessage: 'Hide chart'
+                })
+              : i18n.translate('xpack.apm.transactionBreakdown.showChart', {
+                  defaultMessage: 'Show chart'
+                })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

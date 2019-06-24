@@ -5,12 +5,15 @@
  */
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useState, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { sortBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 const COLORS = [
   theme.euiColorVis0,
@@ -25,6 +28,10 @@ const COLORS = [
   theme.euiColorVis9
 ];
 
+const NoTransactionsTitle = styled.span`
+  font-weight: bold;
+`;
+
 const TransactionBreakdown: React.FC<{
   serviceName: string;
   transactionName?: string;
@@ -33,7 +40,7 @@ const TransactionBreakdown: React.FC<{
 }> = ({ serviceName, start, end, transactionName }) => {
   const [showChart, setShowChart] = useState(false);
 
-  const { data } = useTransactionBreakdown({
+  const { data, status } = useTransactionBreakdown({
     serviceName,
     start,
     end,
@@ -53,20 +60,58 @@ const TransactionBreakdown: React.FC<{
     },
     [data]
   );
+
+  const loading = status === FETCH_STATUS.LOADING || status === undefined;
+
+  const hasHits = data && data.length > 0;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <TransactionBreakdownHeader
           showChart={showChart}
+          hideShowChartButton={!hasHits}
           onToggleClick={() => {
             setShowChart(!showChart);
           }}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        {kpis && <TransactionBreakdownKpiList kpis={kpis} />}
-      </EuiFlexItem>
-      {showChart ? (
+      {hasHits && kpis ? (
+        <EuiFlexItem>
+          {kpis && <TransactionBreakdownKpiList kpis={kpis} />}
+        </EuiFlexItem>
+      ) : (
+        !loading && (
+          <>
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <NoTransactionsTitle>
+                      {i18n.translate(
+                        'xpack.apm.transactionBreakdown.noTransactionsTitle',
+                        {
+                          defaultMessage: 'No transactions were found.'
+                        }
+                      )}
+                    </NoTransactionsTitle>
+                    {' ' +
+                      i18n.translate(
+                        'xpack.apm.transactionBreakdown.noTransactionsTip',
+                        {
+                          defaultMessage:
+                            'Try another time range or reset the filter.'
+                        }
+                      )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiSpacer size="m" />
+          </>
+        )
+      )}
+      {showChart && hasHits ? (
         <EuiFlexItem>
           <TransactionBreakdownGraph />
         </EuiFlexItem>
