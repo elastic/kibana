@@ -34,10 +34,10 @@ export function refreshIntervalWatcher($timeout) {
   };
 
   function init(listenerCallback) {
+    listener = listenerCallback;
     timefilterSubscriber = timefilter.subscribeToRefreshIntervalUpdate(function triggerUpdate() {
       onRefreshIntervalChange();
     });
-    listener = listenerCallback;
   }
 
   function cancel() {

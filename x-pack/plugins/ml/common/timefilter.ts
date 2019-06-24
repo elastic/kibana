@@ -16,7 +16,7 @@ class MlTimefilter {
   constructor() {
     // listen for original timefilter emitted events
     timefilterDep.on('fetch', this.emitUpdate); // setTime or setRefreshInterval called
-    timefilterDep.on('refreshIntervalUpdate', this.emitRefreshIntervalUpdate); // setRefreshInterval called
+    timefilterDep.on('refreshIntervalUpdate', () => this.emitRefreshIntervalUpdate()); // setRefreshInterval called
   }
 
   emitUpdate() {
