@@ -9,5 +9,5 @@ Saved Objects Namespace.
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsNamespace = string | undefined | symbol;
+export declare type SavedObjectsNamespace = string | undefined;
 ```
