@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
