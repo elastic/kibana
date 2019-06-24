@@ -75,7 +75,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-xtest('initial run of main loop works', async () => {
+test('initial run of main loop works', async () => {
   const esClients = {
     adminClient: {},
     dataClient: {
@@ -113,9 +113,10 @@ xtest('initial run of main loop works', async () => {
 
 test('removes stale nodes, keeps good nodes', async () => {
   const nodeName = 'd4fa4018-8510-420c-aa99-d6d722792b3c';
+  const nodeName2 = '073fb287-161c-49f3-976d-1e507575e354';
   const mockHeartbeatReply = {
     _source: {
-      '073fb287-161c-49f3-976d-1e507575e354': 1, // this node will be culled
+      [nodeName2]: 1, // this node will be culled
       [nodeName]: 2,
     },
   };
@@ -124,7 +125,7 @@ test('removes stale nodes, keeps good nodes', async () => {
     _source: {
       'git@github.com:elastic/kibana': {
         state: RouteState.Started,
-        node: '073fb287-161c-49f3-976d-1e507575e354',
+        node: nodeName2,
         type: 'code',
       },
       'git@github.com:elastic/elasticsearch': {
@@ -136,12 +137,10 @@ test('removes stale nodes, keeps good nodes', async () => {
   };
 
   // yay lets implement what es would do with these scripts...
-  let calls = 0;
   const esClients = {
     adminClient: {},
     dataClient: {
       callAsInternalUser: jest.fn<Promise<any>, any>(async (method, params) => {
-        console.log('calls', ++calls);
         if (params.id === 'proxy-heartbeat-list') {
           if (method === 'get') {
             // don't forget js is pass-by-reference! we need a _new_ object here
@@ -150,13 +149,11 @@ test('removes stale nodes, keeps good nodes', async () => {
             if (params.body.script === updateHeartbeat) {
               const resource = params.body.params.resource;
               mockHeartbeatReply._source[params.body.params.resource]++;
-              return;
             } else if (params.body.script === cullDeadNodes) {
               const nodes = params.body.params.nodeList;
-              for (let [key, val] of Object.entries(mockHeartbeatReply._source)) {
+              for (const [key, val] of Object.entries(mockHeartbeatReply._source)) {
                 if (val === nodes[key]) {
                   delete mockHeartbeatReply._source[key];
-                  return;
                 }
               }
             }
@@ -169,21 +166,25 @@ test('removes stale nodes, keeps good nodes', async () => {
                   entry => entry[1].node === params.body.params.resource
                 );
                 delete mockResourceReply._source[key[0]];
-                return;
-              } else {
+              } else if (params.body.script === cullDeadResources) {
                 const nodeList = params.body.params.nodes;
-                for (let [key, val] of Object.entries(mockResourceReply._source)) {
-                  if (!nodeList.contains(key)) {
+                for (const [key, val] of Object.entries(mockResourceReply._source)) {
+                  if (!nodeList.includes(val.node)) {
                     if (val.state === RouteState.Closing) {
                       delete mockResourceReply._source[key];
                     } else {
                       val.state = RouteState.Closing;
                     }
+                  } else if (val.state === RouteState.Closing) {
+                    val.state = RouteState.Started;
                   }
                 }
-                return;
               }
+            } else {
+              Object.assign(mockResourceReply._source, params.body);
             }
+          } else {
+            return JSON.parse(JSON.stringify(mockResourceReply));
           }
         }
       }),
@@ -200,66 +201,56 @@ test('removes stale nodes, keeps good nodes', async () => {
 
   try {
     await clusterDoc.setup(elasticClient);
-    await clusterDoc.start();
   } catch (err) {
     expect(err).toBeFalsy();
   }
 
-  // gets called twice before we force the timer to run
-  expect(esClients.dataClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-  jest.runAllTimers();
-  expect(setTimeout).toHaveBeenCalledTimes(2);
-  // should be called another 3 times when we get here
+  // misses a single update, remove node and set resource to closing
+  await clusterDoc.updateHeartbeat();
+  (clusterDoc as any).nodeCache = await clusterDoc.getHeartbeats();
+  await clusterDoc.updateHeartbeat();
+  await clusterDoc.cullDeadNodes();
+  expect(esClients.dataClient.callAsInternalUser).toHaveBeenCalledTimes(6);
   expect(Object.keys(mockHeartbeatReply._source).length).toBe(1);
+  expect(Object.keys(mockResourceReply._source).length).toBe(2);
+  expect(mockResourceReply._source['git@github.com:elastic/kibana'].state).toBe(RouteState.Closing);
+
+  // updates, restores to routing doc and resource is started
+  await clusterDoc.updateHeartbeat();
+  mockHeartbeatReply._source[nodeName2] = 3;
+  (clusterDoc as any).nodeCache = await clusterDoc.getHeartbeats();
+  await clusterDoc.updateHeartbeat();
+  mockHeartbeatReply._source[nodeName2] = 4;
+  await clusterDoc.cullDeadNodes();
+  expect(Object.keys(mockHeartbeatReply._source).length).toBe(2);
+  expect(Object.keys(mockResourceReply._source).length).toBe(2);
+  expect(mockResourceReply._source['git@github.com:elastic/kibana'].state).toBe(RouteState.Started);
+
+  // misses two updates, remove resource
+  await clusterDoc.updateHeartbeat();
+  (clusterDoc as any).nodeCache = await clusterDoc.getHeartbeats();
+  await clusterDoc.updateHeartbeat();
+  mockHeartbeatReply._source[nodeName2] = (clusterDoc as any).nodeCache[nodeName2];
+  mockResourceReply._source['git@github.com:elastic/kibana'].state = RouteState.Closing;
+  await clusterDoc.cullDeadNodes();
   expect(Object.keys(mockResourceReply._source).length).toBe(1);
+  expect(mockResourceReply._source['git@github.com:elastic/kibana']).toBeFalsy();
+
+  // add a new resource
+  await clusterDoc.assignResource('git@github.com:elastic/beats', 'code', RouteState.Started);
+  expect(Object.keys(mockResourceReply._source).length).toBe(2);
+
+  // add existing resource
+  try {
+    await clusterDoc.assignResource('git@github.com:elastic/beats', 'code', RouteState.Started);
+  } catch (err) {
+    expect(err.message).toBe(
+      `git@github.com:elastic/beats already exists on ${clusterDoc.nodeName}`
+    );
+  }
 });
 
-xtest('assign and unassign resource', async () => {
-  const esClients = {
-    adminClient: {},
-    dataClient: {
-      callAsInternalUser: jest.fn<Promise<any>, any>(async () => ({ _source: {} })),
-    },
-  };
-  const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
-  const config = configService({
-    updateInterval: 100,
-    timeoutThreshold: 100,
-  });
-  const clusterDoc = new ClusterDocClient({ config, env, logger });
-
-  try {
-    await clusterDoc.setup(elasticClient);
-    await clusterDoc.start();
-  } catch (err) {
-    expect(err).toBeFalsy();
-  }
-
-  await clusterDoc.assignResource('/foo/bar', 'code', RouteState.Started);
-  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[3][1];
-  const expected = {
-    '/foo/bar': {
-      type: 'code',
-      state: 1,
-      node: clusterDoc.nodeName,
-    },
-  };
-  expect(nodeList.body.routing_table).toEqual(expected);
-
-  try {
-    await clusterDoc.assignResource('/foo/bar', 'code', RouteState.Started);
-  } catch (err) {
-    expect(err.message).toBe(`/foo/bar already exists on ${clusterDoc.nodeName}`);
-  }
-
-  await clusterDoc.unassignResource('/foo/bar');
-  const nodeList2 = esClients.dataClient.callAsInternalUser.mock.calls[5][1];
-  expect(nodeList2.body.routing_table).toEqual({});
-
-  await clusterDoc.stop();
-});
-
-xtest('it continues on errors', async () => {
+test('it continues on errors', async () => {
   const esClients = {
     adminClient: {},
     dataClient: {
@@ -287,37 +278,4 @@ xtest('it continues on errors', async () => {
   }
 
   expect(setTimeout).toHaveBeenCalledTimes(1);
-});
-
-xtest('it continues on errors still', async () => {
-  const esClients = {
-    adminClient: {},
-    dataClient: {
-      callAsInternalUser: jest.fn(() => {
-        return new Promise((resolve, reject) => {
-          reject(new Error('bar'));
-        });
-      }),
-    },
-  };
-
-  const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
-  const config = configService({
-    updateInterval: 100,
-    timeoutThreshold: 100,
-  });
-  const clusterDoc = new ClusterDocClient({ config, env, logger });
-
-  try {
-    await clusterDoc.setup(elasticClient);
-    await clusterDoc.start();
-  } catch (err) {
-    expect(err).toBeFalsy();
-  }
-
-  setTimeout(() => {
-    expect(setTimeout).toHaveBeenCalledTimes(2);
-  }, 1);
-
-  jest.runAllTimers();
 });

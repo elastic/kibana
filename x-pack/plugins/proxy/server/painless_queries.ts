@@ -25,15 +25,15 @@ for (node in ctx['_source'].entrySet()) {
   data = node.getValue();
   key = node.getKey();
   if (!nodes.contains(data.get('node'))) {
-    if (data.get('state') == 3) {
+    if (data.get('state') == routeClosing) {
       ctx['_source'].remove(key);
     } else {
-      data.put('state', 3)
+      data.put('state', routeClosing)
       ctx['_source'].put(key, data)
     }
   } else {
-    if (data.get('state') == 3) {
-      data.put('state', 1)
+    if (data.get('state') == routeClosing) {
+      data.put('state', routeStarted)
       ctx['_source'].put(key, data)
     }
   }

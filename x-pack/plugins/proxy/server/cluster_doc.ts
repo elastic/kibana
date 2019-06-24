@@ -130,7 +130,7 @@ export class ClusterDocClient {
       throw new Error(`${resource} already exists on ${table[resource].node}`);
     }
     const body = {
-      resource: {
+      [resource]: {
         type,
         state,
         node: node || this.nodeName,
@@ -193,8 +193,7 @@ export class ClusterDocClient {
     }, this.updateInterval);
   }
 
-  private async getHeartbeats() {
-    console.log('getting heartbeats');
+  public async getHeartbeats() {
     const client = await this.getESClient();
     const params = {
       id: this.heartbeatDoc,
@@ -210,10 +209,8 @@ export class ClusterDocClient {
    * Node heartbeats are monotonically increasing integers
    * @param remove [boolean] should this node be deleted
    */
-  private async updateHeartbeat(remove: boolean = false) {
-    console.log('update heartbeats');
+  public async updateHeartbeat(remove: boolean = false) {
     const client = await this.getESClient();
-    console.log('got client');
     let body = {};
     if (remove) {
       body = {
@@ -246,13 +243,16 @@ export class ClusterDocClient {
    * eventually, and update the correctly
    * @param nodes
    */
-  private async cullDeadResources(nodes: string[]) {
-    console.log('removing dead resources');
+  public async cullDeadResources(nodes: string[]) {
     const client = await this.getESClient();
     const body = {
       script: cullDeadResources,
       params: {
         nodes,
+        routeInitializing: RouteState.Initializing,
+        routeStarted: RouteState.Started,
+        routeClosing: RouteState.Closing,
+        routeClosed: RouteState.Closed,
       },
     };
 
@@ -269,8 +269,7 @@ export class ClusterDocClient {
    * remove nodes that are past their timeout. since each node runs this in the
    * same way, we ignore conflicts here -- one of them will win eventually
    */
-  private async cullDeadNodes() {
-    console.log('removing dead nodes');
+  public async cullDeadNodes() {
     const client = await this.getESClient();
     const threshold = new Date().getTime() - this.timeoutThreshold;
     const body = {
@@ -310,13 +309,11 @@ export class ClusterDocClient {
    *
    */
   private async mainLoop() {
-    console.log('CALLING MAIN LOOP', this.runCull);
     try {
       await this.updateHeartbeat();
       // we only want to run the cull every other pass so we'll fiddle with
       // a boolean like a real programmer
       if (this.runCull) {
-        console.log('running cull');
         await this.cullDeadNodes();
         this.runCull = false;
       } else {
