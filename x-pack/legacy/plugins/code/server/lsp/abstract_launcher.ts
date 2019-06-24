@@ -164,7 +164,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   abstract async getPort(): Promise<number>;
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.connect().catch(this.log.debug);
+    proxy.connect();
   }
 
   /**
