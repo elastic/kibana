@@ -95,10 +95,11 @@ async function appendToConfig(installPath, key, value) {
  */
 async function configureKeystore(installPath, password, log = defaultLog, bundledJDK = false) {
   log.info('setting bootstrap password to %s', chalk.bold(password));
-  const env = {
-    [bundledJDK && 'JAVA_HOME']: '',
-  };
 
+  const env = {};
+  if (bundledJDK) {
+    env.JAVA_HOME = '';
+  }
   await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath, env });
 
   await execa(ES_KEYSTORE_BIN, ['add', 'bootstrap.password', '-x'], {

@@ -260,12 +260,10 @@ exports.Cluster = class Cluster {
       cwd: installPath,
       env: {
         ...process.env,
+        ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
         ...(options.esEnvVars || {}),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: {
-        [options.bundledJDK && 'JAVA_HOME']: '',
-      },
     });
 
     // parse log output to find http port
