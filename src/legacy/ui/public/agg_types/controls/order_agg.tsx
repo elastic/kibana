@@ -47,6 +47,7 @@ function OrderAggParamEditor({
           const paramDef = agg.type.params.byName.orderAgg;
           setValue(value || paramDef.makeOrderAgg(agg));
         } else {
+          // we aren't creating a custom aggConfig
           setValue(null);
         }
       }

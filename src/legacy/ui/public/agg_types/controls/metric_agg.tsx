@@ -105,13 +105,9 @@ function MetricAggParamEditor({
       }
 
       return () => {
-        const lastBckt = findLast(
-          state ? state.aggs : [],
-          (aggr: AggConfig) => aggr.type && aggr.type.type === 'buckets'
-        );
-
-        if (lastBckt && lastBckt.error) {
-          delete lastBckt.error;
+        // clear errors in last bucket before component destroyed
+        if (lastBucket && lastBucket.error) {
+          delete lastBucket.error;
         }
       };
     },
