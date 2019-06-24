@@ -29,7 +29,11 @@ exports[`QueryBar Should render the given query 1`] = `
           },
         ]
       }
+      isDirty={false}
       onChange={[Function]}
+      onLoadSavedQuery={[Function]}
+      onSave={[Function]}
+      onSaveNew={[Function]}
       onSubmit={[Function]}
       query={
         Object {
