@@ -20,7 +20,7 @@
 import { Transform } from 'stream';
 
 import { get, once } from 'lodash';
-import { deleteKibanaIndices, cleanKibanaIndices, createDefaultSpace } from './kibana_index';
+import { deleteKibanaIndices, cleanKibanaIndex, createDefaultSpace } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
@@ -45,20 +45,20 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
     const { index, settings, mappings, aliases } = record.value;
 
     // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
-    const isPre7Mapping = !!mappings && Object.keys(mappings).length > 0 && !mappings.properties;
+    const isPre7Mapping = mappings && Object.keys(mappings).length > 0 && !mappings.properties;
     const isKibana = index.startsWith('.kibana');
 
     // If we're trying to import Kibana index docs, we need to ensure that
     // previous indices are removed so we're starting w/ a clean slate for
     // migrations. This only needs to be done once per archive load operation.
-    const cleanKibanaIndicesOnce = once(cleanKibanaIndices);
+    const cleanKibanaIndexOnce = once(cleanKibanaIndex);
     const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
         if (isKibana && !isPre7Mapping) {
           remapKibanaIndexDocs.add(index);
-          await cleanKibanaIndicesOnce({ client, stats, log, kibanaPluginIds });
+          await cleanKibanaIndexOnce({ client, stats, log, kibanaPluginIds });
         } else {
           if (isKibana) {
             await deleteKibanaIndicesOnce({ client, stats, log });

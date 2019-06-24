@@ -128,34 +128,31 @@ async function fetchKibanaIndices(client) {
   return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
 }
 
-export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }) {
-  if (!kibanaPluginIds.includes('spaces')) {
-    return await deleteKibanaIndices({
-      client,
-      stats,
-      log,
-    });
-  }
-
-  await client.deleteByQuery({
-    index: `.kibana`,
-    body: {
-      query: {
-        bool: {
-          must_not: {
-            ids: {
-              values: ['space:default'],
+export async function cleanKibanaIndex({ client, stats, log }) {
+  while (true) {
+    const resp = await client.deleteByQuery({
+      index: `.kibana*`,
+      ignore: 409,
+      body: {
+        query: {
+          bool: {
+            must_not: {
+              ids: {
+                values: ['space:default'],
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  log.warning(
-    `since spaces are enabled, all objects other than the default space were deleted from ` +
-      `.kibana rather than deleting the whole index`
-  );
+    if (resp.status !== 409) {
+      break;
+    }
+
+    log.warning('Conflict while deleting all objects from .kibana, trying again');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
 
   stats.deletedIndex('.kibana');
 }
