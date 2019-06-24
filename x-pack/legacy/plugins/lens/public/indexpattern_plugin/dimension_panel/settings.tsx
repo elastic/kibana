@@ -9,32 +9,31 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
-  EuiButtonIcon,
   EuiFlexItem,
   EuiFlexGroup,
   EuiSideNav,
   EuiCallOut,
   EuiButton,
+  EuiFormRow,
+  EuiFieldText,
+  EuiLink,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { IndexPatternColumn, OperationType, FieldBasedIndexPatternColumn } from '../indexpattern';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
 import { operationDefinitionMap, getOperations, getOperationDisplay } from '../operations';
-import { hasField, getColumnOrder } from '../state_helpers';
+import { hasField, getColumnOrder, deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 
 export interface SettingsProps extends IndexPatternDimensionPanelProps {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn?: IndexPatternColumn;
   filteredColumns: IndexPatternColumn[];
 }
 
 export function Settings(props: SettingsProps) {
-  // TODO kill internal state when closing settings
   const { selectedColumn, filteredColumns, state, columnId, setState } = props;
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [invalidOperationType, setInvalidOperationType] = useState<OperationType | null>(null);
-  // TODO remove this
-  const [showAllOptions, setShowAllOptions] = useState(false);
   const ParamEditor =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType].paramEditor;
   const possibleOperationTypes = filteredColumns.map(col => col.operationType);
@@ -63,14 +62,17 @@ export function Settings(props: SettingsProps) {
     return {
       name: operationPanels[op].displayName,
       id: op as string,
-      className: classNames({
+      className: classNames('lnsConfigPanel__operation', {
         'lnsConfigPanel__operation--selected': Boolean(
           invalidOperationType === op ||
             (!invalidOperationType && selectedColumn && selectedColumn.operationType === op)
         ),
+        'lnsConfigPanel__operation--unsupported': !functionsFromField.some(
+          col => col.operationType === op
+        ),
       }),
       onClick() {
-        if (!functionsFromField.some(col => col.operationType === op)) {
+        if (!selectedColumn || !functionsFromField.some(col => col.operationType === op)) {
           setInvalidOperationType(op);
           return;
         }
@@ -106,111 +108,91 @@ export function Settings(props: SettingsProps) {
     {
       name: '',
       id: '0',
-      items: supportedOperations.map(operationNavItem),
+      items: supportedOperations
+        .map(operationNavItem)
+        .concat(unsupportedOperations.map(operationNavItem)),
     },
   ];
 
-  if (showAllOptions) {
-    sideNavItems.push({
-      name: 'Additional options',
-      id: '2',
-      items: unsupportedOperations.map(operationNavItem),
-    });
-  } else {
-    sideNavItems.push({
-      name: '',
-      id: '1',
-      items: [
-        {
-          name: 'Show all options',
-          id: 'additional_options',
-          className: 'lnsConfigPanel__operation--action',
-          onClick: () => {
-            setShowAllOptions(true);
-          },
-        },
-      ],
-    });
-  }
-
-  const fieldColumns = filteredColumns.filter(
-    col =>
-      'sourceField' in col &&
-      (invalidOperationType
-        ? col.operationType === invalidOperationType
-        : selectedColumn && col.operationType === selectedColumn.operationType)
-  ) as FieldBasedIndexPatternColumn[];
-
-  const uniqueColumnsByField = _.uniq(fieldColumns, col => col.sourceField);
-
-  uniqueColumnsByField.sort((column1, column2) => {
-    return column1.sourceField.localeCompare(column2.sourceField);
-  });
-
-  const fieldOptions = uniqueColumnsByField.map(col => ({
-    label: col.sourceField,
-    value: col.operationId,
-  }));
-
   return (
-    <EuiFlexItem>
-      <EuiPopover
-        id={columnId}
-        className="lnsConfigPanel__summaryPopover"
-        anchorClassName="lnsConfigPanel__summaryPopoverAnchor"
-        button={
-          <EuiButton
-            onClick={() => {
-              setSettingsOpen(true);
+    <EuiPopover
+      id={columnId}
+      className="lnsConfigPanel__summaryPopover"
+      anchorClassName="lnsConfigPanel__summaryPopoverAnchor"
+      button={
+        <EuiLink
+          className="lnsConfigPanel__summaryLink"
+          onClick={() => {
+            setSettingsOpen(true);
+          }}
+        >
+          {selectedColumn
+            ? selectedColumn.label
+            : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
+                defaultMessage: 'Configure dimension',
+              })}
+        </EuiLink>
+      }
+      isOpen={isSettingsOpen}
+      closePopover={() => {
+        setSettingsOpen(false);
+        setInvalidOperationType(null);
+      }}
+      anchorPosition="leftUp"
+      withTitle
+      panelPaddingSize="s"
+    >
+      <EuiFlexGroup gutterSize="s" direction="column">
+        <EuiFlexItem>
+          <FieldSelect
+            {...props}
+            invalidOperationType={invalidOperationType}
+            onDeleteColumn={() => {
+              setState(deleteColumn(state, columnId));
             }}
-          >
-            {selectedColumn
-              ? selectedColumn.label
-              : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
-                  defaultMessage: 'Configure dimension',
-                })}
-          </EuiButton>
-        }
-        isOpen={isSettingsOpen}
-        closePopover={() => {
-          setSettingsOpen(false);
-        }}
-        anchorPosition="leftUp"
-        withTitle
-        panelPaddingSize="s"
-      >
-        <EuiFlexGroup gutterSize="s" direction="column">
-          <EuiFlexItem>
-            <FieldSelect {...props} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem
-                grow={!ParamEditor}
-                className={`lnsConfigPanel__summaryPopoverLeft ${ParamEditor &&
-                  'lnsConfigPanel__summaryPopoverLeft--shaded'}`}
-              >
-                <EuiSideNav items={sideNavItems} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {invalidOperationType ? (
-                  <EuiCallOut
-                    title="Operation not applicable to field"
-                    color="danger"
-                    iconType="cross"
-                  >
-                    <p>Please choose another field</p>
-                  </EuiCallOut>
-                ) : (
-                  ParamEditor && (
-                    <ParamEditor state={state} setState={setState} columnId={columnId} />
-                  )
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopover>
-    </EuiFlexItem>
+            onChangeColumn={column => {
+              setState(changeColumn(state, columnId, column));
+              setInvalidOperationType(null);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={null} className={classNames('lnsConfigPanel__summaryPopoverLeft')}>
+              <EuiSideNav items={sideNavItems} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true} className="lnsConfigPanel__summaryPopoverRight">
+              {invalidOperationType && selectedColumn && (
+                <EuiCallOut
+                  title="Operation not applicable to field"
+                  color="danger"
+                  iconType="cross"
+                >
+                  <p>Please choose another field</p>
+                </EuiCallOut>
+              )}
+              {!invalidOperationType && ParamEditor && (
+                <ParamEditor state={state} setState={setState} columnId={columnId} />
+              )}
+              {!invalidOperationType && selectedColumn && (
+                <EuiFormRow label="Label">
+                  <EuiFieldText
+                    value={selectedColumn.label}
+                    onChange={e => {
+                      setState(
+                        changeColumn(state, columnId, {
+                          ...selectedColumn,
+                          label: e.target.value,
+                        })
+                      );
+                    }}
+                  />
+                </EuiFormRow>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopover>
   );
 }

@@ -16,8 +16,7 @@ import {
   IndexPatternField,
 } from '../indexpattern';
 
-import { getPotentialColumns, operationDefinitionMap } from '../operations';
-import { FieldSelect } from './field_select';
+import { getPotentialColumns } from '../operations';
 import { Settings } from './settings';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, hasField, deleteColumn } from '../state_helpers';
@@ -64,31 +63,31 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
           props.setState(changeColumn(props.state, props.columnId, column));
         }}
       >
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center">
-              <Settings
-                {...props}
-                selectedColumn={selectedColumn}
-                filteredColumns={filteredColumns}
-              />
-              {selectedColumn && (
-                <EuiFlexItem>
-                  <EuiButtonIcon
-                    data-test-subj="indexPattern-dimensionPopover-remove"
-                    iconType="cross"
-                    iconSize="s"
-                    color="danger"
-                    aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                      defaultMessage: 'Remove',
-                    })}
-                    onClick={() => {
-                      props.setState(deleteColumn(props.state, props.columnId));
-                    }}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" className="lnsConfigPanel__summary">
+          <EuiFlexItem grow={true}>
+            <Settings
+              {...props}
+              selectedColumn={selectedColumn}
+              filteredColumns={filteredColumns}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={null}>
+            {selectedColumn && (
+              <EuiFlexItem>
+                <EuiButtonIcon
+                  data-test-subj="indexPattern-dimensionPopover-remove"
+                  iconType="cross"
+                  iconSize="s"
+                  color="danger"
+                  aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                    defaultMessage: 'Remove',
+                  })}
+                  onClick={() => {
+                    props.setState(deleteColumn(props.state, props.columnId));
+                  }}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </DragDrop>

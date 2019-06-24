@@ -9,7 +9,6 @@
   display: flex;
   align-items: center;
   margin-top: $euiSizeXS;
-  padding: $euiSizeXS;
 }
 
 .lnsConfigPanel__summaryPopover {
@@ -29,25 +28,8 @@
 .lnsConfigPanel__summaryLink {
   max-width: 100%; /* 1 */
   display: flex;
-  padding: $euiSizeS $euiSizeXS;
-
-  > span {
-    max-width: 100%; /* 1 */
-    overflow: hidden; /* 1 */
-    text-overflow: ellipsis; /* 1 */
-    flex-grow: 1;
-  }
 }
 
 .lnsConfigPanel__summaryField {
   color: $euiColorPrimary;
-}
-
-.lnsConfigPanel__operation--selected .euiSideNavItemButton__label {
-  color: $euiColorPrimary;
-}
-
-.lnsConfigPanel__operation--unsupported .euiSideNavItemButton__label {
-  // TODO solve this in a sane way 
-  opacity: 0.7;
 }
