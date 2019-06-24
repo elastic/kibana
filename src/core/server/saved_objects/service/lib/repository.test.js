@@ -548,19 +548,6 @@ describe('SavedObjectsRepository', () => {
       );
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(savedObjectsRepository.create(
-        'index-pattern',
-        {
-          title: 'Logstash',
-        },
-        {
-          id: 'foo-id',
-          namespace: Symbol('foo-namespace'),
-        }
-      )).rejects.toThrowErrorMatchingSnapshot();
-    });
   });
 
   describe('#bulkCreate', () => {
@@ -1006,15 +993,6 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(savedObjectsRepository.bulkCreate(
-        [{ type: 'globaltype', id: 'one', attributes: { title: 'Test One' } }],
-        {
-          namespace: Symbol('foo-namespace'),
-        }
-      )).rejects.toThrowErrorMatchingSnapshot();
-    });
-
     it('should return objects in the same order regardless of type', () => {});
   });
 
@@ -1093,12 +1071,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(savedObjectsRepository.delete('globaltype', 'logstash-*', {
-        namespace: Symbol('foo-namespace'),
-      })).rejects.toThrowErrorMatchingSnapshot();
-    });
   });
 
   describe('#deleteByNamespace', () => {
@@ -1113,15 +1085,6 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockReturnValue(deleteByQueryResults);
       expect(
         savedObjectsRepository.deleteByNamespace(['namespace-1', 'namespace-2'])
-      ).rejects.toThrowErrorMatchingSnapshot();
-      expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
-    });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      callAdminCluster.mockReturnValue(deleteByQueryResults);
-      expect(
-        savedObjectsRepository.deleteByNamespace(Symbol('namespace-1'))
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(callAdminCluster).not.toHaveBeenCalled();
       expect(onBeforeWrite).not.toHaveBeenCalled();
@@ -1320,11 +1283,6 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster.mock.calls[0][1]).toHaveProperty('rest_total_hits_as_int', true);
     });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(savedObjectsRepository.find({ type: 'foo', namespace: Symbol('foo') }))
-        .rejects.toThrowErrorMatchingSnapshot();
-    });
   });
 
   describe('#get', () => {
@@ -1445,12 +1403,6 @@ describe('SavedObjectsRepository', () => {
           id: 'globaltype:logstash-*',
         })
       );
-    });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(savedObjectsRepository.get('globaltype', 'logstash-*', {
-        namespace: Symbol('foo-namespace'),
-      })).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -1693,17 +1645,6 @@ describe('SavedObjectsRepository', () => {
         },
       ]);
     });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(savedObjectsRepository.bulkGet([
-        { id: 'one', type: 'config' },
-        { id: 'two', type: 'invalidtype' },
-        { id: 'three', type: 'config' },
-        { id: 'four', type: 'invalidtype' },
-        { id: 'five', type: 'config' },
-      ], { namespace: Symbol('foo') }))
-        .rejects.toThrowErrorMatchingSnapshot();
-    });
   });
 
   describe('#update', () => {
@@ -1916,26 +1857,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(savedObjectsRepository.update(
-        'index-pattern',
-        'foo',
-        {
-          name: 'bar',
-        },
-        {
-          namespace: Symbol('foo-namespace'),
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '1',
-            },
-          ],
-        }
-      )).rejects.toThrowErrorMatchingSnapshot();
-    });
   });
 
   describe('#incrementCounter', () => {
@@ -2131,14 +2052,6 @@ describe('SavedObjectsRepository', () => {
           }
         )
       ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
-    });
-
-    it(`doesn't support Symbol namespaces`, async () => {
-      expect(
-        savedObjectsRepository.incrementCounter('globaltype', 'foo', 'counter', {
-          namespace: Symbol('foo-namespace'),
-        })
-      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
