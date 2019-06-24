@@ -30,10 +30,10 @@ export function compileFormattingRules(
         )
       )
     ),
-    format(fields): InfraLogMessageSegment[] {
+    format(fields, highlights): InfraLogMessageSegment[] {
       for (const compiledRule of compiledRules) {
         if (compiledRule.fulfillsCondition(fields)) {
-          return compiledRule.format(fields);
+          return compiledRule.format(fields, highlights);
         }
       }
 
@@ -66,7 +66,7 @@ const compileCondition = (
 
 const catchAllCondition: CompiledLogMessageFormattingCondition = {
   conditionFields: [] as string[],
-  fulfillsCondition: (fields: Fields) => false,
+  fulfillsCondition: () => false,
 };
 
 const compileExistsCondition = (condition: LogMessageFormattingCondition) =>
@@ -101,15 +101,15 @@ const compileFormattingInstructions = (
           ...combinedFormattingInstructions.formattingFields,
           ...compiledFormattingInstruction.formattingFields,
         ],
-        format: (fields: Fields) => [
-          ...combinedFormattingInstructions.format(fields),
-          ...compiledFormattingInstruction.format(fields),
+        format: (fields: Fields, highlights: Highlights) => [
+          ...combinedFormattingInstructions.format(fields, highlights),
+          ...compiledFormattingInstruction.format(fields, highlights),
         ],
       };
     },
     {
       formattingFields: [],
-      format: (fields: Fields) => [],
+      format: () => [],
     } as CompiledLogMessageFormattingInstruction
   );
 
@@ -124,7 +124,7 @@ const compileFormattingInstruction = (
 
 const catchAllFormattingInstruction: CompiledLogMessageFormattingInstruction = {
   formattingFields: [],
-  format: (fields: Fields) => [
+  format: () => [
     {
       constant: 'invalid format',
     },
@@ -137,13 +137,14 @@ const compileFieldReferenceFormattingInstruction = (
   'field' in formattingInstruction
     ? {
         formattingFields: [formattingInstruction.field],
-        format: (fields: Fields) => {
+        format: (fields, highlights) => {
           const value = fields[formattingInstruction.field];
+          const highlightedValues = highlights[formattingInstruction.field];
           return [
             {
               field: formattingInstruction.field,
               value: typeof value === 'object' ? stringify(value) : `${value}`,
-              highlights: [],
+              highlights: highlightedValues || [],
             },
           ];
         },
@@ -156,7 +157,7 @@ const compileConstantFormattingInstruction = (
   'constant' in formattingInstruction
     ? {
         formattingFields: [] as string[],
-        format: (fields: Fields) => [
+        format: () => [
           {
             constant: formattingInstruction.constant,
           },
@@ -164,14 +165,18 @@ const compileConstantFormattingInstruction = (
       }
     : null;
 
-interface Fields {
+export interface Fields {
   [fieldName: string]: string | number | object | boolean | null;
+}
+
+export interface Highlights {
+  [fieldName: string]: string[];
 }
 
 export interface CompiledLogMessageFormattingRule {
   requiredFields: string[];
   fulfillsCondition(fields: Fields): boolean;
-  format(fields: Fields): InfraLogMessageSegment[];
+  format(fields: Fields, highlights: Highlights): InfraLogMessageSegment[];
 }
 
 export interface CompiledLogMessageFormattingCondition {
@@ -181,5 +186,5 @@ export interface CompiledLogMessageFormattingCondition {
 
 export interface CompiledLogMessageFormattingInstruction {
   formattingFields: string[];
-  format(fields: Fields): InfraLogMessageSegment[];
+  format(fields: Fields, highlights: Highlights): InfraLogMessageSegment[];
 }
