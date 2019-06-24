@@ -85,4 +85,15 @@ describe('capabilitiesMixin', () => {
 
     expect(mockRegisterCapabilitiesRoute.mock.calls[0][2]).toEqual([mockModifier1, mockModifier2]);
   });
+
+  it('exposes request#getCapabilities for retrieving legacy capabilities', async () => {
+    const kbnServer = getKbnServer();
+    jest.spyOn(server, 'decorate');
+    await capabilitiesMixin(kbnServer, server);
+    expect(server.decorate).toHaveBeenCalledWith(
+      'request',
+      'getCapabilities',
+      expect.any(Function)
+    );
+  });
 });

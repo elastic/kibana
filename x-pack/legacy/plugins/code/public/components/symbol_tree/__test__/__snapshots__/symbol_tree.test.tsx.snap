@@ -1,0 +1,564 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render symbol tree correctly 1`] = `
+<div
+  className="codeContainer__sideTabTree"
+>
+  <nav
+    className="euiSideNav"
+  >
+    <button
+      className="euiSideNav__mobileToggle euiLink"
+      type="button"
+    >
+      <span
+        className="euiSideNav__mobileWrap"
+      >
+        <span
+          className="euiSideNav__mobileTitle"
+        />
+        <svg
+          aria-hidden="true"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSideNav__mobileIcon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
+    </button>
+    <div
+      className="euiSideNav__content"
+      role="menubar"
+    >
+      <div
+        className="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+      >
+        <div
+          aria-label={
+            <span
+              className="euiSideNavItemButton__content"
+            >
+              <span
+                className="euiSideNavItemButton__label"
+              >
+                
+              </span>
+            </span>
+          }
+          className="euiSideNavItemButton"
+        >
+          <span
+            className="euiSideNavItemButton__content"
+          >
+            <span
+              className="euiSideNavItemButton__label"
+            >
+              
+            </span>
+          </span>
+        </div>
+        <div
+          className="euiSideNavItem__items"
+        >
+          <div
+            className="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems"
+          >
+            <div
+              className="code-symbol-container"
+            >
+              <div
+                className="codeSymbol"
+              >
+                <svg
+                  className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading codeStructureTree--icon"
+                  focusable="false"
+                  height={16}
+                  onClick={[Function]}
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+                <a
+                  className="code-symbol-link"
+                  href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?sideTab=structure"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                  >
+                    <div
+                      className="euiToken euiToken--tokenTint09 euiToken--square euiToken--small"
+                    >
+                      <svg
+                        className="euiIcon euiIcon--medium euiIcon-isLoading"
+                        focusable="false"
+                        height={16}
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </div>
+                    <div
+                      className="euiText euiText--small"
+                      data-test-subj="codeStructureTreeNode-\\"stack-control\\""
+                    >
+                      "stack-control"
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div
+              className="euiSideNavItem__items"
+            >
+              <div
+                className="euiSideNavItem euiSideNavItem--branch"
+              >
+                <div
+                  className="code-symbol-container"
+                >
+                  <div
+                    className="codeSymbol codeSymbol--nested"
+                  >
+                    <a
+                      className="code-symbol-link"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?sideTab=structure"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                      >
+                        <div
+                          className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
+                        >
+                          <svg
+                            className="euiIcon euiIcon--medium euiIcon-isLoading"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </div>
+                        <div
+                          className="euiText euiText--small"
+                          data-test-subj="codeStructureTreeNode-EventEmitter"
+                        >
+                          EventEmitter
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="euiSideNavItem euiSideNavItem--branch"
+              >
+                <div
+                  className="code-symbol-container"
+                >
+                  <div
+                    className="codeSymbol codeSymbol--nested"
+                  >
+                    <a
+                      className="code-symbol-link"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?sideTab=structure"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                      >
+                        <div
+                          className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
+                        >
+                          <svg
+                            className="euiIcon euiIcon--medium euiIcon-isLoading"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </div>
+                        <div
+                          className="euiText euiText--small"
+                          data-test-subj="codeStructureTreeNode-ClrStackView"
+                        >
+                          ClrStackView
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
+              >
+                <div
+                  className="code-symbol-container"
+                >
+                  <div
+                    className="codeSymbol"
+                  >
+                    <svg
+                      className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading codeStructureTree--icon"
+                      focusable="false"
+                      height={16}
+                      onClick={[Function]}
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                    <a
+                      className="code-symbol-link"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?sideTab=structure"
+                      onClick={[Function]}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                      >
+                        <div
+                          className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
+                        >
+                          <svg
+                            className="euiIcon euiIcon--medium euiIcon-isLoading"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </div>
+                        <div
+                          className="euiText euiText--small"
+                          data-test-subj="codeStructureTreeNode-StackControl"
+                        >
+                          StackControl
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+                <div
+                  className="euiSideNavItem__items"
+                >
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol codeSymbol--nested"
+                      >
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-model"
+                            >
+                              model
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol codeSymbol--nested"
+                      >
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-modelChange"
+                            >
+                              modelChange
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol codeSymbol--nested"
+                      >
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-stackView"
+                            >
+                              stackView
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol codeSymbol--nested"
+                      >
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-Unit"
+                            >
+                              Unit
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol codeSymbol--nested"
+                      >
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-datemath"
+                            >
+                              datemath
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol"
+                      >
+                        <svg
+                          className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading codeStructureTree--icon"
+                          focusable="false"
+                          height={16}
+                          onClick={[Function]}
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-HashMap<K, V>"
+                            >
+                              HashMap&lt;K, V&gt;
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                    <div
+                      className="euiSideNavItem__items"
+                    >
+                      <div
+                        className="euiSideNavItem euiSideNavItem--branch"
+                      >
+                        <div
+                          className="code-symbol-container"
+                        >
+                          <div
+                            className="codeSymbol codeSymbol--nested"
+                          >
+                            <a
+                              className="code-symbol-link"
+                              href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?sideTab=structure"
+                              onClick={[Function]}
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                              >
+                                <div
+                                  className="euiToken euiToken--tokenTint10 euiToken--circle euiToken--small"
+                                >
+                                  <svg
+                                    className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                    focusable="false"
+                                    height={16}
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </div>
+                                <div
+                                  className="euiText euiText--small"
+                                  data-test-subj="codeStructureTreeNode-serialVersionUID"
+                                >
+                                  serialVersionUID
+                                </div>
+                              </div>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</div>
+`;

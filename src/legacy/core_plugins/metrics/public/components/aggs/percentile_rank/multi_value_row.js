@@ -29,32 +29,23 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import AddDeleteButtons from '../../add_delete_buttons';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 
-export const MultiValueRow = ({
-  model,
-  onChange,
-  onDelete,
-  onAdd,
-  disableAdd,
-  disableDelete,
-}) => {
+export const MultiValueRow = ({ model, onChange, onDelete, onAdd, disableAdd, disableDelete }) => {
   const htmlId = htmlIdGenerator();
 
-  const onFieldNumberChange = event => onChange({
-    ...model,
-    value: get(event, 'target.value')
-  });
+  const onFieldNumberChange = event =>
+    onChange({
+      ...model,
+      value: get(event, 'target.value'),
+    });
 
   return (
     <div className="tvbAggRow__multiValueRow">
       <EuiFlexGroup responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFormLabel htmlFor={htmlId('value')}>
-            <FormattedMessage
-              id="tsvb.multivalueRow.valueLabel"
-              defaultMessage="Value:"
-            />
+            <FormattedMessage id="tsvb.multivalueRow.valueLabel" defaultMessage="Value:" />
           </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -73,7 +64,7 @@ export const MultiValueRow = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer/>
+      <EuiSpacer />
     </div>
   );
 };
@@ -93,4 +84,3 @@ MultiValueRow.propTypes = {
   defaultAddValue: PropTypes.string,
   disableDelete: PropTypes.bool,
 };
-

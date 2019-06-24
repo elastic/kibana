@@ -18,19 +18,18 @@
  */
 
 import { expect } from 'chai';
-import getSplits from '../../helpers/get_splits';
+import { getSplits } from '../../helpers/get_splits';
 
 describe('getSplits(resp, panel, series)', () => {
-
   it('should return a splits for everything/filter group bys', () => {
     const resp = {
       aggregations: {
         SERIES: {
           timeseries: { buckets: [] },
           SIBAGG: { value: 1 },
-          meta: { bucketSize: 10 }
-        }
-      }
+          meta: { bucketSize: 10 },
+        },
+      },
     };
     const panel = { type: 'timeseries' };
     const series = {
@@ -39,8 +38,8 @@ describe('getSplits(resp, panel, series)', () => {
       split_mode: 'everything',
       metrics: [
         { id: 'AVG', type: 'avg', field: 'cpu' },
-        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' }
-      ]
+        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
+      ],
     };
     expect(getSplits(resp, panel, series)).to.eql([
       {
@@ -49,8 +48,8 @@ describe('getSplits(resp, panel, series)', () => {
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
-        SIBAGG: { value: 1 }
-      }
+        SIBAGG: { value: 1 },
+      },
     ]);
   });
 
@@ -62,17 +61,17 @@ describe('getSplits(resp, panel, series)', () => {
             {
               key: 'example-01',
               timeseries: { buckets: [] },
-              SIBAGG: { value: 1 }
+              SIBAGG: { value: 1 },
             },
             {
               key: 'example-02',
               timeseries: { buckets: [] },
-              SIBAGG: { value: 2 }
-            }
+              SIBAGG: { value: 2 },
+            },
           ],
-          meta: { bucketSize: 10 }
-        }
-      }
+          meta: { bucketSize: 10 },
+        },
+      },
     };
     const series = {
       id: 'SERIES',
@@ -82,8 +81,8 @@ describe('getSplits(resp, panel, series)', () => {
       terms_size: 10,
       metrics: [
         { id: 'AVG', type: 'avg', field: 'cpu' },
-        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' }
-      ]
+        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
+      ],
     };
     const panel = { type: 'top_n' };
     expect(getSplits(resp, panel, series)).to.eql([
@@ -94,7 +93,7 @@ describe('getSplits(resp, panel, series)', () => {
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
-        SIBAGG: { value: 1 }
+        SIBAGG: { value: 1 },
       },
       {
         id: 'SERIES:example-02',
@@ -103,8 +102,8 @@ describe('getSplits(resp, panel, series)', () => {
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
-        SIBAGG: { value: 2 }
-      }
+        SIBAGG: { value: 2 },
+      },
     ]);
   });
 
@@ -116,17 +115,17 @@ describe('getSplits(resp, panel, series)', () => {
             {
               key: 'example-01',
               timeseries: { buckets: [] },
-              SIBAGG: { value: 1 }
+              SIBAGG: { value: 1 },
             },
             {
               key: 'example-02',
               timeseries: { buckets: [] },
-              SIBAGG: { value: 2 }
-            }
+              SIBAGG: { value: 2 },
+            },
           ],
-          meta: { bucketSize: 10 }
-        }
-      }
+          meta: { bucketSize: 10 },
+        },
+      },
     };
     const series = {
       id: 'SERIES',
@@ -136,8 +135,8 @@ describe('getSplits(resp, panel, series)', () => {
       terms_size: 10,
       metrics: [
         { id: 'AVG', type: 'avg', field: 'cpu' },
-        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' }
-      ]
+        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
+      ],
     };
     const panel = { type: 'timeseries' };
     expect(getSplits(resp, panel, series)).to.eql([
@@ -148,7 +147,7 @@ describe('getSplits(resp, panel, series)', () => {
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
-        SIBAGG: { value: 1 }
+        SIBAGG: { value: 1 },
       },
       {
         id: 'SERIES:example-02',
@@ -157,8 +156,8 @@ describe('getSplits(resp, panel, series)', () => {
         meta: { bucketSize: 10 },
         color: 'rgb(147, 0, 0)',
         timeseries: { buckets: [] },
-        SIBAGG: { value: 2 }
-      }
+        SIBAGG: { value: 2 },
+      },
     ]);
   });
 
@@ -172,11 +171,11 @@ describe('getSplits(resp, panel, series)', () => {
             },
             'filter-2': {
               timeseries: { buckets: [] },
-            }
+            },
           },
-          meta: { bucketSize: 10 }
-        }
-      }
+          meta: { bucketSize: 10 },
+        },
+      },
     };
     const series = {
       id: 'SERIES',
@@ -184,11 +183,9 @@ describe('getSplits(resp, panel, series)', () => {
       split_mode: 'filters',
       split_filters: [
         { id: 'filter-1', color: '#F00', filter: 'status_code:[* TO 200]', label: '200s' },
-        { id: 'filter-2', color: '#0F0', filter: 'status_code:[300 TO *]', label: '300s' }
+        { id: 'filter-2', color: '#0F0', filter: 'status_code:[300 TO *]', label: '300s' },
       ],
-      metrics: [
-        { id: 'COUNT', type: 'count' },
-      ]
+      metrics: [{ id: 'COUNT', type: 'count' }],
     };
     const panel = { type: 'timeseries' };
     expect(getSplits(resp, panel, series)).to.eql([
@@ -207,8 +204,7 @@ describe('getSplits(resp, panel, series)', () => {
         meta: { bucketSize: 10 },
         color: '#0F0',
         timeseries: { buckets: [] },
-      }
+      },
     ]);
   });
-
 });

@@ -18,10 +18,31 @@
  */
 
 import { Toast } from '@elastic/eui';
+import React from 'react';
 import * as Rx from 'rxjs';
 
+import { ErrorToast } from './error_toast';
+import { UiSettingsSetup } from '../../ui_settings';
+import { OverlayStart } from '../../overlays';
+
+type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+
 /** @public */
-export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+
+export interface ErrorToastOptions {
+  /**
+   * The title of the toast and the dialog when expanding the message.
+   */
+  title: string;
+  /**
+   * The message to be shown in the toast. If this is not specified the error's
+   * message will be shown in the toast instead. Overwriting that message can
+   * be used to provide more user-friendly toasts. If you specify this, the error
+   * message will still be shown in the detailed error modal.
+   */
+  toastMessage?: string;
+}
 
 const normalizeToast = (toastOrTitle: ToastInput) => {
   if (typeof toastOrTitle === 'string') {
@@ -37,6 +58,17 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
 export class ToastsApi {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
+  private uiSettings: UiSettingsSetup;
+
+  private overlays?: OverlayStart;
+
+  constructor(deps: { uiSettings: UiSettingsSetup }) {
+    this.uiSettings = deps.uiSettings;
+  }
+
+  public registerOverlays(overlays: OverlayStart) {
+    this.overlays = overlays;
+  }
 
   public get$() {
     return this.toasts$.asObservable();
@@ -45,6 +77,7 @@ export class ToastsApi {
   public add(toastOrTitle: ToastInput) {
     const toast: Toast = {
       id: String(this.idCounter++),
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),
       ...normalizeToast(toastOrTitle),
     };
 
@@ -73,6 +106,7 @@ export class ToastsApi {
     return this.add({
       color: 'warning',
       iconType: 'help',
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:warning'),
       ...normalizeToast(toastOrTitle),
     });
   }
@@ -81,7 +115,38 @@ export class ToastsApi {
     return this.add({
       color: 'danger',
       iconType: 'alert',
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:warning'),
       ...normalizeToast(toastOrTitle),
     });
+  }
+
+  public addError(error: Error, options: ErrorToastOptions) {
+    const message = options.toastMessage || error.message;
+    return this.add({
+      color: 'danger',
+      iconType: 'alert',
+      title: options.title,
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
+      text: (
+        <ErrorToast
+          openModal={this.openModal.bind(this)}
+          error={error}
+          title={options.title}
+          toastMessage={message}
+        />
+      ),
+    });
+  }
+
+  private openModal(
+    ...args: Parameters<OverlayStart['openModal']>
+  ): ReturnType<OverlayStart['openModal']> {
+    if (!this.overlays) {
+      // This case should never happen because no rendering should be occurring
+      // before the ToastService is started.
+      throw new Error(`Modal opened before ToastService was started.`);
+    }
+
+    return this.overlays.openModal(...args);
   }
 }

@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { kpiNetworkQuery } from '../../../../plugins/siem/public/containers/kpi_network/index.gql_query';
-import { GetKpiNetworkQuery } from '../../../../plugins/siem/public/graphql/types';
+import { kpiNetworkQuery } from '../../../../legacy/plugins/siem/public/containers/kpi_network/index.gql_query';
+import { GetKpiNetworkQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
@@ -19,6 +19,59 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
 
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const expectedResult = {
+        __typename: 'KpiNetworkData',
+        networkEvents: 6157,
+        uniqueFlowId: 712,
+        uniqueSourcePrivateIps: 8,
+        uniqueSourcePrivateIpsHistogram: [
+          {
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 8,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 8,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 7,
+            __typename: 'KpiNetworkHistogramData',
+          },
+        ],
+        uniqueDestinationPrivateIps: 9,
+        uniqueDestinationPrivateIpsHistogram: [
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 8,
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 8,
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 8,
+          },
+        ],
+        dnsQueries: 169,
+        tlsHandshakes: 62,
+      };
 
       it('Make sure that we get KpiNetwork data', () => {
         return client
@@ -31,17 +84,12 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
             const kpiNetwork = resp.data.source.KpiNetwork;
-            expect(kpiNetwork!.networkEvents).to.be(6157);
-            expect(kpiNetwork!.uniqueFlowId).to.be(712);
-            expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
-            expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
-            expect(kpiNetwork!.dnsQueries).to.equal(169);
-            expect(kpiNetwork!.tlsHandshakes).to.equal(62);
+            expect(kpiNetwork).to.eql(expectedResult);
           });
       });
     });
@@ -52,7 +100,59 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
 
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
-
+      const expectedResult = {
+        __typename: 'KpiNetworkData',
+        networkEvents: 6157,
+        uniqueFlowId: 712,
+        uniqueSourcePrivateIps: 8,
+        uniqueSourcePrivateIpsHistogram: [
+          {
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 8,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 8,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 7,
+            __typename: 'KpiNetworkHistogramData',
+          },
+        ],
+        uniqueDestinationPrivateIps: 9,
+        uniqueDestinationPrivateIpsHistogram: [
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 8,
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 8,
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 8,
+          },
+        ],
+        dnsQueries: 169,
+        tlsHandshakes: 62,
+      };
       it('Make sure that we get KpiNetwork data', () => {
         return client
           .query<GetKpiNetworkQuery.Query>({
@@ -64,17 +164,12 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
             const kpiNetwork = resp.data.source.KpiNetwork;
-            expect(kpiNetwork!.networkEvents).to.be(6157);
-            expect(kpiNetwork!.uniqueFlowId).to.be(712);
-            expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
-            expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
-            expect(kpiNetwork!.dnsQueries).to.equal(169);
-            expect(kpiNetwork!.tlsHandshakes).to.equal(62);
+            expect(kpiNetwork).to.eql(expectedResult);
           });
       });
     });

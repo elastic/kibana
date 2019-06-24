@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 
 import { renderToHtml } from '../../services';
@@ -31,11 +33,11 @@ import {
 } from '../../components';
 
 import { ModalExample } from './modal';
-const modalSource = require('!!raw-loader!./modal');
+import modalSource from '!!raw-loader!./modal'; // eslint-disable-line import/default
 const modalHtml = renderToHtml(ModalExample);
 
 import { ConfirmModalExample } from './confirm_modal';
-const confirmModalSource = require('!!raw-loader!./confirm_modal');
+import confirmModalSource from '!!raw-loader!./confirm_modal'; // eslint-disable-line import/default
 const confirmModalHtml = renderToHtml(ConfirmModalExample);
 
 export default props => (

@@ -24,6 +24,7 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
+import { hasConfigPathIntersection } from './config';
 
 /** @internal */
 export class ConfigService {
@@ -180,4 +181,4 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  * handled paths.
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
-  handledPaths.some(handledPath => path.startsWith(handledPath));
+  handledPaths.some(handledPath => hasConfigPathIntersection(path, handledPath));

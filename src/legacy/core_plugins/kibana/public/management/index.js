@@ -49,7 +49,7 @@ uiRoutes
     redirectTo: '/management'
   });
 
-require('ui/index_patterns/route_setup/load_default')({
+require('./route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index_pattern'
 });
 
@@ -127,7 +127,7 @@ export const destroyReact = id => {
 
 uiModules
   .get('apps/management')
-  .directive('kbnManagementApp', function (Private, $location) {
+  .directive('kbnManagementApp', function ($location) {
     return {
       restrict: 'E',
       template: appTemplate,

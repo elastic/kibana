@@ -64,5 +64,5 @@ exports.run = async (defaults = {}) => {
   }
 
   const { installPath } = await cluster.installArchive(path, options);
-  await cluster.run(installPath, { esArgs: options.esArgs });
+  await cluster.run(installPath, options);
 };

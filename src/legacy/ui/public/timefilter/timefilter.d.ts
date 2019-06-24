@@ -17,5 +17,27 @@
  * under the License.
  */
 
-export type Timefilter = any;
+import { Moment } from 'moment';
+import { TimeRange } from './time_history';
+
+// NOTE: These types are somewhat guessed, they may be incorrect.
+
+export interface RefreshInterval {
+  pause: boolean;
+  value: number;
+}
+
+export interface Timefilter {
+  time: TimeRange;
+  getTime: () => TimeRange;
+  setTime: (timeRange: TimeRange) => void;
+  setRefreshInterval: (refreshInterval: RefreshInterval) => void;
+  getRefreshInterval: () => RefreshInterval;
+  disableAutoRefreshSelector: () => void;
+  disableTimeRangeSelector: () => void;
+  enableAutoRefreshSelector: () => void;
+  off: (event: string, reload: () => void) => void;
+  on: (event: string, reload: () => void) => void;
+}
+
 export const timefilter: Timefilter;
