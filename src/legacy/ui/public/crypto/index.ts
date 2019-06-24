@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { Sha256 } from './sha256';
+export { Sha256 } from './sha256.js';
