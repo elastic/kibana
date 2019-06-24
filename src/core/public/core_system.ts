@@ -111,21 +111,20 @@ export class CoreSystem {
     try {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
-      const i18n = this.i18n.setup();
       const injectedMetadata = this.injectedMetadata.setup();
-      this.fatalErrorsSetup = this.fatalErrors.setup({ injectedMetadata, i18n });
+      this.fatalErrorsSetup = this.fatalErrors.setup({
+        injectedMetadata,
+        i18n: this.i18n.getContext(),
+      });
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const application = this.application.setup();
-      const chrome = this.chrome.setup({ injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
-        chrome,
         fatalErrors: this.fatalErrorsSetup,
         http,
-        i18n,
         injectedMetadata,
         notifications,
         uiSettings,
@@ -153,7 +152,6 @@ export class CoreSystem {
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
-      const chrome = await this.chrome.start({ application, http });
 
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
@@ -166,11 +164,19 @@ export class CoreSystem {
       this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
       const notifications = await this.notifications.start({
         i18n,
+        overlays,
         targetDomElement: notificationsTargetDomElement,
       });
-      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
+      const chrome = await this.chrome.start({
+        application,
+        http,
+        injectedMetadata,
+        notifications,
+      });
+      const uiSettings = await this.uiSettings.start();
 
       const core: InternalCoreStart = {
         application,
@@ -180,6 +186,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         overlays,
+        uiSettings,
       };
 
       const plugins = await this.plugins.start(core);

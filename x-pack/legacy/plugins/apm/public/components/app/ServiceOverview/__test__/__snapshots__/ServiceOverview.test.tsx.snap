@@ -1,0 +1,369 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Service Overview -> View should render empty message, when list is empty and historical data is found 1`] = `
+NodeList [
+  <tr
+    class="euiTableRow"
+  >
+    <td
+      class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+      colspan="6"
+    >
+      <div
+        class="euiTableCellContent euiTableCellContent--alignCenter"
+      >
+        <span
+          class="euiTableCellContent__text"
+        >
+          <div
+            class="euiEmptyPrompt"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <div
+                class="euiTitle euiTitle--small"
+              >
+                No services found
+              </div>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+            </span>
+          </div>
+        </span>
+      </div>
+    </td>
+  </tr>,
+]
+`;
+
+exports[`Service Overview -> View should render getting started message, when list is empty and no historical data is found 1`] = `
+NodeList [
+  <tr
+    class="euiTableRow"
+  >
+    <td
+      class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+      colspan="6"
+    >
+      <div
+        class="euiTableCellContent euiTableCellContent--alignCenter"
+      >
+        <span
+          class="euiTableCellContent__text"
+        >
+          <div
+            class="euiEmptyPrompt"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <div
+                class="euiTitle euiTitle--small"
+              >
+                Looks like you don't have any APM services installed. Let's add some!
+              </div>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <div
+                class="euiText euiText--medium"
+              >
+                <p>
+                  Upgrading from a pre-7.x version? Make sure you've also upgraded
+              your APM server instance(s) to at least 7.0.
+                </p>
+                <p>
+                  You may also have old data that needs to be migrated.
+                   
+                  <a
+                    class="euiLink euiLink--primary"
+                    href="/app/kibana#/management/elasticsearch/upgrade_assistant"
+                  >
+                    Learn more by visiting the Kibana Upgrade Assistant
+                  </a>
+                  .
+                </p>
+              </div>
+            </span>
+            <div
+              class="euiSpacer euiSpacer--l"
+            />
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <a
+              class="euiLink euiLink--primary"
+              href="/app/kibana#/home/tutorial/apm"
+            >
+              <button
+                class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButton__content"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon-isLoaded euiButton__icon"
+                    focusable="false"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <path
+                        d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                        id="help-a"
+                      />
+                    </defs>
+                    <use
+                      fill-rule="evenodd"
+                      xlink:href="#help-a"
+                    />
+                  </svg>
+                  <span
+                    class="euiButton__text"
+                  >
+                    Setup Instructions
+                  </span>
+                </span>
+              </button>
+            </a>
+          </div>
+        </span>
+      </div>
+    </td>
+  </tr>,
+]
+`;
+
+exports[`Service Overview -> View should render services, when list is not empty 1`] = `
+NodeList [
+  <tr
+    class="euiTableRow"
+  >
+    <td
+      class="euiTableRowCell"
+      width="40%"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Name
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <span
+          class="euiToolTipAnchor"
+        >
+          <a
+            aria-describedby="service-name-tooltip"
+            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            href="#/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+          >
+            My Go Service
+          </a>
+        </span>
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+      width="20%"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Environment
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      />
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Agent
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        go
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Avg. response time
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+      >
+        1 ms
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Trans. per minute
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+      >
+        400.0 tpm
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Errors per minute
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+      >
+        500.0 err.
+      </div>
+    </td>
+  </tr>,
+  <tr
+    class="euiTableRow"
+  >
+    <td
+      class="euiTableRowCell"
+      width="40%"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Name
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <span
+          class="euiToolTipAnchor"
+        >
+          <a
+            aria-describedby="service-name-tooltip"
+            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            href="#/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+          >
+            My Python Service
+          </a>
+        </span>
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+      width="20%"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Environment
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <span
+          class="euiBadge euiBadge--iconLeft euiBadge--hollow"
+        >
+          <span
+            class="euiBadge__content"
+          >
+            <span
+              class="euiBadge__text"
+            >
+              test
+            </span>
+          </span>
+        </span>
+        <span
+          class="euiBadge euiBadge--iconLeft euiBadge--hollow"
+        >
+          <span
+            class="euiBadge__content"
+          >
+            <span
+              class="euiBadge__text"
+            >
+              dev
+            </span>
+          </span>
+        </span>
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Agent
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        python
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Avg. response time
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+      >
+        0 ms
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Trans. per minute
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+      >
+        100.0 tpm
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Errors per minute
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+      >
+        200.0 err.
+      </div>
+    </td>
+  </tr>,
+]
+`;

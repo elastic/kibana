@@ -258,6 +258,10 @@ exports.Cluster = class Cluster {
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
+      env: {
+        ...process.env,
+        ...(options.esEnvVars || {}),
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         [options.bundledJDK && 'JAVA_HOME']: '',

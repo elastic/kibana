@@ -55,6 +55,8 @@ exports.run = async (defaults = {}) => {
       esArgs: 'E',
     },
 
+    string: ['version'],
+
     boolean: ['download-only'],
 
     default: defaults,

@@ -55,37 +55,12 @@ export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
   public setup({ core, plugins }: SetupDeps) {
-    const {
-      application,
-      i18n,
-      injectedMetadata,
-      fatalErrors,
-      notifications,
-      http,
-      uiSettings,
-      chrome,
-    } = core;
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__newPlatformSetup__(core, plugins);
-    require('ui/metadata').__newPlatformSetup__(injectedMetadata.getLegacyMetadata());
-    require('ui/i18n').__newPlatformSetup__(i18n.Context);
-    require('ui/notify/fatal_error').__newPlatformSetup__(fatalErrors);
-    require('ui/kfetch').__newPlatformSetup__(http);
-    require('ui/notify/toasts').__newPlatformSetup__(notifications.toasts);
-    require('ui/chrome/api/loading_count').__newPlatformSetup__(http);
-    require('ui/chrome/api/base_path').__newPlatformSetup__(http);
-    require('ui/chrome/api/ui_settings').__newPlatformSetup__(uiSettings);
-    require('ui/chrome/api/injected_vars').__newPlatformSetup__(injectedMetadata);
-    require('ui/chrome/api/controls').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/help_extension').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/theme').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/badge').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/breadcrumbs').__newPlatformSetup__(chrome);
-    require('ui/chrome/services/global_nav_state').__newPlatformSetup__(chrome);
+    require('ui/new_platform').__setup__(core, plugins);
 
-    injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
-      application.registerLegacyApp({
+    core.injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
+      core.application.registerLegacyApp({
         id: navLink.id,
         order: navLink.order,
         title: navLink.title,
@@ -96,6 +71,12 @@ export class LegacyPlatformService {
         linkToLastSubUrl: navLink.linkToLastSubUrl,
       })
     );
+  }
+
+  public start({ core, targetDomElement, plugins }: StartDeps) {
+    // Inject parts of the new platform into parts of the legacy platform
+    // so that legacy APIs/modules can mimic their new platform counterparts
+    require('ui/new_platform').__start__(core, plugins);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
@@ -103,17 +84,12 @@ export class LegacyPlatformService {
 
     // require the files that will tie into the legacy platform
     this.params.requireLegacyFiles();
-  }
 
-  public start({ core, targetDomElement, plugins }: StartDeps) {
     if (!this.bootstrapModule) {
       throw new Error('Bootstrap module must be loaded before `start`');
     }
 
     this.targetDomElement = targetDomElement;
-
-    require('ui/new_platform').__newPlatformStart__(core, plugins);
-    require('ui/capabilities').__newPlatformStart__(core.application.capabilities);
 
     this.bootstrapModule.bootstrap(this.targetDomElement);
   }
