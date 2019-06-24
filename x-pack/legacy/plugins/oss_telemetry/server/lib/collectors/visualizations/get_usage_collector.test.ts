@@ -30,6 +30,8 @@ describe('getVisualizationsCollector#fetch', () => {
   test('provides known stats', async () => {
     const mockTaskFetch = getMockTaskFetch([
       {
+        taskType: '',
+        params: {},
         state: {
           runs: 1,
           stats: { comic_books: { total: 16, max: 12, min: 2, avg: 6 } },

@@ -6,7 +6,11 @@
 
 import { ESQueryResponse, HapiServer, SavedObjectDoc, TaskInstance } from '../';
 
-export const getMockTaskInstance = (): TaskInstance => ({ state: { runs: 0, stats: {} } });
+export const getMockTaskInstance = (): TaskInstance => ({
+  taskType: '',
+  params: {},
+  state: { runs: 0, stats: {} },
+});
 
 const defaultMockSavedObjects = [
   {
@@ -34,11 +38,6 @@ export const getMockKbnServer = (
   mockCallWithInternal = getMockCallWithInternal(),
   mockTaskFetch = getMockTaskFetch()
 ): HapiServer => ({
-  taskManager: {
-    registerTaskDefinitions: (opts: any) => undefined,
-    schedule: (opts: any) => Promise.resolve(),
-    fetch: mockTaskFetch,
-  },
   plugins: {
     elasticsearch: {
       getCluster: (cluster: string) => ({
@@ -46,6 +45,11 @@ export const getMockKbnServer = (
       }),
     },
     xpack_main: {},
+    taskManager: {
+      registerTaskDefinitions: (opts: any) => undefined,
+      schedule: (opts: any) => Promise.resolve(),
+      fetch: mockTaskFetch,
+    } as any,
   },
   usage: {
     collectorSet: {

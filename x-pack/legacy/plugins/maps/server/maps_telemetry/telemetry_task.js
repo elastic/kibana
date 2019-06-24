@@ -26,21 +26,21 @@ export function scheduleTask(server, taskManager) {
   });
 }
 
-export function registerMapsTelemetryTask(taskManager) {
+export function registerMapsTelemetryTask(taskManager, kbnServer) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Maps telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
       numWorkers: 2,
-      createTaskRunner: telemetryTaskRunner(),
+      createTaskRunner: telemetryTaskRunner(kbnServer),
     },
   });
 }
 
-export function telemetryTaskRunner() {
+export function telemetryTaskRunner(kbnServer) {
 
-  return ({ kbnServer, taskInstance }) => {
+  return ({ taskInstance }) => {
     const { state } = taskInstance;
     const prevState = state;
     const { server } = kbnServer;

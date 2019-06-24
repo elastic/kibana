@@ -19,6 +19,7 @@ export default function (kibana) {
 
     init(server) {
       const taskManager = server.plugins.taskManager;
+      const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
       taskManager.registerTaskDefinitions({
         sampleTask: {
@@ -31,7 +32,7 @@ export default function (kibana) {
           // taskInstance.params has the following optional fields:
           // nextRunMilliseconds: number - If specified, the run method will return a runAt that is now + nextRunMilliseconds
           // failWith: string - If specified, the task will throw an error with the specified message
-          createTaskRunner: ({ kbnServer, taskInstance }) => ({
+          createTaskRunner: ({ taskInstance }) => ({
             async run() {
               const { params, state } = taskInstance;
               const prevState = state || { count: 0 };

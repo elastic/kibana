@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TaskManagerContract, TaskInstance } from '../task_manager';
+
+export { TaskInstance };
+
 export interface VisState {
   type: string;
 }
@@ -26,24 +30,7 @@ export interface ESQueryResponse {
   };
 }
 
-export interface TaskInstance {
-  state: {
-    runs: number;
-    stats: any;
-  };
-  error?: any;
-}
-
 export interface HapiServer {
-  taskManager: {
-    registerTaskDefinitions: (opts: any) => void;
-    schedule: (opts: any) => Promise<void>;
-    fetch: (
-      opts: any
-    ) => Promise<{
-      docs: TaskInstance[];
-    }>;
-  };
   plugins: {
     xpack_main: any;
     elasticsearch: {
@@ -53,6 +40,7 @@ export interface HapiServer {
         callWithInternalUser: () => Promise<ESQueryResponse>;
       };
     };
+    taskManager: TaskManagerContract;
   };
   usage: {
     collectorSet: {
