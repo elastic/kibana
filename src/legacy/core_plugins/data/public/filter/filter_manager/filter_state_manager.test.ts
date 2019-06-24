@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 import { Subscription } from 'rxjs';
 import { FilterStateManager } from './filter_state_manager';
@@ -52,14 +52,16 @@ describe('filter_state_manager', () => {
 
   let subscription: Subscription | undefined;
   let filterManager: FilterManager;
-  let filterManagerState: FilterStateManager;
 
   beforeEach(() => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
     filterManager = new FilterManager(indexPatterns);
-    filterManagerState = new FilterStateManager(
+
+    // FilterStateManager is tested indirectly.
+    // Therefore, we don't need it's instance.
+    new FilterStateManager(
       globalStateStub,
       () => {
         return appStateStub;

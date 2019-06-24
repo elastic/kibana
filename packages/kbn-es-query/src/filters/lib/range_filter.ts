@@ -27,7 +27,7 @@ export interface RangeFilterParams {
 }
 
 export type RangeFilterMeta = FilterMeta & {
-  params?: RangeFilterParams;
+  params: RangeFilterParams;
 };
 
 export type RangeFilter = Filter & {
