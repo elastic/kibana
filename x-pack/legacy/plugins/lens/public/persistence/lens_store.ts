@@ -12,7 +12,7 @@ export interface LensDocument {
   visualizationType: string | null;
   datasourceType: string | null;
   title: string;
-  lensState: {
+  state: {
     datasource: unknown;
     visualization: unknown;
   };
@@ -50,7 +50,7 @@ export class LensSavedObjectStore {
     const { id, type, ...rest } = vis;
     const attributes = {
       ...rest,
-      lensState: JSON.stringify(rest.lensState),
+      state: JSON.stringify(rest.state),
     };
     const result = await (id
       ? this.client.update(DOC_TYPE, id, attributes)
@@ -69,7 +69,7 @@ export class LensSavedObjectStore {
       ...attributes,
       id,
       type,
-      lensState: JSON.parse(((attributes as unknown) as { lensState: string }).lensState as string),
+      state: JSON.parse(((attributes as unknown) as { state: string }).state as string),
     } as LensDocument;
   }
 }

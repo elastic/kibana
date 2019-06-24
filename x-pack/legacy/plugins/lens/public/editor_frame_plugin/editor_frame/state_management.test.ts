@@ -325,7 +325,7 @@ describe('editor_frame state management', () => {
           doc: {
             datasourceType: 'a',
             id: 'b',
-            lensState: {
+            state: {
               datasource: { foo: 'c' },
               visualization: { bar: 'd' },
             },

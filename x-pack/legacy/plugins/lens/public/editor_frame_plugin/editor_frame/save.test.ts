@@ -74,7 +74,7 @@ describe('save editor frame state', () => {
     expect(store.save).toHaveBeenCalledWith({
       datasourceType: '1',
       id: undefined,
-      lensState: {
+      state: {
         datasource: { stuff: '2_datsource_persisted' },
         visualization: { things: '4_vis_persisted' },
       },

@@ -80,7 +80,7 @@ export function EditorFrame(props: EditorFrameProps) {
       if (state.datasource.isLoading && state.datasource.activeId) {
         // TODO: .catch / error handling
         props.datasourceMap[state.datasource.activeId]
-          .initialize(props.doc && props.doc.lensState.datasource)
+          .initialize(props.doc && props.doc.state.datasource)
           .then(datasourceState => {
             if (!datasourceGotSwitched) {
               dispatch({

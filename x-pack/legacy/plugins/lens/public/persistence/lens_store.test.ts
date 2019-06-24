@@ -27,7 +27,7 @@ describe('LensStore', () => {
         title: 'Hello',
         visualizationType: 'bar',
         datasourceType: 'indexpattern',
-        lensState: {
+        state: {
           datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
           visualization: { x: 'foo', y: 'baz' },
         },
@@ -38,7 +38,7 @@ describe('LensStore', () => {
         title: 'Hello',
         visualizationType: 'bar',
         datasourceType: 'indexpattern',
-        lensState: {
+        state: {
           datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
           visualization: { x: 'foo', y: 'baz' },
         },
@@ -49,7 +49,7 @@ describe('LensStore', () => {
         datasourceType: 'indexpattern',
         title: 'Hello',
         visualizationType: 'bar',
-        lensState: JSON.stringify({
+        state: JSON.stringify({
           datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
           visualization: { x: 'foo', y: 'baz' },
         }),
@@ -63,7 +63,7 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         datasourceType: 'indexpattern',
-        lensState: {
+        state: {
           datasource: { type: 'index_pattern', indexPattern: 'lotr' },
           visualization: { gear: ['staff', 'pointy hat'] },
         },
@@ -74,7 +74,7 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         datasourceType: 'indexpattern',
-        lensState: {
+        state: {
           datasource: { type: 'index_pattern', indexPattern: 'lotr' },
           visualization: { gear: ['staff', 'pointy hat'] },
         },
@@ -85,7 +85,7 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         datasourceType: 'indexpattern',
-        lensState: JSON.stringify({
+        state: JSON.stringify({
           datasource: { type: 'index_pattern', indexPattern: 'lotr' },
           visualization: { gear: ['staff', 'pointy hat'] },
         }),
@@ -102,7 +102,7 @@ describe('LensStore', () => {
         attributes: {
           title: 'Hope clouds observation.',
           visualizationType: 'dune',
-          lensState: '{ "datasource": { "giantWorms": true } }',
+          state: '{ "datasource": { "giantWorms": true } }',
         },
       }));
       const doc = await store.load('Paul');
@@ -112,7 +112,7 @@ describe('LensStore', () => {
         type: 'lens',
         title: 'Hope clouds observation.',
         visualizationType: 'dune',
-        lensState: {
+        state: {
           datasource: { giantWorms: true },
         },
       });

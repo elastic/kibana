@@ -102,12 +102,12 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           ...state.datasource,
           activeId: action.doc.datasourceType || null,
           isLoading: true,
-          state: action.doc.lensState.datasource,
+          state: action.doc.state.datasource,
         },
         visualization: {
           ...state.visualization,
           activeId: action.doc.visualizationType,
-          state: action.doc.lensState.visualization,
+          state: action.doc.state.visualization,
         },
       };
     case 'SWITCH_DATASOURCE':

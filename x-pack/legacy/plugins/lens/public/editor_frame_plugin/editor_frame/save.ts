@@ -31,7 +31,7 @@ export async function save({
     type: 'lens',
     visualizationType: state.visualization.activeId || 'unknown',
     datasourceType: state.datasource.activeId || 'unknown',
-    lensState: {
+    state: {
       datasource: datasource && datasource.getPersistableState(state.datasource.state),
       visualization: visualization && visualization.getPersistableState(state.visualization.state),
     },

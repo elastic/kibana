@@ -10,7 +10,7 @@
       "datasourceType": {
         "type": "keyword"
       },
-      "lensState": {
+      "state": {
         "type": "text"
       }
     }
