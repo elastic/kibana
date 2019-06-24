@@ -31,14 +31,14 @@ import { typeSpecs as types } from '../../../plugins/data/common/expressions/exp
 import { Type } from './common';
 import { Legacy } from '../../../../kibana';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { Fn } = require('@kbn/interpreter/common');
+
 export class TypesRegistry extends Registry<any, any> {
   wrapper(obj: any) {
     return new (Type as any)(obj);
   }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Fn } = require('@kbn/interpreter/common');
 
 export class FunctionsRegistry extends Registry<any, any> {
   wrapper(obj: any) {
