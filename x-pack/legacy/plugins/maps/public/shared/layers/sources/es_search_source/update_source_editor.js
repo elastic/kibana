@@ -10,7 +10,6 @@ import {
   EuiFormRow,
   EuiSwitch,
 } from '@elastic/eui';
-import { MultiFieldSelect } from '../../../components/multi_field_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
@@ -169,11 +168,20 @@ export class UpdateSourceEditor extends Component {
 
     return (
       <Fragment>
-        <TooltipSelector
-          tooltipProperties={this.props.tooltipProperties}
-          onChange={this._onTooltipPropertiesChange}
-          fields={this.state.fields}
-        />
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
+            defaultMessage: 'Entity'
+          })}
+        >
+          <SingleFieldSelect
+            placeholder={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder', {
+              defaultMessage: 'Select entity field'
+            })}
+            value={this.props.topHitsSplitField}
+            onChange={this.onTopHitsSplitFieldChange}
+            fields={this.state.termFields}
+          />
+        </EuiFormRow>
 
         {timeFieldSelect}
 
@@ -185,23 +193,11 @@ export class UpdateSourceEditor extends Component {
   render() {
     return (
       <Fragment>
-        <EuiFormRow
-          label={
-            i18n.translate('xpack.maps.source.esSearch.fieldsLabel', {
-              defaultMessage: `Fields to display in tooltip`
-            })
-          }
-        >
-          <MultiFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.fieldsPlaceholder', {
-              defaultMessage: `Select fields`
-            })
-            }
-            value={this.props.tooltipProperties}
-            onChange={this._onTooltipPropertiesChange}
-            fields={this.state.tooltipFields}
-          />
-        </EuiFormRow>
+        <TooltipSelector
+          tooltipProperties={this.props.tooltipProperties}
+          onChange={this._onTooltipPropertiesChange}
+          fields={this.state.fields}
+        />
 
         <EuiFormRow>
           <EuiSwitch
