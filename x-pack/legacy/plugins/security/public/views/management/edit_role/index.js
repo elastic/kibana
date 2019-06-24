@@ -19,7 +19,7 @@ import 'plugins/security/services/shield_indices';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
-import { ROLES_PATH } from '../management_urls';
+import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
@@ -29,10 +29,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
-routes.when(`${ROLES_PATH}/:action/:name?`, {
+const routeDefinition = (action) => ({
   template,
   k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-    $route.current.params.action === 'edit' && $route.current.params.name
+    action === 'edit' && $route.current.params.name
       ? getEditRoleBreadcrumbs
       : getCreateRoleBreadcrumbs
   ),
@@ -102,16 +102,9 @@ routes.when(`${ROLES_PATH}/:action/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http, enableSpaceAwarePrivileges, kbnUrl) {
+  controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
-
-    const action = $route.current.params.action;
-
-    if (!['edit', 'clone'].includes(action)) {
-      kbnUrl.redirect(ROLES_PATH);
-      return;
-    }
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
@@ -174,3 +167,6 @@ routes.when(`${ROLES_PATH}/:action/:name?`, {
     });
   }
 });
+
+routes.when(`${CLONE_ROLES_PATH}/:name`, routeDefinition('clone'));
+routes.when(`${EDIT_ROLES_PATH}/:name?`, routeDefinition('edit'));
