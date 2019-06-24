@@ -19,19 +19,12 @@
 
 import { Transform } from 'stream';
 
-import { get, once } from 'lodash';
-import { deleteKibanaIndices, createDefaultSpace } from './kibana_index';
+import { get } from 'lodash';
+import { cleanKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
   const skipDocsFromIndices = new Set();
-
-  // If we're trying to import Kibana index docs, we need to ensure that
-  // previous indices are removed so we're starting w/ a clean slate for
-  // migrations. This only needs to be done once per archive load operation.
-  const clearKibanaIndices = once(async () => {
-    await deleteKibanaIndices({ client, stats });
-  });
 
   async function handleDoc(stream, record) {
     if (skipDocsFromIndices.has(record.value.index)) {
@@ -46,22 +39,23 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
 
     // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
     const isPre7Mapping = !!mappings && Object.keys(mappings).length > 0 && !mappings.properties;
+    const isKibana = index.startsWith('.kibana');
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
-        if (index.startsWith('.kibana')) {
-          await clearKibanaIndices();
-        }
-
-        await client.indices.create({
-          method: 'PUT',
-          index,
-          include_type_name: isPre7Mapping,
-          body: { settings, mappings, aliases },
-        });
-
-        if (index.startsWith('.kibana') && kibanaPluginIds.includes('spaces')) {
-          await createDefaultSpace({ index, client });
+        if (isKibana) {
+          await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
+        } else {
+          await client.indices.create({
+            method: 'PUT',
+            index,
+            include_type_name: isPre7Mapping,
+            body: {
+              settings,
+              mappings,
+              aliases
+            },
+          });
         }
 
         stats.createdIndex(index, { settings });

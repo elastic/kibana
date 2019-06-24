@@ -114,24 +114,6 @@ async function loadElasticVersion() {
   return JSON.parse(packageJson).version;
 }
 
-export async function createDefaultSpace({ index, client }) {
-  await client.index({
-    index,
-    type: '_doc',
-    id: 'space:default',
-    body: {
-      type: 'space',
-      updated_at: new Date().toISOString(),
-      space: {
-        name: 'Default Space',
-        description: 'This is the default space',
-        disabledFeatures: [],
-        _reserved: true,
-      },
-    },
-  });
-}
-
 /**
  * Migrations mean that the Kibana index will look something like:
  * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
