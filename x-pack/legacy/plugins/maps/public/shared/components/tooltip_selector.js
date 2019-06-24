@@ -13,9 +13,6 @@ import { i18n } from '@kbn/i18n';
 
 export class TooltipSelector extends React.Component {
   render() {
-
-    console.log(this.props.value, this.props.fields);
-
     return (
       <EuiFormRow
         label={
