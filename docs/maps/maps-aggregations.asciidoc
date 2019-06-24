@@ -21,7 +21,7 @@ The point location is the weighted centroid for all geo-points in the gridded ce
 
 *Grid rectangles*:: Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
 
-*Heat map*:: Creates a <<heatmap-layer, heat map layer>> clustering the weighted centroids for each gridded cell.
+*Heat map*:: Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
 
 
 [float]
