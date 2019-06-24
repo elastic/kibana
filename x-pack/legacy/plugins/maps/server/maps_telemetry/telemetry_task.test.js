@@ -20,16 +20,15 @@ describe('telemetryTaskRunner', () => {
   });
 
   test('Returns empty stats on error', async () => {
-    const kbnServer = { server: mockKbnServer };
     const getNextMidnight = () =>
       moment()
         .add(1, 'days')
         .startOf('day')
         .toISOString();
 
-    const getRunner = telemetryTaskRunner();
+    const getRunner = telemetryTaskRunner(mockKbnServer);
     const runResult = await getRunner(
-      { kbnServer, taskInstance: mockTaskInstance }
+      { taskInstance: mockTaskInstance }
     ).run();
 
     expect(runResult).toMatchObject({
