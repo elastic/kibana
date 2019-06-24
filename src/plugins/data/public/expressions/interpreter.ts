@@ -24,15 +24,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { Ast } from '@kbn/interpreter/src/common';
-import { get } from 'lodash';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Fn, getType } = require('@kbn/interpreter/src/common');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { clone } = require('lodash');
-
-export { Ast };
+import { clone, get, mapValues, includes } from 'lodash';
 
 export class Registry<ItemSpec, Item> {
   _prop: string;
@@ -115,6 +107,60 @@ function RenderFunction(this: any, config: any) {
     };
 }
 
+export function Arg(this: any, config: any) {
+  if (config.name === '_') throw Error('Arg names must not be _. Use it in aliases instead.');
+  this.name = config.name;
+  this.required = config.required || false;
+  this.help = config.help || '';
+  this.types = config.types || [];
+  this.default = config.default;
+  this.aliases = config.aliases || [];
+  this.multi = config.multi == null ? false : config.multi;
+  this.resolve = config.resolve == null ? true : config.resolve;
+  this.options = config.options || [];
+  this.accepts = (type: any) => {
+    if (!this.types.length) return true;
+    return includes(config.types, type);
+  };
+}
+
+export function Fn(this: any, config: any) {
+  // Required
+  this.name = config.name; // Name of function
+
+  // Return type of function.
+  // This SHOULD be supplied. We use it for UI and autocomplete hinting,
+  // We may also use it for optimizations in the future.
+  this.type = config.type;
+  this.aliases = config.aliases || [];
+
+  // Function to run function (context, args)
+  this.fn = (...args: any) => Promise.resolve(config.fn(...args));
+
+  // Optional
+  this.help = config.help || ''; // A short help text
+  this.args = mapValues(
+    config.args || {},
+    (arg: any, name: any) => new (Arg as any)({ name, ...arg })
+  );
+
+  this.context = config.context || {};
+
+  this.accepts = (type: any) => {
+    if (!this.context.types) return true; // If you don't tell us about context, we'll assume you don't care what you get
+    return includes(this.context.types, type); // Otherwise, check it
+  };
+}
+
+export function getType(node: any) {
+  if (node == null) return 'null';
+  if (typeof node === 'object') {
+    if (!node.type) throw new Error('Objects must have a type property');
+    return node.type;
+  }
+  return typeof node;
+}
+
 function Type(this: any, config: any) {
   // Required
   this.name = config.name;
@@ -165,7 +211,7 @@ export class RenderFunctionsRegistry extends Registry<any, any> {
 
 export class FunctionsRegistry extends Registry<any, any> {
   wrapper(obj: any) {
-    return new Fn(obj);
+    return new (Fn as any)(obj);
   }
 }
 
