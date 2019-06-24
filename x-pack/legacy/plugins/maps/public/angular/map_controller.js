@@ -49,6 +49,8 @@ import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { data } from 'plugins/data/setup';
+data.search.loadLegacyDirectives();
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -109,7 +111,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     return;
   };
   $scope.showFilterBar = function () {
-    return false;
+    return $scope.filters.length > 0;
+  };
+  $scope.showQueryBar = function () {
+    return true;
   };
 
   /* END HACK */
