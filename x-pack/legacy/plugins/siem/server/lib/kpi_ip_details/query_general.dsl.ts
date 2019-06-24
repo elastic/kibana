@@ -7,7 +7,7 @@
 import { KpiIpDetailsESMSearchBody } from './types';
 import { KpiIpDetailsRequestOptions } from './elasticsearch_adapter';
 
-const getAggs = (type: string, ip: string) => {
+const getAggs = (type: 'source' | 'destination', ip: string) => {
   return {
     [type]: {
       filter: {
@@ -61,6 +61,22 @@ const getAggs = (type: string, ip: string) => {
     },
   };
 };
+
+const getFilter = (type: 'source' | 'destination', ip: string) => {
+  return {
+    bool: {
+      should: [
+        {
+          match_phrase: {
+            [`${type}.ip`]: ip,
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+};
+
 export const buildGeneralQuery = ({
   defaultIndex,
   ip,
@@ -84,7 +100,13 @@ export const buildGeneralQuery = ({
       },
       query: {
         bool: {
-          should: [],
+          filter: [
+            {
+              bool: {
+                should: [getFilter('source', ip), getFilter('destination', ip)],
+              },
+            },
+          ],
         },
       },
       size: 0,
