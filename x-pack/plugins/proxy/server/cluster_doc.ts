@@ -56,7 +56,7 @@ export interface RoutingTable {
 
 export class ClusterDocClient {
   public nodeName: string;
-  private elasticsearch?: Observable<ClusterClient>;
+  private elasticsearch$?: Observable<ClusterClient>;
   private updateInterval? = 15 * 1000;
   private timeoutThreshold = 15 * 1000;
   private updateTimer: null | NodeJS.Timer = null;
@@ -80,7 +80,7 @@ export class ClusterDocClient {
   }
 
   public async setup(esClient: Partial<ElasticsearchServiceSetup>) {
-    this.elasticsearch = esClient.dataClient$;
+    this.elasticsearch$ = esClient.dataClient$;
     const config = await this.config$.pipe(first()).toPromise();
     this.setConfig(config);
   }
@@ -156,11 +156,11 @@ export class ClusterDocClient {
   }
 
   private async getESClient(): Promise<ClusterClient> {
-    if (!this.elasticsearch) {
+    if (!this.elasticsearch$) {
       const err = Boom.boomify(new Error('You must call setup first'), { statusCode: 412 });
       throw err;
     }
-    const client = await this.elasticsearch.pipe(first()).toPromise();
+    const client = await this.elasticsearch$.pipe(first()).toPromise();
     return client;
   }
 
