@@ -6,7 +6,6 @@
 
 import { get } from 'lodash';
 import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
 import { xpackInfoSignature } from './xpack_info_signature';
 import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_converter';
 
@@ -36,15 +35,16 @@ export class XPackInfo {
     sessionStorage.removeItem(XPACK_INFO_KEY);
   };
 
-  refresh = () => {
+  refresh = $injector => {
     if (this.inProgressRefreshPromise) {
       return this.inProgressRefreshPromise;
     }
 
     // store the promise in a shared location so that calls to
     // refresh() before this is complete will get the same promise
+    const $http = $injector.get('$http');
     this.inProgressRefreshPromise = (
-      npStart.core.http.get(chrome.addBasePath('/api/xpack/v1/info'))
+      $http.get(chrome.addBasePath('/api/xpack/v1/info'))
         .catch((err) => {
         // if we are unable to fetch the updated info, we should
         // prevent reusing stale info
