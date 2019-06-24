@@ -6,16 +6,14 @@
 
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
-import { getSelectedLayer, hasDirtyState } from '../../selectors/map_selectors';
+import { getSelectedLayer } from '../../selectors/map_selectors';
 import {
   fitToLayerExtent
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
-  const selectedLayer = getSelectedLayer(state);
   return {
-    selectedLayer,
-    hasStateChanged: hasDirtyState(state)
+    selectedLayer: getSelectedLayer(state),
   };
 }
 
