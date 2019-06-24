@@ -93,7 +93,7 @@ function TableVisTypeProvider(Private) {
           group: 'buckets',
           name: 'bucket',
           title: i18n.translate('tableVis.tableVisEditorConfig.schemas.bucketTitle', {
-            defaultMessage: 'Split Rows',
+            defaultMessage: 'Split rows',
           }),
           aggFilter: ['!filter']
         },
@@ -101,7 +101,7 @@ function TableVisTypeProvider(Private) {
           group: 'buckets',
           name: 'split',
           title: i18n.translate('tableVis.tableVisEditorConfig.schemas.splitTitle', {
-            defaultMessage: 'Split Table',
+            defaultMessage: 'Split table',
           }),
           min: 0,
           max: 1,
