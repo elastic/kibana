@@ -20,7 +20,7 @@
 import { Transform } from 'stream';
 
 import { deleteIndex } from './delete_index';
-import { cleanKibanaIndex } from './kibana_index';
+import { cleanKibanaIndices } from './kibana_index';
 
 export function createDeleteIndexStream(client, stats, log, kibanaPluginIds) {
   return new Transform({
@@ -29,11 +29,10 @@ export function createDeleteIndexStream(client, stats, log, kibanaPluginIds) {
     async transform(record, enc, callback) {
       try {
         if (!record || record.type === 'index') {
-          const { index, mappings } = record.value;
-          const isPre7Mapping = mappings && Object.keys(mappings).length > 0 && !mappings.properties;
+          const { index } = record.value;
 
-          if (index.startsWith('.kibana') && !isPre7Mapping) {
-            await cleanKibanaIndex({ client, stats, log, kibanaPluginIds });
+          if (index.startsWith('.kibana')) {
+            await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
           } else {
             await deleteIndex({ client, stats, log, index });
           }

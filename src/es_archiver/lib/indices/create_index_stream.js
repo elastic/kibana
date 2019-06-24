@@ -20,25 +20,18 @@
 import { Transform } from 'stream';
 
 import { get, once } from 'lodash';
-import { deleteKibanaIndices, cleanKibanaIndex, createDefaultSpace } from './kibana_index';
+import { deleteKibanaIndices, createDefaultSpace } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
   const skipDocsFromIndices = new Set();
-  const remapKibanaIndexDocs = new Set();
 
   async function handleDoc(stream, record) {
     if (skipDocsFromIndices.has(record.value.index)) {
       return;
     }
 
-    stream.push({
-      ...record,
-      value: {
-        ...record.value,
-        index: remapKibanaIndexDocs.has(record.value.index) ? '.kibana' : record.value.index
-      }
-    });
+    stream.push(record);
   }
 
   async function handleIndex(record) {
@@ -51,33 +44,27 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
     // If we're trying to import Kibana index docs, we need to ensure that
     // previous indices are removed so we're starting w/ a clean slate for
     // migrations. This only needs to be done once per archive load operation.
-    const cleanKibanaIndexOnce = once(cleanKibanaIndex);
     const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
-        if (isKibana && !isPre7Mapping) {
-          remapKibanaIndexDocs.add(index);
-          await cleanKibanaIndexOnce({ client, stats, log, kibanaPluginIds });
-        } else {
-          if (isKibana) {
-            await deleteKibanaIndicesOnce({ client, stats, log });
-          }
+        if (isKibana) {
+          await deleteKibanaIndicesOnce({ client, stats, log });
+        }
 
-          await client.indices.create({
-            method: 'PUT',
-            index,
-            include_type_name: isPre7Mapping,
-            body: {
-              settings,
-              mappings,
-              aliases
-            },
-          });
+        await client.indices.create({
+          method: 'PUT',
+          index,
+          include_type_name: isPre7Mapping,
+          body: {
+            settings,
+            mappings,
+            aliases
+          },
+        });
 
-          if (isKibana && kibanaPluginIds.includes('spaces')) {
-            await createDefaultSpace({ client, index });
-          }
+        if (isKibana && kibanaPluginIds.includes('spaces')) {
+          await createDefaultSpace({ client, index });
         }
 
         stats.createdIndex(index, { settings });
