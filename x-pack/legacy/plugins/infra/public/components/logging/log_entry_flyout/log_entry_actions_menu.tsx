@@ -41,7 +41,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         data-test-subj="logEntryActionsMenuItem traceLogEntryActionsMenuItem"
         disabled={!traceLink}
         href={traceLink}
-        icon="apmTrace"
+        icon="apmApp"
         key="traceLink"
       >
         <FormattedMessage
