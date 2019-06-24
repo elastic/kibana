@@ -5,8 +5,6 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-
 import {
   EuiBadge,
   EuiButton,
@@ -26,7 +24,7 @@ import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
 import { uiMetricService } from '../../../../services/ui_metric';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositories: Repository[];
   managedRepository?: string;
   reload: () => Promise<void>;

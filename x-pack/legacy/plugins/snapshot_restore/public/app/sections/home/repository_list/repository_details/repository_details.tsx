@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -45,7 +43,7 @@ import {
 import { BASE_PATH } from '../../../../constants';
 import { TypeDetails } from './type_details';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositoryName: Repository['name'];
   onClose: () => void;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
