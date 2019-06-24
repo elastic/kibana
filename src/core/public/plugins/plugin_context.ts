@@ -63,9 +63,7 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
 ): CoreSetup {
   return {
     http: deps.http,
-    chrome: deps.chrome,
     fatalErrors: deps.fatalErrors,
-    i18n: deps.i18n,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
   };
@@ -95,5 +93,6 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
+    uiSettings: deps.uiSettings,
   };
 }

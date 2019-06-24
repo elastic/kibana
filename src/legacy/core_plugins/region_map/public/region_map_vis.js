@@ -98,8 +98,7 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         {
           group: 'buckets',
           name: 'segment',
-          icon: 'fa fa-globe',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'shape field' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'Shape field' }),
           min: 1,
           max: 1,
           aggFilter: ['terms']
