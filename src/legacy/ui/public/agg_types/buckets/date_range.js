@@ -20,10 +20,12 @@ import { get } from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
 import { dateRange } from '../../utils/date_range';
+import '../directives/validate_date_math';
+import '../directives/documentation_href';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { fieldFormats } from '../../registry/field_formats';
-import { DateRangesParamEditor } from '../controls/date_ranges';
+import dateRangesTemplate from '../controls/date_ranges.html';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -59,7 +61,7 @@ export const dateRangeBucketAgg = new BucketAggType({
       from: 'now-1w/w',
       to: 'now'
     }],
-    editorComponent: DateRangesParamEditor,
+    editor: dateRangesTemplate
   }, {
     name: 'time_zone',
     default: undefined,

@@ -17,7 +17,16 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { documentationLinks } from './documentation_links';
+import { getDocLink } from '../../documentation_links';
+import { uiModules } from '../../modules';
 
-export const getDocLink = (id: string) => get(documentationLinks, id);
+const module = uiModules.get('kibana');
+
+module.directive('documentationHref', function () {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attributes) {
+      element.attr('href', getDocLink(attributes.documentationHref));
+    }
+  };
+});
