@@ -48,44 +48,44 @@ export function MachineLearningPageProvider({
       await testSubjects.exists('mlPageSettings');
     },
 
-    async getJobTable() {
-      return await testSubjects.find('mlJobListTable');
+    async assertJobTableExists() {
+      await testSubjects.existOrFail('mlJobListTable');
     },
 
-    async gettCreateNewJobButton() {
-      return await testSubjects.find('mlCreateNewJobButton');
+    async assertCreateNewJobButtonExists() {
+      await testSubjects.existOrFail('mlCreateNewJobButton');
     },
 
-    async gettJobStatsBar() {
-      return await testSubjects.find('mlJobStatsBar');
+    async assertJobStatsBarExists() {
+      await testSubjects.existOrFail('mlJobStatsBar');
     },
 
-    async getAnomalyExplorerEmptyListMessage() {
-      return await testSubjects.find('mlNoJobsFound');
+    async assertAnomalyExplorerEmptyListMessageExists() {
+      await testSubjects.existOrFail('mlNoJobsFound');
     },
 
-    async getSingleMetricViewerEmptyListMessage() {
-      return await testSubjects.find('mlNoSingleMetricJobsFound');
+    async assertSingleMetricViewerEmptyListMessageExsist() {
+      await testSubjects.existOrFail('mlNoSingleMetricJobsFound');
     },
 
-    async getDataFrameEmptyListMessage() {
-      return await testSubjects.find('mlNoDataFrameJobsFound');
+    async assertDataFrameEmptyListMessageExists() {
+      await testSubjects.existOrFail('mlNoDataFrameJobsFound');
     },
 
-    async getDataVisualizerImportDataCard() {
-      return await testSubjects.find('mlDataVisualizerCardImportData');
+    async assertDataVisualizerImportDataCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardImportData');
     },
 
-    async getDataVisualizerIndexDataCard() {
-      return await testSubjects.find('mlDataVisualizerCardIndexData');
+    async assertDataVisualizerIndexDataCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
     },
 
-    async gettSettingsCalendarLink() {
-      return await testSubjects.find('ml_calendar_mng_button');
+    async assertSettingsCalendarLinkExists() {
+      await testSubjects.existOrFail('ml_calendar_mng_button');
     },
 
-    async gettSettingsFilterlistLink() {
-      return await testSubjects.find('ml_filter_lists_button');
+    async assertSettingsFilterlistLinkExists() {
+      await testSubjects.existOrFail('ml_filter_lists_button');
     },
   };
 }

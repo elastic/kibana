@@ -27,36 +27,36 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
     it('loads the job management page', async () => {
       await PageObjects.machineLearning.navigateToJobManagement();
-      await PageObjects.machineLearning.gettJobStatsBar();
-      await PageObjects.machineLearning.getJobTable();
-      await PageObjects.machineLearning.gettCreateNewJobButton();
+      await PageObjects.machineLearning.assertJobStatsBarExists();
+      await PageObjects.machineLearning.assertJobTableExists();
+      await PageObjects.machineLearning.assertCreateNewJobButtonExists();
     });
 
     it('loads the anomaly explorer page', async () => {
       await PageObjects.machineLearning.navigateToAnomalyExplorert();
-      await PageObjects.machineLearning.getAnomalyExplorerEmptyListMessage();
+      await PageObjects.machineLearning.assertAnomalyExplorerEmptyListMessageExists();
     });
 
     it('loads the single metric viewer page', async () => {
       await PageObjects.machineLearning.navigateToSingleMetricViewer();
-      await PageObjects.machineLearning.getSingleMetricViewerEmptyListMessage();
+      await PageObjects.machineLearning.assertSingleMetricViewerEmptyListMessageExsist();
     });
 
     it('loads the data frame page', async () => {
       await PageObjects.machineLearning.navigateToDataFrames();
-      await PageObjects.machineLearning.getDataFrameEmptyListMessage();
+      await PageObjects.machineLearning.assertDataFrameEmptyListMessageExists();
     });
 
     it('loads the data visualizer page', async () => {
       await PageObjects.machineLearning.navigateToDataVisualizer();
-      await PageObjects.machineLearning.getDataVisualizerImportDataCard();
-      await PageObjects.machineLearning.getDataVisualizerIndexDataCard();
+      await PageObjects.machineLearning.assertDataVisualizerImportDataCardExists();
+      await PageObjects.machineLearning.assertDataVisualizerIndexDataCardExists();
     });
 
     it('loads the settings page', async () => {
       await PageObjects.machineLearning.navigateToSettings();
-      await PageObjects.machineLearning.gettSettingsCalendarLink();
-      await PageObjects.machineLearning.gettSettingsFilterlistLink();
+      await PageObjects.machineLearning.assertSettingsCalendarLinkExists();
+      await PageObjects.machineLearning.assertSettingsFilterlistLinkExists();
     });
   });
 }
