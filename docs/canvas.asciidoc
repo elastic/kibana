@@ -14,11 +14,14 @@ With Canvas, you can:
 
 * Customize your workpad with your own visualizations, such as images and text.
 
+* Customize your data by pulling it directly from Elasticsearch. 
+
 * Show off your data with charts, graphs, progress monitors, and more.
 
 * Focus the data you want to display with filters.
 
-//<<link to some examples of Canvas in use>>
+[role="screenshot"]
+image::images/canvas-gs-example.png[]
 
 For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_5-1xjQ[Stand out with Canvas].
 //When https://github.com/elastic/Video/issues/358 is resolved, update this link.
