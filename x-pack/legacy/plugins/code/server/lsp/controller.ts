@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import fs from 'fs';
-import Path from 'path';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { LanguageServerStatus } from '../../common/language_server';

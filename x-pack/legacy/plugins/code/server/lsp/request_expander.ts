@@ -300,7 +300,7 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   private updateWorkspace(workspacePath: string) {
-    this.getWorkspace(workspacePath).status = Date.now();
+    this.getWorkspace(workspacePath).lastAccess = Date.now();
   }
 
   private hasWorkspacePath(workspacePath: string) {
