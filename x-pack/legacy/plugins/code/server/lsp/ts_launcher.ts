@@ -10,9 +10,9 @@ import { resolve } from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { LanguageServerProxy } from './proxy';
-import { RequestExpander } from './request_expander';
 import { AbstractLauncher } from './abstract_launcher';
+import { LanguageServerProxy } from './proxy';
+import { InitializeOptions, RequestExpander } from './request_expander';
 
 const TS_LANG_DETACH_PORT = 2089;
 
@@ -43,9 +43,11 @@ export class TypescriptServerLauncher extends AbstractLauncher {
       maxWorkspace,
       this.options,
       {
-        installNodeDependency: this.options.security.installNodeDependency,
-        gitHostWhitelist: this.options.security.gitHostWhitelist,
-      },
+        initialOptions: {
+          installNodeDependency: this.options.security.installNodeDependency,
+          gitHostWhitelist: this.options.security.gitHostWhitelist,
+        },
+      } as InitializeOptions,
       this.log
     );
   }

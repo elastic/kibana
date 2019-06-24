@@ -23,6 +23,8 @@
     "tagCloud": "src/legacy/core_plugins/tagcloud",
     "tsvb": "src/legacy/core_plugins/metrics",
     "kbnESQuery": "packages/kbn-es-query",
+    "xpack.actions": "x-pack/legacy/plugins/actions",
+    "xpack.alerting": "x-pack/legacy/plugins/alerting",
     "xpack.apm": "x-pack/legacy/plugins/apm",
     "xpack.beatsManagement": "x-pack/legacy/plugins/beats_management",
     "xpack.canvas": "x-pack/legacy/plugins/canvas",

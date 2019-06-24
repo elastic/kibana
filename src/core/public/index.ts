@@ -40,8 +40,14 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeNavControl,
+  ChromeNavControls,
   ChromeNavLink,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
   ChromeStart,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
 import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor } from './http';
@@ -138,7 +144,13 @@ export {
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
+  ChromeNavControl,
+  ChromeNavControls,
   ChromeNavLink,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
   I18nStart,
   LegacyNavLink,
   Plugin,
