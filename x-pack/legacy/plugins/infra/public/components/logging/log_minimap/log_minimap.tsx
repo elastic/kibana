@@ -35,7 +35,7 @@ interface LogMinimapState {
   timeCursorY: number;
 }
 
-export class LogMinimap extends React.Component<LogMinimapProps> {
+export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
   public readonly state = {
     timeCursorY: 0,
   };
