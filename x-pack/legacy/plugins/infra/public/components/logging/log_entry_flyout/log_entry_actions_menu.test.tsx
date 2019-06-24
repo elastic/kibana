@@ -161,4 +161,62 @@ describe('LogEntryActionsMenu component', () => {
       ).toEqual(true);
     });
   });
+
+  describe('apm link', () => {
+    it('renders with a trace id filter when present in log entry', () => {
+      const elementWrapper = mountWithIntl(
+        <LogEntryActionsMenu
+          logItem={{
+            fields: [{ field: 'trace.id', value: '1234567' }],
+            id: 'ITEM_ID',
+            index: 'INDEX',
+            key: {
+              time: 0,
+              tiebreaker: 0,
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        elementWrapper
+          .find(`button${testSubject('logEntryActionsMenuButton')}`)
+          .last()
+          .simulate('click');
+      });
+      elementWrapper.update();
+
+      expect(
+        elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
+      ).toMatchInlineSnapshot(`"/app/apm#/traces/1234567"`);
+    });
+
+    it('renders as disabled when no supported field is present in log entry', () => {
+      const elementWrapper = mountWithIntl(
+        <LogEntryActionsMenu
+          logItem={{
+            fields: [],
+            id: 'ITEM_ID',
+            index: 'INDEX',
+            key: {
+              time: 0,
+              tiebreaker: 0,
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        elementWrapper
+          .find(`button${testSubject('logEntryActionsMenuButton')}`)
+          .last()
+          .simulate('click');
+      });
+      elementWrapper.update();
+
+      expect(
+        elementWrapper.find(`button${testSubject('apmLogEntryActionsMenuItem')}`).prop('disabled')
+      ).toEqual(true);
+    });
+  });
 });

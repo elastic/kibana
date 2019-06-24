@@ -21,7 +21,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
 
   const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
 
-  const traceLink = useMemo(() => getTraceLink(logItem), [logItem]);
+  const apmLink = useMemo(() => getAPMLink(logItem), [logItem]);
 
   const menuItems = useMemo(
     () => [
@@ -38,14 +38,14 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
-        data-test-subj="logEntryActionsMenuItem traceLogEntryActionsMenuItem"
-        disabled={!traceLink}
-        href={traceLink}
+        data-test-subj="logEntryActionsMenuItem apmLogEntryActionsMenuItem"
+        disabled={!apmLink}
+        href={apmLink}
         icon="apmApp"
-        key="traceLink"
+        key="apmLink"
       >
         <FormattedMessage
-          id="xpack.infra.logEntryActionsMenu.traceActionLabel"
+          id="xpack.infra.logEntryActionsMenu.apmActionLabel"
           defaultMessage="View in APM"
         />
       </EuiContextMenuItem>,
@@ -106,7 +106,7 @@ const getUptimeLink = (logItem: InfraLogItem) => {
   });
 };
 
-const getTraceLink = (logItem: InfraLogItem) => {
+const getAPMLink = (logItem: InfraLogItem) => {
   const traceIdEntry = logItem.fields.find(
     ({ field, value }) => value != null && field === 'trace.id'
   );
