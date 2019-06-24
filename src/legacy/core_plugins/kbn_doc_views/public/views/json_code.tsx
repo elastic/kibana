@@ -26,22 +26,24 @@ export interface JsonCodeProps {
 
 export function JsonCode(props: JsonCodeProps) {
   return (
-    <div className="dshPanel__error panel-content">
-      <EuiCodeEditor
-        id="json-ace"
-        value={JSON.stringify(props.hit, null, 2)}
-        mode="json"
-        isReadOnly
-        aria-label="Read only json view of elasticsearch document hit"
-        width="100%"
-        advanced={{
-          highlightActiveLine: false,
-        }}
-        rendererOptions={{
-          showPrintMargin: false,
-          maxLines: 4294967296,
-        }}
-      />
-    </div>
+    <EuiCodeEditor
+      id="json-ace"
+      value={JSON.stringify(props.hit, null, 2)}
+      mode="json"
+      isReadOnly
+      aria-label="Read only json view of elasticsearch document hit"
+      width="100%"
+      advanced={{
+        highlightActiveLine: false,
+      }}
+      editorProps={{
+        $blockScrolling: Infinity,
+      }}
+      setOptions={{
+        showPrintMargin: false,
+        minLines: 25,
+        maxLines: Infinity,
+      }}
+    />
   );
 }
