@@ -48,7 +48,7 @@ function createCoreSetupMock() {
 }
 
 function createCoreStartMock() {
-  const mock: jest.Mocked<CoreStart> = {
+  const mock = {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
