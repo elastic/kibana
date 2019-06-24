@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { services as commonServiceProviders } from '../../common/services';
+
 import { AppsMenuProvider } from './apps_menu';
 import { BrowserProvider } from './browser';
 import { ComboBoxProvider } from './combo_box';
@@ -53,12 +55,15 @@ import { SnapshotsProvider } from './snapshots';
 // @ts-ignore not TS yet
 import { TableProvider } from './table';
 import { TestSubjectsProvider } from './test_subjects';
+import { ToastsProvider } from './toasts';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';
 // @ts-ignore not TS yet
 import { VisualizeListingTableProvider } from './visualize_listing_table';
 
 export const services = {
+  ...commonServiceProviders,
+
   __webdriver__: RemoteProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
@@ -83,4 +88,5 @@ export const services = {
   inspector: InspectorProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
+  toasts: ToastsProvider,
 };

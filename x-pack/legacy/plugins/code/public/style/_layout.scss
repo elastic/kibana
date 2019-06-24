@@ -1,0 +1,200 @@
+.codeContainer__adminWrapper {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.codeContainer__adminMain {
+  padding: $euiSize $euiSizeXL;
+}
+
+.codeContainer__root {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.codeContainer__rootInner {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  height: 100%;
+}
+
+.codeContainer__main {
+  width: calc(100% - 16rem);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.codeContainer__import {
+  max-width: 56rem;
+  margin: auto;
+}
+
+.codeContainer__setup {
+  width: 56rem;
+  margin: 0 auto;
+  padding: 0 0 $euiSizeXXL 0;
+
+  .codeContainer__setup--step {
+    margin-top: $euiSizeXXL;
+    width: 100%;
+  }
+}
+
+.codeContainer__editor {
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.codeContainer__blame {
+  position: relative;
+  max-height: calc(100% - (6rem + 1px));
+  flex-grow: 1;
+}
+
+.codeContainer__directoryView,
+.codeContainer__history {
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.codeContainer__searchBar {
+  width: 100%;
+}
+
+.codeContainer__select {
+  margin-right: $euiSizeS;
+}
+
+.codeContainer__tabs {
+  height: 3.5rem;
+}
+
+.codeContainer__search--inner {
+  overflow-y: scroll;
+  padding: 1rem;
+}
+
+.codeContainer__search {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.codeContainer__search--main {
+  overflow: hidden;
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.codeContainer__sideTabTree {
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+}
+
+.codeContainer__search--results {
+  margin-top: $euiSize;
+}
+
+.codeSidebar__container {
+  background-color: $euiColorLightestShade;
+  border-right: solid 1px $euiBorderColor;
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: auto;
+  max-width: 256px;
+  min-width: 256px;
+}
+
+.codeSearchbar__container {
+  height: 3.5rem;
+  padding: $euiSizeS;
+  border-bottom: $euiBorderWidthThin solid $euiBorderColor;
+}
+
+.codeSearchSettings__flyout {
+  max-width: 28rem;
+}
+
+.codeFooter--error {
+  color: $euiColorDanger;
+}
+
+.codePanel__project {
+  position: relative;
+  margin-bottom: $euiSizeS;
+}
+
+.codePanel__project--error {
+  border: 2px solid $euiColorDanger;
+}
+
+.codeSettingsPanel__icon {
+  display: inline-block;
+  position: relative;
+  top: $euiSizeS;
+}
+
+.codeText__blameMessage {
+  max-width: 10rem;
+}
+
+.codeAvatar {
+  margin: auto $euiSizeS auto 0;
+}
+
+.codeContainer__progress {
+  width: 40rem;
+  padding: $euiSizeXS;
+  border: $euiBorderThin;
+}
+
+.codeContainer__commitMessages {
+  overflow: auto;
+  flex: 1;
+  padding: $euiSizeM;
+
+  .codeHeader__commit {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.codeContainer__directoryList {
+  padding: $euiSizeL;
+  &:first-child {
+    padding-bottom: 0;
+  }
+  &:not(:first-child) {
+    padding-top: 0;
+  }
+}
+
+.codePanel__error {
+  width: 31rem;
+  margin: auto;
+}
+
+.codeLoader {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.code-symbol-container {
+  white-space: nowrap;
+}

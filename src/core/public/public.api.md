@@ -4,11 +4,9 @@
 
 ```ts
 
-import * as CSS from 'csstype';
-import { default } from 'react';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import * as PropTypes from 'prop-types';
+import React from 'react';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -78,6 +76,20 @@ export interface ChromeBreadcrumb {
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
 // @public (undocumented)
+export interface ChromeNavControl {
+    // (undocumented)
+    mount(targetDomElement: HTMLElement): () => void;
+    // (undocumented)
+    order?: number;
+}
+
+// @public
+export interface ChromeNavControls {
+    registerLeft(navControl: ChromeNavControl): void;
+    registerRight(navControl: ChromeNavControl): void;
+}
+
+// @public (undocumented)
 export interface ChromeNavLink {
     readonly active?: boolean;
     readonly baseUrl: string;
@@ -94,13 +106,60 @@ export interface ChromeNavLink {
     readonly url?: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export type ChromeSetup = ReturnType<ChromeService['setup']>;
+// @public
+export interface ChromeNavLinks {
+    enableForcedAppSwitcherNavigation(): void;
+    get(id: string): ChromeNavLink | undefined;
+    getAll(): Array<Readonly<ChromeNavLink>>;
+    getForceAppSwitcherNavigation$(): Observable<boolean>;
+    getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
+    has(id: string): boolean;
+    showOnly(id: string): void;
+    update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
+}
 
 // @public (undocumented)
-export type ChromeStart = ReturnType<ChromeService['start']>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>>;
+
+// @public
+export interface ChromeRecentlyAccessed {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: No member was found with name "basePath"
+    add(link: string, label: string, id: string): void;
+    get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>;
+    get(): ChromeRecentlyAccessedHistoryItem[];
+}
+
+// @public (undocumented)
+export interface ChromeRecentlyAccessedHistoryItem {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    label: string;
+    // (undocumented)
+    link: string;
+}
+
+// @public (undocumented)
+export interface ChromeStart {
+    addApplicationClass(className: string): void;
+    getApplicationClasses$(): Observable<string[]>;
+    getBadge$(): Observable<ChromeBadge | undefined>;
+    getBrand$(): Observable<ChromeBrand>;
+    getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+    getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
+    getIsCollapsed$(): Observable<boolean>;
+    getIsVisible$(): Observable<boolean>;
+    navControls: ChromeNavControls;
+    navLinks: ChromeNavLinks;
+    recentlyAccessed: ChromeRecentlyAccessed;
+    removeApplicationClass(className: string): void;
+    setBadge(badge?: ChromeBadge): void;
+    setBrand(brand: ChromeBrand): void;
+    setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+    setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+    setIsCollapsed(isCollapsed: boolean): void;
+    setIsVisible(isVisible: boolean): void;
+}
 
 // @internal (undocumented)
 export interface CoreContext {
@@ -109,13 +168,9 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    chrome: ChromeSetup;
-    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     http: HttpSetup;
-    // (undocumented)
-    i18n: I18nSetup;
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -136,6 +191,8 @@ export interface CoreStart {
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
+    // (undocumented)
+    uiSettings: UiSettingsStart;
 }
 
 // @internal
@@ -152,6 +209,14 @@ export class CoreSystem {
     stop(): void;
     }
 
+// Warning: (ae-missing-release-tag) "ErrorToastOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface ErrorToastOptions {
+    title: string;
+    toastMessage?: string;
+}
+
 // @public
 export interface FatalErrorInfo {
     // (undocumented)
@@ -167,9 +232,35 @@ export interface FatalErrorsSetup {
 }
 
 // @public (undocumented)
+export interface HttpInterceptor {
+    // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpErrorRequest" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptController): Promise<Request> | Request | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpResponse" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    response?(httpResponse: HttpResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpErrorResponse" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+}
+
+// @public (undocumented)
 export interface HttpServiceBase {
     // (undocumented)
     addLoadingCount(count$: Observable<number>): void;
+    // (undocumented)
+    basePath: {
+        get: () => string;
+        prepend: (url: string) => string;
+        remove: (url: string) => string;
+    };
     // (undocumented)
     delete: HttpHandler;
     // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
@@ -179,11 +270,11 @@ export interface HttpServiceBase {
     // (undocumented)
     get: HttpHandler;
     // (undocumented)
-    getBasePath(): string;
-    // (undocumented)
     getLoadingCount$(): Observable<number>;
     // (undocumented)
     head: HttpHandler;
+    // (undocumented)
+    intercept(interceptor: HttpInterceptor): () => void;
     // (undocumented)
     options: HttpHandler;
     // (undocumented)
@@ -191,11 +282,9 @@ export interface HttpServiceBase {
     // (undocumented)
     post: HttpHandler;
     // (undocumented)
-    prependBasePath(path: string): string;
-    // (undocumented)
     put: HttpHandler;
     // (undocumented)
-    removeBasePath(path: string): string;
+    removeAllInterceptors(): void;
     // (undocumented)
     stop(): void;
 }
@@ -207,14 +296,11 @@ export type HttpSetup = HttpServiceBase;
 export type HttpStart = HttpServiceBase;
 
 // @public
-export interface I18nSetup {
+export interface I18nStart {
     Context: ({ children }: {
-        children: default.ReactNode;
+        children: React.ReactNode;
     }) => JSX.Element;
 }
-
-// @public (undocumented)
-export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {
@@ -254,12 +340,19 @@ export interface LegacyNavLink {
 
 // @public (undocumented)
 export interface NotificationsSetup {
+    // Warning: (ae-forgotten-export) The symbol "ToastsSetup" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    toasts: ToastsApi;
+    toasts: ToastsSetup;
 }
 
 // @public (undocumented)
-export type NotificationsStart = NotificationsSetup;
+export interface NotificationsStart {
+    // Warning: (ae-forgotten-export) The symbol "ToastsStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    toasts: ToastsStart;
+}
 
 // Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
@@ -271,8 +364,6 @@ export interface OverlayRef {
 
 // @public (undocumented)
 export interface OverlayStart {
-    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
@@ -302,23 +393,39 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 export interface PluginInitializerContext {
 }
 
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
+
 export { Toast }
 
+// Warning: (ae-forgotten-export) The symbol "ToastInputFields" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
-export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 
 // @public (undocumented)
 export class ToastsApi {
+    constructor(deps: {
+        uiSettings: UiSettingsSetup;
+    });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
     // (undocumented)
     addDanger(toastOrTitle: ToastInput): Toast;
+    // (undocumented)
+    addError(error: Error, options: ErrorToastOptions): Toast;
     // (undocumented)
     addSuccess(toastOrTitle: ToastInput): Toast;
     // (undocumented)
     addWarning(toastOrTitle: ToastInput): Toast;
     // (undocumented)
     get$(): Rx.Observable<Toast[]>;
+    // (undocumented)
+    registerOverlays(overlays: OverlayStart): void;
     // (undocumented)
     remove(toast: Toast): void;
     }
@@ -353,6 +460,9 @@ export class UiSettingsClient {
 
 // @public (undocumented)
 export type UiSettingsSetup = UiSettingsClient;
+
+// @public (undocumented)
+export type UiSettingsStart = UiSettingsClient;
 
 // @public (undocumented)
 export interface UiSettingsState {

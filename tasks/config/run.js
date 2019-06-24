@@ -29,7 +29,7 @@ module.exports = function (grunt) {
     return {
       options: {
         wait: false,
-        ready: /Server running/,
+        ready: /http server running/,
         quiet: false,
         failOnError: false
       },
@@ -269,7 +269,15 @@ module.exports = function (grunt) {
       ],
     }),
 
-    licenses: gruntTaskWithGithubChecks('Licenses', 'licenses'),
+    licenses: scriptWithGithubChecks({
+      title: 'Check licenses',
+      cmd: NODE,
+      args: [
+        'scripts/check_licenses',
+        '--dev',
+      ],
+    }),
+
     verifyDependencyVersions:
       gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
     test_server:

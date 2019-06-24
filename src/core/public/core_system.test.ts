@@ -171,11 +171,6 @@ describe('#setup()', () => {
     expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls i18n#setup()', async () => {
-    await setupCore();
-    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
-  });
-
   it('calls fatalErrors#setup()', async () => {
     await setupCore();
     expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
@@ -184,11 +179,6 @@ describe('#setup()', () => {
   it('calls notifications#setup()', async () => {
     await setupCore();
     expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls chrome#setup()', async () => {
-    await setupCore();
-    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls plugin#setup()', async () => {
@@ -220,6 +210,11 @@ describe('#start()', () => {
     expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
   });
 
+  it('calls uiSettings#start()', async () => {
+    await startCore();
+    expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
+  });
+
   it('calls i18n#start()', async () => {
     await startCore();
     expect(MockI18nService.start).toHaveBeenCalledTimes(1);
@@ -235,6 +230,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
+      overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });

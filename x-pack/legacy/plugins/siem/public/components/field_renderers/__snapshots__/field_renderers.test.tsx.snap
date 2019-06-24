@@ -1,0 +1,337 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
+<Component>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <pure(Component)
+        field="source.autonomous_system.as_org"
+        id="ip-overview-source.autonomous_system.as_org"
+        value="Test Org"
+      />
+       /
+      <pure(Component)
+        field="source.autonomous_system.asn"
+        id="ip-overview-source.autonomous_system.asn"
+        value="Test ASN"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Component>
+`;
+
+exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
+<Component>
+  <pure(Component)
+    fieldName="firstSeen"
+    value="2019-02-07T17:19:41.636Z"
+  />
+</Component>
+`;
+
+exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
+<Component>
+  <pure(Component)
+    field="host.name"
+    id="ip-overview-host-name"
+    value="raspberrypi"
+  >
+    <pure(Component)
+      hostName="raspberrypi"
+    >
+      raspberrypi
+    </pure(Component)>
+  </pure(Component)>
+</Component>
+`;
+
+exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
+<Component>
+  <pure(Component)
+    field="host.name"
+    id="ip-overview-host-name"
+    value="raspberrypi"
+  >
+    <pure(Component)
+      hostName="raspberrypi"
+    >
+      raspberrypi
+    </pure(Component)>
+  </pure(Component)>
+</Component>
+`;
+
+exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `
+<Component>
+  <EuiFlexGroup
+    alignItems="center"
+    data-test-subj="location-field"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <pure(Component)
+        field="source.geo.city_name"
+        id="ip-overview-source.geo.city_name"
+        value={
+          Array [
+            "New York",
+          ]
+        }
+      />
+    </EuiFlexItem>
+    , 
+    <EuiFlexItem
+      grow={false}
+    >
+      <pure(Component)
+        field="source.geo.region_name"
+        id="ip-overview-source.geo.region_name"
+        value={
+          Array [
+            "New York",
+          ]
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Component>
+`;
+
+exports[`Field Renderers #reputationRenderer it renders correctly against snapshot 1`] = `
+<Component
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <pure(Component)
+    link="10.10.10.10"
+  >
+    virustotal.com
+  </pure(Component)>
+  , 
+  <pure(Component)
+    domain="10.10.10.10"
+  >
+    talosIntelligence.com
+  </pure(Component)>
+</Component>
+`;
+
+exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`] = `
+<Component
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <pure(Component)
+    domain="10.10.10.10"
+  >
+    iana.org
+  </pure(Component)>
+</Component>
+`;

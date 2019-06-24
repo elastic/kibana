@@ -171,13 +171,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickVisType('markdown');
     }
 
-    async clickAddMetric() {
-      await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+    // clickBucket(bucketName) 'X-axis', 'Split area', 'Split chart'
+    async clickBucket(bucketName, type = 'buckets') {
+      await testSubjects.click(`visEditorAdd_${type}`);
+      await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
     }
 
-    async clickAddBucket() {
-      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
-    }
 
     async clickMetric() {
       await this.clickVisType('metric');
@@ -380,8 +379,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getMetric() {
-      const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
-      return await metricElement.getVisibleText();
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis__container');
+      const values = await Promise.all(elements.map(async element => {
+        const text = await element.getVisibleText();
+        return text;
+      }));
+      return values.filter(item => item.length > 0).reduce((arr, item) => arr.concat(item.split('\n')), []);
     }
 
     async getGaugeValue() {
@@ -395,6 +398,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async clickMetricEditor() {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
+    }
+
+    async clickMetricByIndex(index) {
+      log.debug(`clickMetricByIndex(${index})`);
+      const metrics = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container');
+      expect(metrics.length).greaterThan(index);
+      await metrics[index].click();
     }
 
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
@@ -413,8 +423,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setValue(newValue) {
-      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
-      const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
+      const input = await find.byCssSelector('[data-test-subj="visEditorPercentileRanks"] input');
       await input.clearValue();
       await input.type(newValue);
     }
@@ -426,13 +435,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async getErrorMessage() {
       const element = await find.byCssSelector('.item>h4');
       return await element.getVisibleText();
-    }
-
-    // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName, type = 'bucket') {
-      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
-      const locator = `[data-test-subj="${testSubject}"] .list-group-menu-item[data-test-subj="${bucketName}"]`;
-      await find.clickByCssSelector(locator);
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
@@ -548,21 +550,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async selectFieldById(fieldValue, id) {
       await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
-    }
-
-    async orderBy(fieldValue) {
-      await find.clickByCssSelector(
-        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
-        + `option:contains("${fieldValue}")`);
-    }
-
-    async selectOrderBy(fieldValue) {
-      await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
-    }
-
-    async getInputTypeParam(paramName) {
-      const input = await find.byCssSelector(`input[ng-model="agg.params.${paramName}"]`);
-      return await input.getProperty('value');
     }
 
     async getInterval() {
@@ -1231,19 +1218,20 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getBucketErrorMessage() {
-      const error = await find.byCssSelector('.visEditorAggParam__error');
+      const error = await find.byCssSelector('[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText');
       const errorMessage = await error.getProperty('innerText');
       log.debug(errorMessage);
       return errorMessage;
     }
 
-    async selectSortMetric(agg, metric) {
-      const sortMetric = await find.byCssSelector(`[data-test-subj="visEditorOrder${agg}-${metric}"]`);
-      return await sortMetric.click();
+    async selectOrderByMetric(agg, metric) {
+      const sortSelect = await testSubjects.find(`visEditorOrderBy${agg}`);
+      const sortMetric = await sortSelect.findByCssSelector(`option[value="${metric}"]`);
+      await sortMetric.click();
     }
 
     async selectCustomSortMetric(agg, metric, field) {
-      await this.selectSortMetric(agg, 'custom');
+      await this.selectOrderByMetric(agg, 'custom');
       await this.selectAggregation(metric, 'groupName');
       await this.selectField(field, 'groupName');
     }

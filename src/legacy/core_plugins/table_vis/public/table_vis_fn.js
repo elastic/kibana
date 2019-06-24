@@ -18,7 +18,7 @@
  */
 
 import { functionsRegistry } from 'plugins/interpreter/registries';
-import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaTable = () => ({
