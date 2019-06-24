@@ -60,7 +60,6 @@ export class ClusterDocClient {
   private updateInterval? = 15 * 1000;
   private timeoutThreshold = 15 * 1000;
   private updateTimer: null | NodeJS.Timer = null;
-  private configSubscription?: Subscription;
   private maxRetry: number = 0;
   private runCull: boolean = false;
   private nodeCache: NodeList = {};
@@ -82,9 +81,6 @@ export class ClusterDocClient {
 
   public async setup(esClient: Partial<ElasticsearchServiceSetup>) {
     this.elasticsearch = esClient.dataClient$;
-    this.configSubscription = this.config$.subscribe(config => {
-      this.setConfig(config);
-    });
     const config = await this.config$.pipe(first()).toPromise();
     this.setConfig(config);
   }

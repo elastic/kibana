@@ -75,7 +75,6 @@ export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 
 export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart> {
   public nodeName: string;
-  private configSubscription?: Subscription;
   private clusterDocClient: ClusterDocClient;
   private maxRetry = 0;
   private requestBackoff = 0;
@@ -97,10 +96,6 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
 
   public async setup(core: CoreSetup, plugins: {}) {
     await this.clusterDocClient.setup(core.elasticsearch);
-
-    this.configSubscription = this.config$.subscribe(config => {
-      this.setConfig(config);
-    });
     const config = await this.config$.pipe(first()).toPromise();
     this.setConfig(config);
 
