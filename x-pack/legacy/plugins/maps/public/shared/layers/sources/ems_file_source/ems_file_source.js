@@ -136,9 +136,18 @@ export class EMSFileSource extends AbstractVectorSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     const newProperties = {};
+    const meta = await this._getEmsVectorFileMeta();
     for (const key in properties) {
       if (properties.hasOwnProperty(key) && this._descriptor.tooltipProperties.indexOf(key) > -1) {
-        newProperties[key] = properties[key];
+        let newFieldName = key;
+        console.log(meta, key);
+        for (let i = 0; i < meta.fields.length; i++) {
+          if (meta.fields[i].name === key) {
+            newFieldName = meta.fields[i].description;
+            break;
+          }
+        }
+        newProperties[newFieldName] = properties[key];
       }
     }
     return super.filterAndFormatPropertiesToHtml(newProperties);
