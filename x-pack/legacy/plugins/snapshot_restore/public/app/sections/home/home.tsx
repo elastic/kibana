@@ -26,6 +26,7 @@ import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
+import { RecoveryList } from './recovery_list';
 import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
@@ -44,9 +45,12 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     },
   } = useAppDependencies();
 
-  const tabs = [
+  const tabs: Array<{
+    id: Section;
+    name: React.ReactNode;
+  }> = [
     {
-      id: 'snapshots' as Section,
+      id: 'snapshots',
       name: (
         <FormattedMessage
           id="xpack.snapshotRestore.home.snapshotsTabTitle"
@@ -55,11 +59,20 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
-      id: 'repositories' as Section,
+      id: 'repositories',
       name: (
         <FormattedMessage
           id="xpack.snapshotRestore.home.repositoriesTabTitle"
           defaultMessage="Repositories"
+        />
+      ),
+    },
+    {
+      id: 'recovery',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.recoveryTabTitle"
+          defaultMessage="Recovery status"
         />
       ),
     },
@@ -144,6 +157,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
             component={SnapshotList}
           />
+          <Route exact path={`${BASE_PATH}/recovery`} component={RecoveryList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
