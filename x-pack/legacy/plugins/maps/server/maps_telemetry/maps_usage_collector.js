@@ -8,8 +8,7 @@ import _ from 'lodash';
 import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_task';
 
 export function initTelemetryCollection(server) {
-  const { kbnServer } = server.plugins.xpack_main.status.plugin;
-  registerMapsTelemetryTask(server.plugins.taskManager, kbnServer);
+  registerMapsTelemetryTask(server);
   scheduleTask(server, server.plugins.taskManager);
   registerMapsUsageCollector(server);
 }

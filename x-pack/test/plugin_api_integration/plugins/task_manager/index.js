@@ -19,7 +19,6 @@ export default function (kibana) {
 
     init(server) {
       const taskManager = server.plugins.taskManager;
-      const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
       taskManager.registerTaskDefinitions({
         sampleTask: {
@@ -41,7 +40,7 @@ export default function (kibana) {
                 throw new Error(params.failWith);
               }
 
-              const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+              const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
               await callCluster('index', {
                 index: '.task_manager_test_result',
                 body: {

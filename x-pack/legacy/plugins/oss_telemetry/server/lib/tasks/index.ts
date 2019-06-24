@@ -10,7 +10,6 @@ import { visualizationsTaskRunner } from './visualizations/task_runner';
 
 export function registerTasks(server: HapiServer) {
   const taskManager = server.plugins.taskManager;
-  const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
   taskManager.registerTaskDefinitions({
     [VIS_TELEMETRY_TASK]: {
@@ -19,7 +18,7 @@ export function registerTasks(server: HapiServer) {
       numWorkers: VIS_TELEMETRY_TASK_NUM_WORKERS, // by default it's 100% their workers
       createTaskRunner({ taskInstance }: { taskInstance: any }) {
         return {
-          run: visualizationsTaskRunner(taskInstance, kbnServer),
+          run: visualizationsTaskRunner(taskInstance, server),
         };
       },
     },
