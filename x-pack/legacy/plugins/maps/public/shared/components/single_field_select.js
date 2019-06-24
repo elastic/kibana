@@ -24,20 +24,21 @@ export const getGroupedFieldOptions = (fields, filterField) => {
   fields
     .filter(filterField)
     .forEach(field => {
+      const fieldLabel = typeof field.label === 'string' ? field.label : field.name;
       if (fieldsByTypeMap.has(field.type)) {
         const fieldsList = fieldsByTypeMap.get(field.type);
-        fieldsList.push(field.name);
+        fieldsList.push({ value: field.name, label: fieldLabel });
         fieldsByTypeMap.set(field.type, fieldsList);
       } else {
-        fieldsByTypeMap.set(field.type, [field.name]);
+        fieldsByTypeMap.set(field.type, [{ value: field.name, label: fieldLabel }]);
       }
     });
 
   fieldsByTypeMap.forEach((fieldsList, fieldType) => {
     groupedFieldOptions.push({
       label: fieldType,
-      options: fieldsList.sort().map(fieldName => {
-        return { value: fieldName, label: fieldName };
+      options: fieldsList.sort().map(({ value, label }) => {
+        return { value: value, label: label };
       })
     });
   });

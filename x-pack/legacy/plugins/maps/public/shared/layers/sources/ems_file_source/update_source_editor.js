@@ -35,7 +35,8 @@ export class UpdateSourceEditor extends Component {
     const fields = meta.fields.map(field => {
       return {
         type: 'string',
-        name: field.name
+        name: field.name,
+        label: field.description
       };
     });
     this.setState({ fields: fields });

@@ -140,7 +140,6 @@ export class EMSFileSource extends AbstractVectorSource {
     for (const key in properties) {
       if (properties.hasOwnProperty(key) && this._descriptor.tooltipProperties.indexOf(key) > -1) {
         let newFieldName = key;
-        console.log(meta, key);
         for (let i = 0; i < meta.fields.length; i++) {
           if (meta.fields[i].name === key) {
             newFieldName = meta.fields[i].description;
