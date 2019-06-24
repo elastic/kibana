@@ -18,7 +18,7 @@ export default function (kibana) {
     },
 
     init(server) {
-      const { taskManager } = server;
+      const taskManager = server.plugins.taskManager;
 
       taskManager.registerTaskDefinitions({
         sampleTask: {

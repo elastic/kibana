@@ -8,8 +8,8 @@ import _ from 'lodash';
 import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_task';
 
 export function initTelemetryCollection(server) {
-  registerMapsTelemetryTask(server.taskManager);
-  scheduleTask(server, server.taskManager);
+  registerMapsTelemetryTask(server.plugins.taskManager);
+  scheduleTask(server, server.plugins.taskManager);
   registerMapsUsageCollector(server);
 }
 
@@ -21,7 +21,7 @@ async function isTaskManagerReady(server) {
 async function fetch(server) {
   let docs;
   try {
-    ({ docs } = await server.taskManager.fetch({
+    ({ docs } = await server.plugins.taskManager.fetch({
       query: {
         bool: {
           filter: {

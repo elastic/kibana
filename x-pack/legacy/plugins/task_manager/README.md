@@ -49,12 +49,12 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 ## Task definitions
 
-Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.taskManager` object.
+Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.taskManager` object.
 
 A sample task can be found in the [x-pack/test/plugin_api_integration/plugins/task_manager](../../test/plugin_api_integration/plugins/task_manager/index.js) folder.
 
 ```js
-const { taskManager } = server;
+const taskManager = server.plugins.taskManager;
 taskManager.registerTaskDefinitions({
   // clusterMonitoring is the task type, and must be unique across the entire system
   clusterMonitoring: {
@@ -210,7 +210,7 @@ The data stored for a task instance looks something like this:
 The task manager mixin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
 
 ```js
-const { taskManager } = server;
+const taskManager = server.plugins.taskManager;
 // Schedules a task. All properties are as documented in the previous
 // storage section, except that here, params is an object, not a JSON
 // string.
@@ -253,7 +253,7 @@ For example:
 
 ```js
 // In your plugin's init
-server.taskManager.addMiddleware({
+server.plugins.taskManager.addMiddleware({
   async beforeSave({ taskInstance, ...opts }) {
     console.log(`About to save a task of type ${taskInstance.taskType}`);
 
