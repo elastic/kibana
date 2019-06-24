@@ -170,12 +170,15 @@ class SpacesMenuUI extends Component<Props, State> {
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
     const icon = <SpaceAvatar space={space} size={'s'} />;
-    const itemAriaLabel = i18n.translate('xpack.spaces.headerNavigationSwitchAriaLabel', {
-      defaultMessage: '; Switch to {spaceName} space',
-      values: {
-        spaceName: space.name,
-      },
-    });
+    const itemAriaLabel = i18n.translate(
+      'xpack.spaces.navControl.spacesMenu.headerNavigationSwitchAriaLabel',
+      {
+        defaultMessage: '; Switch to {spaceName} space',
+        values: {
+          spaceName: space.name,
+        },
+      }
+    );
     return (
       <EuiContextMenuItem
         key={space.id}

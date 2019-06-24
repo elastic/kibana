@@ -163,7 +163,7 @@ export class NavControlPopover extends Component<Props, State> {
   private onSelectSpace = (space: Space) => {
     toastNotifications.add({
       title: i18n.translate(
-        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
+        'xpack.spaces.navControl.spacesMenu.jobCreationFailedNotificationTitle',
         {
           defaultMessage: 'Switching to {spaceName} space',
           values: {
