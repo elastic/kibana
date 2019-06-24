@@ -1,8 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 /* tslint:disable */
 
 // ====================================================
@@ -512,6 +507,8 @@ export interface MonitorSummary {
   monitor_id: string;
 
   state: State;
+
+  histogram: SummaryHistogramPoint[];
 }
 
 export interface State {
@@ -586,6 +583,17 @@ export interface StateUrl {
   port?: number | null;
 
   scheme?: string | null;
+}
+/** Represents a monitor's statuses for a period of time. */
+export interface SummaryHistogramPoint {
+  /** The time at which these data were collected. */
+  timestamp: string;
+  /** The number of documents at the given time period. */
+  count: number;
+  /** The number of _up_ documents. */
+  up: number;
+  /** The number of _down_ documents. */
+  down: number;
 }
 
 export interface StatesIndexStatus {

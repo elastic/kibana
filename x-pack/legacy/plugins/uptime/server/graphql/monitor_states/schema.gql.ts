@@ -7,6 +7,18 @@
 import gql from 'graphql-tag';
 
 export const monitorStatesSchema = gql`
+  "Represents a monitor's statuses for a period of time."
+  type SummaryHistogramPoint {
+    "The time at which these data were collected."
+    timestamp: String!
+    "The number of documents at the given time period."
+    count: Int!
+    "The number of _up_ documents."
+    up: Int!
+    "The number of _down_ documents."
+    down: Int!
+  }
+
   type Agent {
     id: String!
   }
@@ -94,6 +106,7 @@ export const monitorStatesSchema = gql`
   type MonitorSummary {
     monitor_id: String!
     state: State!
+    histogram: [SummaryHistogramPoint!]!
   }
 
   type MonitorSummaryResult {
