@@ -1,0 +1,21 @@
+{
+  "cat.snapshots": {
+    "url_params": {
+      "format": "",
+      "ignore_unavailable": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/snapshots",
+      "_cat/snapshots/{repository}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-snapshots.html"
+  }
+}
