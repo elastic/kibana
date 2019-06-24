@@ -20,7 +20,7 @@
 import { FilterStateManager } from 'plugins/data';
 import { data } from 'plugins/data/setup';
 
-export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
+export function FilterBarQueryFilterProvider(getAppState, globalState) {
   const filterManager = data.filter.filterManager;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
