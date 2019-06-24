@@ -28,3 +28,18 @@ export {
 export { ExpressionFunction } from './functions';
 export { ExpressionType } from './types';
 export * from '../expression_types';
+
+export type ExpressionArgAST = string | boolean | number | ExpressionAST;
+
+export interface ExpressionFunctionAST {
+  type: 'function';
+  function: string;
+  arguments: {
+    [key: string]: ExpressionArgAST[];
+  };
+}
+
+export interface ExpressionAST {
+  type: 'expression';
+  chain: ExpressionFunctionAST[];
+}

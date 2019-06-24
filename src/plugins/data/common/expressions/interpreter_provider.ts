@@ -20,6 +20,7 @@
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/src/common';
 import { createError } from './create_error';
+import { ExpressionAST } from './types';
 
 export { createError };
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -32,7 +33,7 @@ export function interpreterProvider(config: any) {
 
   return interpret;
 
-  async function interpret(node: any, context = null) {
+  async function interpret(node: ExpressionAST, context = null) {
     switch (getType(node)) {
       case 'expression':
         return invokeChain(node.chain, context);
