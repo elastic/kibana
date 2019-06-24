@@ -34,11 +34,11 @@ Then, {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metri
 Set up most recent entities on a *Documents* source by enabling "Show most recent documents by entity"
 and configuring the following:
 
-. Set `Entity` to the field that identifies entities in your documents.
+. Set *Entity* to the field that identifies entities in your documents.
 This field will be used in the terms aggregation to group your documents into entity buckets.
-. Set `Time` to the date field that puts your documents in chronological order.
+. Set *Time* to the date field that puts your documents in chronological order.
 This field will be used to sort your documents in the top hits aggregation.
-. Set `Documents per entity` to configure the maximum number of documents accumulated per entity.
+. Set *Documents per entity* to configure the maximum number of documents accumulated per entity.
 
 
 [float]
