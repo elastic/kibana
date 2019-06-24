@@ -14,8 +14,6 @@ export function toExpression(state: IndexPatternPrivateState) {
     return null;
   }
 
-  const sortedColumns = state.columnOrder.map(col => state.columns[col]);
-
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
     // Typescript is not smart enough to infer that definitionMap[C['operationType']] is always OperationDefinition<C>,
     // but this is made sure by the typing of the operation map
@@ -25,23 +23,29 @@ export function toExpression(state: IndexPatternPrivateState) {
     return operationDefinition.toEsAggsConfig(column, columnId);
   }
 
-  if (sortedColumns.length) {
-    const aggs = sortedColumns.map((col, index) => {
-      return getEsAggsConfig(col, state.columnOrder[index]);
+  const columnEntries = state.columnOrder.map(
+    colId => [colId, state.columns[colId]] as [string, IndexPatternColumn]
+  );
+
+  if (columnEntries.length) {
+    const aggs = columnEntries.map(([colId, col]) => {
+      return getEsAggsConfig(col, colId);
     });
 
-    const idMap = state.columnOrder.reduce(
-      (currentIdMap, columnId, index) => ({
-        ...currentIdMap,
-        [`col-${index}-${columnId}`]: columnId,
-      }),
+    const idMap = columnEntries.reduce(
+      (currentIdMap, [colId], index) => {
+        return {
+          ...currentIdMap,
+          [`col-${index}-${colId}`]: colId,
+        };
+      },
       {} as Record<string, string>
     );
 
     return `esaggs
       index="${state.currentIndexPatternId}"
-      metricsAtAllLevels="false"
-      partialRows="false"
+      metricsAtAllLevels=false
+      partialRows=false
       aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 
