@@ -20,7 +20,7 @@
 import { getFields } from '../lib/get_fields';
 import { getIndexPatternService } from '../lib/get_index_pattern_service';
 
-export const fieldsRoutes = ({ http: { server } }) => {
+export const fieldsRoutes = server => {
   server.route({
     config: {
       pre: [getIndexPatternService],

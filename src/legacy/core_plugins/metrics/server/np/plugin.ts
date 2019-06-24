@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { InternalCoreSetup } from 'kibana/server';
+import { Legacy } from 'kibana';
 // @ts-ignore
 import { fieldsRoutes } from '../routes/fields';
 // @ts-ignore
@@ -26,10 +26,10 @@ import { visDataRoutes } from '../routes/vis';
 import { SearchStrategiesRegister } from '../lib/search_strategies/search_strategies_register';
 
 export class MetricsPlugin {
-  public setup(core: InternalCoreSetup) {
-    fieldsRoutes(core);
-    visDataRoutes(core);
+  public setup(server: Legacy.Server) {
+    fieldsRoutes(server);
+    visDataRoutes(server);
 
-    SearchStrategiesRegister.init(core);
+    SearchStrategiesRegister.init(server);
   }
 }

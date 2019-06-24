@@ -18,26 +18,32 @@
  */
 
 // @ts-ignore
+import { functionsRegistry } from 'plugins/interpreter/registries';
+// @ts-ignore
 import { tsvb } from './tsvb_fn';
 // @ts-ignore
 import { MetricsVisProvider } from './kbn_vis_type';
-import { TypesService } from '../../visualizations/public/types';
-import { InterpreterService } from './interpreter';
+import { visualizations } from '../../visualizations/public';
 
 export class Plugin {
-  private readonly visTypes: TypesService;
-  private readonly interpreter: InterpreterService;
-
-  constructor() {
-    this.visTypes = new TypesService();
-    this.interpreter = new InterpreterService();
-  }
-
-  public setup() {
-    this.interpreter.setup().functionsRegistry.register(tsvb);
+  // @ts-ignore
+  public setup(core, plugins) {
+    plugins.data.expressions.functionsRegistry.register(tsvb);
     // register the provider with the visTypes registry so that other know it exists
-    this.visTypes.setup().VisTypesRegistryProvider.register(MetricsVisProvider);
+    plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVisProvider);
   }
+
+  public stop() {}
 }
 
-new Plugin().setup();
+const core = {};
+const plugins = {
+  data: {
+    expressions: {
+      functionsRegistry,
+    },
+  },
+  visualizations,
+};
+
+new Plugin().setup(core, plugins);
