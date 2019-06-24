@@ -87,25 +87,25 @@ describe('validateActionTypeParams()', () => {
     expect(() => {
       validateActionTypeParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"message\\" fails because [\\"message\\" is required]"`
+      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" is required]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
+      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 'x', tags: 2 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"tags\\" fails because [\\"tags\\" must be an array]"`
+      `"The actionParams is invalid: child \\"tags\\" fails because [\\"tags\\" must be an array]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 'x', tags: [2] });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"tags\\" fails because [\\"tags\\" at position 0 fails because [\\"0\\" must be a string]]"`
+      `"The actionParams is invalid: child \\"tags\\" fails because [\\"tags\\" at position 0 fails because [\\"0\\" must be a string]]"`
     );
   });
 });
