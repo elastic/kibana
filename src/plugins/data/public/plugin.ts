@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { setup } from './interpreter/setup';
 
-export class Plugin {
+export class DataPublicPlugin implements Plugin<{}> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
@@ -30,7 +30,6 @@ export class Plugin {
     };
   }
 
-  public start(core: CoreStart) {
-    return {};
-  }
+  public start(core: CoreStart) {}
+  public stop() {}
 }

@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 
-export class Plugin {
+export class DataServerPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
-
   public setup(core: CoreSetup) {}
-
   public start(core: CoreStart) {}
+  public stop() {}
 }
+
+export { DataServerPlugin as Plugin };

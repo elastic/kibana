@@ -18,8 +18,10 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { Plugin } from './plugin';
+import { DataServerPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+  return new DataServerPlugin(initializerContext);
 }
+
+export { DataServerPlugin as Plugin };

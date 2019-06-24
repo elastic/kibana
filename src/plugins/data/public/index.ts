@@ -18,10 +18,10 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { Plugin } from './plugin';
+import { DataPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+  return new DataPublicPlugin(initializerContext);
 }
 
-export { Plugin };
+export { DataPublicPlugin as Plugin };
