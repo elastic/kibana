@@ -40,7 +40,7 @@ export interface HapiServer {
         callWithInternalUser: () => Promise<ESQueryResponse>;
       };
     };
-    taskManager: TaskManagerContract;
+    task_manager: TaskManagerContract;
   };
   usage: {
     collectorSet: {

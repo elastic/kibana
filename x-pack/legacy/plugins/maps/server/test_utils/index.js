@@ -34,7 +34,7 @@ export const getMockKbnServer = (
       }),
     },
     xpack_main: {},
-    taskManager: {
+    task_manager: {
       registerTaskDefinitions: () => undefined,
       schedule: () => Promise.resolve(),
       fetch: mockTaskFetch,
