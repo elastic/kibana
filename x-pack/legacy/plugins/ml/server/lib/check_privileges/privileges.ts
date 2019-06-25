@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Privileges } from '../../../common/types/privileges';
-
 export const mlPrivileges = {
   cluster: [
     'cluster:monitor/data_frame/get',
