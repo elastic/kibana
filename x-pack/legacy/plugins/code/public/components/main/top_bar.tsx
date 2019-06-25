@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import React, { ChangeEvent } from 'react';
 import { SearchOptions, SearchScope } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
@@ -38,11 +38,8 @@ export class TopBar extends React.Component<Props, { value: string }> {
   getBranch = (revision: string) => {
     const r = decodeRevisionString(revision);
     const branch = this.props.branches.find(b => b.name === r);
-    const sameCommitBranch = this.props.branches.find(b => b.commit.id.startsWith(r));
     if (branch) {
       return branch.name;
-    } else if (sameCommitBranch) {
-      return sameCommitBranch.commit.id;
     } else {
       return '';
     }
@@ -51,16 +48,16 @@ export class TopBar extends React.Component<Props, { value: string }> {
   get branchOptions() {
     return this.props.branches.map(b => ({
       value: b.name,
-      inputDisplay: b.name,
-      dropdownDisplay: <div className="codeContainer__selectOption">{b.name}</div>,
+      text: b.name,
       ['data-test-subj']: `codeBranchSelectOption-${b.name}${
         this.branch === b.name ? 'Active' : ''
       }`,
     }));
   }
 
-  public onChange = (value: string) => {
+  public onChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const { resource, org, repo, path = '', pathType } = this.props.routeParams;
+    const { value } = e.target;
     this.setState({
       value,
     });
@@ -88,13 +85,10 @@ export class TopBar extends React.Component<Props, { value: string }> {
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem className="codeContainer__select" grow={false}>
-                <EuiSuperSelect
+                <EuiSelect
                   options={this.branchOptions}
-                  valueOfSelected={branch}
+                  value={branch}
                   onChange={this.onChange}
-                  itemClassName="codeContainer__selectOptionItem"
-                  className="codeContainer__superSelect"
-                  popoverClassName="codeContainer__superSelectPopover"
                   data-test-subj="codeBranchSelector"
                 />
               </EuiFlexItem>
