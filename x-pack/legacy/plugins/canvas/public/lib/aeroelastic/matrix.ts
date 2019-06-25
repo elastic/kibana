@@ -282,8 +282,12 @@ export const subtract = (
     p - P,
   ];
 
-export const componentProduct = ([a, b, c, d]: Vector3d, [A, B, C, D]: Vector3d): Vector3d =>
-  [a * A, b * B, c * C, d * D];
+export const componentProduct = ([a, b, c, d]: Vector3d, [A, B, C, D]: Vector3d): Vector3d => [
+  a * A,
+  b * B,
+  c * C,
+  d * D,
+];
 
 export const reduceTransforms = (transforms: TransformMatrix3d[]): TransformMatrix3d =>
   transforms.length === 1
