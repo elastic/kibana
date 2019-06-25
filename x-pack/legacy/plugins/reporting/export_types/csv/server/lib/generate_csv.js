@@ -50,7 +50,7 @@ export function createGenerateCsv(logger) {
 
         const flattened = flattenHit(hit);
         const rows = formatCsvValues(flattened);
-        const rowsHaveFormulas = checkIfRowsHaveFormulas(flattened, fields);
+        const rowsHaveFormulas = settings.checkForFormulas && checkIfRowsHaveFormulas(flattened, fields);
 
         if (rowsHaveFormulas) {
           csvContainsFormulas = true;

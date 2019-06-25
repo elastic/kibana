@@ -102,6 +102,7 @@ function executeJobFn(server) {
       formatsMap,
       settings: {
         ...uiSettings,
+        checkForFormulas: config.get('xpack.reporting.csv.checkForFormulas'),
         maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
         scroll: config.get('xpack.reporting.csv.scroll'),
       },
