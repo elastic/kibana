@@ -20,7 +20,6 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
-// import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';

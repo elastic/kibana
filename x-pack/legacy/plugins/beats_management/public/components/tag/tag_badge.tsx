@@ -26,24 +26,22 @@ export const TagBadge = (props: TagBadgeProps) => {
         {idToRender}
       </EuiBadge>
     );
+  } else if (onClick && onClickAriaLabel) {
+    return (
+      <EuiBadge
+        color={tag.color || 'primary'}
+        iconType={iconType}
+        onClick={onClick}
+        onClickAriaLabel={onClickAriaLabel}
+      >
+        {idToRender}
+      </EuiBadge>
+    );
   } else {
-    if (onClick && onClickAriaLabel) {
-      return (
-        <EuiBadge
-          color={tag.color || 'primary'}
-          iconType={iconType}
-          onClick={onClick}
-          onClickAriaLabel={onClickAriaLabel}
-        >
-          {idToRender}
-        </EuiBadge>
-      );
-    } else {
-      return (
-        <EuiBadge color={tag.color || 'primary'} iconType={iconType}>
-          {idToRender}
-        </EuiBadge>
-      );
-    }
+    return (
+      <EuiBadge color={tag.color || 'primary'} iconType={iconType}>
+        {idToRender}
+      </EuiBadge>
+    );
   }
 };
