@@ -500,8 +500,6 @@
     "common.ui.paginateSelectableList.sortByButtonLabeDescendingScreenReaderOnly": "降順",
     "common.ui.paginateSelectableList.sortByButtonLabel": "名前",
     "common.ui.paginateSelectableList.sortByButtonLabelScreenReaderOnly": "並べ替え基準",
-    "common.ui.parseEsInterval.invalidEsCalendarIntervalErrorMessage": "無効なカレンダー間隔: {interval}、1 よりも大きな値が必要です",
-    "common.ui.parseEsInterval.invalidEsIntervalFormatErrorMessage": "無効な間隔のフォーマット: {interval}",
     "common.ui.recentLinks.linkItem.screenReaderLabel": "{recentlyAccessedItemLinklabel}、タイプ: {pageType}",
     "common.ui.savedObjectFinder.addNewItemButtonLabel": "新規 {item} を追加",
     "common.ui.savedObjectFinder.manageItemsButtonLabel": "{items} の管理",

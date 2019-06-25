@@ -17,7 +17,18 @@
  * under the License.
  */
 
-export class Sha256 {
-  public update(json: string | Buffer, encoding?: string): Sha256;
-  public digest(encoding: string): string;
+import React from 'react';
+import { AggControlProps } from './agg_control_props';
+
+interface AggControlReactWrapperProps<T> extends AggControlProps<T> {
+  component: React.FunctionComponent<AggControlProps<T>>;
 }
+
+function AggControlReactWrapper({
+  component: Component,
+  ...rest
+}: AggControlReactWrapperProps<boolean | number>) {
+  return <Component {...rest} />;
+}
+
+export { AggControlReactWrapper };
