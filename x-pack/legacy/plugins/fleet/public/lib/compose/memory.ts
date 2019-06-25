@@ -18,8 +18,8 @@ import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_a
 import { AgentsLib } from '../agent';
 import { FrameworkLib } from '../framework';
 import { FrontendLibs } from '../types';
-import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
-import { ElasticsearchLib } from './../elasticsearch';
+import { MemoryElasticsearchAdapter } from '../adapters/elasticsearch/memory';
+import { ElasticsearchLib } from '../elasticsearch';
 
 const onKibanaReady = uiModules.get('kibana').run;
 

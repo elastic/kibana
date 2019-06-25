@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as t from 'io-ts';
-import { LICENSES } from './../../../../common/constants/security';
+import { LICENSES } from '../../../../common/constants/security';
 
 export interface FrameworkAdapter {
   // Instance vars
