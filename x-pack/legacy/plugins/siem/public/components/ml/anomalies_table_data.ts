@@ -30,7 +30,7 @@ export const anomaliesTableData = async (
     body: JSON.stringify(body),
     headers: {
       'kbn-system-api': 'true',
-      'Content-Type': 'application/json',
+      'content-Type': 'application/json',
       'kbn-xsrf': chrome.getXsrfToken(),
       ...headers,
     },

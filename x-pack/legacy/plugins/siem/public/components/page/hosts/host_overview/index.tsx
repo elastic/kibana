@@ -9,6 +9,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { DescriptionList } from '../../../../../common/utility_types';
 import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
 
@@ -21,11 +22,6 @@ import { IPDetailsLink } from '../../../links';
 import { AnomalyScores } from '../../../ml/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 
-interface DescriptionList {
-  title: string;
-  description: JSX.Element;
-}
-
 interface HostSummaryProps {
   data: HostItem;
   loading: boolean;
@@ -36,7 +32,7 @@ interface HostSummaryProps {
   narrowDateRange: NarrowDateRange;
 }
 
-const DescriptionList = styled(EuiDescriptionList)`
+const DescriptionListStyled = styled(EuiDescriptionList)`
   ${({ theme }) => `
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
@@ -46,7 +42,7 @@ const DescriptionList = styled(EuiDescriptionList)`
 
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
   <EuiFlexItem key={key}>
-    <DescriptionList listItems={descriptionList} />
+    <DescriptionListStyled listItems={descriptionList} />
   </EuiFlexItem>
 );
 

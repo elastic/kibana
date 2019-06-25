@@ -8,7 +8,7 @@ import chrome from 'ui/chrome';
 
 const payload = { jobIds: [] };
 
-// TODO: Finish this, call it, and use it
+// TODO: Finish this, call it, and use it or delete this
 export const jobsSummary = async (jobIds = payload) => {
   const response = await fetch('/api/ml/jobs/jobs_summary', {
     method: 'POST',

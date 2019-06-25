@@ -9,6 +9,7 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { DescriptionList } from '../../../../../common/utility_types';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -28,11 +29,6 @@ import { LoadingPanel } from '../../../loading';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/anomaly_scores';
 
-interface DescriptionList {
-  title: string;
-  description: JSX.Element;
-}
-
 interface OwnProps {
   data: IpOverviewData;
   flowTarget: FlowTarget;
@@ -48,7 +44,7 @@ interface OwnProps {
 
 export type IpOverviewProps = OwnProps;
 
-const DescriptionList = styled(EuiDescriptionList)`
+const DescriptionListStyled = styled(EuiDescriptionList)`
   ${({ theme }) => `
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
@@ -59,7 +55,7 @@ const DescriptionList = styled(EuiDescriptionList)`
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
   return (
     <EuiFlexItem key={key}>
-      <DescriptionList listItems={descriptionList} />
+      <DescriptionListStyled listItems={descriptionList} />
     </EuiFlexItem>
   );
 };

@@ -27,13 +27,8 @@ export const createJobKey = (score: Anomaly): string =>
 export const AnomalyScores = React.memo<Args>(
   ({ anomalies, startDate, endDate, isLoading, narrowDateRange }): JSX.Element => {
     if (isLoading) {
-      return <EuiLoadingSpinner size="m" />;
-    } else if (
-      anomalies == null ||
-      anomalies.anomalies.length === 0 ||
-      startDate == null ||
-      endDate == null
-    ) {
+      return <EuiLoadingSpinner data-test-subj="anomaly-score-spinner" size="m" />;
+    } else if (anomalies == null || anomalies.anomalies.length === 0) {
       return getEmptyTagValue();
     } else {
       return (
@@ -57,6 +52,7 @@ export const AnomalyScores = React.memo<Args>(
                 }
               >
                 <EuiDescriptionList
+                  data-test-subj="anomaly-description-list"
                   listItems={createDescriptionsList(
                     score,
                     startDate,
