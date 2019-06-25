@@ -17,6 +17,13 @@
  * under the License.
  */
 
-export { parseEsInterval, ParsedInterval } from './parse_es_interval';
-export { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
-export { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
+/** @public static code */
+export { dateHistogramInterval } from './date_histogram_interval';
+/** @public static code */
+export {
+  isValidEsInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  parseEsInterval,
+  ParsedInterval,
+} from './parse_es_interval';
