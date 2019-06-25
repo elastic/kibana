@@ -10,6 +10,7 @@ import { Shortcuts } from 'react-shortcuts';
 import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
+import { isTextInput } from '../../lib/is_text_input';
 
 const WORKPAD_CANVAS_BUFFER = 32; // 32px padding around the workpad
 
@@ -35,40 +36,25 @@ export class Workpad extends React.PureComponent {
     unregisterLayout: PropTypes.func.isRequired,
   };
 
-  keyHandler = action => {
-    const {
-      fetchAllRenderables,
-      undoHistory,
-      redoHistory,
-      nextPage,
-      previousPage,
-      grid, // TODO: Get rid of grid when we improve the layout engine
-      setGrid,
-    } = this.props;
-
-    // handle keypress events for editor and presentation events
+  // handle keypress events for editor and presentation events
+  _keyMap = {
     // this exists in both contexts
-    if (action === 'REFRESH') {
-      return fetchAllRenderables();
-    }
-
+    REFRESH: this.props.fetchAllRenderables,
     // editor events
-    if (action === 'UNDO') {
-      return undoHistory();
-    }
-    if (action === 'REDO') {
-      return redoHistory();
-    }
-    if (action === 'GRID') {
-      return setGrid(!grid);
-    }
-
+    UNDO: this.props.undoHistory,
+    REDO: this.props.redoHistory,
+    GRID: () => this.props.setGrid(!this.props.grid),
+    ZOOM_IN: this.props.zoomIn,
+    ZOOM_OUT: this.props.zoomOut,
     // presentation events
-    if (action === 'PREV') {
-      return previousPage();
-    }
-    if (action === 'NEXT') {
-      return nextPage();
+    PREV: this.props.previousPage,
+    NEXT: this.props.nextPage,
+  };
+
+  _keyHandler = (action, event) => {
+    if (!isTextInput(event.target)) {
+      event.preventDefault();
+      this._keyMap[action]();
     }
   };
 
@@ -86,18 +72,27 @@ export class Workpad extends React.PureComponent {
       isFullscreen,
       registerLayout,
       unregisterLayout,
+      zoomScale,
     } = this.props;
 
     const bufferStyle = {
-      height: isFullscreen ? height : height + WORKPAD_CANVAS_BUFFER,
-      width: isFullscreen ? width : width + WORKPAD_CANVAS_BUFFER,
+      height: isFullscreen ? height : (height + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
+      width: isFullscreen ? width : (width + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
     };
 
     return (
       <div className="canvasWorkpad__buffer" style={bufferStyle}>
-        <div className="canvasCheckered" style={{ height, width }}>
+        <div
+          className="canvasCheckered"
+          style={{
+            height,
+            width,
+            transformOrigin: '0 0',
+            transform: isFullscreen ? undefined : `scale3d(${zoomScale}, ${zoomScale}, 1)`, // don't scale in fullscreen mode
+          }}
+        >
           {!isFullscreen && (
-            <Shortcuts name="EDITOR" handler={this.keyHandler} targetNodeSelector="body" global />
+            <Shortcuts name="EDITOR" handler={this._keyHandler} targetNodeSelector="body" global />
           )}
 
           <Fullscreen>
