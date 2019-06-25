@@ -14,13 +14,14 @@ import { buildUniqueIpsQuery } from './query_unique_ips.dsl';
 import {
   KpiHostsAdapter,
   KpiHostsESMSearchBody,
-  KpiHostsGeneralHit,
   KpiHostsAuthHit,
   KpiHostHistogram,
   KpiHostGeneralHistogramCount,
   KpiHostAuthHistogramCount,
-  KpiHostDetailsOptions,
+  RequestKpiHostDetailsOptions,
   KpiHostDetailsData,
+  KpiHostsUniqueIpsHit,
+  KpiHostsHostsHit,
 } from './types';
 import { KpiHostHistogramData, KpiHostsData } from '../../graphql/types';
 
@@ -57,7 +58,7 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
     const uniqueIpsQuery: KpiHostsESMSearchBody[] = buildUniqueIpsQuery(options);
     const authQuery: KpiHostsESMSearchBody[] = buildAuthQuery(options);
     const response = await this.framework.callWithRequest<
-      KpiHostsGeneralHit | KpiHostsAuthHit,
+      KpiHostsHostsHit | KpiHostsUniqueIpsHit | KpiHostsAuthHit,
       TermAggregation
     >(request, 'msearch', {
       body: [...uniqueIpsQuery, ...authQuery, ...hostsQuery],
@@ -116,12 +117,12 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
 
   public async getKpiHostDetails(
     request: FrameworkRequest,
-    options: KpiHostDetailsOptions
+    options: RequestKpiHostDetailsOptions
   ): Promise<KpiHostDetailsData> {
     const uniqueIpsQuery: KpiHostsESMSearchBody[] = buildUniqueIpsQuery(options);
     const authQuery: KpiHostsESMSearchBody[] = buildAuthQuery(options);
     const response = await this.framework.callWithRequest<
-      KpiHostsGeneralHit | KpiHostsAuthHit,
+      KpiHostsUniqueIpsHit | KpiHostsAuthHit,
       TermAggregation
     >(request, 'msearch', {
       body: [...uniqueIpsQuery, ...authQuery],
