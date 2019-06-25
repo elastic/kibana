@@ -31,7 +31,7 @@ pipeline {
           // Runs src/dev/ci_setup/extract_bootstrap_cache.sh, src/dev/ci_setup/setup.sh, and src/dev/ci_setup/checkout_sibling_es.sh
           // setup.sh bootstraps the app, so we can stash from here
           sh './.ci/run.sh' 
-          du -hcs node_modules // How big is it?
+          sh 'du -hcs node_modules' // How big is it?
         }
         stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**  '
       }
