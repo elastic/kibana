@@ -19,12 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { IScope } from 'angular';
 import { showSettingsModal } from './settings_show_modal';
 
 // help
-import { showHelpPanel } from '../components/help_show_panel';
+import { showHelpPanel } from './help_show_panel';
 
-export function getTopNavConfig(toggleHistory: () => void) {
+export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
   return [
     {
       key: 'history',
@@ -61,7 +62,10 @@ export function getTopNavConfig(toggleHistory: () => void) {
         defaultMessage: 'Help',
       }),
       run: () => {
-        showHelpPanel();
+        const closeModal = showHelpPanel();
+        $scope.$on('$destroy', () => {
+          closeModal();
+        });
       },
       testId: 'consoleHelpButton',
     },

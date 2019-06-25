@@ -17,31 +17,31 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
-import { HelpPanel } from './help_panel';
+import React, { useEffect } from 'react';
+// @ts-ignore
+import exampleText from 'raw-loader!./helpExample.txt';
+import $ from 'jquery';
+// @ts-ignore
+import SenseEditor from '../sense_editor/editor';
 
-let isOpen = false;
+interface EditorExampleProps {
+  panel: string;
+}
 
-export function showHelpPanel() {
-  if (isOpen) {
-    return;
-  }
+export function EditorExample(props: EditorExampleProps) {
+  const elemId = `help-example-${props.panel}`;
 
-  isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
+  useEffect(() => {
+    const el = $(`#${elemId}`);
+    el.text(exampleText.trim());
+    const editor = new SenseEditor(el);
+    editor.setReadOnly(true);
+    editor.$blockScrolling = Infinity;
 
-  document.body.appendChild(container);
-  const element = (
-    <I18nContext>
-      <HelpPanel onClose={onClose} />
-    </I18nContext>
-  );
-  ReactDOM.render(element, container);
+    return () => {
+      editor.destroy();
+    };
+  }, []);
+
+  return <div id={elemId} className="conHelp__example" />;
 }

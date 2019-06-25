@@ -34,7 +34,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 import { DevToolsSettings } from './dev_tools_settings';
@@ -123,11 +122,7 @@ export function DevToolsSettingsModal(props: Props) {
 
   return (
     <EuiOverlayMask>
-      <EuiModal
-        data-test-subj="devToolsSettingsModal"
-        className="devToolsSettingsModal"
-        onClose={props.onClose}
-      >
+      <EuiModal data-test-subj="devToolsSettingsModal" onClose={props.onClose}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
@@ -151,7 +146,7 @@ export function DevToolsSettingsModal(props: Props) {
               data-test-subj="setting-font-size-input"
               value={fontSize}
               onChange={e => {
-                setFontSize((e.target.value as unknown) as number);
+                setFontSize(parseInt(e.target.value, 10));
               }}
             />
           </EuiFormRow>
@@ -237,19 +232,16 @@ export function DevToolsSettingsModal(props: Props) {
             />
           </EuiFormRow>
 
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="autocompletePolling"
-              id="autocompletePolling"
-              onClick={props.refreshAutocompleteSettings}
-            >
-              <FormattedMessage
-                defaultMessage="Refresh autocomplete suggestions"
-                id="console.settingsPage.refreshButtonLabel"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiSpacer />
+          <EuiButton
+            data-test-subj="autocompletePolling"
+            id="autocompletePolling"
+            onClick={props.refreshAutocompleteSettings}
+          >
+            <FormattedMessage
+              defaultMessage="Refresh autocomplete suggestions"
+              id="console.settingsPage.refreshButtonLabel"
+            />
+          </EuiButton>
         </EuiModalBody>
 
         <EuiModalFooter>
@@ -262,6 +254,7 @@ export function DevToolsSettingsModal(props: Props) {
             data-test-subj="settings-save-button"
             onClick={saveSettings}
             isLoading={isLoading}
+            disabled={isLoading}
           >
             <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
           </EuiButton>

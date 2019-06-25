@@ -40,16 +40,19 @@ module.run(function ($rootScope) {
   };
 });
 
-function showWelcomeMessageIfNeeded() {
+function showWelcomeMessageIfNeeded($scope) {
   if (true || storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    welcomeShowPanel();
+    const closeModal = welcomeShowPanel();
+    $scope.$on('$destroy', () => {
+      closeModal();
+    });
   }
 }
 
-module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, kbnUiAceKeyboardModeService) {
+module.controller('SenseController', function SenseController($scope, $timeout, $location, kbnUiAceKeyboardModeService) {
   docTitle.change('Console');
 
-  showWelcomeMessageIfNeeded();
+  showWelcomeMessageIfNeeded($scope);
 
   // Since we pass this callback via reactDirective into a react component, which has the function defined as required
   // in it's prop types, we should set this initially (before it's set in the $timeout below). Without this line
@@ -103,7 +106,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     $scope.showHistory = !$scope.showHistory;
   };
 
-  $scope.topNavMenu = getTopNavConfig($scope.toggleHistory);
+  $scope.topNavMenu = getTopNavConfig($scope, $scope.toggleHistory);
 
   $scope.openDocumentation = () => {
     if (!$scope.documentation) {
@@ -115,7 +118,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   $scope.sendSelected = () => {
     input.focus();
     input.sendCurrentRequestToES(() => {
-      $scope.historyDirty = new Date().getTime();
+      // History watches this value and will re-render itself when it changes, so that
+      // the list of requests stays up-to-date as new requests are sent.
+      $scope.lastRequestTimestamp = new Date().getTime();
     });
     return false;
   };

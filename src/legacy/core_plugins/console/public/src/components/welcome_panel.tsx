@@ -30,7 +30,7 @@ import {
   EuiText,
   EuiFlyoutFooter,
 } from '@elastic/eui';
-import { EditorExample } from './help_example';
+import { EditorExample } from './editor_example';
 
 interface Props {
   onClose: () => void;
@@ -72,7 +72,7 @@ export function WelcomePanel(props: Props) {
               defaultMessage="Console understands requests in a compact format, similar to cURL:"
             />
           </p>
-          <EditorExample />
+          <EditorExample panel="welcome" />
           <p>
             <FormattedMessage
               id="console.welcomePage.supportedRequestFormatDescription"

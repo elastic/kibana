@@ -27,7 +27,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { EditorExample } from './help_example';
+import { EditorExample } from './editor_example';
 
 interface Props {
   onClose: () => void;
@@ -57,7 +57,7 @@ export function HelpPanel(props: Props) {
               defaultMessage="You can type one or more requests in the white editor. Console understands requests in a compact format:"
             />
           </p>
-          <EditorExample />
+          <EditorExample panel="help" />
           <h3>
             <FormattedMessage
               id="console.helpPage.keyboardCommandsTitle"

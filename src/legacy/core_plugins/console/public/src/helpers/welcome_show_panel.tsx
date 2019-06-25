@@ -26,19 +26,22 @@ import storage from '../storage';
 
 let isOpen = false;
 
-export function welcomeShowPanel() {
+export function welcomeShowPanel(): () => void {
+  const onClose = () => {
+    if (!container) return;
+    ReactDOM.unmountComponentAtNode(container);
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
+    }
+    isOpen = false;
+  };
+
   if (isOpen) {
-    return;
+    return onClose;
   }
 
   isOpen = true;
   const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
-
   const onDismiss = () => {
     storage.set('version_welcome_shown', '@@SENSE_REVISION');
     onClose();
@@ -51,4 +54,6 @@ export function welcomeShowPanel() {
     </I18nContext>
   );
   ReactDOM.render(element, container);
+
+  return onClose;
 }
