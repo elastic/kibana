@@ -3,6 +3,7 @@
 exports[`Settings Renders settings page 1`] = `
 <EuiPage
   className="mlSettingsPage"
+  data-test-subj="mlPageSettings"
   restrictWidth={false}
 >
   <EuiPageBody
