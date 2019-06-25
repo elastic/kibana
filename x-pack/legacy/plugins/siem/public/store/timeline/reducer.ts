@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { defaultsDeep, pickBy, isNil } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import {
   addTimeline,
   addHistory,
@@ -53,6 +51,7 @@ import {
   addTimelineNote,
   addTimelineNoteToEvent,
   addTimelineProvider,
+  addTimelineToStore,
   applyDeltaToCurrentWidth,
   applyDeltaToTimelineColumnWidth,
   applyKqlFilterQueryDraft,
@@ -83,7 +82,6 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { timelineDefaults } from './model';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -97,16 +95,7 @@ export const initialTimelineState: TimelineState = {
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addTimeline, (state, { id, timeline }) => ({
     ...state,
-    timelineById: {
-      // As right now, We are not managing multiple timeline
-      // for now simplification, we do not need the line below
-      // ...state.timelineById,
-      [id]: {
-        ...defaultsDeep(timelineDefaults, pickBy(v => !isNil(v), timeline)),
-        id: timeline.savedObjectId || '',
-        show: true,
-      },
-    },
+    timelineById: addTimelineToStore({ id, timeline }),
   }))
   .case(createTimeline, (state, { id, show, columns }) => ({
     ...state,

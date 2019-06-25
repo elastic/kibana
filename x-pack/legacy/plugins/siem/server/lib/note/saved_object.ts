@@ -104,21 +104,22 @@ export class Note {
     version: string | null,
     note: SavedNote
   ): Promise<ResponseNote> {
-    let timelineVersionSavedObject = null;
     try {
-      if (note.timelineId == null) {
-        const timelineResult = convertSavedObjectToSavedTimeline(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .create(
-              timelineSavedObjectType,
-              pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-            )
-        );
-        note.timelineId = timelineResult.savedObjectId;
-        timelineVersionSavedObject = timelineResult.version;
-      }
       if (noteId == null) {
+        let timelineVersionSavedObject = null;
+        if (note.timelineId == null) {
+          const timelineResult = convertSavedObjectToSavedTimeline(
+            await this.libs.savedObjects
+              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+              .create(
+                timelineSavedObjectType,
+                pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+              )
+          );
+          note.timelineId = timelineResult.savedObjectId;
+          timelineVersionSavedObject = timelineResult.version;
+        }
+
         // Create new note
         return {
           code: 200,

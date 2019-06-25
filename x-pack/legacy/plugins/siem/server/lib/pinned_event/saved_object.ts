@@ -97,21 +97,21 @@ export class PinnedEvent {
     eventId: string,
     timelineId: string | null
   ): Promise<PinnedEventSavedObject | null> {
-    let timelineVersionSavedObject = null;
     try {
-      if (timelineId == null) {
-        const timelineResult = convertSavedObjectToSavedTimeline(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .create(
-              timelineSavedObjectType,
-              pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-            )
-        );
-        timelineId = timelineResult.savedObjectId;
-        timelineVersionSavedObject = timelineResult.version;
-      }
       if (pinnedEventId == null) {
+        let timelineVersionSavedObject = null;
+        if (timelineId == null) {
+          const timelineResult = convertSavedObjectToSavedTimeline(
+            await this.libs.savedObjects
+              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+              .create(
+                timelineSavedObjectType,
+                pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+              )
+          );
+          timelineId = timelineResult.savedObjectId;
+          timelineVersionSavedObject = timelineResult.version;
+        }
         const allPinnedEventId = await this.getAllPinnedEventsByTimelineId(request, timelineId);
         const isPinnedAlreadyExisting = allPinnedEventId.filter(
           pinnedEvent => pinnedEvent.eventId === eventId
