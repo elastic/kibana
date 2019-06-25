@@ -44,6 +44,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   } = useContext(LogFlyoutState.Context);
   const { showLogsConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
 
+  // Highlighting
+
   return (
     <>
       <ReduxSourceIdBridge sourceId={sourceId} />
