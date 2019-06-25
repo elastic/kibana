@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -27,9 +27,11 @@ const SignatureFlexItem = styled(EuiFlexItem)`
   min-width: 77px;
 `;
 
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
 
 const LinkFlexItem = styled(EuiFlexItem)`
   margin-left: 6px;

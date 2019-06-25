@@ -69,6 +69,8 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     const title = `${field}: "${formattedValue}"`;
 
     return (
+      // Ref: https://github.com/elastic/eui/issues/1655
+      // @ts-ignore
       <ProviderBadgeStyled
         id={`${providerId}-${field}-${val}`}
         className={classes}
@@ -83,7 +85,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         closeButtonProps={{
           // Removing tab focus on close button because the same option can be obtained through the context menu
           // TODO: add a `DEL` keyboard press functionality
-          tabIndex: '-1',
+          tabIndex: -1,
         }}
         data-test-subj="providerBadge"
       >
