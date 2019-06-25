@@ -25,7 +25,7 @@ import dateMath from '@elastic/datemath';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { ThresholdWatch } from 'plugins/watcher/models/watch/threshold_watch';
 import { getWatchVisualizationData } from '../../../../lib/api';
@@ -98,7 +98,7 @@ const getTimeBuckets = (watch: any) => {
   return timeBuckets;
 };
 
-const WatchVisualizationUi = () => {
+export const WatchVisualization = () => {
   const { watch } = useContext(WatchContext);
   const {
     index,
@@ -288,5 +288,3 @@ const WatchVisualizationUi = () => {
   }
   return null;
 };
-
-export const WatchVisualization = injectI18n(WatchVisualizationUi);
