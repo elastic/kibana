@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
-
-import { KpiHostsESMSearchBody } from './types';
-
+import { KpiHostsESMSearchBody, RequestKpiHostsOptions } from './types';
+import { isKpiHostDetailsOptions } from './helpers';
 const getAuthQueryFilter = () => [
   {
     bool: {
@@ -28,15 +26,16 @@ const getAuthQueryFilter = () => [
   },
 ];
 
-export const buildAuthQuery = ({
-  filterQuery,
-  timerange: { from, to },
-  defaultIndex,
-  sourceConfiguration: {
-    fields: { timestamp },
-  },
-}: RequestBasicOptions): KpiHostsESMSearchBody[] => {
-  const filter = [
+export const buildAuthQuery = (options: RequestKpiHostsOptions): KpiHostsESMSearchBody[] => {
+  const {
+    filterQuery,
+    timerange: { from, to },
+    defaultIndex,
+    sourceConfiguration: {
+      fields: { timestamp },
+    },
+  } = options;
+  const kpiHostsFilter = [
     ...createQueryFilterClauses(filterQuery),
     ...getAuthQueryFilter(),
     {
@@ -48,6 +47,9 @@ export const buildAuthQuery = ({
       },
     },
   ];
+  const filter = isKpiHostDetailsOptions(options)
+    ? [...kpiHostsFilter, { term: { 'host.name': options.hostName } }]
+    : kpiHostsFilter;
 
   const dslQuery = [
     {

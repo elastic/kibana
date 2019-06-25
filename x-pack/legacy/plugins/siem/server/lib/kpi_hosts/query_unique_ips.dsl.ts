@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
+import { KpiHostsESMSearchBody, RequestKpiHostsOptions } from './types';
+import { isKpiHostDetailsOptions } from './helpers';
 
-import { KpiHostsESMSearchBody } from './types';
-
-export const buildUniqueIpsQuery = ({
-  filterQuery,
-  timerange: { from, to },
-  defaultIndex,
-  sourceConfiguration: {
-    fields: { timestamp },
-  },
-}: RequestBasicOptions): KpiHostsESMSearchBody[] => {
-  const filter = [
+export const buildUniqueIpsQuery = (options: RequestKpiHostsOptions): KpiHostsESMSearchBody[] => {
+  const {
+    filterQuery,
+    timerange: { from, to },
+    defaultIndex,
+    sourceConfiguration: {
+      fields: { timestamp },
+    },
+  } = options;
+  const kpiHostsFilter = [
     ...createQueryFilterClauses(filterQuery),
     {
       range: {
@@ -27,6 +27,10 @@ export const buildUniqueIpsQuery = ({
       },
     },
   ];
+
+  const filter = isKpiHostDetailsOptions(options)
+    ? [...kpiHostsFilter, { term: { 'host.name': options.hostName } }]
+    : kpiHostsFilter;
 
   const dslQuery = [
     {
