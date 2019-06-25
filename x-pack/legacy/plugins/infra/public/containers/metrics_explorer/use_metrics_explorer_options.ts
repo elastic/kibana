@@ -38,7 +38,7 @@ const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
 };
 
 const DEFAULT_OPTIONS: MetricsExplorerOptions = {
-  aggregation: MetricsExplorerAggregation.avg,
+  aggregation: MetricsExplorerAggregation.count,
   metrics: [],
 };
 
