@@ -3,5 +3,5 @@
   "server": true,
   "ui": false,
   "configPath": ["xpath", "proxy"],
-  "version": "1.0.0"
+  "version": "kibana"
 }
