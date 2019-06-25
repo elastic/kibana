@@ -26,14 +26,11 @@ This section summarizes the changes in each release.
 [[release-notes-7.2.0]]
 == {kib} 7.2.0
 
-coming[7.2.0]
-
-
 [float]
 [[breaking-7.2.0]]
 === Breaking Changes
 
-See <<breaking-changes-7.2, Breaking changes in 7.2>> for more information.
+See <<breaking-changes-7.2, breaking changes in 7.2>> for more information.
 
 Index Patterns::
 * Removes support for time-based interval index patterns with migration {pull}35262[#35262]
