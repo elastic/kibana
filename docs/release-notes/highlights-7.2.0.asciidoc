@@ -229,6 +229,20 @@ TIP: You must use {filebeat} to collect the logs.
 // end::notable-highlights[]
 
 [float]
+
+=== Observability
+
+Observability has two new notable features.
+
+* Metrics Explorer is a new view in the Infrastructure app. Metrics Explorer 
+enhances how you interact with infrastructure metrics in an ad hoc way.
+
+* APM agents now collect language-specific metrics, in addition to the common 
+key performance indicators. These new metrics are automatically displayed in the APM UI.
+
+For more information, visit the https://www.elastic.co/blog/elastic-observability-update-7-2-0[Observability blog].
+
+[float]
 === Give us your feedback
 
 Enjoy all the new features and functionality in {kib} 7.2. Play around with them 
