@@ -78,6 +78,7 @@ class HostsComponentQuery extends QueryTemplate<
       endDate,
       limit,
       startDate,
+      skip,
       sourceId,
       sortField,
     } = this.props;
@@ -105,6 +106,7 @@ class HostsComponentQuery extends QueryTemplate<
         query={HostsTableQuery}
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
