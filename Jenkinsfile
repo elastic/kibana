@@ -13,18 +13,18 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    stage('Kickoff') {
-      agent { label 'master || immutable' }
-      steps {
-        // sh 'env > env.txt' 
-        // script {
-        //   for (String x: readFile('env.txt').split("\r?\n")) {
-        //     println "# ENV VAR: ${x}"
-        //   }
-        // } 
-      }
-    }
-    stage('Build OSS') {
+    // stage('Kickoff') {
+    //   agent { label 'master || immutable' }
+    //   steps {
+    //     // sh 'env > env.txt' 
+    //     // script {
+    //     //   for (String x: readFile('env.txt').split("\r?\n")) {
+    //     //     println "# ENV VAR: ${x}"
+    //     //   }
+    //     // } 
+    //   }
+    // }
+    stage('Setup and Build OSS') {
       agent { label 'linux || immutable' }
       steps {
         dir("${env.BASE_DIR}"){
