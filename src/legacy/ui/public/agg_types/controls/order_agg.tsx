@@ -32,12 +32,10 @@ function OrderAggParamEditor({
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
   useEffect(
-    () => {
-      return () => {
-        setValidity(true);
-      };
+    () => () => {
+      setValidity(true);
     },
-    [value]
+    []
   );
   useEffect(
     () => {
@@ -74,7 +72,7 @@ function OrderAggParamEditor({
       vis={subAggParams.vis}
       onAggParamsChange={(...rest) => {
         // to force update when sub-agg params are changed
-        setInnerState(!state);
+        setInnerState(!innerState);
         subAggParams.onAggParamsChange(...rest);
       }}
       onAggTypeChange={subAggParams.onAggTypeChange}

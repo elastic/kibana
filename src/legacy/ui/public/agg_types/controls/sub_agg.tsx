@@ -70,7 +70,7 @@ function SubAggParamEditor({
       vis={subAggParams.vis}
       onAggParamsChange={(...rest) => {
         // to force update when sub-agg params are changed
-        setInnerState(!state);
+        setInnerState(!innerState);
         subAggParams.onAggParamsChange(...rest);
       }}
       onAggTypeChange={subAggParams.onAggTypeChange}
