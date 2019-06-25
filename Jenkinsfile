@@ -13,18 +13,18 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    stage('Checkout') {
-      agent { label 'master || immutable || linux' }
-      steps {
-        stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**'
-      }
-    }
+    // stage('Checkout') {
+    //   agent { label 'master || immutable || linux' }
+    //   steps {
+    //     stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**'
+    //   }
+    // }
     stage('Setup and Build OSS') {
       agent { label 'linux || immutable' } // Not on the master lightweight executor:   
       options { skipDefaultCheckout() }
       steps {
-        deleteDir()
-        unstash 'source'
+        // deleteDir()
+        // unstash 'source'
         dir("${env.BASE_DIR}"){
           // Runs src/dev/ci_setup/extract_bootstrap_cache.sh, src/dev/ci_setup/setup.sh, and src/dev/ci_setup/checkout_sibling_es.sh
           // setup.sh bootstraps the app, so we can stash from here
@@ -38,9 +38,8 @@ pipeline {
       agent { label 'linux || immutable' } 
       options { skipDefaultCheckout() }
       steps {
-        sh 'echo "Not implemented yet"'
-        // deleteDir()
-        // unstash 'oss-source'
+        deleteDir()
+        unstash 'oss-source'
         // sh './test/scripts/jenkins_unit.sh'
       }
     }
