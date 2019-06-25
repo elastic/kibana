@@ -29,11 +29,12 @@ export interface KpiHostsProps extends QueryTemplateProps {
 }
 
 export const KpiHostsQuery = React.memo<KpiHostsProps>(
-  ({ id = 'kpiHostsQuery', children, filterQuery, sourceId, startDate, endDate }) => (
+  ({ id = 'kpiHostsQuery', children, filterQuery, skip, sourceId, startDate, endDate }) => (
     <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
       query={kpiHostsQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
+      skip={skip}
       variables={{
         sourceId,
         timerange: {

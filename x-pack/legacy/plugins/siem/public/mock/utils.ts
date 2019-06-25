@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-
-interface HookWrapperProps {
+interface Global extends NodeJS.Global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hook: () => any;
+  window?: any;
 }
-export const HookWrapper = (props: HookWrapperProps) => {
-  const myHook = props.hook ? props.hook() : null;
-  return <div>{JSON.stringify(myHook)}</div>;
-};
+
+export const globalNode: Global = global;
