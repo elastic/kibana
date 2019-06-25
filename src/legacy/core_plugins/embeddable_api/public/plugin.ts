@@ -16,40 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export {
-  IEmbeddable,
-  EmbeddableFactory,
-  EmbeddableInstanceConfiguration,
-  Embeddable,
-  embeddableFactories,
-  OutputSpec,
-  ErrorEmbeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  isErrorEmbeddable,
-} from './embeddables';
 
-export { ViewMode, Trigger, EmbeddablePlugin } from './types';
+import { Action, actionRegistry } from './actions';
+import { EmbeddableFactory, embeddableFactories } from './embeddables';
+import { EmbeddablePlugin } from './types';
+import { attachAction, triggerRegistry } from './triggers';
 
-export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
-
-export {
-  APPLY_FILTER_TRIGGER,
-  triggerRegistry,
-  executeTriggerActions,
-  CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from './triggers';
-
-export {
-  Container,
-  ContainerInput,
-  ContainerOutput,
-  PanelState,
-  IContainer,
-  EmbeddableChildPanel,
-} from './containers';
-
-export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';
-
-export { embeddablePlugin } from './plugin';
+export const embeddablePlugin: EmbeddablePlugin = {
+  addAction: (action: Action) => actionRegistry.set(action.id, action),
+  addEmbeddableFactory: (factory: EmbeddableFactory) =>
+    embeddableFactories.set(factory.type, factory),
+  attachAction: data => attachAction(triggerRegistry, data),
+};

@@ -16,40 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export {
-  IEmbeddable,
-  EmbeddableFactory,
-  EmbeddableInstanceConfiguration,
-  Embeddable,
-  embeddableFactories,
-  OutputSpec,
-  ErrorEmbeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  isErrorEmbeddable,
-} from './embeddables';
 
-export { ViewMode, Trigger, EmbeddablePlugin } from './types';
-
-export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
-
-export {
-  APPLY_FILTER_TRIGGER,
-  triggerRegistry,
-  executeTriggerActions,
-  CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from './triggers';
-
-export {
-  Container,
-  ContainerInput,
-  ContainerOutput,
-  PanelState,
-  IContainer,
-  EmbeddableChildPanel,
-} from './containers';
-
-export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';
-
-export { embeddablePlugin } from './plugin';
+export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DASHBOARD_GRID_HEIGHT = 20;
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+export const DEFAULT_PANEL_HEIGHT = 15;
