@@ -10,6 +10,7 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
   EuiTextAlign,
+  EuiPagination
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -19,6 +20,8 @@ export class FeatureTooltip extends React.Component {
   state = {
     properties: undefined,
     loadPropertiesErrorMsg: undefined,
+    pageNumber: 0,
+    selectedLayer: null
   };
 
   componentDidMount() {
@@ -37,11 +40,13 @@ export class FeatureTooltip extends React.Component {
   }
 
   _loadProperties = () => {
+
+    const feature = this.props.tooltipState.features[this.state.pageNumber];
     this._fetchProperties({
-      nextFeatureId: this.props.tooltipState.featureId,
-      nextLayerId: this.props.tooltipState.layerId,
+      nextFeatureId: feature.id,
+      nextLayerId: feature.layerId
     });
-  }
+  };
 
   _fetchProperties = async ({ nextLayerId, nextFeatureId }) => {
     if (this.prevLayerId === nextLayerId && this.prevFeatureId === nextFeatureId) {
@@ -109,6 +114,36 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderProperties() {
+
+    if (this.state.loadPropertiesErrorMsg) {
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.maps.tooltip.unableToLoadContentTitle', {
+            defaultMessage: 'Unable to load tooltip content'
+          })}
+          color="danger"
+          iconType="alert"
+          size="s"
+        >
+          <p>
+            {this.state.loadPropertiesErrorMsg}
+          </p>
+        </EuiCallOut>
+      );
+    }
+
+    if (!this.state.properties) {
+      const loadingMsg = i18n.translate('xpack.maps.tooltip.loadingMsg', {
+        defaultMessage: 'Loading'
+      });
+      return (
+        <EuiTextAlign textAlign="center">
+          <EuiLoadingSpinner size="m" />
+          {loadingMsg}
+        </EuiTextAlign>
+      );
+    }
+
     const rows = this.state.properties.map(tooltipProperty => {
       const label = tooltipProperty.getPropertyName();
       return (
@@ -158,40 +193,38 @@ export class FeatureTooltip extends React.Component {
     );
   }
 
+  _onPageChange = (pageNumber) => {
+    console.log('must change page', pageNumber);
+    this.setState({
+      pageNumber: pageNumber,
+      properties: null
+    });
+    this._loadProperties();
+  };
+
+  _renderPagination() {
+
+    console.log('render feature list ... ', this.props);
+
+    if (!this.props.showFeatureList) {
+      return null;
+    }
+
+    return (
+      <EuiPagination
+        pageCount={this.props.tooltipState.features.length}
+        activePage={this.state.pageNumber}
+        onPageClick={this._onPageChange}
+      />
+    );
+  }
+
   render() {
-    if (!this.state.properties) {
-      const loadingMsg = i18n.translate('xpack.maps.tooltip.loadingMsg', {
-        defaultMessage: 'Loading'
-      });
-      return (
-        <EuiTextAlign textAlign="center">
-          <EuiLoadingSpinner size="m" />
-          {loadingMsg}
-        </EuiTextAlign>
-      );
-    }
-
-    if (this.state.loadPropertiesErrorMsg) {
-      return (
-        <EuiCallOut
-          title={i18n.translate('xpack.maps.tooltip.unableToLoadContentTitle', {
-            defaultMessage: 'Unable to load tooltip content'
-          })}
-          color="danger"
-          iconType="alert"
-          size="s"
-        >
-          <p>
-            {this.state.loadPropertiesErrorMsg}
-          </p>
-        </EuiCallOut>
-      );
-    }
-
     return (
       <Fragment>
         {this._renderCloseButton()}
         {this._renderProperties()}
+        {this._renderPagination()}
       </Fragment>
     );
   }

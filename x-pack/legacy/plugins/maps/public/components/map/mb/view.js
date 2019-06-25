@@ -126,6 +126,15 @@ export class MBMapContainer extends React.Component {
     }
   }, 256);
 
+  _getIdsForFeatures(features) {
+    return features.map((feature) => {
+      const layer = this._getLayerByMbLayerId(feature.layer.id);
+      return {
+        id: feature.properties[FEATURE_ID_PROPERTY_NAME],
+        layerId: layer.getId()
+      };
+    });
+  }
 
   _lockTooltip =  (e) => {
 
@@ -145,10 +154,12 @@ export class MBMapContainer extends React.Component {
     const targetFeature = features[0];
     const layer = this._getLayerByMbLayerId(targetFeature.layer.id);
     const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
+
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.LOCKED,
       layerId: layer.getId(),
       featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
+      features: this._getIdsForFeatures(features),
       location: popupAnchorLocation
     });
   };
@@ -186,6 +197,7 @@ export class MBMapContainer extends React.Component {
       type: TOOLTIP_TYPE.HOVER,
       featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
       layerId: layer.getId(),
+      features: this._getIdsForFeatures(features),
       location: popupAnchorLocation
     });
 
@@ -391,6 +403,7 @@ export class MBMapContainer extends React.Component {
         closeTooltip={this._onTooltipClose}
         showFilterButtons={this.props.isFilterable && isLocked}
         showCloseButton={isLocked}
+        showFeatureList={isLocked}
       />
     ), this._tooltipContainer);
 
