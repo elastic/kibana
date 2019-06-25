@@ -21,6 +21,7 @@ interface Response {
 export function privilegesProvider(callWithRequest: callWithRequestType, xpackMainPlugin: any) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
   async function getPrivileges(): Promise<Response> {
+    // get the default privileges, forced to be false.
     let privileges = getDefaultPrivileges(false);
 
     const upgradeInProgress = await isUpgradeInProgress();
@@ -28,15 +29,24 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
 
     if (securityDisabled === true) {
       if (upgradeInProgress === true) {
+        // if security is disabled and an upgrade in is progress,
+        // force all "getting" privileges to be true
+        // leaving all "setting" privileges to be the default false
         setGettingPrivileges({}, privileges, true);
       } else {
+        // if no upgrade is in progress,
+        // get all privileges forced to true
         privileges = getDefaultPrivileges(true);
       }
     } else {
-      const resp = await callWithRequest('ml.privilegeCheck', { body: mlPrivileges });
-      setGettingPrivileges(resp.cluster, privileges);
+      // security enabled
+      // load all ml privileges for this user.
+      const { cluster } = await callWithRequest('ml.privilegeCheck', { body: mlPrivileges });
+      setGettingPrivileges(cluster, privileges);
       if (upgradeInProgress === false) {
-        setActionPrivileges(resp.cluster, privileges);
+        // if an upgrade is in progress, don't apply the "setting"
+        // privileges. leave them to be the default false.
+        setActionPrivileges(cluster, privileges);
       }
     }
     return { privileges, upgradeInProgress };

@@ -12,11 +12,11 @@ import { Privileges, getDefaultPrivileges } from '../../common/types/privileges'
 export function getPrivileges(): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     ml.checkMlPrivileges()
-      .then(resp => {
-        if (resp.upgradeInProgress === true) {
+      .then(({ privileges, upgradeInProgress }) => {
+        if (upgradeInProgress === true) {
           setUpgradeInProgress(true);
         }
-        resolve(resp.privileges);
+        resolve(privileges);
       })
       .catch(() => {
         reject(getDefaultPrivileges(false));

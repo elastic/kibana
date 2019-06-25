@@ -6,6 +6,7 @@
 
 import { callWithRequestProvider } from './__mocks__/call_with_request';
 import { privilegesProvider } from './check_privileges';
+import { mlPrivileges } from './privileges';
 
 const xpackMainPluginWithSecurity = {
   info: {
@@ -27,7 +28,13 @@ const xpackMainPluginWithOutSecurity = {
 
 describe('check_privileges', () => {
   describe('getPrivileges() - right number of privileges', () => {
-    test('privileges count', async done => {
+    test('es privileges count', async done => {
+      const count = mlPrivileges.cluster.length;
+      expect(count).toBe(35);
+      done();
+    });
+
+    test('kibana privileges count', async done => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
       const { privileges } = await getPrivileges();
