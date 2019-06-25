@@ -567,7 +567,7 @@ export function getUiSettingDefaults() {
       type: 'number',
       description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
         defaultMessage:
-          'Heatmap visualization\'s maximum number of buckets a single datasource can return.'
+          'The maximum number of buckets a single datasource can return.'
       }),
       category: ['visualization'],
     },
