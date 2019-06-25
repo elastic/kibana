@@ -28,8 +28,8 @@ export class EMSFileSource extends AbstractVectorSource {
   static createDescriptor({ id, tooltipProperties = [] }) {
     return {
       type: EMSFileSource.type,
-      id: id,
-      tooltipProperties: tooltipProperties
+      id,
+      tooltipProperties
     };
   }
 
@@ -130,8 +130,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   canFormatFeatureProperties() {
-    //tooltipProperties may be empty, as this was not introduced until 7.2
-    return this._descriptor.tooltipProperties && this._descriptor.tooltipProperties.length > 0;
+    return this._descriptor.tooltipProperties.length;
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
