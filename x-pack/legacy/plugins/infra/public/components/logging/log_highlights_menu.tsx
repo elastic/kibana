@@ -32,7 +32,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({ onChange }
       setHighlightTerm(value);
       onChange([value]);
     },
-    [setHighlightTerm]
+    [setHighlightTerm, onChange]
   );
   const button = (
     <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
