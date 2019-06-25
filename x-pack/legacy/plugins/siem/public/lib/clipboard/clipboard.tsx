@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Toast, EuiButtonIcon } from '@elastic/eui';
+import { EuiGlobalToastListToast, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import * as React from 'react';
 import uuid from 'uuid';
@@ -20,7 +20,7 @@ interface GetSuccessToastParams {
   titleSummary?: string;
 }
 
-const getSuccessToast = ({ titleSummary }: GetSuccessToastParams): Toast => ({
+const getSuccessToast = ({ titleSummary }: GetSuccessToastParams): EuiGlobalToastListToast => ({
   id: `copy-success-${uuid.v4()}`,
   color: 'success',
   iconType: 'copyClipboard',

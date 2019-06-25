@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, Toast, EuiButton } from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast, EuiButton } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { createContext, Dispatch, useReducer, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { ModalAllErrors } from './modal_all_errors';
 import * as i18n from './translations';
 
-export interface AppToast extends Toast {
+export interface AppToast extends EuiGlobalToastListToast {
   errors?: string[];
 }
 

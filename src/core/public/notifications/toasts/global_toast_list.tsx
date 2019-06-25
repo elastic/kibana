@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import { EuiGlobalToastList, Toast } from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
 
 import React from 'react';
 import * as Rx from 'rxjs';
 
 interface Props {
-  toasts$: Rx.Observable<Toast[]>;
-  dismissToast: (t: Toast) => void;
+  toasts$: Rx.Observable<EuiGlobalToastListToast[]>;
+  dismissToast: (t: EuiGlobalToastListToast) => void;
 }
 
 interface State {
-  toasts: Toast[];
+  toasts: EuiGlobalToastListToast[];
 }
 
 export class GlobalToastList extends React.Component<Props, State> {
