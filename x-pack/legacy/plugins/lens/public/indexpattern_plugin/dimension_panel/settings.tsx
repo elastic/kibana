@@ -160,6 +160,7 @@ export function Settings(props: SettingsProps) {
             <EuiFlexItem grow={true} className="lnsConfigPanel__summaryPopoverRight">
               {invalidOperationType && selectedColumn && (
                 <EuiCallOut
+                  data-test-subj="indexPattern-invalid-operation"
                   title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
                     defaultMessage: 'Operation not applicable to field',
                   })}
@@ -180,6 +181,7 @@ export function Settings(props: SettingsProps) {
               {!invalidOperationType && selectedColumn && (
                 <EuiFormRow label="Label">
                   <EuiFieldText
+                    data-test-subj="indexPattern-label-edit"
                     value={selectedColumn.label}
                     onChange={e => {
                       setState(
