@@ -17,15 +17,28 @@
  * under the License.
  */
 
-const mockRegistry = {
-  register: () => {},
+import sinon from 'sinon';
+
+const resetRegistry = (registry: any) => {
+  registry.wrapper = sinon.stub();
+  registry.register = sinon.stub();
+  registry.toJS = sinon.stub();
+  registry.toArray = sinon.stub();
+  registry.get = sinon.stub();
+  registry.getProp = sinon.stub();
+  registry.reset = sinon.stub();
 };
 
-export const functionsRegistry = mockRegistry;
-export const renderersRegistry = mockRegistry;
-export const typesRegistry = mockRegistry;
+export const functionsRegistry = {};
+export const renderersRegistry = {};
+export const typesRegistry = {};
 export const registries = {
   browserFunctions: functionsRegistry,
   renderers: renderersRegistry,
   types: typesRegistry,
 };
+
+const resetAll = () => Object.values(registries).forEach(resetRegistry);
+
+resetAll();
+afterEach(resetAll);
