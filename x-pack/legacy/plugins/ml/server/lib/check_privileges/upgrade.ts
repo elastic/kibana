@@ -5,8 +5,7 @@
  */
 
 import { mlLog } from '../../client/log';
-
-export type callWithRequestType = (action: string, params?: any) => Promise<any>;
+import { callWithRequestType } from '../../../common/types/kibana';
 
 export function upgradeCheckProvider(callWithRequest: callWithRequestType) {
   async function isUpgradeInProgress(): Promise<boolean> {

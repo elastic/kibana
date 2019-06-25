@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type callWithRequestType = (action: string, params?: any) => Promise<any>;
-
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
+import { callWithRequestType } from '../../../common/types/kibana';
 import { isSecurityDisabled } from '../../lib/security_utils';
 import { upgradeCheckProvider } from './upgrade';
 
