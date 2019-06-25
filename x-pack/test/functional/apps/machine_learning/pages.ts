@@ -11,8 +11,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('page navigation', () => {
+  describe('page navigation', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
