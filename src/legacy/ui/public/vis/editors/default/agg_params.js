@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { DefaultEditorAggParams } from './components/default_editor_agg_params';
@@ -27,14 +28,13 @@ uiModules
     ['agg', { watchDepth: 'reference' }],
     ['aggParams', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
-    ['responseValueAggs', { watchDepth: 'collection' }],
+    ['responseValueAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
     ['state', { watchDepth: 'reference' }],
     ['vis', { watchDepth: 'reference' }],
     ['onAggTypeChange', { watchDepth: 'reference' }],
     ['onAggParamsChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    'id',
     'aggError',
     'aggIndex',
     'groupName',

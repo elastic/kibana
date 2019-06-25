@@ -37,6 +37,7 @@ function MetricAggParamEditor({
   setValue,
   setValidity,
   setTouched,
+  subAggParams,
   responseValueAggs,
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.metricLabel', {
@@ -89,7 +90,11 @@ function MetricAggParamEditor({
       }
 
       if (canUseAggregation) {
-        lastBucket.params.min_doc_count = lastBucket.type.name === 'histogram' ? 1 : 0;
+        subAggParams.onAggParamsChange(
+          lastBucket,
+          'min_doc_count',
+          lastBucket.type.name === 'histogram' ? 1 : 0
+        );
       } else {
         if (lastBucket) {
           lastBucket.error = i18n.translate(

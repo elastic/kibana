@@ -42,12 +42,13 @@ function OrderAggParamEditor({
     () => {
       if (responseValueAggs) {
         const orderBy = agg.params.orderBy;
-        if (orderBy && orderBy === 'custom') {
+
+        // we aren't creating a custom aggConfig
+        if (!orderBy || orderBy !== 'custom') {
+          setValue(null);
+        } else {
           const paramDef = agg.type.params.byName.orderAgg;
           setValue(value || paramDef.makeOrderAgg(agg));
-        } else {
-          // we aren't creating a custom aggConfig
-          setValue(null);
         }
       }
     },
