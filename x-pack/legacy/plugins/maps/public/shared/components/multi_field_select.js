@@ -23,9 +23,6 @@ export function MultiFieldSelect({
   placeholder,
   ...rest
 }) {
-  if (!fields) {
-    return null;
-  }
 
   const onSelection = (selectedOptions) => {
     const fieldNamesArray = selectedOptions.map(({ value }) => {
@@ -35,12 +32,12 @@ export function MultiFieldSelect({
   };
 
   let selectedOptions;
-  if (value && fields) {
+  if (value) {
     selectedOptions = value.map(fieldName => {
       const matchingField = fields.find(field => {
         return field.name === fieldName;
       });
-      const labelValue = matchingField ? matchingField.label : fieldName;
+      const labelValue = matchingField && matchingField.label ? matchingField.label : fieldName;
       return { value: fieldName, label: labelValue };
     });
   } else {
