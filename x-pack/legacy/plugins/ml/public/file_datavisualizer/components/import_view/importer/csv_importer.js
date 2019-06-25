@@ -64,7 +64,9 @@ function formatToJson(data, columnNames) {
     const line = {};
     for (let c = 0; c < columnNames.length; c++) {
       const col = columnNames[c];
-      line[col] = data[i][c];
+      if (data[i][c] !== undefined && data[i][c] !== '') {
+        line[col] = data[i][c];
+      }
     }
     docArray.push(line);
   }

@@ -5,6 +5,7 @@
  */
 
 import { mapValues } from 'lodash';
+import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 export interface ShortcutMap {
   osx: string[];
@@ -86,6 +87,26 @@ export const keymap: KeyMap = {
     SEND_TO_BACK: getShortcuts('down', { modifiers: ['ctrl', 'shift'], help: 'Send to back' }),
     GROUP: getShortcuts('g', { help: 'Group' }),
     UNGROUP: getShortcuts('u', { help: 'Ungroup' }),
+    SHIFT_UP: getShortcuts('up', { help: `Shift up by ${ELEMENT_SHIFT_OFFSET}px` }),
+    SHIFT_DOWN: getShortcuts('down', { help: `Shift down by ${ELEMENT_SHIFT_OFFSET}px` }),
+    SHIFT_LEFT: getShortcuts('left', { help: `Shift left by ${ELEMENT_SHIFT_OFFSET}px` }),
+    SHIFT_RIGHT: getShortcuts('right', { help: `Shift right by ${ELEMENT_SHIFT_OFFSET}px` }),
+    NUDGE_UP: getShortcuts('up', {
+      modifiers: ['shift'],
+      help: `Shift up by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
+    NUDGE_DOWN: getShortcuts('down', {
+      modifiers: ['shift'],
+      help: `Shift down by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
+    NUDGE_LEFT: getShortcuts('left', {
+      modifiers: ['shift'],
+      help: `Shift left by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
+    NUDGE_RIGHT: getShortcuts('right', {
+      modifiers: ['shift'],
+      help: `Shift right by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
   },
   EXPRESSION: {
     displayName: 'Expression controls',
