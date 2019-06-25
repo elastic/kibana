@@ -16,19 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
+import { JsonCodeEditor } from './json_code_editor';
 
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
-import { JsonCode } from './json_code';
-
-DocViewsRegistryProvider.register(function (reactDirective) {
-  const reactDir = reactDirective(JsonCode, ['hit']);
-  //required, else the react component won't get any of the assigned scope props,
-  reactDir.scope = {
-    hit: '=',
-  };
-  return {
-    title: 'JSON',
-    order: 20,
-    directive: reactDir,
-  };
+it('returns the `JsonCodeEditor` component', () => {
+  const hit = { _index: 'test', _source: { test: 123 } };
+  expect(shallow(<JsonCodeEditor hit={hit} />)).toMatchSnapshot();
 });

@@ -17,33 +17,22 @@
  * under the License.
  */
 // @ts-ignore
-import { EuiCodeEditor } from '@elastic/eui';
-import React from 'react';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { i18n } from '@kbn/i18n';
+import { JsonCodeEditor } from './json_code_editor';
 
-export interface JsonCodeProps {
-  hit: any;
-}
-
-export function JsonCode(props: JsonCodeProps) {
-  return (
-    <EuiCodeEditor
-      id="json-ace"
-      value={JSON.stringify(props.hit, null, 2)}
-      mode="json"
-      isReadOnly
-      aria-label="Read only json view of elasticsearch document hit"
-      width="100%"
-      advanced={{
-        highlightActiveLine: false,
-      }}
-      editorProps={{
-        $blockScrolling: Infinity,
-      }}
-      setOptions={{
-        showPrintMargin: false,
-        minLines: 25,
-        maxLines: Infinity,
-      }}
-    />
-  );
-}
+DocViewsRegistryProvider.register(function(reactDirective: any) {
+  const reactDir = reactDirective(JsonCodeEditor, ['hit']);
+  // required to assign $scope props to the react component
+  // via render-directive in doc_viewer.js
+  reactDir.scope = {
+    hit: '=',
+  };
+  return {
+    title: i18n.translate('kbnDocViews.json.jsonTitle', {
+      defaultMessage: 'JSON',
+    }),
+    order: 20,
+    directive: reactDir,
+  };
+});
