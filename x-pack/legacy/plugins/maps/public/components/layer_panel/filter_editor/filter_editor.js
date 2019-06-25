@@ -23,7 +23,7 @@ import { indexPatternService } from '../../../kibana_services';
 import { Storage } from 'ui/storage';
 
 import { data } from 'plugins/data/setup';
-const { QueryBar } = data.query.ui;
+const { SearchBar } = data.search.ui;
 
 const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
@@ -79,7 +79,9 @@ export class FilterEditor extends Component {
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
   }
-
+  _onFiltersUpdated = () => {
+    return;
+  }
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
 
@@ -92,12 +94,17 @@ export class FilterEditor extends Component {
         anchorPosition="leftCenter"
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
-          <QueryBar
+          <SearchBar
             query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-            onSubmit={this._onQueryChange}
             appName="maps"
-            showDatePicker={false}
+            screenTitle="maps"
+            onQuerySubmit={this._onQueryChange}
             indexPatterns={this.state.indexPatterns}
+            showDatePicker={false}
+            filters={[]}
+            onFiltersUpdated={this._onFiltersUpdated}
+            showFilterBar={false}
+            showQueryBar={true}
             store={localStorage}
             customSubmitButton={
               <EuiButton

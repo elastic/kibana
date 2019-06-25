@@ -75,6 +75,7 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSaved?: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
+  customSubmitButton?: any;
 }
 
 interface State {
@@ -457,6 +458,9 @@ class SearchBarUI extends Component<Props, State> {
             onChange={this.onQueryBarChange}
             onLoadSavedQuery={this.onLoadSavedQuery}
             isDirty={this.isDirty()}
+            customSubmitButton={
+              this.props.customSubmitButton ? this.props.customSubmitButton : undefined
+            }
           />
         ) : (
           ''
