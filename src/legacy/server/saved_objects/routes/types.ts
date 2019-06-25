@@ -18,7 +18,7 @@
  */
 
 import Hapi from 'hapi';
-import { SavedObjectsClientContract } from '../';
+import { SavedObjectsClientContract } from 'src/core/server';
 
 export interface SavedObjectReference {
   name: string;
