@@ -66,13 +66,8 @@ interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   indexPattern: IndexPattern;
   responseValueAggs: AggConfig[] | null;
   state: VisState;
-  callbacks: {
-    setTouched: (isTouched: boolean) => void;
-    setValidity: (isValid: boolean) => void;
-    onAggParamsChange: (agg: AggParams, paramName: string, value: any) => void;
-    onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-    onAggErrorChanged: (agg: AggConfig, error?: string) => void;
-  };
+  setTouched: (isTouched: boolean) => void;
+  setValidity: (isValid: boolean) => void;
 }
 
 function DefaultEditorAggParams({
@@ -86,15 +81,12 @@ function DefaultEditorAggParams({
   responseValueAggs,
   state = {} as VisState,
   vis,
-  callbacks,
+  onAggParamsChange,
+  onAggTypeChange,
+  setTouched,
+  setValidity,
+  onAggErrorChanged,
 }: DefaultEditorAggParamsProps) {
-  const {
-    onAggParamsChange,
-    onAggTypeChange,
-    setTouched,
-    setValidity,
-    onAggErrorChanged,
-  } = callbacks;
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
   const errors = getError(agg, aggIsTooLow);
 

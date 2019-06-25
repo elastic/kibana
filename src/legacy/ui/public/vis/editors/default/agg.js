@@ -130,44 +130,36 @@ uiModules
           $scope.formIsTouched = value;
         }, true);
 
-        function onAggTypeChange(agg, value) {
+        $scope.onAggTypeChange = (agg, value) => {
           if (agg.type !== value) {
             agg.type = value;
           }
-        }
+        };
 
-        function onAggParamsChange(params, paramName, value) {
+        $scope.onAggParamsChange = (params, paramName, value) => {
           if (params[paramName] !== value) {
             params[paramName] = value;
           }
-        }
+        };
 
-        function setValidity(isValid) {
+        $scope.setValidity = (isValid) => {
           ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
-        }
+        };
 
-        function setTouched(isTouched) {
+        $scope.setTouched = (isTouched) => {
           if (isTouched) {
             ngModelCtrl.$setTouched();
           } else {
             ngModelCtrl.$setUntouched();
           }
-        }
+        };
 
-        function onAggErrorChanged(agg, error) {
+        $scope.onAggErrorChanged = (agg, error) => {
           if (error) {
             agg.error = error;
           } else {
             delete agg.error;
           }
-        }
-
-        $scope.callbacks = {
-          onAggTypeChange,
-          onAggParamsChange,
-          onAggErrorChanged,
-          setValidity,
-          setTouched
         };
       }
     };

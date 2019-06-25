@@ -102,9 +102,9 @@
     set-value="callbacks.onAggParamsChange"
   />
 
-  <!-- should be rendered after link function run, i.e. 'callbacks' is defined  -->
+  <!-- should be rendered after link function run, i.e. 'onAggTypeChange' is defined  -->
   <vis-editor-agg-params
-    ng-if="callbacks"
+    ng-if="onAggTypeChange"
     ng-show="editorOpen"
     agg="agg"
     agg-index="$index"
@@ -118,7 +118,11 @@
     response-value-aggs="responseValueAggs"
     state="state"
     vis="vis"
-    callbacks="callbacks">
+    on-agg-type-change="onAggTypeChange"
+    on-agg-params-change="onAggParamsChange"
+    set-touched="setTouched"
+    set-validity="setValidity"
+    on-agg-error-changed="onAggErrorChanged">
   </vis-editor-agg-params>
 </div>
 

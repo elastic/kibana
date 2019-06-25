@@ -31,7 +31,11 @@ uiModules
     ['responseValueAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
     ['state', { watchDepth: 'reference' }],
     ['vis', { watchDepth: 'reference' }],
-    ['callbacks', { watchDepth: 'reference' }],
+    ['onAggErrorChanged', { watchDepth: 'reference' }],
+    ['onAggTypeChange', { watchDepth: 'reference' }],
+    ['onAggParamsChange', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
     'aggError',
     'aggIndex',
     'groupName',

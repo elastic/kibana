@@ -62,18 +62,6 @@ function OrderAggParamEditor({
     return null;
   }
 
-  const callbacks = {
-    setValidity,
-    setTouched,
-    onAggTypeChange: subAggParams.onAggTypeChange,
-    onAggErrorChanged: subAggParams.onAggErrorChanged,
-    onAggParamsChange: (...rest: [AggParams, string, any]) => {
-      // to force update when sub-agg params are changed
-      setInnerState(!innerState);
-      subAggParams.onAggParamsChange(...rest);
-    },
-  };
-
   return (
     <DefaultEditorAggParams
       agg={value}
@@ -84,8 +72,15 @@ function OrderAggParamEditor({
       responseValueAggs={responseValueAggs}
       state={state}
       vis={subAggParams.vis}
-      callbacks={callbacks}
-      {...callbacks} // because DefaultEditorAggParams is also AggParamEditorProps in this case
+      onAggParamsChange={(...rest) => {
+        // to force update when sub-agg params are changed
+        setInnerState(!state);
+        subAggParams.onAggParamsChange(...rest);
+      }}
+      onAggTypeChange={subAggParams.onAggTypeChange}
+      onAggErrorChanged={subAggParams.onAggErrorChanged}
+      setValidity={setValidity}
+      setTouched={setTouched}
     />
   );
 }
