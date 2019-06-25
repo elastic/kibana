@@ -17,30 +17,13 @@
  * under the License.
  */
 
-import dateMath from '@elastic/datemath';
-import { uiModules } from '../../modules';
-
-uiModules.get('kibana').directive('validateDateMath', function () {
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    scope: {
-      'ngModel': '='
-    },
-    link: function ($scope, elem, attr, ngModel) {
-      ngModel.$parsers.unshift(validateDateMath);
-      ngModel.$formatters.unshift(validateDateMath);
-
-      function validateDateMath(input) {
-        if (input == null || input === '') {
-          ngModel.$setValidity('validDateMath', true);
-          return null;
-        }
-
-        const moment = dateMath.parse(input);
-        ngModel.$setValidity('validDateMath', moment != null && moment.isValid());
-        return input;
-      }
-    }
-  };
-});
+/** @public static code */
+export { dateHistogramInterval } from './date_histogram_interval';
+/** @public static code */
+export {
+  isValidEsInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  parseEsInterval,
+  ParsedInterval,
+} from './parse_es_interval';

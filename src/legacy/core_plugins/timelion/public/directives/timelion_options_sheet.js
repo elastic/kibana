@@ -17,6 +17,14 @@
  * under the License.
  */
 
-export { parseEsInterval, ParsedInterval } from './parse_es_interval';
-export { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
-export { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
+import { uiModules } from 'ui/modules';
+import template from 'plugins/timelion/partials/sheet_options.html';
+const app = uiModules.get('apps/timelion', []);
+
+app.directive('timelionOptions', function () {
+  return {
+    replace: true,
+    restrict: 'E',
+    template,
+  };
+});
