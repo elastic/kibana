@@ -18,7 +18,6 @@
  */
 
 export * from './get_es_search_config';
-export * from './get_index_pattern';
-export * from './register_default_search_strategy';
+export * from './default_search_strategy';
 export * from './search';
-export * from './search_strategy_registry';
+export * from './search_strategies';

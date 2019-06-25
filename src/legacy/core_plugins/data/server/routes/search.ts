@@ -18,11 +18,10 @@
  */
 
 import 'abortcontroller-polyfill';
-import { RequestQuery } from 'hapi';
-import { Legacy } from 'kibana';
+import { Server, RequestQuery } from 'hapi';
 import { search } from '../lib';
 
-export function registerSearchApi(server: Legacy.Server): void {
+export function registerSearchApi(server: Server): void {
   server.route({
     path: '/api/search/{index}',
     method: 'POST',

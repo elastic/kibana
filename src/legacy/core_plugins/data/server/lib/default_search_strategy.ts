@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { Request } from 'hapi';
+import { Server, Request } from 'hapi';
 import { SearchOptions } from '../../common';
+import { registerSearchStrategy } from './search_strategies';
+import { getEsSearchConfig } from './get_es_search_config';
 
-export type SearchStrategy = (
-  request: Request,
-  index: string,
-  body: any,
-  options?: SearchOptions
-) => Promise<any>;
-
-const searchStrategyRegistry: Map<string, SearchStrategy> = new Map<string, SearchStrategy>();
-
-export function registerSearchStrategy(name: string, searchStrategy: SearchStrategy) {
-  searchStrategyRegistry.set(name, searchStrategy);
-}
-
-export function getSearchStrategy(name: string = 'default') {
-  return searchStrategyRegistry.get(name);
+export function registerDefaultSearchStrategy(server: Server) {
+  registerSearchStrategy('default', async function defaultSearchStrategy(
+    request: Request,
+    index: string,
+    body: any,
+    { signal, onProgress = () => {} }: SearchOptions = {}
+  ) {
+    const config = await getEsSearchConfig(server, request);
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+    const promise = callWithRequest(request, 'search', { index, body, ...config }, { signal });
+    return promise.then(response => {
+      onProgress(response._shards);
+      return response;
+    }, server.plugins.kibana.handleEsError);
+  });
 }

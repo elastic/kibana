@@ -19,7 +19,7 @@
 
 import { Request } from 'hapi';
 import { SearchOptions } from '../../common';
-import { getSearchStrategy } from './search_strategy_registry';
+import { searchStrategies } from './search_strategies';
 
 /**
  * The server-side API for making requests to Elasticsearch using raw Elasticsearch query DSL.
@@ -43,9 +43,10 @@ export async function search(
   body: any,
   options: SearchOptions = {}
 ) {
-  const searchStrategy = await getSearchStrategy(options.strategy);
+  const { strategy = 'default' } = options;
+  const searchStrategy = searchStrategies.get(strategy);
   if (typeof searchStrategy !== 'function') {
-    throw new Error(`No search strategy registered with name ${options.strategy}`);
+    throw new Error(`No search strategy registered with name "${strategy}"`);
   }
   return searchStrategy(request, index, body, options);
 }

@@ -18,24 +18,17 @@
  */
 
 import { Request } from 'hapi';
-import { Legacy } from 'kibana';
 import { SearchOptions } from '../../common';
-import { registerSearchStrategy } from './search_strategy_registry';
-import { getEsSearchConfig } from './get_es_search_config';
 
-export function registerDefaultSearchStrategy(server: Legacy.Server) {
-  registerSearchStrategy('default', async function defaultSearchStrategy(
-    request: Request,
-    index: string,
-    body: any,
-    { signal, onProgress = () => {} }: SearchOptions = {}
-  ) {
-    const config = await getEsSearchConfig(server, request);
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-    const promise = callWithRequest(request, 'search', { index, body, ...config }, { signal });
-    return promise.then(response => {
-      onProgress(response._shards);
-      return response;
-    }, server.plugins.kibana.handleEsError);
-  });
+export type SearchStrategy = (
+  request: Request,
+  index: string,
+  body: any,
+  options?: SearchOptions
+) => Promise<any>;
+
+export const searchStrategies: Map<string, SearchStrategy> = new Map<string, SearchStrategy>();
+
+export function registerSearchStrategy(name: string, strategy: SearchStrategy) {
+  searchStrategies.set(name, strategy);
 }
