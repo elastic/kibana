@@ -67,13 +67,16 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async checkTimeSeriesChartIsPresent() {
-      await testSubjects.existOrFail('timeseriesChart');
+      const isPresent = await find.existsByCssSelector('.tvbVisTimeSeries');
+      if (!isPresent) {
+        throw new Error(`TimeSeries chart is not loaded`);
+      }
     }
 
     public async checkTimeSeriesLegendIsPresent() {
-      const isPresent = await find.existsByCssSelector('.tvbLegend');
+      const isPresent = await find.existsByCssSelector('.echLegend');
       if (!isPresent) {
-        throw new Error(`TimeSeries legend is not loaded`);
+        throw new Error(`TimeSeries chart is not loaded`);
       }
     }
 
@@ -291,9 +294,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await el.type(value);
     }
 
-    public async getRhythmChartLegendValue() {
+    public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = await find.byCssSelector('.elasticChartsLegendListItem__displayValue');
+      const metricValue = (await find.allByCssSelector(
+        `.echLegendItem .echLegendItem__displayValue`
+      ))[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
