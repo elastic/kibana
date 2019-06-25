@@ -12,7 +12,7 @@ import { ServerOptions } from '../server_options';
 import { LanguageServerDefinition } from './language_servers';
 
 export class InstallManager {
-  constructor(readonly server: Server, readonly serverOptions: ServerOptions) {}
+  constructor(public readonly server: Server, readonly serverOptions: ServerOptions) {}
 
   public status(def: LanguageServerDefinition): LanguageServerStatus {
     if (def.installationType === InstallationType.Embed) {

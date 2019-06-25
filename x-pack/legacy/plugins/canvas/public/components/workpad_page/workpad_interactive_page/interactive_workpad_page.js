@@ -47,6 +47,7 @@ export class InteractiveWorkpadPage extends PureComponent {
       canvasOrigin,
       saveCanvasOrigin,
       commit,
+      setMultiplePositions,
     } = this.props;
 
     let shortcuts = null;
@@ -59,6 +60,7 @@ export class InteractiveWorkpadPage extends PureComponent {
       selectedNodes,
       selectToplevelNodes,
       commit,
+      setMultiplePositions,
     };
     shortcuts = <WorkpadShortcuts {...shortcutProps} />;
 
