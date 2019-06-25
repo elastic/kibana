@@ -12,19 +12,25 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 
+
+const sortByLabel  = (a, b) => {
+  if (a.label < b.label) return -1;
+  if (a.label > b.label) return 1;
+  return 0;
+};
+
 // Creates grouped options by grouping fields by field type
 export const getGroupedFieldOptions = (fields, filterField) => {
   if (!fields) {
-    return undefined;
+    return;
   }
 
   const fieldsByTypeMap = new Map();
-  const groupedFieldOptions = [];
 
   fields
     .filter(filterField)
     .forEach(field => {
-      const fieldLabel = typeof field.label === 'string' ? field.label : field.name;
+      const fieldLabel = 'label' in field ? field.label : field.name;
       if (fieldsByTypeMap.has(field.type)) {
         const fieldsList = fieldsByTypeMap.get(field.type);
         fieldsList.push({ value: field.name, label: fieldLabel });
@@ -34,20 +40,23 @@ export const getGroupedFieldOptions = (fields, filterField) => {
       }
     });
 
+
+  const groupedFieldOptions = [];
   fieldsByTypeMap.forEach((fieldsList, fieldType) => {
+
+    const sortedOptions = fieldsList
+      .sort(sortByLabel)
+      .map(({ value, label }) => {
+        return { value: value, label: label };
+      });
+
     groupedFieldOptions.push({
       label: fieldType,
-      options: fieldsList.sort().map(({ value, label }) => {
-        return { value: value, label: label };
-      })
+      options: sortedOptions
     });
   });
 
-  groupedFieldOptions.sort((a, b) => {
-    if (a.label < b.label) return -1;
-    if (a.label > b.label) return 1;
-    return 0;
-  });
+  groupedFieldOptions.sort(sortByLabel);
 
   return groupedFieldOptions;
 };

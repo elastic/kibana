@@ -34,11 +34,18 @@ export function MultiFieldSelect({
     onChange(fieldNamesArray);
   };
 
-  const selectedOptions = value
-    ? value.map(fieldName => {
-      return { value: fieldName, label: fieldName };
-    })
-    : [];
+  let selectedOptions;
+  if (value && fields) {
+    selectedOptions = value.map(fieldName => {
+      const matchingField = fields.find(field => {
+        return field.name === fieldName;
+      });
+      const labelValue = matchingField ? matchingField.label : fieldName;
+      return { value: fieldName, label: labelValue };
+    });
+  } else {
+    selectedOptions = [];
+  }
 
   return (
     <EuiComboBox
