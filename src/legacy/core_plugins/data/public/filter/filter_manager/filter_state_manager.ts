@@ -62,21 +62,19 @@ export class FilterStateManager {
       const stateUndefined = !appState || !this.globalState;
       if (stateUndefined) return;
 
-      const filterStateUndefined = !appState.filters || !this.globalState.filters;
-      if (filterStateUndefined) return;
+      const globalFilters = this.globalState.filters || [];
+      const appFilters = appState.filters || [];
 
       const globalFilterChanged = !(
-        this.prevGlobalFilters && _.isEqual(this.prevGlobalFilters, this.globalState.filters)
+        this.prevGlobalFilters && _.isEqual(this.prevGlobalFilters, globalFilters)
       );
-      const appFilterChanged = !(
-        this.prevAppFilters && _.isEqual(this.prevAppFilters, appState.filters)
-      );
+      const appFilterChanged = !(this.prevAppFilters && _.isEqual(this.prevAppFilters, appFilters));
       const filterStateChanged = globalFilterChanged || appFilterChanged;
 
       if (!filterStateChanged) return;
 
-      const newGlobalFilters = _.cloneDeep(this.globalState.filters);
-      const newAppFilters = _.cloneDeep(appState.filters);
+      const newGlobalFilters = _.cloneDeep(globalFilters);
+      const newAppFilters = _.cloneDeep(appFilters);
       FilterManager.setFiltersStore(newAppFilters, FilterStateStore.APP_STATE);
       FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE);
 
