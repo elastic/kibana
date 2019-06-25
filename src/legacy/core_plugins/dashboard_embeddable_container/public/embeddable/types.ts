@@ -16,40 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export {
-  IEmbeddable,
-  EmbeddableFactory,
-  EmbeddableInstanceConfiguration,
-  Embeddable,
-  embeddableFactories,
-  OutputSpec,
-  ErrorEmbeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  isErrorEmbeddable,
-} from './embeddables';
+import { PanelState, EmbeddableInput } from '../../../embeddable_api/public/index';
+export type PanelId = string;
+export type SavedObjectId = string;
 
-export { ViewMode, Trigger, EmbeddablePlugin } from './types';
+export interface GridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
 
-export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
-
-export {
-  APPLY_FILTER_TRIGGER,
-  triggerRegistry,
-  executeTriggerActions,
-  CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from './triggers';
-
-export {
-  Container,
-  ContainerInput,
-  ContainerOutput,
-  PanelState,
-  IContainer,
-  EmbeddableChildPanel,
-} from './containers';
-
-export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';
-
-export { embeddablePlugin } from './plugin';
+export interface DashboardPanelState<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>
+  extends PanelState<TEmbeddableInput> {
+  readonly gridData: GridData;
+}

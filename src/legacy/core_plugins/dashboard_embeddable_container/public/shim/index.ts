@@ -16,40 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export {
-  IEmbeddable,
-  EmbeddableFactory,
-  EmbeddableInstanceConfiguration,
-  Embeddable,
-  embeddableFactories,
-  OutputSpec,
-  ErrorEmbeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  isErrorEmbeddable,
-} from './embeddables';
 
-export { ViewMode, Trigger, EmbeddablePlugin } from './types';
+import { PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { embeddablePlugin } from '../../../embeddable_api/public';
+import { Plugin } from './plugin';
 
-export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
+export function plugin(initializerContext: PluginInitializerContext) {
+  const dashboardContainerPlugin = new Plugin(initializerContext);
 
-export {
-  APPLY_FILTER_TRIGGER,
-  triggerRegistry,
-  executeTriggerActions,
-  CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from './triggers';
+  dashboardContainerPlugin.setup(npSetup.core, {
+    embeddable: embeddablePlugin,
+  });
 
-export {
-  Container,
-  ContainerInput,
-  ContainerOutput,
-  PanelState,
-  IContainer,
-  EmbeddableChildPanel,
-} from './containers';
+  dashboardContainerPlugin.start(npStart.core, {
+    embeddable: embeddablePlugin,
+  });
+}
 
-export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';
-
-export { embeddablePlugin } from './plugin';
+plugin({} as any);
