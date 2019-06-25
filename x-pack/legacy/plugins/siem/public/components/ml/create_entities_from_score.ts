@@ -6,17 +6,25 @@
 
 import { Anomaly } from './types';
 
+export const createEntityFromRecord = (entity: Record<string, string>) =>
+  createEntity(Object.keys(entity)[0], Object.values(entity)[0]);
+
+export const createEntity = (entityName: string, entityValue: string) =>
+  `${entityName}:'${entityValue}'`;
+
 export const createEntitiesFromScore = (score: Anomaly): string => {
   const influencers = score.influencers.reduce((accum, item, index) => {
     if (index === 0) {
-      return `${Object.keys(item)[0]}:'${Object.values(item)[0]}'`;
+      return createEntityFromRecord(item);
     } else {
-      return `${accum},${Object.keys(item)[0]}:'${Object.values(item)[0]}'`;
+      return `${accum},${createEntityFromRecord(item)}`;
     }
   }, '');
 
-  if (!influencers.includes(score.entityName)) {
-    return `${influencers},${score.entityName}:'${score.entityValue}'`;
+  if (influencers.length === 0) {
+    return createEntity(score.entityName, score.entityValue);
+  } else if (!influencers.includes(score.entityName)) {
+    return `${influencers},${createEntity(score.entityName, score.entityValue)}`;
   } else {
     return influencers;
   }

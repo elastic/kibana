@@ -7,13 +7,13 @@
 import moment from 'moment';
 import { Anomaly } from './types';
 
-interface Return {
+export interface FromTo {
   from: number;
   to: number;
 }
 
-export const scoreIntervalToDateTime = (score: Anomaly, interval: string): Return => {
-  if (interval === 'minute' || interval === 'second' || interval === 'hour') {
+export const scoreIntervalToDateTime = (score: Anomaly, interval: string): FromTo => {
+  if (interval === 'second' || interval === 'minute' || interval === 'hour') {
     return {
       from: moment(score.time)
         .subtract(1, 'hour')

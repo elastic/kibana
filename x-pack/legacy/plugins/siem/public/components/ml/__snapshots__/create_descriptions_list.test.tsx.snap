@@ -17,7 +17,7 @@ exports[`create_descriptions_list renders correctly against snapshot 1`] = `
       size="m"
     />
     <Styled(EuiText)>
-      16
+      17
     </Styled(EuiText)>
   </EuiDescriptionListDescription>
   <EuiDescriptionListTitle

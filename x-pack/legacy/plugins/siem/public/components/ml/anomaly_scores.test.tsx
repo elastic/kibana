@@ -18,7 +18,7 @@ const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const narrowDateRange = jest.fn();
 
 describe('anomaly_scores', () => {
-  let anomalies: Anomalies = mockAnomalies;
+  let anomalies: Anomalies = cloneDeep(mockAnomalies);
 
   beforeEach(() => {
     anomalies = cloneDeep(mockAnomalies);

@@ -11,7 +11,7 @@ export const getTopSeverityJobs = (anomalies: Anomaly[]): Anomaly[] => {
   const reduced = anomalies.reduce<Record<string, Anomaly>>((accum, item) => {
     const jobId = item.jobId;
     const severity = item.severity;
-    if (accum[jobId] == null || (accum[jobId] != null && accum[jobId].severity < severity)) {
+    if (accum[jobId] == null || accum[jobId].severity < severity) {
       accum[jobId] = item;
     }
     return accum;
