@@ -21,7 +21,7 @@ pipeline {
     // }
     stage('Setup and Build OSS') {
       agent { label 'linux || immutable' } // Not on the master lightweight executor:   
-      options { skipDefaultCheckout() }
+      // options { skipDefaultCheckout() }
       steps {
         // deleteDir()
         // unstash 'source'
