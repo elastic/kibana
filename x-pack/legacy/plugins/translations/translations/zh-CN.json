@@ -508,8 +508,6 @@
     "common.ui.paginateSelectableList.sortByButtonLabeDescendingScreenReaderOnly": "降序",
     "common.ui.paginateSelectableList.sortByButtonLabel": "名称",
     "common.ui.paginateSelectableList.sortByButtonLabelScreenReaderOnly": "排序依据",
-    "common.ui.parseEsInterval.invalidEsCalendarIntervalErrorMessage": "无效的日历时间间隔：{interval}，值必须为 1",
-    "common.ui.parseEsInterval.invalidEsIntervalFormatErrorMessage": "无效的时间间隔格式：{interval}",
     "common.ui.recentLinks.linkItem.screenReaderLabel": "{recentlyAccessedItemLinklabel}，类型：{pageType}",
     "common.ui.savedObjectFinder.addNewItemButtonLabel": "添加新的 {item}",
     "common.ui.savedObjectFinder.manageItemsButtonLabel": "管理 {items}",
