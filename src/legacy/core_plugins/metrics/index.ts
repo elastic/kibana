@@ -20,6 +20,7 @@
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
+import { InternalCoreSetup } from 'src/core/server';
 import { metricsPlugin } from './server/np/';
 
 // eslint-disable-next-line import/no-default-export
@@ -44,8 +45,9 @@ export default function(kibana: any) {
 
     init(server: Legacy.Server) {
       const initializerContext = {} as PluginInitializerContext;
+      const core = { http: { server } } as InternalCoreSetup;
 
-      metricsPlugin(initializerContext).setup(server);
+      metricsPlugin(initializerContext).setup(core);
     },
   });
 }

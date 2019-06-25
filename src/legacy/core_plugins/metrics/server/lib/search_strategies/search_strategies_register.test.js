@@ -32,7 +32,6 @@ class MockSearchStrategy extends AbstractSearchStrategy {
 }
 
 describe('SearchStrategiesRegister', () => {
-  let core;
   let server;
   let strategies;
   let anotherSearchStrategy;
@@ -43,7 +42,6 @@ describe('SearchStrategiesRegister', () => {
         server[strategy] = func;
       }),
     };
-    core = { http: { server } };
     strategies = [
       ['AbstractSearchStrategy', AbstractSearchStrategy],
       ['AbstractSearchRequest', AbstractSearchRequest],
@@ -51,7 +49,7 @@ describe('SearchStrategiesRegister', () => {
       ['addSearchStrategy', expect.any(Function)],
     ];
 
-    SearchStrategiesRegister.init(core);
+    SearchStrategiesRegister.init(server);
   });
 
   test('should init strategies register', () => {
