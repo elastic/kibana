@@ -28,7 +28,7 @@ export interface SavedObjectRecord {
   };
 }
 
-export abstract class SavedObjectsManagementAction<T = unknown> {
+export abstract class SavedObjectsManagementAction {
   public abstract render: () => ReactNode;
   public abstract id: string;
   public abstract euiAction: {
@@ -42,27 +42,20 @@ export abstract class SavedObjectsManagementAction<T = unknown> {
     render?: (item: SavedObjectRecord) => any;
   };
 
-  private isActive: boolean = false;
   private callbacks: Function[] = [];
 
-  protected context: T | null = null;
+  protected record: SavedObjectRecord | null = null;
 
   public registerOnFinishCallback(callback: Function) {
     this.callbacks.push(callback);
   }
 
-  public get active() {
-    return this.isActive;
-  }
-
-  protected start(context: T) {
-    this.isActive = true;
-    this.context = context;
+  protected start(record: SavedObjectRecord) {
+    this.record = record;
   }
 
   protected finish() {
-    this.isActive = false;
-    this.context = null;
+    this.record = null;
     this.callbacks.forEach(callback => callback());
   }
 }

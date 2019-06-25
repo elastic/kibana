@@ -11,9 +11,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CopyToSpace } from '../components/copy_to_space';
 
-export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction<
-  SavedObjectRecord
-> {
+export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
 
   public euiAction = {
@@ -31,10 +29,10 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
   };
 
   public render = () => {
-    if (!this.context) {
-      throw new Error('No context available! `render()` was likely called before `start()`.');
+    if (!this.record) {
+      throw new Error('No record available! `render()` was likely called before `start()`.');
     }
-    return <CopyToSpace onClose={this.onClose} object={this.context} />;
+    return <CopyToSpace onClose={this.onClose} object={this.record} />;
   };
 
   private onClose = () => {
