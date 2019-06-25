@@ -17,24 +17,11 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import {
-  AngularHttpError,
-  formatAngularHttpError,
-  isAngularHttpError,
-} from './lib/format_angular_http_error';
-
-export function addFatalErrorCallback(callback: () => void) {
-  npSetup.core.fatalErrors.get$().subscribe(() => {
-    callback();
-  });
-}
-
-export function fatalError(error: AngularHttpError | Error | string, location?: string) {
-  // add support for angular http errors to newPlatformFatalErrors
-  if (isAngularHttpError(error)) {
-    error = formatAngularHttpError(error);
-  }
-
-  npSetup.core.fatalErrors.add(error, location);
-}
+// Those exports are kept here for now, so we can move over imports
+// step by step into the data plugin.
+export {
+  parseEsInterval,
+  ParsedInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+} from '../../../core_plugins/data/common';

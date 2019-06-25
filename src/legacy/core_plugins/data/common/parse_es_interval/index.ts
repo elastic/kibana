@@ -17,24 +17,7 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import {
-  AngularHttpError,
-  formatAngularHttpError,
-  isAngularHttpError,
-} from './lib/format_angular_http_error';
-
-export function addFatalErrorCallback(callback: () => void) {
-  npSetup.core.fatalErrors.get$().subscribe(() => {
-    callback();
-  });
-}
-
-export function fatalError(error: AngularHttpError | Error | string, location?: string) {
-  // add support for angular http errors to newPlatformFatalErrors
-  if (isAngularHttpError(error)) {
-    error = formatAngularHttpError(error);
-  }
-
-  npSetup.core.fatalErrors.add(error, location);
-}
+export { parseEsInterval, ParsedInterval } from './parse_es_interval';
+export { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
+export { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
+export { isValidEsInterval } from './is_valid_es_interval';
