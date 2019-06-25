@@ -59,15 +59,22 @@ export class FilterStateManager {
     // Moving forward, state should provide observable subscriptions.
     this.interval = setInterval(() => {
       const appState = this.getAppState();
-      if (
-        !appState ||
-        !this.globalState ||
-        (this.prevGlobalFilters &&
-          _.isEqual(this.prevGlobalFilters, this.globalState.filters) &&
-          this.prevAppFilters &&
-          _.isEqual(this.prevAppFilters, appState.filters))
-      )
-        return;
+      const stateUndefined = _.isUndefined(appState) || _.isUndefined(this.globalState);
+      if (stateUndefined) return;
+
+      const filterStateUndefined =
+        _.isUndefined(appState.filters) || _.isUndefined(this.globalState.filters);
+      if (filterStateUndefined) return;
+
+      const globalFilterChanged = !(
+        this.prevGlobalFilters && _.isEqual(this.prevGlobalFilters, this.globalState.filters)
+      );
+      const appFilterChanged = !(
+        this.prevAppFilters && _.isEqual(this.prevAppFilters, appState.filters)
+      );
+      const filterStateChanged = globalFilterChanged || appFilterChanged;
+
+      if (!filterStateChanged) return;
 
       const newGlobalFilters = _.cloneDeep(this.globalState.filters);
       const newAppFilters = _.cloneDeep(appState.filters);
