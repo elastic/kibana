@@ -30,7 +30,11 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      setErrorMessage('Messages could not be loaded');
+      setErrorMessage(
+        i18n.translate('xpack.ml.dfJobsList.jobDetails.messagesPane.errorMessage', {
+          defaultMessage: 'Messages could not be loaded',
+        })
+      );
     }
   }
 
