@@ -23,3 +23,4 @@ The index must contain at least one field mapped as {ref}/geo-point.html[geo_poi
 
 include::terms-join.asciidoc[]
 include::vector-style.asciidoc[]
+include::vector-style-properties.asciidoc[]

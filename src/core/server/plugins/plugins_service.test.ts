@@ -320,6 +320,7 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
       initialize: true,
       pluginSearchPaths: [
         resolve(process.cwd(), 'src', 'plugins'),
+        resolve(process.cwd(), 'x-pack', 'plugins'),
         resolve(process.cwd(), 'plugins'),
         resolve(process.cwd(), '..', 'kibana-extra'),
       ],
