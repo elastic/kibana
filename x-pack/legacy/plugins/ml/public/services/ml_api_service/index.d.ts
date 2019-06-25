@@ -28,6 +28,7 @@ declare interface Ml {
     getDataFrameTransformsPreview(payload: any): Promise<any>;
     startDataFrameTransformsJob(jobId: string): Promise<any>;
     stopDataFrameTransformsJob(jobId: string): Promise<any>;
+    getTransformAuditMessages(transformId: string): Promise<any>;
   };
 
   checkPrivilege(obj: object): Promise<any>;
