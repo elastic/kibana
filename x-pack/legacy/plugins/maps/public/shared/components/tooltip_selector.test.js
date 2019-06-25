@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { TooltipSelector } from './tooltip_selector';
 
@@ -18,16 +18,11 @@ const defaultProps = {
 describe('TooltipSelector', () => {
 
   test('should create eui row component', async () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <TooltipSelector
         {...defaultProps}
       />
     );
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
 
     expect(component)
       .toMatchSnapshot();
