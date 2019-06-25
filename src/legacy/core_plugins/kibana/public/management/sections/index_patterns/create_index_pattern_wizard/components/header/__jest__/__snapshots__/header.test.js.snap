@@ -16,7 +16,6 @@ exports[`Header should render a different name, prompt, and beta tag if provided
        
       <EuiBetaBadge
         label="Beta"
-        tooltipPosition="top"
       />
     </h1>
   </EuiTitle>

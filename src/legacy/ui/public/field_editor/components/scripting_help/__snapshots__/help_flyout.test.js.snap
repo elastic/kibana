@@ -12,6 +12,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
 >
   <EuiFlyoutBody>
     <EuiTabbedContent
+      autoFocus="initial"
       initialSelectedTab={
         Object {
           "content": <ScriptingSyntax />,

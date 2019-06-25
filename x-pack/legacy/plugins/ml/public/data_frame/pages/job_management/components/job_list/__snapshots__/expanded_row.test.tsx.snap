@@ -2,6 +2,7 @@
 
 exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
 <EuiTabbedContent
+  autoFocus="initial"
   expand={false}
   initialSelectedTab={
     Object {
