@@ -94,12 +94,6 @@ export function DevToolsSettingsModal(props: Props) {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      // TODO
-    };
-  }, []);
-
   function saveSettings() {
     if (isLoading) {
       return;
