@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { GaugeSeries } from './series';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
 jest.mock('plugins/data/setup', () => ({
   data: {
     query: {
@@ -26,33 +27,36 @@ jest.mock('plugins/data/setup', () => ({
     },
   },
 }));
-import { GaugePanelConfig } from './gauge';
 
-describe('GaugePanelConfig', () => {
-  it('call switch tab onChange={handleChange}', () => {
-    const props = {
-      fields: {},
-      model: {},
-      onChange: jest.fn(),
-    };
-    const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
+const defaultProps = {
+  disableAdd: true,
+  disableDelete: true,
+  dragHandleProps: {},
+  toggleVisible: jest.fn(),
+  onAdd: jest.fn(),
+  onChange: jest.fn(),
+  onClone: jest.fn(),
+  onDelete: jest.fn(),
+};
 
-    wrapper
-      .find('EuiTab')
-      .first()
-      .simulate('onClick');
-    expect(props.onChange).toBeCalled();
-  });
+it('should disable adding data', () => {
+  const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
+  const props = wrapper.props();
 
-  it('call onChange={handleChange}', () => {
-    const props = {
-      fields: {},
-      model: {},
-      onChange: jest.fn(),
-    };
-    const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
+  expect(props.disableAdd).toBeTruthy();
+});
 
-    wrapper.simulate('onClick');
-    expect(props.onChange).toBeCalled();
-  });
+it('should disable delete data', () => {
+  const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
+  const props = wrapper.props();
+  expect(props.disableDelete).toBeTruthy();
+});
+
+it('should called toggleVisible function', () => {
+  const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
+  wrapper
+    .find('EuiButtonIcon')
+    .at(0)
+    .simulate('click');
+  expect(defaultProps.toggleVisible).toBeCalled();
 });
