@@ -95,9 +95,9 @@
   </div>
 
   <div class="schemaEditors visEditorSidebar__aggParamFormRow"></div>
-  <!-- should be rendered after link function run, i.e. onAggTypeChange is defined  -->
+  <!-- should be rendered after link function run, i.e. 'callbacks' is defined  -->
   <vis-editor-agg-params
-    ng-if="onAggTypeChange"
+    ng-if="callbacks"
     ng-show="editorOpen"
     agg="agg"
     agg-index="$index"
@@ -111,10 +111,7 @@
     response-value-aggs="responseValueAggs"
     state="state"
     vis="vis"
-    on-agg-type-change="onAggTypeChange"
-    on-agg-params-change="onAggParamsChange"
-    set-touched="setTouched"
-    set-validity="setValidity">
+    callbacks="callbacks">
   </vis-editor-agg-params>
 </div>
 

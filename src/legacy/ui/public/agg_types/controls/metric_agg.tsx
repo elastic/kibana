@@ -72,7 +72,7 @@ function MetricAggParamEditor({
     () => {
       // check buckets
       const lastBucket: AggConfig = findLast(
-        state ? state.aggs : [],
+        state.aggs,
         aggr => aggr.type && aggr.type.type === 'buckets'
       );
       const bucketHasType = lastBucket && lastBucket.type;
@@ -81,13 +81,11 @@ function MetricAggParamEditor({
       const canUseAggregation = lastBucket && bucketIsHistogram;
 
       // remove errors on all buckets
-      if (state) {
-        state.aggs.forEach((aggr: AggConfig) => {
-          if (aggr.error) {
-            delete aggr.error;
-          }
-        });
-      }
+      state.aggs.forEach((aggr: AggConfig) => {
+        if (aggr.error) {
+          subAggParams.onAggErrorChanged(aggr);
+        }
+      });
 
       if (canUseAggregation) {
         subAggParams.onAggParamsChange(
@@ -97,14 +95,14 @@ function MetricAggParamEditor({
         );
       } else {
         if (lastBucket) {
-          lastBucket.error = i18n.translate(
-            'common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage',
-            {
+          subAggParams.onAggErrorChanged(
+            lastBucket,
+            i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
               defaultMessage:
                 'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
               values: { type: agg.type.title },
               description: 'Date Histogram and Histogram should not be translated',
-            }
+            })
           );
         }
       }
@@ -112,7 +110,7 @@ function MetricAggParamEditor({
       return () => {
         // clear errors in last bucket before component destroyed
         if (lastBucket && lastBucket.error) {
-          delete lastBucket.error;
+          subAggParams.onAggErrorChanged(lastBucket);
         }
       };
     },

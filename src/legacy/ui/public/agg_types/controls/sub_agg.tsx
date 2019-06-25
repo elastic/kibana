@@ -25,6 +25,7 @@ function SubAggParamEditor({
   agg,
   value,
   responseValueAggs,
+  state,
   setValue,
   setValidity,
   setTouched,
@@ -51,11 +52,23 @@ function SubAggParamEditor({
     [value, responseValueAggs]
   );
 
-  const [state, setState] = useState(true);
+  const [innerState, setInnerState] = useState(true);
 
   if (agg.params.metricAgg !== 'custom' || !agg.params.customMetric) {
     return null;
   }
+
+  const callbacks = {
+    setValidity,
+    setTouched,
+    onAggTypeChange: subAggParams.onAggTypeChange,
+    onAggErrorChanged: subAggParams.onAggErrorChanged,
+    onAggParamsChange: (...rest: [AggConfig, string, any]) => {
+      // to force update when sub-agg params are changed
+      setInnerState(!innerState);
+      subAggParams.onAggParamsChange(...rest);
+    },
+  };
 
   return (
     <DefaultEditorAggParams
@@ -65,15 +78,10 @@ function SubAggParamEditor({
       formIsTouched={subAggParams.formIsTouched}
       indexPattern={agg.getIndexPattern()}
       responseValueAggs={responseValueAggs}
+      state={state}
       vis={subAggParams.vis}
-      onAggParamsChange={(...rest) => {
-        // to force update when sub-agg params are changed
-        setState(!state);
-        subAggParams.onAggParamsChange(...rest);
-      }}
-      onAggTypeChange={subAggParams.onAggTypeChange}
-      setValidity={setValidity}
-      setTouched={setTouched}
+      callbacks={callbacks}
+      {...callbacks}
     />
   );
 }

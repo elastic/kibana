@@ -23,13 +23,15 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
-import { AggConfig } from 'ui/vis/agg_config';
+import { IndexPattern } from 'ui/index_patterns';
 import { documentationLinks } from '../../../../documentation_links/documentation_links';
 import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
-  agg: AggConfig;
+  aggError?: string;
   aggTypeOptions: AggType[];
+  id: string;
+  indexPattern: IndexPattern;
   showValidation: boolean;
   isSubAggregation: boolean;
   value: AggType;
@@ -39,7 +41,9 @@ interface DefaultEditorAggSelectProps {
 }
 
 function DefaultEditorAggSelect({
-  agg,
+  aggError,
+  id,
+  indexPattern,
   value,
   setValue,
   aggTypeOptions,
@@ -63,8 +67,8 @@ function DefaultEditorAggSelect({
   );
 
   let aggHelpLink = '';
-  if (has(agg, 'type.name')) {
-    aggHelpLink = get(documentationLinks, ['aggs', agg.type.name]);
+  if (has(value, 'name')) {
+    aggHelpLink = get(documentationLinks, ['aggs', value.name]);
   }
 
   const helpLink = value && aggHelpLink && (
@@ -89,17 +93,17 @@ function DefaultEditorAggSelect({
       i18n.translate('common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription', {
         defaultMessage: 'The index pattern {indexPatternTitle} does not contain any aggregations.',
         values: {
-          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+          indexPatternTitle: indexPattern && indexPattern.title,
         },
       })
     );
   }
 
-  if (agg.error) {
-    errors.push(agg.error);
+  if (aggError) {
+    errors.push(aggError);
   }
 
-  const isValid = !!value && !errors.length && !agg.error;
+  const isValid = !!value && !errors.length && !aggError;
 
   useEffect(
     () => {
@@ -137,7 +141,7 @@ function DefaultEditorAggSelect({
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select an aggregation',
         })}
-        id={`visDefaultEditorAggSelect${agg.id}`}
+        id={`visDefaultEditorAggSelect${id}`}
         isDisabled={!aggTypeOptions.length}
         options={aggTypeOptions}
         selectedOptions={selectedOptions}

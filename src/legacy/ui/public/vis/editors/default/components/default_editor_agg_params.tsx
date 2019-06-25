@@ -55,6 +55,7 @@ export interface SubAggParamsProp {
   vis: Vis;
   onAggParamsChange: (agg: AggConfig, paramName: string, value: any) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
+  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
 }
 interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   agg: AggConfig;
@@ -64,9 +65,14 @@ interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   groupName: string;
   indexPattern: IndexPattern;
   responseValueAggs: AggConfig[] | null;
-  state?: VisState;
-  setTouched: (isTouched: boolean) => void;
-  setValidity: (isValid: boolean) => void;
+  state: VisState;
+  callbacks: {
+    setTouched: (isTouched: boolean) => void;
+    setValidity: (isValid: boolean) => void;
+    onAggParamsChange: (agg: AggConfig, paramName: string, value: any) => void;
+    onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
+    onAggErrorChanged: (agg: AggConfig, error?: string) => void;
+  };
 }
 
 function DefaultEditorAggParams({
@@ -80,11 +86,15 @@ function DefaultEditorAggParams({
   responseValueAggs,
   state = {} as VisState,
   vis,
-  onAggParamsChange,
-  onAggTypeChange,
-  setTouched,
-  setValidity,
+  callbacks,
 }: DefaultEditorAggParamsProps) {
+  const {
+    onAggParamsChange,
+    onAggTypeChange,
+    setTouched,
+    setValidity,
+    onAggErrorChanged,
+  } = callbacks;
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
   const errors = getError(agg, aggIsTooLow);
 
@@ -187,6 +197,7 @@ function DefaultEditorAggParams({
         subAggParams={{
           onAggParamsChange,
           onAggTypeChange,
+          onAggErrorChanged,
           formIsTouched,
           vis,
         }}
@@ -203,7 +214,9 @@ function DefaultEditorAggParams({
       data-test-subj={`visAggEditorParams${agg.id}`}
     >
       <DefaultEditorAggSelect
-        agg={agg}
+        aggError={agg.error}
+        id={agg.id}
+        indexPattern={indexPattern}
         value={agg.type}
         aggTypeOptions={groupedAggTypeOptions}
         isSubAggregation={aggIndex >= 1 && groupName === 'buckets'}

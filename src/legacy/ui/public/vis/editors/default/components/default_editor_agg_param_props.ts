@@ -35,7 +35,7 @@ export interface AggParamCommonProps<T> {
   editorConfig: EditorConfig;
   indexedFields?: FieldParamType[];
   showValidation: boolean;
-  state?: VisState;
+  state: VisState;
   value: T;
   responseValueAggs: AggConfig[] | null;
   visName: string;

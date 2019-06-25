@@ -129,28 +129,44 @@ uiModules
           $scope.formIsTouched = value;
         }, true);
 
-        $scope.onAggTypeChange = (agg, value) => {
+        function onAggTypeChange(agg, value) {
           if (agg.type !== value) {
             agg.type = value;
           }
-        };
+        }
 
-        $scope.onAggParamsChange = (agg, paramName, value) => {
+        function onAggParamsChange(agg, paramName, value) {
           if (agg.params[paramName] !== value) {
             agg.params[paramName] = value;
           }
-        };
+        }
 
-        $scope.setValidity = (isValid) => {
+        function setValidity(isValid) {
           ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
-        };
+        }
 
-        $scope.setTouched = (isTouched) => {
+        function setTouched(isTouched) {
           if (isTouched) {
             ngModelCtrl.$setTouched();
           } else {
             ngModelCtrl.$setUntouched();
           }
+        }
+
+        function onAggErrorChanged(agg, error) {
+          if (error) {
+            agg.error = error;
+          } else {
+            delete agg.error;
+          }
+        }
+
+        $scope.callbacks = {
+          onAggTypeChange,
+          onAggParamsChange,
+          onAggErrorChanged,
+          setValidity,
+          setTouched
         };
 
         addSchemaEditor();

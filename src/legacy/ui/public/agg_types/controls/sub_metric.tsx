@@ -28,6 +28,7 @@ function SubMetricParamEditor({
   aggParam,
   value,
   responseValueAggs,
+  state,
   setValue,
   setValidity,
   setTouched,
@@ -57,11 +58,23 @@ function SubMetricParamEditor({
     setValue(agg.params[type] || agg.type.params.byName[type].makeAgg(agg));
   }, []);
 
-  const [state, setState] = useState(true);
+  const [innerState, setInnerState] = useState(true);
 
   if (!agg.params[type]) {
     return null;
   }
+
+  const callbacks = {
+    setValidity,
+    setTouched,
+    onAggTypeChange: subAggParams.onAggTypeChange,
+    onAggErrorChanged: subAggParams.onAggErrorChanged,
+    onAggParamsChange: (...rest: [AggConfig, string, any]) => {
+      // to force update when sub-agg params are changed
+      setInnerState(!innerState);
+      subAggParams.onAggParamsChange(...rest);
+    },
+  };
 
   return (
     <>
@@ -73,15 +86,10 @@ function SubMetricParamEditor({
         formIsTouched={subAggParams.formIsTouched}
         indexPattern={agg.getIndexPattern()}
         responseValueAggs={responseValueAggs}
+        state={state}
         vis={subAggParams.vis}
-        onAggParamsChange={(...rest) => {
-          // to force update when sub-agg params are changed
-          setState(!state);
-          subAggParams.onAggParamsChange(...rest);
-        }}
-        onAggTypeChange={subAggParams.onAggTypeChange}
-        setValidity={setValidity}
-        setTouched={setTouched}
+        callbacks={callbacks}
+        {...callbacks}
       />
     </>
   );
