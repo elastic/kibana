@@ -35,7 +35,6 @@
  */
 
 jest.mock('ui/metadata');
-jest.mock('ui/new_platform');
 jest.mock('ui/documentation_links/documentation_links');
 jest.mock('ui/chrome');
 
