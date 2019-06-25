@@ -13,18 +13,7 @@ import { ServiceDetails } from '../../ServiceDetails';
 import { TransactionDetails } from '../../TransactionDetails';
 import { Home } from '../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
-import {
-  HOME,
-  SERVICES,
-  TRACES,
-  METRICS,
-  ERRORS,
-  TRANSACTIONS,
-  SERVICE,
-  ERROR,
-  TRANSACTION_TYPE,
-  TRANSACTION_NAME
-} from './route_names';
+import { RouteName } from './route_names';
 
 interface RouteParams {
   serviceName: string;
@@ -47,7 +36,7 @@ export const routes: BreadcrumbRoute[] = [
     path: '/',
     render: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
-    name: HOME
+    name: RouteName.HOME
   },
   {
     exact: true,
@@ -56,7 +45,7 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
       defaultMessage: 'Services'
     }),
-    name: SERVICES
+    name: RouteName.SERVICES
   },
   {
     exact: true,
@@ -65,7 +54,7 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
       defaultMessage: 'Traces'
     }),
-    name: TRACES
+    name: RouteName.TRACES
   },
   {
     exact: true,
@@ -75,14 +64,14 @@ export const routes: BreadcrumbRoute[] = [
       renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
         props
       ),
-    name: SERVICE
+    name: RouteName.SERVICE
   },
   {
     exact: true,
     path: '/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
     breadcrumb: ({ match }) => match.params.groupId,
-    name: ERROR
+    name: RouteName.ERROR
   },
   {
     exact: true,
@@ -91,7 +80,7 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors'
     }),
-    name: ERRORS
+    name: RouteName.ERRORS
   },
   {
     exact: true,
@@ -100,7 +89,7 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
       defaultMessage: 'Transactions'
     }),
-    name: TRANSACTIONS
+    name: RouteName.TRANSACTIONS
   },
   // Have to split this out as its own route to prevent duplicate breadcrumbs from both matching
   // if we use :transactionType? as a single route here
@@ -109,7 +98,7 @@ export const routes: BreadcrumbRoute[] = [
     path: '/:serviceName/transactions/:transactionType',
     component: ServiceDetails,
     breadcrumb: null,
-    name: TRANSACTION_TYPE
+    name: RouteName.TRANSACTION_TYPE
   },
   {
     exact: true,
@@ -118,7 +107,7 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
       defaultMessage: 'Metrics'
     }),
-    name: METRICS
+    name: RouteName.METRICS
   },
   {
     exact: true,
@@ -126,6 +115,6 @@ export const routes: BreadcrumbRoute[] = [
     component: TransactionDetails,
     breadcrumb: ({ match }) =>
       legacyDecodeURIComponent(match.params.transactionName) || '',
-    name: TRANSACTION_NAME
+    name: RouteName.TRANSACTION_NAME
   }
 ];

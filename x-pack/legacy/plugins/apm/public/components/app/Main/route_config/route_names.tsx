@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const HOME = 'home';
-export const SERVICES = 'services';
-export const TRACES = 'traces';
-export const SERVICE = 'service';
-export const TRANSACTIONS = 'transactions';
-export const ERRORS = 'errors';
-export const ERROR = 'error';
-export const METRICS = 'metrics';
-export const TRANSACTION_TYPE = 'transaction_type';
-export const TRANSACTION_NAME = 'transaction_name';
+export enum RouteName {
+  HOME = 'home',
+  SERVICES = 'services',
+  TRACES = 'traces',
+  SERVICE = 'service',
+  TRANSACTIONS = 'transactions',
+  ERRORS = 'errors',
+  ERROR = 'error',
+  METRICS = 'metrics',
+  TRANSACTION_TYPE = 'transaction_type',
+  TRANSACTION_NAME = 'transaction_name'
+}

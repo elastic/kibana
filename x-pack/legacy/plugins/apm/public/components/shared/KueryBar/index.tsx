@@ -28,11 +28,7 @@ import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
-import {
-  TRANSACTIONS,
-  METRICS,
-  ERRORS
-} from '../../app/Main/route_config/route_names';
+import { RouteName } from '../../app/Main/route_config/route_names';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -62,11 +58,12 @@ export function KueryBar() {
   let currentRequestCheck;
 
   const exampleMap: { [key: string]: string } = {
-    [TRANSACTIONS]: 'transaction.duration.us > 300000',
-    [ERRORS]: 'http.response.status_code >= 400',
-    [METRICS]: 'process.pid = "1234"'
+    [RouteName.TRANSACTIONS]: 'transaction.duration.us > 300000',
+    [RouteName.ERRORS]: 'http.response.status_code >= 400',
+    [RouteName.METRICS]: 'process.pid = "1234"'
   };
 
+  // sets queryExample to the first matched example query, else default example
   const queryExample =
     matchedRoutes.map(({ name }) => exampleMap[name]).find(Boolean) ||
     'transaction.duration.us > 300000 AND http.response.status_code >= 400';

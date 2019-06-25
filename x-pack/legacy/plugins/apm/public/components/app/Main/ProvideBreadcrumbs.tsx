@@ -13,6 +13,7 @@ import {
   withRouter
 } from 'react-router-dom';
 import { StringMap } from '../../../../typings/common';
+import { RouteName } from './route_config/route_names';
 
 type LocationMatch = Pick<
   RouteComponentProps<StringMap<string>>,
@@ -23,7 +24,7 @@ type BreadcrumbFunction = (props: LocationMatch) => string;
 
 export interface BreadcrumbRoute extends RouteProps {
   breadcrumb: string | BreadcrumbFunction | null;
-  name: string;
+  name: RouteName;
 }
 
 export interface Breadcrumb extends LocationMatch {
