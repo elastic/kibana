@@ -17,19 +17,29 @@
  * under the License.
  */
 
-export const range = () => ({
-  name: 'range',
+import { ExpressionType, Render } from '../../types';
+
+const name = 'range';
+
+export interface Range {
+  type: typeof name;
+  from: number;
+  to: number;
+}
+
+export const range = (): ExpressionType<typeof name, Range> => ({
+  name,
   from: {
-    null: () => {
+    null: (): Range => {
       return {
         type: 'range',
         from: 0,
-        to: 0
+        to: 0,
       };
     },
   },
   to: {
-    render: value => {
+    render: (value: Range): Render<{}> => {
       const text = `from ${value.from} to ${value.to}`;
       return {
         type: 'render',
