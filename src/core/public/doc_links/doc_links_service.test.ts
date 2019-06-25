@@ -17,7 +17,18 @@
  * under the License.
  */
 
-export class Sha256 {
-  public update(json: string | Buffer, encoding?: string): Sha256;
-  public digest(encoding: string): string;
-}
+import { DocLinksService } from './doc_links_service';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+
+describe('DocLinksService#start()', () => {
+  it('templates the doc links with the branch information from injectedMetadata', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
+    const service = new DocLinksService();
+    const start = service.start({ injectedMetadata });
+    expect(start.DOC_LINK_VERSION).toEqual('test-branch');
+    expect(start.links.kibana).toEqual(
+      'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
+    );
+  });
+});

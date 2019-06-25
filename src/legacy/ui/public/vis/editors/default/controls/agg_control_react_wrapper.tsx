@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import { getDocLink } from '../../documentation_links';
-import { uiModules } from '../../modules';
+import React from 'react';
+import { AggControlProps } from './agg_control_props';
 
-const module = uiModules.get('kibana');
+interface AggControlReactWrapperProps<T> extends AggControlProps<T> {
+  component: React.FunctionComponent<AggControlProps<T>>;
+}
 
-module.directive('documentationHref', function () {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attributes) {
-      element.attr('href', getDocLink(attributes.documentationHref));
-    }
-  };
-});
+function AggControlReactWrapper({
+  component: Component,
+  ...rest
+}: AggControlReactWrapperProps<boolean | number>) {
+  return <Component {...rest} />;
+}
+
+export { AggControlReactWrapper };

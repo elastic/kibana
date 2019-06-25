@@ -13,9 +13,9 @@ import path from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { LanguageServerProxy } from './proxy';
-import { RequestExpander } from './request_expander';
 import { AbstractLauncher } from './abstract_launcher';
+import { LanguageServerProxy } from './proxy';
+import { InitializeOptions, RequestExpander } from './request_expander';
 
 const JAVA_LANG_DETACH_PORT = 2090;
 
@@ -30,17 +30,26 @@ export class JavaLauncher extends AbstractLauncher {
   }
 
   createExpander(proxy: LanguageServerProxy, builtinWorkspace: boolean, maxWorkspace: number) {
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-      settings: {
-        'java.import.gradle.enabled': this.options.security.enableGradleImport,
-        'java.import.maven.enabled': this.options.security.enableMavenImport,
-        'java.autobuild.enabled': false,
-      },
-    });
+    return new RequestExpander(
+      proxy,
+      builtinWorkspace,
+      maxWorkspace,
+      this.options,
+      {
+        initialOptions: {
+          settings: {
+            'java.import.gradle.enabled': this.options.security.enableGradleImport,
+            'java.import.maven.enabled': this.options.security.enableMavenImport,
+            'java.autobuild.enabled': false,
+          },
+        },
+      } as InitializeOptions,
+      this.log
+    );
   }
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.awaitServerConnection().catch(this.log.debug);
+    proxy.startServerConnection();
   }
 
   async getPort(): Promise<number> {

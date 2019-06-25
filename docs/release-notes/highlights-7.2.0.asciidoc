@@ -4,12 +4,10 @@
 <titleabbrev>7.2.0</titleabbrev>
 ++++
 
-coming[7.2.0]
-
 Each release of {kib} brings new features and product improvements. 
 Here are the highlights of the feature and user experience changes in 7.2.0.
 
-Refer to the {kib} <<breaking-changes-7.2, breaking changes>> and <<release-notes, 
+Refer to the {kib} <<breaking-changes-7.2, breaking changes>> and <<release-notes-7.2.0, 
 release notes>> for a list of bug fixes and other changes.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
