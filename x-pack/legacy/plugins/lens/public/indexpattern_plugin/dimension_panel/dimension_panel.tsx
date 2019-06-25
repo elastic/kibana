@@ -50,6 +50,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
   return (
     <ChildDragDropProvider {...props.dragDropContext}>
       <DragDrop
+        className="lnsConfigPanel__summary"
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={field => {
@@ -63,7 +64,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
           props.setState(changeColumn(props.state, props.columnId, column));
         }}
       >
-        <EuiFlexGroup alignItems="center" className="lnsConfigPanel__summary">
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={true}>
             <Settings
               {...props}
