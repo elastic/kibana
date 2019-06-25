@@ -134,16 +134,18 @@ export function EditorFrame(props: EditorFrameProps) {
           <nav>
             <EuiButton
               fill
-              onClick={() =>
-                save({
-                  datasource,
-                  dispatch,
-                  visualization,
-                  state,
-                  redirectTo: props.redirectTo,
-                  store: props.store,
-                })
-              }
+              onClick={() => {
+                if (datasource && visualization) {
+                  save({
+                    datasource,
+                    dispatch,
+                    visualization,
+                    state,
+                    redirectTo: props.redirectTo,
+                    store: props.store,
+                  });
+                }
+              }}
               disabled={state.saving || !state.datasource.activeId || !state.visualization.activeId}
             >
               {i18n.translate('xpack.lens.editorFrame.Save', {

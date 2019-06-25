@@ -4,10 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { save } from './save';
+import { save, Props } from './save';
 import { Action } from './state_management';
 
 describe('save editor frame state', () => {
+  const saveArgs: Props = {
+    dispatch: jest.fn(),
+    redirectTo: jest.fn(),
+    datasource: { getPersistableState: x => x },
+    visualization: { getPersistableState: x => x },
+    state: {
+      title: 'aaa',
+      datasource: { activeId: '1', isLoading: false, state: {} },
+      saving: false,
+      visualization: { activeId: '2', state: {} },
+    },
+    store: {
+      async save() {
+        return { id: 'foo' };
+      },
+    },
+  };
+
   it('dispatches saved status actions before and after saving', async () => {
     let saved = false;
 
@@ -21,8 +39,8 @@ describe('save editor frame state', () => {
     });
 
     await save({
+      ...saveArgs,
       dispatch,
-      redirectTo: jest.fn(),
       state: {
         title: 'aaa',
         datasource: { activeId: '1', isLoading: false, state: {} },
@@ -46,6 +64,7 @@ describe('save editor frame state', () => {
       save: jest.fn(async () => ({ id: 'bar' })),
     };
     await save({
+      ...saveArgs,
       store,
       datasource: {
         getPersistableState(state) {
@@ -54,8 +73,6 @@ describe('save editor frame state', () => {
           };
         },
       },
-      dispatch: jest.fn(),
-      redirectTo: jest.fn(),
       state: {
         title: 'bbb',
         datasource: { activeId: '1', isLoading: false, state: '2' },
@@ -89,6 +106,7 @@ describe('save editor frame state', () => {
     const redirectTo = jest.fn();
     const dispatch = jest.fn();
     await save({
+      ...saveArgs,
       dispatch,
       redirectTo,
       state: {
@@ -113,6 +131,7 @@ describe('save editor frame state', () => {
     const redirectTo = jest.fn();
     const dispatch = jest.fn();
     await save({
+      ...saveArgs,
       dispatch,
       redirectTo,
       state: {

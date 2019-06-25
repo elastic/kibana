@@ -7,6 +7,15 @@
 import { Action, EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 
+export interface Props {
+  datasource: { getPersistableState: (state: unknown) => unknown };
+  dispatch: (value: Action) => void;
+  redirectTo: (path: string) => void;
+  state: EditorFrameState;
+  store: { save: (doc: Document) => Promise<{ id: string }> };
+  visualization: { getPersistableState: (state: unknown) => unknown };
+}
+
 export async function save({
   datasource,
   dispatch,
@@ -14,14 +23,7 @@ export async function save({
   state,
   store,
   visualization,
-}: {
-  datasource?: { getPersistableState: (state: unknown) => unknown };
-  dispatch: (value: Action) => void;
-  redirectTo: (path: string) => void;
-  state: EditorFrameState;
-  store: { save: (doc: Document) => Promise<{ id: string }> };
-  visualization?: { getPersistableState: (state: unknown) => unknown };
-}) {
+}: Props) {
   dispatch({ type: 'SAVING' });
 
   // TODO: error handling
@@ -29,11 +31,11 @@ export async function save({
     id: state.persistedId,
     title: state.title,
     type: 'lens',
-    visualizationType: state.visualization.activeId || 'unknown',
-    datasourceType: state.datasource.activeId || 'unknown',
+    visualizationType: state.visualization.activeId,
+    datasourceType: state.datasource.activeId,
     state: {
-      datasource: datasource && datasource.getPersistableState(state.datasource.state),
-      visualization: visualization && visualization.getPersistableState(state.visualization.state),
+      datasource: datasource.getPersistableState(state.datasource.state),
+      visualization: visualization.getPersistableState(state.visualization.state),
     },
   });
 
