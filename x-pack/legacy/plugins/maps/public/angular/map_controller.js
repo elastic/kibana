@@ -103,8 +103,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     globalState: globalState,
   });
   /*
+    START QueryBar replacement with SearchBar
     Saved Queries required moving the query bar state caching to the search bar. Using the search bar instead of the query bar in Maps requires obscuring the filter functionality within the app.
-    The following is a hack, implemented to enable use of the search bar instead of the query bar.
+    The following is allows us to use the search bar without the filters.
   */
   $scope.filters = [];
   $scope.onFiltersUpdated = function () {
@@ -116,8 +117,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   $scope.showQueryBar = function () {
     return true;
   };
-
-  /* END HACK */
+  /* END QueryBar replacement with SearchBar */
 
   $scope.refreshConfig = getInitialRefreshConfig({
     mapStateJSON: savedMap.mapStateJSON,
