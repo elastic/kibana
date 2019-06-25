@@ -103,6 +103,8 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 
 export function XYChart({ data, args }: XYChartProps) {
   const { legend, x, y, splitSeriesAccessors, stackAccessors, seriesType } = args;
+  // TODO: Stop mapping data once elastic-charts allows axis naming
+  // https://github.com/elastic/elastic-charts/issues/245
   const seriesProps = {
     splitSeriesAccessors,
     stackAccessors,
