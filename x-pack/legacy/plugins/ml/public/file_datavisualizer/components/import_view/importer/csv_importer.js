@@ -18,6 +18,7 @@ export class CsvImporter extends Importer {
     this.hasHeaderRow = results.has_header_row;
     this.columnNames = results.column_names;
     this.shouldTrimFields = (results.should_trim_fields || false);
+    this.mappings = results.mappings;
   }
 
   async read(csv) {
@@ -28,6 +29,7 @@ export class CsvImporter extends Importer {
         skipEmptyLines: 'greedy',
         delimiter: this.delimiter,
         quoteChar: this.quote,
+        dynamicTyping: (c => shouldUseDynamicType(this.columnNames, this.mappings, c)),
         transform,
       };
 
@@ -58,13 +60,38 @@ export class CsvImporter extends Importer {
   }
 }
 
+// parse numeric and boolean fields - treat everything else as a string
+function shouldUseDynamicType(columnNames, mappings, columnNumber) {
+  if (columnNumber >= columnNames.length) {
+    return false;
+  }
+  const columnMapping = mappings[columnNames[columnNumber]];
+  if (columnMapping === undefined || columnMapping.type === undefined) {
+    return false;
+  }
+  switch (columnMapping.type) {
+    case 'boolean':
+    case 'long':
+    case 'integer':
+    case 'short':
+    case 'byte':
+    case 'double':
+    case 'float':
+    case 'half_float':
+    case 'scaled_float':
+      return true;
+    default:
+      return false;
+  }
+}
+
 function formatToJson(data, columnNames) {
   const docArray = [];
   for (let i = 0; i < data.length; i++) {
     const line = {};
     for (let c = 0; c < columnNames.length; c++) {
       const col = columnNames[c];
-      if (data[i][c] !== undefined && data[i][c] !== '') {
+      if (data[i][c] !== null && data[i][c] !== '') {
         line[col] = data[i][c];
       }
     }
