@@ -14,6 +14,7 @@ import { TransactionDetails } from '../../TransactionDetails';
 import { Home } from '../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
+import { TraceIdRedirect } from '../../TraceOverview/TraceIdRedirect';
 
 interface RouteParams {
   serviceName: string;
@@ -55,6 +56,13 @@ export const routes: BreadcrumbRoute[] = [
       defaultMessage: 'Traces'
     }),
     name: RouteName.TRACES
+  },
+  {
+    exact: true,
+    path: '/traces/:id',
+    component: TraceIdRedirect,
+    breadcrumb: null,
+    name: RouteName.TRACES // TODO can this be duplicated? Does it matter what it is for a redirect?
   },
   {
     exact: true,
