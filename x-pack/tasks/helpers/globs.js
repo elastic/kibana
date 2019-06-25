@@ -17,9 +17,6 @@ function getPluginPaths(plugins, opts = {}) {
   return plugins.reduce((paths, pluginName) => {
     const plugin = pluginName.trim();
 
-    if (plugin !== 'canvas') {
-      return paths;
-    }
     const commonPath = `${plugin}/common`;
     const serverPath = `${plugin}/**/server`;
     const publicPath = `${plugin}/**/public`;
