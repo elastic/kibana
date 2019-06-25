@@ -127,7 +127,8 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
   );
 }
 
-describe('lsp_indexer unit tests', function(this: any) {
+// FLAKY: https://github.com/elastic/kibana/issues/36478 and https://github.com/elastic/kibana/issues/39574
+describe.skip('lsp_indexer unit tests', function(this: any) {
   this.timeout(20000);
 
   // @ts-ignore
