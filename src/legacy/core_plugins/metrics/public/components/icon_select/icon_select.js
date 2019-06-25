@@ -51,21 +51,42 @@ export const ICONS = [
     value: 'fa-star',
     label: i18n.translate('tsvb.iconSelect.starLabel', { defaultMessage: 'Star' }),
   },
-  { value: 'fa-tag', label: i18n.translate('tsvb.iconSelect.tagLabel', { defaultMessage: 'Tag' }) },
-  // TODO: Watch for https://github.com/elastic/eui/issues/1871
-  // { value: 'fa-bomb', label: i18n.translate('tsvb.iconSelect.bombLabel', { defaultMessage: 'Bomb' }) },
-  // { value: 'fa-bug', label: i18n.translate('tsvb.iconSelect.bugLabel', { defaultMessage: 'Bug' }) },
-  // {
-  //   value: 'fa-exclamation-circle',
-  //   label: i18n.translate('tsvb.iconSelect.exclamationCircleLabel', { defaultMessage: 'Exclamation Circle' })
-  // },
-  // {
-  //   value: 'fa-exclamation-triangle',
-  //   label: i18n.translate('tsvb.iconSelect.exclamationTriangleLabel', { defaultMessage: 'Exclamation Triangle' })
-  // },
-  // { value: 'fa-fire', label: i18n.translate('tsvb.iconSelect.fireLabel', { defaultMessage: 'Fire' }) },
-  // { value: 'fa-flag', label: i18n.translate('tsvb.iconSelect.flagLabel', { defaultMessage: 'Flag' }) },
-  // { value: 'fa-heart', label: i18n.translate('tsvb.iconSelect.heartLabel', { defaultMessage: 'Heart' }) },
+  {
+    value: 'fa-tag',
+    label: i18n.translate('tsvb.iconSelect.tagLabel', { defaultMessage: 'Tag' }),
+  },
+  {
+    value: 'fa-bomb',
+    label: i18n.translate('tsvb.iconSelect.bombLabel', { defaultMessage: 'Bomb' }),
+  },
+  {
+    value: 'fa-bug',
+    label: i18n.translate('tsvb.iconSelect.bugLabel', { defaultMessage: 'Bug' }),
+  },
+  {
+    value: 'fa-exclamation-circle',
+    label: i18n.translate('tsvb.iconSelect.exclamationCircleLabel', {
+      defaultMessage: 'Exclamation Circle',
+    }),
+  },
+  {
+    value: 'fa-exclamation-triangle',
+    label: i18n.translate('tsvb.iconSelect.exclamationTriangleLabel', {
+      defaultMessage: 'Exclamation Triangle',
+    }),
+  },
+  {
+    value: 'fa-fire',
+    label: i18n.translate('tsvb.iconSelect.fireLabel', { defaultMessage: 'Fire' }),
+  },
+  {
+    value: 'fa-flag',
+    label: i18n.translate('tsvb.iconSelect.flagLabel', { defaultMessage: 'Flag' }),
+  },
+  {
+    value: 'fa-heart',
+    label: i18n.translate('tsvb.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
+  },
 ];
 
 export function IconView({ value: icon, label }) {
@@ -78,13 +99,13 @@ export function IconView({ value: icon, label }) {
 }
 
 export function IconSelect({ value, onChange }) {
-  const selectedIcon = ICONS.find(option => value === option.value);
+  const selectedIcon = ICONS.find(option => value === option.value) || ICONS[0];
 
   return (
     <EuiComboBox
       isClearable={false}
       options={ICONS}
-      selectedOptions={selectedIcon ? [selectedIcon] : [ICONS[0]]}
+      selectedOptions={[selectedIcon]}
       onChange={onChange}
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
