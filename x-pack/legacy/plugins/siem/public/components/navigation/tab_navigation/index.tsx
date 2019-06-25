@@ -5,6 +5,7 @@
  */
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
+import { getOr } from 'lodash/fp';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import { trackUiAction as track } from '../../../lib/track_usage';
@@ -91,7 +92,19 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       selectedTabId: id,
     }));
     track(`tab_${id}`);
-    window.location.assign(href);
+    // console.log('WINDOW', window);
+    console.log('eeee', window.event);
+    const mouseEvent: MouseEvent = window.event as MouseEvent;
+    if (mouseEvent.metaKey) {
+      // ctrl was held down during the click
+      let locationHash = getOr('', 'location.hash', window);
+      if (locationHash.match(/\?(.*)/g)) {
+        locationHash = locationHash.match(/\?(.*)/g)[0];
+      }
+      window.open(href + locationHash);
+    } else {
+      return window.location.assign(href);
+    }
   };
 
   private renderTabs = () =>

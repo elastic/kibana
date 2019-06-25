@@ -32,4 +32,18 @@ describe('Tab Navigation', () => {
     wrapper.update();
     expect(networkTab().prop('isSelected')).toBeTruthy();
   });
+  test.only('command+click opens new tab', () => {
+    const fakeOpen = jest.fn();
+    // window.event = {};
+    // const mouseEvent: MouseEvent = window.event as MouseEvent;
+    // mouseEvent.metaKey = false;
+    window.open = fakeOpen;
+    const wrapper = shallow(<TabNavigation location={'/hosts'} />);
+    console.log('wra', wrapper.instance())
+    const spy = jest.spyOn(window, 'event.metaKey')
+    const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
+    networkTab().simulate('click');
+    console.log('window.open', fakeOpen.mock.calls);
+    expect(true).toBeTruthy();
+  });
 });
