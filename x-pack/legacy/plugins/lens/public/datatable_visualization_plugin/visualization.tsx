@@ -174,6 +174,7 @@ export const datatableVisualization: Visualization<
             label: col.operation.label,
           })),
         },
+        previewIcon: 'visTable',
       };
     });
   },

@@ -8,6 +8,7 @@ import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
 import { State } from './types';
+import { toExpression } from './to_expression';
 
 const columnSortOrder = {
   date: 0,
@@ -75,28 +76,46 @@ function getSuggestion(
   // TODO: Localize the title, label, etc
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
+  const state: State = {
+    title,
+    legend: { isVisible: true, position: Position.Right },
+    seriesType: isDate ? 'line' : 'bar',
+    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
+    stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
+    x: {
+      accessor: xValue.columnId,
+      position: Position.Bottom,
+      showGridlines: false,
+      title: xTitle,
+    },
+    y: {
+      accessors: yValues.map(col => col.columnId),
+      position: Position.Left,
+      showGridlines: false,
+      title: yTitle,
+    },
+  };
+
   return {
     title,
     score: 1,
     datasourceSuggestionId,
-    state: {
-      title,
-      legend: { isVisible: true, position: Position.Right },
-      seriesType: isDate ? 'line' : 'bar',
-      splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
-      stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
+    state,
+    previewIcon: isDate ? 'visLine' : 'visBar',
+    previewExpression: toExpression({
+      ...state,
       x: {
-        accessor: xValue.columnId,
-        position: Position.Bottom,
-        showGridlines: false,
-        title: xTitle,
+        ...state.x,
+        hide: true,
       },
       y: {
-        accessors: yValues.map(col => col.columnId),
-        position: Position.Left,
-        showGridlines: false,
-        title: yTitle,
+        ...state.y,
+        hide: true,
       },
-    },
+      legend: {
+        ...state.legend,
+        isVisible: false,
+      },
+    }),
   };
 }

@@ -133,6 +133,7 @@ export function EditorFrame(props: EditorFrameProps) {
             visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}
             dispatch={dispatch}
+            ExpressionRenderer={props.ExpressionRenderer}
           />
         }
       />

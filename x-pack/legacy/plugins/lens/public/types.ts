@@ -154,6 +154,8 @@ export interface VisualizationSuggestion<T = unknown> {
   title: string;
   state: T;
   datasourceSuggestionId: number;
+  previewExpression?: Ast | string;
+  previewIcon: string;
 }
 
 export interface Visualization<T = unknown, P = unknown> {
