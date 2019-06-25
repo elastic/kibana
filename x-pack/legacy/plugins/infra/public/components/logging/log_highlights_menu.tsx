@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useState } from 'react';
-import { EuiPopover, EuiButton } from '@elastic/eui';
-import euiStyled from '../../../../../common/eui_styled_components';
+import { EuiPopover, EuiButton, EuiFieldText } from '@elastic/eui';
 
-export const LogHighlightsMenu: React.FC = () => {
+interface LogHighlightsMenuProps {
+  onChange: (highlightTerms: string[]) => void;
+}
+export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({ onChange }) => {
+  // Popover state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(
     () => {
@@ -21,7 +24,16 @@ export const LogHighlightsMenu: React.FC = () => {
     },
     [setIsPopoverOpen]
   );
-
+  // Input field state
+  const [highlightTerm, setHighlightTerm] = useState('');
+  const changeHighlightTerm = useCallback(
+    e => {
+      const value = e.target.value;
+      setHighlightTerm(value);
+      onChange([value]);
+    },
+    [setHighlightTerm]
+  );
   const button = (
     <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
       Highlights
@@ -30,7 +42,14 @@ export const LogHighlightsMenu: React.FC = () => {
 
   return (
     <EuiPopover id="popover" button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <div>Highlights menu content</div>
+      <div>
+        <EuiFieldText
+          placeholder="Term to highlight"
+          value={highlightTerm}
+          onChange={changeHighlightTerm}
+          aria-label="Term to highlight"
+        />
+      </div>
     </EuiPopover>
   );
 };
