@@ -67,4 +67,16 @@ describe('MonitorBarSeries component', () => {
     const component = shallowWithIntl(<MonitorBarSeries {...props} />);
     expect(component).toEqual({});
   });
+
+  it('renders nothing if the data series is null', () => {
+    const component = shallowWithIntl(
+      <MonitorBarSeries
+        absoluteStartDate={123}
+        absoluteEndDate={124}
+        dangerColor="danger"
+        histogramSeries={null}
+      />
+    );
+    expect(component).toEqual({});
+  });
 });

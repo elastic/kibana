@@ -179,7 +179,7 @@ export const MonitorListComponent = (props: Props) => {
           {
             field: 'histogram.points',
             name: 'Downtime history',
-            render: (histogramSeries: SummaryHistogramPoint[]) => (
+            render: (histogramSeries: SummaryHistogramPoint[] | null) => (
               <MonitorBarSeries
                 absoluteStartDate={absoluteStartDate}
                 absoluteEndDate={absoluteEndDate}

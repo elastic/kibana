@@ -16,6 +16,74 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     this.database = database;
   }
 
+  // public async getLatestDocsForMonitors(
+  //   request: any,
+  //   monitorIds: string[]
+  // ): Promise<{ [key: string]: Ping }> {
+  //   const params = {
+  //     index: INDEX_NAMES.HEARTBEAT,
+  //     body: {
+  //       size: 0,
+  //       query: {
+  //         terms: {
+  //           'monitor.id': [
+  //             'auto-http-0X21EE76EAC459873F',
+  //             'auto-http-0X2A3DAB5D64B874F8',
+  //             'auto-http-0X2AF1D7DB9C490053',
+  //             'auto-http-0X2E097095C06B7B4E',
+  //             'auto-http-0X3F1F767F45156CB3',
+  //             'auto-http-0X55511C5F7D2442BF',
+  //             'auto-http-0X728B660675AD66C2',
+  //             'auto-http-0X7BD0BBBE9FCA62B3',
+  //             'auto-http-0X89BB0F9A6C81D178',
+  //             'auto-http-0XE4A3C7D7E53C51AD',
+  //             'auto-icmp-0X5E0870F7B7178EFD',
+  //             'auto-tcp-0X43965CDA26D0025F',
+  //             'auto-tcp-0X709158D957AE02A5',
+  //             'auto-tcp-0X7BAA5C23EED7A602',
+  //             'auto-tcp-0X7D120A181386F6FF',
+  //             'auto-tcp-0X9B871DF976CE3FF6',
+  //             'auto-tcp-0XB5135CCF01B9181',
+  //             'auto-tcp-0XCEFD11A886FD7BFB',
+  //             'auto-tcp-0XD9E69ACFD41A759C',
+  //             'icmp-test',
+  //           ],
+  //         },
+  //       },
+  //       aggs: {
+  //         by_id: {
+  //           terms: {
+  //             field: 'monitor.id',
+  //             size: 10000,
+  //           },
+  //           aggs: {
+  //             latest: {
+  //               top_hits: {
+  //                 sort: [
+  //                   {
+  //                     '@timestamp': {
+  //                       order: 'desc',
+  //                     },
+  //                   },
+  //                 ],
+  //                 size: 1,
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   };
+  //   const result = await this.database.search(request, params);
+  //   return get(result, 'aggregations.by_id.buckets', []).reduce(
+  //     (map: { [key: string]: Ping }, bucket: any) => {
+  //       map[bucket.key] = get<Ping>(bucket, 'latest.hits.hits[0]');
+  //       return map;
+  //     },
+  //     {}
+  //   );
+  // }
+
   public async getMonitorStates(
     request: any,
     pageIndex: number,

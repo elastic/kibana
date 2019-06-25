@@ -25,14 +25,17 @@ exports[`MonitorListDrawer component renders a CondensedCheckList when there are
           Object {
             "ip": "127.0.0.1",
             "status": "up",
+            "timestamp": "121",
           },
           Object {
             "ip": "127.0.0.2",
             "status": "down",
+            "timestamp": "123",
           },
           Object {
             "ip": "127.0.0.3",
             "status": "up",
+            "timestamp": "125",
           },
         ],
         "location": null,

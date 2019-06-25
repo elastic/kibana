@@ -112,7 +112,7 @@ export const monitorStatesSchema = gql`
   type MonitorSummary {
     monitor_id: String!
     state: State!
-    histogram: SummaryHistogram!
+    histogram: SummaryHistogram
   }
 
   type MonitorSummaryResult {
