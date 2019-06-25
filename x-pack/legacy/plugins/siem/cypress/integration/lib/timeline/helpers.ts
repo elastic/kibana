@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { drag, drop } from '../drag_n_drop/helpers';
 import { waitForAllHostsWidget } from '../hosts/helpers';
+import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../hosts/selectors';
 import { HOSTS_PAGE } from '../urls';
 
-import { drag, drop } from '../drag_n_drop/helpers';
 import { TIMELINE_DATA_PROVIDERS, TIMELINE_TOGGLE_BUTTON } from './selectors';
-import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../hosts/selectors';
 
 /* eslint-disable spaced-comment */
 /// <reference types="cypress"/>
@@ -24,7 +24,7 @@ export const toggleTimelineVisibility = () =>
     .first()
     .click();
 
-/** Drags and drops a host from the All Hosts widget on the Hosts page to the timeline */
+/** Drags and drops a host from the `All Hosts` widget on the `Hosts` page to the timeline */
 export const dragFromAllHostsToTimeline = () => {
   cy.visit(HOSTS_PAGE);
 

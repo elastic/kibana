@@ -10,7 +10,7 @@
 const primaryButton = 0;
 
 /**
- * To overcome the React Beautiful DND has a sloppy click detection threshold:
+ * To overcome the React Beautiful DND sloppy click detection threshold:
  * https://github.com/atlassian/react-beautiful-dnd/blob/67b96c8d04f64af6b63ae1315f74fc02b5db032b/docs/sensors/mouse.md#sloppy-clicks-and-click-prevention-
  */
 const dndSloppyClickDetectionThreshold = 5;
@@ -34,7 +34,7 @@ export const drag = (subject: JQuery<HTMLElement>) => {
     });
 };
 
-/** "Drops" the subject being dragged on the spcified drop target  */
+/** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
   cy.wrap(dropTarget)
     .trigger('mousemove', { button: primaryButton })

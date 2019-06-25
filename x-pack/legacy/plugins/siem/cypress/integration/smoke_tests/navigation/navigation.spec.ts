@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { login } from '../../lib/login';
+import { login } from '../../lib/login/helpers';
 import { logout } from '../../lib/logout';
 import { HOSTS_PAGE, NETWORK_PAGE, OVERVIEW_PAGE, TIMELINES_PAGE } from '../../lib/urls';
 import {
@@ -19,7 +19,7 @@ import {
 
 const NAVIGATION_TIMEOUT = 10 * 1000;
 
-describe('navigation', () => {
+describe('top-level navigation common to all pages in the SIEM app', () => {
   beforeEach(() => {
     login();
 
