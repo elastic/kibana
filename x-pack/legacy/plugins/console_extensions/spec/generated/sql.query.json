@@ -1,5 +1,5 @@
 {
-  "xpack.sql.query": {
+  "sql.query": {
     "url_params": {
       "format": ""
     },

@@ -1,5 +1,5 @@
 {
-  "xpack.license.get": {
+  "license.get": {
     "url_params": {
       "local": "__flag__"
     },
@@ -9,6 +9,6 @@
     "patterns": [
       "_license"
     ],
-    "documentation": "https://www.elastic.co/guide/en/x-pack/current/license-management.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-license.html"
   }
 }

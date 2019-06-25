@@ -1,5 +1,5 @@
 {
-  "xpack.license.post_start_trial": {
+  "license.post_start_trial": {
     "url_params": {
       "type": "\"trial\"",
       "acknowledge": "__flag__"
@@ -10,6 +10,6 @@
     "patterns": [
       "_license/start_trial"
     ],
-    "documentation": "https://www.elastic.co/guide/en/x-pack/current/license-management.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trial.html"
   }
 }

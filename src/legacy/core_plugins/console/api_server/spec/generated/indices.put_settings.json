@@ -1,5 +1,5 @@
 {
-  "put_settings": {
+  "indices.put_settings": {
     "url_params": {
       "master_timeout": "",
       "timeout": "",

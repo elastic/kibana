@@ -1,5 +1,5 @@
 {
-  "xpack.watcher.activate_watch": {
+  "watcher.activate_watch": {
     "methods": [
       "PUT",
       "POST"

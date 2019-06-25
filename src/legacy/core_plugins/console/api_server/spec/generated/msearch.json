@@ -9,7 +9,10 @@
       ],
       "max_concurrent_searches": "",
       "typed_keys": "__flag__",
-      "pre_filter_shard_size": ""
+      "pre_filter_shard_size": "",
+      "max_concurrent_shard_requests": "",
+      "rest_total_hits_as_int": "__flag__",
+      "ccs_minimize_roundtrips": "__flag__"
     },
     "methods": [
       "GET",
@@ -17,8 +20,7 @@
     ],
     "patterns": [
       "_msearch",
-      "{indices}/_msearch",
-      "{indices}/{type}/_msearch"
+      "{indices}/_msearch"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
   }

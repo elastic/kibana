@@ -1,5 +1,5 @@
 {
-  "xpack.watcher.execute_watch": {
+  "watcher.execute_watch": {
     "url_params": {
       "debug": "__flag__"
     },

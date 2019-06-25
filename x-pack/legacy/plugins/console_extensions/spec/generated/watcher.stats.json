@@ -1,12 +1,7 @@
 {
-  "xpack.watcher.stats": {
+  "watcher.stats": {
     "url_params": {
-      "metric": [
-        "_all",
-        "queued_watches",
-        "current_watches",
-        "pending_watches"
-      ],
+      "metric": [],
       "emit_stacktraces": "__flag__"
     },
     "methods": [

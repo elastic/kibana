@@ -1,8 +1,10 @@
 {
-  "xpack.watcher.put_watch": {
+  "watcher.put_watch": {
     "url_params": {
       "active": "__flag__",
-      "version": ""
+      "version": "",
+      "if_seq_no": "",
+      "if_primary_term": ""
     },
     "methods": [
       "PUT",

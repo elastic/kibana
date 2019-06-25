@@ -1,5 +1,5 @@
 {
-  "xpack.sql.translate": {
+  "sql.translate": {
     "methods": [
       "POST",
       "GET"

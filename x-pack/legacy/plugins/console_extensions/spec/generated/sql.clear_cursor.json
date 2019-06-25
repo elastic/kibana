@@ -1,5 +1,5 @@
 {
-  "xpack.sql.clear_cursor": {
+  "sql.clear_cursor": {
     "methods": [
       "POST"
     ],

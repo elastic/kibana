@@ -1,5 +1,5 @@
 {
-  "xpack.watcher.start": {
+  "watcher.start": {
     "methods": [
       "POST"
     ],
