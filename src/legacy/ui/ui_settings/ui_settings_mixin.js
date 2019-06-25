@@ -27,22 +27,21 @@ import {
 } from './routes';
 
 export function uiSettingsMixin(kbnServer, server) {
-  const getDefaults = () => {
-    return Object.keys(kbnServer.uiExports.uiSettingDefaults).reduce((acc, currentKey) => {
-      const defaultSetting = kbnServer.uiExports.uiSettingDefaults[currentKey];
-      const updatedDefaultSetting = {
-        ...defaultSetting,
-      };
-      if (typeof defaultSetting.options === 'function') {
-        updatedDefaultSetting.options = defaultSetting.options(server);
-      }
-      if (typeof defaultSetting.value === 'function') {
-        updatedDefaultSetting.value = defaultSetting.value(server);
-      }
-      acc[currentKey] = updatedDefaultSetting;
-      return acc;
-    }, {});
-  };
+  const uiSettingDefaults = Object.keys(kbnServer.uiExports.uiSettingDefaults).reduce((acc, currentKey) => {
+    const defaultSetting = kbnServer.uiExports.uiSettingDefaults[currentKey];
+    const updatedDefaultSetting = {
+      ...defaultSetting,
+    };
+    if (typeof defaultSetting.options === 'function') {
+      updatedDefaultSetting.options = defaultSetting.options(server);
+    }
+    if (typeof defaultSetting.value === 'function') {
+      updatedDefaultSetting.value = defaultSetting.value(server);
+    }
+    acc[currentKey] = updatedDefaultSetting;
+    return acc;
+  }, {});
+  const getDefaults = () => uiSettingDefaults;
   const overrides = kbnServer.config.get('uiSettings.overrides');
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
