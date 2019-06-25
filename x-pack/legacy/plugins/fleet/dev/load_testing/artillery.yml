@@ -1,0 +1,14 @@
+config:
+  target: 'http://0.0.0.0:5603/qgv'
+  phases:
+    - duration: 20
+      arrivalRate: 10
+      rampTo: 50
+      name: 'Warm up the stack'
+    - duration: 400
+      arrivalRate: 100000
+      name: 'Sustained max load'
+scenarios:
+  - flow:
+      - get:
+          url: '/api/fleet/load'
