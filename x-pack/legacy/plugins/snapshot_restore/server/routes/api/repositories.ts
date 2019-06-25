@@ -73,16 +73,27 @@ export const getOneHandler: RouterRouteHandler = async (
 ): Promise<{
   repository: Repository | {};
   isManagedRepository?: boolean;
-  snapshots: { count: number | undefined } | {};
+  snapshots: { count: number | null } | {};
 }> => {
   const { name } = req.params;
   const managedRepository = await getManagedRepositoryName();
   const repositoryByName = await callWithRequest('snapshot.getRepository', { repository: name });
-  const { snapshots } = await callWithRequest('snapshot.get', {
+  const {
+    responses: snapshotResponses,
+  }: {
+    responses: Array<{
+      repository: string;
+      snapshots: any[];
+    }>;
+  } = await callWithRequest('snapshot.get', {
     repository: name,
     snapshot: '_all',
   }).catch(e => ({
-    snapshots: null,
+    responses: [
+      {
+        snapshots: null,
+      },
+    ],
   }));
 
   if (repositoryByName[name]) {
@@ -95,7 +106,10 @@ export const getOneHandler: RouterRouteHandler = async (
       },
       isManagedRepository: managedRepository === name,
       snapshots: {
-        count: snapshots ? snapshots.length : null,
+        count:
+          snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots
+            ? snapshotResponses[0].snapshots.length
+            : null,
       },
     };
   } else {
