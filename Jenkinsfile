@@ -2,7 +2,7 @@
 // @Library('apm@current') _
 
 pipeline {
-  agent any
+  agent none 
   environment {
     BASE_DIR = "."
     CI = true
@@ -13,43 +13,38 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    // stage('Kickoff') {
-    //   agent { label 'master || immutable' }
-    //   steps {
-    //     // sh 'env > env.txt' 
-    //     // script {
-    //     //   for (String x: readFile('env.txt').split("\r?\n")) {
-    //     //     println "# ENV VAR: ${x}"
-    //     //   }
-    //     // } 
-    //   }
-    // }
-    stage('Setup and Build OSS') {
-      agent { label 'linux || immutable' }
+    stage('Checkout') {
+      agent { label 'master || immutable' }
+      options { skipDefaultCheckout() }
       steps {
+        deleteDir()
+        gitCheckout(basedir: "${BASE_DIR}")
+        stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**'
+      }
+    }
+    stage('Setup and Build OSS') {
+      agent { label 'linux || immutable' } // Not on the master lightweight executor:   
+      options { skipDefaultCheckout() }
+      steps {
+        deleteDir()
+        unstash 'source'
         dir("${env.BASE_DIR}"){
           // Runs src/dev/ci_setup/extract_bootstrap_cache.sh, src/dev/ci_setup/setup.sh, and src/dev/ci_setup/checkout_sibling_es.sh
           // setup.sh bootstraps the app, so we can stash from here
           sh './.ci/run.sh' 
-          sh 'du -hcs node_modules' // How big is it?
+          sh 'du -hcs node_modules' // How big is node_modules?
         }
-        stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**  '
+        stash allowEmpty: true, name: 'oss-source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**'
       }
     }
     stage('kibana-intake') {
-      steps {
-        sh 'env > env.txt' 
-        script {
-          for (String x: readFile('env.txt').split("\r?\n")) {
-            println "# ENV VAR: ${x}"
-          }
-        } 
-        sh './test/scripts/jenkins_unit.sh'
-      }
-    }
-    stage('Unit Test') {
+      agent { label 'linux || immutable' } // Not on the master lightweight executor:   
+      options { skipDefaultCheckout() }
       steps {
         sh 'echo "Not implemented yet"'
+        // deleteDir()
+        // unstash 'oss-source'
+        // sh './test/scripts/jenkins_unit.sh'
       }
     }
     stage('Component Integration Tests') {
@@ -65,6 +60,12 @@ pipeline {
     stage('Finish') {
       steps {
         sh 'echo "Not implemented yet"'
+        // sh 'env > env.txt' 
+        // script {
+        //   for (String x: readFile('env.txt').split("\r?\n")) {
+        //     println "# ENV VAR: ${x}"
+        //   }
+        // } 
       }
     }
   }
