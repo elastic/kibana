@@ -138,7 +138,7 @@ export function StickyTransactionProperties({
         label: i18n.translate('xpack.apm.transactionDetails.userAgentOsLabel', {
           defaultMessage: 'User agent OS'
         }),
-        val: os.full,
+        val: os.full || os.name,
         truncated: true,
         width
       });

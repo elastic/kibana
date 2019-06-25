@@ -12,8 +12,8 @@ export interface UserAgent {
   original: string;
   os?: {
     name: string;
-    version: string;
-    full: string;
+    version?: string;
+    full?: string;
   };
   version?: string;
 }
