@@ -5,6 +5,7 @@
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
 * <<load-balancing>>
+* <<high-availability>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -107,3 +108,21 @@ transport.tcp.port: 9300 - 9400
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.hosts: ["http://localhost:9200"]
 --------
+
+[float]
+[[high-availability]]
+=== High Availability Across Multiple Elasticsearch Nodes
+Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
+Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
+
+Currently the Console application is limited to connecting to the first node listed.
+
+In kibana.yml:
+--------
+elasticsearch.hosts:
+  - http://elasticsearch1:9200
+  - http://elasticsearch2:9200
+--------
+
+Related configurations include `elasticsearch.sniffInterval`, `elasticsearch.sniffOnStart`, and `elasticsearch.sniffOnConnectionFault`.
+These can be used to automatically update the list of hosts as a cluster is resized.  Parameters can be found on the {kibana-ref}/settings.html[settings page].
