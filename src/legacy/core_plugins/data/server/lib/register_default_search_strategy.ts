@@ -21,7 +21,7 @@ import { Request } from 'hapi';
 import { Legacy } from 'kibana';
 import { SearchOptions } from '../../common';
 import { registerSearchStrategy } from './search_strategy_registry';
-import { getEsShardTimeout } from './get_es_config';
+import { getEsSearchConfig } from './get_es_search_config';
 
 export function registerDefaultSearchStrategy(server: Legacy.Server) {
   registerSearchStrategy('default', async function defaultSearchStrategy(
@@ -30,9 +30,9 @@ export function registerDefaultSearchStrategy(server: Legacy.Server) {
     body: any,
     { signal, onProgress = () => {} }: SearchOptions = {}
   ) {
-    const timeout = await getEsShardTimeout(server);
+    const config = await getEsSearchConfig(server, request);
     const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-    const promise = callWithRequest(request, 'search', { index, body, timeout }, { signal });
+    const promise = callWithRequest(request, 'search', { index, body, ...config }, { signal });
     return promise.then(response => {
       onProgress(response._shards);
       return response;

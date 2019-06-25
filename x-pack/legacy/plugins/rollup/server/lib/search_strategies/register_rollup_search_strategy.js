@@ -10,10 +10,9 @@ import { callWithRequestFactory } from '../call_with_request_factory';
 
 export const registerRollupSearchStrategy = (kbnServer, server) => kbnServer.afterPluginsInit(() => {
   server.plugins.data.registerSearchStrategy('rollup', async (request, index, body, { signal, onProgress = () => {} } = {}) => {
-    const timeout = await server.plugins.data.getEsShardTimeout(server);
-    console.log(timeout);
+    const config = await server.plugins.data.getEsSearchConfig(server, request);
     const callWithRequest = callWithRequestFactory(server, request);
-    const promise = callWithRequest('rollup.search', { index, body, timeout, rest_total_hits_as_int: true }, { signal });
+    const promise = callWithRequest('rollup.search', { index, body, rest_total_hits_as_int: true, ...config }, { signal });
     return promise.then(response => {
       onProgress(response._shards);
       return response;

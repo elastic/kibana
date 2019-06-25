@@ -29,9 +29,10 @@ export {
 } from './parse_es_interval';
 
 export interface SearchOptions {
-  strategy?: string;
   onProgress?: (shards: ShardProgress) => void;
   signal?: AbortSignal;
+  strategy?: string;
+  sessionId?: string;
 }
 
 export interface ShardProgress {

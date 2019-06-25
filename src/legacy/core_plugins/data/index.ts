@@ -18,10 +18,10 @@
  */
 
 import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
+import { Legacy } from 'kibana';
 import { registerSearchApi } from './server/routes/search';
 import {
-  getEsShardTimeout,
+  getEsSearchConfig,
   getIndexPattern,
   registerDefaultSearchStrategy,
   registerSearchStrategy,
@@ -42,7 +42,7 @@ export default function DataPlugin(kibana: any) {
     init: (server: Legacy.Server) => {
       registerSearchApi(server);
       registerDefaultSearchStrategy(server);
-      server.expose('getEsShardTimeout', getEsShardTimeout);
+      server.expose('getEsSearchConfig', getEsSearchConfig);
       server.expose('getIndexPattern', getIndexPattern);
       server.expose('registerSearchStrategy', registerSearchStrategy);
       server.expose('search', search);

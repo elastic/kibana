@@ -20,6 +20,10 @@
 import { kfetch } from 'ui/kfetch';
 import { SearchOptions } from '../../common';
 
+// Not really a "session" ID per se, but just something unique to this browser load so that
+// requests can hit the same shards if the `preference` setting is set to this
+const sessionId = `${Date.now()}`;
+
 /**
  * The client-side API for making requests to Elasticsearch using raw Elasticsearch query DSL.
  *
@@ -36,11 +40,12 @@ import { SearchOptions } from '../../common';
  * const response = await search('twitter', body, options);
  */
 export function search(index: string, body: any, options: SearchOptions = {}) {
-  const { signal, onProgress = () => {}, strategy = 'default' } = options;
+  const { signal, onProgress = () => {}, strategy } = options;
+  const query = strategy ? { strategy, sessionId } : { sessionId };
   const promise = kfetch({
     method: 'POST',
     pathname: `../api/search/${index}`,
-    query: { strategy },
+    query,
     body: JSON.stringify(body),
     signal,
   });
