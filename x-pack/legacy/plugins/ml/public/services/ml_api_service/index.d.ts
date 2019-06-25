@@ -5,6 +5,7 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
+import { Privileges } from '../../../common/types/privileges';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -30,7 +31,8 @@ declare interface Ml {
     stopDataFrameTransformsJob(jobId: string): Promise<any>;
   };
 
-  checkPrivilege(obj: object): Promise<any>;
+  hasPrivileges(obj: object): Promise<any>;
+  checkMlPrivileges(): Promise<{ privileges: Privileges; upgradeInProgress: boolean }>;
   esSearch: any;
   getIndices(): Promise<EsIndex[]>;
 
