@@ -4,30 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { login } from '../../lib/login/helpers';
 import { logout } from '../../lib/logout';
 import { TIMELINE_DROPPED_DATA_PROVIDERS } from '../../lib/timeline/selectors';
 import {
   dragFromAllHostsToTimeline,
   TIMELINE_RENDER_DATA_PROVIDERS_TIMEOUT,
+  toggleTimelineVisibility,
 } from '../../lib/timeline/helpers';
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../../lib/hosts/selectors';
+import { HOSTS_PAGE } from '../../lib/urls';
+import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
+import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 /* eslint-disable spaced-comment */
 /// <reference types="cypress"/>
 
 describe('timeline data providers', () => {
   beforeEach(() => {
-    login();
-
-    cy.viewport('macbook-15');
+    loginAndWaitForPage(HOSTS_PAGE);
   });
 
   afterEach(() => {
     logout();
   });
 
+  // eslint-disable-next-line ban/ban
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
+    waitForAllHostsWidget();
+
+    toggleTimelineVisibility();
+
     dragFromAllHostsToTimeline();
 
     cy.get(TIMELINE_DROPPED_DATA_PROVIDERS, {

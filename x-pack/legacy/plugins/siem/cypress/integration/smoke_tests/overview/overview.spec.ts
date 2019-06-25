@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { login } from '../../lib/login/helpers';
 import { logout } from '../../lib/logout';
 import { OVERVIEW_PAGE } from '../../lib/urls';
 import { clearFetch, stubApi } from '../../lib/fixtures/helpers';
 import { HOST_STATS, NETWORK_STATS, STAT_AUDITD } from '../../lib/overview/selectors';
+import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 /* eslint-disable spaced-comment */
 /// <reference types="cypress"/>
 
-const OVERVIEW_TIMEOUT = 10 * 1000;
-
 describe('Overview Page', () => {
   beforeEach(() => {
     clearFetch();
-    login();
-
-    cy.viewport('macbook-15');
+    stubApi('overview');
+    loginAndWaitForPage(OVERVIEW_PAGE);
   });
 
   afterEach(() => {
@@ -28,11 +25,7 @@ describe('Overview Page', () => {
   });
 
   it('Host and Network stats render with correct values', () => {
-    stubApi('overview');
-    cy.visit(OVERVIEW_PAGE);
-
-    // wait for stats to load (only need to check one w/ timeout
-    cy.get(STAT_AUDITD.domId, { timeout: OVERVIEW_TIMEOUT });
+    cy.get(STAT_AUDITD.domId);
 
     HOST_STATS.forEach(stat => {
       cy.get(stat.domId)

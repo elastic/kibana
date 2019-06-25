@@ -5,9 +5,7 @@
  */
 
 import { drag, drop } from '../drag_n_drop/helpers';
-import { waitForAllHostsWidget } from '../hosts/helpers';
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../hosts/selectors';
-import { HOSTS_PAGE } from '../urls';
 
 import { TIMELINE_DATA_PROVIDERS, TIMELINE_TOGGLE_BUTTON } from './selectors';
 
@@ -26,12 +24,6 @@ export const toggleTimelineVisibility = () =>
 
 /** Drags and drops a host from the `All Hosts` widget on the `Hosts` page to the timeline */
 export const dragFromAllHostsToTimeline = () => {
-  cy.visit(HOSTS_PAGE);
-
-  toggleTimelineVisibility();
-
-  waitForAllHostsWidget();
-
   cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
     .first()
     .then(host => drag(host));
