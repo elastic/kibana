@@ -59,11 +59,10 @@ export class FilterStateManager {
     // Moving forward, state should provide observable subscriptions.
     this.interval = setInterval(() => {
       const appState = this.getAppState();
-      const stateUndefined = _.isUndefined(appState) || _.isUndefined(this.globalState);
+      const stateUndefined = !appState || !this.globalState;
       if (stateUndefined) return;
 
-      const filterStateUndefined =
-        _.isUndefined(appState.filters) || _.isUndefined(this.globalState.filters);
+      const filterStateUndefined = !appState.filters || !this.globalState.filters;
       if (filterStateUndefined) return;
 
       const globalFilterChanged = !(
