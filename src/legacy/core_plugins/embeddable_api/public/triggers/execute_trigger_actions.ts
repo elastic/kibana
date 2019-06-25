@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TriggerRegistry } from '../state/registries';
 import { actionRegistry } from '../actions';
-import { triggerRegistry } from '../triggers';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu_actions';
 import { IEmbeddable } from '../embeddables';
 import { getActionsForTrigger } from '../get_actions_for_trigger';
@@ -30,7 +30,7 @@ export async function executeTriggerActions(
   }: {
     embeddable: IEmbeddable;
     triggerContext: any;
-  }
+  }, triggerRegistry: TriggerRegistry
 ) {
   const actions = await getActionsForTrigger(actionRegistry, triggerRegistry, triggerId, {
     embeddable,
