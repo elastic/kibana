@@ -16,13 +16,13 @@ export class TooltipSelector extends React.Component {
     return (
       <EuiFormRow
         label={
-          i18n.translate('xpack.maps.source.esSearch.fieldsLabel', {
+          i18n.translate('xpack.maps.tooltipSelectorLabel', {
             defaultMessage: `Fields to display in tooltip`
           })
         }
       >
         <MultiFieldSelect
-          placeholder={i18n.translate('xpack.maps.source.esSearch.fieldsPlaceholder', {
+          placeholder={i18n.translate('xpack.maps.tooltipSelectorPlaceholder', {
             defaultMessage: `Select fields`
           })
           }
