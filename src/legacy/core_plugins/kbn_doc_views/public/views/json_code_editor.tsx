@@ -25,30 +25,26 @@ export interface JsonCodeEditorProps {
   hit: Record<string, any>;
 }
 
-export function JsonCodeEditor(props: JsonCodeEditorProps) {
+export function JsonCodeEditor({ hit }: JsonCodeEditorProps) {
   return (
     <EuiCodeEditor
-      id="json-ace"
-      theme="textmate"
-      value={JSON.stringify(props.hit, null, 2)}
-      mode="json"
-      isReadOnly
       aria-label={
         <FormattedMessage
           id="kbnDocViews.json.codeEditorAriaLabel"
           defaultMessage="Read only JSON view of an elasticsearch document"
         />
       }
-      width="100%"
-      editorProps={{
-        $blockScrolling: Infinity,
-      }}
+      isReadOnly
+      mode="json"
       setOptions={{
         showPrintMargin: false,
-        minLines: 25,
+        minLines: 20,
         maxLines: Infinity,
         highlightActiveLine: false,
       }}
+      theme="textmate"
+      value={JSON.stringify(hit, null, 2)}
+      width="100%"
     />
   );
 }
