@@ -8,7 +8,7 @@
 
 import {
   Blame,
-  Commit,
+  Commit as NodeGitCommit,
   Diff as NodeGitDiff,
   Error as NodeGitError,
   Oid,
@@ -23,7 +23,7 @@ import { CommitDescription, TreeDescription } from 'isomorphic-git';
 import { isBinaryFileSync } from 'isbinaryfile';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
-import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
+import { Commit, FileTree, FileTreeItemType, RepositoryUri } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
 
@@ -127,13 +127,13 @@ export class GitOperations {
     throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
   }
 
-  public async getCommit(uri: RepositoryUri, revision: string): Promise<Commit> {
+  public async getCommit(uri: RepositoryUri, revision: string): Promise<NodeGitCommit> {
     const info = await this.getCommitOr404(uri, revision);
     const repo = await this.openRepo(uri);
     return (await checkExists(
       () => this.findCommit(repo, info.id),
       `revision or branch ${revision} not found in ${uri}`
-    )) as Commit;
+    )) as NodeGitCommit;
   }
 
   public async getDefaultBranch(uri: RepositoryUri): Promise<string> {
@@ -301,6 +301,23 @@ export class GitOperations {
       default:
         throw new Error('unknown mode: ' + mode);
     }
+  }
+
+  // TODO: this is the GIT API to iterate all commits.
+  public async iterateCommits(
+    uri: RepositoryUri,
+    revision: string
+  ): Promise<AsyncIterableIterator<Commit>> {
+    const commit = await this.getCommit(uri, revision);
+
+    async function* walk(): AsyncIterableIterator<Commit> {
+      yield {
+        repoUri: uri,
+        id: commit.sha(),
+      };
+    }
+
+    return await walk();
   }
 
   /**
@@ -559,7 +576,7 @@ export class GitOperations {
     return res;
   }
 
-  private async getOriginCode(commit: Commit, repo: Repository, path: string) {
+  private async getOriginCode(commit: NodeGitCommit, repo: Repository, path: string) {
     for (const oid of commit.parents()) {
       const parentCommit = await repo.getCommit(oid);
       if (parentCommit) {
@@ -572,12 +589,12 @@ export class GitOperations {
     return '';
   }
 
-  private async getModifiedCode(commit: Commit, path: string) {
+  private async getModifiedCode(commit: NodeGitCommit, path: string) {
     const entry = await commit.getEntry(path);
     return (await entry.getBlob()).content().toString('utf8');
   }
 
-  private async findCommit(repo: Repository, oid: string): Promise<Commit | null> {
+  private async findCommit(repo: Repository, oid: string): Promise<NodeGitCommit | null> {
     try {
       return repo.getCommit(Oid.fromString(oid));
     } catch (e) {
@@ -682,7 +699,7 @@ export class GitOperations {
   }
 }
 
-export function commitInfo(commit: Commit): CommitInfo {
+export function commitInfo(commit: NodeGitCommit): CommitInfo {
   return {
     updated: commit.date(),
     message: commit.message(),

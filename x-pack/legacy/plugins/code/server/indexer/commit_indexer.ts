@@ -75,11 +75,14 @@ export class CommitIndexer extends AbstractIndexer {
         HEAD
       );
       repo = workspaceRepo;
-      // const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
-      yield {
-        repoUri: this.repoUri,
-        revision: 'HEAD',
-      };
+      const commitIterator = await this.gitOps.iterateCommits(this.repoUri, HEAD);
+      for await (const commit of commitIterator) {
+        const req: CommitIndexRequest = {
+          repoUri: this.repoUri,
+          revision: commit.id,
+        };
+        yield req;
+      }
     } catch (error) {
       this.log.error(`Prepare commit indexing requests error.`);
       this.log.error(error);
