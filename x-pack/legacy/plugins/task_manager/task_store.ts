@@ -13,14 +13,21 @@ import {
   TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
 } from './constants';
 import { Logger } from './lib/logger';
-import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
+import {
+  ConcreteTaskInstance,
+  ElasticJs,
+  SanitizedTaskDefinition,
+  TaskDictionary,
+  TaskInstance,
+  TaskStatus,
+} from './task';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
   getKibanaUuid: () => string;
   index: string;
   maxAttempts: number;
-  supportedTypes: string[];
+  definitions: TaskDictionary<SanitizedTaskDefinition>;
   logger: Logger;
 }
 
@@ -80,7 +87,7 @@ export class TaskStore {
   public getKibanaUuid: () => string;
   public readonly index: string;
   private callCluster: ElasticJs;
-  private supportedTypes: string[];
+  private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private _isInitialized = false; // eslint-disable-line @typescript-eslint/camelcase
   private logger: Logger;
 
@@ -90,26 +97,18 @@ export class TaskStore {
    * @prop {CallCluster} callCluster - The elastic search connection
    * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
-   * @prop {string[]} supportedTypes - The task types supported by this store
+   * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {Logger} logger - The task manager logger.
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
     this.maxAttempts = opts.maxAttempts;
-    this.supportedTypes = opts.supportedTypes;
+    this.definitions = opts.definitions;
     this.logger = opts.logger;
     this.getKibanaUuid = opts.getKibanaUuid;
 
     this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
-  }
-
-  public addSupportedTypes(types: string[]) {
-    if (!this._isInitialized) {
-      this.supportedTypes = this.supportedTypes.concat(types);
-    } else {
-      throw new Error('Cannot add task types after initialization');
-    }
   }
 
   /**
@@ -229,11 +228,11 @@ export class TaskStore {
       await this.init();
     }
 
-    if (!this.supportedTypes.includes(taskInstance.taskType)) {
+    if (!this.definitions[taskInstance.taskType]) {
       throw new Error(
-        `Unsupported task type "${
-          taskInstance.taskType
-        }". Supported types are ${this.supportedTypes.join(', ')}`
+        `Unsupported task type "${taskInstance.taskType}". Supported types are ${Object.keys(
+          this.definitions
+        ).join(', ')}`
       );
     }
 
@@ -289,10 +288,31 @@ export class TaskStore {
       query: {
         bool: {
           must: [
-            { terms: { 'task.taskType': this.supportedTypes } },
-            { range: { 'task.attempts': { lte: this.maxAttempts } } },
+            {
+              bool: {
+                should: Object.entries(this.definitions).map(([type, definition]) => ({
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'task.taskType': type,
+                        },
+                      },
+                      {
+                        range: {
+                          'task.attempts': {
+                            lte: definition.maxAttempts || this.maxAttempts,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                })),
+              },
+            },
             { range: { 'task.runAt': { lte: 'now' } } },
             { range: { 'kibana.apiVersion': { lte: API_VERSION } } },
+            { term: { 'task.status': 'idle' } },
           ],
         },
       },

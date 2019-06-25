@@ -10,11 +10,32 @@ import {
   TASK_MANAGER_API_VERSION as API_VERSION,
   TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
 } from './constants';
-import { TaskInstance, TaskStatus } from './task';
+import { TaskDictionary, SanitizedTaskDefinition, TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
 
 const getKibanaUuid = sinon.stub().returns('kibana-uuid-123-test');
+
+const taskDefinitions: TaskDictionary<SanitizedTaskDefinition> = {
+  report: {
+    type: 'report',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+  dernstraight: {
+    type: 'dernstraight',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+  yawn: {
+    type: 'yawn',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+};
 
 describe('TaskStore', () => {
   describe('init', () => {
@@ -27,7 +48,7 @@ describe('TaskStore', () => {
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
       });
 
       await store.init();
@@ -65,7 +86,7 @@ describe('TaskStore', () => {
         logger,
         index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
       });
 
       await store.init();
@@ -96,7 +117,7 @@ describe('TaskStore', () => {
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['report', 'dernstraight', 'yawn'],
+        definitions: taskDefinitions,
       });
       await store.init();
       const result = await store.schedule(task);
@@ -171,7 +192,7 @@ describe('TaskStore', () => {
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
       });
 
       const result = await store.fetch(opts);
@@ -335,7 +356,7 @@ describe('TaskStore', () => {
       const store = new TaskStore({
         callCluster,
         logger: mockLogger(),
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
         index: 'tasky',
         maxAttempts: 2,
         ...opts,
@@ -358,7 +379,7 @@ describe('TaskStore', () => {
         callCluster,
         getKibanaUuid,
         logger: mockLogger(),
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
         index: 'tasky',
         maxAttempts: 2,
       });
@@ -373,12 +394,27 @@ describe('TaskStore', () => {
 
     test('it filters tasks by supported types, maxAttempts, and runAt', async () => {
       const maxAttempts = _.random(2, 43);
+      const customMaxAttempts = _.random(44, 100);
       const index = `index_${_.random(1, 234)}`;
       const { args } = await testFetchAvailableTasks({
         opts: {
           index,
           maxAttempts,
-          supportedTypes: ['foo', 'bar'],
+          definitions: {
+            foo: {
+              type: 'foo',
+              title: '',
+              numWorkers: 1,
+              createTaskRunner: jest.fn(),
+            },
+            bar: {
+              type: 'bar',
+              title: '',
+              numWorkers: 1,
+              maxAttempts: customMaxAttempts,
+              createTaskRunner: jest.fn(),
+            },
+          },
         },
       });
       expect(args).toMatchObject({
@@ -390,10 +426,51 @@ describe('TaskStore', () => {
                 {
                   bool: {
                     must: [
-                      { terms: { 'task.taskType': ['foo', 'bar'] } },
-                      { range: { 'task.attempts': { lte: maxAttempts } } },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              bool: {
+                                must: [
+                                  {
+                                    term: {
+                                      'task.taskType': 'foo',
+                                    },
+                                  },
+                                  {
+                                    range: {
+                                      'task.attempts': {
+                                        lte: maxAttempts,
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              bool: {
+                                must: [
+                                  {
+                                    term: {
+                                      'task.taskType': 'bar',
+                                    },
+                                  },
+                                  {
+                                    range: {
+                                      'task.attempts': {
+                                        lte: customMaxAttempts,
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
                       { range: { 'task.runAt': { lte: 'now' } } },
                       { range: { 'kibana.apiVersion': { lte: 1 } } },
+                      { term: { 'task.status': 'idle' } },
                     ],
                   },
                 },
@@ -510,7 +587,7 @@ describe('TaskStore', () => {
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
       });
 
       const result = await store.update(task);
@@ -561,7 +638,7 @@ describe('TaskStore', () => {
         logger: mockLogger(),
         index: 'myindex',
         maxAttempts: 2,
-        supportedTypes: ['a'],
+        definitions: taskDefinitions,
       });
       const result = await store.remove(id);
 

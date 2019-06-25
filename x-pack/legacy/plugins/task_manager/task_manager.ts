@@ -59,7 +59,7 @@ export class TaskManager {
       callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
       index: config.get('xpack.task_manager.index'),
       maxAttempts: config.get('xpack.task_manager.max_attempts'),
-      supportedTypes: Object.keys(this.definitions),
+      definitions: this.definitions,
       logger,
       getKibanaUuid: () => config.get('server.uuid'),
     });
@@ -90,7 +90,6 @@ export class TaskManager {
     this.poller = poller;
 
     kbnServer.afterPluginsInit(async () => {
-      store.addSupportedTypes(Object.keys(this.definitions));
       const startPoller = () => {
         return poller
           .start()

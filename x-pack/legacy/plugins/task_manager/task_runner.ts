@@ -212,7 +212,8 @@ export class TaskManagerRunner implements TaskRunner {
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
     // recurring task: update the task instance
     const state = result.state || this.instance.state || {};
-    const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
+    const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
+    const status = this.instance.attempts < maxAttempts ? 'idle' : 'failed';
 
     let runAt;
     if (status === 'failed') {

@@ -102,6 +102,11 @@ export interface TaskDefinition {
   timeout?: string;
 
   /**
+   * Up to how many times the task should retry when it fails to run.
+   */
+  maxAttempts?: number;
+
+  /**
    * The numer of workers / slots a running instance of this task occupies.
    * This defaults to 1.
    */
@@ -126,6 +131,7 @@ export const validateTaskDefinition = Joi.object({
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   timeout: Joi.string().default('5m'),
+  maxAttempts: Joi.number().optional(),
   numWorkers: Joi.number()
     .min(1)
     .default(1),

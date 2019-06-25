@@ -53,7 +53,7 @@ describe('TaskManagerRunner', () => {
         state: { hey: 'there' },
       },
       definitions: {
-        testtype: {
+        bar: {
           createTaskRunner: () => ({
             async run() {
               throw new Error('Dangit!');
@@ -80,6 +80,15 @@ describe('TaskManagerRunner', () => {
       instance: {
         interval: '10m',
       },
+      definitions: {
+        bar: {
+          createTaskRunner: () => ({
+            async run() {
+              return;
+            },
+          }),
+        },
+      }
     });
 
     await runner.run();
@@ -187,7 +196,7 @@ describe('TaskManagerRunner', () => {
   test('warns if cancel is called on a non-cancellable task', async () => {
     const { runner, logger } = testOpts({
       definitions: {
-        testType: {
+        bar: {
           createTaskRunner: () => ({
             run: async () => undefined,
           }),

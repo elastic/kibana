@@ -69,6 +69,10 @@ taskManager.registerTaskDefinitions({
     // This defaults to 5 minutes.
     timeout: '5m',
 
+    // Optional, how many times to retry if task fails to run.
+    // This defaults to what is configured at the task manager level.
+    maxAttempts: 5,
+
     // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
     // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
     // overridden by the `override_num_workers` config value, if specified.
