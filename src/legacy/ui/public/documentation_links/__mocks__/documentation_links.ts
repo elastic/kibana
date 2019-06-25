@@ -17,30 +17,9 @@
  * under the License.
  */
 
-import dateMath from '@elastic/datemath';
-import { uiModules } from '../../modules';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
-uiModules.get('kibana').directive('validateDateMath', function () {
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    scope: {
-      'ngModel': '='
-    },
-    link: function ($scope, elem, attr, ngModel) {
-      ngModel.$parsers.unshift(validateDateMath);
-      ngModel.$formatters.unshift(validateDateMath);
+const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinksServiceMock.createStartContract();
 
-      function validateDateMath(input) {
-        if (input == null || input === '') {
-          ngModel.$setValidity('validDateMath', true);
-          return null;
-        }
-
-        const moment = dateMath.parse(input);
-        ngModel.$setValidity('validDateMath', moment != null && moment.isValid());
-        return input;
-      }
-    }
-  };
-});
+export { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL };
+export const documentationLinks = links;
