@@ -15,6 +15,10 @@ export function getFullscreen(state) {
   return get(state, 'transient.fullscreen', false);
 }
 
+export function getZoomScale(state) {
+  return get(state, 'transient.zoomScale', 1);
+}
+
 export function getServerFunctions(state) {
   return get(state, 'app.serverFunctions');
 }
