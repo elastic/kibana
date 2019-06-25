@@ -18,7 +18,7 @@ export class XPackInfo {
   }
 
   get = (path, defaultValue = undefined) => {
-    const xpackInfoValuesJson = sessionStorage.getItem(XPACK_INFO_KEY);
+    const xpackInfoValuesJson = window.sessionStorage.getItem(XPACK_INFO_KEY);
     const xpackInfoValues = xpackInfoValuesJson ? JSON.parse(xpackInfoValuesJson) : {};
     return get(xpackInfoValues, path, defaultValue);
   };
@@ -28,7 +28,8 @@ export class XPackInfo {
     // convention of using kebabe-case/snake-case in API response bodies but camel-case in JS
     // objects. See pull #29304 for more info.
     const camelCasedXPackInfo = convertKeysToCamelCaseDeep(updatedXPackInfo);
-    sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
+    // guarding sessionStorage for testing
+    typeof sessionStorage !== 'undefined' && sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
   };
 
   clear = () => {
