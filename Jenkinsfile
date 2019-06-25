@@ -55,16 +55,19 @@ pipeline {
 
 
     stage('Component Integration Tests') {
+      agent { label 'linux || immutable' } 
       steps {
         sh 'echo "Not implemented yet"'
       }
     }
     stage('Functional Tests') {
+      agent { label 'linux || immutable' } 
       steps {
         sh 'echo "Not implemented yet"'
       }
     }
     stage('Finish') {
+      agent { label 'linux || immutable' } 
       steps {
         sh 'echo "Not implemented yet"'
         // sh 'env > env.txt' 
