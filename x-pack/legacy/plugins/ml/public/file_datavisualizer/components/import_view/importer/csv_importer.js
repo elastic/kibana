@@ -5,6 +5,7 @@
  */
 
 
+import { ES_FIELD_TYPES } from '../../../../../common/constants/field_types';
 import { Importer } from './importer';
 import Papa from 'papaparse';
 
@@ -71,15 +72,15 @@ function shouldUseDynamicType(columnNames, mappings, columnNumber) {
     return false;
   }
   switch (columnMapping.type) {
-    case 'boolean':
-    case 'long':
-    case 'integer':
-    case 'short':
-    case 'byte':
-    case 'double':
-    case 'float':
-    case 'half_float':
-    case 'scaled_float':
+    case ES_FIELD_TYPES.BOOLEAN:
+    case ES_FIELD_TYPES.LONG:
+    case ES_FIELD_TYPES.INTEGER:
+    case ES_FIELD_TYPES.SHORT:
+    case ES_FIELD_TYPES.BYTE:
+    case ES_FIELD_TYPES.DOUBLE:
+    case ES_FIELD_TYPES.FLOAT:
+    case ES_FIELD_TYPES.HALF_FLOAT:
+    case ES_FIELD_TYPES.SCALED_FLOAT:
       return true;
     default:
       return false;
