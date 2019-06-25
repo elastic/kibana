@@ -16,7 +16,8 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { DataFrameJobListColumn, DataFrameJobListRow, JobId } from './common';
+import { JobId } from '../../../../common';
+import { DataFrameJobListColumn, DataFrameJobListRow } from './common';
 import { getActions } from './actions';
 
 export const getColumns = (
