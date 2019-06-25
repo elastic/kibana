@@ -14,8 +14,7 @@ pipeline {
   }
   stages {
     stage('Checkout') {
-      agent { label 'master || immutable' }
-      options { skipDefaultCheckout() }
+      agent { label 'master || immutable || linux' }
       steps {
         stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**'
       }
@@ -36,7 +35,7 @@ pipeline {
       }
     }
     stage('kibana-intake') {
-      agent { label 'linux || immutable' } // Not on the master lightweight executor:   
+      agent { label 'linux || immutable' } 
       options { skipDefaultCheckout() }
       steps {
         sh 'echo "Not implemented yet"'
