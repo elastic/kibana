@@ -17,8 +17,6 @@ pipeline {
       agent { label 'master || immutable' }
       options { skipDefaultCheckout() }
       steps {
-        deleteDir()
-        gitCheckout(basedir: "${BASE_DIR}")
         stash allowEmpty: true, name: 'source', useDefaultExcludes: true, excludes: 'node_modules/@elastic/nodegit/vendor/libgit2/tests/**'
       }
     }
@@ -47,6 +45,17 @@ pipeline {
         // sh './test/scripts/jenkins_unit.sh'
       }
     }
+
+
+
+
+
+
+
+
+
+
+
     stage('Component Integration Tests') {
       steps {
         sh 'echo "Not implemented yet"'
