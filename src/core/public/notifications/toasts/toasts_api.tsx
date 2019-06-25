@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 
@@ -25,7 +25,7 @@ import { ErrorToast } from './error_toast';
 import { UiSettingsSetup } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
 
-type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGlobalToastListToast, 'id'>>;
+type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
 
 /** @public */
 export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
@@ -56,7 +56,7 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
 
 /** @public */
 export class ToastsApi {
-  private toasts$ = new Rx.BehaviorSubject<EuiGlobalToastListToast[]>([]);
+  private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
   private uiSettings: UiSettingsSetup;
 
@@ -75,7 +75,7 @@ export class ToastsApi {
   }
 
   public add(toastOrTitle: ToastInput) {
-    const toast: EuiGlobalToastListToast = {
+    const toast: Toast = {
       id: String(this.idCounter++),
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),
       ...normalizeToast(toastOrTitle),
@@ -86,7 +86,7 @@ export class ToastsApi {
     return toast;
   }
 
-  public remove(toast: EuiGlobalToastListToast) {
+  public remove(toast: Toast) {
     const list = this.toasts$.getValue();
     const listWithoutToast = list.filter(t => t !== toast);
     if (listWithoutToast.length !== list.length) {

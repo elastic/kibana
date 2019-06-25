@@ -57,7 +57,7 @@ import {
   ErrorToastOptions,
   NotificationsSetup,
   NotificationsStart,
-  EuiGlobalToastListToast,
+  Toast,
   ToastInput,
   ToastsApi,
 } from './notifications';
@@ -163,7 +163,7 @@ export {
   NotificationsStart,
   OverlayRef,
   OverlayStart,
-  EuiGlobalToastListToast as Toast,
+  Toast,
   ToastInput,
   ToastsApi,
   UiSettingsClient,

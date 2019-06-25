@@ -8,7 +8,7 @@ import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public (undocumented)
 export interface ApplicationSetup {

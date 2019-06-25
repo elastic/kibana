@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiGlobalToastListToast } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiGlobalToastListToast as Toast,
+} from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import { pure } from 'recompose';
 import * as React from 'react';
@@ -52,7 +57,7 @@ const AutoSaveWarningMsgComponent = pure<OwnProps>(
   }) => {
     const dispatchToaster = useStateToaster()[1];
     if (timelineId != null && newTimelineModel != null) {
-      const toast: EuiGlobalToastListToast = {
+      const toast: Toast = {
         id: 'AutoSaveWarningMsg',
         title: i18n.TITLE,
         color: 'warning',

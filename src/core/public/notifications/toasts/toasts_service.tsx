@@ -20,7 +20,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { I18nStart } from '../../i18n';
 import { UiSettingsSetup } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
@@ -59,7 +59,7 @@ export class ToastsService {
     render(
       <i18n.Context>
         <GlobalToastList
-          dismissToast={(toast: EuiGlobalToastListToast) => this.api!.remove(toast)}
+          dismissToast={(toast: Toast) => this.api!.remove(toast)}
           toasts$={this.api!.get$()}
         />
       </i18n.Context>,
