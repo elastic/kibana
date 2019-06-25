@@ -559,6 +559,18 @@ export function getUiSettingDefaults() {
       }),
       category: ['visualization'],
     },
+    'visualization:heatmap:maxBuckets': {
+      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
+        defaultMessage: 'Heatmap maximum buckets',
+      }),
+      value: 250,
+      type: 'number',
+      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
+        defaultMessage:
+          'Heatmap visualization\'s maximum number of buckets a single datasource can return.'
+      }),
+      category: ['visualization'],
+    },
     'csv:separator': {
       name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
         defaultMessage: 'CSV separator',
