@@ -56,15 +56,17 @@ beforeAll(() => {
   });
   actionTypeRegistry.register(getActionType({ executor: mockSlackExecutor }));
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+
+  test('ensure action type is valid', () => {
+    expect(actionType).toBeTruthy();
+  });
 });
 
 describe('action is registered', () => {
   test('gets registered with builtin actions', () => {
     expect(actionTypeRegistry.has(ACTION_TYPE_ID)).toEqual(true);
   });
-});
 
-describe('get()', () => {
   test('returns action type', () => {
     const returnedActionType = actionTypeRegistry.get(ACTION_TYPE_ID);
     expect(returnedActionType.id).toEqual(ACTION_TYPE_ID);
@@ -73,10 +75,6 @@ describe('get()', () => {
 });
 
 describe('validateParams()', () => {
-  test('ensure action type is valid', () => {
-    expect(actionType).toBeTruthy();
-  });
-
   test('should validate and pass when params is valid', () => {
     expect(validateActionTypeParams(actionType, { message: 'a message' })).toEqual({
       message: 'a message',
@@ -99,13 +97,13 @@ describe('validateParams()', () => {
 });
 
 describe('validateActionTypeConfig()', () => {
-  test('should validate and pass when params is valid', () => {
+  test('should validate and pass when config is valid', () => {
     validateActionTypeConfig(actionType, {
       webhookUrl: 'https://example.com',
     });
   });
 
-  test('should validate and throw error when params is invalid', () => {
+  test('should validate and throw error when config is invalid', () => {
     expect(() => {
       validateActionTypeConfig(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(

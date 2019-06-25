@@ -22,9 +22,9 @@ const PARAMS_SCHEMA = Joi.object()
   .required();
 
 // customizing executor is only used for tests
-export function getActionType({
-  executor = slackExecutor,
-}: { executor?: ExecutorType } = {}): ActionType {
+export function getActionType({ executor }: { executor?: ExecutorType } = {}): ActionType {
+  if (executor == null) executor = slackExecutor;
+
   return {
     id: '.slack',
     name: 'slack',
@@ -37,9 +37,9 @@ export function getActionType({
   };
 }
 
+// the production executor for this action
 export const actionType = getActionType();
 
-// the default, and production, executor for this action
 async function slackExecutor({
   config,
   params,

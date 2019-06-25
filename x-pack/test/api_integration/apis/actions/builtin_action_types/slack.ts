@@ -66,4 +66,7 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         });
     });
   });
+
+  // TODO: once we have the HTTP API fire action, test that with a webhook url pointing
+  // back to the Kibana server
 }
