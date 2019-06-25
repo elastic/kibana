@@ -116,7 +116,7 @@ more advanced knowledge of {es}, such as wasteful index memory usage.
 
 [float]
 [[jobs-page]]
-==== [xpack]#Jobs#
+==== Jobs
 
 To view {ml} job metrics, click **Jobs**. For each job in your cluster, it shows
 information such as its status, the number of records processed, the size of the
@@ -128,8 +128,6 @@ image::monitoring/images/monitoring-jobs.png["Machine learning jobs",link="image
 [float]
 [[ccr-overview-page]]
 ==== CCR
-
-beta[]
 
 To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
 shows information such as the leader index, an indication of how much the
