@@ -13,7 +13,7 @@ import { LspService } from './lsp/lsp_service';
 import { GitOperations } from './git_operations';
 import { ServerOptions } from './server_options';
 import { CodeServices } from './distributed/code_services';
-import { LspIndexerFactory } from './indexer';
+import { LspIndexerFactory, CommitIndexFactory } from './indexer';
 import { CancellationSerivce, CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './queue';
 import { RepositoryServiceFactory } from './repository_service_factory';
 import { getRepositoryHandler, RepositoryServiceDefinition } from './distributed/apis';
@@ -32,6 +32,7 @@ export function initWorkers(
 ) {
   // Initialize indexing factories.
   const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, gitOps, esClient, log);
+  const commitIndexerFactory = new CommitIndexerFactory(lspService, gitOps, esClient, log);
 
   // Initialize queue worker cancellation service.
   const cancellationService = new CancellationSerivce();
@@ -39,7 +40,7 @@ export function initWorkers(
     queue,
     log,
     esClient,
-    [lspIndexerFactory],
+    [lspIndexerFactory, commitIndexerFactory],
     gitOps,
     cancellationService
   ).bind(codeServices);

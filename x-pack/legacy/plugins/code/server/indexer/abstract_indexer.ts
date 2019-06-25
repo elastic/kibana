@@ -24,8 +24,9 @@ export abstract class AbstractIndexer implements Indexer {
     protected readonly repoUri: RepositoryUri,
     protected readonly revision: string,
     protected readonly client: EsClient,
-    protected readonly log: Logger
+    protected log: Logger
   ) {
+    this.log = log.addTags(['indexer', this.type]);
     this.indexCreator = new IndexCreator(client);
   }
 

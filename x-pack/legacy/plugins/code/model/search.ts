@@ -20,6 +20,11 @@ export interface Document {
   sha1?: string;
 }
 
+export interface Commit {
+  repoUri: RepositoryUri;
+  id: string;
+}
+
 // The base interface of indexer requests
 export interface IndexRequest {
   repoUri: RepositoryUri;
@@ -29,6 +34,12 @@ export interface IndexRequest {
 export interface LspIndexRequest extends IndexRequest {
   filePath: string; // The file path within the repository
   revision: string; // The revision of the current repository
+}
+
+// The request for CommitIndexer
+export interface CommitIndexRequest extends IndexRequest {
+  revision: string;
+  // TODO: add more.
 }
 
 export interface LspIncIndexRequest extends LspIndexRequest {

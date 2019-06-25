@@ -106,6 +106,8 @@ export interface UpdateWorkerResult extends WorkerResult {
 }
 
 export enum IndexStatsKey {
+  Commit = 'commit-added-count',
+  CommitDeleted = 'commit-deleted-count',
   File = 'file-added-count',
   FileDeleted = 'file-deleted-count',
   Symbol = 'symbol-added-count',
