@@ -29,7 +29,7 @@ import mappings from '../mappings';
 import { getCurrentSettings, updateSettings } from '../settings';
 
 export function showSettingsModal() {
-  const container = document.createElement('div');
+  const container = document.getElementById('consoleSettingsModal');
   const curSettings = getCurrentSettings();
 
   const refreshAutocompleteSettings = () => {
@@ -37,8 +37,9 @@ export function showSettingsModal() {
   };
 
   const closeModal = () => {
+    if (!container) return;
     ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
+    container.innerHTML = '';
   };
 
   const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
@@ -71,7 +72,6 @@ export function showSettingsModal() {
     closeModal();
   };
 
-  document.body.appendChild(container);
   const element = (
     <I18nContext>
       <DevToolsSettingsModal

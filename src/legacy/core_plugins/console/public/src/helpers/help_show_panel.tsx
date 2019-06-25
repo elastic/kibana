@@ -28,26 +28,21 @@ export function showHelpPanel(): () => void {
   const onClose = () => {
     if (!container) return;
     ReactDOM.unmountComponentAtNode(container);
-    if (document.body.contains(container)) {
-      document.body.removeChild(container);
-    }
+    container.innerHTML = '';
     isOpen = false;
   };
 
-  if (isOpen) {
-    return onClose;
+  const container = document.getElementById('consoleHelpPanel');
+
+  if (container && !isOpen) {
+    isOpen = true;
+    const element = (
+      <I18nContext>
+        <HelpPanel onClose={onClose} />
+      </I18nContext>
+    );
+    ReactDOM.render(element, container);
   }
-
-  isOpen = true;
-  const container = document.createElement('div');
-
-  document.body.appendChild(container);
-  const element = (
-    <I18nContext>
-      <HelpPanel onClose={onClose} />
-    </I18nContext>
-  );
-  ReactDOM.render(element, container);
 
   return onClose;
 }

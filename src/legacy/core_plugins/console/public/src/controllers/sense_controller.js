@@ -41,7 +41,7 @@ module.run(function ($rootScope) {
 });
 
 function showWelcomeMessageIfNeeded($scope) {
-  if (true || storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
+  if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
     const closeModal = welcomeShowPanel();
     $scope.$on('$destroy', () => {
       closeModal();

@@ -30,30 +30,25 @@ export function welcomeShowPanel(): () => void {
   const onClose = () => {
     if (!container) return;
     ReactDOM.unmountComponentAtNode(container);
-    if (document.body.contains(container)) {
-      document.body.removeChild(container);
-    }
+    container.innerHTML = '';
     isOpen = false;
   };
 
-  if (isOpen) {
-    return onClose;
-  }
-
-  isOpen = true;
-  const container = document.createElement('div');
   const onDismiss = () => {
     storage.set('version_welcome_shown', '@@SENSE_REVISION');
     onClose();
   };
 
-  document.body.appendChild(container);
-  const element = (
-    <I18nContext>
-      <WelcomePanel onClose={onClose} onDismiss={onDismiss} />
-    </I18nContext>
-  );
-  ReactDOM.render(element, container);
+  const container = document.getElementById('consoleWelcomePanel');
+  if (container && !isOpen) {
+    isOpen = true;
+    const element = (
+      <I18nContext>
+        <WelcomePanel onClose={onClose} onDismiss={onDismiss} />
+      </I18nContext>
+    );
+    ReactDOM.render(element, container);
+  }
 
   return onClose;
 }
