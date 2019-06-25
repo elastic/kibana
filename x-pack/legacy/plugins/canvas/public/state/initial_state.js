@@ -14,6 +14,7 @@ export const getInitialState = path => {
     assets: {}, // assets end up here
     transient: {
       canUserWrite: capabilities.get().canvas.save,
+      zoomScale: 1,
       elementStats: {
         total: 0,
         ready: 0,
