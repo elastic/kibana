@@ -4,13 +4,11 @@
 <titleabbrev>7.2.0</titleabbrev>
 ++++
 
-coming[7.2.0]
-
 Each release of {kib} brings new features and product improvements. 
 Here are the highlights of the feature and user experience changes in 7.2.0.
 
 Refer to the {kib} {kibana-ref}/breaking-changes-7.2.html[breaking changes] and 
-{kibana-ref}/release-notes.html[release notes]
+{kibana-ref}/release-notes-7.2.0.html[release notes]
 for a list of bug fixes and other changes.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
@@ -190,7 +188,7 @@ The query bar suggests influencer field names and values for the selected jobs
 as you type.
 
 [float]
-=== Simplified creation of {ml} jobs for sample data sets and {metricbeat} data
+=== Simplified creation of {ml} jobs for sample and {metricbeat} data
 
 If you use the {kib} sample data sets, there are now {ml} jobs for the
 sample eCommerce orders and the sample web logs. These jobs demonstrate a
@@ -213,7 +211,7 @@ and visualizations. For more information, see
 {kibana-ref}/ml-jobs.html[Creating {ml} jobs].
 
 [float]
-=== View recent log entries alongside your monitoring data
+=== Recent log entries alongside your monitoring data
 
 You can now see your cluster's recent log entries within the *Stack Monitoring*
 application:
