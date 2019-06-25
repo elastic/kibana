@@ -17,17 +17,32 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup } from '../../../../../src/core/public';
-import { DataPublicPlugin } from './index';
-
-const initializerContext: PluginInitializerContext = {};
-
-// core shim
-const coreSetup = {} as CoreSetup;
-
 /**
- * We export data here so that users importing from '../core_plugins/data/setup'
- * will receive the response value of the `setup` contract, mimicking the
+ * New Platform Shim
+ *
+ * In this file, we import any legacy dependencies we have, and shim them into
+ * our plugin by manually constructing the values that the new platform will
+ * eventually be passing to the `setup` method of our plugin definition.
+ *
+ * The idea is that our `plugin.ts` can stay "pure" and not contain any legacy
+ * world code. Then when it comes time to migrate to the new platform, we can
+ * simply delete this shim file.
+ *
+ * We are also calling `setup` here and exporting our public contract so that
+ * other legacy plugins are able to import from '../core_plugins/data/setup'
+ * and receive the response value of the `setup` contract, mimicking the
  * data that will eventually be injected by the new platform.
  */
-export const data = new DataPublicPlugin(initializerContext).setup(coreSetup);
+import { npSetup } from 'ui/new_platform';
+
+import { PluginInitializerContext, CoreSetup } from '../../../../../src/core/public';
+import { DataPublicPlugin } from './plugin';
+
+// core shims
+const initializerContext: PluginInitializerContext = {};
+const coreSetup: CoreSetup = npSetup.core;
+
+// plugin dependency shims
+const pluginsSetup = {};
+
+export const data = new DataPublicPlugin(initializerContext).setup(coreSetup, pluginsSetup);

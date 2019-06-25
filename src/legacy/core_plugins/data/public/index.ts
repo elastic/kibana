@@ -17,61 +17,29 @@
  * under the License.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '../../../../../src/core/public';
+/**
+ * Data Plugin - public
+ *
+ * This is the entry point for the entire client-side public contract of the plugin.
+ * If something is not explicitly exported here, you can safely assume it is private
+ * to the plugin and not considered stable.
+ *
+ * All stateful contracts will be injected by the platform at runtime, and are defined
+ * in the PluginSetup/PluginStart interfaces. The remaining items exported here are
+ * either types, or static code.
+ */
+import { PluginInitializer, PluginInitializerContext } from '../../../../../src/core/public';
+import { DataPublicPlugin, DataPluginSetup } from './plugin';
 
-// Services
-import { ExpressionsService, ExpressionsSetup } from './expressions';
-import { SearchService, SearchSetup } from './search';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
+// This is what Core looks for when loading our plugin
+export const plugin: PluginInitializer<DataPluginSetup, {}> = (
+  initializerContext: PluginInitializerContext
+) => {
+  return new DataPublicPlugin(initializerContext);
+};
 
-/** @public */
-export interface DataPluginSetup {
-  expressions: ExpressionsSetup;
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  search: SearchSetup;
-  query: QuerySetup;
-}
-
-export class DataPublicPlugin implements Plugin<DataPluginSetup, void> {
-  // Exposed services, sorted alphabetically
-  private readonly expressions = new ExpressionsService();
-  private readonly filter = new FilterService();
-  private readonly indexPatterns = new IndexPatternsService();
-  private readonly search = new SearchService();
-  private readonly query = new QueryService();
-
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup): DataPluginSetup {
-    const indexPatternsSetup = this.indexPatterns.setup();
-
-    return {
-      expressions: this.expressions.setup(),
-      indexPatterns: indexPatternsSetup,
-      filter: this.filter.setup({ indexPatterns: indexPatternsSetup }),
-      search: this.search.setup(),
-      query: this.query.setup(),
-    };
-  }
-
-  public start(core: CoreStart) {}
-
-  public stop() {
-    this.expressions.stop();
-    this.indexPatterns.stop();
-    this.filter.stop();
-    this.search.stop();
-    this.query.stop();
-  }
-}
+/** @public interfaces for stateful services */
+export { DataPluginSetup };
 
 /** @public types */
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
