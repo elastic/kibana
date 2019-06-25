@@ -20,8 +20,8 @@ import { AxiosRestAPIAdapter } from '../adapters/rest_api/axios_rest_api_adapter
 import { AgentsLib } from '../agent';
 import { ElasticsearchLib } from '../elasticsearch';
 import { FrontendLibs } from '../types';
-import { PLUGIN } from './../../../common/constants/plugin';
-import { FrameworkLib } from './../framework';
+import { PLUGIN } from '../../../common/constants/plugin';
+import { FrameworkLib } from '../framework';
 
 // A super early spot in kibana loading that we can use to hook before most other things
 const onKibanaReady = chrome.dangerouslyGetActiveInjector;
