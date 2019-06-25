@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiPage, EuiPageSideBar, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar, EuiPageBody } from '@elastic/eui';
 import { RootDragDropProvider } from '../../drag_drop';
 
 export interface FrameLayoutProps {
