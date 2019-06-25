@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export class Sha256 {
-  public update(json: string | Buffer, encoding?: string): Sha256;
-  public digest(encoding: string): string;
-}
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
+
+const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinksServiceMock.createStartContract();
+
+export { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL };
+export const documentationLinks = links;
