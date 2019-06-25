@@ -188,7 +188,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
-      ).toMatchInlineSnapshot(`"/app/apm#/traces/1234567"`);
+      ).toMatchInlineSnapshot(`"/app/apm#/traces?kuery=${encodeURIComponent('trace.id:1234567')}"`);
     });
 
     it('renders as disabled when no supported field is present in log entry', () => {

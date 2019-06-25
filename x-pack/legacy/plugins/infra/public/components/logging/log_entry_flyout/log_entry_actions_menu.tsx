@@ -117,6 +117,6 @@ const getAPMLink = (logItem: InfraLogItem) => {
 
   return url.format({
     pathname: chrome.addBasePath('/app/apm'),
-    hash: `/traces/${traceIdEntry.value}`,
+    hash: `/traces?kuery=${encodeURIComponent(`trace.id:${traceIdEntry.value}`)}`,
   });
 };
