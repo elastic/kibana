@@ -33,7 +33,7 @@ image:management/index-patterns/images/rollup-index-pattern.png["Menu with rollu
 ==== Standard index pattern
 
 {kib} makes it easy for you to create an index pattern by walking you through 
-the process. Just start typing in the *Index pattern* field and {kib} looks for 
+the process. Just start typing in the *Index pattern* field, and {kib} looks for 
 the names of {es} indices that match your input. If you want to include 
 system indices in your search, toggle the switch in the upper right.
 
@@ -63,8 +63,8 @@ see <<getting-started, Getting Started>>.
 [float]
 ==== Rolled up index pattern
 
-Clicking *Create index pattern* includes an item for creating a rollup 
-index pattern, if a rollup index is detected in the cluster. You create an 
+If a rollup index is detected in the cluster, clicking *Create index pattern* 
+includes an item for creating a rollup index pattern. You create an 
 index pattern for rolled up data the same way you do for any data.  
 
 You can match an index pattern to only rolled up data, or mix both rolled 
@@ -87,7 +87,7 @@ and associated data type in the index.
 image:management/index-patterns/images/new-index-pattern.png["Index files and data types"]
 
 From this page, you can perform actions on the index pattern using the 
-controls in the upper right. You can:
+controls in the upper right:
 
 * *Make it the default index pattern.* {kib} uses a badge to make users 
 aware of which index pattern is the default. The first pattern 
