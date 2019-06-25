@@ -454,7 +454,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Shift up by 16px
+                  Shift up by 10px
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
@@ -475,7 +475,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Shift down by 16px
+                  Shift down by 10px
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
@@ -496,7 +496,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Shift left by 16px
+                  Shift left by 10px
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
@@ -517,7 +517,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Shift right by 16px
+                  Shift right by 10px
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
