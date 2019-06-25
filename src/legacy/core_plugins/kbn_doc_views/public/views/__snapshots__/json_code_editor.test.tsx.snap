@@ -9,19 +9,13 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
       values={Object {}}
     />
   }
-  editorProps={
-    Object {
-      "$blockScrolling": Infinity,
-    }
-  }
-  id="json-ace"
   isReadOnly={true}
   mode="json"
   setOptions={
     Object {
       "highlightActiveLine": false,
       "maxLines": Infinity,
-      "minLines": 25,
+      "minLines": 20,
       "showPrintMargin": false,
     }
   }
