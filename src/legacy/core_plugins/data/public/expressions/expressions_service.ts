@@ -19,9 +19,8 @@
 
 import { Ast } from '@kbn/interpreter/common';
 
-// TODO:
-// this type import and the types below them should be switched to the types of
-// the interpreter plugin itself once they are ready
+// TODO: These imports should be switched to the types of
+// the interpreter plugin itself once they are ready.
 import { Registry } from '@kbn/interpreter/common';
 import { Adapters } from 'ui/inspector';
 import { TimeRange } from 'ui/timefilter/time_history';
@@ -71,13 +70,8 @@ export interface Interpreter {
   interpretAst(ast: Ast, context: Context, handlers: Handlers): Promise<Result>;
 }
 
-type InterpreterGetter = () => Promise<{ interpreter: Interpreter }>;
-
-export interface ExpressionsServiceDependencies {
-  interpreter: {
-    renderersRegistry: RenderFunctionsRegistry;
-    getInterpreter: InterpreterGetter;
-  };
+interface InterpreterGetter {
+  getInterpreter: () => Promise<{ interpreter: Interpreter }>;
 }
 
 /**
@@ -85,9 +79,14 @@ export interface ExpressionsServiceDependencies {
  * @internal
  */
 export class ExpressionsService {
-  public setup({
-    interpreter: { renderersRegistry, getInterpreter },
-  }: ExpressionsServiceDependencies) {
+  public setup() {
+    // TODO: this is temporarily imported here to avoid circular imports, until interpreter
+    // moves into the expressions service.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getInterpreter }: InterpreterGetter = require('plugins/interpreter/interpreter');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { renderersRegistry } = require('plugins/interpreter/registries');
+
     const run = createRunFn(
       renderersRegistry,
       getInterpreter().then(({ interpreter }) => interpreter)
@@ -120,9 +119,9 @@ export class ExpressionsService {
     };
   }
 
-  public stop() {
-    // nothing to do here yet
-  }
+  public start() {}
+
+  public stop() {}
 }
 
 /** @public */

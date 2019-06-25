@@ -17,13 +17,6 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
-// @ts-ignore
-import { renderersRegistry } from 'plugins/interpreter/registries';
-
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -58,21 +51,12 @@ export class DataPublicPlugin implements Plugin<DataPluginSetup, void> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): DataPluginSetup {
-    // TODO: this is imported here to avoid circular imports.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getInterpreter } = require('plugins/interpreter/interpreter');
-    const indexPatternsService = this.indexPatterns.setup();
+    const indexPatternsSetup = this.indexPatterns.setup();
+
     return {
-      expressions: this.expressions.setup({
-        interpreter: {
-          getInterpreter,
-          renderersRegistry,
-        },
-      }),
-      indexPatterns: indexPatternsService,
-      filter: this.filter.setup({
-        indexPatterns: indexPatternsService.indexPatterns,
-      }),
+      expressions: this.expressions.setup(),
+      indexPatterns: indexPatternsSetup,
+      filter: this.filter.setup({ indexPatterns: indexPatternsSetup }),
       search: this.search.setup(),
       query: this.query.setup(),
     };

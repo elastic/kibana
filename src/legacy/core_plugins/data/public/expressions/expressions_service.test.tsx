@@ -21,12 +21,11 @@ import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 import {
   ExpressionsService,
-  RenderFunctionsRegistry,
   RenderFunction,
   Interpreter,
-  ExpressionsServiceDependencies,
   Result,
   ExpressionsSetup,
+  RenderFunctionsRegistry,
 } from './expressions_service';
 import { mount } from 'enzyme';
 import React from 'react';
@@ -45,7 +44,6 @@ describe('expressions_service', () => {
   let interpretAstMock: jest.Mocked<Interpreter>['interpretAst'];
   let interpreterMock: jest.Mocked<Interpreter>;
   let renderFunctionMock: jest.Mocked<RenderFunction>;
-  let setupPluginsMock: ExpressionsServiceDependencies;
   const expressionResult: Result = { type: 'render', as: RENDERER_ID, value: {} };
 
   let api: ExpressionsSetup;
@@ -53,20 +51,22 @@ describe('expressions_service', () => {
   let testAst: Ast;
 
   beforeEach(() => {
-    interpretAstMock = jest.fn(_ => Promise.resolve(expressionResult));
+    interpretAstMock = jest.fn((ast, context, handlers) => Promise.resolve(expressionResult));
     interpreterMock = { interpretAst: interpretAstMock };
     renderFunctionMock = ({
       render: jest.fn(),
     } as unknown) as jest.Mocked<RenderFunction>;
-    setupPluginsMock = {
-      interpreter: {
-        getInterpreter: () => Promise.resolve({ interpreter: interpreterMock }),
-        renderersRegistry: ({
-          get: (id: string) => (id === RENDERER_ID ? renderFunctionMock : null),
-        } as unknown) as RenderFunctionsRegistry,
-      },
-    };
-    api = new ExpressionsService().setup(setupPluginsMock);
+
+    jest.doMock('plugins/interpreter/interpreter', () => ({
+      getInterpreter: () => Promise.resolve({ interpreter: interpreterMock }),
+    }));
+    jest.doMock('plugins/interpreter/registries', () => ({
+      renderersRegistry: ({
+        get: (id: string) => (id === RENDERER_ID ? renderFunctionMock : null),
+      } as unknown) as RenderFunctionsRegistry,
+    }));
+
+    api = new ExpressionsService().setup();
     testExpression = 'test | expression';
     testAst = fromExpression(testExpression);
   });
