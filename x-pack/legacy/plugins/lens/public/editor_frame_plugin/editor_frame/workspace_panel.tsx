@@ -6,7 +6,15 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiTitle,
+  EuiPageContentBody,
+} from '@elastic/eui';
 
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
@@ -147,8 +155,19 @@ export function WorkspacePanel({
   }
 
   return (
-    <DragDrop draggable={false} droppable={true} onDrop={onDrop}>
-      {renderVisualization()}
-    </DragDrop>
+    <EuiPageContent className="lnsPageContent">
+      <EuiPageContentHeader className="lnsPageContentHeader">
+        <EuiPageContentHeaderSection>
+          <EuiTitle size="xs">
+            <h2>New Visualization</h2>
+          </EuiTitle>
+        </EuiPageContentHeaderSection>
+      </EuiPageContentHeader>
+      <EuiPageContentBody className="lnsPageContentBody">
+        <DragDrop draggable={false} droppable={true} onDrop={onDrop}>
+          {renderVisualization()}
+        </DragDrop>
+      </EuiPageContentBody>
+    </EuiPageContent>
   );
 }
