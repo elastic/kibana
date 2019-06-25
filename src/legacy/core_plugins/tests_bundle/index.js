@@ -21,6 +21,7 @@ import { createReadStream } from 'fs';
 
 import globby from 'globby';
 import MultiStream from 'multistream';
+import webpackMerge from 'webpack-merge';
 
 import { fromRoot } from '../../../legacy/utils';
 import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
@@ -103,6 +104,12 @@ export default (kibana) => {
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
         });
+
+        uiBundles.extendConfig(webpackConfig => webpackMerge({
+          resolve: {
+            extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
+          }
+        }, webpackConfig));
 
         kbnServer.server.route({
           method: 'GET',

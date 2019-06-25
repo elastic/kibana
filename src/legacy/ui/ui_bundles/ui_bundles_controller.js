@@ -78,6 +78,7 @@ export class UiBundlesController {
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
     this._postLoaders = [];
     this._bundles = [];
+    this._configModifiers = [];
 
     // create a bundle for each uiApp
     for (const uiApp of uiApps) {
@@ -216,5 +217,13 @@ export class UiBundlesController {
   getIds() {
     return this._bundles
       .map(bundle => bundle.getId());
+  }
+
+  extendConfig(configModifier) {
+    this._configModifiers.push(configModifier);
+  }
+
+  getExtendedConfig(webpackConfig) {
+    return this._configModifiers.reduce((acc, modifier) => modifier(acc), webpackConfig);
   }
 }
