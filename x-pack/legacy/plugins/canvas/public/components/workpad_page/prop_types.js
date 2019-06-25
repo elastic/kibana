@@ -49,4 +49,5 @@ export const interactiveWorkpadPagePropTypes = {
   canvasOrigin: PropTypes.func,
   saveCanvasOrigin: PropTypes.func.isRequired,
   commit: PropTypes.func.isRequired,
+  setMultiplePositions: PropTypes.func.isRequired,
 };

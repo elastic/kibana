@@ -25,3 +25,5 @@ export const DEFAULT_WORKPAD_CSS = '.canvasPage {\n\n}';
 export const DEFAULT_ELEMENT_CSS = '.canvasRenderEl{\n\n}';
 export const VALID_IMAGE_TYPES = ['gif', 'jpeg', 'png', 'svg+xml'];
 export const ASSET_MAX_SIZE = 25000;
+export const ELEMENT_SHIFT_OFFSET = 10;
+export const ELEMENT_NUDGE_OFFSET = 1;
