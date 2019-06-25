@@ -12,7 +12,7 @@ export type Pick3<T, K1 extends keyof T, K2 extends keyof T[K1], K3 extends keyo
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-// This type is for typing EUIDescriptionLists and comes
+// This type is for typing EUIDescriptionList
 export interface DescriptionList {
   title: NonNullable<ReactNode>;
   description: NonNullable<ReactNode>;
