@@ -21,10 +21,15 @@ import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 import { i18n } from '@kbn/i18n';
 import { JsonCodeEditor } from './json_code_editor';
 
+/*
+ * Registration of the the doc view: json
+ * - used to display an ES hit as pretty printed JSON at Discover
+ * - registered as angular directive to stay compatible with community plugins
+ */
 DocViewsRegistryProvider.register(function(reactDirective: any) {
   const reactDir = reactDirective(JsonCodeEditor, ['hit']);
-  // required to assign $scope props to the react component
-  // via render-directive in doc_viewer.js
+  // setting of reactDir.scope is required to assign $scope props
+  // to the react component via render-directive in doc_viewer.js
   reactDir.scope = {
     hit: '=',
   };
