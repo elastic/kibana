@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { clog } from './clog';
-import { esaggs } from './esaggs';
-import { font } from './font';
-import { kibana } from './kibana';
-import { kibanaContext } from './kibana_context';
-import { visualization } from './visualization';
-import { visDimension } from './vis_dimension';
-
-export const functions = [
-  clog, esaggs, font, kibana, kibanaContext, visualization, visDimension,
-];
+export * from './style';
