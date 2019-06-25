@@ -49,31 +49,102 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 const K = [
-  0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
-  0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
-  0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3,
-  0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
-  0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC,
-  0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
-  0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7,
-  0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
-  0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13,
-  0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
-  0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3,
-  0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
-  0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5,
-  0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
-  0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
-  0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2,
+  0x428a2f98,
+  0x71374491,
+  0xb5c0fbcf,
+  0xe9b5dba5,
+  0x3956c25b,
+  0x59f111f1,
+  0x923f82a4,
+  0xab1c5ed5,
+  0xd807aa98,
+  0x12835b01,
+  0x243185be,
+  0x550c7dc3,
+  0x72be5d74,
+  0x80deb1fe,
+  0x9bdc06a7,
+  0xc19bf174,
+  0xe49b69c1,
+  0xefbe4786,
+  0x0fc19dc6,
+  0x240ca1cc,
+  0x2de92c6f,
+  0x4a7484aa,
+  0x5cb0a9dc,
+  0x76f988da,
+  0x983e5152,
+  0xa831c66d,
+  0xb00327c8,
+  0xbf597fc7,
+  0xc6e00bf3,
+  0xd5a79147,
+  0x06ca6351,
+  0x14292967,
+  0x27b70a85,
+  0x2e1b2138,
+  0x4d2c6dfc,
+  0x53380d13,
+  0x650a7354,
+  0x766a0abb,
+  0x81c2c92e,
+  0x92722c85,
+  0xa2bfe8a1,
+  0xa81a664b,
+  0xc24b8b70,
+  0xc76c51a3,
+  0xd192e819,
+  0xd6990624,
+  0xf40e3585,
+  0x106aa070,
+  0x19a4c116,
+  0x1e376c08,
+  0x2748774c,
+  0x34b0bcb5,
+  0x391c0cb3,
+  0x4ed8aa4a,
+  0x5b9cca4f,
+  0x682e6ff3,
+  0x748f82ee,
+  0x78a5636f,
+  0x84c87814,
+  0x8cc70208,
+  0x90befffa,
+  0xa4506ceb,
+  0xbef9a3f7,
+  0xc67178f2,
 ];
 
 const W = new Array(64);
 
+/* eslint-disable  no-bitwise, no-shadow */
 export class Sha256 {
+  private _a: number;
+  private _b: number;
+  private _c: number;
+  private _d: number;
+  private _e: number;
+  private _f: number;
+  private _g: number;
+  private _h: number;
+
+  private _block: Buffer;
+  private _finalSize: number;
+  private _blockSize: number;
+  private _len: number;
+  private _s: number;
+
+  private _w: number[];
   constructor() {
-    this.init();
+    this._a = 0x6a09e667;
+    this._b = 0xbb67ae85;
+    this._c = 0x3c6ef372;
+    this._d = 0xa54ff53a;
+    this._e = 0x510e527f;
+    this._f = 0x9b05688c;
+    this._g = 0x1f83d9ab;
+    this._h = 0x5be0cd19;
 
     this._w = W; // new Array(64)
 
@@ -86,33 +157,20 @@ export class Sha256 {
     this._s = 0;
   }
 
-  init() {
-    this._a = 0x6a09e667;
-    this._b = 0xbb67ae85;
-    this._c = 0x3c6ef372;
-    this._d = 0xa54ff53a;
-    this._e = 0x510e527f;
-    this._f = 0x9b05688c;
-    this._g = 0x1f83d9ab;
-    this._h = 0x5be0cd19;
-
-    return this;
-  }
-
-  update(data, enc) {
+  update(data: string | Buffer, encoding?: string): Sha256 {
     if (typeof data === 'string') {
-      enc = enc || 'utf8';
-      data = Buffer.from(data, enc);
+      encoding = encoding || 'utf8';
+      data = Buffer.from(data, encoding);
     }
 
-    const l = this._len += data.length;
+    const l = (this._len += data.length);
     let s = this._s || 0;
     let f = 0;
     const buffer = this._block;
 
     while (s < l) {
       const t = Math.min(data.length, f + this._blockSize - (s % this._blockSize));
-      const ch = (t - f);
+      const ch = t - f;
 
       for (let i = 0; i < ch; i++) {
         buffer[(s % this._blockSize) + i] = data[i + f];
@@ -121,7 +179,7 @@ export class Sha256 {
       s += ch;
       f += ch;
 
-      if ((s % this._blockSize) === 0) {
+      if (s % this._blockSize === 0) {
         this._update(buffer);
       }
     }
@@ -130,7 +188,7 @@ export class Sha256 {
     return this;
   }
 
-  digest(enc) {
+  digest(encoding: string): string {
     // Suppose the length of the message M, in bits, is l
     const l = this._len * 8;
 
@@ -138,7 +196,7 @@ export class Sha256 {
     this._block[this._len % this._blockSize] = 0x80;
 
     // and then k zero bits, where k is the smallest non-negative solution to the equation (l + 1 + k) === finalSize mod blockSize
-    this._block.fill(0, this._len % this._blockSize + 1);
+    this._block.fill(0, (this._len % this._blockSize) + 1);
 
     if (l % (this._blockSize * 8) >= this._finalSize * 8) {
       this._update(this._block);
@@ -148,13 +206,14 @@ export class Sha256 {
     // to this append the block which is equal to the number l written in binary
     // TODO: handle case where l is > Math.pow(2, 29)
     this._block.writeInt32BE(l, this._blockSize - 4);
+    this._update(this._block);
 
-    const hash = this._update(this._block) || this._hash();
+    const hash = this._hash();
 
-    return enc ? hash.toString(enc) : hash;
+    return hash.toString(encoding);
   }
 
-  _update(M) {
+  _update(M: Buffer) {
     const W = this._w;
 
     let a = this._a | 0;
@@ -210,26 +269,26 @@ export class Sha256 {
   }
 }
 
-function ch(x, y, z) {
+function ch(x: number, y: number, z: number) {
   return z ^ (x & (y ^ z));
 }
 
-function maj(x, y, z) {
+function maj(x: number, y: number, z: number) {
   return (x & y) | (z & (x | y));
 }
 
-function sigma0(x) {
-  return (x >>> 2 | x << 30) ^ (x >>> 13 | x << 19) ^ (x >>> 22 | x << 10);
+function sigma0(x: number) {
+  return ((x >>> 2) | (x << 30)) ^ ((x >>> 13) | (x << 19)) ^ ((x >>> 22) | (x << 10));
 }
 
-function sigma1(x) {
-  return (x >>> 6 | x << 26) ^ (x >>> 11 | x << 21) ^ (x >>> 25 | x << 7);
+function sigma1(x: number) {
+  return ((x >>> 6) | (x << 26)) ^ ((x >>> 11) | (x << 21)) ^ ((x >>> 25) | (x << 7));
 }
 
-function gamma0(x) {
-  return (x >>> 7 | x << 25) ^ (x >>> 18 | x << 14) ^ (x >>> 3);
+function gamma0(x: number) {
+  return ((x >>> 7) | (x << 25)) ^ ((x >>> 18) | (x << 14)) ^ (x >>> 3);
 }
 
-function gamma1(x) {
-  return (x >>> 17 | x << 15) ^ (x >>> 19 | x << 13) ^ (x >>> 10);
+function gamma1(x: number) {
+  return ((x >>> 17) | (x << 15)) ^ ((x >>> 19) | (x << 13)) ^ (x >>> 10);
 }
