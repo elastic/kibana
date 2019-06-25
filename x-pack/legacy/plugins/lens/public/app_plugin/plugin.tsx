@@ -8,6 +8,10 @@ import React from 'react';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
+import {
+  datatableVisualizationSetup,
+  datatableVisualizationStop,
+} from '../datatable_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 
@@ -20,11 +24,13 @@ export class AppPlugin {
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
+    const datatableVisualization = datatableVisualizationSetup();
     const xyVisualization = xyVisualizationSetup();
     const editorFrame = editorFrameSetup();
 
     editorFrame.registerDatasource('indexpattern', indexPattern);
     editorFrame.registerVisualization('xy', xyVisualization);
+    editorFrame.registerVisualization('datatable', datatableVisualization);
 
     this.instance = editorFrame.createInstance({});
 
@@ -39,6 +45,7 @@ export class AppPlugin {
     // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();
     xyVisualizationStop();
+    datatableVisualizationStop();
     editorFrameStop();
   }
 }

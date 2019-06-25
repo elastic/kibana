@@ -11,7 +11,7 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import uuid from 'uuid';
-import { Datasource, DataType } from '../../public';
+import { Datasource, DataType } from '..';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -372,8 +372,26 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       return [];
     },
 
-    getDatasourceSuggestionsFromCurrentState(state) {
-      return [];
+    getDatasourceSuggestionsFromCurrentState(
+      state
+    ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+      if (!state.columnOrder.length) {
+        return [];
+      }
+      return [
+        {
+          state,
+
+          table: {
+            columns: state.columnOrder.map(id => ({
+              columnId: id,
+              operation: columnToOperation(state.columns[id]),
+            })),
+            isMultiRow: true,
+            datasourceSuggestionId: 0,
+          },
+        },
+      ];
     },
   };
 

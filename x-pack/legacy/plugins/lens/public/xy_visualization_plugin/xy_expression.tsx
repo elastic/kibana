@@ -19,7 +19,7 @@ import {
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { XYArgs } from './types';
 import { KibanaDatatable } from '../types';
-import { RenderFunction } from './plugin';
+import { RenderFunction } from '../interpreter_types';
 
 export interface XYChartProps {
   data: KibanaDatatable;
