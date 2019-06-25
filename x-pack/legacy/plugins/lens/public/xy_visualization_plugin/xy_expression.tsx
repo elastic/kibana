@@ -106,7 +106,6 @@ export function XYChart({ data, args }: XYChartProps) {
   const seriesProps = {
     splitSeriesAccessors,
     stackAccessors,
-    // id: getSpecId(y.accessors.join(',')),
     id: getSpecId(y.labels.join(',')),
     xAccessor: x.accessor,
     yAccessors: y.labels,
