@@ -92,7 +92,7 @@ function executeJobFn(server) {
       })(),
     ]);
 
-    const { content, maxSizeReached, size } = await generateCsv({
+    const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
       searchRequest,
       fields,
       metaFields,
@@ -112,6 +112,7 @@ function executeJobFn(server) {
       content,
       max_size_reached: maxSizeReached,
       size,
+      csv_contains_formulas: csvContainsFormulas,
     };
   };
 }
