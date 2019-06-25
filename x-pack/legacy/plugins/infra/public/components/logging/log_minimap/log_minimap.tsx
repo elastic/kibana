@@ -36,7 +36,6 @@ interface LogMinimapProps {
   // searchSummaryBuckets?: SearchSummaryBucket[];
   target: number | null;
   width: number;
-  onScroll: (offset: number) => void;
 }
 
 interface LogMinimapState {
@@ -101,32 +100,23 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       this.handleClick(event);
       return;
     }
-    // const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
-    // const startYPosition = drag.startY - svgPosition.top;
-    // const endYPosition = event.clientY - svgPosition.top;
-    // const startTime = getTime(startYPosition);
-    // const endTime = getTime(endYPosition);
-    // const timeDifference = endTime - startTime;
-    // const newTime = (this.props.target || 0) - timeDifference;
-    this.setState({ drag: null, target: this.props.target });
-    // this.props.jumpToTarget({
-    //   tiebreaker: 0,
-    //   time: newTime,
-    // });
+    const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
+    const startYPosition = drag.startY - svgPosition.top;
+    const endYPosition = event.clientY - svgPosition.top;
+    const startTime = getTime(startYPosition);
+    const endTime = getTime(endYPosition);
+    const timeDifference = endTime - startTime;
+    const newTime = (this.props.target || 0) - timeDifference;
+    this.setState({ drag: null, target: newTime });
+    this.props.jumpToTarget({
+      tiebreaker: 0,
+      time: newTime,
+    });
   };
 
   private handleDragMove = (event: MouseEvent) => {
-    const { drag, svgPosition } = this.state;
+    const { drag } = this.state;
     if (!drag) return;
-    // const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
-    // const startYPosition = drag.startY - svgPosition.top;
-    // const currentYPosition = event.clientY - svgPosition.top;
-    // const startTime = getTime(startYPosition);
-    // const currentTime = getTime(currentYPosition);
-    // const timeDifference = currentTime - startTime;
-    // const newTime = (this.state.target || 0) - timeDifference;
-    const offset = (drag.currentY || 0) - event.clientY;
-    this.props.onScroll(offset);
     this.setState({
       drag: {
         ...drag,

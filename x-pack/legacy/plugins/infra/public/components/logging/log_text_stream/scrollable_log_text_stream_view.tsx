@@ -53,7 +53,6 @@ interface ScrollableLogTextStreamViewProps {
   showColumnConfiguration: () => void;
   intl: InjectedIntl;
   highlightedItem: string | null;
-  scrollSubscriber: (offset: number) => void;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -112,7 +111,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       scale,
       showColumnConfiguration,
       wrap,
-      scrollSubscriber,
     } = this.props;
     const { targetId } = this.state;
     const hasItems = items.length > 0;
@@ -167,7 +165,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                         target={targetId}
                         hideScrollbar={true}
                         data-test-subj={'logStream'}
-                        scrollSubscriber={scrollSubscriber}
                       >
                         {registerChild => (
                           <>

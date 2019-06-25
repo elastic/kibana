@@ -52,7 +52,10 @@ export const initialLogPositionState: LogPositionState = {
 
 const targetPositionReducer = reducerWithInitialState(initialLogPositionState.targetPosition).case(
   jumpToTargetPosition,
-  (state, target) => target
+  (state, target) => {
+    console.log(state, target);
+    return target;
+  }
 );
 
 const targetPositionUpdatePolicyReducer = reducerWithInitialState(

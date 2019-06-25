@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 import { AutoSizer } from '../../components/auto_sizer';
@@ -43,9 +43,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { showLogsConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
-  const [scrollEmitter, scrollSubscriber] = useState({
-    fn: () => {},
-  });
+
   return (
     <>
       <ReduxSourceIdBridge sourceId={sourceId} />
@@ -108,7 +106,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   setFlyoutItem={setFlyoutId}
                   setFlyoutVisibility={setFlyoutVisibility}
                   highlightedItem={surroundingLogsId ? surroundingLogsId : null}
-                  scrollSubscriber={fn => scrollSubscriber({ fn })}
                 />
               )}
             </WithStreamItems>
@@ -130,7 +127,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                           jumpToTarget={jumpToTargetPosition}
                           summaryBuckets={buckets}
                           target={visibleMidpointTime}
-                          onScroll={scrollEmitter.fn}
                         />
                       )}
                     </WithLogPosition>

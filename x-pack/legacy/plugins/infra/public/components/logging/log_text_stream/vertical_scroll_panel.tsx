@@ -30,7 +30,6 @@ interface VerticalScrollPanelProps<Child> {
   width: number;
   hideScrollbar?: boolean;
   'data-test-subj'?: string;
-  scrollSubscriber: (subscriberFn: (offset: number) => void) => void;
 }
 
 interface VerticalScrollPanelSnapshot<Child> {
@@ -42,7 +41,7 @@ interface MeasurableChild {
   getOffsetRect(): Rect | null;
 }
 
-const SCROLL_THROTTLE_INTERVAL = 2000;
+const SCROLL_THROTTLE_INTERVAL = 250;
 export const ASSUMED_SCROLLBAR_WIDTH = 20;
 
 export class VerticalScrollPanel<Child> extends React.PureComponent<
@@ -160,13 +159,6 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     }
   };
 
-  private onReceiveScroll = (offset: number) => {
-    const { scrollRef } = this;
-    if (scrollRef.current === null) return;
-
-    scrollRef.current.scrollTop += offset;
-  };
-
   public handleUpdatedChildren = (target: Child | undefined, offset: number | undefined) => {
     this.updateChildDimensions();
     if (!!target) {
@@ -177,7 +169,6 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
 
   public componentDidMount() {
     this.handleUpdatedChildren(this.props.target, undefined);
-    this.props.scrollSubscriber(this.onReceiveScroll);
   }
 
   public getSnapshotBeforeUpdate(
