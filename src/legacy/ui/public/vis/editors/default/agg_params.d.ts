@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import { AggParams } from '../agg_params';
-
-export interface AggControlProps<T> {
-  aggParams: AggParams;
-  editorStateParams: AggParams;
-  setValue(params: AggParams, paramName: string, value: T): void;
+export interface AggParams {
+  [key: string]: any;
 }
