@@ -97,7 +97,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             ),
         },
         {
-          title: 'Max Anomaly Score By Job', // TODO: I18n this
+          title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
           description: (
             <AnomalyScores
               anomalies={anomaliesData}

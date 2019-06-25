@@ -89,7 +89,7 @@ export const IpOverview = pure<IpOverviewProps>(
             : getEmptyTagValue(),
         },
         {
-          title: 'Max Anomaly Score By Job', // TODO: I18n this
+          title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
           description: (
             <AnomalyScores
               anomalies={anomaliesData}
