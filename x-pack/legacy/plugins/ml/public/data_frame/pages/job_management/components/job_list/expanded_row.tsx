@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { DataFrameJobListRow } from './common';
 import { JobDetailsPane, SectionConfig } from './job_details_pane';
 import { JobJsonPane } from './job_json_pane';
+import { TransformMessagesPane } from './transform_messages_pane';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -55,6 +56,11 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
       id: 'job-json',
       name: 'JSON',
       content: <JobJsonPane json={item.config} />,
+    },
+    {
+      id: 'job-messages',
+      name: 'Messages',
+      content: <TransformMessagesPane transformId={item.id} />,
     },
   ];
   return (
