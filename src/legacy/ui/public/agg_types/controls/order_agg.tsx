@@ -19,7 +19,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
-import { AggConfig } from '../../vis';
+import { AggConfig, AggParams } from '../../vis';
 
 function OrderAggParamEditor({
   agg,
@@ -67,7 +67,7 @@ function OrderAggParamEditor({
     setTouched,
     onAggTypeChange: subAggParams.onAggTypeChange,
     onAggErrorChanged: subAggParams.onAggErrorChanged,
-    onAggParamsChange: (...rest: [AggConfig, string, any]) => {
+    onAggParamsChange: (...rest: [AggParams, string, any]) => {
       // to force update when sub-agg params are changed
       setInnerState(!innerState);
       subAggParams.onAggParamsChange(...rest);

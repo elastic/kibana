@@ -94,7 +94,14 @@
 
   </div>
 
-  <div class="schemaEditors visEditorSidebar__aggParamFormRow"></div>
+  <vis-agg-control-react-wrapper
+    ng-if="agg.schema.editorComponent"
+    agg-params="agg.params"
+    component="agg.schema.editorComponent"
+    editor-state-params="state.params"
+    set-value="callbacks.onAggParamsChange"
+  />
+
   <!-- should be rendered after link function run, i.e. 'callbacks' is defined  -->
   <vis-editor-agg-params
     ng-if="callbacks"

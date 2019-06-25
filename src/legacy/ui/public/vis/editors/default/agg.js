@@ -19,6 +19,7 @@
 
 import './agg_params';
 import './agg_add';
+import './controls/agg_controls';
 import { Direction } from './keyboard_move';
 import _ from 'lodash';
 import '../../../fancy_forms';
@@ -28,7 +29,7 @@ import { move } from '../../../utils/collection';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAgg', ($compile) => {
+  .directive('visEditorAgg', () => {
     return {
       restrict: 'A',
       template: aggTemplate,
@@ -135,9 +136,9 @@ uiModules
           }
         }
 
-        function onAggParamsChange(agg, paramName, value) {
-          if (agg.params[paramName] !== value) {
-            agg.params[paramName] = value;
+        function onAggParamsChange(params, paramName, value) {
+          if (params[paramName] !== value) {
+            params[paramName] = value;
           }
         }
 
@@ -168,17 +169,6 @@ uiModules
           setValidity,
           setTouched
         };
-
-        addSchemaEditor();
-
-        function addSchemaEditor() {
-          const $schemaEditor = $el.find('.schemaEditors');
-
-          if ($scope.agg.schema.editor) {
-            $schemaEditor.append($scope.agg.schema.editor);
-            $compile($schemaEditor)($scope.$new());
-          }
-        }
       }
     };
   });

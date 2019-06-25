@@ -89,7 +89,7 @@ function MetricAggParamEditor({
 
       if (canUseAggregation) {
         subAggParams.onAggParamsChange(
-          lastBucket,
+          lastBucket.params,
           'min_doc_count',
           lastBucket.type.name === 'histogram' ? 1 : 0
         );

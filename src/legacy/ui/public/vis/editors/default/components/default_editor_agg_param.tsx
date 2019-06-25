@@ -19,12 +19,12 @@
 
 import React, { useEffect } from 'react';
 
-import { AggConfig } from 'ui/vis';
+import { AggParams } from '../agg_params';
 import { AggParamEditorProps, AggParamCommonProps } from './default_editor_agg_param_props';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
-  onChange(agg: AggConfig, paramName: string, value?: T): void;
+  onChange(aggParams: AggParams, paramName: string, value?: T): void;
 }
 
 function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
@@ -48,7 +48,7 @@ function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
       agg={agg}
       aggParam={aggParam}
       setValidity={setValidity}
-      setValue={(value: T) => onChange(agg, aggParam.name, value)}
+      setValue={(value: T) => onChange(agg.params, aggParam.name, value)}
       {...rest}
     />
   );
