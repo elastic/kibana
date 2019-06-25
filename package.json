@@ -48,7 +48,7 @@
     "test:ui": "node scripts/functional_tests",
     "test:ui:server": "node scripts/functional_tests_server",
     "test:ui:runner": "node scripts/functional_test_runner",
-    "test:server": "grunt test:server",
+    "test:server": "echo 'use yarn test:mocha instead'; exit 1",
     "test:coverage": "grunt test:coverage",
     "typespec": "typings-tester --config x-pack/plugins/canvas/public/lib/aeroelastic/tsconfig.json x-pack/plugins/canvas/public/lib/aeroelastic/__fixtures__/typescript/typespec_tests.ts",
     "checkLicenses": "node scripts/check_licenses --dev",
