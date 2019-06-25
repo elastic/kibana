@@ -1,5 +1,5 @@
 [[TSVB]]
-== Visualize your data with TSVB
+== Visualizing your data with TSVB
 
 TSVB is a time series data visualizer that allows you to use the full power of 
 Elasticsearch aggregation framework. With TSVB, you can combine an infinite 
@@ -12,8 +12,7 @@ image:images/tsvb-screenshot.png["TSVB Interface"]
 [[time-series-visualizations]]
 === TSVB visualizations
 
-TSVB comes with 6 different visualizations. To switch between the 
-visualizations, use the tabbed picker at the top of the interface.
+TSVB comes with 6 visualizations.
 
 ==== Time Series
 
@@ -64,9 +63,45 @@ the rows, and the columns of data to display.
 image:images/tsvb-table.png["Table Visualization"]
 
 [[time-series-interface]]
-=== Using the visualization interface
+=== Create TSVB visualizations
 
 Choose how you want to display your data using the interface options.
+
+To switch between the visualizations, use the tabbed picker at the top of the 
+interface.
+
+==== Create a Time Series visualization
+
+Display your data over time with area, line, and bar charts.
+
+Fully customize the colors, points, line thickness, and fill 
+opacity. Compare two time periods by using time shifting, and use annotations 
+that are loaded from a separate index based on a query.
+
+* Select *Time Series*.
+
+* To specify the series labels and colors that you want to represent your data, select *Data*.
++
+For series that are grouped by a term, you can specify a mustache variable of `{{key}}` to substitute the term.
+
+** Select *Metrics*, then specify the options.
++
+Each series supports multiple metrics (aggregations); the last metric (aggregation)
+is the value that will be displayed for the series, this is indicated with the "eye"
+icon to the left of the metric. Metrics can be composed using pipeline aggregations.
+A common use case is to create a metric with a "max" aggregation then create a "derivative"
+metric and choose the previous "max" metric as the source; this will create a rate.
+
+** Select *Options*, then specify the series options for your Time Series visualization.
+
+** To specify how the series should be grouped or split, select an option from the *Group by* drop-down list.
+
+* To configure the panel options, select *Panel options*.
+
+* To add annotation data sources, select *Annotations*.
+
+image:images/tsvb-timeseries.png["Time Series Visualization"]
+
 
 ==== Data Tab
 
@@ -97,15 +132,6 @@ image:images/tsvb-data-tab-derivative-example.png["Derivative Example"]
 
 ===== Series Options
 
-Each series also supports a set of options which are dependent on the type of
-visualizations you have selected. Universal across each visualization type
-you can configure:
-
-* Data format
-* Time range offset
-* Index pattern, timestamp, and interval override
-
-
 image:images/tsvb-data-tab-series-options.png["Default Series Options"]
 
 For the Time Series visualization you can also configure:
@@ -117,69 +143,6 @@ For the Time Series visualization you can also configure:
 * Split color theme
 
 image:images/tsvb-data-tab-series-options-time-series.png["Time Series Series Options"]
-
-===== Group By Controls
-
-At the bottom of the metrics there is a set of "Group By" controls that allows you
-to specify how the series should be grouped or split. There are four choices:
-
-* Everything
-* Filter (single)
-* Filters (multiple with configurable colors)
-* Terms
-
-By default the series is grouped by everything.
-
-==== Panel Options Tab
-
-The panel options tab is used for configuring the entire panel; the set of options
-available is dependent on which visualization you have selected. Below is a list
-of the options available per visualization:
-
-*Time Series*
-
-* Index pattern, timestamp, and Interval
-* Y-Axis min and max
-* Y-Axis position
-* Background color
-* Legend visibility
-* Legend position
-* Panel filter
-
-*Metric*
-
-* Index pattern, timestamp, and interval
-* Panel filter
-* Color rules for background and primary value
-
-*Top N*
-
-* Index pattern, timestamp, and interval
-* Panel filter
-* Background color
-* Item URL
-* Color rules for bar colors
-
-*Gauge*
-
-* Index pattern, timestamp, and interval
-* Panel filter
-* Background color
-* Gauge max
-* Gauge style
-* Inner gauge color
-* Inner gauge width
-* Gauge line width
-* Color rules for gauge line
-
-*Markdown*
-
-* Index pattern, timestamp, and interval
-* Panel filter
-* Background color
-* Scroll bar visibility
-* Vertical alignment of content
-* Custom Panel CSS with support for Less syntax
 
 ==== Annotations Tab
 
