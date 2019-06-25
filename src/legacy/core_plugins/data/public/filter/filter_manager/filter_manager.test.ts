@@ -26,7 +26,7 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
 
-import { getFilter, getRangeFilter } from './test_helpers/get_stub_filter';
+import { getFilter } from './test_helpers/get_stub_filter';
 import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { StubState } from './test_helpers/stub_state';
 import { getFiltersArray } from './test_helpers/get_filters_array';
@@ -69,7 +69,6 @@ describe('filter_manager', () => {
   let fetchSubscription: Subscription | undefined;
   let updateListener: sinon.SinonSpy<any[], any>;
 
-  let filterManagerState: FilterStateManager;
   let filterManager: FilterManager;
   let indexPatterns: any;
   let readyFilters: Filter[];
@@ -81,7 +80,10 @@ describe('filter_manager', () => {
     indexPatterns = new StubIndexPatterns();
     filterManager = new FilterManager(indexPatterns);
     readyFilters = getFiltersArray();
-    filterManagerState = new FilterStateManager(
+
+    // FilterStateManager is tested indirectly.
+    // Therefore, we don't need it's instance.
+    new FilterStateManager(
       globalStateStub,
       () => {
         return appStateStub;
@@ -676,13 +678,6 @@ describe('filter_manager', () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
       await filterManager.addFiltersAndChangeTimeFilter([f1]);
       expect(filterManager.getFilters()).toHaveLength(1);
-    });
-
-    test('should set timerange and add filters', async () => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      const f2 = getRangeFilter(FilterStateStore.GLOBAL_STATE, false, false);
-      await filterManager.addFiltersAndChangeTimeFilter([f1, f2]);
-      expect(filterManager.getFilters()).toHaveLength(2);
     });
   });
 });
