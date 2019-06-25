@@ -17,35 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { SavedDashboardPanel } from '../types';
 
-export interface SemanticVersion {
-  major: number;
-  minor: number;
-}
-
 export class PanelUtils {
-  public static parseVersion(version = '6.0.0'): SemanticVersion {
-    const versionSplit = version.split('.');
-    if (versionSplit.length < 3) {
-      throw new Error(
-        i18n.translate('kbn.dashboard.panel.invalidVersionErrorMessage', {
-          defaultMessage: 'Invalid version, {version}, expected {semver}',
-          values: {
-            version,
-            semver: '<major>.<minor>.<patch>',
-          },
-        })
-      );
-    }
-    return {
-      major: parseInt(versionSplit[0], 10),
-      minor: parseInt(versionSplit[1], 10),
-    };
-  }
-
   public static initPanelIndexes(panels: SavedDashboardPanel[]): void {
     // find the largest panelIndex in all the panels
     let maxIndex = this.getMaxPanelIndex(panels);

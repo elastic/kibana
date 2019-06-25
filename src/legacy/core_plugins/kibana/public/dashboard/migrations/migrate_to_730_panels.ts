@@ -18,8 +18,8 @@
  */
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import semver from 'semver';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
-import { PanelUtils } from '../panel/panel_utils';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
@@ -60,28 +60,23 @@ function isPre61Panel(
 }
 
 function is61Panel(panel: unknown | RawSavedDashboardPanel610): panel is RawSavedDashboardPanel610 {
-  const panelVersion = PanelUtils.parseVersion((panel as RawSavedDashboardPanel610).version);
-  return panelVersion && panelVersion.major === 6 && panelVersion.minor === 1;
+  return semver.satisfies((panel as RawSavedDashboardPanel610).version, '6.1.x');
 }
 
 function is62Panel(panel: unknown | RawSavedDashboardPanel620): panel is RawSavedDashboardPanel620 {
-  const panelVersion = PanelUtils.parseVersion((panel as RawSavedDashboardPanel620).version);
-  return panelVersion && panelVersion.major === 6 && panelVersion.minor === 2;
+  return semver.satisfies((panel as RawSavedDashboardPanel620).version, '6.2.x');
 }
 
 function is63Panel(panel: unknown | RawSavedDashboardPanel630): panel is RawSavedDashboardPanel630 {
-  const panelVersion = PanelUtils.parseVersion((panel as RawSavedDashboardPanel630).version);
-  return panelVersion && panelVersion.major === 6 && panelVersion.minor === 3;
+  return semver.satisfies((panel as RawSavedDashboardPanel630).version, '6.3.x');
 }
 
 function is640To720Panel(
   panel: unknown | RawSavedDashboardPanel640To720
 ): panel is RawSavedDashboardPanel640To720 {
-  const panelVersion = PanelUtils.parseVersion((panel as RawSavedDashboardPanel640To720).version);
   return (
-    panelVersion &&
-    ((panelVersion.major === 6 && panelVersion.minor > 3) ||
-      (panelVersion.major === 7 && panelVersion.minor < 3))
+    semver.satisfies((panel as RawSavedDashboardPanel630).version, '>6.3') &&
+    semver.satisfies((panel as RawSavedDashboardPanel630).version, '<7.3')
   );
 }
 
@@ -120,16 +115,16 @@ function migratePre61PanelToLatest(
     ? PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS
     : PANEL_HEIGHT_SCALE_FACTOR;
 
-  const { columns, sort, row, col, size_x, size_y, ...rest } = panel;
+  const { columns, sort, row, col, size_x: sizeX, size_y: sizeY, ...rest } = panel;
   return {
     ...rest,
     version,
     panelIndex: panel.panelIndex.toString(),
     gridData: {
-      x: (panel.col - 1) * PANEL_WIDTH_SCALE_FACTOR,
-      y: (panel.row - 1) * heightScaleFactor,
-      w: panel.size_x ? panel.size_x * PANEL_WIDTH_SCALE_FACTOR : DEFAULT_PANEL_WIDTH,
-      h: panel.size_y ? panel.size_y * heightScaleFactor : DEFAULT_PANEL_HEIGHT,
+      x: (col - 1) * PANEL_WIDTH_SCALE_FACTOR,
+      y: (row - 1) * heightScaleFactor,
+      w: sizeX ? sizeX * PANEL_WIDTH_SCALE_FACTOR : DEFAULT_PANEL_WIDTH,
+      h: sizeY ? sizeY * heightScaleFactor : DEFAULT_PANEL_HEIGHT,
       i: panel.panelIndex.toString(),
     },
     embeddableConfig,

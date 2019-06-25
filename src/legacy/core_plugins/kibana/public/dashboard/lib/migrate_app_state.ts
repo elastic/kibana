@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import semver from 'semver';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { trackUiMetric } from '../../../../ui_metric/public';
-import { PanelUtils } from '../panel/panel_utils';
 import {
   DashboardAppState,
   SavedDashboardPanelTo60,
@@ -46,29 +46,23 @@ export function migrateAppState(appState: { [key: string]: unknown } | Dashboard
     );
   }
 
-  const panelNeedsMigration =
-    (appState.panels as Array<
-      | SavedDashboardPanelTo60
-      | SavedDashboardPanel610
-      | SavedDashboardPanel620
-      | SavedDashboardPanel630
-      | SavedDashboardPanel640To720
-      | SavedDashboardPanel730ToLatest
-    >).findIndex(panel => {
-      if ((panel as { version?: string }).version === undefined) return true;
+  const panelNeedsMigration = (appState.panels as Array<
+    | SavedDashboardPanelTo60
+    | SavedDashboardPanel610
+    | SavedDashboardPanel620
+    | SavedDashboardPanel630
+    | SavedDashboardPanel640To720
+    | SavedDashboardPanel730ToLatest
+  >).some(panel => {
+    if ((panel as { version?: string }).version === undefined) return true;
 
-      const parsedVersion = PanelUtils.parseVersion(
-        (panel as SavedDashboardPanel730ToLatest).version
-      );
+    const version = (panel as SavedDashboardPanel730ToLatest).version;
 
-      // This will help us figure out when to remove support for older style URLs.
-      trackUiMetric('DashboardPanelVersionInUrl', `${parsedVersion.major}.${parsedVersion.minor}`);
+    // This will help us figure out when to remove support for older style URLs.
+    trackUiMetric('DashboardPanelVersionInUrl', `${version}`);
 
-      return (
-        (parsedVersion && parsedVersion.major === 6) ||
-        (parsedVersion.major === 7 && parsedVersion.minor < 3)
-      );
-    }) > -1;
+    return semver.satisfies(version, '<7.3');
+  });
 
   if (panelNeedsMigration) {
     appState.panels = migratePanelsTo730(
