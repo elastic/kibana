@@ -6,6 +6,7 @@
 
 import Joi from 'joi';
 import { AlertExecuteOptions } from '../types';
+import { ConcreteTaskInstance } from '../../../task_manager';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
@@ -36,8 +37,14 @@ const getCreateTaskRunnerFunctionParams = {
   internalSavedObjectsRepository: savedObjectsClient,
 };
 
-const mockedTaskInstance = {
+const mockedTaskInstance: ConcreteTaskInstance = {
+  id: '',
+  attempts: 0,
+  status: 'running',
+  primaryTerm: 0,
+  sequenceNumber: 1,
   runAt: mockedLastRunAt,
+  scheduledAt: mockedLastRunAt,
   state: {
     scheduledRunAt: mockedLastRunAt,
   },
@@ -89,7 +96,6 @@ Object {
     "alertInstances": Object {},
     "alertTypeState": undefined,
     "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
-    "scheduledRunAt": 2019-06-03T18:55:30.982Z,
   },
 }
 `);

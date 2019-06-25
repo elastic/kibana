@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionsPlugin } from '../../../actions';
 import { AlertType, Services, AlertServices } from '../types';
-import { TaskInstance } from '../../../task_manager';
+import { ConcreteTaskInstance } from '../../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
@@ -22,7 +22,7 @@ interface CreateTaskRunnerFunctionOptions {
 }
 
 interface TaskRunnerOptions {
-  taskInstance: TaskInstance;
+  taskInstance: ConcreteTaskInstance;
 }
 
 export function getCreateTaskRunnerFunction({
@@ -66,7 +66,7 @@ export function getCreateTaskRunnerFunction({
           services: alertTypeServices,
           params: validatedAlertTypeParams,
           state: taskInstance.state.alertTypeState || {},
-          scheduledRunAt: taskInstance.state.scheduledRunAt,
+          scheduledRunAt: taskInstance.scheduledAt,
           previousScheduledRunAt: taskInstance.state.previousScheduledRunAt,
         });
 
@@ -88,7 +88,7 @@ export function getCreateTaskRunnerFunction({
         );
 
         const nextRunAt = getNextRunAt(
-          new Date(taskInstance.state.scheduledRunAt),
+          new Date(taskInstance.scheduledAt),
           alertSavedObject.attributes.interval
         );
 
@@ -96,9 +96,7 @@ export function getCreateTaskRunnerFunction({
           state: {
             alertTypeState,
             alertInstances,
-            // We store nextRunAt ourselves since task manager changes runAt when executing a task
-            scheduledRunAt: nextRunAt,
-            previousScheduledRunAt: taskInstance.state.scheduledRunAt,
+            previousScheduledRunAt: taskInstance.scheduledAt,
           },
           runAt: nextRunAt,
         };
