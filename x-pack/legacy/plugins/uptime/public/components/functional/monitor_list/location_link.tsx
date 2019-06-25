@@ -10,6 +10,7 @@ import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 
 interface LocationLinkProps {
   location?: string | null;
+  textSize?: 'xs' | 's' | 'm';
 }
 
 const locationDocsLink =
@@ -19,9 +20,9 @@ const locationDocsLink =
  * Renders some location text, or directs the user to the docs where
  * they can learn to configure location.
  */
-export const LocationLink = ({ location }: LocationLinkProps) => {
+export const LocationLink = ({ location, textSize }: LocationLinkProps) => {
   return location ? (
-    <EuiText>{location}</EuiText>
+    <EuiText size={textSize || 's'}>{location}</EuiText>
   ) : (
     <EuiLink href={locationDocsLink} target="_blank">
       {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
