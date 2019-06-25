@@ -204,6 +204,13 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
         "id": "job-json",
         "name": "JSON",
       },
+      Object {
+        "content": <TransformMessagesPane
+          transformId="fq_date_histogram_1m_1441"
+        />,
+        "id": "job-messages",
+        "name": "Messages",
+      },
     ]
   }
 />
