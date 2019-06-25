@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { login } from '../../lib/login';
+import { login } from '../../lib/login/helpers';
 import { logout } from '../../lib/logout';
 import { OVERVIEW_PAGE } from '../../lib/urls';
 import { clearFetch, stubApi } from '../../lib/fixtures/helpers';

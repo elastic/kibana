@@ -6,8 +6,7 @@
   "license": "Elastic-License",
   "scripts": {
     "build-graphql-types": "node scripts/generate_types_from_graphql.js",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:open": "cypress open"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^4.1.0",
