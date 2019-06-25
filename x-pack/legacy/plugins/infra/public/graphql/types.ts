@@ -626,6 +626,46 @@ export namespace FlyoutItemQuery {
   };
 }
 
+export namespace LogEntryHighlightsQuery {
+  export type Variables = {
+    sourceId?: string | null;
+    startKey: InfraTimeKeyInput;
+    endKey: InfraTimeKeyInput;
+    filterQuery?: string | null;
+    highlights: InfraLogEntryHighlightInput[];
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logEntryHighlights: LogEntryHighlights[];
+  };
+
+  export type LogEntryHighlights = {
+    __typename?: 'InfraLogEntryInterval';
+
+    start?: Start | null;
+
+    end?: End | null;
+
+    entries: Entries[];
+  };
+
+  export type Start = InfraTimeKeyFields.Fragment;
+
+  export type End = InfraTimeKeyFields.Fragment;
+
+  export type Entries = InfraLogEntryHighlightFields.Fragment;
+}
+
 export namespace LogSummary {
   export type Variables = {
     sourceId?: string | null;
@@ -1132,5 +1172,53 @@ export namespace InfraLogEntryFields {
     field: string;
 
     value: string;
+  };
+}
+
+export namespace InfraLogEntryHighlightFields {
+  export type Fragment = {
+    __typename?: 'InfraLogEntry';
+
+    gid: string;
+
+    key: Key;
+
+    columns: Columns[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+
+    time: number;
+
+    tiebreaker: number;
+  };
+
+  export type Columns =
+    | InfraLogEntryMessageColumnInlineFragment
+    | InfraLogEntryFieldColumnInlineFragment;
+
+  export type InfraLogEntryMessageColumnInlineFragment = {
+    __typename?: 'InfraLogEntryMessageColumn';
+
+    message: Message[];
+  };
+
+  export type Message = InfraLogMessageFieldSegmentInlineFragment;
+
+  export type InfraLogMessageFieldSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageFieldSegment';
+
+    field: string;
+
+    highlights: string[];
+  };
+
+  export type InfraLogEntryFieldColumnInlineFragment = {
+    __typename?: 'InfraLogEntryFieldColumn';
+
+    field: string;
+
+    highlights: string[];
   };
 }
