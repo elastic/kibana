@@ -36,7 +36,7 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../store/ui';
-import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { docTitle } from 'ui/doc_title';
@@ -210,6 +210,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
 
   $scope.isFullScreen = false;
+  $scope.isSaveDisabled = false;
   function handleStoreChanges(store) {
     const nextIsFullScreen = getIsFullScreen(store.getState());
     if (nextIsFullScreen !== $scope.isFullScreen) {
@@ -223,6 +224,13 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
       updateIndexPatterns(nextIndexPatternIds);
+    }
+
+    const nextIsSaveDisabled = hasDirtyState(store.getState());
+    if (nextIsSaveDisabled !== $scope.isSaveDisabled) {
+      $scope.$evalAsync(() => {
+        $scope.isSaveDisabled = nextIsSaveDisabled;
+      });
     }
   }
 
@@ -326,6 +334,16 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       defaultMessage: `Save map`
     }),
     testId: 'mapSaveButton',
+    disableButton() {
+      return $scope.isSaveDisabled;
+    },
+    tooltip() {
+      if ($scope.isSaveDisabled) {
+        return i18n.translate('xpack.maps.mapController.saveMapDisabledButtonTooltip', {
+          defaultMessage: 'Save or Cancel your layer changes before saving'
+        });
+      }
+    },
     run: async () => {
       const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
         const currentTitle = savedMap.title;
