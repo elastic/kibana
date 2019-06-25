@@ -157,7 +157,7 @@ export function ElasticsearchPanel(props) {
       return (
         <>
           <EuiDescriptionListTitle>
-            <EuiLink href={gotoURL} >
+            <EuiLink href={gotoURL}>
               <FormattedMessage
                 id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
                 defaultMessage="Jobs"
@@ -165,7 +165,7 @@ export function ElasticsearchPanel(props) {
             </EuiLink>
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="esMlJobs">
-            <EuiLink href={gotoURL} >{props.ml.jobs}</EuiLink>
+            <EuiLink href={gotoURL}>{props.ml.jobs}</EuiLink>
           </EuiDescriptionListDescription>
         </>
       );
