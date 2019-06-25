@@ -60,6 +60,7 @@ import {
   UptimeProvider,
   InfraSourceConfigurationFlyoutProvider,
   InfraLogStreamProvider,
+  MachineLearningProvider,
 } from './services';
 
 import {
@@ -150,6 +151,7 @@ export default async function ({ readConfigFile }) {
       rollup: RollupPageProvider,
       infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
       infraLogStream: InfraLogStreamProvider,
+      ml: MachineLearningProvider,
     },
 
     // just like services, PageObjects are defined as a map of
