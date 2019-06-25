@@ -36,6 +36,7 @@ import {
   migrateKibanaIndex,
   Progress,
   getEnabledKibanaPluginIds,
+  createDefaultSpace,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -95,6 +96,10 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
     await migrateKibanaIndex({ client, log, kibanaPluginIds });
+
+    if (kibanaPluginIds.includes('spaces')) {
+      await createDefaultSpace({ client, index: '.kibana' });
+    }
   }
 
   return result;

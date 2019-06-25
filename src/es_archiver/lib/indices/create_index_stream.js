@@ -20,10 +20,10 @@
 import { Transform } from 'stream';
 
 import { get, once } from 'lodash';
-import { deleteKibanaIndices, createDefaultSpace } from './kibana_index';
+import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
-export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }) {
+export function createCreateIndexStream({ client, stats, skipExisting, log }) {
   const skipDocsFromIndices = new Set();
 
   // If we're trying to import Kibana index docs, we need to ensure that
@@ -62,10 +62,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
             aliases
           },
         });
-
-        if (isKibana && kibanaPluginIds.includes('spaces')) {
-          await createDefaultSpace({ client, index });
-        }
 
         stats.createdIndex(index, { settings });
       } catch (err) {

@@ -161,10 +161,11 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }
 }
 
 export async function createDefaultSpace({ index, client }) {
-  await client.index({
+  await client.create({
     index,
     type: '_doc',
     id: 'space:default',
+    ignore: 409,
     body: {
       type: 'space',
       updated_at: new Date().toISOString(),
