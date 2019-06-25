@@ -18,7 +18,7 @@ import {
 import { hasField, sortByField } from '../state_helpers';
 
 export interface FieldSelectProps {
-  invalidOperationType: OperationType | null;
+  incompatibleSelectedOperationType: OperationType | null;
   selectedColumn?: IndexPatternColumn;
   filteredColumns: IndexPatternColumn[];
   onChangeColumn: (newColumn: IndexPatternColumn) => void;
@@ -26,7 +26,7 @@ export interface FieldSelectProps {
 }
 
 export function FieldSelect({
-  invalidOperationType,
+  incompatibleSelectedOperationType,
   selectedColumn,
   filteredColumns,
   onChangeColumn,
@@ -39,8 +39,8 @@ export function FieldSelect({
     _.uniq(
       fieldColumns
         .filter(col =>
-          invalidOperationType
-            ? col.operationType === invalidOperationType
+          incompatibleSelectedOperationType
+            ? col.operationType === incompatibleSelectedOperationType
             : selectedColumn && col.operationType === selectedColumn.operationType
         )
         .concat(fieldColumns),
@@ -50,16 +50,16 @@ export function FieldSelect({
 
   useEffect(
     () => {
-      if (!selectedColumn && invalidOperationType && inputRef.current) {
+      if (!selectedColumn && incompatibleSelectedOperationType && inputRef.current) {
         inputRef.current.focus();
       }
     },
-    [selectedColumn, invalidOperationType]
+    [selectedColumn, incompatibleSelectedOperationType]
   );
 
   function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
-    return invalidOperationType
-      ? col.operationType === invalidOperationType
+    return incompatibleSelectedOperationType
+      ? col.operationType === incompatibleSelectedOperationType
       : !selectedColumn || col.operationType === selectedColumn.operationType;
   }
 
@@ -120,7 +120,7 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={fieldOptions}
-      isInvalid={Boolean(invalidOperationType && selectedColumn)}
+      isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumn)}
       selectedOptions={
         selectedColumn
           ? hasField(selectedColumn)

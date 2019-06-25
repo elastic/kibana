@@ -60,7 +60,10 @@ export interface SettingsProps extends IndexPatternDimensionPanelProps {
 export function Settings(props: SettingsProps) {
   const { selectedColumn, filteredColumns, state, columnId, setState } = props;
   const [isSettingsOpen, setSettingsOpen] = useState(false);
-  const [invalidOperationType, setInvalidOperationType] = useState<OperationType | null>(null);
+  const [
+    incompatibleSelectedOperationType,
+    setInvalidOperationType,
+  ] = useState<OperationType | null>(null);
 
   const ParamEditor =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType].paramEditor;
@@ -75,12 +78,12 @@ export function Settings(props: SettingsProps) {
           id: operationType as string,
           className: classNames('lnsConfigPanel__operation', {
             'lnsConfigPanel__operation--selected': Boolean(
-              invalidOperationType === operationType ||
-                (!invalidOperationType &&
+              incompatibleSelectedOperationType === operationType ||
+                (!incompatibleSelectedOperationType &&
                   selectedColumn &&
                   selectedColumn.operationType === operationType)
             ),
-            'lnsConfigPanel__operation--unsupported': !compatibleWithCurrentField,
+            'lnsConfigPanel__operation--incompatible': !compatibleWithCurrentField,
           }),
           'data-test-subj': `lns-indexPatternDimension-${operationType}`,
           onClick() {
@@ -88,7 +91,7 @@ export function Settings(props: SettingsProps) {
               setInvalidOperationType(operationType);
               return;
             }
-            if (invalidOperationType) {
+            if (incompatibleSelectedOperationType) {
               setInvalidOperationType(null);
             }
             if (selectedColumn.operationType === operationType) {
@@ -142,7 +145,7 @@ export function Settings(props: SettingsProps) {
           <FieldSelect
             filteredColumns={filteredColumns}
             selectedColumn={selectedColumn}
-            invalidOperationType={invalidOperationType}
+            incompatibleSelectedOperationType={incompatibleSelectedOperationType}
             onDeleteColumn={() => {
               setState(deleteColumn(state, columnId));
             }}
@@ -158,7 +161,7 @@ export function Settings(props: SettingsProps) {
               <EuiSideNav items={sideNavItems} />
             </EuiFlexItem>
             <EuiFlexItem grow={true} className="lnsConfigPanel__summaryPopoverRight">
-              {invalidOperationType && selectedColumn && (
+              {incompatibleSelectedOperationType && selectedColumn && (
                 <EuiCallOut
                   data-test-subj="indexPattern-invalid-operation"
                   title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
@@ -175,10 +178,10 @@ export function Settings(props: SettingsProps) {
                   </p>
                 </EuiCallOut>
               )}
-              {!invalidOperationType && ParamEditor && (
+              {!incompatibleSelectedOperationType && ParamEditor && (
                 <ParamEditor state={state} setState={setState} columnId={columnId} />
               )}
-              {!invalidOperationType && selectedColumn && (
+              {!incompatibleSelectedOperationType && selectedColumn && (
                 <EuiFormRow label="Label">
                   <EuiFieldText
                     data-test-subj="indexPattern-label-edit"

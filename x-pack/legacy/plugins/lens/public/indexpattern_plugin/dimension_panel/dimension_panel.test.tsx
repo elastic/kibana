@@ -241,10 +241,10 @@ describe('IndexPatternDimensionPanel', () => {
       className: string;
     }>;
 
-    expect(options.find(({ name }) => name === 'Minimum')!.className).not.toContain('unsupported');
+    expect(options.find(({ name }) => name === 'Minimum')!.className).not.toContain('incompatible');
 
     expect(options.find(({ name }) => name === 'Date Histogram')!.className).toContain(
-      'unsupported'
+      'incompatible'
     );
   });
 
@@ -793,7 +793,7 @@ describe('IndexPatternDimensionPanel', () => {
       );
     });
 
-    it('ignores drops of unsupported fields', () => {
+    it('ignores drops of incompatible fields', () => {
       const dragging = { type: 'number', name: 'baz' };
       const testState = dragDropState();
       wrapper = shallow(
