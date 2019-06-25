@@ -67,10 +67,11 @@ export class WhereExpression extends Component {
             })}
             uppercase={false}
             value={expressionValue}
+            data-test-subj="mapJoinWhereExpressionButton"
           />
         }
       >
-        <div className="mapFilterEditor" data-test-subj="mapJoinFilterEditor">
+        <div className="mapFilterEditor" data-test-subj="mapJoinWhereFilterEditor">
           <QueryBar
             query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
             onSubmit={this._onQueryChange}
