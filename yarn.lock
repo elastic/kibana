@@ -1639,15 +1639,16 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/github-checks-reporter@0.0.20b1":
-  version "0.0.20-b1"
-  resolved "https://registry.yarnpkg.com/@elastic/github-checks-reporter/-/github-checks-reporter-0.0.20-b1.tgz#c7bfefda94aeb6c97845286459f23cbe4bc8c79e"
-  integrity sha512-nsT7/v4AyMUCBNBqIL8Ty932r4aVcVoiEa/6iu0iMvUiT2W12nSXbhfkLOrFY8c9m8wliW1Hs7PANTcfh/oxqQ==
+"@elastic/github-checks-reporter@0.0.20b2":
+  version "0.0.20-b2"
+  resolved "https://registry.yarnpkg.com/@elastic/github-checks-reporter/-/github-checks-reporter-0.0.20-b2.tgz#bd629794efdb68a873ca1e136b6e7300889e084b"
+  integrity sha512-waDfKipY2UWjrqZ8Ji08J6mvgBFNL85W1o5lUlRfY6VFaqaNCPGtRJ8933e9DyfBF0ZUA8svtsYOJbEiBFlEOw==
   dependencies:
     "@octokit/app" "^2.2.2"
     "@octokit/plugin-retry" "^2.2.0"
     "@octokit/request" "^2.4.2"
     "@octokit/rest" "^16.23.2"
+    async-retry "^1.2.3"
     strip-ansi "^5.2.0"
 
 "@elastic/good@8.1.1-kibana2":
@@ -5697,6 +5698,13 @@ async-limiter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
   integrity sha512-jp/uFnooOiO+L211eZOoSyzpOITMXx1rBITauYykG3BRYPu8h0UcxsPNB04RR5vo4Tyz3+ay17tR6JVf9qzYWg==
+
+async-retry@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/async-retry/-/async-retry-1.2.3.tgz#a6521f338358d322b1a0012b79030c6f411d1ce0"
+  integrity sha512-tfDb02Th6CE6pJUF2gjW5ZVjsgwlucVXOEQMvEX9JgSJMs9gAX+Nz3xRuJBKuUYjTSYORqvDBORdAQ3LU59g7Q==
+  dependencies:
+    retry "0.12.0"
 
 async.queue@^0.5.2:
   version "0.5.2"
@@ -23993,7 +24001,7 @@ retry-axios@^1.0.1:
   resolved "https://registry.yarnpkg.com/retry-axios/-/retry-axios-1.0.1.tgz#c1e465126416d8aee7a0a2d4be28401cc0135029"
   integrity sha512-aVnENElFbdmbsv1WbTi610Ukdper88yUPz4Y3eg/DUyHV7vNaLrj9orB6FOjvmFoXL9wZvbMAsOD87BmcyBVOw==
 
-retry@^0.12.0:
+retry@0.12.0, retry@^0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/retry/-/retry-0.12.0.tgz#1b42a6266a21f07421d1b0b54b7dc167b01c013b"
   integrity sha1-G0KmJmoh8HQh0bC1S33BZ7AcATs=
