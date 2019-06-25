@@ -314,6 +314,7 @@ Object {
           title: 'my title',
           state: {},
           datasourceSuggestionId: 0,
+          previewIcon: 'empty',
         },
       ]);
 
@@ -365,12 +366,14 @@ Object {
             isFirst: true,
           },
           datasourceSuggestionId: 1,
+          previewIcon: 'empty',
         },
         {
           score: 0.5,
           title: 'second suggestion',
           state: {},
           datasourceSuggestionId: 0,
+          previewIcon: 'empty',
         },
       ]);
 
