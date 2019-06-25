@@ -24,6 +24,10 @@ export function MultiFieldSelect({
   ...rest
 }) {
 
+  if (!fields) {
+    return null;
+  }
+
   const onSelection = (selectedOptions) => {
     const fieldNamesArray = selectedOptions.map(({ value }) => {
       return value;
