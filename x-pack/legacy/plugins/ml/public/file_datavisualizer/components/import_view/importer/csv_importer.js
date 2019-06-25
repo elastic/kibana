@@ -24,13 +24,14 @@ export class CsvImporter extends Importer {
   async read(csv) {
     try {
       const transform = this.shouldTrimFields ? (f => f.trim()) : (f => f);
+      const dynamicTyping = (c => shouldUseDynamicType(this.columnNames, this.mappings, c));
       const config = {
         header: false,
         skipEmptyLines: 'greedy',
         delimiter: this.delimiter,
         quoteChar: this.quote,
-        dynamicTyping: (c => shouldUseDynamicType(this.columnNames, this.mappings, c)),
         transform,
+        dynamicTyping,
       };
 
       const parserOutput = Papa.parse(csv, config);
