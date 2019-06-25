@@ -26,6 +26,8 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function without splits or buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0,1],\\"buckets\\":[]}}' "`;
 
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function with boolean param showLabel 1`] = `"tagcloud metric={visdimension 0} showLabel=false "`;
+
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function with buckets 1`] = `"tagcloud metric={visdimension 0} bucket={visdimension 1 } "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function without buckets 1`] = `"tagcloud metric={visdimension 0} "`;
@@ -33,5 +35,7 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":0,\\"geohash\\":1,\\"geocentroid\\":3}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles timelion function 1`] = `"timelion_vis expression='foo' interval='bar' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles undefined markdown function 1`] = `"markdownvis '' font={font size=12} openLinksInNewTab=true "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles vega function 1`] = `"vega spec='this is a test' "`;
