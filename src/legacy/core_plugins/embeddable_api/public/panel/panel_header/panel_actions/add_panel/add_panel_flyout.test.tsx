@@ -17,7 +17,7 @@
  * under the License.
  */
 import '../../../../ui_capabilities.test.mocks';
-import { coreStartMock } from '../../../../../../../../core/public/ui_new_platform.test.mocks';
+jest.mock('ui/new_platform');
 
 import React from 'react';
 import {
@@ -36,6 +36,8 @@ import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { EmbeddableFactory } from '../../../../embeddables';
+import { OverlayStart } from 'src/core/public';
+import { npStart } from 'ui/new_platform';
 
 const onClose = jest.fn();
 let container: Container;
@@ -79,7 +81,8 @@ test('create new calls factory.adds a panel to the container', async done => {
 
   await nextTick();
 
-  const overlayMock = coreStartMock.overlays;
+  const overlayMock = npStart.core.overlays as jest.Mocked<PublicMethodsOf<OverlayStart>>;
+
   ((overlayMock.openModal.mock.calls[0][0] as any).props as ContactCardInitializerProps).onCreate({
     firstName: 'Dany',
     lastName: 'Targaryan',
