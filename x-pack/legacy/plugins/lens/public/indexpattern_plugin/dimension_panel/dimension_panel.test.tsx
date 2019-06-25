@@ -13,6 +13,7 @@ import { getPotentialColumns, operationDefinitionMap } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../state_helpers');
 jest.mock('../operations');
@@ -269,10 +270,7 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    wrapper
-      .find('[data-test-subj="lns-indexPatternDimension-min"]')
-      .first()
-      .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
     const comboBox = wrapper.find(EuiComboBox);
     const options = comboBox.prop('options');
@@ -285,7 +283,7 @@ describe('IndexPatternDimensionPanel', () => {
         ...state.columns,
         col2: expect.objectContaining({
           sourceField: 'bytes',
-          operationType: 'min',
+          operationType: 'avg',
           // Other parts of this don't matter for this test
         }),
       },
@@ -299,8 +297,19 @@ describe('IndexPatternDimensionPanel', () => {
         dragDropContext={dragDropContext}
         state={{
           ...state,
-          columns: {
-            ...state.columns,
+          indexPatterns: {
+            1: {
+              ...state.indexPatterns[1],
+              fields: [
+                ...state.indexPatterns[1].fields,
+                {
+                  name: 'memory',
+                  type: 'number',
+                  aggregatable: true,
+                  searchable: true,
+                },
+              ],
+            },
           },
         }}
         setState={() => {}}
@@ -314,10 +323,7 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    wrapper
-      .find('[data-test-subj="lns-indexPatternDimension-min"]')
-      .first()
-      .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
     const options = wrapper.find(EuiComboBox).prop('options');
 
@@ -334,7 +340,7 @@ describe('IndexPatternDimensionPanel', () => {
     ).not.toContain('incompatible');
   });
 
-  it('should show all operation that are not filtered out', () => {
+  it('should show all operations that are not filtered out', () => {
     const setState = jest.fn();
 
     const wrapper = mount(
@@ -409,10 +415,7 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    wrapper
-      .find('[data-test-subj="lns-indexPatternDimension-min"]')
-      .first()
-      .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -447,7 +450,7 @@ describe('IndexPatternDimensionPanel', () => {
       .simulate('click');
 
     const comboBox = wrapper.find(EuiComboBox)!;
-    const option = comboBox.prop('options')![1].options![1];
+    const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
 
     comboBox.prop('onChange')!([option]);
 
