@@ -30,15 +30,21 @@ export class UpdateSourceEditor extends Component {
   }
 
   async loadFields() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const meta = emsFiles.find((source => source.id === this.props.layerId));
-    const fields = meta.fields.map(field => {
-      return {
-        type: 'string',
-        name: field.name,
-        label: field.description
-      };
-    });
+    let fields;
+    try {
+      const emsFiles = await getEmsVectorFilesMeta();
+      const meta = emsFiles.find((source => source.id === this.props.layerId));
+      fields = meta.fields.map(field => {
+        return {
+          type: 'string',
+          name: field.name,
+          label: field.description
+        };
+      });
+    } catch(e) {
+      //swallow this error. when a matching EMS-config cannot be found, the source already will have thrown errors that when doing the data request. This will propagate to the vector-layer and be displayed in the UX
+      fields = [];
+    }
     this.setState({ fields: fields });
   }
 
