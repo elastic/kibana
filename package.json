@@ -119,7 +119,6 @@
     "@kbn/pm": "1.0.0",
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
-    "@slack/webhook": "^5.0.0",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.clonedeep": "^4.5.4",
     "@types/react-grid-layout": "^0.16.7",

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function serverLogTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function slackTest({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
 
   describe('create slack action', () => {
@@ -20,7 +20,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         .send({
           attributes: {
             description: 'A slack action',
-            actionTypeId: 'kibana.slack',
+            actionTypeId: '.slack',
             actionTypeConfig: {
               webhookUrl: 'http://example.com',
             },
@@ -33,7 +33,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
             id: resp.body.id,
             attributes: {
               description: 'A slack action',
-              actionTypeId: 'kibana.slack',
+              actionTypeId: '.slack',
               actionTypeConfig: {},
             },
             references: [],
@@ -51,7 +51,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         .send({
           attributes: {
             description: 'A slack action',
-            actionTypeId: 'kibana.slack',
+            actionTypeId: '.slack',
             actionTypeConfig: {},
           },
         })

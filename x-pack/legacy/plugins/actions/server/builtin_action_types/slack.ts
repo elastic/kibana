@@ -7,42 +7,48 @@
 import Joi from 'joi';
 import { IncomingWebhook } from '@slack/webhook';
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
+import { ActionType, ActionTypeExecutorOptions, ExecutorType } from '../types';
 
-// TODO: figure out the right way type-safe way to mock slack's IncomingWebhook class
-let IncomingWebhookImpl: any = IncomingWebhook;
+const CONFIG_SCHEMA = Joi.object()
+  .keys({
+    webhookUrl: Joi.string().required(),
+  })
+  .required();
 
-// for testing
-export function setIncomingWebhookImpl(incomingWebHook: any = IncomingWebhook): void {
-  IncomingWebhookImpl = incomingWebHook;
+const PARAMS_SCHEMA = Joi.object()
+  .keys({
+    message: Joi.string().required(),
+  })
+  .required();
+
+// customizing executor is only used for tests
+export function getActionType({
+  executor = slackExecutor,
+}: { executor?: ExecutorType } = {}): ActionType {
+  return {
+    id: '.slack',
+    name: 'slack',
+    unencryptedAttributes: [],
+    validate: {
+      params: PARAMS_SCHEMA,
+      config: CONFIG_SCHEMA,
+    },
+    executor,
+  };
 }
 
-const CONFIG_SCHEMA = Joi.object().keys({
-  webhookUrl: Joi.string().required(),
-});
+export const actionType = getActionType();
 
-const PARAMS_SCHEMA = Joi.object().keys({
-  message: Joi.string().required(),
-});
-
-export const actionType: ActionType = {
-  id: 'kibana.slack',
-  name: 'slack',
-  unencryptedAttributes: [],
-  validate: {
-    params: PARAMS_SCHEMA,
-    config: CONFIG_SCHEMA,
-  },
-  executor,
-};
-
-async function executor({ config, params, services }: ActionTypeExecutorOptions): Promise<any> {
+// the default, and production, executor for this action
+async function slackExecutor({
+  config,
+  params,
+  services,
+}: ActionTypeExecutorOptions): Promise<any> {
   const { webhookUrl } = config;
   const { message } = params;
 
-  // TODO: do we need an agent for proxy access?
-  const webhook = new IncomingWebhookImpl(webhookUrl);
+  const webhook = new IncomingWebhook(webhookUrl);
 
-  // TODO: should we have a standardized response for executor?
   return await webhook.send(message);
 }

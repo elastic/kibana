@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType, Services } from '../types';
+import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { validateActionTypeParams } from '../lib';
 import { validateActionTypeConfig } from '../lib';
-import { setIncomingWebhookImpl } from './slack';
-import { registerBuiltInActionTypes } from './index';
-import { MockIncomingWebhook } from './incoming_webhook.mock';
+import { getActionType } from './slack';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 
-const ACTION_TYPE_ID = 'kibana.slack';
+const ACTION_TYPE_ID = '.slack';
 
 const NO_OP_FN = () => {};
 
@@ -32,9 +30,23 @@ function getServices(): Services {
 let actionTypeRegistry: ActionTypeRegistry;
 let actionType: ActionType;
 
-const mockEncryptedSavedObjectsPlugin = {
-  getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
-} as EncryptedSavedObjectsPlugin;
+const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+
+async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
+  const { params } = options;
+  const { message } = params;
+  if (message == null) throw new Error('message property required in parameter');
+
+  const failureMatch = message.match(/^failure: (.*)$/);
+  if (failureMatch != null) {
+    const failMessage = failureMatch[1];
+    throw new Error(`slack mockExecutor failure: ${failMessage}`);
+  }
+
+  return {
+    text: `slack mockExecutor success: ${message}`,
+  };
+}
 
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
@@ -42,13 +54,8 @@ beforeAll(() => {
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
   });
-  registerBuiltInActionTypes(actionTypeRegistry);
-  setIncomingWebhookImpl(MockIncomingWebhook);
+  actionTypeRegistry.register(getActionType({ executor: mockSlackExecutor }));
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-});
-
-afterAll(() => {
-  setIncomingWebhookImpl();
 });
 
 describe('action is registered', () => {
@@ -122,7 +129,7 @@ describe('execute()', () => {
     });
     expect(response).toMatchInlineSnapshot(`
 Object {
-  "text": "mockIncomingWebhook success: this invocation should succeed",
+  "text": "slack mockExecutor success: this invocation should succeed",
 }
 `);
   });
@@ -135,7 +142,7 @@ Object {
         params: { message: 'failure: this invocation should fail' },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"mockIncomingWebhook failure: this invocation should fail"`
+      `"slack mockExecutor failure: this invocation should fail"`
     );
   });
 });
