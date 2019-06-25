@@ -58,15 +58,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public async waitUntilFrameworkReady(): Promise<void> {
     const $injector = await this.onKibanaReady();
-
-    let xpackInfo: any;
-    try {
-      xpackInfo = this.xpackInfoService;
-    } catch (e) {
-      xpackInfo = false;
-    }
-
+    const xpackInfo: any = this.xpackInfoService;
     let xpackInfoUnpacked: FrameworkInfo;
+
     try {
       xpackInfoUnpacked = {
         basePath: this.getBasePath(),
