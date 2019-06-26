@@ -40,7 +40,7 @@ export function registerSaveRoute(server) {
       if (watchPayload.isNew) {
         const conflictError = wrapCustomError(
           new Error(i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
-            defaultMessage: 'There is already a watch with ID \'{watchId}\'',
+            defaultMessage: 'There is already a watch with ID \'{watchId}\'.',
             values: {
               watchId: watchPayload.id,
             }

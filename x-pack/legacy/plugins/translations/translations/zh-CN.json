@@ -7561,7 +7561,6 @@
     "xpack.watcher.constants.watchStates.firingStateText": "正在发送",
     "xpack.watcher.constants.watchStates.okStateText": "确定",
     "xpack.watcher.models.action.actionJsonPropertyMissingBadRequestMessage": "json 参数必须包含 {actionJson} 属性",
-    "xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage": "json 参数必须包含 {actionStatusJson} 属性",
     "xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage": "json 参数必须包含 {id} 属性",
     "xpack.watcher.models.actionStatus.notDetermineActionStatusBadImplementationMessage": "无法确定操作状态；操作 = {actionStatusJson}",
     "xpack.watcher.models.baseAction.idPropertyMissingBadRequestMessage": "json 参数必须包含 {id} 属性",
@@ -7645,14 +7644,6 @@
     "xpack.watcher.thresholdWatchExpression.groupByLabel.topLabel": "顶部",
     "xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage": "需要值。",
     "xpack.watcher.thresholdWatchExpression.timeWindow.durationSizeIsRequiredValidationMessage": "“窗口持续时间大小”必填。",
-    "xpack.watcher.timeUnits.dayPluralLabel": "天",
-    "xpack.watcher.timeUnits.daySingularLabel": "天",
-    "xpack.watcher.timeUnits.hourPluralLabel": "小时",
-    "xpack.watcher.timeUnits.hourSingularLabel": "小时",
-    "xpack.watcher.timeUnits.minutePluralLabel": "分钟",
-    "xpack.watcher.timeUnits.minuteSingularLabel": "分钟",
-    "xpack.watcher.timeUnits.secondPluralLabel": "秒",
-    "xpack.watcher.timeUnits.secondSingularLabel": "秒",
     "xpack.watcher.watchActions.logging.logTextIsRequiredValidationMessage": "“日志文本”必填。",
     "xpack.watcher.watcherDescription": "通过创建、管理和监测警报来检测数据中的更改。"
   }
