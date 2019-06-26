@@ -15,6 +15,7 @@ import { searchConfigurations } from '../lib/settings/cm/search';
 import { listConfigurations } from '../lib/settings/cm/list_configurations';
 import { getEnvironments } from '../lib/settings/cm/get_environments';
 import { deleteConfiguration } from '../lib/settings/cm/delete_configuration';
+import { createCmIndex } from '../lib/settings/cm/create_cm_index';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
@@ -24,6 +25,8 @@ const defaultErrorHandler = (err: Error) => {
 
 export function initSettingsApi(core: InternalCoreSetup) {
   const { server } = core.http;
+
+  createCmIndex(server);
 
   // get list of configurations
   server.route({
