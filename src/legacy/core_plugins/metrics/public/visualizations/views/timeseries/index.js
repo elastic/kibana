@@ -19,7 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+
 import {
   Axis,
   Chart,
@@ -38,13 +38,14 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP } from '../../constants';
 
-function generateAnnotationData(values) {
-  return values.map(({ key, docs }) => ({
+const generateAnnotationData = (values, formatter) =>
+  values.map(({ key, docs }) => ({
     dataValue: key,
     details: docs[0],
-    header: moment(key).format('MMM DD, YYYY hh:mm A'),
+    header: formatter(key),
   }));
-}
+
+const decorateFormatter = formatter => ({ value }) => formatter(value);
 
 export const TimeSeries = ({
   isDarkMode,
@@ -58,6 +59,8 @@ export const TimeSeries = ({
   xAxisFormatter,
   annotations,
 }) => {
+  const tooltipFormatter = decorateFormatter(xAxisFormatter);
+
   return (
     <Chart renderer="canvas" className="tvbVisTimeSeries">
       <Settings
@@ -66,10 +69,13 @@ export const TimeSeries = ({
         onBrushEnd={onBrush}
         animateData={false}
         theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+        tooltip={{
+          headerFormatter: tooltipFormatter,
+        }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
-        const dataValues = generateAnnotationData(data);
+        const dataValues = generateAnnotationData(data, tooltipFormatter);
         const style = { line: { stroke: color } };
 
         return (
