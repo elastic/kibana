@@ -79,14 +79,14 @@ export const startDatafeeds = async (datafeedIds: string[]) => {
 };
 
 /**
- * Stops the given dataFeedIds
+ * Stops the given dataFeedIds and sets the corresponding Job's jobState to closed
  *
- * TODO: This action *does not* return the jobState to closed, check w/ ML team to ensure this is OK
+ * TODO: Error Handling
  *
  * @param datafeedIds
  */
 export const stopDatafeeds = async (datafeedIds: string[]) => {
-  const response = await fetch('/api/ml/jobs/stop_datafeeds', {
+  const stopDatafeedsResponse = await fetch('/api/ml/jobs/stop_datafeeds', {
     method: 'POST',
     credentials: 'same-origin',
     body: JSON.stringify({
@@ -95,6 +95,45 @@ export const stopDatafeeds = async (datafeedIds: string[]) => {
     headers: {
       'kbn-system-api': 'true',
       'Content-Type': 'application/json',
+      'kbn-xsrf': chrome.getXsrfToken(),
+    },
+  });
+
+  const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
+
+  const datafeedPrefix = 'datafeed-';
+  const closeJobsResponse = await fetch('/api/ml/jobs/close_jobs', {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify({
+      jobIds: datafeedIds.map(dataFeedId =>
+        dataFeedId.startsWith(datafeedPrefix)
+          ? dataFeedId.substring(datafeedPrefix.length)
+          : dataFeedId
+      ),
+    }),
+    headers: {
+      'kbn-system-api': 'true',
+      'Content-Type': 'application/json',
+      'kbn-xsrf': chrome.getXsrfToken(),
+    },
+  });
+
+  return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
+};
+
+/**
+ * Fetches Job Details for given jobIds
+ *
+ * TODO: Remove after Frank's ML PR makes it in
+ *
+ * @param jobIds
+ */
+export const jobsSummary = async (jobIds: string[]) => {
+  const response = await fetch(`/api/ml/anomaly_detectors/${jobIds.join(',')}`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
       'kbn-xsrf': chrome.getXsrfToken(),
     },
   });

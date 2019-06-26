@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const INTEGRATIONS = i18n.translate('xpack.siem.components.mlPopup.integrationTitle', {
+  defaultMessage: 'Integrations',
+});
+
 export const MACHINE_LEARNING = i18n.translate(
   'xpack.siem.components.mlPopup.machineLearningTitle',
   {
@@ -17,10 +21,22 @@ export const ML_DESCRIPTION = i18n.translate(
   'xpack.siem.components.mlPopup.machineLearningDescription',
   {
     defaultMessage:
-      "Enable to view the results of machine learning jobs such as Anomalous Events, Hosts & IP's.",
+      "View the results of machine learning jobs such as Anomalous Events, Hosts & IP's throughout the SIEM App.",
   }
 );
 
+export const CREATE_JOBS = i18n.translate('xpack.siem.components.mlPopup.addJobsTitle', {
+  defaultMessage: 'Create jobs',
+});
+
 export const JOB_DETAILS = i18n.translate('xpack.siem.components.mlPopup.jobDetailsTitle', {
   defaultMessage: 'Job Details',
+});
+
+export const SHOW_ALL_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobs', {
+  defaultMessage: 'Show all SIEM jobs',
+});
+
+export const SHOW_SIEM_JOBS = i18n.translate('xpack.siem.components.mlPopup.showSiemJobsLabel', {
+  defaultMessage: 'Show only embedded jobs',
 });

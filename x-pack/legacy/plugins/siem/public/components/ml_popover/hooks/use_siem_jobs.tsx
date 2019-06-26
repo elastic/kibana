@@ -7,23 +7,25 @@
 import { useState, useEffect, useContext } from 'react';
 import { groupsData } from '../api';
 import { Group } from '.././types';
-import {
-  AppKibanaFrameworkAdapter,
-  KibanaConfigContext,
-} from '../../../lib/adapters/framework/kibana_framework_adapter';
+import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 
-type Return = [boolean, Group[] | []];
+type Return = [boolean, string[]];
 
-export const useGroupData = (refetchData: boolean): Return => {
-  const [groupData, setGroupData] = useState<Group[]>([]);
+export const useSiemJobs = (refetchData: boolean): Return => {
+  const [siemJobs, setSiemJobs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
+  const config = useContext(KibanaConfigContext);
 
   const fetchFunc = async () => {
     const data = await groupsData({
       'kbn-version': config.kbnVersion,
     });
-    setGroupData(data);
+
+    const siemJobIds = data.reduce((jobIds: string[], group: Group) => {
+      return group.id === 'siem' ? [...jobIds, ...group.jobIds] : jobIds;
+    }, []);
+
+    setSiemJobs(siemJobIds);
     setLoading(false);
   };
 
@@ -35,5 +37,5 @@ export const useGroupData = (refetchData: boolean): Return => {
     [refetchData]
   );
 
-  return [loading, groupData];
+  return [loading, siemJobs];
 };

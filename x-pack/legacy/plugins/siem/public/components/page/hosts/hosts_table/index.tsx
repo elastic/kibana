@@ -9,9 +9,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
@@ -34,11 +31,6 @@ import {
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import { MlPopover } from '../../../ml_popover/ml_popover';
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  margin-right: 16px;
-`;
 
 interface OwnProps {
   data: HostsEdges[];
@@ -125,13 +117,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         columns={this.memoizedColumns(type, indexPattern)}
         hasNextPage={hasNextPage}
         headerCount={totalCount}
-        headerSupplement={
-          <EuiFlexGroup alignItems="center">
-            <StyledEuiFlexItem grow={false}>
-              <MlPopover />
-            </StyledEuiFlexItem>
-          </EuiFlexGroup>
-        }
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
