@@ -169,7 +169,7 @@ export const JsonWatchEditSimulateResults = ({
       <EuiFlyoutHeader hasBorder>
         {flyoutTitle}
         <EuiSpacer size="xs" />
-        <WatchStatus status={state} />
+        <WatchStatus status={state} size="m" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {actionsTableData && actionsTableData.length > 0 && (
