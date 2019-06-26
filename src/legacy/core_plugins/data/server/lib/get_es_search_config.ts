@@ -22,10 +22,12 @@ import { Server, Request, RequestQuery } from 'hapi';
 import KbnServer from 'src/legacy/server/kbn_server';
 
 export async function getEsSearchConfig(server: Server, request: Request) {
-  const timeout = await getEsShardTimeout(server);
-  const preference = await getEsPreference(request);
-  const ignoreThrottled = await getEsIgnoreThrottled(request);
-  return { timeout, preference, ignore_throttled: ignoreThrottled };
+  return {
+    timeout: await getEsShardTimeout(server),
+    preference: await getEsPreference(request),
+    ignore_throttled: await getEsIgnoreThrottled(request),
+    max_concurrent_shard_requests: await getEsMaxConcurrentShardRequests(request),
+  };
 }
 
 export async function getEsShardTimeout(server: Server) {
@@ -44,11 +46,17 @@ export async function getEsPreference(request: Request) {
   if (setRequestPreferenceTo === 'sessionId') {
     return (request.query as RequestQuery).sessionId;
   } else if (setRequestPreferenceTo === 'custom') {
-    return await config.get('courier:customRequestPreference');
+    return config.get('courier:customRequestPreference');
   }
 }
 
-export async function getEsIgnoreThrottled(request: Request) {
+export function getEsIgnoreThrottled(request: Request) {
   const config = request.getUiSettingsService();
   return config.get('search:includeFrozen');
+}
+
+export async function getEsMaxConcurrentShardRequests(request: Request) {
+  const config = request.getUiSettingsService();
+  const maxConcurrentShardRequests = await config.get('courier:maxConcurrentShardRequests');
+  if (maxConcurrentShardRequests !== 0) return maxConcurrentShardRequests;
 }
