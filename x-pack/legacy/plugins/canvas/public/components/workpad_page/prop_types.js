@@ -50,4 +50,5 @@ export const interactiveWorkpadPagePropTypes = {
   saveCanvasOrigin: PropTypes.func.isRequired,
   commit: PropTypes.func.isRequired,
   setMultiplePositions: PropTypes.func.isRequired,
+  zoomScale: PropTypes.number.isRequired,
 };
