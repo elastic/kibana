@@ -317,10 +317,6 @@ export class FeatureTooltip extends React.Component {
 
   _renderPagination(filteredFeatures) {
 
-    if (filteredFeatures.length === 1) {
-      return null;
-    }
-
     if (!this.props.showFeatureList) {
       return (
         <EuiTextAlign textAlign="center">
@@ -345,8 +341,8 @@ export class FeatureTooltip extends React.Component {
     return (
       <Fragment>
         {this._renderCloseButton()}
-        {this._renderLayerFilterBox()}
         {this._renderProperties(filteredFeatures)}
+        {this._renderLayerFilterBox()}
         {this._renderPagination(filteredFeatures)}
       </Fragment>
     );
