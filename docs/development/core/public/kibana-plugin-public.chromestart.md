@@ -4,6 +4,7 @@
 
 ## ChromeStart interface
 
+ChromeStart allows plugins to customize the global chrome header UI and enrich the UX with additional information about the current location of the browser.
 
 <b>Signature:</b>
 
@@ -39,4 +40,29 @@ export interface ChromeStart
 |  [setHelpExtension(helpExtension)](./kibana-plugin-public.chromestart.sethelpextension.md) | Override the current set of custom help content |
 |  [setIsCollapsed(isCollapsed)](./kibana-plugin-public.chromestart.setiscollapsed.md) | Set the collapsed state of the chrome navigation. |
 |  [setIsVisible(isVisible)](./kibana-plugin-public.chromestart.setisvisible.md) | Set the temporary visibility for the chrome. This does nothing if the chrome is hidden by default and should be used to hide the chrome for things like full-screen modes with an exit button. |
+
+## Remarks
+
+While ChromeStart exposes many APIs, they should be used sparingly and the developer should understand how they affect other plugins and applications.
+
+## Example 1
+
+How to add a recently accessed item to the sidebar:
+
+```ts
+core.chrome.recentlyAccessed.add('/app/map/1234', 'Map 1234', '1234');
+
+```
+
+## Example 2
+
+How to set the help dropdown extension:
+
+```tsx
+core.chrome.setHelpExtension(elem => {
+  ReactDOM.render(<MyHelpComponent />, elem);
+  return () => ReactDOM.unmountComponentAtNode(elem);
+});
+
+```
 

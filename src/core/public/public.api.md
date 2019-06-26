@@ -143,7 +143,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
     link: string;
 }
 
-// @public (undocumented)
+// @public
 export interface ChromeStart {
     addApplicationClass(className: string): void;
     getApplicationClasses$(): Observable<string[]>;
