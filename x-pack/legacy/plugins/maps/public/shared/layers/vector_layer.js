@@ -243,11 +243,11 @@ export class VectorLayer extends AbstractLayer {
 
     let updateDueToQuery = false;
     let updateDueToFilters = false;
-    let updateDueToLayerQuery = false;
+    let updateDueToSourceQuery = false;
     let updateDueToApplyGlobalQuery = false;
     if (isQueryAware) {
       updateDueToApplyGlobalQuery = prevMeta.applyGlobalQuery !== nextMeta.applyGlobalQuery;
-      updateDueToLayerQuery = !_.isEqual(prevMeta.layerQuery, nextMeta.layerQuery);
+      updateDueToSourceQuery = !_.isEqual(prevMeta.sourceQuery, nextMeta.sourceQuery);
       if (nextMeta.applyGlobalQuery) {
         updateDueToQuery = !_.isEqual(prevMeta.query, nextMeta.query);
         updateDueToFilters = !_.isEqual(prevMeta.filters, nextMeta.filters);
@@ -273,7 +273,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToFields
       && !updateDueToQuery
       && !updateDueToFilters
-      && !updateDueToLayerQuery
+      && !updateDueToSourceQuery
       && !updateDueToApplyGlobalQuery
       && !updateDueToPrecisionChange
       && !updateDueToSourceMetaChange;
@@ -287,7 +287,7 @@ export class VectorLayer extends AbstractLayer {
 
     const searchFilters = {
       ...dataFilters,
-      layerQuery: joinSource.getWhereQuery(),
+      sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
     };
     const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
@@ -344,7 +344,7 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      layerQuery: this.getQuery(),
+      sourceQuery: this.getQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
       sourceMeta: this._source.getSyncMeta(),
     };
