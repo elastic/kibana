@@ -10,28 +10,35 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
+  HostFields,
+  HostItem,
   HostsEdges,
   HostsFields,
   HostsSortField,
-  HostItem,
-  HostFields,
   OsFields,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import {
+  Columns,
   Criteria,
   ItemsPerRow,
   LoadMoreTable,
-  Columns,
   SortingBasicTable,
 } from '../../../load_more_table';
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
+import { MlPopover } from '../../../ml_popover/ml_popover';
+
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  margin-right: 16px;
+`;
 
 interface OwnProps {
   data: HostsEdges[];
@@ -118,6 +125,13 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         columns={this.memoizedColumns(type, indexPattern)}
         hasNextPage={hasNextPage}
         headerCount={totalCount}
+        headerSupplement={
+          <EuiFlexGroup alignItems="center">
+            <StyledEuiFlexItem grow={false}>
+              <MlPopover />
+            </StyledEuiFlexItem>
+          </EuiFlexGroup>
+        }
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
