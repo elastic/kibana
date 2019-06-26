@@ -188,7 +188,47 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
-      ).toMatchInlineSnapshot(`"/app/apm#/traces?kuery=${encodeURIComponent('trace.id:1234567')}"`);
+      ).toMatchInlineSnapshot(
+        `"/app/apm#/traces?kuery=${encodeURIComponent(
+          'trace.id:1234567'
+        )}&rangeFrom=now-1y&rangeTo=now"`
+      );
+    });
+
+    it('renders with a trace id filter and timestamp when present in log entry', () => {
+      const timestamp = new Date(Date.now() - 6000 * 1000).toISOString();
+      const elementWrapper = mountWithIntl(
+        <LogEntryActionsMenu
+          logItem={{
+            fields: [
+              { field: 'trace.id', value: '1234567' },
+              { field: '@timestamp', value: timestamp },
+            ],
+            id: 'ITEM_ID',
+            index: 'INDEX',
+            key: {
+              time: 0,
+              tiebreaker: 0,
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        elementWrapper
+          .find(`button${testSubject('logEntryActionsMenuButton')}`)
+          .last()
+          .simulate('click');
+      });
+      elementWrapper.update();
+
+      expect(
+        elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
+      ).toMatchInlineSnapshot(
+        `"/app/apm#/traces?kuery=${encodeURIComponent(
+          'trace.id:1234567'
+        )}&rangeFrom=now-6060s&rangeTo=now-6000s"`
+      );
     });
 
     it('renders as disabled when no supported field is present in log entry', () => {

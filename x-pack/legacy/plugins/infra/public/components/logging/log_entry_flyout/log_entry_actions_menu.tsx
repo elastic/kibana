@@ -115,8 +115,23 @@ const getAPMLink = (logItem: InfraLogItem) => {
     return undefined;
   }
 
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  const timestampField = logItem.fields.find(({ field }) => field === '@timestamp');
+  const timestampInSeconds = timestampField
+    ? Math.floor(Date.parse(timestampField.value) / 1000)
+    : null;
+  const { rangeFrom, rangeTo } = timestampInSeconds
+    ? (() => {
+        const timeAgoPlus1Minute = nowInSeconds - timestampInSeconds + 60;
+        const timeAgo = nowInSeconds - timestampInSeconds;
+        return { rangeFrom: `now-${timeAgoPlus1Minute}s`, rangeTo: `now-${timeAgo}s` };
+      })()
+    : { rangeFrom: 'now-1y', rangeTo: 'now' };
+
   return url.format({
     pathname: chrome.addBasePath('/app/apm'),
-    hash: `/traces?kuery=${encodeURIComponent(`trace.id:${traceIdEntry.value}`)}`,
+    hash: `/traces?kuery=${encodeURIComponent(
+      `trace.id:${traceIdEntry.value}`
+    )}&rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
   });
 };
