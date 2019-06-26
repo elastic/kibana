@@ -1,8 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 /* tslint:disable */
 
 // ====================================================
@@ -403,10 +398,8 @@ export interface HistogramDataPoint {
 }
 /** The data used to populate the monitor charts. */
 export interface MonitorChart {
-  /** The max and min values for the monitor duration. */
-  durationArea: MonitorDurationAreaPoint[];
   /** The average values for the monitor duration. */
-  durationLine: MonitorDurationAveragePoint[];
+  locationDurationLines: LocationDurationLine[];
   /** The counts of up/down checks for the monitor. */
   status: StatusData[];
   /** The maximum status doc count in this chart. */
@@ -414,14 +407,11 @@ export interface MonitorChart {
   /** The maximum duration value in this chart. */
   durationMaxValue: number;
 }
-/** Represents a monitor's duration performance in microseconds at a point in time. */
-export interface MonitorDurationAreaPoint {
-  /** The timeseries value for this point in time. */
-  x: UnsignedInteger;
-  /** The min duration value in microseconds at this time. */
-  yMin?: number | null;
-  /** The max duration value in microseconds at this point. */
-  yMax?: number | null;
+
+export interface LocationDurationLine {
+  name: string;
+
+  line: MonitorDurationAveragePoint[];
 }
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {
@@ -488,6 +478,15 @@ export interface DataPoint {
   x?: UnsignedInteger | null;
 
   y?: number | null;
+}
+/** Represents a monitor's duration performance in microseconds at a point in time. */
+export interface MonitorDurationAreaPoint {
+  /** The timeseries value for this point in time. */
+  x: UnsignedInteger;
+  /** The min duration value in microseconds at this time. */
+  yMin?: number | null;
+  /** The max duration value in microseconds at this point. */
+  yMax?: number | null;
 }
 
 // ====================================================

@@ -57,16 +57,19 @@ export const monitorsSchema = gql`
 
   "The data used to populate the monitor charts."
   type MonitorChart {
-    "The max and min values for the monitor duration."
-    durationArea: [MonitorDurationAreaPoint!]!
     "The average values for the monitor duration."
-    durationLine: [MonitorDurationAveragePoint!]!
+    locationDurationLines: [LocationDurationLine!]!
     "The counts of up/down checks for the monitor."
     status: [StatusData!]!
     "The maximum status doc count in this chart."
     statusMaxCount: Int!
     "The maximum duration value in this chart."
     durationMaxValue: Int!
+  }
+
+  type LocationDurationLine {
+    name: String!
+    line: [MonitorDurationAveragePoint!]!
   }
 
   type MonitorKey {

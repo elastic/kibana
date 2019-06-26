@@ -1999,27 +1999,7 @@
         "description": "The data used to populate the monitor charts.",
         "fields": [
           {
-            "name": "durationArea",
-            "description": "The max and min values for the monitor duration.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "MonitorDurationAreaPoint", "ofType": null }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "durationLine",
+            "name": "locationDurationLines",
             "description": "The average values for the monitor duration.",
             "args": [],
             "type": {
@@ -2031,11 +2011,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "MonitorDurationAveragePoint",
-                    "ofType": null
-                  }
+                  "ofType": { "kind": "OBJECT", "name": "LocationDurationLine", "ofType": null }
                 }
               }
             },
@@ -2094,50 +2070,48 @@
       },
       {
         "kind": "OBJECT",
-        "name": "MonitorDurationAreaPoint",
-        "description": "Represents a monitor's duration performance in microseconds at a point in time.",
+        "name": "LocationDurationLine",
+        "description": "",
         "fields": [
           {
-            "name": "x",
-            "description": "The timeseries value for this point in time.",
+            "name": "name",
+            "description": "",
             "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "yMin",
-            "description": "The min duration value in microseconds at this time.",
+            "name": "line",
+            "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "yMax",
-            "description": "The max duration value in microseconds at this point.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "MonitorDurationAveragePoint",
+                    "ofType": null
+                  }
+                }
+              }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }
         ],
         "inputFields": null,
         "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "Float",
-        "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point). ",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -2169,6 +2143,16 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Float",
+        "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point). ",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -3164,6 +3148,45 @@
           {
             "name": "y",
             "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MonitorDurationAreaPoint",
+        "description": "Represents a monitor's duration performance in microseconds at a point in time.",
+        "fields": [
+          {
+            "name": "x",
+            "description": "The timeseries value for this point in time.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "yMin",
+            "description": "The min duration value in microseconds at this time.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "yMax",
+            "description": "The max duration value in microseconds at this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,

@@ -30,7 +30,7 @@ export const MonitorChartsComponent = (props: Props) => {
   const { danger, data, mean, range, success } = props;
   if (data && data.monitorChartsData) {
     const {
-      monitorChartsData: { durationArea, durationLine, status },
+      monitorChartsData: { locationDurationLines, status },
     } = data;
 
     return (
@@ -38,8 +38,7 @@ export const MonitorChartsComponent = (props: Props) => {
         <EuiFlexGroup>
           <EuiFlexItem style={{ height: 400 }}>
             <DurationChart
-              durationArea={durationArea}
-              durationLine={durationLine}
+              locationDurationLines={locationDurationLines}
               meanColor={mean}
               rangeColor={range}
             />

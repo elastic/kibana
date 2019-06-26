@@ -15,6 +15,7 @@ import {
   MonitorPageTitle,
   MonitorSeriesPoint,
   Ping,
+  LocationDurationLine,
 } from '../../../../common/graphql/types';
 import {
   dropLatestBucket,
@@ -24,6 +25,7 @@ import {
 } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
+import { keyCodes } from '@elastic/eui';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -85,8 +87,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
-              status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
-              duration: { stats: { field: 'monitor.duration.us' } },
+              location: {
+                terms: {
+                  field: "observer.location.name",
+                  missing: "N/A"
+                },
+                aggs: {
+                  status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
+                  duration: { stats: { field: 'monitor.duration.us' } },
+                }
+              }
             },
           },
         },
@@ -94,7 +104,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const buckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
+    const dateBuckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
 
     /**
      * The code below is responsible for formatting the aggregation data we fetched above in a way
@@ -108,34 +118,33 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
      * what the domain size should be.
      */
     const monitorChartsData: MonitorChart = {
-      durationArea: [],
-      durationLine: [],
+      locationDurationLines: [],
       status: [],
       durationMaxValue: 0,
       statusMaxCount: 0,
     };
 
-    buckets.forEach(bucket => {
-      const x = get(bucket, 'key');
-      const docCount = get(bucket, 'doc_count', 0);
-      // update the maximum value for each point
-      monitorChartsData.statusMaxCount = Math.max(docCount, monitorChartsData.statusMaxCount);
-      monitorChartsData.durationMaxValue = Math.max(
-        monitorChartsData.durationMaxValue,
-        get(bucket, 'duration.max', 0)
-      );
+    const linesByLocation: {[key: string]: LocationDurationLine} = {};
+    dateBuckets.forEach(dateBucket => {
+      const x = get(dateBucket, 'key');
+      const docCount = get(dateBucket, 'doc_count', 0);
 
-      // these points express a range that will be displayed as an area chart
-      monitorChartsData.durationArea.push({
-        x,
-        yMin: get(bucket, 'duration.min', null),
-        yMax: get(bucket, 'duration.max', null),
+      dateBucket.location.buckets.forEach((locationBucket: { key: string; duration: { avg: Number; }; }) => {
+        const locationName = locationBucket.key;
+        let ldl: LocationDurationLine = get(linesByLocation, locationName);
+        if (!ldl) {
+          ldl = {name: locationName, line: []};
+          linesByLocation[locationName] = ldl;
+          monitorChartsData.locationDurationLines.push(ldl);
+        }
+        ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) })
       });
-      monitorChartsData.durationLine.push({ x, y: get(bucket, 'duration.avg', null) });
+
       monitorChartsData.status.push(
-        formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount)
+        formatStatusBuckets(x, get(dateBucket, 'status.buckets', []), docCount)
       );
     });
+
     return monitorChartsData;
   }
 
