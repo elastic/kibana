@@ -50,4 +50,27 @@ export const sharedFragments = {
       }
     }
   `,
+  InfraLogEntryHighlightFields: gql`
+    fragment InfraLogEntryHighlightFields on InfraLogEntry {
+      gid
+      key {
+        time
+        tiebreaker
+      }
+      columns {
+        ... on InfraLogEntryMessageColumn {
+          message {
+            ... on InfraLogMessageFieldSegment {
+              field
+              highlights
+            }
+          }
+        }
+        ... on InfraLogEntryFieldColumn {
+          field
+          highlights
+        }
+      }
+    }
+  `,
 };

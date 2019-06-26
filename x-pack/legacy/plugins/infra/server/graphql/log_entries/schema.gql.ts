@@ -44,6 +44,8 @@ export const logEntriesSchema = gql`
     field: String!
     "The value of the field in the log entry"
     value: String!
+    "A list of highlighted substrings of the value"
+    highlights: [String!]!
   }
 
   "A column of a log entry"
@@ -62,6 +64,10 @@ export const logEntriesSchema = gql`
     source: String!
     "The columns used for rendering the log entry"
     columns: [InfraLogEntryColumn!]!
+  }
+
+  input InfraLogEntryHighlightInput {
+    query: String!
   }
 
   "A log summary bucket"
@@ -133,8 +139,6 @@ export const logEntriesSchema = gql`
       countAfter: Int = 0
       "The query to filter the log entries by"
       filterQuery: String
-      "The query to highlight the log entries with"
-      highlightQuery: String
     ): InfraLogEntryInterval!
     "A consecutive span of log entries within an interval"
     logEntriesBetween(
@@ -144,9 +148,18 @@ export const logEntriesSchema = gql`
       endKey: InfraTimeKeyInput!
       "The query to filter the log entries by"
       filterQuery: String
-      "The query to highlight the log entries with"
-      highlightQuery: String
     ): InfraLogEntryInterval!
+    "Sequences of log entries matching sets of highlighting queries within an interval"
+    logEntryHighlights(
+      "The sort key that corresponds to the start of the interval"
+      startKey: InfraTimeKeyInput!
+      "The sort key that corresponds to the end of the interval"
+      endKey: InfraTimeKeyInput!
+      "The query to filter the log entries by"
+      filterQuery: String
+      "The highlighting to apply to the log entries"
+      highlights: [InfraLogEntryHighlightInput!]!
+    ): [InfraLogEntryInterval!]!
     "A consecutive span of summary buckets within an interval"
     logSummaryBetween(
       "The millisecond timestamp that corresponds to the start of the interval"

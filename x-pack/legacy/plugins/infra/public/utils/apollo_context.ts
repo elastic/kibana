@@ -17,3 +17,10 @@ export const ApolloClientContext = createContext<ApolloClient<{}> | undefined>(u
 export const useApolloClient = () => {
   return useContext(ApolloClientContext);
 };
+
+export class DependencyError extends Error {
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}

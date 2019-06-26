@@ -34,6 +34,8 @@ export interface InfraSource {
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
   logEntriesBetween: InfraLogEntryInterval;
+  /** Sequences of log entries matching sets of highlighting queries within an interval */
+  logEntryHighlights: InfraLogEntryInterval[];
   /** A consecutive span of summary buckets within an interval */
   logSummaryBetween: InfraLogSummaryInterval;
 
@@ -209,6 +211,8 @@ export interface InfraLogEntryFieldColumn {
   field: string;
   /** The value of the field in the log entry */
   value: string;
+  /** A list of highlighted substrings of the value */
+  highlights: string[];
 }
 /** A consecutive sequence of log summary buckets */
 export interface InfraLogSummaryInterval {
@@ -325,6 +329,10 @@ export interface InfraTimeKeyInput {
   tiebreaker: number;
 }
 
+export interface InfraLogEntryHighlightInput {
+  query: string;
+}
+
 export interface InfraTimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
   interval: string;
@@ -419,8 +427,6 @@ export interface LogEntriesAroundInfraSourceArgs {
   countAfter?: number | null;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
-  /** The query to highlight the log entries with */
-  highlightQuery?: string | null;
 }
 export interface LogEntriesBetweenInfraSourceArgs {
   /** The sort key that corresponds to the start of the interval */
@@ -429,8 +435,16 @@ export interface LogEntriesBetweenInfraSourceArgs {
   endKey: InfraTimeKeyInput;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
-  /** The query to highlight the log entries with */
-  highlightQuery?: string | null;
+}
+export interface LogEntryHighlightsInfraSourceArgs {
+  /** The sort key that corresponds to the start of the interval */
+  startKey: InfraTimeKeyInput;
+  /** The sort key that corresponds to the end of the interval */
+  endKey: InfraTimeKeyInput;
+  /** The query to filter the log entries by */
+  filterQuery?: string | null;
+  /** The highlighting to apply to the log entries */
+  highlights: InfraLogEntryHighlightInput[];
 }
 export interface LogSummaryBetweenInfraSourceArgs {
   /** The millisecond timestamp that corresponds to the start of the interval */
@@ -610,6 +624,46 @@ export namespace FlyoutItemQuery {
 
     value: string;
   };
+}
+
+export namespace LogEntryHighlightsQuery {
+  export type Variables = {
+    sourceId?: string | null;
+    startKey: InfraTimeKeyInput;
+    endKey: InfraTimeKeyInput;
+    filterQuery?: string | null;
+    highlights: InfraLogEntryHighlightInput[];
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logEntryHighlights: LogEntryHighlights[];
+  };
+
+  export type LogEntryHighlights = {
+    __typename?: 'InfraLogEntryInterval';
+
+    start?: Start | null;
+
+    end?: End | null;
+
+    entries: Entries[];
+  };
+
+  export type Start = InfraTimeKeyFields.Fragment;
+
+  export type End = InfraTimeKeyFields.Fragment;
+
+  export type Entries = InfraLogEntryHighlightFields.Fragment;
 }
 
 export namespace LogSummary {
@@ -1118,5 +1172,53 @@ export namespace InfraLogEntryFields {
     field: string;
 
     value: string;
+  };
+}
+
+export namespace InfraLogEntryHighlightFields {
+  export type Fragment = {
+    __typename?: 'InfraLogEntry';
+
+    gid: string;
+
+    key: Key;
+
+    columns: Columns[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+
+    time: number;
+
+    tiebreaker: number;
+  };
+
+  export type Columns =
+    | InfraLogEntryMessageColumnInlineFragment
+    | InfraLogEntryFieldColumnInlineFragment;
+
+  export type InfraLogEntryMessageColumnInlineFragment = {
+    __typename?: 'InfraLogEntryMessageColumn';
+
+    message: Message[];
+  };
+
+  export type Message = InfraLogMessageFieldSegmentInlineFragment;
+
+  export type InfraLogMessageFieldSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageFieldSegment';
+
+    field: string;
+
+    highlights: string[];
+  };
+
+  export type InfraLogEntryFieldColumnInlineFragment = {
+    __typename?: 'InfraLogEntryFieldColumn';
+
+    field: string;
+
+    highlights: string[];
   };
 }

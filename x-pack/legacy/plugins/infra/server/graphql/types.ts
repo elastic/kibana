@@ -62,6 +62,8 @@ export interface InfraSource {
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
   logEntriesBetween: InfraLogEntryInterval;
+  /** Sequences of log entries matching sets of highlighting queries within an interval */
+  logEntryHighlights: InfraLogEntryInterval[];
   /** A consecutive span of summary buckets within an interval */
   logSummaryBetween: InfraLogSummaryInterval;
 
@@ -237,6 +239,8 @@ export interface InfraLogEntryFieldColumn {
   field: string;
   /** The value of the field in the log entry */
   value: string;
+  /** A list of highlighted substrings of the value */
+  highlights: string[];
 }
 /** A consecutive sequence of log summary buckets */
 export interface InfraLogSummaryInterval {
@@ -353,6 +357,10 @@ export interface InfraTimeKeyInput {
   tiebreaker: number;
 }
 
+export interface InfraLogEntryHighlightInput {
+  query: string;
+}
+
 export interface InfraTimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
   interval: string;
@@ -447,8 +455,6 @@ export interface LogEntriesAroundInfraSourceArgs {
   countAfter?: number | null;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
-  /** The query to highlight the log entries with */
-  highlightQuery?: string | null;
 }
 export interface LogEntriesBetweenInfraSourceArgs {
   /** The sort key that corresponds to the start of the interval */
@@ -457,8 +463,16 @@ export interface LogEntriesBetweenInfraSourceArgs {
   endKey: InfraTimeKeyInput;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
-  /** The query to highlight the log entries with */
-  highlightQuery?: string | null;
+}
+export interface LogEntryHighlightsInfraSourceArgs {
+  /** The sort key that corresponds to the start of the interval */
+  startKey: InfraTimeKeyInput;
+  /** The sort key that corresponds to the end of the interval */
+  endKey: InfraTimeKeyInput;
+  /** The query to filter the log entries by */
+  filterQuery?: string | null;
+  /** The highlighting to apply to the log entries */
+  highlights: InfraLogEntryHighlightInput[];
 }
 export interface LogSummaryBetweenInfraSourceArgs {
   /** The millisecond timestamp that corresponds to the start of the interval */
@@ -643,6 +657,8 @@ export namespace InfraSourceResolvers {
     logEntriesAround?: LogEntriesAroundResolver<InfraLogEntryInterval, TypeParent, Context>;
     /** A consecutive span of log entries within an interval */
     logEntriesBetween?: LogEntriesBetweenResolver<InfraLogEntryInterval, TypeParent, Context>;
+    /** Sequences of log entries matching sets of highlighting queries within an interval */
+    logEntryHighlights?: LogEntryHighlightsResolver<InfraLogEntryInterval[], TypeParent, Context>;
     /** A consecutive span of summary buckets within an interval */
     logSummaryBetween?: LogSummaryBetweenResolver<InfraLogSummaryInterval, TypeParent, Context>;
 
@@ -708,8 +724,6 @@ export namespace InfraSourceResolvers {
     countAfter?: number | null;
     /** The query to filter the log entries by */
     filterQuery?: string | null;
-    /** The query to highlight the log entries with */
-    highlightQuery?: string | null;
   }
 
   export type LogEntriesBetweenResolver<
@@ -724,8 +738,22 @@ export namespace InfraSourceResolvers {
     endKey: InfraTimeKeyInput;
     /** The query to filter the log entries by */
     filterQuery?: string | null;
-    /** The query to highlight the log entries with */
-    highlightQuery?: string | null;
+  }
+
+  export type LogEntryHighlightsResolver<
+    R = InfraLogEntryInterval[],
+    Parent = InfraSource,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, LogEntryHighlightsArgs>;
+  export interface LogEntryHighlightsArgs {
+    /** The sort key that corresponds to the start of the interval */
+    startKey: InfraTimeKeyInput;
+    /** The sort key that corresponds to the end of the interval */
+    endKey: InfraTimeKeyInput;
+    /** The query to filter the log entries by */
+    filterQuery?: string | null;
+    /** The highlighting to apply to the log entries */
+    highlights: InfraLogEntryHighlightInput[];
   }
 
   export type LogSummaryBetweenResolver<
@@ -1293,6 +1321,8 @@ export namespace InfraLogEntryFieldColumnResolvers {
     field?: FieldResolver<string, TypeParent, Context>;
     /** The value of the field in the log entry */
     value?: ValueResolver<string, TypeParent, Context>;
+    /** A list of highlighted substrings of the value */
+    highlights?: HighlightsResolver<string[], TypeParent, Context>;
   }
 
   export type FieldResolver<
@@ -1302,6 +1332,11 @@ export namespace InfraLogEntryFieldColumnResolvers {
   > = Resolver<R, Parent, Context>;
   export type ValueResolver<
     R = string,
+    Parent = InfraLogEntryFieldColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type HighlightsResolver<
+    R = string[],
     Parent = InfraLogEntryFieldColumn,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
