@@ -57,6 +57,7 @@ export const useRefreshInterval = (
       } else {
         setRefreshInterval(value);
       }
+      setlastUpdate(Date.now());
       getJobs(true);
     }
 
