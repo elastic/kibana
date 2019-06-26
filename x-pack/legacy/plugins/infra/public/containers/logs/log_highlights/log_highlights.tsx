@@ -39,6 +39,9 @@ export const useLogHighlightsState = ({
         if (!apolloClient) {
           throw new DependencyError('Failed to load source: No apollo client available.');
         }
+        if (!startKey || !endKey || !highlightTerms.length) {
+          throw new Error();
+        }
 
         return await apolloClient.query<
           LogEntryHighlightsQuery.Query,
@@ -48,17 +51,14 @@ export const useLogHighlightsState = ({
           query: logEntryHighlightsQuery,
           variables: {
             sourceId,
-            startKey: {
-              time: 0,
-              tiebreaker: 0,
-            },
-            endKey: {
-              time: 0,
-              tiebreaker: 0,
-            },
+            startKey,
+            endKey,
+            filterQuery,
             highlights: [
               {
-                query: JSON.stringify({ multi_match: { query: 'jvm', type: 'phrase' } }),
+                query: JSON.stringify({
+                  multi_match: { query: highlightTerms[0], type: 'phrase' },
+                }),
               },
             ],
           },
@@ -68,12 +68,16 @@ export const useLogHighlightsState = ({
         setLogEntryHighlights(response.data.source.logEntryHighlights);
       },
     },
-    [apolloClient, sourceId]
+    [apolloClient, sourceId, startKey, endKey, filterQuery, highlightTerms]
   );
 
   useEffect(
     () => {
-      // Terms, startKey, endKey or filter has changed, fetch data
+      if (highlightTerms.length && startKey && endKey) {
+        loadLogEntryHighlights();
+      } else {
+        setLogEntryHighlights(undefined);
+      }
     },
     [highlightTerms, startKey, endKey, filterQuery, sourceVersion]
   );
