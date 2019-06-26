@@ -503,8 +503,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
-    public async getLegentItems(): Promise<WebElementWrapper[]> {
-      return await testSubjects.findAll('tsvbLegendItem');
+    public async getLegendItems(): Promise<WebElementWrapper[]> {
+      return await find.allByCssSelector('.echLegendItem');
     }
 
     public async getSeries(): Promise<WebElementWrapper[]> {

@@ -73,7 +73,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.changePanelPreview();
 
         await visualBuilder.cloneSeries();
-        const legend = await visualBuilder.getLegentItems();
+        const legend = await visualBuilder.getLegendItems();
         const series = await visualBuilder.getSeries();
         expect(legend.length).to.be(2);
         expect(series.length).to.be(2);
