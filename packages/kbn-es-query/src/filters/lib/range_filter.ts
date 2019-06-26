@@ -32,5 +32,4 @@ export type RangeFilterMeta = FilterMeta & {
 
 export type RangeFilter = Filter & {
   meta: RangeFilterMeta;
-  range?: object;
 };
