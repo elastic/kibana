@@ -71,9 +71,14 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
   },
 };
 
-export interface YConfig extends AxisConfig {
+export interface YState extends AxisConfig {
   accessors: string[];
 }
+
+export type YConfig = AxisConfig &
+  YState & {
+    labels: string[];
+  };
 
 type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
@@ -90,6 +95,11 @@ export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConf
     accessors: {
       types: ['string'],
       help: 'The columns to display on the y axis.',
+      multi: true,
+    },
+    labels: {
+      types: ['string'],
+      help: '',
       multi: true,
     },
   },
@@ -141,5 +151,15 @@ export interface XYArgs {
   stackAccessors: string[];
 }
 
-export type State = XYArgs;
-export type PersistableState = XYArgs;
+export interface XYState {
+  seriesType: SeriesType;
+  title: string;
+  legend: LegendConfig;
+  y: YState;
+  x: XConfig;
+  splitSeriesAccessors: string[];
+  stackAccessors: string[];
+}
+
+export type State = XYState;
+export type PersistableState = XYState;

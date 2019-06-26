@@ -37,7 +37,7 @@ describe('editor_frame', () => {
   let mockVisualization: Visualization;
   let mockDatasource: DatasourceMock;
 
-  let mockVisualization2: Visualization;
+  let mockVisualization2: jest.Mocked<Visualization>;
   let mockDatasource2: DatasourceMock;
 
   let expressionRendererMock: ExpressionRenderer;
@@ -544,9 +544,17 @@ Object {
       expect(mockVisualization2.initialize).toHaveBeenCalled();
     });
 
-    it('should call visualization render with new state on switch', async () => {
-      const initialState = {};
-      mockVisualization2.initialize = () => initialState;
+    it('should use suggestions to switch to new visualization', async () => {
+      const initialState = { suggested: true };
+      mockVisualization2.initialize.mockReturnValueOnce({ initial: true });
+      mockVisualization2.getSuggestions.mockReturnValueOnce([
+        {
+          title: 'Suggested vis',
+          score: 1,
+          datasourceSuggestionId: 0,
+          state: initialState,
+        },
+      ]);
 
       act(() => {
         instance
@@ -554,9 +562,33 @@ Object {
           .simulate('change', { target: { value: 'testVis2' } });
       });
 
+      expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
+      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
+      expect(mockVisualization2.initialize).toHaveBeenCalledWith(
+        mockDatasource.publicAPIMock,
+        initialState
+      );
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
-        expect.objectContaining({ state: initialState })
+        expect.objectContaining({ state: { initial: true } })
+      );
+    });
+
+    it('should fall back when switching visualizations if the visualization has no suggested use', async () => {
+      mockVisualization2.initialize.mockReturnValueOnce({ initial: true });
+
+      act(() => {
+        instance
+          .find('select[data-test-subj="visualization-switch"]')
+          .simulate('change', { target: { value: 'testVis2' } });
+      });
+
+      expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
+      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
+      expect(mockVisualization2.initialize).toHaveBeenCalledWith(mockDatasource.publicAPIMock);
+      expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({ state: { initial: true } })
       );
     });
   });

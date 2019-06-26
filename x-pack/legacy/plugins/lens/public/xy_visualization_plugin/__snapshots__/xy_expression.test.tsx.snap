@@ -8,6 +8,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   <inject-SettingsComponent-with-chartStore
     legendPosition="top"
     showLegend={false}
+    showLegendDisplayValue={false}
   />
   <inject-AxisSpec-with-chartStore
     id="x"
@@ -25,25 +26,25 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     data={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
+          "Label A": 1,
+          "Label B": 2,
           "c": 3,
         },
         Object {
-          "a": 1,
-          "b": 5,
+          "Label A": 1,
+          "Label B": 5,
           "c": 4,
         },
       ]
     }
-    id="a,b"
+    id="Label A,Label B"
     splitSeriesAccessors={Array []}
     stackAccessors={Array []}
     xAccessor="c"
     yAccessors={
       Array [
-        "a",
-        "b",
+        "Label A",
+        "Label B",
       ]
     }
   />
@@ -58,6 +59,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   <inject-SettingsComponent-with-chartStore
     legendPosition="top"
     showLegend={false}
+    showLegendDisplayValue={false}
   />
   <inject-AxisSpec-with-chartStore
     id="x"
@@ -75,25 +77,25 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     data={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
+          "Label A": 1,
+          "Label B": 2,
           "c": 3,
         },
         Object {
-          "a": 1,
-          "b": 5,
+          "Label A": 1,
+          "Label B": 5,
           "c": 4,
         },
       ]
     }
-    id="a,b"
+    id="Label A,Label B"
     splitSeriesAccessors={Array []}
     stackAccessors={Array []}
     xAccessor="c"
     yAccessors={
       Array [
-        "a",
-        "b",
+        "Label A",
+        "Label B",
       ]
     }
   />
@@ -108,6 +110,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   <inject-SettingsComponent-with-chartStore
     legendPosition="top"
     showLegend={false}
+    showLegendDisplayValue={false}
   />
   <inject-AxisSpec-with-chartStore
     id="x"
@@ -125,25 +128,25 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     data={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
+          "Label A": 1,
+          "Label B": 2,
           "c": 3,
         },
         Object {
-          "a": 1,
-          "b": 5,
+          "Label A": 1,
+          "Label B": 5,
           "c": 4,
         },
       ]
     }
-    id="a,b"
+    id="Label A,Label B"
     splitSeriesAccessors={Array []}
     stackAccessors={Array []}
     xAccessor="c"
     yAccessors={
       Array [
-        "a",
-        "b",
+        "Label A",
+        "Label B",
       ]
     }
   />

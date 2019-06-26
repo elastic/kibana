@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Position } from '@elastic/charts';
+import { BarSeries, Position } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { KibanaDatatable } from '../types';
 import React from 'react';
@@ -26,6 +26,7 @@ function sampleArgs() {
     },
     y: {
       accessors: ['a', 'b'],
+      labels: ['Label A', 'Label B'],
       position: Position.Left,
       showGridlines: false,
       title: 'A and B',
@@ -74,6 +75,7 @@ describe('xy_expression', () => {
     test('yConfig produces the correct arguments', () => {
       const args: YConfig = {
         accessors: ['bar'],
+        labels: [''],
         position: Position.Bottom,
         showGridlines: true,
         title: 'Barrrrrr!',
@@ -121,6 +123,20 @@ describe('xy_expression', () => {
       expect(
         shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />)
       ).toMatchSnapshot();
+    });
+
+    test('it remaps rows based on the labels', () => {
+      const { data, args } = sampleArgs();
+
+      const chart = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
+      const barSeries = chart.find(BarSeries);
+
+      expect(barSeries.prop('yAccessors')).toEqual(['Label A', 'Label B']);
+      expect(barSeries.prop('data')[0]).toEqual({
+        'Label A': 1,
+        'Label B': 2,
+        c: 3,
+      });
     });
   });
 });

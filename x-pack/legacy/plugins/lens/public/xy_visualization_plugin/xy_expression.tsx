@@ -99,18 +99,37 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 
 export function XYChart({ data, args }: XYChartProps) {
   const { legend, x, y, splitSeriesAccessors, stackAccessors, seriesType } = args;
+  // TODO: Stop mapping data once elastic-charts allows axis naming
+  // https://github.com/elastic/elastic-charts/issues/245
   const seriesProps = {
     splitSeriesAccessors,
     stackAccessors,
-    id: getSpecId(y.accessors.join(',')),
+    id: getSpecId(y.labels.join(',')),
     xAccessor: x.accessor,
-    yAccessors: y.accessors,
-    data: data.rows,
+    yAccessors: y.labels,
+    data: data.rows.map(row => {
+      const newRow: typeof row = {};
+
+      // Remap data to { 'Count of documents': 5 }
+      Object.keys(row).forEach(key => {
+        const labelIndex = y.accessors.indexOf(key);
+        if (labelIndex > -1) {
+          newRow[y.labels[labelIndex]] = row[key];
+        } else {
+          newRow[key] = row[key];
+        }
+      });
+      return newRow;
+    }),
   };
 
   return (
     <Chart className="lnsChart">
-      <Settings showLegend={legend.isVisible} legendPosition={legend.position} />
+      <Settings
+        showLegend={legend.isVisible}
+        legendPosition={legend.position}
+        showLegendDisplayValue={false}
+      />
 
       <Axis
         id={getAxisId('x')}

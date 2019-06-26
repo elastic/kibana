@@ -19,6 +19,30 @@ interface ConfigPanelWrapperProps {
   datasourcePublicAPI: DatasourcePublicAPI;
 }
 
+function getSuggestedVisualizationState(
+  visualization: Visualization,
+  datasource: DatasourcePublicAPI
+) {
+  const suggestions = visualization.getSuggestions({
+    tables: [
+      {
+        datasourceSuggestionId: 0,
+        isMultiRow: true,
+        columns: datasource.getTableSpec().map(col => ({
+          ...col,
+          operation: datasource.getOperationForColumnId(col.columnId)!,
+        })),
+      },
+    ],
+  });
+
+  if (!suggestions.length) {
+    return visualization.initialize(datasource);
+  }
+
+  return visualization.initialize(datasource, suggestions[0].state);
+}
+
 export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const context = useContext(DragContext);
   const setVisualizationState = useMemo(
@@ -41,14 +65,14 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
         }))}
         value={props.activeVisualizationId || undefined}
         onChange={e => {
+          const newState = getSuggestedVisualizationState(
+            props.visualizationMap[e.target.value],
+            props.datasourcePublicAPI
+          );
           props.dispatch({
             type: 'SWITCH_VISUALIZATION',
             newVisualizationId: e.target.value,
-            // TODO we probably want to have a separate API to "force" a visualization switch
-            // which isn't a result of a picked suggestion
-            initialState: props.visualizationMap[e.target.value].initialize(
-              props.datasourcePublicAPI
-            ),
+            initialState: newState,
           });
         }}
       />
