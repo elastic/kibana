@@ -39,7 +39,7 @@ const defaultProps = {
   onDelete: jest.fn(),
 };
 
-it('should disable adding data', () => {
+it('should disable add data', () => {
   const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
   const props = wrapper.props();
 
@@ -52,7 +52,7 @@ it('should disable delete data', () => {
   expect(props.disableDelete).toBeTruthy();
 });
 
-it('should called toggleVisible function', () => {
+it('should call toggleVisible function', () => {
   const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
   wrapper
     .find('EuiButtonIcon')
