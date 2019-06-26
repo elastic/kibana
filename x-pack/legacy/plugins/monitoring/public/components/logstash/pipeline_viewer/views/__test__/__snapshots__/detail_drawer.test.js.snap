@@ -452,10 +452,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           id="xpack.monitoring.logstash.pipeline.detailDrawer.vertexIdDescription"
           values={
             Object {
-              "vertexId": <EuiBadge
-                color="default"
-                iconSide="left"
-              >
+              "vertexId": <EuiBadge>
                 parse_apache_logline
               </EuiBadge>,
               "vertexType": "plugin",
