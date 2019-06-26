@@ -1,36 +1,76 @@
 [role="xpack"]
 [[canvas-workpad]]
-=== Create workpads
+=== Create a workpad
 
-Whether you are ready to start from scratch, or need a little jump start, it's time to get that creative idea out of your head and into Canvas!
+When you create a workpad, you'll start with a blank page, or you can use a workpad that is already started for you. 
 
-When you create a workpad, you'll start with a single blank page, ready for you to build from the ground up. If the prospect of a blank page has you feeling uneasy, visit the template tab for a growing list of workpads that you can clone and edit.
+. Open *Canvas*.
 
-//Insert image
+. Choose one of the following options:
 
-For advanced example workpads, install one or more of the {kibana-ref}/add-sample-data.html[sample Kibana data sets], then find the related sample workpads on the Canvas home page.
+* To start with a single, blank workpad, click *Create workpad*.
 
-We'll talk more about how to import and export workpads in Sharing workpads, but keep in mind that you can import workpad JSON files by dragging them onto the Canvas home page. Maybe your data-loving friends have some that they care share!
+* To create a workpad from a template, select *Templates*, then select a preconfigured template.
 
-No need to worry about cluttering up your space with too many workpads. The bulk editing actions allow you to clean up whenever you need.
+* To import an existing workpad, click and drag a workpad JSON file to the *Import workpad JSON file* field.
 
-Now, let's create a workpad and see what Canvas can do!
+For advanced workpad examples, add a {kibana-ref}/add-sample-data.html[sample Kibana data set], then select *Canvas* from the *View Data* drop-down list.
 
-==== Navigate Canvas
+For more workpad inspiration, go to the link:elastic.co[Elastic Blog] where we share Canvas updates and customer stories. 
 
-Now that you have a workpad, take a look at the tools surrounding the page.
+[float]
+==== Personalize your workpad
 
-On the panel to the right, enter the workpad name, change the page size, change the background color, and more. 
+To personalize your workpad, use the editor on the right.
 
-//insert image
+. In the *Width* and *Height* fields, specify the size of your workpad. 
 
-There's more to cover in this area, but let's check out another section.
+. Select the layout for your workpad. 
++
+For example, click *720p* for a traditional presentation layout.
 
-Once you're ready to show off what you've created, use the presentation-related options in the upper left corner. These options control things such as data refresh intervals, display modes, and sharing capabilities.
+. Click the *Background color* picker, then select the background color for your workpad.
 
-//insert image
+. Add more pages to your workpad, then select the page transition.
 
+.. Click *Page 1*, then click the *+* icon.
 
+.. From the *Transition* drop-down list, select the page transition you want to use. 
 
+. To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
 
+//TODO ask Catherine for cool video image, then insert here
 
+[float]
+=== Share your workpad
+
+When you are ready to share your workpad, create a PDF, or export your workpad to another author.
+
+[float]
+==== Create a PDF of your workpad
+
+To view your workpad outside of Kibana, generate a PDF. 
+
+. Enable reporting in your config/kibana.yml file.
+
+. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+
+. Click *Generate PDF*. 
+
+//TODO ask Catherine for cool video image, then insert here
+
+[float]
+==== Export your workpad
+
+To import your workpads to another author, create JSON files of your workpads.
+
+. Go to the *Canvas workpads* page. 
+
+. Choose one of the following options:
+.. To export a single workpad, click the *Export* icon next to the template you want to export.
++
+To create a JSON file from your workpad, click the *Share workpad* icon in the upper left corner, then click *Download as JSON*.
+
+.. To export multiple workpads, select the workpads you want to export, then click *Export*.
+
+//TODO ask Catherine for cool video image, then insert here
