@@ -19,11 +19,11 @@
 
 import { InternalCoreSetup } from 'kibana/server';
 // @ts-ignore
-import { fieldsRoutes } from '../routes/fields';
+import { fieldsRoutes } from './routes/fields';
 // @ts-ignore
-import { visDataRoutes } from '../routes/vis';
+import { visDataRoutes } from './routes/vis';
 // @ts-ignore
-import { SearchStrategiesRegister } from '../lib/search_strategies/search_strategies_register';
+import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
 
 export class MetricsPlugin {
   public setup(core: InternalCoreSetup) {

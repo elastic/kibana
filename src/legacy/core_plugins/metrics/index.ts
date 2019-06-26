@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
 import { InternalCoreSetup } from 'src/core/server';
-import { metricsPlugin } from './server/np/';
+import { metricsPlugin } from './server/';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
