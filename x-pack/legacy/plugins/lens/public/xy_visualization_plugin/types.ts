@@ -153,7 +153,6 @@ export interface XYArgs {
 
 export interface XYState {
   seriesType: SeriesType;
-  title: string;
   legend: LegendConfig;
   y: YState;
   x: XConfig;

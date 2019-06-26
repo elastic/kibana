@@ -13,7 +13,7 @@ import {
   createMockVisualization,
 } from './mocks';
 import { SavedObjectStore, Document } from '../persistence';
-import { render, shallow, mount } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 // import chrome from 'ui/chrome';
 jest.mock('ui/chrome', () => ({
