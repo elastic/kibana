@@ -7,7 +7,10 @@
 import { RequestBasicOptions } from '../framework/types';
 import { RequestKpiHostDetailsOptions } from './types';
 
-export const mockOptions: RequestBasicOptions = {
+const FROM = new Date('2019-05-03T13:24:00.660Z').valueOf();
+const TO = new Date('2019-05-04T13:24:00.660Z').valueOf();
+
+export const mockKpiHostsOptions: RequestBasicOptions = {
   defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
     fields: {
@@ -19,7 +22,7 @@ export const mockOptions: RequestBasicOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
+  timerange: { interval: '12h', to: TO, from: FROM },
   filterQuery: {},
 };
 
@@ -35,18 +38,18 @@ export const mockKpiHostDetailsOptions: RequestKpiHostDetailsOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
+  timerange: { interval: '12h', to: TO, from: FROM },
   filterQuery: {},
   hostName: 'beats-ci-immutable-ubuntu-1604-1560970771368235343',
 };
 
-export const mockRequest = {
+export const mockKpiHostsRequest = {
   params: {},
   payload: {
     operationName: 'GetKpiHostsQuery',
     variables: {
       sourceId: 'default',
-      timerange: { interval: '12h', from: 1556890277121, to: 1556976677122 },
+      timerange: { interval: '12h', from: FROM, to: TO },
       filterQuery: '',
     },
     query:
@@ -61,7 +64,7 @@ export const mockKpiHostDetailsRequest = {
     operationName: 'GetKpiHostDetailsQuery',
     variables: {
       sourceId: 'default',
-      timerange: { interval: '12h', from: 1556890277121, to: 1556976677122 },
+      timerange: { interval: '12h', from: FROM, to: TO },
       filterQuery: '',
       hostName: 'internal-ci-immutable-debian-9-1561441475088662137',
     },
@@ -285,12 +288,12 @@ const mockHostsReponse = {
   status: 200,
 };
 
-export const mockResponse = {
+export const mockKpiHostsResponse = {
   took: 4405,
   responses: [mockUniqueIpsResponse, mockAuthResponse, mockHostsReponse],
 };
 
-export const mockResult = {
+export const mockKpiHostsResult = {
   hosts: 986,
   hostsHistogram: [
     {
@@ -368,7 +371,7 @@ export const mockResult = {
   ],
 };
 
-export const mockKpiIpDetailsResponse = {
+export const mockKpiHostDetailsResponse = {
   took: 4405,
   responses: [mockUniqueIpsResponse, mockAuthResponse],
 };
@@ -436,12 +439,19 @@ export const mockKpiHostDetailsResult = {
   ],
 };
 
+const mockMsearchHeader = {
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  allowNoIndices: true,
+  ignoreUnavailable: true,
+};
+
+const mockHostNameFilter = {
+  term: { 'host.name': 'beats-ci-immutable-ubuntu-1604-1560970771368235343' },
+};
+const mockTimerangeFilter = { range: { '@timestamp': { gte: FROM, lte: TO } } };
+
 export const mockHostsQuery = [
-  {
-    index: ['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-  },
+  mockMsearchHeader,
   {
     aggregations: {
       hosts: { cardinality: { field: 'host.name' } },
@@ -451,73 +461,80 @@ export const mockHostsQuery = [
       },
     },
     query: {
-      bool: { filter: [{ range: { '@timestamp': { gte: 1556889840660, lte: 1556976240660 } } }] },
+      bool: { filter: [{ range: { '@timestamp': mockTimerangeFilter } }] },
     },
     size: 0,
     track_total_hits: false,
   },
 ];
 
-export const mockUniqueIpsQuery = [
-  {
-    index: ['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+const mockUniqueIpsAggs = {
+  unique_source_ips: { cardinality: { field: 'source.ip' } },
+  unique_source_ips_histogram: {
+    auto_date_histogram: { field: '@timestamp', buckets: '6' },
+    aggs: { count: { cardinality: { field: 'source.ip' } } },
   },
+  unique_destination_ips: { cardinality: { field: 'destination.ip' } },
+  unique_destination_ips_histogram: {
+    auto_date_histogram: { field: '@timestamp', buckets: '6' },
+    aggs: { count: { cardinality: { field: 'destination.ip' } } },
+  },
+};
+
+export const mockKpiHostsUniqueIpsQuery = [
+  mockMsearchHeader,
   {
-    aggregations: {
-      unique_source_ips: { cardinality: { field: 'source.ip' } },
-      unique_source_ips_histogram: {
-        auto_date_histogram: { field: '@timestamp', buckets: '6' },
-        aggs: { count: { cardinality: { field: 'source.ip' } } },
-      },
-      unique_destination_ips: { cardinality: { field: 'destination.ip' } },
-      unique_destination_ips_histogram: {
-        auto_date_histogram: { field: '@timestamp', buckets: '6' },
-        aggs: { count: { cardinality: { field: 'destination.ip' } } },
-      },
-    },
+    aggregations: mockUniqueIpsAggs,
     query: {
-      bool: { filter: [{ range: { '@timestamp': { gte: 1556889840660, lte: 1556976240660 } } }] },
+      bool: { filter: [mockTimerangeFilter] },
     },
     size: 0,
     track_total_hits: false,
   },
 ];
 
-export const mockAuthQuery = [
+export const mockKpiHostDetailsUniqueIpsQuery = [
+  mockMsearchHeader,
   {
-    index: ['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-  },
-  {
-    aggs: {
-      authentication_success: { filter: { term: { 'event.type': 'authentication_success' } } },
-      authentication_success_histogram: {
-        auto_date_histogram: { field: '@timestamp', buckets: '6' },
-        aggs: { count: { filter: { term: { 'event.type': 'authentication_success' } } } },
-      },
-      authentication_failure: { filter: { term: { 'event.type': 'authentication_failure' } } },
-      authentication_failure_histogram: {
-        auto_date_histogram: { field: '@timestamp', buckets: '6' },
-        aggs: { count: { filter: { term: { 'event.type': 'authentication_failure' } } } },
-      },
+    aggregations: mockUniqueIpsAggs,
+    query: {
+      bool: { filter: [mockTimerangeFilter, mockHostNameFilter] },
     },
+    size: 0,
+    track_total_hits: false,
+  },
+];
+
+const mockAuthAggs = {
+  authentication_success: { filter: { term: { 'event.type': 'authentication_success' } } },
+  authentication_success_histogram: {
+    auto_date_histogram: { field: '@timestamp', buckets: '6' },
+    aggs: { count: { filter: { term: { 'event.type': 'authentication_success' } } } },
+  },
+  authentication_failure: { filter: { term: { 'event.type': 'authentication_failure' } } },
+  authentication_failure_histogram: {
+    auto_date_histogram: { field: '@timestamp', buckets: '6' },
+    aggs: { count: { filter: { term: { 'event.type': 'authentication_failure' } } } },
+  },
+};
+
+const mockAuthFilter = {
+  bool: {
+    should: [
+      { match: { 'event.type': 'authentication_success' } },
+      { match: { 'event.type': 'authentication_failure' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
+export const mockKpiHostsAuthQuery = [
+  mockMsearchHeader,
+  {
+    aggs: mockAuthAggs,
     query: {
       bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                { match: { 'event.type': 'authentication_success' } },
-                { match: { 'event.type': 'authentication_failure' } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          { range: { '@timestamp': { gte: 1556889840660, lte: 1556976240660 } } },
-        ],
+        filter: [mockAuthFilter, mockTimerangeFilter],
       },
     },
     size: 0,
@@ -525,10 +542,24 @@ export const mockAuthQuery = [
   },
 ];
 
-export const mockMsearchOptions = {
-  body: [...mockUniqueIpsQuery, ...mockAuthQuery, ...mockHostsQuery],
+export const mockKpiHostDetailsAuthQuery = [
+  mockMsearchHeader,
+  {
+    aggs: mockAuthAggs,
+    query: {
+      bool: {
+        filter: [mockAuthFilter, mockTimerangeFilter, mockHostNameFilter],
+      },
+    },
+    size: 0,
+    track_total_hits: false,
+  },
+];
+
+export const mockKpiHostsMsearchOptions = {
+  body: [...mockKpiHostsUniqueIpsQuery, ...mockKpiHostsAuthQuery, ...mockHostsQuery],
 };
 
 export const mockKpiHostDetailsMsearchOptions = {
-  body: [...mockUniqueIpsQuery, ...mockAuthQuery],
+  body: [...mockKpiHostDetailsUniqueIpsQuery, ...mockKpiHostDetailsAuthQuery],
 };

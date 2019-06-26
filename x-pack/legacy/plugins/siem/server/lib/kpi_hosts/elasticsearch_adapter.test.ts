@@ -8,19 +8,21 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchKpiHostsAdapter } from './elasticsearch_adapter';
 import {
-  mockAuthQuery,
+  mockKpiHostsAuthQuery,
+  mockKpiHostDetailsAuthQuery,
   mockHostsQuery,
-  mockUniqueIpsQuery,
-  mockMsearchOptions,
-  mockOptions,
-  mockKpiHostDetailsOptions,
-  mockRequest,
-  mockResponse,
-  mockResult,
-  mockKpiIpDetailsResponse,
-  mockKpiHostDetailsResult,
+  mockKpiHostsUniqueIpsQuery,
+  mockKpiHostDetailsUniqueIpsQuery,
+  mockKpiHostsMsearchOptions,
   mockKpiHostDetailsMsearchOptions,
+  mockKpiHostsOptions,
+  mockKpiHostDetailsOptions,
+  mockKpiHostsRequest,
   mockKpiHostDetailsRequest,
+  mockKpiHostsResponse,
+  mockKpiHostDetailsResponse,
+  mockKpiHostsResult,
+  mockKpiHostDetailsResult,
 } from './mock';
 import * as authQueryDsl from './query_authentication.dsl';
 import * as uniqueIpsQueryDsl from './query_unique_ips.dsl';
@@ -47,22 +49,25 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
 
     describe('getKpiHosts - call stack', () => {
       beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockResponse);
+        mockCallWithRequest.mockResolvedValue(mockKpiHostsResponse);
         jest.doMock('../framework', () => ({
           callWithRequest: mockCallWithRequest,
         }));
         mockBuildUniqueIpsQuery = jest
           .spyOn(uniqueIpsQueryDsl, 'buildUniqueIpsQuery')
-          .mockReturnValue(mockUniqueIpsQuery);
+          .mockReturnValue(mockKpiHostsUniqueIpsQuery);
         mockBuildAuthQuery = jest
           .spyOn(authQueryDsl, 'buildAuthQuery')
-          .mockReturnValue(mockAuthQuery);
+          .mockReturnValue(mockKpiHostsAuthQuery);
         mockBuildHostsQuery = jest
           .spyOn(hostsQueryDsl, 'buildHostsQuery')
           .mockReturnValue(mockHostsQuery);
 
         EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHosts(mockRequest as FrameworkRequest, mockOptions);
+        data = await EsKpiHosts.getKpiHosts(
+          mockKpiHostsRequest as FrameworkRequest,
+          mockKpiHostsOptions
+        );
       });
 
       afterAll(() => {
@@ -73,34 +78,37 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
       });
 
       test('should build general query with correct option', () => {
-        expect(mockBuildUniqueIpsQuery).toHaveBeenCalledWith(mockOptions);
+        expect(mockBuildUniqueIpsQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
       });
 
       test('should build auth query with correct option', () => {
-        expect(mockBuildAuthQuery).toHaveBeenCalledWith(mockOptions);
+        expect(mockBuildAuthQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
       });
 
       test('should build hosts query with correct option', () => {
-        expect(mockBuildHostsQuery).toHaveBeenCalledWith(mockOptions);
+        expect(mockBuildHostsQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
       });
 
       test('should send msearch request', () => {
         expect(mockCallWithRequest).toHaveBeenCalledWith(
-          mockRequest,
+          mockKpiHostsRequest,
           'msearch',
-          mockMsearchOptions
+          mockKpiHostsMsearchOptions
         );
       });
     });
 
     describe('Happy Path - get Data', () => {
       beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockResponse);
+        mockCallWithRequest.mockResolvedValue(mockKpiHostsResponse);
         jest.doMock('../framework', () => ({
           callWithRequest: mockCallWithRequest,
         }));
         EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHosts(mockRequest as FrameworkRequest, mockOptions);
+        data = await EsKpiHosts.getKpiHosts(
+          mockKpiHostsRequest as FrameworkRequest,
+          mockKpiHostsOptions
+        );
       });
 
       afterAll(() => {
@@ -108,7 +116,7 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
       });
 
       test('getKpiHosts - response with data', () => {
-        expect(data).toEqual(mockResult);
+        expect(data).toEqual(mockKpiHostsResult);
       });
     });
 
@@ -119,7 +127,10 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
           callWithRequest: mockCallWithRequest,
         }));
         EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHosts(mockRequest as FrameworkRequest, mockOptions);
+        data = await EsKpiHosts.getKpiHosts(
+          mockKpiHostsRequest as FrameworkRequest,
+          mockKpiHostsOptions
+        );
       });
 
       afterAll(() => {
@@ -148,16 +159,16 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
 
     describe('getKpiHostDetails - call stack', () => {
       beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockKpiIpDetailsResponse);
+        mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponse);
         jest.doMock('../framework', () => ({
           callWithRequest: mockCallWithRequest,
         }));
         mockBuildUniqueIpsQuery = jest
           .spyOn(uniqueIpsQueryDsl, 'buildUniqueIpsQuery')
-          .mockReturnValue(mockUniqueIpsQuery);
+          .mockReturnValue(mockKpiHostDetailsUniqueIpsQuery);
         mockBuildAuthQuery = jest
           .spyOn(authQueryDsl, 'buildAuthQuery')
-          .mockReturnValue(mockAuthQuery);
+          .mockReturnValue(mockKpiHostDetailsAuthQuery);
         mockBuildHostsQuery = jest
           .spyOn(hostsQueryDsl, 'buildHostsQuery')
           .mockReturnValue(mockHostsQuery);
@@ -184,7 +195,7 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
         expect(mockBuildAuthQuery).toHaveBeenCalledWith(mockKpiHostDetailsOptions);
       });
 
-      test('should not call build hosts query', () => {
+      test('should not build hosts query', () => {
         expect(mockBuildHostsQuery).not.toHaveBeenCalled();
       });
 
@@ -199,7 +210,7 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
 
     describe('Happy Path - get Data', () => {
       beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockKpiIpDetailsResponse);
+        mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponse);
         jest.doMock('../framework', () => ({
           callWithRequest: mockCallWithRequest,
         }));
