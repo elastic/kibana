@@ -40,12 +40,12 @@ export function checkLicense(xpackLicenseInfo) {
   ];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_FULL_LICENSE_MODES);
-  const licenseType = (isLicenseModeValid === true) ? LICENSE_TYPE.FULL : LICENSE_TYPE.BASIC;
+  const licenseType = (isLicenseModeValid === true) ? LICENSE_TYPE.PLATINUM : LICENSE_TYPE.BASIC;
   const isLicenseActive = xpackLicenseInfo.license.isActive();
   const licenseTypeName = xpackLicenseInfo.license.getType();
 
   // Platinum or trial license is valid but not active, i.e. expired
-  if (licenseType === LICENSE_TYPE.FULL && isLicenseActive === false) {
+  if (licenseType === LICENSE_TYPE.PLATINUM && isLicenseActive === false) {
     return {
       isAvailable: true,
       showLinks: true,

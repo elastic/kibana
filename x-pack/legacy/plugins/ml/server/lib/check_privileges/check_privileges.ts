@@ -30,7 +30,7 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
     const upgradeInProgress = await isUpgradeInProgress();
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
     const license = checkLicense(xpackMainPlugin.info);
-    const isPlatinumLicense = license.licenseType === LICENSE_TYPE.FULL;
+    const isPlatinumLicense = license.licenseType === LICENSE_TYPE.PLATINUM;
 
     const setGettingPrivileges = isPlatinumLicense
       ? setPlatinumGettingPrivileges

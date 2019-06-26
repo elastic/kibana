@@ -6,5 +6,5 @@
 
 export enum LICENSE_TYPE {
   BASIC,
-  FULL,
+  PLATINUM,
 }

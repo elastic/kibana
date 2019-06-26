@@ -115,7 +115,7 @@ export function hasLicenseExpired() {
 }
 
 export function isFullLicense() {
-  return (licenseType === LICENSE_TYPE.FULL);
+  return (licenseType === LICENSE_TYPE.PLATINUM);
 }
 
 export function xpackFeatureAvailable(feature) {

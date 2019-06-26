@@ -135,7 +135,7 @@ export class Plugin {
       // and there is a full license (trial or platinum).
       if (mlFeature.isEnabled() === true) {
         const licenseCheckResults = mlFeature.getLicenseCheckResults();
-        if (licenseCheckResults.licenseType === LICENSE_TYPE.FULL) {
+        if (licenseCheckResults.licenseType === LICENSE_TYPE.PLATINUM) {
           addLinksToSampleDatasets({ addAppLinksToSampleDataset });
         }
       }
