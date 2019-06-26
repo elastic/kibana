@@ -67,22 +67,29 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   });
 
   describe('buildPipelineVisFunction', () => {
-    const visStateDef: VisState = {
-      title: 'title',
-      // @ts-ignore
-      type: 'type',
-      params: {},
-    };
+    let visStateDef: VisState;
+    let schemaConfig: SchemaConfig;
+    let schemasDef: Schemas;
+    let uiState: any;
 
-    const schemaConfig: SchemaConfig = {
-      accessor: 0,
-      format: {},
-      params: {},
-      aggType: '',
-    };
+    beforeEach(() => {
+      visStateDef = {
+        title: 'title',
+        // @ts-ignore
+        type: 'type',
+        params: {},
+      };
 
-    const schemasDef: Schemas = { metric: [schemaConfig] };
-    const uiState = {};
+      schemaConfig = {
+        accessor: 0,
+        format: {},
+        params: {},
+        aggType: '',
+      };
+
+      schemasDef = { metric: [schemaConfig] };
+      uiState = {};
+    });
 
     it('handles vega function', () => {
       const vis = {
@@ -222,8 +229,8 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     describe('handles metric function', () => {
-      const visState = { ...visStateDef, params: { metric: {} } };
       it('without buckets', () => {
+        const visState = { ...visStateDef, params: { metric: {} } };
         const schemas = {
           ...schemasDef,
           metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
@@ -233,11 +240,19 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       });
 
       it('with buckets', () => {
+        const visState = { ...visStateDef, params: { metric: {} } };
         const schemas = {
           ...schemasDef,
           metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
           group: [{ accessor: 2 }],
         };
+        const actual = buildPipelineVisFunction.metric(visState, schemas, uiState);
+        expect(actual).toMatchSnapshot();
+      });
+
+      it('with percentage mode should have percentage format', () => {
+        const visState = { ...visStateDef, params: { metric: { percentageMode: true } } };
+        const schemas = { ...schemasDef };
         const actual = buildPipelineVisFunction.metric(visState, schemas, uiState);
         expect(actual).toMatchSnapshot();
       });

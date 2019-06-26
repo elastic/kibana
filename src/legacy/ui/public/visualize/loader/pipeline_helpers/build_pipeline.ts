@@ -313,6 +313,13 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     } = visState.params.metric;
     const { metrics, bucket } = buildVisConfig.metric(schemas).dimensions;
 
+    // fix formatter for percentage mode
+    if (get(visState.params, 'metric.percentageMode') === true) {
+      metrics.forEach((metric: SchemaConfig) => {
+        metric.format = { id: 'percent' };
+      });
+    }
+
     let expr = `metricvis `;
     expr += prepareValue('percentage', percentageMode);
     expr += prepareValue('colorScheme', colorSchema);
