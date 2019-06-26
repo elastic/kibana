@@ -161,6 +161,7 @@ export class CoreSystem {
       const application = await this.application.start({ injectedMetadata });
 
       const coreUiTargetDomElement = document.createElement('div');
+      coreUiTargetDomElement.id = 'kibana-body';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
 
