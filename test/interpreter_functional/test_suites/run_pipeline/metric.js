@@ -67,8 +67,8 @@ export default function ({ getService, updateBaselines }) {
       });
 
       it('with percentage option', async () => {
-        const expression = 'metricVis metric={visdimension 0} percentage=true';
-        await (await expectExpression('metric_percentage', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        const expression = 'metricVis metric={visdimension 0} percentage=true colorRange={range from=0 to=1000}';
+        await expectExpression('metric_percentage', expression, dataContext).toMatchSnapshot();
       });
     });
   });

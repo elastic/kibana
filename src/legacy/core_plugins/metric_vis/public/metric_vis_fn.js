@@ -97,7 +97,7 @@ export const metric = () => ({
       help: i18n.translate('metricVis.function.font.help', {
         defaultMessage: 'Font settings.'
       }),
-      default: `{font size=60}`,
+      default: '{font size=60}',
     },
     subText: {
       types: ['string'],
@@ -132,7 +132,7 @@ export const metric = () => ({
       dimensions.bucket = args.bucket;
     }
 
-    if (args.percentage && args.colorRange.length === 0) {
+    if (args.percentage && (!args.colorRange || args.colorRange.length === 0)) {
       throw new Error ('colorRange must be provided when using percentage');
     }
 
