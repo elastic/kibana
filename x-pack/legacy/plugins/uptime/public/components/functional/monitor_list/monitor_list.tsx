@@ -18,7 +18,7 @@ import {
 } from '../../../../common/graphql/types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
-import { Criteria, Pagination, ExpandedRowMap } from './types';
+import { ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
@@ -32,9 +32,11 @@ interface MonitorListProps {
   absoluteEndDate: number;
   dangerColor: string;
   successColor: string;
-  pageIndex: number;
-  pageSize: number;
-  onChange: (criteria: Criteria) => void;
+  // TODO: reintegrate pagination in a future release
+  // pageIndex: number;
+  // pageSize: number;
+  // TODO: reintroduce for pagination and sorting
+  // onChange: (criteria: Criteria) => void;
   // TODO: reintegrate sorting in a future release
   // sortField: string;
   // sortDirection: string;
@@ -51,27 +53,31 @@ export const MonitorListComponent = (props: Props) => {
     data,
     errors,
     loading,
-    onChange,
-    pageIndex,
-    pageSize,
-    // TODO: reintegrate sorting in a future release
+    // TODO: reintroduce for pagination and sorting
+    // onChange,
+    // TODO: reintegrate pagination in future release
+    // pageIndex,
+    // pageSize,
+    // TODO: reintegrate sorting in future release
     // sortDirection,
     // sortField,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
-  const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
+  // TODO: use with pagination
+  // const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
-  const pagination: Pagination = {
-    pageIndex,
-    pageSize,
-    pageSizeOptions: [5, 10, 20, 50],
-    totalItemCount: count,
-    hidePerPageOptions: false,
-  };
+  // TODO: reintegrate pagination in future release
+  // const pagination: Pagination = {
+  //   pageIndex,
+  //   pageSize,
+  //   pageSizeOptions: [5, 10, 20, 50],
+  //   totalItemCount: count,
+  //   hidePerPageOptions: false,
+  // };
 
-  // TODO: reintegrate sorting in a future release
+  // TODO: reintegrate sorting in future release
   // const sorting = {
   //   sort: {
   //     field: sortField,
@@ -110,12 +116,16 @@ export const MonitorListComponent = (props: Props) => {
           };
         }, {})}
         items={items}
-        onChange={onChange}
+        // TODO: not needed without sorting and pagination
+        // onChange={onChange}
         noItemsMessage={i18n.translate('xpack.uptime.monitorList.noItemMessage', {
           defaultMessage: 'No uptime monitors found',
           description: 'This message is shown if the monitors table is rendered but has no items.',
         })}
-        pagination={pagination}
+        // TODO: reintegrate pagination in future release
+        // pagination={pagination}
+        // TODO: reintegrate sorting in future release
+        // sorting={sorting}
         columns={[
           {
             field: 'monitor_id',

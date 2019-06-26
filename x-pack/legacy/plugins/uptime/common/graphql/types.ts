@@ -704,10 +704,6 @@ export interface GetMonitorPageTitleQueryArgs {
   monitorId: string;
 }
 export interface GetMonitorStatesQueryArgs {
-  pageIndex: number;
-
-  pageSize: number;
-
   dateRangeStart: string;
 
   dateRangeEnd: string;

@@ -7,16 +7,8 @@
 import gql from 'graphql-tag';
 
 export const monitorStatesQuery = gql`
-  query MonitorStates(
-    $pageIndex: Int!
-    $pageSize: Int!
-    $dateRangeStart: String!
-    $dateRangeEnd: String!
-    $filters: String
-  ) {
+  query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
     monitorStates: getMonitorStates(
-      pageIndex: $pageIndex
-      pageSize: $pageSize
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
       filters: $filters

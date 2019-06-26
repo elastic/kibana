@@ -13,7 +13,7 @@ import { EmptyState, FilterBar, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
-import { MonitorList, Criteria } from '../components/functional/monitor_list';
+import { MonitorList } from '../components/functional/monitor_list';
 
 interface OverviewPageProps {
   basePath: string;
@@ -46,9 +46,10 @@ export const OverviewPage = ({
   const {
     dateRangeStart,
     dateRangeEnd,
-    monitorListPageIndex,
-    monitorListPageSize,
-    // TODO: reintegrate sorting in a future release
+    // TODO: reintegrate pagination in future release
+    // monitorListPageIndex,
+    // monitorListPageSize,
+    // TODO: reintegrate sorting in future release
     // monitorListSortDirection,
     // monitorListSortField,
     search,
@@ -89,14 +90,15 @@ export const OverviewPage = ({
     refreshApp();
   };
 
-  const onMonitorListChange = ({ page: { index, size }, sort: { field, direction } }: Criteria) => {
-    updateUrl({
-      monitorListPageIndex: index,
-      monitorListPageSize: size,
-      monitorListSortDirection: direction,
-      monitorListSortField: field,
-    });
-  };
+  // TODO: reintroduce for pagination and sorting
+  // const onMonitorListChange = ({ page: { index, size }, sort: { field, direction } }: Criteria) => {
+  //   updateUrl({
+  //     monitorListPageIndex: index,
+  //     monitorListPageSize: size,
+  //     monitorListSortDirection: direction,
+  //     monitorListSortField: field,
+  //   });
+  // };
 
   return (
     <Fragment>
@@ -119,18 +121,22 @@ export const OverviewPage = ({
           absoluteStartDate={absoluteStartDate}
           absoluteEndDate={absoluteEndDate}
           dangerColor={colors.danger}
+          implementsCustomErrorState={true}
           successColor={colors.success}
-          pageIndex={monitorListPageIndex}
-          pageSize={monitorListPageSize}
-          // TODO: reintegrate sorting in a future release
+          // TODO: reintegrate pagination in future release
+          // pageIndex={monitorListPageIndex}
+          // pageSize={monitorListPageSize}
+          // TODO: reintegrate sorting in future release
           // sortDirection={monitorListSortDirection}
           // sortField={monitorListSortField}
-          onChange={onMonitorListChange}
+          // TODO: reintroduce for pagination and sorting
+          // onChange={onMonitorListChange}
           variables={{
             ...sharedProps,
-            pageIndex: monitorListPageIndex,
-            pageSize: monitorListPageSize,
-            // TODO: reintegrate sorting in a future release
+            // TODO: reintegrate pagination in future release
+            // pageIndex: monitorListPageIndex,
+            // pageSize: monitorListPageSize,
+            // TODO: reintegrate sorting in future release
             // sortField: monitorListSortField,
             // sortDirection: monitorListSortDirection,
           }}

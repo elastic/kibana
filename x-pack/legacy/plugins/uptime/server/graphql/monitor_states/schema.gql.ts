@@ -127,8 +127,6 @@ export const monitorStatesSchema = gql`
 
   extend type Query {
     getMonitorStates(
-      pageIndex: Int!
-      pageSize: Int!
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
