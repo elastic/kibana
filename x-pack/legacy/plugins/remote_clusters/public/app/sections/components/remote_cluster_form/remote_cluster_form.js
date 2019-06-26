@@ -479,7 +479,7 @@ export class RemoteClusterForm extends Component {
     if (errorClusterName) {
       errorExplanation.push({
         key: 'nameExplanation',
-        where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputErrorsScreenReaderExplanation', {
+        where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputNameErrorsScreenReaderExplanation', {
           defaultMessage: 'The input "Name". You have entered: {name}.',
           values: { name }
         }),
@@ -489,7 +489,7 @@ export class RemoteClusterForm extends Component {
     if (localSeedErrors && localSeedErrors.length) {
       errorExplanation.push({
         key: 'seedExplanation',
-        where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputErrorsScreenReaderExplanation', {
+        where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputSeedErrorsScreenReaderExplanation', {
           defaultMessage: 'The "Seed Nodes" input. You have entered: {seedInput}.',
           values: { seedInput }
         }),
