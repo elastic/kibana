@@ -38,7 +38,7 @@ If a task specifies a higher `numWorkers` than the system supports, the system's
 
 The task_manager can be configured via `taskManager` config options (e.g. `taskManager.maxAttempts`):
 
-- `max_attempts` - How many times a failing task instance will be retried before it is never run again
+- `max_attempts` - The maximum number of times a task will be attempted before being abandoned as failed
 - `poll_interval` - How often the background worker should check the task_manager index for more work
 - `index` - The name of the index that the task_manager
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
@@ -69,7 +69,7 @@ taskManager.registerTaskDefinitions({
     // This defaults to 5 minutes.
     timeout: '5m',
 
-    // Optional, how many times to retry if task fails to run.
+    // Optional, how many attempts before marking task as failed.
     // This defaults to what is configured at the task manager level.
     maxAttempts: 5,
 

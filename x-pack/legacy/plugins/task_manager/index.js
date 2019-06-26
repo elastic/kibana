@@ -16,7 +16,7 @@ export function taskManager(kibana) {
         enabled: Joi.boolean().default(true),
         max_attempts: Joi.number()
           .description('The maximum number of times a task will be attempted before being abandoned as failed')
-          .min(0) // no retries
+          .min(1)
           .default(3),
         poll_interval: Joi.number()
           .description('How often, in milliseconds, the task manager will look for more work.')
