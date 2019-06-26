@@ -6,7 +6,7 @@
 
 /**
  * Returns a date that is the specified interval from now. Currently,
- * only minute-intervals are supported.
+ * only minute-intervals and second-intervals are supported.
  *
  * @param {string} interval - An interval of the form `Nm` such as `5m`
  */
@@ -16,6 +16,10 @@ export function intervalFromNow(interval?: string): Date | undefined {
   }
 
   assertValidInterval(interval);
+
+  if (isSeconds(interval)) {
+    return secondsFromNow(parseInterval(interval));
+  }
 
   return minutesFromNow(parseInterval(interval));
 }
@@ -34,12 +38,29 @@ export function minutesFromNow(mins: number): Date {
 }
 
 /**
+ * Returns a date that is secs seconds from now.
+ *
+ * @param secs The number of seconds from now
+ */
+export function secondsFromNow(secs: number): Date {
+  const now = new Date();
+
+  now.setSeconds(now.getSeconds() + secs);
+
+  return now;
+}
+
+/**
  * Verifies that the specified interval matches our expected format.
  *
- * @param {string} interval - An interval such as `5m`
+ * @param {string} interval - An interval such as `5m` or `10s`
  */
 export function assertValidInterval(interval: string) {
-  if (/^[0-9]+m$/.test(interval)) {
+  if (isMinutes(interval)) {
+    return interval;
+  }
+
+  if (isSeconds(interval)) {
     return interval;
   }
 
@@ -50,4 +71,12 @@ export function assertValidInterval(interval: string) {
 
 function parseInterval(interval: string) {
   return parseInt(interval, 10);
+}
+
+function isMinutes(interval: string) {
+  return /^[0-9]+m$/.test(interval);
+}
+
+function isSeconds(interval: string) {
+  return /^[0-9]+s$/.test(interval);
 }

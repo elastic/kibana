@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { assertValidInterval, intervalFromNow, minutesFromNow } from './intervals';
+import { assertValidInterval, intervalFromNow, minutesFromNow, secondsFromNow } from './intervals';
 
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {
@@ -13,7 +13,11 @@ describe('taskIntervals', () => {
       expect(() => assertValidInterval(`${_.random(1000)}m`)).not.toThrow();
     });
 
-    test('it rejects intervals are not of the form `Nm`', () => {
+    test('it accepts intervals in the form `Ns`', () => {
+      expect(() => assertValidInterval(`${_.random(1000)}s`)).not.toThrow();
+    });
+
+    test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
       expect(() => assertValidInterval(`5m 2s`)).toThrow(
         /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
       );
@@ -31,7 +35,14 @@ describe('taskIntervals', () => {
       expect(Math.abs(nextRun - expected)).toBeLessThan(100);
     });
 
-    test('it rejects intervals are not of the form `Nm`', () => {
+    test('it returns the current date plus n seconds', () => {
+      const secs = _.random(1, 100);
+      const expected = Date.now() + secs * 1000;
+      const nextRun = intervalFromNow(`${secs}s`)!.getTime();
+      expect(Math.abs(nextRun - expected)).toBeLessThan(100);
+    });
+
+    test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
       expect(() => intervalFromNow(`5m 2s`)).toThrow(
         /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
       );
@@ -46,6 +57,15 @@ describe('taskIntervals', () => {
       const mins = _.random(1, 100);
       const expected = Date.now() + mins * 60 * 1000;
       const nextRun = minutesFromNow(mins).getTime();
+      expect(Math.abs(nextRun - expected)).toBeLessThan(100);
+    });
+  });
+
+  describe('secondsFromNow', () => {
+    test('it returns the current date plus a number of seconds', () => {
+      const secs = _.random(1, 100);
+      const expected = Date.now() + secs * 1000;
+      const nextRun = secondsFromNow(secs).getTime();
       expect(Math.abs(nextRun - expected)).toBeLessThan(100);
     });
   });

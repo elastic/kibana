@@ -165,7 +165,7 @@ The data stored for a task instance looks something like this:
   runAt: "2020-07-24T17:34:35.272Z",
 
   // Indicates that this is a recurring task. We currently only support
-  // 1 minute granularity.
+  // minute syntax `5m` or second syntax `10s`.
   interval: '5m',
 
   // How many times this task has been unsuccesfully attempted,
