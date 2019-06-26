@@ -308,88 +308,72 @@ export class SidebarHeader extends Component<Props, State> {
     };
   };
 
-  private _getAlignmentMenuItems = (close: (fn: () => void) => () => void): MenuTuple[] => {
-    const {
-      alignLeft,
-      alignCenter,
-      alignRight,
-      alignTop,
-      alignMiddle,
-      alignBottom,
-      selectedNodes,
-    } = this.props;
+  private _getAlignmentMenuItems = (close: (fn: () => void) => () => void): MenuTuple => {
+    const { alignLeft, alignCenter, alignRight, alignTop, alignMiddle, alignBottom } = this.props;
 
-    return selectedNodes.length < 2
-      ? []
-      : [
+    return {
+      menuItem: { name: 'Align elements', className: 'canvasContextMenu', panel: 2 },
+      panel: {
+        id: 2,
+        title: 'Alignment',
+        items: [
           {
-            menuItem: { name: 'Align elements', className: 'canvasContextMenu', panel: 2 },
-            panel: {
-              id: 2,
-              title: 'Alignment',
-              items: [
-                {
-                  name: 'Left',
-                  icon: 'editorItemAlignLeft',
-                  onClick: close(alignLeft),
-                },
-                {
-                  name: 'Center',
-                  icon: 'editorItemAlignCenter',
-                  onClick: close(alignCenter),
-                },
-                {
-                  name: 'Right',
-                  icon: 'editorItemAlignRight',
-                  onClick: close(alignRight),
-                },
-                {
-                  name: 'Top',
-                  icon: 'editorItemAlignTop',
-                  onClick: close(alignTop),
-                },
-                {
-                  name: 'Middle',
-                  icon: 'editorItemAlignMiddle',
-                  onClick: close(alignMiddle),
-                },
-                {
-                  name: 'Bottom',
-                  icon: 'editorItemAlignBottom',
-                  onClick: close(alignBottom),
-                },
-              ],
-            },
+            name: 'Left',
+            icon: 'editorItemAlignLeft',
+            onClick: close(alignLeft),
           },
-        ];
+          {
+            name: 'Center',
+            icon: 'editorItemAlignCenter',
+            onClick: close(alignCenter),
+          },
+          {
+            name: 'Right',
+            icon: 'editorItemAlignRight',
+            onClick: close(alignRight),
+          },
+          {
+            name: 'Top',
+            icon: 'editorItemAlignTop',
+            onClick: close(alignTop),
+          },
+          {
+            name: 'Middle',
+            icon: 'editorItemAlignMiddle',
+            onClick: close(alignMiddle),
+          },
+          {
+            name: 'Bottom',
+            icon: 'editorItemAlignBottom',
+            onClick: close(alignBottom),
+          },
+        ],
+      },
+    };
   };
 
-  private _getDistributionMenuItems = (close: (fn: () => void) => () => void): MenuTuple[] => {
-    const { distributeHorizontally, distributeVertically, selectedNodes } = this.props;
+  private _getDistributionMenuItems = (close: (fn: () => void) => () => void): MenuTuple => {
+    const { distributeHorizontally, distributeVertically } = this.props;
 
-    return selectedNodes.length < 2
-      ? []
-      : [
+    return {
+      menuItem: { name: 'Distribute elements', className: 'canvasContextMenu', panel: 3 },
+      panel: {
+        id: 3,
+        title: 'Distribution',
+        items: [
           {
-            menuItem: { name: 'Distribute elements', className: 'canvasContextMenu', panel: 3 },
-            panel: {
-              id: 3,
-              title: 'Distribution',
-              items: [
-                {
-                  name: 'Horizontal',
-                  icon: 'editorDistributeHorizontal',
-                  onClick: close(distributeHorizontally),
-                },
-                {
-                  name: 'Vertical',
-                  icon: 'editorDistributeVertical',
-                  onClick: close(distributeVertically),
-                },
-              ],
-            },
+            name: 'Horizontal',
+            icon: 'editorDistributeHorizontal',
+            onClick: close(distributeHorizontally),
           },
-        ];
+          {
+            name: 'Vertical',
+            icon: 'editorDistributeVertical',
+            onClick: close(distributeVertically),
+          },
+        ],
+      },
+    };
   };
 
   private _getGroupMenuItems = (
@@ -480,8 +464,13 @@ export class SidebarHeader extends Component<Props, State> {
       panels.push(panel);
     };
 
-    this._getAlignmentMenuItems(close).forEach(menuFiller);
-    this._getDistributionMenuItems(close).forEach(menuFiller);
+    if (this.props.selectedNodes.length > 1) {
+      menuFiller(this._getAlignmentMenuItems(close));
+    }
+
+    if (this.props.selectedNodes.length > 2) {
+      menuFiller(this._getDistributionMenuItems(close));
+    }
 
     items.push({
       name: 'Save as new element',
