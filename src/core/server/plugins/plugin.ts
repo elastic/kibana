@@ -143,7 +143,7 @@ export interface Plugin<
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-  stop(): void;
+  stop?(): void;
 }
 
 /**
