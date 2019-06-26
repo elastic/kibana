@@ -85,4 +85,9 @@ export class LspService {
   public languageServerStatus(lang: string): LanguageServerStatus {
     return this.controller.status(lang);
   }
+
+  public async initializeState(repoUri: string, revision: string) {
+    const workspacePath = await this.workspaceHandler.revisionDir(repoUri, revision);
+    return this.controller.initializeState(workspacePath);
+  }
 }
