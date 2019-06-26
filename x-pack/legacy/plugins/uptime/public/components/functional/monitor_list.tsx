@@ -123,7 +123,7 @@ export const MonitorListComponent = ({
               render: (id: string, monitor: LatestMonitor) => (
                 <MonitorPageLink
                   id={id}
-                  location={get<string | undefined>(monitor, 'ping.observer.geo.name')}
+                  location={undefined}
                   linkParameters={linkParameters}
                 >
                   {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name

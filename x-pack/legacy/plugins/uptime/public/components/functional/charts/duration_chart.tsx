@@ -66,14 +66,15 @@ export const DurationChart = ({
   const areaSpecId = getSpecId('area');
 
   // this id is used for the line chart representing the average duration length
-  const averageSpecId = getSpecId('average');
+  const averageSpecId = getSpecId('average-');
 
   const lineSeries = locationDurationLines.map(ldl => {
+    const locationSpecId = getSpecId('loc-avg' + ldl.name);
     return <LineSeries
             curve={CurveType.CURVE_MONOTONE_X}
             customSeriesColors={getColorsMap(meanColor, averageSpecId)}
             data={ldl.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
-            id={averageSpecId}
+            id={locationSpecId}
             name={i18n.translate(
               'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
               {
