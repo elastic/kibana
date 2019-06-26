@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function translations(kibana: any) {
-  return new kibana.Plugin({
-    id: 'translations',
+class TranslationsPlugin {
+  public setup() {
+    return {};
+  }
 
-    init() {
-      // There is nothing to initialize.
-    },
-  });
+  public start() {
+    return {};
+  }
 }
+
+export const plugin = () => new TranslationsPlugin();
