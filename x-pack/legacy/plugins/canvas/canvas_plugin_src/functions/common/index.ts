@@ -30,7 +30,7 @@ import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
-import { joinRows } from './joinRows';
+import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapColumn } from './mapColumn';
