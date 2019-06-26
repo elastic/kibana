@@ -1,0 +1,30 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "SIEM Packetbeat: Detect unusually high amounts of data in outbound requests",
+  "groups": ["siem"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high volume of data in outbound requests",
+        "function": "high_non_null_sum",
+        "field_name": "source.bytes",
+        "over_field_name": "http.request.headers.host"
+      }
+    ],
+    "influencers": [
+      "host.name",
+      "http.request.headers.host"
+    ]
+  },
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-packetbeat"
+  }
+}

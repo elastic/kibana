@@ -1,0 +1,31 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "SIEM Packetbeat: Detect unusually high amounts of information content in DNS requests",
+  "groups": ["siem"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high amount of entropy in subdomain field",
+        "function": "high_info_content",
+        "field_name": "dns.question.name",
+        "over_field_name": "dns.question.etld_plus_one",
+        "exclude_frequent": "all"
+      }
+    ],
+    "influencers": [
+      "agent.hostname",
+      "dns.question.etld_plus_one"
+    ]
+  },
+  "analysis_limits": {
+   "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-packetbeat"
+  }
+}
