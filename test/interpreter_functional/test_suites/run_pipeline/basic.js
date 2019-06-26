@@ -51,7 +51,7 @@ export default function ({ getService, updateBaselines }) {
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'  | 
-        metricVis metric={vis_dimension 1 format="number"} bucket={vis_dimension 0}'
+        metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
       `;
 
       // we can execute an expression and validate the result manually:
@@ -94,11 +94,11 @@ export default function ({ getService, updateBaselines }) {
 
         // we reuse that response to render 3 different charts and compare screenshots with baselines
         const tagCloudExpr =
-          `tagcloud metric={vis_dimension 1 format="number"} bucket={vis_dimension 0}'`;
+          `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}'`;
         await expectExpression('partial_test_1', tagCloudExpr, context).toMatchScreenshot();
 
         const metricExpr =
-          `metricVis metric={vis_dimension 1 format="number"} bucket={vis_dimension 0}'`;
+          `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}'`;
         await expectExpression('partial_test_2', metricExpr, context).toMatchScreenshot();
 
         const regionMapExpr =
