@@ -5,9 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-
-export const ES_ARCHIVER_ACTION_ID = '19cfba7c-711a-4170-8590-9a99a281e85c';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -18,11 +17,12 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   const esTestIndexName = '.kibaka-alerting-test-data';
 
-  describe('actions', () => {
+  describe('fire', () => {
     beforeEach(() => esArchiver.load('actions/basic'));
     afterEach(() => esArchiver.unload('actions/basic'));
 
     before(async () => {
+      await es.indices.delete({ index: esTestIndexName, ignore: [404] });
       await es.indices.create({
         index: esTestIndexName,
         body: {
@@ -53,9 +53,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
     after(() => es.indices.delete({ index: esTestIndexName }));
 
-    it('decrypts attributes and joins on actionTypeConfig when firing', async () => {
+    it('decrypts attributes and joins on actionTypeConfig when calling fire API', async () => {
       await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -64,11 +64,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(200)
+        .expect(204)
         .then((resp: any) => {
-          expect(resp.body).to.eql({
-            success: true,
-          });
+          expect(resp.body).to.eql({});
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
@@ -110,7 +108,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       });
     });
 
-    it('encrypted attributes still available after update', async () => {
+    it('fire still works with encrypted attributes after updating an action', async () => {
       const { body: updatedAction } = await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
@@ -139,7 +137,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         },
       });
       await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -148,11 +146,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(200)
+        .expect(204)
         .then((resp: any) => {
-          expect(resp.body).to.eql({
-            success: true,
-          });
+          expect(resp.body).to.eql({});
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
@@ -191,6 +187,38 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         },
         reference: 'actions-fire-2',
         source: 'action:test.index-record',
+      });
+    });
+
+    it(`should return 404 when action doesn't exist`, async () => {
+      const { body: response } = await supertest
+        .post('/api/action/1/_fire')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: { foo: true },
+        })
+        .expect(404);
+      expect(response).to.eql({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Saved object [action/1] not found',
+      });
+    });
+
+    it('should return 400 when payload is empty and invalid', async () => {
+      const { body: response } = await supertest
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({})
+        .expect(400);
+      expect(response).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'child "params" fails because ["params" is required]',
+        validation: {
+          source: 'payload',
+          keys: ['params'],
+        },
       });
     });
   });

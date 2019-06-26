@@ -1,8 +1,51 @@
 [role="xpack"]
+[[maps-aggregations]]
+== Plot big data without plotting too much data
+
+The Maps application uses {ref}/search-aggregations.html[aggregations] to plot large data sets without overwhemling your network or your browser.
+
+Aggregations group your documents into buckets and calculate metrics for each bucket.
+Your documents stay in Elasticsearch and only the metrics for each group are returned to your computer.
+
+
+[float]
+[[maps-grid-aggregation]]
+=== Grid aggregation
+
+The *Grid aggregation* source uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] to group your documents into grids. You can calculate metrics for each gridded cell.
+
+You can symbolize grid aggregation metrics as:
+
+*Points*:: Creates a <<vector-layer, vector layer>> with a point for each gridded cell.
+The point location is the weighted centroid for all geo-points in the gridded cell.
+
+*Grid rectangles*:: Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
+
+*Heat map*:: Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
+
+
+[float]
+[[maps-top-hits-aggregation]]
+=== Most recent entities
+
+Most recent entities uses {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by entity.
+Then, {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation] accumulates the most recent documents for each entry.
+
+Most recent entities is only available for vector layers with *Documents* source.
+To enable most recent entities, click "Show most recent documents by entity" and configure the following:
+
+. Set *Entity* to the field that identifies entities in your documents.
+This field will be used in the terms aggregation to group your documents into entity buckets.
+. Set *Time* to the date field that puts your documents in chronological order.
+This field will be used to sort your documents in the top hits aggregation.
+. Set *Documents per entity* to configure the maximum number of documents accumulated per entity.
+
+
+[float]
 [[terms-join]]
 === Terms join
 
-Terms joins use a shared key to combine the results of an Elasticsearch terms aggregation and vector features.
+Terms joins use a shared key to combine the results of an {es} terms aggregation and vector features.
 You can augment vector features with property values that symbolize features and provide richer tooltip content.
 
 [role="screenshot"]
@@ -93,3 +136,4 @@ Example terms aggregation response:
 Finally, the terms aggregation response is joined with the vector features.
 [role="screenshot"]
 image::maps/images/terms_join_tooltip.png[]
+
