@@ -4,5 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type Cluster = Record<string, boolean>;
-export type Privileges = Record<string, boolean>;
+let upgradeInProgress: boolean = false;
+
+export function setUpgradeInProgress(show: boolean) {
+  upgradeInProgress = show;
+}
+
+export function isUpgradeInProgress(): boolean {
+  return upgradeInProgress;
+}
