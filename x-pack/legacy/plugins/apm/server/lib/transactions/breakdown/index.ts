@@ -33,14 +33,14 @@ export async function getTransactionBreakdown({
           must: [
             {
               term: {
-                'service.name': {
+                'service.name.keyword': {
                   value: serviceName
                 }
               }
             },
             {
               term: {
-                'transaction.type': {
+                'transaction.type.keyword': {
                   value: 'request'
                 }
               }
@@ -51,7 +51,7 @@ export async function getTransactionBreakdown({
               ? [
                   {
                     term: {
-                      'transaction.name': {
+                      'transaction.name.keyword': {
                         value: transactionName
                       }
                     }
@@ -64,7 +64,7 @@ export async function getTransactionBreakdown({
       aggs: {
         sum_all_self_times: {
           sum: {
-            field: 'span.self_time.sum'
+            field: 'span.self_time.sum.us'
           }
         },
         total_transaction_breakdown_count: {
@@ -74,20 +74,20 @@ export async function getTransactionBreakdown({
         },
         types: {
           terms: {
-            field: 'span.type',
+            field: 'span.type.keyword',
             size: 42
           },
           aggs: {
             subtypes: {
               terms: {
-                field: 'span.subtype',
+                field: 'span.subtype.keyword',
                 missing: '',
                 size: 42
               },
               aggs: {
                 total_self_time_per_subtype: {
                   sum: {
-                    field: 'span.self_time.sum'
+                    field: 'span.self_time.sum.us'
                   }
                 },
                 total_span_count_per_subtype: {
