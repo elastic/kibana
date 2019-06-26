@@ -41,7 +41,10 @@ export default new Datasource ('graphite', {
       `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,
   }),
   fn: function graphite(args, tlConfig) {
-
+    console.log({
+      args,
+      tlConfig,
+    });
     const config = args.byName;
 
     const time = {
