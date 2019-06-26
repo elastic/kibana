@@ -71,6 +71,14 @@
   fill: $euiColorEmptyShade;
 }
 
+.gphGraph__menus {
+  margin: $euiSizeM;
+}
+
+.gphGraph__bar {
+  margin: $euiSizeM;
+}
+
 .gphGraph__flexGroup {
   display: flex;
   width: 100%;
