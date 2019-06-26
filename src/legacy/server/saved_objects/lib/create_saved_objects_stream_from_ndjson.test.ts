@@ -19,17 +19,10 @@
 
 import { createSavedObjectsStreamFromNdJson } from './create_saved_objects_stream_from_ndjson';
 import { Readable } from 'stream';
+import { createPromiseFromStreams, createConcatStream } from '../../../utils/streams';
 
-async function readStream(stream: Readable) {
-  return new Promise((resolve, reject) => {
-    const data: unknown[] = [];
-
-    stream.on('data', chunk => {
-      data.push(chunk);
-    });
-    stream.on('end', () => resolve(data));
-    stream.on('error', error => reject(error));
-  });
+async function readStreamToCompletion(stream: Readable) {
+  return createPromiseFromStreams([stream, createConcatStream([])]);
 }
 
 describe('createSavedObjectsStreamFromNdJson', () => {
@@ -44,7 +37,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
       })
     );
 
-    const result = await readStream(savedObjectsStream);
+    const result = await readStreamToCompletion(savedObjectsStream);
 
     expect(result).toEqual([
       {
@@ -71,7 +64,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
       })
     );
 
-    const result = await readStream(savedObjectsStream);
+    const result = await readStreamToCompletion(savedObjectsStream);
 
     expect(result).toEqual([
       {
