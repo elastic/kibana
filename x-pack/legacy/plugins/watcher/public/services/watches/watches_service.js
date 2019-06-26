@@ -7,7 +7,7 @@
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../../common/constants';
 import { Watch } from 'plugins/watcher/models/watch';
-import { npStart } from 'ui/new_platform';
+import { kfetch } from '../../../../../../../src/legacy/ui/public/kfetch';
 
 export class WatchesService {
   constructor() {
@@ -15,7 +15,7 @@ export class WatchesService {
   }
 
   getWatchList() {
-    return npStart.core.http.get(`${this.basePath}/watches`)
+    return kfetch({ pathname: '/watches' })
       .then(response => response.data.watches)
       .then(watches => watches.map(watch => {
         return Watch.fromUpstreamJson(watch);
@@ -35,7 +35,7 @@ export class WatchesService {
     const body = {
       watchIds
     };
-    return npStart.core.http.post(`${this.basePath}/watches/delete`, body)
+    return kfetch({ pathname: '/watches/delete', method: 'POST', body })
       .then(response => response.data.results);
   }
 }
