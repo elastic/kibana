@@ -9,19 +9,19 @@
 }
 
 .lnsSidebar {
+  @include euiScrollBar;
+  overflow: hidden auto;
+  padding: $euiSize;
   margin: 0;
   flex: 1 0 18%;
   min-width: ($euiSize * 16);
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .lnsSidebar--right {
-  @include euiScrollBar;
-  overflow: hidden auto;
-  padding: $euiSize;
+  flex: 1 0 0;
   min-width: ($euiSize * 18);
 }
 
@@ -36,7 +36,7 @@
   }
 
   .lnsPageContent {
-    padding: 0 !important;
+    padding: 0;
     display: flex;
     flex-direction: column;
 
