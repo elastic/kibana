@@ -86,7 +86,7 @@ function DefaultEditorAggSelect({
     </EuiLink>
   );
 
-  const errors = [];
+  const errors = aggError ? [aggError] : [];
 
   if (!aggTypeOptions.length) {
     errors.push(
@@ -99,11 +99,7 @@ function DefaultEditorAggSelect({
     );
   }
 
-  if (aggError) {
-    errors.push(aggError);
-  }
-
-  const isValid = !!value && !errors.length && !aggError;
+  const isValid = !!value && !errors.length;
 
   useEffect(
     () => {
