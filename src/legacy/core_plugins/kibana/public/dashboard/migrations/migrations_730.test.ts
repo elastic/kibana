@@ -24,6 +24,12 @@ import {
   RawSavedDashboardPanel730ToLatest,
 } from './types';
 
+const mockLogger = {
+  warning: () => {},
+  debug: () => {},
+  info: () => {},
+};
+
 test('dashboard migration 7.3.0 migrates filters to query on search source', () => {
   const doc: DashboardDoc700To720 = {
     id: '1',
@@ -43,7 +49,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
         '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
     },
   };
-  const newDoc = migrations730(doc);
+  const newDoc = migrations730(doc, mockLogger);
 
   expect(newDoc).toMatchInlineSnapshot(`
 Object {
@@ -83,7 +89,7 @@ test('dashboard migration 7.3.0 migrates panels', () => {
     },
   };
 
-  const newDoc = migrations730(doc) as DashboardDoc730ToLatest;
+  const newDoc = migrations730(doc, mockLogger) as DashboardDoc730ToLatest;
 
   const newPanels = JSON.parse(newDoc.attributes.panelsJSON) as RawSavedDashboardPanel730ToLatest[];
 
