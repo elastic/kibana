@@ -508,7 +508,7 @@ export interface MonitorSummary {
 
   state: State;
 
-  histogram: SummaryHistogram;
+  histogram?: SummaryHistogram | null;
 }
 
 export interface State {
@@ -584,10 +584,11 @@ export interface StateUrl {
 
   scheme?: string | null;
 }
-
+/** Monitor status data over time. */
 export interface SummaryHistogram {
+  /** The number of documents used to assemble the histogram. */
   count: number;
-
+  /** The individual histogram data points. */
   points: SummaryHistogramPoint[];
 }
 /** Represents a monitor's statuses for a period of time. */
@@ -706,6 +707,12 @@ export interface GetMonitorStatesQueryArgs {
   pageIndex: number;
 
   pageSize: number;
+
+  dateRangeStart: string;
+
+  dateRangeEnd: string;
+
+  filters?: string | null;
 
   sortField?: string | null;
 

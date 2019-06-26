@@ -14,6 +14,12 @@ export interface UMMonitorStatesAdapter {
     sortField?: string | null,
     sortDirection?: string | null
   ): Promise<MonitorSummary[]>;
+  legacyGetMonitorStates(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<MonitorSummary[]>;
   getSummaryCount(request: any): Promise<DocCount>;
   statesIndexExists(request: any): Promise<boolean>;
 }

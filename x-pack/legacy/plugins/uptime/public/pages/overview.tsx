@@ -49,8 +49,9 @@ export const OverviewPage = ({
     dateRangeEnd,
     monitorListPageIndex,
     monitorListPageSize,
-    monitorListSortDirection,
-    monitorListSortField,
+    // TODO: reintegrate sorting in a future release
+    // monitorListSortDirection,
+    // monitorListSortField,
     search,
   } = params;
 
@@ -120,22 +121,21 @@ export const OverviewPage = ({
         <MonitorList
           absoluteStartDate={absoluteStartDate}
           absoluteEndDate={absoluteEndDate}
-          basePath={basePath}
           dangerColor={colors.danger}
           successColor={colors.success}
-          dateRangeStart={dateRangeStart}
-          dateRangeEnd={dateRangeEnd}
-          linkParameters={linkParameters}
           pageIndex={monitorListPageIndex}
           pageSize={monitorListPageSize}
-          sortDirection={monitorListSortDirection}
-          sortField={monitorListSortField}
+          // TODO: reintegrate sorting in a future release
+          // sortDirection={monitorListSortDirection}
+          // sortField={monitorListSortField}
           onChange={onMonitorListChange}
           variables={{
+            ...sharedProps,
             pageIndex: monitorListPageIndex,
             pageSize: monitorListPageSize,
-            sortField: monitorListSortField,
-            sortDirection: monitorListSortDirection,
+            // TODO: reintegrate sorting in a future release
+            // sortField: monitorListSortField,
+            // sortDirection: monitorListSortDirection,
           }}
         />
         <EuiSpacer size="s" />

@@ -5,7 +5,7 @@
  */
 
 import { UMMonitorStatesAdapter } from '../adapters/monitor_states';
-import { DocCount } from '../../../common/graphql/types';
+import { DocCount, MonitorSummary } from '../../../common/graphql/types';
 
 export class UMMonitorStatesDomain {
   constructor(private readonly adapter: UMMonitorStatesAdapter, libs: {}) {
@@ -18,7 +18,7 @@ export class UMMonitorStatesDomain {
     pageSize: number,
     sortField?: string,
     sortDirection?: string
-  ): Promise<any> {
+  ): Promise<MonitorSummary[]> {
     return this.adapter.getMonitorStates(request, pageIndex, pageSize, sortField, sortDirection);
   }
 
@@ -28,5 +28,14 @@ export class UMMonitorStatesDomain {
 
   public async statesIndexExists(request: any): Promise<boolean> {
     return this.adapter.statesIndexExists(request);
+  }
+
+  public async legacyGetMonitorStates(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<MonitorSummary[]> {
+    return this.adapter.legacyGetMonitorStates(request, dateRangeStart, dateRangeEnd, filters);
   }
 }

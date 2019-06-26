@@ -129,8 +129,9 @@ export const monitorStatesSchema = gql`
     getMonitorStates(
       pageIndex: Int!
       pageSize: Int!
-      sortField: String
-      sortDirection: String
+      dateRangeStart: String!
+      dateRangeEnd: String!
+      filters: String
     ): MonitorSummaryResult
 
     getStatesIndexStatus: StatesIndexStatus!

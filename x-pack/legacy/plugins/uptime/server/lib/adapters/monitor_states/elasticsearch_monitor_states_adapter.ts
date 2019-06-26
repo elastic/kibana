@@ -4,16 +4,229 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set, sortBy } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter } from './adapter_types';
-import { MonitorSummary, DocCount, SummaryHistogram } from '../../../../common/graphql/types';
+import {
+  MonitorSummary,
+  DocCount,
+  SummaryHistogram,
+  Check,
+} from '../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { getHistogramInterval } from '../../helper';
+import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
+
+type SortChecks = (c: Check) => string[];
+const checksSortBy = (c: Check) => [
+  get<string>(c, 'observer.geo.name'),
+  // TODO: this doesn't _really_ sort by ip, it's a naive string sort
+  get<string>(c, 'monitor.ip'),
+];
 
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
+  }
+
+  public async legacyGetMonitorStates(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<MonitorSummary[]> {
+    const { query, statusFilter } = getFilteredQueryAndStatusFilter(
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query,
+        size: 0,
+        aggs: {
+          monitors: {
+            composite: {
+              size: 5000,
+              sources: [
+                {
+                  monitor_id: {
+                    terms: {
+                      field: 'monitor.id',
+                    },
+                  },
+                },
+              ],
+            },
+            aggregations: {
+              state: {
+                scripted_metric: {
+                  init_script: `
+                    // Globals are values that should be identical across all docs
+                    // We can cheat a bit by always overwriting these and make the
+                    // assumption that there is no variation in these across checks
+                    state.globals = new HashMap();
+                    // Here we store stuff broken out by agent.id and monitor.id
+                    // This should correspond to a unique check.
+                    state.checksByAgentIdIP = new HashMap();
+                `,
+                  map_script: `
+                    Map curCheck = new HashMap();
+                    String agentId = doc["agent.id"][0];
+                    String ip = doc["monitor.ip"][0];
+                    String agentIdIP = agentId + "-" + ip.toString();
+                    def ts = doc["@timestamp"][0].toInstant().toEpochMilli();
+                    
+                    def lastCheck = state.checksByAgentIdIP[agentId];
+                    Instant lastTs = lastCheck != null ? lastCheck["@timestamp"] : null;
+                    if (lastTs != null && lastTs > ts) {
+                      return;
+                    }
+                    
+                    curCheck.put("@timestamp", ts);
+                    
+                    Map agent = new HashMap();
+                    agent.id = agentId;
+                    curCheck.put("agent", agent);
+                    
+                    if (state.globals.url == null) {
+                      Map url = new HashMap();
+                      Collection fields = ["full", "original", "scheme", "username", "password", "domain", "port", "path", "query", "fragment"];
+                      url.full = doc["url.full"];
+                      for (field in fields) {
+                        String docPath = "url." + field;
+                        def val = doc[docPath];
+                        if (!val.isEmpty()) {
+                          url[field] = val[0];
+                        }
+                      }
+                      state.globals.url = url;
+                    }
+                    
+                    Map monitor = new HashMap();
+                    monitor.status = doc["monitor.status"][0];
+                    monitor.ip = ip;
+                    def monitorName = doc["monitor.name"][0];
+                    if (monitorName != "") {
+                      monitor.name = monitorName;
+                    }
+                    curCheck.monitor = monitor;
+                    
+                    if (curCheck.observer == null) {
+                      curCheck.observer = new HashMap();
+                    }
+                    if (curCheck.observer.geo == null) {
+                      curCheck.observer.geo = new HashMap();
+                    }
+                    if (!doc["observer.geo.name"].isEmpty()) {
+                      curCheck.observer.geo.name = doc["observer.geo.name"][0];
+                    }
+                    if (!doc["observer.geo.location"].isEmpty()) {
+                      curCheck.observer.geo.location = doc["observer.geo.location"][0];
+                    }
+                    
+                    state.checksByAgentIdIP[agentIdIP] = curCheck;
+                `,
+                  combine_script: 'return state;',
+                  reduce_script: `
+                  // The final document
+                  Map result = new HashMap();
+                  
+                  Map checks = new HashMap();
+                  Instant maxTs = Instant.ofEpochMilli(0);
+                  Collection ips = new HashSet();
+                  Collection geoNames = new HashSet();
+                  for (state in states) {
+                    result.putAll(state.globals);
+                    for (entry in state.checksByAgentIdIP.entrySet()) {
+                      def agentIdIP = entry.getKey();
+                      def check = entry.getValue();
+                      def lastBestCheck = checks.get(agentIdIP);
+                      def checkTs = Instant.ofEpochMilli(check.get("@timestamp"));
+                  
+                      if (maxTs.isBefore(checkTs)) { maxTs = checkTs}
+                  
+                      if (lastBestCheck == null || lastBestCheck.get("@timestamp") < checkTs) {
+                        check["@timestamp"] = check["@timestamp"];
+                        checks[agentIdIP] = check
+                      }
+                  
+                  
+                      ips.add(check.monitor.ip);
+                      if (check.observer != null && check.observer.geo != null && check.observer.geo.name != null) {
+                        geoNames.add(check.observer.geo.name);
+                      }
+                    }
+                  }
+                  
+                  // We just use the values so we can store these as nested docs
+                  result.checks = checks.values();
+                  result.put("@timestamp", maxTs);
+                  
+                  
+                  Map summary = new HashMap();
+                  summary.up = checks.entrySet().stream().filter(c -> c.getValue().monitor.status == "up").count();
+                  summary.down = checks.size() - summary.up;
+                  result.summary = summary;
+                  
+                  Map monitor = new HashMap();
+                  monitor.ip = ips;
+                  monitor.status = summary.down > 0 ? (summary.up > 0 ? "mixed": "down") : "up";
+                  result.monitor = monitor;
+                  
+                  Map observer = new HashMap();
+                  Map geo = new HashMap();
+                  observer.geo = geo;
+                  geo.name = geoNames;
+                  result.observer = observer;
+                  
+                  return result;
+                `,
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const result = await this.database.search(request, params);
+    let monitors = get(result, 'aggregations.monitors.buckets', []);
+
+    if (statusFilter) {
+      monitors = monitors.filter(
+        (monitor: any) => get(monitor, 'state.value.monitor.status') === statusFilter
+      );
+    }
+
+    const monitorIds: string[] = [];
+    const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
+      const monitorId = get<string>(monitor, 'key.monitor_id');
+      monitorIds.push(monitorId);
+      let state = get<any>(monitor, 'state.value');
+      state = {
+        ...state,
+        timestamp: state['@timestamp'],
+      };
+      const { checks } = state;
+      if (checks) {
+        state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
+        state.checks = state.checks.map((check: any) => ({
+          ...check,
+          timestamp: check['@timestamp'],
+        }));
+      } else {
+        state.checks = [];
+      }
+      return {
+        monitor_id: monitorId,
+        state,
+      };
+    });
+    const histogramMap = await this.getHistogramForMonitors(request, 'now-15m', 'now', monitorIds);
+    return summaries.map(summary => ({
+      ...summary,
+      histogram: histogramMap[summary.monitor_id],
+    }));
   }
 
   public async getMonitorStates(
@@ -53,17 +266,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         timestamp: sourceState['@timestamp'],
       };
       if (state.checks) {
-        state.checks.sort((a: any, b: any) =>
-          a.observer.geo.name === b.observer.geo.name
-            ? 0
-            : a.observer.geo.name >= b.observer.geo.name
-            ? 1
-            : -1
+        state.checks = sortBy<SortChecks, Check>(state.checks, checksSortBy).map(
+          (check: any): Check => ({
+            ...check,
+            timestamp: check['@timestamp'],
+          })
         );
-        state.checks = state.checks.map((check: any) => ({
-          ...check,
-          timestamp: check['@timestamp'],
-        }));
       } else {
         state.checks = [];
       }

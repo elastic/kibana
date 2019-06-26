@@ -40,15 +40,21 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
     Query: {
       async getMonitorStates(
         resolver,
-        { pageIndex, pageSize, sortField, sortDirection },
+        { dateRangeStart, dateRangeEnd, filters, pageIndex, pageSize, sortField, sortDirection },
         { req }
       ): Promise<MonitorSummaryResult> {
-        const [summaries, totalSummaryCount] = await Promise.all([
-          libs.monitorStates.getMonitorStates(req, pageIndex, pageSize, sortField, sortDirection),
+        const [
+          // TODO: rely on new summaries adapter function once continuous data frame is available
+          // summaries,
+          totalSummaryCount,
+          legacySummaries,
+        ] = await Promise.all([
+          // libs.monitorStates.getMonitorStates(req, pageIndex, pageSize, sortField, sortDirection),
           libs.monitorStates.getSummaryCount(req),
+          libs.monitorStates.legacyGetMonitorStates(req, dateRangeStart, dateRangeEnd, filters),
         ]);
         return {
-          summaries,
+          summaries: legacySummaries,
           totalSummaryCount,
         };
       },

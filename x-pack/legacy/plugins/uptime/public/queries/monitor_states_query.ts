@@ -10,14 +10,16 @@ export const monitorStatesQuery = gql`
   query MonitorStates(
     $pageIndex: Int!
     $pageSize: Int!
-    $sortDirection: String
-    $sortField: String
+    $dateRangeStart: String!
+    $dateRangeEnd: String!
+    $filters: String
   ) {
     monitorStates: getMonitorStates(
       pageIndex: $pageIndex
       pageSize: $pageSize
-      sortDirection: $sortDirection
-      sortField: $sortField
+      dateRangeStart: $dateRangeStart
+      dateRangeEnd: $dateRangeEnd
+      filters: $filters
     ) {
       totalSummaryCount {
         count

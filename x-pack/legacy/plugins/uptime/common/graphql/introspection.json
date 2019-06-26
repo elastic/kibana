@@ -368,6 +368,32 @@
                 "defaultValue": null
               },
               {
+                "name": "dateRangeStart",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "dateRangeEnd",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "filters",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "sortField",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -2635,11 +2661,7 @@
             "name": "histogram",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "SummaryHistogram", "ofType": null }
-            },
+            "type": { "kind": "OBJECT", "name": "SummaryHistogram", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3011,11 +3033,11 @@
       {
         "kind": "OBJECT",
         "name": "SummaryHistogram",
-        "description": "",
+        "description": "Monitor status data over time.",
         "fields": [
           {
             "name": "count",
-            "description": "",
+            "description": "The number of documents used to assemble the histogram.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -3027,7 +3049,7 @@
           },
           {
             "name": "points",
-            "description": "",
+            "description": "The individual histogram data points.",
             "args": [],
             "type": {
               "kind": "NON_NULL",

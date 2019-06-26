@@ -35,8 +35,9 @@ interface MonitorListProps {
   pageIndex: number;
   pageSize: number;
   onChange: (criteria: Criteria) => void;
-  sortField: string;
-  sortDirection: string;
+  // TODO: reintegrate sorting in a future release
+  // sortField: string;
+  // sortDirection: string;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -53,8 +54,9 @@ export const MonitorListComponent = (props: Props) => {
     onChange,
     pageIndex,
     pageSize,
-    sortDirection,
-    sortField,
+    // TODO: reintegrate sorting in a future release
+    // sortDirection,
+    // sortField,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
@@ -69,12 +71,13 @@ export const MonitorListComponent = (props: Props) => {
     hidePerPageOptions: false,
   };
 
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
+  // TODO: reintegrate sorting in a future release
+  // const sorting = {
+  //   sort: {
+  //     field: sortField,
+  //     direction: sortDirection,
+  //   },
+  // };
 
   return (
     <EuiPanel paddingSize="s">
@@ -113,7 +116,6 @@ export const MonitorListComponent = (props: Props) => {
           description: 'This message is shown if the monitors table is rendered but has no items.',
         })}
         pagination={pagination}
-        sorting={sorting}
         columns={[
           {
             field: 'monitor_id',
