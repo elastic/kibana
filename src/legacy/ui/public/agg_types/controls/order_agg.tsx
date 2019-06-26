@@ -31,6 +31,7 @@ function OrderAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
+  // reset validity before component destroyed
   useEffect(
     () => () => {
       setValidity(true);

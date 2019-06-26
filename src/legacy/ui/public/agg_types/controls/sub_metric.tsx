@@ -45,13 +45,12 @@ function SubMetricParamEditor({
   const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
   const aggGroup = type === 'customMetric' ? 'metrics' : 'buckets';
 
+  // reset validity before component destroyed
   useEffect(
-    () => {
-      return () => {
-        setValidity(true);
-      };
+    () => () => {
+      setValidity(true);
     },
-    [value]
+    []
   );
 
   useEffect(() => {

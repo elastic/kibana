@@ -31,13 +31,12 @@ function SubAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
+  // reset validity before component destroyed
   useEffect(
-    () => {
-      return () => {
-        setValidity(true);
-      };
+    () => () => {
+      setValidity(true);
     },
-    [value]
+    []
   );
 
   useEffect(
