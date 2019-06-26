@@ -39,7 +39,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/fbaligand/kibana-enhanced-table[Enhanced Table] (fbaligand)
 * https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
-* https://github.com/flexmonster/pivot-kibana [Flexmonster Pivot Table & Charts plugin for Kibana] - a customizable pivot table component for advanced data analysis and reporting.
+* https://github.com/flexmonster/pivot-kibana[Flexmonster Pivot Table & Charts plugin for Kibana] - a customizable pivot table component for advanced data analysis and reporting.
 * https://github.com/outbrain/ob-kb-funnel[Funnel Visualization] (roybass)
 * https://github.com/sbeyn/kibana-plugin-gauge-sg[Gauge] (sbeyn)
 * https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
