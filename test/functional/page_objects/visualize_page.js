@@ -442,7 +442,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         [data-test-subj="visAggEditorParams"]
-        ${childAggregationType ? '[data-test-subj="visAggEditorParams"]' : ''}
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
 
@@ -487,10 +487,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // select our agg
       const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
+        .byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+          vis-editor-agg-params:not(.ng-hide) [data-test-subj="defaultEditorAggSelect"]`);
       await comboBox.setElement(aggSelect, agg);
 
-      const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
+      const fieldSelect = await find.byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+        vis-editor-agg-params:not(.ng-hide) [data-test-subj="visDefaultEditorField"]`);
       // select our field
       await comboBox.setElement(fieldSelect, field);
       // enter custom label
@@ -543,7 +545,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         [data-test-subj="visAggEditorParams"]
-        ${childAggregationType ? '[data-test-subj="visAggEditorParams"]' : ''}
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
       `;
       const fieldEl = await find.byCssSelector(selector);

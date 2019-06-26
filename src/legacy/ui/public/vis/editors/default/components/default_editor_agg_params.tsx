@@ -200,7 +200,6 @@ function DefaultEditorAggParams({
 
   return (
     <EuiForm
-      id={`visAggEditorParams${agg.id}`}
       className={className}
       isInvalid={!!errors.length}
       error={errors}
