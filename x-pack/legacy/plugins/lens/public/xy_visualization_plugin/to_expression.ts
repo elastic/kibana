@@ -61,7 +61,7 @@ export const toExpression = (state: State): Ast => ({
                   showGridlines: [state.y.showGridlines],
                   position: [state.y.position],
                   accessors: state.y.accessors,
-                  hide: [Boolean(state.x.hide)],
+                  hide: [Boolean(state.y.hide)],
                 },
               },
             ],

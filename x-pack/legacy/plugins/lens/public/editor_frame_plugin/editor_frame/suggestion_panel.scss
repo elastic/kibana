@@ -4,9 +4,11 @@
   }
 }
 
+$suggestionHeight: 120px;
+
 .lnsSidebar__suggestionIcon {
   width: 100%;
-  min-height: 120px;
+  height: $suggestionHeight;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,6 +16,6 @@
 }
 
  .lnsSuggestionChartWrapper {
-   height: 100px;
+   height: $suggestionHeight;
    pointer-events: none;
  }
