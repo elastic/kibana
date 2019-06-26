@@ -21,7 +21,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
-import { AggConfig, AggParams } from '../../vis';
+import { AggConfig } from '../../vis';
 
 function SubMetricParamEditor({
   agg,

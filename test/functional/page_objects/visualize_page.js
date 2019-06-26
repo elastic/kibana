@@ -441,7 +441,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '[data-test-subj="visAggEditorParams"]' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
 
@@ -541,7 +542,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '[data-test-subj="visAggEditorParams"]' : ''}
         [data-test-subj="visDefaultEditorField"]
       `;
       const fieldEl = await find.byCssSelector(selector);
@@ -1223,8 +1225,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async selectCustomSortMetric(agg, metric, field) {
       await this.selectOrderByMetric(agg, 'custom');
-      await this.selectAggregation(metric, 'groupName');
-      await this.selectField(field, 'groupName');
+      await this.selectAggregation(metric, 'buckets', true);
+      await this.selectField(field, 'buckets', true);
     }
 
     async clickSplitDirection(direction) {

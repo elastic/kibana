@@ -19,7 +19,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
-import { AggConfig, AggParams } from '../../vis';
+import { AggConfig } from '../../vis';
 
 function SubAggParamEditor({
   agg,
