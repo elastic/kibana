@@ -5,7 +5,6 @@
  */
 
 export const TIME_UNITS: { [key: string]: string } = {
-  MILLISECOND: 'ms',
   SECOND: 's',
   MINUTE: 'm',
   HOUR: 'h',

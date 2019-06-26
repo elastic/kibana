@@ -16,10 +16,10 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { WatchContext } from '../../watch_context';
 
-const MonitoringWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
+export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const { watch } = useContext(WatchContext);
 
   const systemWatchTitle = (
@@ -65,5 +65,3 @@ const MonitoringWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
     </EuiPageContent>
   );
 };
-
-export const MonitoringWatchEdit = injectI18n(MonitoringWatchEditUi);

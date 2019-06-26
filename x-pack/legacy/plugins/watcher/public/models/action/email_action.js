@@ -14,7 +14,7 @@ export class EmailAction extends BaseAction {
     super(props);
 
     const uiSettings = chrome.getUiSettingsClient();
-    const defaultToEmail = uiSettings.get('xPack:defaultAdminEmail') || undefined;
+    const defaultToEmail = uiSettings.get('xPack:defaultAdminEmail');
     const toArray = get(props, 'to', defaultToEmail);
     this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
 

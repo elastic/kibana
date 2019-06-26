@@ -7,7 +7,7 @@
 import { BaseWatch } from './base_watch';
 import uuid from 'uuid';
 import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from '../../../common/constants';
-import { getTimeUnitsLabel } from '../../lib/get_time_units_label';
+import { getTimeUnitLabel } from '../../lib/get_time_unit_label';
 import { i18n } from '@kbn/i18n';
 import { aggTypes } from './agg_types';
 import { groupByTypes } from './group_by_types';
@@ -82,7 +82,7 @@ export class ThresholdWatch extends BaseWatch {
       return staticPart;
     }
 
-    const timeUnitLabel = getTimeUnitsLabel(this.triggerIntervalUnit, this.triggerIntervalSize);
+    const timeUnitLabel = getTimeUnitLabel(this.triggerIntervalUnit, this.triggerIntervalSize);
     const dynamicPartText = i18n.translate(
       'xpack.watcher.models.thresholdWatch.thresholdWatchIntervalTitleDescription',
       {

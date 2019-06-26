@@ -35,28 +35,23 @@ import { ErrableFormRow } from '../../../../components/form_errors';
 import { executeWatch } from '../../../../lib/api';
 import { executeWatchApiUrl } from '../../../../lib/documentation_links';
 import { WatchContext } from '../../watch_context';
-import { timeUnits } from '../../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
+import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 
 const actionModeOptions = Object.keys(ACTION_MODES).map(mode => ({
   text: ACTION_MODES[mode],
   value: ACTION_MODES[mode],
 }));
 
-const scheduledTimeUnitOptions = [
-  {
-    value: TIME_UNITS.SECOND,
-    text: timeUnits[TIME_UNITS.SECOND].labelPlural,
-  },
-  {
-    value: TIME_UNITS.MINUTE,
-    text: timeUnits[TIME_UNITS.MINUTE].labelPlural,
-  },
-  {
-    value: TIME_UNITS.HOUR,
-    text: timeUnits[TIME_UNITS.HOUR].labelPlural,
-  },
-];
+const getScheduleTimeOptions = (unitSize = '0') =>
+  Object.entries(TIME_UNITS)
+    .filter(([key]) => key !== TIME_UNITS.DAY)
+    .map(([_key, value]) => {
+      return {
+        text: getTimeUnitLabel(value, unitSize),
+        value,
+      };
+    });
 
 export const JsonWatchEditSimulate = ({
   executeWatchErrors,
@@ -205,7 +200,7 @@ export const JsonWatchEditSimulate = ({
               <EuiFlexItem>
                 <EuiSelect
                   value={scheduledTimeUnit}
-                  options={scheduledTimeUnitOptions}
+                  options={getScheduleTimeOptions(scheduledTimeValue)}
                   onChange={e => {
                     setExecuteDetails(
                       new ExecuteDetails({
@@ -230,7 +225,11 @@ export const JsonWatchEditSimulate = ({
               value={triggeredTimeValue}
               min={0}
               data-test-subj="triggeredTimeInput"
-              append={<EuiText size="s">{timeUnits[TIME_UNITS.SECOND].labelPlural}</EuiText>}
+              append={
+                <EuiText size="s">
+                  {getTimeUnitLabel(TIME_UNITS.SECOND, triggeredTimeValue)}
+                </EuiText>
+              }
               onChange={e => {
                 const value = e.target.value;
                 setExecuteDetails(

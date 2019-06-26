@@ -25,7 +25,7 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
@@ -44,7 +44,7 @@ import { loadWatches } from '../../../lib/api';
 import { watcherGettingStartedUrl } from '../../../lib/documentation_links';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
 
-const WatchListUi = () => {
+export const WatchList = () => {
   // hooks
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
@@ -481,5 +481,3 @@ const WatchListUi = () => {
   }
   return null;
 };
-
-export const WatchList = injectI18n(WatchListUi);

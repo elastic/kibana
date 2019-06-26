@@ -9610,7 +9610,6 @@
     "xpack.watcher.constants.watchStates.firingStateText": "実行中",
     "xpack.watcher.constants.watchStates.okStateText": "OK",
     "xpack.watcher.models.action.actionJsonPropertyMissingBadRequestMessage": "json 引数には {actionJson} プロパティが含まれている必要があります",
-    "xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage": "json 引数には {actionStatusJson} プロパティが含まれている必要があります",
     "xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage": "json 引数には {id} プロパティが含まれている必要があります",
     "xpack.watcher.models.actionStatus.notDetermineActionStatusBadImplementationMessage": "アクションステータスを把握できませんでした; action = {actionStatusJson}",
     "xpack.watcher.models.baseAction.idPropertyMissingBadRequestMessage": "json 引数には {id} プロパティが含まれている必要があります",
@@ -9704,14 +9703,6 @@
     "xpack.watcher.thresholdWatchExpression.groupByLabel.topLabel": "トップ",
     "xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage": "値が必要です。",
     "xpack.watcher.thresholdWatchExpression.timeWindow.durationSizeIsRequiredValidationMessage": "ウィンドウ期間サイズが必要です。",
-    "xpack.watcher.timeUnits.dayPluralLabel": "日",
-    "xpack.watcher.timeUnits.daySingularLabel": "日",
-    "xpack.watcher.timeUnits.hourPluralLabel": "時間",
-    "xpack.watcher.timeUnits.hourSingularLabel": "時間",
-    "xpack.watcher.timeUnits.minutePluralLabel": "分",
-    "xpack.watcher.timeUnits.minuteSingularLabel": "分",
-    "xpack.watcher.timeUnits.secondPluralLabel": "秒",
-    "xpack.watcher.timeUnits.secondSingularLabel": "秒",
     "xpack.watcher.watchActions.logging.logTextIsRequiredValidationMessage": "ログテキストが必要です。",
     "xpack.watcher.watcherDescription": "アラートの作成、管理、監視によりデータへの変更を検知します。"
   }

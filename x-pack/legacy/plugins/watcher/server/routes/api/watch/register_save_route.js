@@ -9,6 +9,7 @@ import { Watch } from '../../../models/watch';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError, wrapCustomError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { i18n } from '@kbn/i18n';
 
 function fetchWatch(callWithRequest, watchId) {
   return callWithRequest('watcher.getWatch', {
@@ -38,7 +39,12 @@ export function registerSaveRoute(server) {
       // For new watches, verify watch with the same ID doesn't already exist
       if (watchPayload.isNew) {
         const conflictError = wrapCustomError(
-          new Error(`There is already a watch with ID '${watchPayload.id}'.`),
+          new Error(i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
+            defaultMessage: 'There is already a watch with ID \'{watchId}\'.',
+            values: {
+              watchId: watchPayload.id,
+            }
+          })),
           409
         );
 

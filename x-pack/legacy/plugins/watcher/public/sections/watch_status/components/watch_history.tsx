@@ -6,7 +6,7 @@
 
 import React, { Fragment, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 
 import {
@@ -67,7 +67,7 @@ const watchHistoryTimeSpanOptions = [
   },
 ];
 
-const WatchHistoryUi = () => {
+export const WatchHistory = () => {
   const { watchDetail: loadedWatch } = useContext(WatchDetailsContext);
 
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
@@ -309,5 +309,3 @@ const WatchHistoryUi = () => {
     </Fragment>
   );
 };
-
-export const WatchHistory = injectI18n(WatchHistoryUi);

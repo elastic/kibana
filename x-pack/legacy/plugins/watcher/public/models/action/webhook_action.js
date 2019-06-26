@@ -53,17 +53,19 @@ export class WebhookAction extends BaseAction {
     }
 
     if (this.contentType === 'application/json' && typeof this.body === 'string' && this.body !== '') {
+      const invalidJsonMessage = i18n.translate('xpack.watcher.watchActions.webhook.invalidJsonValidationMessage', {
+        defaultMessage: 'Invalid JSON',
+      });
+
       try {
         const parsedJson = JSON.parse(this.body);
+
         if (parsedJson && typeof parsedJson !== 'object') {
-          errors.body.push(i18n.translate('xpack.watcher.watchActions.webhook.bodyParseValidationMessage', {
-            defaultMessage: 'Invalid JSON',
-          }));
+          errors.body.push(invalidJsonMessage);
         }
+
       } catch (e) {
-        errors.body.push(i18n.translate('xpack.watcher.watchActions.webhook.bodyParseValidationMessage', {
-          defaultMessage: 'Invalid JSON',
-        }));
+        errors.body.push(invalidJsonMessage);
       }
     }
 

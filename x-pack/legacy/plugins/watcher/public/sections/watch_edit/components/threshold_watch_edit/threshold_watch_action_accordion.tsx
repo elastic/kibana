@@ -124,7 +124,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
           }
           paddingSize="l"
         >
-          {executeResultsError && (
+          {executeResultsError && executeResultsError[action.id] && (
             <Fragment>
               <SectionError
                 title={
@@ -133,7 +133,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                     defaultMessage="Error testing action"
                   />
                 }
-                error={executeResultsError}
+                error={executeResultsError[action.id]}
               />
               <EuiSpacer size="s" />
             </Fragment>
@@ -227,7 +227,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                 setIsExecuting(false);
 
                 if (error) {
-                  return setExecuteResultsError(error);
+                  return setExecuteResultsError({ [action.id]: error });
                 }
 
                 const formattedResults = WatchHistoryItem.fromUpstreamJson(data.watchHistoryItem);

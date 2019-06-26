@@ -16,7 +16,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { getActionType } from '../../../../../common/lib/get_action_type';
 import { BaseWatch, ExecutedWatchDetails } from '../../../../../common/types/watch_types';
@@ -81,7 +80,7 @@ function getActionModes(items: WatchAction[]) {
   return result;
 }
 
-const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
+export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const { watch } = useContext(WatchContext);
   const watchActions = getActions(watch);
   // hooks
@@ -139,5 +138,3 @@ const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
     </EuiPageContent>
   );
 };
-
-export const JsonWatchEdit = injectI18n(JsonWatchEditUi);

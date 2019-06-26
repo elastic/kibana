@@ -6,7 +6,7 @@
 
 import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 
 import {
@@ -35,7 +35,7 @@ interface ActionStatus {
   errors: ActionError[];
 }
 
-const WatchDetailUi = () => {
+export const WatchDetail = () => {
   const { watchDetail } = useContext(WatchDetailsContext);
 
   const [actionStatuses, setActionStatuses] = useState<ActionStatus[]>([]);
@@ -234,5 +234,3 @@ const WatchDetailUi = () => {
     </Fragment>
   );
 };
-
-export const WatchDetail = injectI18n(WatchDetailUi);

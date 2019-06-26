@@ -25,19 +25,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { TIME_UNITS } from '../../../../../common/constants';
 import { ErrableFormRow, SectionError } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { groupByTypes } from '../../../../models/watch/group_by_types';
 import { comparators } from '../../../../models/watch/comparators';
-import { timeUnits } from '../../time_units';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
+import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 
 const expressionFieldsWithValidation = [
   'aggField',
@@ -77,23 +76,18 @@ const firstFieldOption = {
 };
 
 const getTimeOptions = (unitSize: string) =>
-  Object.entries(timeUnits)
-    .filter(([key]) => key !== TIME_UNITS.MILLISECOND)
-    .map(([key, value]) => {
-      return {
-        text: unitSize && parseInt(unitSize, 10) === 1 ? value.labelSingular : value.labelPlural,
-        value: key,
-      };
-    });
+  Object.entries(TIME_UNITS).map(([_key, value]) => {
+    return {
+      text: getTimeUnitLabel(value, unitSize),
+      value,
+    };
+  });
 
 const getFields = async (indices: string[]) => {
   return await fetchFields(indices);
 };
 const getTimeFieldOptions = (fields: any) => {
   const options = [firstFieldOption];
-  if (!fields.length) {
-    return options;
-  }
 
   fields.forEach((field: any) => {
     if (field.type === 'date') {
@@ -109,41 +103,38 @@ interface IOption {
   label: string;
   options: Array<{ value: string; label: string }>;
 }
+
 const getIndexOptions = async (patternString: string, indexPatterns: string[]) => {
   const options: IOption[] = [];
+
   if (!patternString) {
     return options;
   }
+
   const matchingIndices = (await getMatchingIndices(patternString)) as string[];
   const matchingIndexPatterns = indexPatterns.filter(anIndexPattern => {
     return anIndexPattern.includes(patternString);
   }) as string[];
-  if (matchingIndices) {
+
+  if (matchingIndices.length || matchingIndexPatterns.length) {
+    const matchingOptions = _.uniq([...matchingIndices, ...matchingIndexPatterns]);
+
     options.push({
-      label: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.indicesAndAliasesLabel', {
-        defaultMessage: 'Based on your indices/aliases',
-      }),
-      options: matchingIndices.map(matchingIndex => {
+      label: i18n.translate(
+        'xpack.watcher.sections.watchEdit.titlePanel.indicesAndIndexPatternsLabel',
+        {
+          defaultMessage: 'Based on your indices and index patterns',
+        }
+      ),
+      options: matchingOptions.map(match => {
         return {
-          label: matchingIndex,
-          value: matchingIndex,
+          label: match,
+          value: match,
         };
       }),
     });
   }
-  if (matchingIndexPatterns) {
-    options.push({
-      label: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.indexPatternLabel', {
-        defaultMessage: 'Based on your index patterns',
-      }),
-      options: matchingIndexPatterns.map(matchingIndexPattern => {
-        return {
-          label: matchingIndexPattern,
-          value: matchingIndexPattern,
-        };
-      }),
-    });
-  }
+
   options.push({
     label: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.chooseLabel', {
       defaultMessage: 'Choose…',
@@ -155,10 +146,11 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
       },
     ],
   });
+
   return options;
 };
 
-const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTitle: string }) => {
+export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   // hooks
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [esFields, setEsFields] = useState([]);
@@ -377,10 +369,12 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
             <ErrableFormRow
               id="watchInterval"
               fullWidth
-              label={intl.formatMessage({
-                id: 'xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel',
-                defaultMessage: 'Run watch every',
-              })}
+              label={
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel"
+                  defaultMessage="Run watch every"
+                />
+              }
               errorKey="triggerIntervalSize"
               isShowingErrors={hasErrors && watch.triggerIntervalSize !== undefined}
               errors={errors}
@@ -408,10 +402,12 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                   <EuiSelect
                     fullWidth
                     value={watch.triggerIntervalUnit}
-                    aria-label={intl.formatMessage({
-                      id: 'xpack.watcher.sections.watchEdit.titlePanel.durationAriaLabel',
-                      defaultMessage: 'Duration time unit',
-                    })}
+                    aria-label={i18n.translate(
+                      'xpack.watcher.sections.watchEdit.titlePanel.durationAriaLabel',
+                      {
+                        defaultMessage: 'Duration time unit',
+                      }
+                    )}
                     onChange={e => {
                       setWatchProperty('triggerIntervalUnit', e.target.value);
                     }}
@@ -510,7 +506,6 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                     closePopover={() => {
                       setAggFieldPopoverOpen(false);
                     }}
-                    ownFocus
                     anchorPosition="downLeft"
                   >
                     <div>
@@ -523,39 +518,40 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                         )}
                       </EuiPopoverTitle>
                       <EuiFlexGroup>
-                        <EuiFlexItem grow={false} style={{ width: 150 }}>
+                        <EuiFlexItem
+                          grow={false}
+                          className="watcherThresholdAlertAggFieldContainer"
+                        >
                           <ErrableFormRow
                             errorKey="aggField"
                             isShowingErrors={hasErrors && watch.aggField !== undefined}
                             errors={errors}
                           >
-                            <EuiSelect
-                              value={watch.aggField}
-                              onChange={e => {
-                                setWatchProperty('aggField', e.target.value);
+                            <EuiComboBox
+                              singleSelection={{ asPlainText: true }}
+                              placeholder={firstFieldOption.text}
+                              options={esFields.reduce((esFieldOptions: any[], field: any) => {
+                                if (
+                                  aggTypes[watch.aggType].validNormalizedTypes.includes(
+                                    field.normalizedType
+                                  )
+                                ) {
+                                  esFieldOptions.push({
+                                    label: field.name,
+                                  });
+                                }
+                                return esFieldOptions;
+                              }, [])}
+                              selectedOptions={watch.aggField ? [{ label: watch.aggField }] : []}
+                              onChange={selectedOptions => {
+                                setWatchProperty(
+                                  'aggField',
+                                  selectedOptions.length === 1
+                                    ? selectedOptions[0].label
+                                    : undefined
+                                );
                                 setAggFieldPopoverOpen(false);
                               }}
-                              onBlur={() => {
-                                if (!watch.aggField) {
-                                  setWatchProperty('aggField', '');
-                                }
-                              }}
-                              options={esFields.reduce(
-                                (options, field: any) => {
-                                  if (
-                                    aggTypes[watch.aggType].validNormalizedTypes.includes(
-                                      field.normalizedType
-                                    )
-                                  ) {
-                                    options.push({
-                                      text: field.name,
-                                      value: field.name,
-                                    });
-                                  }
-                                  return options;
-                                },
-                                [firstFieldOption]
-                              )}
                             />
                           </ErrableFormRow>
                         </EuiFlexItem>
@@ -757,10 +753,11 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                                 >
                                   <EuiFieldNumber
                                     value={watch.threshold[i] == null ? '' : watch.threshold[i]}
-                                    min={1}
+                                    min={0}
+                                    step={0.1}
                                     onChange={e => {
                                       const { value } = e.target;
-                                      const threshold = value !== '' ? parseInt(value, 10) : value;
+                                      const threshold = value !== '' ? parseFloat(value) : value;
                                       const newThreshold = [...watch.threshold];
                                       newThreshold[i] = threshold;
                                       setWatchProperty('threshold', newThreshold);
@@ -787,11 +784,10 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                           defaultMessage: 'for the last',
                         }
                       )}
-                      value={`${watch.timeWindowSize} ${
-                        watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
-                          ? timeUnits[watch.timeWindowUnit].labelSingular
-                          : timeUnits[watch.timeWindowUnit].labelPlural
-                      }`}
+                      value={`${watch.timeWindowSize} ${getTimeUnitLabel(
+                        watch.timeWindowUnit,
+                        parseInt(watch.timeWindowSize, 10).toString()
+                      )}`}
                       isActive={watchDurationPopoverOpen || !watch.timeWindowSize}
                       onClick={() => {
                         setWatchDurationPopoverOpen(true);
@@ -908,5 +904,3 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
     </EuiPageContent>
   );
 };
-
-export const ThresholdWatchEdit = injectI18n(ThresholdWatchEditUi);

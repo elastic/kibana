@@ -23,24 +23,23 @@ export class ExecuteDetails {
     const errors = {
       json: [],
     };
-    if (this.alternativeInput || this.alternativeInput !== '') {
+
+    const invalidJsonFieldError = i18n.translate(
+      'xpack.watcher.sections.watchEdit.simulate.form.invalidJsonFieldError',
+      {
+        defaultMessage: 'Invalid JSON',
+      }
+    );
+
+    if (this.alternativeInput !== '') {
       try {
         const parsedJson = JSON.parse(this.alternativeInput);
+
         if (parsedJson && typeof parsedJson !== 'object') {
-          errors.json.push(i18n.translate(
-            'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
-            {
-              defaultMessage: 'Invalid JSON',
-            }
-          ));
+          errors.json.push(invalidJsonFieldError);
         }
       } catch (e) {
-        errors.json.push(i18n.translate(
-          'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
-          {
-            defaultMessage: 'Invalid JSON',
-          }
-        ));
+        errors.json.push(invalidJsonFieldError);
       }
     }
     return errors;
