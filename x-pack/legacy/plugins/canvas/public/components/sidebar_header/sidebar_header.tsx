@@ -451,25 +451,21 @@ export class SidebarHeader extends Component<Props, State> {
       },
     ];
 
-    if (showLayerControls) {
-      const { menuItem, panel } = this._getLayerMenuItems();
-      // add Order menu item to first panel
-      items.push(menuItem);
-      // add nested panel for layers controls
-      panels.push(panel);
-    }
-
-    const menuFiller = ({ menuItem, panel }: MenuTuple) => {
-      items.push(menuItem);
-      panels.push(panel);
+    const fillMenu = ({ menuItem, panel }: MenuTuple) => {
+      items.push(menuItem); // add Order menu item to first panel
+      panels.push(panel); // add nested panel for layers controls
     };
 
+    if (showLayerControls) {
+      fillMenu(this._getLayerMenuItems());
+    }
+
     if (this.props.selectedNodes.length > 1) {
-      menuFiller(this._getAlignmentMenuItems(close));
+      fillMenu(this._getAlignmentMenuItems(close));
     }
 
     if (this.props.selectedNodes.length > 2) {
-      menuFiller(this._getDistributionMenuItems(close));
+      fillMenu(this._getDistributionMenuItems(close));
     }
 
     items.push({
