@@ -106,4 +106,9 @@ export class TileLayer extends AbstractLayer {
   isLayerLoading() {
     return false;
   }
+
+  isDataLoaded() {
+    // data loaded directly by mapbox
+    return true;
+  }
 }

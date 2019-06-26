@@ -221,3 +221,20 @@ export const hasDirtyState = createSelector(
     });
   }
 );
+
+export const areLayersLoaded = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    if (waitingForMapReadyLayerList.length) {
+      return false;
+    }
+
+    for (let i = 0; i < layerList.length; i++) {
+      if (!layerList[i].isDataLoaded()) {
+        return false;
+      }
+    }
+    return true;
+  }
+);

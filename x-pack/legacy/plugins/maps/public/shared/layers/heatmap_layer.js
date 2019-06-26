@@ -218,4 +218,9 @@ export class HeatmapLayer extends AbstractLayer {
     return this._style.getLegendDetails(label);
   }
 
+  isDataLoaded() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    return sourceDataRequest && sourceDataRequest.hasData();
+  }
+
 }

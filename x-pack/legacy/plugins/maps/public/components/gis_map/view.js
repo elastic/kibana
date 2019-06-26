@@ -59,6 +59,7 @@ export class GisMap extends Component {
 
   render() {
     const {
+      areLayersLoaded,
       layerDetailsVisible,
       addLayerVisible,
       noFlyoutVisible,
@@ -108,7 +109,12 @@ export class GisMap extends Component {
       );
     }
     return (
-      <EuiFlexGroup gutterSize="none" responsive={false}>
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+        data-render-complete={areLayersLoaded}
+        data-shared-item
+      >
         <EuiFlexItem className="mapMapWrapper">
           <MBMapContainer/>
           <ToolbarOverlay />
