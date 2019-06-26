@@ -26,11 +26,10 @@ import storage from '../storage';
 
 let isOpen = false;
 
-export function welcomeShowPanel(): () => void {
+export function showWelcomePanel(): () => void {
   const onClose = () => {
     if (!container) return;
     ReactDOM.unmountComponentAtNode(container);
-    container.innerHTML = '';
     isOpen = false;
   };
 
@@ -44,7 +43,7 @@ export function welcomeShowPanel(): () => void {
     isOpen = true;
     const element = (
       <I18nContext>
-        <WelcomePanel onClose={onClose} onDismiss={onDismiss} />
+        <WelcomePanel onDismiss={onDismiss} />
       </I18nContext>
     );
     ReactDOM.render(element, container);

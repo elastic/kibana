@@ -54,7 +54,6 @@ export function DevToolsSettingsModal(props: Props) {
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
   const [polling, setPolling] = useState(props.settings.polling);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
-  const [isLoading, setIsLoading] = useState(false);
 
   const autoCompleteCheckboxes = [
     {
@@ -94,10 +93,6 @@ export function DevToolsSettingsModal(props: Props) {
   };
 
   function saveSettings() {
-    if (isLoading) {
-      return;
-    }
-    setIsLoading(true);
     props.onSaveSettings({
       fontSize,
       wrapMode,
@@ -109,8 +104,6 @@ export function DevToolsSettingsModal(props: Props) {
       polling,
       tripleQuotes,
     });
-
-    setIsLoading(false);
   }
 
   return (
@@ -138,8 +131,12 @@ export function DevToolsSettingsModal(props: Props) {
               autoFocus
               data-test-subj="setting-font-size-input"
               value={fontSize}
+              min={6}
+              max={50}
               onChange={e => {
-                setFontSize(parseInt(e.target.value, 10));
+                const val = parseInt(e.target.value, 10);
+                if (!val) return;
+                setFontSize(val);
               }}
             />
           </EuiFormRow>
@@ -242,13 +239,7 @@ export function DevToolsSettingsModal(props: Props) {
             <FormattedMessage id="console.settingsPage.cancelButtonLabel" defaultMessage="Cancel" />
           </EuiButtonEmpty>
 
-          <EuiButton
-            fill
-            data-test-subj="settings-save-button"
-            onClick={saveSettings}
-            isLoading={isLoading}
-            disabled={isLoading}
-          >
+          <EuiButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
             <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
           </EuiButton>
         </EuiModalFooter>

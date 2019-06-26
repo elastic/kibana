@@ -28,7 +28,6 @@ export function showHelpPanel(): () => void {
   const onClose = () => {
     if (!container) return;
     ReactDOM.unmountComponentAtNode(container);
-    container.innerHTML = '';
     isOpen = false;
   };
 

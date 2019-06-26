@@ -62,9 +62,9 @@ export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
         defaultMessage: 'Help',
       }),
       run: () => {
-        const closeModal = showHelpPanel();
+        const hideHelpPanel = showHelpPanel();
         $scope.$on('$destroy', () => {
-          closeModal();
+          hideHelpPanel();
         });
       },
       testId: 'consoleHelpButton',

@@ -27,7 +27,7 @@ import { getEndpointFromPosition } from '../autocomplete';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
 // welcome message
-import { welcomeShowPanel } from '../helpers/welcome_show_panel';
+import { showWelcomePanel } from '../helpers/welcome_show_panel';
 import storage from '../storage';
 
 import { getTopNavConfig } from '../helpers/get_top_nav';
@@ -42,9 +42,9 @@ module.run(function ($rootScope) {
 
 function showWelcomeMessageIfNeeded($scope) {
   if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    const closeModal = welcomeShowPanel();
+    const hideWelcomePanel = showWelcomePanel();
     $scope.$on('$destroy', () => {
-      closeModal();
+      hideWelcomePanel();
     });
   }
 }
