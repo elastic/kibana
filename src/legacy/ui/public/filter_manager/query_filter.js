@@ -18,9 +18,11 @@
  */
 
 import { FilterStateManager } from 'plugins/data';
-import { data } from 'plugins/data/setup';
 
 export function FilterBarQueryFilterProvider(getAppState, globalState) {
+  // TODO: this is imported here to avoid circular imports.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { data } = require('plugins/data/setup');
   const filterManager = data.filter.filterManager;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
