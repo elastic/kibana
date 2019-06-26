@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { AggConfig } from '../vis';
+import { AggConfig, AggParamEditorProps } from '../vis';
 
 interface AggParam {
-  editorComponent: React.FunctionComponent;
+  editorComponent: React.ComponentType<AggParamEditorProps<unknown>>;
   type: string;
   name: string;
   advanced?: boolean;

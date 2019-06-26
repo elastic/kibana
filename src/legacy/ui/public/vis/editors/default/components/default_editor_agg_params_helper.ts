@@ -28,6 +28,7 @@ import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { groupAggregationsBy } from '../default_editor_utils';
 import { EditorConfig } from '../../config/types';
 import { AggTypeState, AggParamsState } from './default_editor_agg_params_state';
+import { AggParamEditorProps } from './default_editor_agg_param_props';
 
 interface ParamInstanceBase {
   agg: AggConfig;
@@ -39,7 +40,7 @@ interface ParamInstanceBase {
 export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
   indexedFields: FieldParamType[];
-  paramEditor: React.FunctionComponent<any>;
+  paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: any;
   visName: string;
 }

@@ -575,7 +575,6 @@
     "common.ui.vis.courier.inspector.dataRequest.title": "データ",
     "common.ui.vis.defaultEditor.aggSelect.aggregationLabel": "集約",
     "common.ui.vis.defaultEditor.aggSelect.helpLinkLabel": "{aggTitle} のヘルプ",
-    "common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription": "インデックスパターン {indexPatternTitle} には集約が含まれていません。",
     "common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder": "集約を選択してください",
     "common.ui.vis.defaultEditor.aggSelect.subAggregationLabel": "サブ集約",
     "common.ui.vis.defaultFeedbackMessage": "フィードバックがございますか？{link} で問題を報告してください。",

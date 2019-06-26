@@ -66,7 +66,7 @@ function DefaultEditorAggSelect({
     />
   );
 
-  let aggHelpLink = '';
+  let aggHelpLink: string | undefined;
   if (has(value, 'name')) {
     aggHelpLink = get(documentationLinks, ['aggs', value.name]);
   }
@@ -91,7 +91,8 @@ function DefaultEditorAggSelect({
   if (!aggTypeOptions.length) {
     errors.push(
       i18n.translate('common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription', {
-        defaultMessage: 'The index pattern {indexPatternTitle} does not contain any aggregations.',
+        defaultMessage:
+          'The index pattern {indexPatternTitle} does not have any aggregatable fields.',
         values: {
           indexPatternTitle: indexPattern && indexPattern.title,
         },
