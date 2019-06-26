@@ -166,7 +166,7 @@ export class Logs extends PureComponent {
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
-          defaultMessage: 'Want to see more logs?'
+          defaultMessage: 'Want to see more log entries?'
         })}
         iconType="loggingApp"
       >
@@ -196,7 +196,7 @@ export class Logs extends PureComponent {
 
     if (nodeId) {
       description = i18n.translate('xpack.monitoring.logs.listing.nodePageDescription', {
-        defaultMessage: 'Showing the most recent logs for this node, up to {limit} total logs.',
+        defaultMessage: 'Showing the most recent log entries for this node, up to {limit} total log entries.',
         values: {
           limit,
         }
@@ -204,7 +204,7 @@ export class Logs extends PureComponent {
     }
     else if (indexUuid) {
       description = i18n.translate('xpack.monitoring.logs.listing.indexPageDescription', {
-        defaultMessage: 'Showing the most recent logs for this index, up to {limit} total logs.',
+        defaultMessage: 'Showing the most recent log entries for this index, up to {limit} total log entries.',
         values: {
           limit,
         }
@@ -212,7 +212,7 @@ export class Logs extends PureComponent {
     }
     else {
       description = i18n.translate('xpack.monitoring.logs.listing.clusterPageDescription', {
-        defaultMessage: 'Showing the most recent logs for this cluster, up to {limit} total logs.',
+        defaultMessage: 'Showing the most recent log entries for this cluster, up to {limit} total log entries.',
         values: {
           limit,
         }
@@ -224,7 +224,7 @@ export class Logs extends PureComponent {
         <EuiTitle>
           <h1>
             {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {
-              defaultMessage: 'Recent Logs'
+              defaultMessage: 'Recent Log Entries'
             })}
           </h1>
         </EuiTitle>
