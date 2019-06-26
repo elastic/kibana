@@ -30,7 +30,7 @@ function StatusIcon({ status }: { status: string }) {
   return null;
 }
 
-export function WatchStatus({ status, size = 's' }: { status: string; size: 'xs' | 's' | 'm' }) {
+export function WatchStatus({ status, size = 's' }: { status: string; size?: 'xs' | 's' | 'm' }) {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
