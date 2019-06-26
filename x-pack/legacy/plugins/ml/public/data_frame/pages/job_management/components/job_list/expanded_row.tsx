@@ -25,9 +25,10 @@ function getItemDescription(value: any) {
 
 interface Props {
   item: DataFrameJobListRow;
+  lastUpdate: number;
 }
 
-export const ExpandedRow: SFC<Props> = ({ item }) => {
+export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
   const state: SectionConfig = {
     title: 'State',
     items: Object.entries(item.state).map(s => {
@@ -60,7 +61,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
     {
       id: 'job-messages',
       name: 'Messages',
-      content: <TransformMessagesPane transformId={item.id} />,
+      content: <TransformMessagesPane transformId={item.id} lastUpdate={lastUpdate} />,
     },
   ];
   return (

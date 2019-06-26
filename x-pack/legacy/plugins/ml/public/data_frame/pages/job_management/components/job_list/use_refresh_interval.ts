@@ -17,7 +17,8 @@ import { GetJobs } from './job_service/get_jobs';
 
 export const useRefreshInterval = (
   getJobs: GetJobs,
-  setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>
+  setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>,
+  setlastUpdate: React.Dispatch<React.SetStateAction<number>>
 ) => {
   useEffect(() => {
     let jobsRefreshInterval: null | number = null;
@@ -64,6 +65,7 @@ export const useRefreshInterval = (
       if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
         setBlockRefresh(false);
         const intervalId = window.setInterval(() => {
+          setlastUpdate(Date.now());
           getJobs();
         }, interval);
         jobsRefreshInterval = intervalId;

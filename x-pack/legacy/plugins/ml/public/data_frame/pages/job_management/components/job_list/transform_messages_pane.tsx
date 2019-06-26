@@ -16,9 +16,10 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface Props {
   transformId: string;
+  lastUpdate: number;
 }
 
-export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
+export const TransformMessagesPane: React.SFC<Props> = ({ transformId, lastUpdate }) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -38,9 +39,12 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
     }
   }
 
-  useEffect(() => {
-    getMessages();
-  }, []);
+  useEffect(
+    () => {
+      getMessages();
+    },
+    [lastUpdate]
+  );
 
   const columns = [
     {
