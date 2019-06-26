@@ -86,24 +86,21 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       return res;
     }, '');
 
-  private handleTabClick = (href: string, id: string) => {
+  private handleTabClick = (mouseEvent: React.MouseEvent, href: string, id: string) => {
     this.setState(prevState => ({
       ...prevState,
       selectedTabId: id,
     }));
     track(`tab_${id}`);
-    // console.log('WINDOW', window);
-    console.log('eeee', window.event);
-    const mouseEvent: MouseEvent = window.event as MouseEvent;
+    let locationHash = getOr('', 'location.hash', window);
+    if (locationHash.match(/\?(.*)/g)) {
+      locationHash = locationHash.match(/\?(.*)/g)[0];
+    }
     if (mouseEvent.metaKey) {
-      // ctrl was held down during the click
-      let locationHash = getOr('', 'location.hash', window);
-      if (locationHash.match(/\?(.*)/g)) {
-        locationHash = locationHash.match(/\?(.*)/g)[0];
-      }
+      // command/windows key was held down during the click
       window.open(href + locationHash);
     } else {
-      return window.location.assign(href);
+      return window.location.assign(href + locationHash);
     }
   };
 
@@ -115,7 +112,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
         disabled={tab.disabled}
         isSelected={this.state.selectedTabId === tab.id}
         key={`navigation-${tab.id}`}
-        onClick={() => this.handleTabClick(tab.href, tab.id)}
+        onClick={(e: React.MouseEvent) => this.handleTabClick(e, tab.href, tab.id)}
       >
         {tab.name}
       </EuiTab>
