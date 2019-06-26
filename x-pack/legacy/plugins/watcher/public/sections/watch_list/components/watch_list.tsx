@@ -267,14 +267,6 @@ export const WatchList = () => {
         render: (state: string) => <WatchStatus status={state} />,
       },
       {
-        field: 'watchStatus.comment',
-        name: i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
-          defaultMessage: 'Comment',
-        }),
-        sortable: true,
-        truncateText: true,
-      },
-      {
         field: 'watchStatus.lastMetCondition',
         name: i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
           defaultMessage: 'Last fired',
@@ -297,6 +289,14 @@ export const WatchList = () => {
         render: (lastChecked: Moment) => {
           return lastChecked ? lastChecked.fromNow() : lastChecked;
         },
+      },
+      {
+        field: 'watchStatus.comment',
+        name: i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
+          defaultMessage: 'Comment',
+        }),
+        sortable: true,
+        truncateText: true,
       },
       {
         name: i18n.translate('xpack.watcher.sections.watchList.watchTable.actionHeader', {

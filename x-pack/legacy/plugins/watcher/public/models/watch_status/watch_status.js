@@ -16,7 +16,7 @@ export class WatchStatus {
     this.isActive = get(props, 'isActive');
     this.lastFired = getMoment(get(props, 'lastFired'));
     this.lastChecked = getMoment(get(props, 'lastChecked'));
-    this.lastMetCondition = getMoment(this.lastMetCondition);
+    this.lastMetCondition = getMoment(get(props, 'lastMetCondition'));
 
     if (this.lastFired) {
       this.lastFiredHumanized = this.lastFired.fromNow();

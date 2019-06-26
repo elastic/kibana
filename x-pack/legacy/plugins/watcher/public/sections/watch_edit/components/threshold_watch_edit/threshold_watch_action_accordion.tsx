@@ -74,7 +74,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
   const { watch, setWatchProperty } = useContext(WatchContext);
   const { actions } = watch;
 
-  const [isExecuting, setIsExecuting] = useState<boolean>(false);
+  const [isExecuting, setIsExecuting] = useState<{ [key: string]: boolean }>({});
   const [executeResultsError, setExecuteResultsError] = useState<any>(null);
 
   if (actions && actions.length >= 1) {
@@ -199,7 +199,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
             <EuiButton
               type="submit"
               isDisabled={hasErrors}
-              isLoading={isExecuting}
+              isLoading={isExecuting[action.id]}
               data-test-subj="simulateActionButton"
               onClick={async () => {
                 const selectedWatchAction = watch.actions.filter(
@@ -219,12 +219,12 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                   actions: selectedWatchAction,
                 });
 
-                setIsExecuting(true);
+                setIsExecuting({ [action.id]: true });
                 setExecuteResultsError(null);
 
                 const { data, error } = await executeWatch(executeDetails, newExecuteWatch);
 
-                setIsExecuting(false);
+                setIsExecuting({ [action.id]: false });
 
                 if (error) {
                   return setExecuteResultsError({ [action.id]: error });
