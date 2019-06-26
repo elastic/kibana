@@ -16,7 +16,13 @@ import { logEntryHighlightsQuery } from './log_highlights.gql_query';
 
 type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
 
-export const useLogHighlightsState = ({ sourceId }: { sourceId: string }) => {
+export const useLogHighlightsState = ({
+  sourceId,
+  sourceVersion,
+}: {
+  sourceId: string;
+  sourceVersion: string | undefined;
+}) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
   const apolloClient = useApolloClient();
   const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights | undefined>(
@@ -69,7 +75,7 @@ export const useLogHighlightsState = ({ sourceId }: { sourceId: string }) => {
     () => {
       // Terms, startKey, endKey or filter has changed, fetch data
     },
-    [highlightTerms, startKey, endKey, filterQuery]
+    [highlightTerms, startKey, endKey, filterQuery, sourceVersion]
   );
 
   return {
