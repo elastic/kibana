@@ -236,6 +236,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       injectedMetadata: {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
+        branch: config.get('pkg.branch'),
         basePath,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
