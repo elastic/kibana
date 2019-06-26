@@ -37,10 +37,13 @@ interface PingListProps {
   onUpdateApp: () => void;
   onSelectedStatusUpdate: (status: string | null) => void;
   selectedOption: string;
-  locations: string[];
+  selectedLocation: EuiComboBoxOptionProps[];
+  setSelectedLocation: (location: EuiComboBoxOptionProps[]) => void;
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
+
+export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
 
 export const PingListComponent = ({
   data,
@@ -48,6 +51,8 @@ export const PingListComponent = ({
   onSelectedStatusUpdate,
   onUpdateApp,
   selectedOption,
+  selectedLocation,
+  setSelectedLocation,
 }: Props) => {
   const statusOptions: EuiComboBoxOptionProps[] = [
     {
@@ -69,19 +74,16 @@ export const PingListComponent = ({
       value: 'down',
     },
   ];
-  const baseLocationOptions = [{ label: 'All', value: 'All' }];
-  const locations = get<string[]>(data, 'allPings].locations');
+  const locations = get<string[]>(data, 'allPings.locations');
   const locationOptions: EuiComboBoxOptionProps[] = !locations
-    ? baseLocationOptions
-    : baseLocationOptions.concat(
+    ? BaseLocationOptions
+    : BaseLocationOptions.concat(
         locations.map(name => {
           return { label: name, value: name };
         })
       );
 
-  const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
-    baseLocationOptions
-  );
+  
   const columns = [
     {
       field: 'monitor.status',

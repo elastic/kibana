@@ -22,6 +22,8 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { BaseLocationOptions } from '../components/functional/ping_list';
+import { EuiComboBoxOptionProps } from '@elastic/eui';
 
 interface MonitorPageProps {
   history: { push: any };
@@ -68,7 +70,13 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
     },
     [params]
   );
-  const sharedVariables = { dateRangeStart, dateRangeEnd, location: geoLocation, monitorId };
+
+  const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
+    BaseLocationOptions
+  );
+
+  const locationVar = selectedLocation[0].value === 'All' ? null : selectedLocation[0].value;
+  const sharedVariables = { dateRangeStart, dateRangeEnd, location: locationVar, monitorId };
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
@@ -83,6 +91,8 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
         }
         onUpdateApp={refreshApp}
         selectedOption={selectedPingStatus}
+        selectedLocation={selectedLocation}
+        setSelectedLocation={setSelectedLocation}
         variables={{
           ...sharedVariables,
           status: selectedPingStatus,
