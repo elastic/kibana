@@ -100,7 +100,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       // command/windows key was held down during the click
       window.open(href + locationHash);
     } else {
-      return window.location.assign(href + locationHash);
+      window.location.assign(href + locationHash);
     }
   };
 
