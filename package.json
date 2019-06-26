@@ -79,8 +79,7 @@
   "resolutions": {
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
-    "**/typescript": "^3.3.3333",
-    "**/@elastic/eui/**/core-js": "2.6.9"
+    "**/typescript": "^3.3.3333"
   },
   "workspaces": {
     "packages": [
@@ -102,9 +101,9 @@
     "@babel/core": "7.4.5",
     "@babel/polyfill": "7.4.4",
     "@babel/register": "7.4.4",
-    "@elastic/charts": "^6.0.1",
+    "@elastic/charts": "^7.0.1",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "11.3.2",
+    "@elastic/eui": "12.1.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
@@ -137,7 +136,7 @@
     "bluebird": "3.5.5",
     "boom": "^7.2.0",
     "brace": "0.11.1",
-    "cache-loader": "1.2.2",
+    "cache-loader": "^4.0.1",
     "chalk": "^2.4.1",
     "color": "1.0.3",
     "commander": "2.20.0",
@@ -263,7 +262,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/types": "7.4.4",
     "@elastic/eslint-config-kibana": "0.15.0",
-    "@elastic/github-checks-reporter": "0.0.19",
+    "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^4.4.0",
     "@kbn/es": "1.0.0",
     "@kbn/eslint-import-resolver-kibana": "2.0.0",

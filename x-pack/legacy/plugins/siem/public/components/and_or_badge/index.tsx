@@ -36,8 +36,12 @@ const RoundedBadge = styled(EuiBadge)`
 export type AndOr = 'and' | 'or';
 
 /** Displays AND / OR in a round badge */
-export const AndOrBadge = pure<{ type: AndOr }>(({ type }) => (
-  <RoundedBadge data-test-subj="and-or-badge" color="hollow">
-    {type === 'and' ? i18n.AND : i18n.OR}
-  </RoundedBadge>
-));
+export const AndOrBadge = pure<{ type: AndOr }>(({ type }) => {
+  return (
+    // Ref: https://github.com/elastic/eui/issues/1655
+    // @ts-ignore
+    <RoundedBadge data-test-subj="and-or-badge" color="hollow">
+      {type === 'and' ? i18n.AND : i18n.OR}
+    </RoundedBadge>
+  );
+});

@@ -5,6 +5,7 @@
     "legacy/common/**/*",
     "legacy/server/**/*",
     "legacy/plugins/**/*",
+    "plugins/**/*",
     "test_utils/**/*"
   ],
   "exclude": [

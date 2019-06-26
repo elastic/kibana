@@ -40,23 +40,23 @@ const getShortcuts = (
     modifiers = [modifiers];
   }
 
-  let macShortcuts = shortcuts;
+  let macShortcuts = [...shortcuts];
 
   // handle shift modifier
   if (modifiers.includes('shift')) {
-    macShortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `shift+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
   }
 
   // handle alt modifier
   if (modifiers.includes('alt') || modifiers.includes('option')) {
-    macShortcuts = shortcuts.map(shortcut => `option+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `option+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `alt+${shortcut}`);
   }
 
   // handle ctrl modifier
   if (modifiers.includes('ctrl') || modifiers.includes('command')) {
-    macShortcuts = shortcuts.map(shortcut => `command+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `command+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `ctrl+${shortcut}`);
   }
 
@@ -138,6 +138,8 @@ export const keymap: KeyMap = {
     EDITING: getShortcuts('e', { modifiers: 'alt', help: 'Toggle edit mode' }),
     GRID: getShortcuts('g', { modifiers: 'alt', help: 'Show grid' }),
     REFRESH: refreshShortcut,
+    ZOOM_IN: getShortcuts('plus', { modifiers: ['ctrl', 'alt'], help: 'Zoom in' }),
+    ZOOM_OUT: getShortcuts('minus', { modifiers: ['ctrl', 'alt'], help: 'Zoom out' }),
   },
   PRESENTATION: {
     displayName: 'Presentation controls',
