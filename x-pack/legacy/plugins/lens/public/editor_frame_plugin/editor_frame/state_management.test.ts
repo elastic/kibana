@@ -15,6 +15,7 @@ describe('editor_frame state management', () => {
 
     beforeEach(() => {
       props = {
+        onError: jest.fn(),
         redirectTo: jest.fn(),
         store: {
           load: jest.fn(),

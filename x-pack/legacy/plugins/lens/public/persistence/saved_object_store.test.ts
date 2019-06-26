@@ -96,7 +96,7 @@ describe('LensStore', () => {
   describe('load', () => {
     test('parses the visState', async () => {
       const { client, store } = testStore();
-      client.get = jest.fn(() => ({
+      client.get = jest.fn(async () => ({
         id: 'Paul',
         type: 'lens',
         attributes: {
@@ -119,6 +119,22 @@ describe('LensStore', () => {
 
       expect(client.get).toHaveBeenCalledTimes(1);
       expect(client.get).toHaveBeenCalledWith('lens', 'Paul');
+    });
+
+    test('throws if an error is returned', async () => {
+      const { client, store } = testStore();
+      client.get = jest.fn(async () => ({
+        id: 'Paul',
+        type: 'lens',
+        attributes: {
+          title: 'Hope clouds observation.',
+          visualizationType: 'dune',
+          state: '{ "datasource": { "giantWorms": true } }',
+        },
+        error: new Error('shoot dang!'),
+      }));
+
+      await expect(store.load('Paul')).rejects.toThrow('shoot dang!');
     });
   });
 });

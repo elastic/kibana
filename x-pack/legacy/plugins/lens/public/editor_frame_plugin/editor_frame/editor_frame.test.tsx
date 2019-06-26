@@ -48,6 +48,7 @@ describe('editor_frame', () => {
       load: jest.fn(),
     },
     redirectTo: jest.fn(),
+    onError: jest.fn(),
   };
 
   beforeEach(() => {

@@ -21,7 +21,6 @@ export function InitializableComponent<T>(props: Props<T>) {
   useEffect(() => {
     let isStale = false;
 
-    // TODO: error handling
     props.init().then(result => {
       if (!isStale) {
         setState({ isLoading: false, result });

@@ -18,16 +18,21 @@ export interface Document {
   };
 }
 
-interface SavedObectStore {
+const DOC_TYPE = 'lens';
+
+interface SavedObjectClient {
   create: (type: string, object: SavedObjectAttributes) => Promise<{ id: string }>;
   update: (type: string, id: string, object: SavedObjectAttributes) => Promise<{ id: string }>;
   get: (
     type: string,
     id: string
-  ) => Promise<{ id: string; type: string; attributes: SavedObjectAttributes }>;
+  ) => Promise<{
+    id: string;
+    type: string;
+    attributes: SavedObjectAttributes;
+    error?: { message: string };
+  }>;
 }
-
-const DOC_TYPE = 'lens';
 
 export interface DocumentSaver {
   save: (vis: Document) => Promise<{ id: string }>;
@@ -40,9 +45,9 @@ export interface DocumentLoader {
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  private client: SavedObectStore;
+  private client: SavedObjectClient;
 
-  constructor(client: SavedObectStore) {
+  constructor(client: SavedObjectClient) {
     this.client = client;
   }
 
@@ -63,7 +68,11 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   async load(id: string): Promise<Document> {
-    const { type, attributes } = await this.client.get(DOC_TYPE, id);
+    const { type, attributes, error } = await this.client.get(DOC_TYPE, id);
+
+    if (error) {
+      throw error;
+    }
 
     return {
       ...attributes,

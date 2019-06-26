@@ -24,25 +24,26 @@ export async function save({
   store,
   visualization,
 }: Props) {
-  dispatch({ type: 'SAVING' });
+  try {
+    dispatch({ type: 'SAVING' });
 
-  // TODO: error handling
-  const doc = await store.save({
-    id: state.persistedId,
-    title: state.title,
-    type: 'lens',
-    visualizationType: state.visualization.activeId,
-    datasourceType: state.datasource.activeId,
-    state: {
-      datasource: datasource.getPersistableState(state.datasource.state),
-      visualization: visualization.getPersistableState(state.visualization.state),
-    },
-  });
+    const doc = await store.save({
+      id: state.persistedId,
+      title: state.title,
+      type: 'lens',
+      visualizationType: state.visualization.activeId,
+      datasourceType: state.datasource.activeId,
+      state: {
+        datasource: datasource.getPersistableState(state.datasource.state),
+        visualization: visualization.getPersistableState(state.visualization.state),
+      },
+    });
 
-  if (doc.id !== state.persistedId) {
-    dispatch({ type: 'UPDATE_PERSISTED_ID', id: doc.id });
-    redirectTo(`/edit/${doc.id}`);
+    if (doc.id !== state.persistedId) {
+      dispatch({ type: 'UPDATE_PERSISTED_ID', id: doc.id });
+      redirectTo(`/edit/${doc.id}`);
+    }
+  } finally {
+    dispatch({ type: 'SAVED' });
   }
-
-  dispatch({ type: 'SAVED' });
 }

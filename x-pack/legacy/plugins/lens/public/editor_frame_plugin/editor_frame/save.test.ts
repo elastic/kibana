@@ -59,6 +59,31 @@ describe('save editor frame state', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'SAVED' });
   });
 
+  it('allows saves if an error occurs', async () => {
+    const dispatch = jest.fn();
+
+    await expect(
+      save({
+        ...saveArgs,
+        dispatch,
+        state: {
+          title: 'aaa',
+          datasource: { activeId: '1', isLoading: false, state: {} },
+          saving: false,
+          visualization: { activeId: '2', state: {} },
+        },
+        store: {
+          async save() {
+            throw new Error('aw shnap!');
+          },
+        },
+      })
+    ).rejects.toThrow();
+
+    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVING' });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVED' });
+  });
+
   it('transforms from internal state to persisted doc format', async () => {
     const store = {
       save: jest.fn(async () => ({ id: 'bar' })),

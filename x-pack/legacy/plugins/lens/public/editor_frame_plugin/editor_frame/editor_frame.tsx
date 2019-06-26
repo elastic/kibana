@@ -28,10 +28,12 @@ export interface EditorFrameProps {
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
+  onError: (e: { message: string }) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
+  const { onError } = props;
 
   // create public datasource api for current state
   // as soon as datasource is available and memoize it
@@ -78,7 +80,6 @@ export function EditorFrame(props: EditorFrameProps) {
     () => {
       let datasourceGotSwitched = false;
       if (state.datasource.isLoading && state.datasource.activeId) {
-        // TODO: .catch / error handling
         props.datasourceMap[state.datasource.activeId]
           .initialize(props.doc && props.doc.state.datasource)
           .then(datasourceState => {
@@ -88,7 +89,8 @@ export function EditorFrame(props: EditorFrameProps) {
                 newState: datasourceState,
               });
             }
-          });
+          })
+          .catch(onError);
 
         return () => {
           datasourceGotSwitched = true;
@@ -143,7 +145,7 @@ export function EditorFrame(props: EditorFrameProps) {
                     state,
                     redirectTo: props.redirectTo,
                     store: props.store,
-                  });
+                  }).catch(onError);
                 }
               }}
               disabled={state.saving || !state.datasource.activeId || !state.visualization.activeId}
