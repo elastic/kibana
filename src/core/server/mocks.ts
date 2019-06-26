@@ -54,22 +54,16 @@ function pluginInitializerContextMock<T>(config: T) {
 }
 
 function createCoreSetupMock() {
-  const mock = {
+  const mock: MockedKeys<CoreSetup> = {
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
   };
-
-  // This line is a noop but gives TS warnings if our mock doesn't satisfy the CoreSetup type
-  ((): CoreSetup => mock)();
 
   return mock;
 }
 
 function createCoreStartMock() {
-  const mock = {};
-
-  // This line is a noop but gives TS warnings if our mock doesn't satisfy the CoreStart type
-  ((): CoreStart => mock)();
+  const mock: MockedKeys<CoreStart> = {};
 
   return mock;
 }

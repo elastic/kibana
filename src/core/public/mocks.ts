@@ -39,21 +39,18 @@ export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 function createCoreSetupMock() {
-  const mock = {
+  const mock: MockedKeys<CoreSetup> = {
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
 
-  // This line is a noop but gives TS warnings if our mock doesn't satisfy the CoreSetup type
-  ((): CoreSetup => mock)();
-
   return mock;
 }
 
 function createCoreStartMock() {
-  const mock = {
+  const mock: MockedKeys<CoreStart> = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -63,9 +60,6 @@ function createCoreStartMock() {
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
-
-  // This line is a noop but gives TS warnings if our mock doesn't satisfy the CoreStart type
-  ((): CoreStart => mock)();
 
   return mock;
 }
