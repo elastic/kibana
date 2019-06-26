@@ -35,7 +35,7 @@ export class WatchesService {
     const body = {
       watchIds
     };
-    return npStart.core.http.post('/watches/delete', body)
+    return npStart.core.http.post('/watches/delete', { body })
       .then(response => response.data.results);
   }
 }
