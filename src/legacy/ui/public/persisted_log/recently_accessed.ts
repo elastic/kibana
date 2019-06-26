@@ -16,45 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from 'ui/chrome';
-import { PersistedLog } from './';
-import { createLogKey } from './create_log_key';
 
-export interface RecentlyAccessedHistoryItem {
-  link: string;
-  label: string;
-  id: string;
-}
+import { npStart } from '../new_platform';
 
-class RecentlyAccessed {
-  public history: PersistedLog<RecentlyAccessedHistoryItem>;
-
-  constructor() {
-    const logKey = createLogKey('recentlyAccessed', chrome.getBasePath());
-    this.history = new PersistedLog(logKey, {
-      maxLength: 20,
-      filterDuplicates: true,
-      isDuplicate: (oldItem, newItem) => {
-        return oldItem.id === newItem.id;
-      },
-    });
-  }
-
-  public add(link: string, label: string, id: string) {
-    this.history.add({
-      link,
-      label,
-      id,
-    });
-  }
-
-  public get() {
-    return this.history.get();
-  }
-
-  public get$() {
-    return this.history.get$();
-  }
-}
-
-export const recentlyAccessed = new RecentlyAccessed();
+export const recentlyAccessed = npStart.core.chrome.recentlyAccessed;

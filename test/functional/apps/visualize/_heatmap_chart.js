@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');

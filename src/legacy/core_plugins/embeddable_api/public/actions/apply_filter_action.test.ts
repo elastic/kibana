@@ -39,7 +39,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  embeddableFactories.reset();
+  embeddableFactories.clear();
 });
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {

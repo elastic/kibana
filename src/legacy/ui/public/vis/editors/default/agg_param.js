@@ -106,7 +106,7 @@ uiModules
 
           $scope.onChange = (value) => {
             $scope.paramValue = value;
-            $scope.onParamChange($scope.agg, $scope.aggParam.name, value);
+            $scope.onParamChange($scope.agg.params, $scope.aggParam.name, value);
             $scope.showValidation = true;
             ngModelCtrl.$setDirty();
           };

@@ -189,8 +189,6 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // 
     // @internal
     static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
-    // (undocumented)
-    getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -421,8 +419,10 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
 
 // @public (undocumented)
 export interface SavedObjectAttributes {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectAttribute" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    [key: string]: SavedObjectAttributes | string | number | boolean | null;
+    [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }
 
 // @public

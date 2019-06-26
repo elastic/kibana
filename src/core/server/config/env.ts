@@ -55,6 +55,7 @@ export interface CliArgs {
   basePath: boolean;
   optimize: boolean;
   open: boolean;
+  oss: boolean;
 }
 
 export class Env {
@@ -115,9 +116,10 @@ export class Env {
 
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
+      options.cliArgs.oss ? '' : resolve(this.homeDir, 'x-pack', 'plugins'),
       resolve(this.homeDir, 'plugins'),
       resolve(this.homeDir, '..', 'kibana-extra'),
-    ];
+    ].filter(Boolean);
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);

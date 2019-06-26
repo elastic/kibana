@@ -10,7 +10,7 @@ import { ApolloClient } from 'apollo-client';
 import {
   UpdateSourceInput,
   UpdateSourceResult,
-} from '../../../../plugins/infra/public/graphql/types';
+} from '../../../../legacy/plugins/infra/public/graphql/types';
 
 export interface EsArchiver {
   load(name: string): void;

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './change_time_filter.test.mocks';
+
 jest.mock('ui/chrome',
   () => ({
     getBasePath: () => `/some/base/path`,
