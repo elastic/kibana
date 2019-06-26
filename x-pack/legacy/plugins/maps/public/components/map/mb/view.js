@@ -126,11 +126,11 @@ export class MBMapContainer extends React.Component {
     }
   }, 256);
 
-  _getIdsForFeatures(features) {
-    return features.map((feature) => {
-      const layer = this._getLayerByMbLayerId(feature.layer.id);
+  _getIdsForFeatures(mbFeatures) {
+    return mbFeatures.map((mbFeature) => {
+      const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
       return {
-        id: feature.properties[FEATURE_ID_PROPERTY_NAME],
+        id: mbFeature.properties[FEATURE_ID_PROPERTY_NAME],
         layerId: layer.getId()
       };
     });
@@ -145,21 +145,23 @@ export class MBMapContainer extends React.Component {
 
     this._updateHoverTooltipState.cancel();//ignore any possible moves
 
-    const features = this._getFeaturesUnderPointer(e.point);
-    if (!features.length) {
+    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    if (!mbFeatures.length) {
       this.props.setTooltipState(null);
       return;
     }
 
-    const targetFeature = features[0];
-    const layer = this._getLayerByMbLayerId(targetFeature.layer.id);
-    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
+    const targetMbFeataure = mbFeatures[0];
+    // const layer = this._getLayerByMbLayerId(targetMbFeataure.layer.id);
+    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
+    const features = this._getIdsForFeatures(mbFeatures);
+    console.log('f', features);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.LOCKED,
-      layerId: layer.getId(),
-      featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
-      features: this._getIdsForFeatures(features),
+      // layerId: layer.getId(),
+      // featureId: targetMbFeataure.properties[FEATURE_ID_PROPERTY_NAME],
+      features: features,
       location: popupAnchorLocation
     });
   };
@@ -176,28 +178,28 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    const features = this._getFeaturesUnderPointer(e.point);
-    if (!features.length) {
+    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    if (!mbFeatures.length) {
       this.props.setTooltipState(null);
       return;
     }
 
-    const targetFeature = features[0];
-
+    const targetMbFeature = mbFeatures[0];
     if (this.props.tooltipState) {
-      if (targetFeature.properties[FEATURE_ID_PROPERTY_NAME] === this.props.tooltipState.featureId) {
+      const firstFeature = this.props.tooltipState.features[0];
+      if (targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
         return;
       }
     }
 
-    const layer = this._getLayerByMbLayerId(targetFeature.layer.id);
-    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
-
+    // const layer = this._getLayerByMbLayerId(targetMbFeature.layer.id);
+    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetMbFeature);
+    const features = this._getIdsForFeatures(mbFeatures);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.HOVER,
-      featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
-      layerId: layer.getId(),
-      features: this._getIdsForFeatures(features),
+      // featureId: targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME],
+      // layerId: layer.getId(),
+      features: features,
       location: popupAnchorLocation
     });
 
@@ -400,6 +402,7 @@ export class MBMapContainer extends React.Component {
       <FeatureTooltip
         tooltipState={this.props.tooltipState}
         loadFeatureProperties={this._loadFeatureProperties}
+        findLayerById={this._findLayerById}
         closeTooltip={this._onTooltipClose}
         showFilterButtons={this.props.isFilterable && isLocked}
         showCloseButton={isLocked}
@@ -413,9 +416,7 @@ export class MBMapContainer extends React.Component {
   }
 
   _loadFeatureProperties = async ({ layerId, featureId }) => {
-    const tooltipLayer = this.props.layerList.find(layer => {
-      return layer.getId() === layerId;
-    });
+    const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
@@ -424,7 +425,13 @@ export class MBMapContainer extends React.Component {
       return [];
     }
     return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
-  }
+  };
+
+  _findLayerById = (layerId) => {
+    return this.props.layerList.find(layer => {
+      return layer.getId() === layerId;
+    });
+  };
 
   _syncTooltipState() {
     if (this.props.tooltipState) {

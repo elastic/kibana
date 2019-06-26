@@ -9,19 +9,26 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiLoadingSpinner,
+  EuiText,
   EuiTextAlign,
-  EuiPagination
+  EuiPagination,
+  EuiSuperSelect
 } from '@elastic/eui';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+
+const ALL_LAYERS = '_ALL_LAYERS_';
+const DEFAULT_PAGE_NUMBER = 0;
 
 export class FeatureTooltip extends React.Component {
 
   state = {
-    properties: undefined,
-    loadPropertiesErrorMsg: undefined,
-    pageNumber: 0,
-    selectedLayer: null
+    uniqueLayers: [],
+    properties: null,
+    loadPropertiesErrorMsg: null,
+    pageNumber: DEFAULT_PAGE_NUMBER,
+    layerIdFilter: ALL_LAYERS
   };
 
   componentDidMount() {
@@ -33,15 +40,74 @@ export class FeatureTooltip extends React.Component {
 
   componentDidUpdate() {
     this._loadProperties();
+    this._loadUniqueLayers();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  _loadProperties = () => {
+  _onLayerChange = (layerId) => {
 
-    const feature = this.props.tooltipState.features[this.state.pageNumber];
+    if (this.state.layerIdFilter === layerId) {
+      return;
+    }
+
+    this.setState({
+      properties: null,
+      pageNumber: DEFAULT_PAGE_NUMBER,
+      layerIdFilter: layerId
+    }, () => {
+      this.prevLayerId = null;
+      this.prevFeatureId = null;
+      this._loadProperties();
+    });
+  };
+
+  _loadUniqueLayers = async () => {
+
+    const uniqueLayerIds = [];
+    for (let i = 0; i < this.props.tooltipState.features.length; i++) {
+      if (uniqueLayerIds.indexOf(this.props.tooltipState.features[i].layerId) < 0) {
+        uniqueLayerIds.push(this.props.tooltipState.features[i].layerId);
+      }
+    }
+
+    const layers = uniqueLayerIds.map(layerId => {
+      return this.props.findLayerById(layerId);
+    });
+
+    const layerNamePromises = layers.map(layer => {
+      return layer.getDisplayName();
+    });
+
+    const layerNames = await Promise.all(layerNamePromises);
+
+
+    const options = layers.map((layer, index) => {
+      return {
+        displayName: layerNames[index],
+        id: layer.getId()
+      };
+    });
+
+    if (this._isMounted) {
+      if (!_.isEqual(this.state.uniqueLayers, options)) {
+        this.setState({
+          uniqueLayers: options
+        });
+      }
+    }
+  };
+
+  _loadProperties = () => {
+    const features = this._filterFeatures();
+    const feature = features[this.state.pageNumber];
+
+    if (!feature) {
+      return;
+    }
+
     this._fetchProperties({
       nextFeatureId: feature.id,
       nextLayerId: feature.layerId
@@ -84,7 +150,7 @@ export class FeatureTooltip extends React.Component {
         properties
       });
     }
-  }
+  };
 
   _renderFilterCell(tooltipProperty) {
     if (!this.props.showFilterButtons || !tooltipProperty.isFilterable())  {
@@ -175,6 +241,41 @@ export class FeatureTooltip extends React.Component {
     );
   }
 
+  _renderLayerFilterBox() {
+
+    if (!this.props.showFeatureList) {
+      return null;
+    }
+
+    if (!this.state.uniqueLayers || this.state.uniqueLayers.length < 2) {
+      return null;
+    }
+
+    const layerOptions = this.state.uniqueLayers.map(({ id, displayName })=> {
+      return {
+        value: id,
+        inputDisplay: (<EuiText>{displayName}</EuiText>)
+      };
+    });
+
+    const options = [
+      {
+        value: ALL_LAYERS,
+        inputDisplay: (<EuiText>All layers</EuiText>)
+      },
+      ...layerOptions
+    ];
+
+    return (
+      <EuiSuperSelect
+        options={options}
+        onChange={this._onLayerChange}
+        valueOfSelected={this.state.layerIdFilter}
+      />
+    );
+
+  }
+
   _renderCloseButton() {
     if (!this.props.showCloseButton) {
       return null;
@@ -194,25 +295,43 @@ export class FeatureTooltip extends React.Component {
   }
 
   _onPageChange = (pageNumber) => {
-    console.log('must change page', pageNumber);
+    this.prevLayerId = null;
+    this.prevFeatureId = null;
     this.setState({
       pageNumber: pageNumber,
       properties: null
+    }, () => {
+      this._loadProperties();
     });
-    this._loadProperties();
   };
 
-  _renderPagination() {
+  _filterFeatures() {
+    if (this.state.layerIdFilter === ALL_LAYERS) {
+      return this.props.tooltipState.features;
+    }
 
-    console.log('render feature list ... ', this.props);
+    return this.props.tooltipState.features.filter((feature) => {
+      return feature.layerId === this.state.layerIdFilter;
+    });
+  }
+
+  _renderPagination(filteredFeatures) {
+
+    if (filteredFeatures.length === 1) {
+      return null;
+    }
 
     if (!this.props.showFeatureList) {
-      return null;
+      return (
+        <EuiTextAlign textAlign="center">
+          <EuiText>1 of {filteredFeatures.length}</EuiText>
+        </EuiTextAlign>
+      );
     }
 
     return (
       <EuiPagination
-        pageCount={this.props.tooltipState.features.length}
+        pageCount={filteredFeatures.length}
         activePage={this.state.pageNumber}
         onPageClick={this._onPageChange}
       />
@@ -220,11 +339,15 @@ export class FeatureTooltip extends React.Component {
   }
 
   render() {
+
+    const filteredFeatures = this._filterFeatures();
+
     return (
       <Fragment>
         {this._renderCloseButton()}
-        {this._renderProperties()}
-        {this._renderPagination()}
+        {this._renderLayerFilterBox()}
+        {this._renderProperties(filteredFeatures)}
+        {this._renderPagination(filteredFeatures)}
       </Fragment>
     );
   }
