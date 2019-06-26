@@ -51,14 +51,12 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
       rowContent = (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <p>
-              <EuiLink onClick={onSave}>Save changes</EuiLink> to {savedQuery.title}
-            </p>
+            <EuiButtonEmpty onClick={onSave}>
+              Save changes to query: {savedQuery.title}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <p>
-              <EuiLink onClick={onSaveNew}>Save as new</EuiLink>
-            </p>
+            <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
           </EuiFlexItem>
         </Fragment>
       );
@@ -66,12 +64,12 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
       rowContent = (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <p>{savedQuery.title}</p>
+            <EuiButtonEmpty href={''} color="text">
+              {savedQuery.title}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <p>
-              <EuiLink onClick={onSaveNew}>Save as new</EuiLink>
-            </p>
+            <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
           </EuiFlexItem>
         </Fragment>
       );
@@ -84,8 +82,8 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
     );
   } else {
     rowContent = (
-      <EuiFlexItem>
-        <EuiLink href={`#/management/kibana/objects`}>Manage Saved Queries</EuiLink>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty href={`#/management/kibana/objects`}>Manage Saved Queries</EuiButtonEmpty>
       </EuiFlexItem>
     );
   }

@@ -51,6 +51,7 @@ import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { data } from 'plugins/data/setup';
 data.search.loadLegacyDirectives();
+const { savedQueryService } = data.search.services;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -118,6 +119,44 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     return true;
   };
   /* END QueryBar replacement with SearchBar */
+
+  /* Saved Queries */
+  $scope.onQuerySaved = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  const updateStateFromSavedQuery = (savedQuery) => {
+    $scope.query = savedQuery.attributes.query;
+    if (savedQuery.attributes.timefilter) {
+      $scope.time.setTime({
+        from: savedQuery.attributes.timefilter.timeFrom,
+        to: savedQuery.attributes.timefilter.timeTo,
+      });
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        $scope.refreshInterval = savedQuery.attributes.timefilter.refreshInterval;
+      }
+    }
+    syncAppAndGlobalState();
+  };
+
+  $scope.$watch('state.savedQuery', newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
+
+    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      $scope.$evalAsync(() => {
+        $scope.savedQuery = savedQuery;
+        updateStateFromSavedQuery(savedQuery);
+      });
+    });
+  });
+  /* end Saved Queries */
 
   $scope.refreshConfig = getInitialRefreshConfig({
     mapStateJSON: savedMap.mapStateJSON,
