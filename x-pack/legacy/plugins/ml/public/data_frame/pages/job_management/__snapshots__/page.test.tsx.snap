@@ -24,7 +24,6 @@ exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
             <EuiBetaBadge
               label="Beta"
               tooltipContent="Data frames are a beta feature. We'd love to hear your feedback."
-              tooltipPosition="top"
             />
           </h1>
         </EuiTitle>
