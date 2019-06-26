@@ -30,6 +30,7 @@ import {
   EuiText,
   EuiTitle,
   EuiDelayRender,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import {
@@ -537,34 +538,34 @@ export class RemoteClusterForm extends Component {
       });
     }
 
-    const messageToBeRendered = (
-      <Fragment>
-        {errorExplanation.length && errorExplanation.map(errorMessage => (
+    const messagesToBeRendered = (
+      errorExplanation.length && errorExplanation.map(errorMessage => (
+        <EuiScreenReaderOnly>
           <p key={errorMessage.key}>
             {errorMessage.where}<br/>
             {errorMessage.what}
           </p>
-        ))}
-      </Fragment>
+        </EuiScreenReaderOnly>
+      ))
     );
 
     return (
       <Fragment>
         <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
-        <EuiDelayRender>
-          <EuiCallOut
-            title={(
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-                defaultMessage="Fix errors before continuing."
-              />
-            )}
-            color="danger"
-            iconType="cross"
-          >
-            {messageToBeRendered}
-          </EuiCallOut>
-        </EuiDelayRender>
+        <EuiCallOut
+          title={(
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.errorTitle"
+              defaultMessage="Fix errors before continuing."
+            />
+          )}
+          color="danger"
+          iconType="cross"
+        >
+          <EuiDelayRender>
+            {messagesToBeRendered}
+          </EuiDelayRender>
+        </EuiCallOut>
       </Fragment>
     );
   }
