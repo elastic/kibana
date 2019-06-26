@@ -26,6 +26,7 @@ query PingList(
     location: $location
   ) {
       total
+      locations
       pings {
         timestamp
         http {

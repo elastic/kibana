@@ -36,8 +36,11 @@ export interface Query {
 }
 
 export interface PingResults {
+  /** Total number of matching pings */
   total: UnsignedInteger;
-
+  /** Unique list of all locations the query matched */
+  locations: string[];
+  /** List of pings */
   pings: Ping[];
 }
 /** A request sent from a monitor to a host */

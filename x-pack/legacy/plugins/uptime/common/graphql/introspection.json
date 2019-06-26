@@ -376,7 +376,7 @@
         "fields": [
           {
             "name": "total",
-            "description": "",
+            "description": "Total number of matching pings",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -387,8 +387,28 @@
             "deprecationReason": null
           },
           {
+            "name": "locations",
+            "description": "Unique list of all locations the query matched",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "pings",
-            "description": "",
+            "description": "List of pings ",
             "args": [],
             "type": {
               "kind": "NON_NULL",

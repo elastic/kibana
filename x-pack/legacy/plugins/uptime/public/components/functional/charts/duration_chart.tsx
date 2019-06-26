@@ -75,6 +75,7 @@ export const DurationChart = ({
             customSeriesColors={getColorsMap(meanColor, averageSpecId)}
             data={ldl.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
             id={locationSpecId}
+            key={`locline-${ldl.name}`}
             name={i18n.translate(
               'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
               {

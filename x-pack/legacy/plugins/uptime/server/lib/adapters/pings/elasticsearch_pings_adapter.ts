@@ -61,10 +61,20 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
         ...sortParam,
         ...sizeParam,
+        aggregations: {
+          locations: {
+            terms: {
+              field: "observer.geo.name",
+              missing: "N/A",
+              size: 1000
+            }
+          }
+        }
       },
     };
     const {
-      hits: { hits, total },
+      hits: { hits, total},
+      aggregations: { locations }
     } = await this.database.search(request, params);
 
     const pings: Ping[] = hits.map(({ _source }: any) => {
@@ -74,6 +84,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const results: PingResults = {
       total: total.value,
+      locations: locations.buckets.map((bucket: {key: string}) => bucket.key),
       pings,
     };
 
