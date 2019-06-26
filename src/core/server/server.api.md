@@ -189,8 +189,6 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // 
     // @internal
     static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
-    // (undocumented)
-    getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;

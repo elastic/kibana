@@ -30,7 +30,6 @@ import { help as esdocs } from './esdocs';
 import { help as essql } from './essql';
 import { help as exactly } from './exactly';
 import { help as filterrows } from './filterrows';
-import { help as font } from './font';
 import { help as formatdate } from './formatdate';
 import { help as formatnumber } from './formatnumber';
 import { help as getCell } from './getCell';
@@ -175,7 +174,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   essql,
   exactly,
   filterrows,
-  font,
   formatdate,
   formatnumber,
   getCell,

@@ -100,10 +100,16 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
             }
             const lines = extractLines(blob.content(), fromLine, toLine);
             const lang = await detectLanguage(path, lines);
-            return h.response(lines).type(`text/${lang || 'plain'}`);
+            return h
+              .response(lines)
+              .type(`text/plain`)
+              .header('lang', lang);
           } else if (blob.content().length <= TEXT_FILE_LIMIT) {
             const lang = await detectLanguage(path, blob.content());
-            return h.response(blob.content()).type(`text/${lang || 'plain'}`);
+            return h
+              .response(blob.content())
+              .type(`text/plain'`)
+              .header('lang', lang);
           } else {
             return h.response('').type(`text/big`);
           }

@@ -12,6 +12,7 @@ import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
+import { UpdateSourceEditor } from './update_source_editor';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -24,20 +25,35 @@ export class EMSFileSource extends AbstractVectorSource {
   });
   static icon = 'emsApp';
 
-  static createDescriptor(id) {
+  static createDescriptor({ id, tooltipProperties = [] }) {
     return {
       type: EMSFileSource.type,
-      id: id
+      id,
+      tooltipProperties
     };
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onChange = (selectedId) => {
-      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
+      const emsFileSourceDescriptor = EMSFileSource.createDescriptor({ id: selectedId });
       const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, inspectorAdapters);
       onPreviewSource(emsFileSource);
     };
     return <EMSFileCreateSourceEditor onChange={onChange}/>;
+  }
+
+  constructor(descriptor, inspectorAdapters) {
+    super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
+  }
+
+  renderSourceSettingsEditor({ onChange }) {
+    return (
+      <UpdateSourceEditor
+        onChange={onChange}
+        tooltipProperties={this._descriptor.tooltipProperties}
+        layerId={this._descriptor.id}
+      />
+    );
   }
 
   async _getEmsVectorFileMeta() {
@@ -114,7 +130,25 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   canFormatFeatureProperties() {
-    return true;
+    return this._descriptor.tooltipProperties.length;
+  }
+
+  async filterAndFormatPropertiesToHtml(properties) {
+    const newProperties = {};
+    const meta = await this._getEmsVectorFileMeta();
+    for (const key in properties) {
+      if (properties.hasOwnProperty(key) && this._descriptor.tooltipProperties.indexOf(key) > -1) {
+        let newFieldName = key;
+        for (let i = 0; i < meta.fields.length; i++) {
+          if (meta.fields[i].name === key) {
+            newFieldName = meta.fields[i].description;
+            break;
+          }
+        }
+        newProperties[newFieldName] = properties[key];
+      }
+    }
+    return super.filterAndFormatPropertiesToHtml(newProperties);
   }
 
   async getSupportedShapeTypes() {

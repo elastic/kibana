@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType } from '../types';
+import { ActionType, Services } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
@@ -16,13 +16,13 @@ import { registerBuiltInActionTypes } from './index';
 const ACTION_TYPE_ID = 'kibana.server-log';
 const NO_OP_FN = () => {};
 
-const services = {
+const services: Services = {
   log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
-function getServices() {
+function getServices(): Services {
   return services;
 }
 
