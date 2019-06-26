@@ -26,6 +26,8 @@ const ActionTypeConfig = {
   }),
 };
 
+const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'user', 'from'];
+
 export type ActionParamsType = TypeOf<typeof ActionParams.schema>;
 
 const ActionParams = {
@@ -91,6 +93,7 @@ function validateParams(object: any): { error?: Error; value?: ActionParamsType 
 export const actionType: ActionType = {
   id: '.email',
   name: 'email',
+  unencryptedAttributes: unencryptedConfigProperties,
   validate: {
     config: { validate: validateConfig },
     params: { validate: validateParams },

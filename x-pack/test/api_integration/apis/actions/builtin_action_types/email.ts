@@ -37,7 +37,11 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
             attributes: {
               description: 'An email action',
               actionTypeId: '.email',
-              actionTypeConfig: {},
+              actionTypeConfig: {
+                from: 'bob@example.com',
+                service: 'gmail',
+                user: 'bob',
+              },
             },
             references: [],
             updated_at: resp.body.updated_at,
