@@ -14,14 +14,9 @@ import {
   SortDirection,
 } from '@elastic/eui';
 
-import { moveToDataFrameWizard } from '../../../../common';
+import { JobId, moveToDataFrameWizard } from '../../../../common';
 
-import {
-  DataFrameJobListColumn,
-  DataFrameJobListRow,
-  ItemIdToExpandedRowMap,
-  JobId,
-} from './common';
+import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
@@ -70,6 +65,7 @@ export const DataFrameJobList: SFC = () => {
             Create your first data frame job
           </EuiButtonEmpty>,
         ]}
+        data-test-subj="mlNoDataFrameJobsFound"
       />
     );
   }

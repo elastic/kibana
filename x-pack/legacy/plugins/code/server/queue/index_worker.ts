@@ -16,7 +16,7 @@ import {
   WorkerProgress,
   WorkerReservedProgress,
 } from '../../model';
-import { GitOperations } from '../git_operations';
+import { GitOperations, HEAD } from '../git_operations';
 import { IndexerFactory } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -171,7 +171,7 @@ export class IndexWorker extends AbstractWorker {
 
   protected async getTimeoutMs(payload: any) {
     try {
-      const totalCount = await this.gitOps.countRepoFiles(payload.uri, 'head');
+      const totalCount = await this.gitOps.countRepoFiles(payload.uri, HEAD);
       let timeout = moment.duration(1, 'hour').asMilliseconds();
       if (totalCount > 0) {
         // timeout = ln(file_count) in hour
