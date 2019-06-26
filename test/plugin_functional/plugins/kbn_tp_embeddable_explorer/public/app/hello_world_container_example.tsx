@@ -23,7 +23,6 @@ import {
   EmbeddablePanel,
   Container,
   embeddableFactories,
-  IRegistry,
   EmbeddableFactory,
 } from 'plugins/embeddable_api';
 import {
@@ -33,7 +32,7 @@ import {
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
 interface Props {
-  embeddableFactories: IRegistry<EmbeddableFactory>;
+  embeddableFactories: Map<string, EmbeddableFactory>;
 }
 
 export class HelloWorldContainerExample extends React.Component<Props> {

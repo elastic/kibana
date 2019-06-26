@@ -49,7 +49,7 @@ uiRoutes
     redirectTo: '/management'
   });
 
-require('ui/index_patterns/route_setup/load_default')({
+require('./route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index_pattern'
 });
 

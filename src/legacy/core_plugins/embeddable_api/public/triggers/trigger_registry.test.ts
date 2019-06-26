@@ -25,11 +25,11 @@ import { attachAction } from './attach_action';
 import { detachAction } from './detach_action';
 
 beforeAll(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 afterAll(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 test('TriggerRegistry adding and getting a new trigger', async () => {

@@ -29,7 +29,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: integrationConfig.get('esTestCluster'),
     apps: integrationConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
+      directory: path.resolve(__dirname, '../functional/es_archives')
     },
     screenshots: integrationConfig.get('screenshots'),
     junit: {

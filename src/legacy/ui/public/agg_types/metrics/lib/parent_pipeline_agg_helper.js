@@ -34,7 +34,7 @@ const metricAggSchema = (new Schemas([
     group: 'none',
     name: 'metricAgg',
     title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-      defaultMessage: 'Metric Agg'
+      defaultMessage: 'Metric agg'
     }),
     hideCustomLabel: true,
     aggFilter: metricAggFilter

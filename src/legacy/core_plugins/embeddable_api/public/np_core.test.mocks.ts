@@ -47,13 +47,6 @@ jest.doMock('ui/new_platform', () => {
   };
 });
 
-jest.doMock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
-
 jest.doMock('ui/capabilities', () => ({
   uiCapabilities: {
     visualize: {

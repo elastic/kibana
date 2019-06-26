@@ -32,6 +32,7 @@ import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
 import { mapToObject } from '../utils/';
+import { DocLinksService } from './doc_links';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -65,6 +66,7 @@ export class CoreSystem {
   private readonly overlay: OverlayService;
   private readonly plugins: PluginsService;
   private readonly application: ApplicationService;
+  private readonly docLinks: DocLinksService;
 
   private readonly rootDomElement: HTMLElement;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -97,6 +99,7 @@ export class CoreSystem {
     this.overlay = new OverlayService();
     this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
+    this.docLinks = new DocLinksService();
 
     const core: CoreContext = {};
     this.plugins = new PluginsService(core);
@@ -149,6 +152,7 @@ export class CoreSystem {
   public async start() {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
+      const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
@@ -176,15 +180,18 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
+      const uiSettings = await this.uiSettings.start();
 
       const core: InternalCoreStart = {
         application,
         chrome,
+        docLinks,
         http,
         i18n,
         injectedMetadata,
         notifications,
         overlays,
+        uiSettings,
       };
 
       const plugins = await this.plugins.start(core);

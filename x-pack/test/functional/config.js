@@ -60,6 +60,7 @@ import {
   UptimeProvider,
   InfraSourceConfigurationFlyoutProvider,
   InfraLogStreamProvider,
+  MachineLearningProvider,
 } from './services';
 
 import {
@@ -150,6 +151,7 @@ export default async function ({ readConfigFile }) {
       rollup: RollupPageProvider,
       infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
       infraLogStream: InfraLogStreamProvider,
+      ml: MachineLearningProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -194,9 +196,9 @@ export default async function ({ readConfigFile }) {
         '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
-        '--stats.maximumWaitTimeForAllCollectorsInS=0',
+        '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
+        '--xpack.encrypted_saved_objects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
       ],
     },

@@ -201,7 +201,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         const apiResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Authorization', 'Bearer AbCdEf')
+          .set('Authorization', 'Basic a3JiNTprcmI1')
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
 

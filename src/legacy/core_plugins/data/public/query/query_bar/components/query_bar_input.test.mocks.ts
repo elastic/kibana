@@ -78,11 +78,6 @@ jest.mock('ui/kfetch', () => ({
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'foo',
-  },
-}));
 jest.mock('ui/autocomplete_providers', () => ({
   getAutocompleteProvider: mockGetAutocompleteProvider,
 }));

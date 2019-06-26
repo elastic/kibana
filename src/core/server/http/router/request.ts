@@ -18,11 +18,12 @@
  */
 
 import { Url } from 'url';
-import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
+import { ObjectType, TypeOf } from '@kbn/config-schema';
+
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { filterHeaders, Headers } from './headers';
+import { Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
 const requestSymbol = Symbol('request');
@@ -46,13 +47,21 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
    * @internal
+   *
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
-    routeSchemas?: RouteSchemas<P, Q, B>
+    routeSchemas?: RouteSchemas<P, Q, B>,
+    withoutSecretHeaders: boolean = true
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
-    return new KibanaRequest(req, requestParts.params, requestParts.query, requestParts.body);
+    return new KibanaRequest(
+      req,
+      requestParts.params,
+      requestParts.query,
+      requestParts.body,
+      withoutSecretHeaders
+    );
   }
 
   /**
@@ -86,9 +95,14 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     return { query, params, body };
   }
 
-  public readonly headers: Headers;
   public readonly url: Url;
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
+  /**
+   * Readonly copy of incoming request headers.
+   * @remarks
+   * This property will contain a `filtered` copy of request headers.
+   */
+  public readonly headers: Headers;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -97,17 +111,21 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     request: Request,
     readonly params: Params,
     readonly query: Query,
-    readonly body: Body
+    readonly body: Body,
+    // @ts-ignore we will use this flag as soon as http request proxy is supported in the core
+    // until that time we have to expose all the headers
+    private readonly withoutSecretHeaders: boolean
   ) {
-    this.headers = request.headers;
     this.url = request.url;
+    this.headers = deepFreeze({ ...request.headers });
 
-    this[requestSymbol] = request;
+    // prevent Symbol exposure via Object.getOwnPropertySymbols()
+    Object.defineProperty(this, requestSymbol, {
+      value: request,
+      enumerable: false,
+    });
+
     this.route = deepFreeze(this.getRouteInfo());
-  }
-
-  public getFilteredHeaders(headersToKeep: string[]) {
-    return filterHeaders(this.headers, headersToKeep);
   }
 
   private getRouteInfo() {
@@ -124,7 +142,28 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 }
 
 /**
- * Returns underlying Hapi Request object for KibanaRequest
+ * Returns underlying Hapi Request
  * @internal
  */
-export const toRawRequest = (request: KibanaRequest) => request[requestSymbol];
+export const ensureRawRequest = (request: KibanaRequest | Request) =>
+  isKibanaRequest(request) ? request[requestSymbol] : request;
+
+function isKibanaRequest(request: unknown): request is KibanaRequest {
+  return request instanceof KibanaRequest;
+}
+
+function isRequest(request: any): request is Request {
+  try {
+    return request.raw.req && typeof request.raw.req === 'object';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Checks if an incoming request either KibanaRequest or Legacy.Request
+ * @internal
+ */
+export function isRealRequest(request: unknown): request is KibanaRequest | Request {
+  return isKibanaRequest(request) || isRequest(request);
+}

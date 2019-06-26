@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IRegistry, Trigger } from '../types';
+import { Trigger } from '../types';
 
 export function attachAction(
-  triggerRegistry: IRegistry<Trigger>,
+  triggerRegistry: Map<string, Trigger>,
   { triggerId, actionId }: { triggerId: string; actionId: string }
 ) {
   const trigger = triggerRegistry.get(triggerId);
@@ -31,5 +31,4 @@ export function attachAction(
   if (!trigger.actionIds.find(id => id === actionId)) {
     trigger.actionIds.push(actionId);
   }
-  triggerRegistry.set(trigger.id, trigger);
 }

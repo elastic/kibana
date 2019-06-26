@@ -29,7 +29,6 @@ import {
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { IRegistry } from '../types';
 import { PanelNotFoundError } from './panel_not_found_error';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -44,14 +43,14 @@ export abstract class Container<
   protected readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
-  public readonly embeddableFactories: IRegistry<EmbeddableFactory>;
+  public readonly embeddableFactories: Map<string, EmbeddableFactory>;
 
   private subscription: Subscription;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    embeddableFactories: IRegistry<EmbeddableFactory>,
+    embeddableFactories: Map<string, EmbeddableFactory>,
     parent?: Container
   ) {
     super(input, output, parent);

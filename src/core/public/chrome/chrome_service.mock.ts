@@ -37,6 +37,17 @@ const createStartContractMock = () => {
       enableForcedAppSwitcherNavigation: jest.fn(),
       getForceAppSwitcherNavigation$: jest.fn(),
     },
+    recentlyAccessed: {
+      add: jest.fn(),
+      get: jest.fn(),
+      get$: jest.fn(),
+    },
+    navControls: {
+      registerLeft: jest.fn(),
+      registerRight: jest.fn(),
+      getLeft$: jest.fn(),
+      getRight$: jest.fn(),
+    },
     setBrand: jest.fn(),
     getBrand$: jest.fn(),
     setIsVisible: jest.fn(),
@@ -69,7 +80,7 @@ const createMock = () => {
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 

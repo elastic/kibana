@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
   describe('sample data', function describeIndexTests() {
+    this.tags('smoke');
 
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');

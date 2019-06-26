@@ -1,12 +1,10 @@
-[[code-intro]]
+[[code]]
 = Code
 
 [partintro]
 --
 
-beta[] Interaction with source code is pervasive and essential for any technology company. How efficiently you search, navigate, and gain insight to your source code impacts how fast your organization can innovate. *Code* provides an easy-to-use code search solution that scales with your organization, so your team can focus on shipping awesome products and providing the best services. *Code* provides the following functions:
-
-Code provides:
+beta[] Interaction with source code is pervasive and essential for any technology company. Speed of innovation is limited by how easy it is to search, navigate, and gain insight into your source code. Elastic *Code* provides an easy-to-use code search solution that scales with your organization. *Code* empowers your team to ship awesome products and provide the best services. *Code* offers the following functions:
 
 * Jump to definition and find references for a symbol
 * Typeahead search for symbol definition, file, and repo

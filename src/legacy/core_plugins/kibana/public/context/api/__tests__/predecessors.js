@@ -48,7 +48,25 @@ describe('context app', function () {
       getSearchSourceStub = createSearchSourceStubProvider([], '@timestamp', MS_PER_DAY * 8);
       Private.stub(SearchSourceProvider, getSearchSourceStub);
 
-      fetchPredecessors = Private(fetchContextProvider).fetchPredecessors;
+      fetchPredecessors = (indexPatternId, timeField, sortDir, timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
+        const anchor = {
+          _source: {
+            [timeField]: timeValIso
+          },
+          sort: [timeValNr, tieBreakerValue]
+        };
+
+        return Private(fetchContextProvider).fetchSurroundingDocs(
+          'predecessors',
+          indexPatternId,
+          anchor,
+          timeField,
+          tieBreakerField,
+          sortDir,
+          size,
+          []
+        );
+      };
     }));
 
     it('should perform exactly one query when enough hits are returned', function () {
