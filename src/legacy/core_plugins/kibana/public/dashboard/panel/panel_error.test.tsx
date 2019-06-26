@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import ReactMarkdown from 'react-markdown';
+// TODO: remove this when EUI supports types for this.
+// @ts-ignore: implicit any for JS file
+import { takeMountedSnapshot } from '@elastic/eui/lib/test';
 import React from 'react';
+import { PanelError } from './panel_error';
+import { mount } from 'enzyme';
 
-export interface PanelErrorProps {
-  error: string | React.ReactNode;
-}
+test('PanelError renders plain string', () => {
+  const component = mount(<PanelError error="test" />);
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
+});
 
-export function PanelError({ error }: PanelErrorProps) {
-  return (
-    <div className="dshPanel__error panel-content">
-      <EuiText color="subdued" size="xs">
-        <EuiIcon type="alert" color="danger" />
-        <EuiSpacer size="s" />
-        {typeof error === 'string' ? <ReactMarkdown source={error} /> : error}
-      </EuiText>
-    </div>
-  );
-}
+test('PanelError renders string with markdown link', () => {
+  const component = mount(<PanelError error="[test](http://www.elastic.co/)" />);
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
+});
+
+test('PanelError renders given React Element ', () => {
+  const component = mount(<PanelError error={<div>test</div>} />);
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
+});
