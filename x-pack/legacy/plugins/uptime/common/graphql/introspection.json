@@ -392,18 +392,6 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
-              },
-              {
-                "name": "sortField",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
-              },
-              {
-                "name": "sortDirection",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "MonitorSummaryResult", "ofType": null },
@@ -413,7 +401,34 @@
           {
             "name": "getStatesIndexStatus",
             "description": "",
-            "args": [],
+            "args": [
+              {
+                "name": "dateRangeStart",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "dateRangeEnd",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "filters",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,

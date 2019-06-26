@@ -10,8 +10,8 @@ import { UMResolver } from '../../../common/graphql/resolver_types';
 import {
   GetMonitorStatesQueryArgs,
   MonitorSummaryResult,
-  DocCount,
   StatesIndexStatus,
+  GetStatesIndexStatusQueryArgs,
 } from '../../../common/graphql/types';
 
 export type UMGetMonitorStatesResolver = UMResolver<
@@ -24,7 +24,7 @@ export type UMGetMonitorStatesResolver = UMResolver<
 export type UMStatesIndexExistsResolver = UMResolver<
   StatesIndexStatus | Promise<StatesIndexStatus>,
   any,
-  undefined,
+  GetStatesIndexStatusQueryArgs,
   UMContext
 >;
 
@@ -40,7 +40,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
     Query: {
       async getMonitorStates(
         resolver,
-        { dateRangeStart, dateRangeEnd, filters, pageIndex, pageSize, sortField, sortDirection },
+        { dateRangeStart, dateRangeEnd, filters, pageIndex, pageSize },
         { req }
       ): Promise<MonitorSummaryResult> {
         const [
@@ -50,7 +50,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           legacySummaries,
         ] = await Promise.all([
           // libs.monitorStates.getMonitorStates(req, pageIndex, pageSize, sortField, sortDirection),
-          libs.monitorStates.getSummaryCount(req),
+          libs.pings.getDocCount(req),
           libs.monitorStates.legacyGetMonitorStates(req, dateRangeStart, dateRangeEnd, filters),
         ]);
         return {
@@ -58,15 +58,27 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
         };
       },
-      async getStatesIndexStatus(resolver, params, { req }): Promise<StatesIndexStatus> {
+      async getStatesIndexStatus(
+        resolver,
+        { dateRangeStart, dateRangeEnd, filters },
+        { req }
+      ): Promise<StatesIndexStatus> {
         const indexExists = await libs.monitorStates.statesIndexExists(req);
-        let docCount: DocCount | undefined;
+        let summaryCount: { up: number; down: number } | undefined;
         if (indexExists) {
-          docCount = await libs.monitorStates.getSummaryCount(req);
+          // TODO: provide count of states index in future release
+          summaryCount = await libs.monitorStates.getSummaryCount(
+            req,
+            dateRangeStart,
+            dateRangeEnd,
+            filters
+          );
         }
         return {
           indexExists,
-          docCount,
+          docCount: {
+            count: summaryCount ? summaryCount.up + summaryCount.down : undefined,
+          },
         };
       },
     },

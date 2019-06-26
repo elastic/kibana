@@ -5,12 +5,20 @@
  */
 
 import { UMMonitorStatesAdapter } from './adapter_types';
-import { MonitorSummary, DocCount } from '../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../common/graphql/types';
 
 /**
  * This class will be implemented for server-side tests.
  */
 export class UMMemoryMonitorStatesAdapter implements UMMonitorStatesAdapter {
+  public async legacyGetMonitorStates(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null | undefined
+  ): Promise<MonitorSummary[]> {
+    throw new Error('Method not implemented.');
+  }
   public async getMonitorStates(
     request: any,
     pageIndex: number,
@@ -20,7 +28,12 @@ export class UMMemoryMonitorStatesAdapter implements UMMonitorStatesAdapter {
   ): Promise<MonitorSummary[]> {
     throw new Error('Method not implemented.');
   }
-  public async getSummaryCount(request: any): Promise<DocCount> {
+  public async getSummaryCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<{ up: number; down: number }> {
     throw new Error('Method not implemented.');
   }
   public async statesIndexExists(request: any): Promise<boolean> {

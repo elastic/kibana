@@ -15,7 +15,7 @@ import { StatesIndexStatus } from '../../../../common/graphql/types';
 import { DataMissing } from './data_missing';
 
 interface EmptyStateQueryResult {
-  getStatesIndexStatus?: StatesIndexStatus;
+  statesIndexStatus?: StatesIndexStatus;
 }
 
 interface EmptyStateProps {
@@ -29,8 +29,8 @@ export const EmptyStateComponent = ({ basePath, children, data, errors }: Props)
   if (errors) {
     return <EmptyStateError errorMessage={formatUptimeGraphQLErrorList(errors)} />;
   }
-  if (data && data.getStatesIndexStatus) {
-    const { docCount, indexExists } = data.getStatesIndexStatus;
+  if (data && data.statesIndexStatus) {
+    const { docCount, indexExists } = data.statesIndexStatus;
     if (!indexExists) {
       return (
         <DataMissing

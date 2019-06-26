@@ -713,10 +713,13 @@ export interface GetMonitorStatesQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+}
+export interface GetStatesIndexStatusQueryArgs {
+  dateRangeStart: string;
 
-  sortField?: string | null;
+  dateRangeEnd: string;
 
-  sortDirection?: string | null;
+  filters?: string | null;
 }
 
 // ====================================================

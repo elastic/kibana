@@ -134,6 +134,10 @@ export const monitorStatesSchema = gql`
       filters: String
     ): MonitorSummaryResult
 
-    getStatesIndexStatus: StatesIndexStatus!
+    getStatesIndexStatus(
+      dateRangeStart: String!
+      dateRangeEnd: String!
+      filters: String
+    ): StatesIndexStatus!
   }
 `;

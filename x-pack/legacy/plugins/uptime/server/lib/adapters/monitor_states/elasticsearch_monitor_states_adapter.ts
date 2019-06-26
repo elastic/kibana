@@ -7,12 +7,7 @@
 import { get, set, sortBy } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter } from './adapter_types';
-import {
-  MonitorSummary,
-  DocCount,
-  SummaryHistogram,
-  Check,
-} from '../../../../common/graphql/types';
+import { MonitorSummary, SummaryHistogram, Check } from '../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 
@@ -28,12 +23,13 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     this.database = database;
   }
 
-  public async legacyGetMonitorStates(
+  private async runEntitySieveQuery(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<MonitorSummary[]> {
+    filters?: string | null,
+    searchAfter?: any
+  ): Promise<{ result: any; statusFilter?: any; afterKey?: any }> {
     const { query, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
@@ -189,14 +185,37 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         },
       },
     };
+    if (searchAfter) {
+      set(params, 'body.aggs.monitors.composite.after', searchAfter);
+    }
     const result = await this.database.search(request, params);
-    let monitors = get(result, 'aggregations.monitors.buckets', []);
+    const afterKey = get<any | undefined>(result, 'aggregations.monitors.after_key', undefined);
+    return { afterKey, result, statusFilter };
+  }
 
+  private getMonitorBuckets(queryResult: any, statusFilter: any) {
+    let monitors = get(queryResult, 'aggregations.monitors.buckets', []);
     if (statusFilter) {
       monitors = monitors.filter(
         (monitor: any) => get(monitor, 'state.value.monitor.status') === statusFilter
       );
     }
+    return monitors;
+  }
+
+  public async legacyGetMonitorStates(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<MonitorSummary[]> {
+    const { result, statusFilter } = await this.runEntitySieveQuery(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
+    const monitors: any[] = this.getMonitorBuckets(result, statusFilter);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
@@ -376,13 +395,49 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     }, {});
   }
 
-  public async getSummaryCount(request: any): Promise<DocCount> {
-    const { count } = await this.database.count(request, { index: 'heartbeat-states-8.0.0' });
+  public async getSummaryCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<{ up: number; down: number }> {
+    // TODO: adapt this to the states index in future release
+    // const { count } = await this.database.count(request, { index: 'heartbeat-states-8.0.0' });
 
-    return { count };
+    // return { count };
+    const count = {
+      up: 0,
+      down: 0,
+    };
+
+    let searchAfter: any | undefined;
+    do {
+      const { afterKey, result, statusFilter } = await this.runEntitySieveQuery(
+        request,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        searchAfter
+      );
+      searchAfter = afterKey;
+      this.getMonitorBuckets(result, statusFilter).reduce(
+        (acc: { up: number; down: number }, monitor: any) => {
+          const status = get<string | undefined>(monitor, 'state.value.monitor.status', undefined);
+          if (status === 'up') {
+            acc.up += 1;
+          } else if (status === 'down') {
+            acc.down += 1;
+          }
+          return acc;
+        },
+        count
+      );
+    } while (searchAfter);
+    return count;
   }
 
   public async statesIndexExists(request: any): Promise<boolean> {
-    return await this.database.head(request, { index: 'heartbeat-states-8.0.0' });
+    // TODO: adapt this to the states index in future release
+    return await this.database.head(request, { index: INDEX_NAMES.HEARTBEAT });
   }
 }
