@@ -35,21 +35,6 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
     },
   } = useAppDependencies();
 
-  const includeGlobalStateToHumanizedMap: Record<string, any> = {
-    0: (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
-        defaultMessage="No"
-      />
-    ),
-    1: (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
-        defaultMessage="Yes"
-      />
-    ),
-  };
-
   const {
     versionId,
     version,
@@ -82,7 +67,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
-                defaultMessage="Show {count} more indices"
+                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
                 values={{ count: hiddenIndicesCount }}
               />
             </EuiLink>
@@ -162,7 +147,17 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            {includeGlobalStateToHumanizedMap[includeGlobalState]}
+            {includeGlobalState ? (
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
+                defaultMessage="Yes"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
+                defaultMessage="No"
+              />
+            )}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>

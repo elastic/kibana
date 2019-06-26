@@ -118,7 +118,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
     }
 
     if (unremovableSettings && unremovableSettings.length > 0) {
-      validation.errors.indexSettings.push(
+      validation.errors.ignoreIndexSettings.push(
         i18n.translate('xpack.snapshotRestore.restoreValidation.indexSettingsNotRemovableError', {
           defaultMessage: 'These settings are not removable: {settings}',
           // @ts-ignore Bug filed: https://github.com/elastic/kibana/issues/39299
