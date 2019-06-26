@@ -18,7 +18,7 @@
  */
 
 import { find } from 'lodash';
-import { SavedObjectAttributes } from '../../../server/saved_objects';
+import { SavedObjectAttributes } from 'src/core/server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 

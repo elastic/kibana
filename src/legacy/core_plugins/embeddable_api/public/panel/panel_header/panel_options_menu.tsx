@@ -84,7 +84,7 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
         color="text"
         className="embPanel__optionsMenuButton"
         aria-label={intl.formatMessage({
-          id: 'kbn.dashboard.panel.optionsMenu.panelOptionsButtonAriaLabel',
+          id: 'embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel',
           defaultMessage: 'Panel options',
         })}
         data-test-subj="embeddablePanelToggleMenuIcon"

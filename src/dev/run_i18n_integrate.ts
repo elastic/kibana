@@ -18,8 +18,9 @@
  */
 
 import chalk from 'chalk';
+import Listr from 'listr';
 
-import { integrateLocaleFiles, mergeConfigs } from './i18n';
+import { ErrorReporter, integrateLocaleFiles, mergeConfigs } from './i18n';
 import { extractDefaultMessages } from './i18n/tasks';
 import { createFailError, run } from './run';
 
@@ -75,18 +76,41 @@ run(
     }
 
     const config = await mergeConfigs(includeConfig);
-    const defaultMessages = await extractDefaultMessages({ path, config });
+    const list = new Listr([
+      {
+        title: 'Extracting Default Messages',
+        task: () => new Listr(extractDefaultMessages({ path, config }), { exitOnError: true }),
+      },
+      {
+        title: 'Intregrating Locale File',
+        task: async ({ messages }) => {
+          await integrateLocaleFiles(messages, {
+            sourceFileName: source,
+            targetFileName: target,
+            dryRun,
+            ignoreIncompatible,
+            ignoreUnused,
+            ignoreMissing,
+            config,
+            log,
+          });
+        },
+      },
+    ]);
 
-    await integrateLocaleFiles(defaultMessages, {
-      sourceFileName: source,
-      targetFileName: target,
-      dryRun,
-      ignoreIncompatible,
-      ignoreUnused,
-      ignoreMissing,
-      config,
-      log,
-    });
+    try {
+      const reporter = new ErrorReporter();
+      const messages: Map<string, { message: string }> = new Map();
+      await list.run({ messages, reporter });
+    } catch (error) {
+      process.exitCode = 1;
+      if (error instanceof ErrorReporter) {
+        error.errors.forEach((e: string | Error) => log.error(e));
+      } else {
+        log.error('Unhandled exception!');
+        log.error(error);
+      }
+    }
   },
   {
     flags: {

@@ -35,7 +35,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
   }
 
   public getDisplayName() {
-    return i18n.translate('kbn.embeddable.samples.contactCard.displayName', {
+    return i18n.translate('embeddableApi.samples.contactCard.displayName', {
       defaultMessage: 'contact card',
     });
   }

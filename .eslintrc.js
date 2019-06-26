@@ -53,8 +53,8 @@ module.exports = {
         'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
         'src/legacy/server/saved_objects/**/*',
-        'x-pack/plugins/apm/**/*',
-        'x-pack/plugins/canvas/**/*',
+        'x-pack/legacy/plugins/apm/**/*',
+        'x-pack/legacy/plugins/canvas/**/*',
         '**/*.{ts,tsx}',
         'src/legacy/core_plugins/metrics/**/*.js',
       ],
@@ -166,7 +166,7 @@ module.exports = {
     {
       files: [
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/plugins/apm/**/*.js',
+        'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/visual_regression/tests/**/*',
         'x-pack/test/visual_regression/tests/**/*',
@@ -205,12 +205,15 @@ module.exports = {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/plugins')).reduce((acc, name) => {
-              if (!name.startsWith('_')) {
-                acc[name] = `x-pack/plugins/${name}`;
-              }
-              return acc;
-            }, {}),
+            pluginMap: readdirSync(resolve(__dirname, 'x-pack/legacy/plugins')).reduce(
+              (acc, name) => {
+                if (!name.startsWith('_')) {
+                  acc[name] = `x-pack/legacy/plugins/${name}`;
+                }
+                return acc;
+              },
+              {}
+            ),
           },
         },
       },
@@ -253,7 +256,7 @@ module.exports = {
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
-        'x-pack/plugins/apm/public/utils/testHelpers.js',
+        'x-pack/legacy/plugins/apm/public/utils/testHelpers.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -303,7 +306,6 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'test/visual_regression/services/visual_testing/take_percy_snapshot.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -361,7 +363,7 @@ module.exports = {
      * APM overrides
      */
     {
-      files: ['x-pack/plugins/apm/**/*.js'],
+      files: ['x-pack/legacy/plugins/apm/**/*.js'],
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
@@ -372,7 +374,7 @@ module.exports = {
      * GIS overrides
      */
     {
-      files: ['x-pack/plugins/maps/**/*.js'],
+      files: ['x-pack/legacy/plugins/maps/**/*.js'],
       rules: {
         'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
       },
@@ -382,7 +384,7 @@ module.exports = {
      * Graph overrides
      */
     {
-      files: ['x-pack/plugins/graph/**/*.js'],
+      files: ['x-pack/legacy/plugins/graph/**/*.js'],
       globals: {
         angular: true,
         $: true,
@@ -405,7 +407,7 @@ module.exports = {
      * ML overrides
      */
     {
-      files: ['x-pack/plugins/ml/**/*.js'],
+      files: ['x-pack/legacy/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
       },
@@ -416,7 +418,7 @@ module.exports = {
      */
     {
       // front end typescript and javascript files only
-      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
+      files: ['x-pack/legacy/plugins/siem/public/**/*.{js,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -430,7 +432,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/plugins/siem/**/*.{ts,tsx}'],
+      files: ['x-pack/legacy/plugins/siem/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -464,7 +466,7 @@ module.exports = {
     },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
+      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       rules: {
         'accessor-pairs': 'error',
@@ -611,7 +613,7 @@ module.exports = {
      * Monitoring overrides
      */
     {
-      files: ['x-pack/plugins/monitoring/**/*.js'],
+      files: ['x-pack/legacy/plugins/monitoring/**/*.js'],
       rules: {
         'block-spacing': ['error', 'always'],
         curly: ['error', 'all'],
@@ -620,7 +622,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/monitoring/public/**/*.js'],
+      files: ['x-pack/legacy/plugins/monitoring/public/**/*.js'],
       env: { browser: true },
     },
 
@@ -628,7 +630,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
         curly: ['error', 'all'],
@@ -674,12 +676,12 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/canvas/gulpfile.js',
-        'x-pack/plugins/canvas/scripts/*.js',
-        'x-pack/plugins/canvas/tasks/*.js',
-        'x-pack/plugins/canvas/tasks/**/*.js',
-        'x-pack/plugins/canvas/__tests__/**/*.js',
-        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/legacy/plugins/canvas/gulpfile.js',
+        'x-pack/legacy/plugins/canvas/scripts/*.js',
+        'x-pack/legacy/plugins/canvas/tasks/*.js',
+        'x-pack/legacy/plugins/canvas/tasks/**/*.js',
+        'x-pack/legacy/plugins/canvas/__tests__/**/*.js',
+        'x-pack/legacy/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -692,7 +694,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
       rules: {
         'import/no-unresolved': [
@@ -704,13 +706,13 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/public/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
+      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
       env: {
         jquery: true,
       },

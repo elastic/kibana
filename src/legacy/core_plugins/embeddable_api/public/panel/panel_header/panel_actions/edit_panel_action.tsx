@@ -40,7 +40,7 @@ export class EditPanelAction extends Action {
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(embeddable.type);
     }
-    return i18n.translate('kbn.dashboard.panel.editPanel.displayName', {
+    return i18n.translate('embeddableApi.panel.editPanel.displayName', {
       defaultMessage: 'Edit {value}',
       values: {
         value: factory.getDisplayName(),

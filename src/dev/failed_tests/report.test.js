@@ -50,10 +50,10 @@ Array [
       expect(failures).toMatchInlineSnapshot(`
 Array [
   Object {
-    "classname": "X-Pack Jest Tests.x-pack/plugins/code/server/lsp",
+    "classname": "X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp",
     "failure": "
         TypeError: Cannot read property '0' of undefined
-    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
+    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
       ",
     "name": "launcher can reconnect if process died",
     "time": "7.060",
@@ -105,6 +105,50 @@ Wait timed out after 10055ms
   },
 ]
 `);
+    });
+  });
+
+  describe('mocha report', () => {
+    it('allows relevant tests', async () => {
+      const failures = await createPromiseFromStreams([
+        vfs.src([resolve(__dirname, '__fixtures__/mocha_report.xml')]),
+        mapXml(),
+        filterFailures(),
+        createConcatStream(),
+      ]);
+
+      expect(console.log.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"before all\\" hook
+    
+          Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
+    <html>
+  <head><title>503 Service Temporarily Unavailable</title></head>
+  <body bgcolor=\\"white\\">
+  <center><h1>503 Service Temporarily Unavailable</h1></center>
+  <hr><center>nginx/1.13.7</center>
+  </body>
+  </html>
+  
+      at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/kbn-es/src/artifact.js:95:13)
+      at process._tickCallback (internal/process/next_tick.js:68:7)
+        ",
+  ],
+  Array [
+    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"after all\\" hook
+    
+          TypeError: Cannot read property 'shutdown' of undefined
+      at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)
+      at process.topLevelDomainCallback (domain.js:120:23)
+        ",
+  ],
+  Array [
+    "Found 0 test failures",
+  ],
+]
+`);
+      expect(failures).toMatchInlineSnapshot(`Array []`);
     });
   });
 });

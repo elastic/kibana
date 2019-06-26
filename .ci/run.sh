@@ -20,6 +20,9 @@ kibana-ciGroup*)
 kibana-visualRegression*)
   ./test/scripts/jenkins_visual_regression.sh
   ;;
+kibana-firefoxSmoke*)
+  ./test/scripts/jenkins_firefox_smoke.sh
+  ;;
 x-pack-intake)
   ./test/scripts/jenkins_xpack.sh
   ;;
@@ -29,6 +32,9 @@ x-pack-ciGroup*)
   ;;
 x-pack-visualRegression*)
   ./test/scripts/jenkins_xpack_visual_regression.sh
+  ;;
+x-pack-firefoxSmoke*)
+  ./test/scripts/jenkins_xpack_firefox_smoke.sh
   ;;
 *)
   echo "JOB '$JOB' is not implemented."

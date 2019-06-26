@@ -21,13 +21,13 @@ import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
 
 import {
-  MigrationVersion,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
-  SavedObjectsClient as SavedObjectsApi,
-} from '../../../server/saved_objects';
-import { FindOptions } from '../../../server/saved_objects/service';
+  SavedObjectsClientContract as SavedObjectsApi,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+} from 'src/core/server';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
@@ -43,7 +43,7 @@ interface RequestParams {
 interface CreateOptions {
   id?: string;
   overwrite?: boolean;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
 
@@ -55,7 +55,7 @@ interface BulkCreateOptions<T extends SavedObjectAttributes = SavedObjectAttribu
 
 interface UpdateOptions {
   version?: string;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
 
@@ -239,7 +239,7 @@ export class SavedObjectsClient {
    * @returns A find result with objects matching the specified search.
    */
   public find = <T extends SavedObjectAttributes>(
-    options: FindOptions = {}
+    options: SavedObjectsFindOptions = {}
   ): Promise<FindResults<T>> => {
     const path = this.getPath(['_find']);
     const query = keysToSnakeCaseShallow(options);

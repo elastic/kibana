@@ -20,7 +20,7 @@
 import { Request, Server } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
 
-import { KibanaRequest, toRawRequest } from './router';
+import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
 
 export interface SessionStorageCookieOptions<T> {
@@ -31,7 +31,7 @@ export interface SessionStorageCookieOptions<T> {
 }
 
 class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
-  constructor(private readonly server: Server, private readonly request: Readonly<Request>) {}
+  constructor(private readonly server: Server, private readonly request: Request) {}
   public async get(): Promise<T | null> {
     try {
       return await this.server.auth.test('security-cookie', this.request as Request);
@@ -73,9 +73,8 @@ export async function createCookieSessionStorageFactory<T>(
   });
 
   return {
-    asScoped(request: Readonly<Request> | KibanaRequest) {
-      const req = request instanceof KibanaRequest ? toRawRequest(request) : request;
-      return new ScopedCookieSessionStorage<T>(server, req);
+    asScoped(request: KibanaRequest) {
+      return new ScopedCookieSessionStorage<T>(server, ensureRawRequest(request));
     },
   };
 }

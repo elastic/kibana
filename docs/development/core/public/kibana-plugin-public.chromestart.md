@@ -2,11 +2,40 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeStart](./kibana-plugin-public.chromestart.md)
 
-## ChromeStart type
+## ChromeStart interface
 
 
 <b>Signature:</b>
 
 ```typescript
-export declare type ChromeStart = ReturnType<ChromeService['start']>;
+export interface ChromeStart 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [navControls](./kibana-plugin-public.chromestart.navcontrols.md) | <code>ChromeNavControls</code> | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
+|  [navLinks](./kibana-plugin-public.chromestart.navlinks.md) | <code>ChromeNavLinks</code> | [APIs](./kibana-plugin-public.chromenavlinks.md) for manipulating nav links. |
+|  [recentlyAccessed](./kibana-plugin-public.chromestart.recentlyaccessed.md) | <code>ChromeRecentlyAccessed</code> | [APIs](./kibana-plugin-public.chromerecentlyaccessed.md) for recently accessed history. |
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [addApplicationClass(className)](./kibana-plugin-public.chromestart.addapplicationclass.md) | Add a className that should be set on the application container. |
+|  [getApplicationClasses$()](./kibana-plugin-public.chromestart.getapplicationclasses$.md) | Get the current set of classNames that will be set on the application container. |
+|  [getBadge$()](./kibana-plugin-public.chromestart.getbadge$.md) | Get an observable of the current badge |
+|  [getBrand$()](./kibana-plugin-public.chromestart.getbrand$.md) | Get an observable of the current brand information. |
+|  [getBreadcrumbs$()](./kibana-plugin-public.chromestart.getbreadcrumbs$.md) | Get an observable of the current list of breadcrumbs |
+|  [getHelpExtension$()](./kibana-plugin-public.chromestart.gethelpextension$.md) | Get an observable of the current custom help conttent |
+|  [getIsCollapsed$()](./kibana-plugin-public.chromestart.getiscollapsed$.md) | Get an observable of the current collapsed state of the chrome. |
+|  [getIsVisible$()](./kibana-plugin-public.chromestart.getisvisible$.md) | Get an observable of the current visibility state of the chrome. |
+|  [removeApplicationClass(className)](./kibana-plugin-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
+|  [setBadge(badge)](./kibana-plugin-public.chromestart.setbadge.md) | Override the current badge |
+|  [setBrand(brand)](./kibana-plugin-public.chromestart.setbrand.md) | Set the brand configuration. |
+|  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
+|  [setHelpExtension(helpExtension)](./kibana-plugin-public.chromestart.sethelpextension.md) | Override the current set of custom help content |
+|  [setIsCollapsed(isCollapsed)](./kibana-plugin-public.chromestart.setiscollapsed.md) | Set the collapsed state of the chrome navigation. |
+|  [setIsVisible(isVisible)](./kibana-plugin-public.chromestart.setisvisible.md) | Set the temporary visibility for the chrome. This does nothing if the chrome is hidden by default and should be used to hide the chrome for things like full-screen modes with an exit button. |
+

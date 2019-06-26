@@ -46,4 +46,3 @@ echo ""
 #   --config "test/functional/config.firefox.js"
 # echo ""
 # echo ""
-

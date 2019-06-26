@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { Filters, Query, TimeRange } from 'ui/visualize';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Filter } from '@kbn/es-query';
 
 const name = 'kibana_context';
 
 export interface KibanaContext {
   type: typeof name;
   query?: Query;
-  filters?: Filters;
+  filters?: Filter[];
   timeRange?: TimeRange;
 }
 

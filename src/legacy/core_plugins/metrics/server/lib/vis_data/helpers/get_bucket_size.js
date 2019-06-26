@@ -19,20 +19,40 @@
 
 import { calculateAuto } from './calculate_auto';
 import moment from 'moment';
-import { getUnitValue } from './unit_to_seconds';
+import {
+  getUnitValue,
+  parseInterval,
+  convertIntervalToUnit,
+  ASCENDING_UNIT_ORDER,
+} from './unit_to_seconds';
 import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 
 const calculateBucketData = (timeInterval, capabilities) => {
-  const intervalString = capabilities
+  let intervalString = capabilities
     ? capabilities.getValidTimeInterval(timeInterval)
     : timeInterval;
   const intervalStringMatch = intervalString.match(INTERVAL_STRING_RE);
+  const parsedInterval = parseInterval(intervalString);
 
   let bucketSize = Number(intervalStringMatch[1]) * getUnitValue(intervalStringMatch[2]);
 
   // don't go too small
   if (bucketSize < 1) {
     bucketSize = 1;
+  }
+
+  // Check decimal
+  if (parsedInterval.value % 1 !== 0) {
+    if (parsedInterval.unit !== 'ms') {
+      const { value, unit } = convertIntervalToUnit(
+        intervalString,
+        ASCENDING_UNIT_ORDER[ASCENDING_UNIT_ORDER.indexOf(parsedInterval.unit) - 1]
+      );
+
+      intervalString = value + unit;
+    } else {
+      intervalString = '1ms';
+    }
   }
 
   return {

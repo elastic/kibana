@@ -38,6 +38,7 @@ import {
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
   MockApplicationService,
+  MockDocLinksService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -208,6 +209,16 @@ describe('#start()', () => {
   it('calls application#start()', async () => {
     await startCore();
     expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls docLinks#start()', async () => {
+    await startCore();
+    expect(MockDocLinksService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls uiSettings#start()', async () => {
+    await startCore();
+    expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {

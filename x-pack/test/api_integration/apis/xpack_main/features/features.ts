@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SecurityService } from '../../../../common/services';
-import { Feature } from '../../../../../plugins/xpack_main/types';
+import { Feature } from '../../../../../legacy/plugins/xpack_main/types';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export

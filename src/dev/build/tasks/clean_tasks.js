@@ -204,7 +204,7 @@ export const CleanExtraBrowsersTask = {
 
   async run(config, log, build) {
     const getBrowserPathsForPlatform = platform => {
-      const reportingDir = 'x-pack/plugins/reporting';
+      const reportingDir = 'x-pack/legacy/plugins/reporting';
       const chromiumDir = '.chromium';
       const chromiumPath = p =>
         build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);

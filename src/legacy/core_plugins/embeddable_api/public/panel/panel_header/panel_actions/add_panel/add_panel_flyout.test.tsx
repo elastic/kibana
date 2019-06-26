@@ -35,14 +35,13 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
-import { createRegistry } from '../../../../create_registry';
 import { EmbeddableFactory } from '../../../../embeddables';
 
 const onClose = jest.fn();
 let container: Container;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   return new HelloWorldContainer(input, embeddableFactories);
 }

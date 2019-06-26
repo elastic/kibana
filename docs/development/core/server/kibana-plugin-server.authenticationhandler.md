@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type AuthenticationHandler = (request: Readonly<Request>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
+export declare type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 ```

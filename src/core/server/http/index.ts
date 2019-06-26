@@ -19,7 +19,9 @@
 
 export { config, HttpConfig, HttpConfigType } from './http_config';
 export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
+export { GetAuthHeaders } from './auth_headers_storage';
 export {
+  isRealRequest,
   KibanaRequest,
   KibanaRequestRoute,
   Router,
@@ -28,6 +30,6 @@ export {
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
 export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
-export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
+export { AuthenticationHandler, AuthHeaders, AuthResultData, AuthToolkit } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
 export { SessionStorageFactory, SessionStorage } from './session_storage';
