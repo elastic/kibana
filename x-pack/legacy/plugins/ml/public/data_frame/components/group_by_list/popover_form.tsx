@@ -176,13 +176,10 @@ export const PopoverForm: React.SFC<Props> = ({
         isInvalid={!validAggName}
         helpText={
           isUnsupportedAgg
-            ? i18n.translate(
-                'xpack.ml.dataframe.groupBy.popoverForm.unsupportedAggregationHelpText',
-                {
-                  defaultMessage:
-                    'Besides the custom aggregation name, editing this aggregation is not supported using this form. Please use the advanced editor instead.',
-                }
-              )
+            ? i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.unsupportedGroupByHelpText', {
+                defaultMessage:
+                  'Only the group_by name can be edited in this form. Please use the advanced editor to edit the other parts of the group_by configuration.',
+              })
             : ''
         }
         label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.nameLabel', {

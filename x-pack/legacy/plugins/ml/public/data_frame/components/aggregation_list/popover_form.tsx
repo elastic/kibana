@@ -99,7 +99,7 @@ export const PopoverForm: React.SFC<Props> = ({
           isUnsupportedAgg
             ? i18n.translate('xpack.ml.dataframe.agg.popoverForm.unsupportedAggregationHelpText', {
                 defaultMessage:
-                  'Besides the custom aggregation name, editing this aggregation is not supported using this form. Please use the advanced editor instead.',
+                  'Only the aggregation name can be edited in this form. Please use the advanced editor to edit the other parts of the aggregation.',
               })
             : ''
         }

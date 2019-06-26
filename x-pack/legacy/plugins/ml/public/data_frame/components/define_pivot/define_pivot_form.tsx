@@ -617,7 +617,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                         {i18n.translate(
                           'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalBodyText',
                           {
-                            defaultMessage: `The changes in the advanced editor's haven't been applied yet. By disabling the advanced editor you will lose your edits.`,
+                            defaultMessage: `The changes in the advanced editor haven't been applied yet. By disabling the advanced editor you will lose your edits.`,
                           }
                         )}
                       </p>
