@@ -576,7 +576,11 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                   )}
                   checked={isAdvancedEditorEnabled}
                   onChange={() => {
-                    if (isAdvancedEditorEnabled && isAdvancedEditorApplyButtonEnabled) {
+                    if (
+                      isAdvancedEditorEnabled &&
+                      (isAdvancedEditorApplyButtonEnabled ||
+                        advancedEditorConfig !== advancedEditorConfigLastApplied)
+                    ) {
                       setAdvancedEditorSwitchModalVisible(true);
                       return;
                     }
