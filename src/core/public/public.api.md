@@ -174,7 +174,7 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
-    uiSettings: UiSettingsSetup;
+    uiSettings: UiSettingsClientContract;
 }
 
 // @public
@@ -194,7 +194,7 @@ export interface CoreStart {
     // (undocumented)
     overlays: OverlayStart;
     // (undocumented)
-    uiSettings: UiSettingsStart;
+    uiSettings: UiSettingsClientContract;
 }
 
 // @internal
@@ -503,7 +503,7 @@ export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 // @public (undocumented)
 export class ToastsApi {
     constructor(deps: {
-        uiSettings: UiSettingsSetup;
+        uiSettings: UiSettingsClientContract;
     });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
@@ -552,10 +552,7 @@ export class UiSettingsClient {
     }
 
 // @public (undocumented)
-export type UiSettingsSetup = PublicMethodsOf<UiSettingsClient>;
-
-// @public (undocumented)
-export type UiSettingsStart = PublicMethodsOf<UiSettingsClient>;
+export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
 export interface UiSettingsState {

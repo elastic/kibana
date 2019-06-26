@@ -17,10 +17,10 @@
  * under the License.
  */
 import * as Rx from 'rxjs';
-import { UiSettingsService, UiSettingsSetup } from './ui_settings_service';
+import { UiSettingsService, UiSettingsClientContract } from './';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PublicMethodsOf<UiSettingsSetup>> = {
+  const setupContract: jest.Mocked<UiSettingsClientContract> = {
     getAll: jest.fn(),
     get: jest.fn(),
     get$: jest.fn(),
