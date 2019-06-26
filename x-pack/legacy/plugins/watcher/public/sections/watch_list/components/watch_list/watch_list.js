@@ -94,7 +94,7 @@ app.directive('watchList', function ($injector) {
                 if (err.status === 403) {
                   this.forbidden = true;
                 } else {
-                  toastNotifications.addDanger(err.data.message);
+                  toastNotifications.addDanger(err.message);
                 }
               });
           });
@@ -191,7 +191,7 @@ app.directive('watchList', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => toastNotifications.addDanger(err.data.message));
+              .then(() => toastNotifications.addDanger(err.message));
           });
       }
 

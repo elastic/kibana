@@ -15,8 +15,8 @@ export class WatchesService {
   }
 
   getWatchList() {
-    return kfetch({ pathname: '/watches' })
-      .then(response => response.data.watches)
+    return kfetch({ pathname: `${this.basePath}/watches` })
+      .then(response => response.watches)
       .then(watches => watches.map(watch => {
         return Watch.fromUpstreamJson(watch);
       }));
@@ -35,7 +35,7 @@ export class WatchesService {
     const body = {
       watchIds
     };
-    return kfetch({ pathname: '/watches/delete', method: 'POST', body })
-      .then(response => response.data.results);
+    return kfetch({ pathname: `${this.basePath}/watches/delete`, method: 'POST', body: JSON.stringify(body) })
+      .then(response => response.results);
   }
 }
