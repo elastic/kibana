@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { EuiLoadingSpinner, EuiPopover, EuiDescriptionList } from '@elastic/eui';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import React from 'react';
+import { EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
 import { getEmptyTagValue } from '../empty_value';
 import { Anomalies, Anomaly, NarrowDateRange } from './types';
 import { getTopSeverityJobs } from './get_top_severity';
-import { DraggableScore } from './draggable_score';
-import { createDescriptionsList } from './create_descriptions_list';
+import { AnomalyScore } from './anomaly_score';
 
 interface Args {
   startDate: number;
@@ -19,13 +17,14 @@ interface Args {
   anomalies: Anomalies | null;
   isLoading: boolean;
   narrowDateRange: NarrowDateRange;
+  limit?: number;
 }
 
 export const createJobKey = (score: Anomaly): string =>
   `${score.jobId}-${score.severity}-${score.entityName}-${score.entityValue}`;
 
 export const AnomalyScores = React.memo<Args>(
-  ({ anomalies, startDate, endDate, isLoading, narrowDateRange }): JSX.Element => {
+  ({ anomalies, startDate, endDate, isLoading, narrowDateRange, limit }): JSX.Element => {
     if (isLoading) {
       return <EuiLoadingSpinner data-test-subj="anomaly-score-spinner" size="m" />;
     } else if (anomalies == null || anomalies.anomalies.length === 0) {
@@ -33,37 +32,23 @@ export const AnomalyScores = React.memo<Args>(
     } else {
       return (
         <>
-          {getTopSeverityJobs(anomalies.anomalies).map((score, index) => {
-            const jobKey = createJobKey(score);
-            const [isOpen, setIsOpen] = useState(false);
-            return (
-              <EuiPopover
-                key={jobKey}
-                id="anomaly-score-popover"
-                isOpen={isOpen}
-                onClick={() => setIsOpen(!isOpen)}
-                closePopover={() => setIsOpen(!isOpen)}
-                button={
-                  <DraggableScore
-                    id={escapeDataProviderId(`anomaly-scores-${jobKey}`)}
-                    index={index}
-                    score={score}
-                  />
-                }
-              >
-                <EuiDescriptionList
-                  data-test-subj="anomaly-description-list"
-                  listItems={createDescriptionsList(
-                    score,
-                    startDate,
-                    endDate,
-                    anomalies.interval,
-                    narrowDateRange
-                  )}
+          <EuiFlexGroup gutterSize="none" responsive={false}>
+            {getTopSeverityJobs(anomalies.anomalies, limit).map((score, index) => {
+              const jobKey = createJobKey(score);
+              return (
+                <AnomalyScore
+                  key={jobKey}
+                  jobKey={jobKey}
+                  startDate={startDate}
+                  endDate={endDate}
+                  index={index}
+                  score={score}
+                  interval={anomalies.interval}
+                  narrowDateRange={narrowDateRange}
                 />
-              </EuiPopover>
-            );
-          })}
+              );
+            })}
+          </EuiFlexGroup>
         </>
       );
     }

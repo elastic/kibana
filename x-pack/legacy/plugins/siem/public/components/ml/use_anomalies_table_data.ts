@@ -52,7 +52,7 @@ export const useAnomaliesTableData = ({ influencers, startDate, endDate }: Args)
           jobIds: [],
           criteriaFields: [],
           aggregationInterval: 'auto',
-          threshold: 0,
+          threshold: 75,
           earliestMs,
           latestMs,
           influencers: influencersInput,

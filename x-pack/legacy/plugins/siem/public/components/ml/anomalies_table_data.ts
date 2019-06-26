@@ -24,16 +24,25 @@ export const anomaliesTableData = async (
   body: Body,
   headers: Record<string, string | undefined>
 ): Promise<Anomalies> => {
-  const response = await fetch('/api/ml/results/anomalies_table_data', {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify(body),
-    headers: {
-      'kbn-system-api': 'true',
-      'content-Type': 'application/json',
-      'kbn-xsrf': chrome.getXsrfToken(),
-      ...headers,
-    },
-  });
-  return await response.json();
+  try {
+    const response = await fetch('/api/ml/results/anomalies_table_data', {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: JSON.stringify(body),
+      headers: {
+        'kbn-system-api': 'true',
+        'content-Type': 'application/json',
+        'kbn-xsrf': chrome.getXsrfToken(),
+        ...headers,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    // TODO: Toaster error when this happens instead of returning empty data
+    const empty: Anomalies = {
+      anomalies: [],
+      interval: 'second',
+    };
+    return empty;
+  }
 };
