@@ -104,7 +104,7 @@ export class ActionStatus {
     const missingPropertyError = missingProperty => i18n.translate(
       'xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage',
       {
-        defaultMessage: 'JSON argument must contain a "{missingProperty}" property',
+        defaultMessage: 'JSON argument must contain an "{missingProperty}" property',
         values: { missingProperty }
       }
     );
