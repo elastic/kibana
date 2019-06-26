@@ -476,7 +476,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} =
     // (undocumented)
     start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
-    stop(): void;
+    stop?(): void;
 }
 
 // @public

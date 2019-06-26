@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-stop(): void;
+stop?(): void;
 ```
 <b>Returns:</b>
 
