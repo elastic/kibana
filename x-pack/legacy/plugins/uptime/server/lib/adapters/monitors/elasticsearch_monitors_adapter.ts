@@ -89,7 +89,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             aggs: {
               location: {
                 terms: {
-                  field: "observer.location.name",
+                  field: "observer.geo.name",
                   missing: "N/A"
                 },
                 aggs: {

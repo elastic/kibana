@@ -32,6 +32,7 @@ import {
 } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { getColorsMap } from './get_colors_map';
+import { position } from 'polished';
 
 interface DurationChartProps {
   /**
@@ -76,7 +77,7 @@ export const DurationChart = ({
             name={i18n.translate(
               'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
               {
-                defaultMessage: 'Mean duration',
+                defaultMessage: ldl.name,
               }
             )}
             xAccessor={0}
@@ -100,7 +101,7 @@ export const DurationChart = ({
       </EuiTitle>
       <EuiPanel>
         <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={true} />
+          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={true} legendPosition={Position.Bottom} />
           <Axis
             id={getAxisId('bottom')}
             position={Position.Bottom}
