@@ -43,6 +43,7 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { httpServiceMock } from '../http/http_service.mock';
 import { UiSettingsClient } from '../ui_settings';
 import { CoreSetup, CoreStart } from '..';
+import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -81,6 +82,7 @@ beforeEach(() => {
   mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),

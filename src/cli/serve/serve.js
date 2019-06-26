@@ -214,6 +214,7 @@ export default function (program) {
           repl: !!opts.repl,
           basePath: !!opts.basePath,
           optimize: !!opts.optimize,
+          oss: !!opts.oss,
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,

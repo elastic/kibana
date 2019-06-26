@@ -15,6 +15,7 @@ import { notify } from './notify';
 import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
 import { PositionedElement } from './positioned_element';
+import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 const extractId = (node: { id: string }): string => node.id;
 
@@ -47,9 +48,13 @@ export interface Props {
    * commits events to layout engine
    */
   commit: (eventType: string, config: { event: string }) => void;
+  /**
+   * sets new position for multiple elements
+   */
+  setMultiplePositions: (elements: PositionedElement[]) => void;
 }
 
-// handlers for clone and delete
+// handlers for clone, delete, and saving custom elements
 export const basicHandlerCreators = {
   cloneNodes: ({ insertNodes, pageId, selectToplevelNodes, selectedNodes }: Props) => (): void => {
     const clonedNodes = selectedNodes && cloneSubgraphs(selectedNodes);
@@ -152,5 +157,73 @@ export const layerHandlerCreators = {
     if (selectedNodes.length === 1) {
       elementLayer(pageId, selectedNodes[0].id, -Infinity);
     }
+  },
+};
+
+// handlers for shifting elements up, down, left, and right
+export const positionHandlerCreators = {
+  shiftUp: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.top -= ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  shiftDown: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.top += ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  shiftLeft: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.left -= ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  shiftRight: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.left += ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeUp: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.top -= ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeDown: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.top += ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeLeft: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.left -= ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeRight: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map(element => {
+        element.position.left += ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
   },
 };
