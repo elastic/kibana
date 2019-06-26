@@ -15,6 +15,7 @@ import { BorderConnection } from '../../border_connection';
 import { BorderResizeHandle } from '../../border_resize_handle';
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
+import { InteractionBoundary } from './interaction_boundary';
 
 export class InteractiveWorkpadPage extends PureComponent {
   static propTypes = interactiveWorkpadPagePropTypes;
@@ -126,16 +127,7 @@ export class InteractiveWorkpadPage extends PureComponent {
             }
           })
           .filter(element => !!element)}
-        <div
-          style={{
-            width: 2000,
-            height: 2000,
-            left: -500,
-            top: -500,
-            position: 'absolute',
-            backgroundColor: 'rgba(255, 255, 255, 0.01)',
-          }}
-        />
+        <InteractionBoundary />
       </div>
     );
   }
