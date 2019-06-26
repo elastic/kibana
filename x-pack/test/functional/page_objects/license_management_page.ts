@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
-import expect from '@kbn/expect';
-
 export const LicenseManagementPageProvider = ({
-  getPageObjects,
   getService,
 }: KibanaFunctionalTestDefaultProviders) => {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const pageObjects = getPageObjects(['common']);
 
   return {
     async appHasLoaded() {
+      await log.debug('Checking for license header.');
       const licenseText = await testSubjects.getVisibleText('licenseText');
       expect(licenseText).to.be('Your Trial license is active');
-
     },
-  }
-
+  };
 };

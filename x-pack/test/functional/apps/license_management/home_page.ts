@@ -8,13 +8,12 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
-  const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'licenseManagement']);
 
-  describe('Home page', function () {
-    // this.tags('smoke');
+  describe('Home page', function() {
+    this.tags('smoke');
     before(async () => {
-      await pageObjects.common.navigateToApp('licenseManagement')
+      await pageObjects.common.navigateToApp('licenseManagement');
     });
 
     it('Loads the app', async () => {
