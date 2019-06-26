@@ -16,5 +16,6 @@ export default function actionsTests({ loadTestFile }: KibanaFunctionalTestDefau
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
+    loadTestFile(require.resolve('./builtin_action_types/slack'));
   });
 }

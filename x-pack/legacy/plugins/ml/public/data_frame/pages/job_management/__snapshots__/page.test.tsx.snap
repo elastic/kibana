@@ -2,6 +2,7 @@
 
 exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
 <EuiPage
+  data-test-subj="mlPageDataFrame"
   restrictWidth={false}
 >
   <EuiPageBody
