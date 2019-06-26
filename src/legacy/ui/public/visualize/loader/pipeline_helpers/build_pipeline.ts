@@ -240,6 +240,30 @@ export const prepareDimension = (variable: string, data: any) => {
   return expr;
 };
 
+const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
+  const visState = vis.getCurrentState();
+  const visConfig = visState.params;
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+
+  (dimensions.y || []).forEach(yDimension => {
+    const yAgg = responseAggs[yDimension.accessor];
+    const seriesParam = (visConfig.seriesParams || []).find(
+      (param: any) => param.data.id === yAgg.id
+    );
+    if (seriesParam) {
+      const usedValueAxis = (visConfig.valueAxes || []).find(
+        (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
+      );
+      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+        yDimension.format = { id: 'percent' };
+      }
+    }
+    if (get(visConfig, 'gauge.percentageMode') === true) {
+      yDimension.format = { id: 'percent' };
+    }
+  });
+};
+
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   vega: visState => {
     return `vega ${prepareString('spec', visState.params.spec)}`;
@@ -447,29 +471,8 @@ export const buildVislibDimensions = async (
       dimensions.x.params.interval = output.params.interval;
     }
   }
-  if (vislibCharts.includes(vis.type.name)) {
-    const visState = vis.getCurrentState();
-    const visConfig = visState.params;
-    const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
-    dimensions.y.forEach(yDimension => {
-      const yAgg = responseAggs[yDimension.accessor];
-      const seriesParam = (visConfig.seriesParams || []).find(
-        (param: any) => param.data.id === yAgg.id
-      );
-      if (seriesParam) {
-        const usedValueAxis = (visConfig.valueAxes || []).find(
-          (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
-        );
-        if (get(usedValueAxis, 'scale.mode') === 'percentage') {
-          yDimension.format = { id: 'percent' };
-        }
-      }
-      if (get(visConfig, 'gauge.percentageMode') === true) {
-        yDimension.format = { id: 'percent' };
-      }
-    });
-  }
 
+  adjustVislibDimensionFormmaters(vis, dimensions);
   return dimensions;
 };
 
