@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Readable, pipeline } from 'stream';
+import { Readable } from 'stream';
 import { SavedObject } from 'kibana/server';
 import { createSplitStream, createMapStream, createFilterStream } from '../../../utils/streams';
 
 export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
-  return pipeline(
-    ndJsonStream,
-    createSplitStream('\n'),
-    createMapStream((str: string) => {
-      if (str && str.trim() !== '') {
-        return JSON.parse(str);
-      }
-    }),
-    createFilterStream<SavedObject>(obj => !!obj)
-  );
+  return ndJsonStream
+    .pipe(createSplitStream('\n'))
+    .pipe(
+      createMapStream((str: string) => {
+        if (str && str.trim() !== '') {
+          return JSON.parse(str);
+        }
+      })
+    )
+    .pipe(createFilterStream<SavedObject>(obj => !!obj));
 }
