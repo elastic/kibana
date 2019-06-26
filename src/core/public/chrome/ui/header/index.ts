@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { kbnChromeProvider } from './kbn_chrome';
-
-export function directivesProvider(chrome, internals) {
-  kbnChromeProvider(chrome, internals);
-}
+export { Header, HeaderProps } from './header';

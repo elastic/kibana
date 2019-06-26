@@ -17,16 +17,5 @@
  * under the License.
  */
 
-import './header_global_nav';
-
-export enum NavControlSide {
-  Left = 'left',
-  Right = 'right',
-}
-
-export interface NavControl {
-  name: string;
-  order: number;
-  side: NavControlSide;
-  render: (targetDomElement: HTMLDivElement) => (() => void);
-}
+export { LoadingIndicator } from './loading_indicator';
+export { Header } from './header';
