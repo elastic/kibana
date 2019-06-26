@@ -152,6 +152,9 @@ export class MonitoringViewBaseController {
       });
       ++zoomInLevel;
       clearTimeout(deferTimer);
+      /*
+        Needed to defer 'popstate' event, so it does not fire immediately after it's added
+      */
       deferTimer = setTimeout(() => addPopstateHandler(), 10);
     };
 

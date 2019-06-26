@@ -6,7 +6,7 @@
 
 .monRhythmChart__wrapper .monRhythmChart__zoom {
   visibility: hidden;
-  padding-right: 12px;
+  padding-right: $euiSizeM;
 }
 
 .monRhythmChart__wrapper:hover .monRhythmChart__zoom {
