@@ -68,6 +68,7 @@ export const DataFrameJobList: SFC = () => {
             Create your first data frame job
           </EuiButtonEmpty>,
         ]}
+        data-test-subj="mlNoDataFrameJobsFound"
       />
     );
   }

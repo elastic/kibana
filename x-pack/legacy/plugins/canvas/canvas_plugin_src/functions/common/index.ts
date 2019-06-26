@@ -21,7 +21,6 @@ import { dropdownControl } from './dropdownControl';
 import { eq } from './eq';
 import { exactly } from './exactly';
 import { filterrows } from './filterrows';
-import { font } from './font';
 import { formatdate } from './formatdate';
 import { formatnumber } from './formatnumber';
 import { getCell } from './getCell';
@@ -77,7 +76,6 @@ export const functions = [
   eq,
   exactly,
   filterrows,
-  font,
   formatdate,
   formatnumber,
   getCell,
