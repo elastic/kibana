@@ -1592,16 +1592,15 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@11.3.2":
-  version "11.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.3.2.tgz#d578ab2d6ebe9c85a445376fad190564d43bcdb4"
-  integrity sha512-lnf7ZCEI443uwXJX9rWD/nK10asBTFOmd8HiH1Mn6iggOBchk4QCrI8XDqfJRp2bUqMetBGI6Az7WgqF4uZsEw==
+"@elastic/eui@12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-12.1.0.tgz#bc826bca75035464b2a60582ec0e2d36bd7820e9"
+  integrity sha512-HjIWQNkCFSNHyoU9nSeM+YPs+B1uD7cwRJnZ7Xc8LlBQOWX10nQ8MSdA4RcKdhvFpf5B9fjtfv1Q8/UiOVXP7w==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
     "@types/react-beautiful-dnd" "^10.1.0"
     classnames "^2.2.5"
-    core-js "^2.5.1"
     highlight.js "^9.12.0"
     html "^1.0.0"
     keymirror "^0.1.1"
