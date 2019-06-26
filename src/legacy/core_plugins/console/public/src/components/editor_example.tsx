@@ -17,26 +17,31 @@
  * under the License.
  */
 
-require('./sense_help_example');
+import React, { useEffect } from 'react';
+// @ts-ignore
+import exampleText from 'raw-loader!./helpExample.txt';
+import $ from 'jquery';
+// @ts-ignore
+import SenseEditor from '../sense_editor/editor';
 
-import { i18n } from '@kbn/i18n';
-import template from './welcome.html';
+interface EditorExampleProps {
+  panel: string;
+}
 
-const storage = require('../storage');
+export function EditorExample(props: EditorExampleProps) {
+  const elemId = `help-example-${props.panel}`;
 
-require('ui/modules')
-  .get('app/sense')
-  .directive('senseWelcome', function () {
-    return {
-      restrict: 'E',
-      template,
-      link: function ($scope) {
-        $scope.$on('$destroy', function () {
-          storage.set('version_welcome_shown', '@@SENSE_REVISION');
-        });
-        $scope.asWellAsFragmentText = i18n.translate('console.welcomePage.supportedRequestFormatDescription.asWellAsFragmentText', {
-          defaultMessage: 'as well as'
-        });
-      },
+  useEffect(() => {
+    const el = $(`#${elemId}`);
+    el.text(exampleText.trim());
+    const editor = new SenseEditor(el);
+    editor.setReadOnly(true);
+    editor.$blockScrolling = Infinity;
+
+    return () => {
+      editor.destroy();
     };
-  });
+  }, []);
+
+  return <div id={elemId} className="conHelp__example" />;
+}
