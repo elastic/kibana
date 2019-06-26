@@ -38,6 +38,7 @@ export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    branch: string;
     basePath: string;
     csp: {
       warnLegacyBrowsers: boolean;
@@ -126,6 +127,10 @@ export class InjectedMetadataService {
       getKibanaBuildNumber: () => {
         return this.state.buildNumber;
       },
+
+      getKibanaBranch: () => {
+        return this.state.branch;
+      },
     };
   }
 }
@@ -138,6 +143,7 @@ export class InjectedMetadataService {
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
   getKibanaBuildNumber: () => number;
+  getKibanaBranch: () => string;
   getKibanaVersion: () => string;
   getCapabilities: () => Capabilities;
   getCspConfig: () => {

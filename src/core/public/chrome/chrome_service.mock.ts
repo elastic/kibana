@@ -22,12 +22,32 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeService,
-  ChromeSetup,
   ChromeStart,
 } from './chrome_service';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<ChromeSetup> = {
+const createStartContractMock = () => {
+  const setupContract: jest.Mocked<ChromeStart> = {
+    navLinks: {
+      getNavLinks$: jest.fn(),
+      has: jest.fn(),
+      get: jest.fn(),
+      getAll: jest.fn(),
+      showOnly: jest.fn(),
+      update: jest.fn(),
+      enableForcedAppSwitcherNavigation: jest.fn(),
+      getForceAppSwitcherNavigation$: jest.fn(),
+    },
+    recentlyAccessed: {
+      add: jest.fn(),
+      get: jest.fn(),
+      get$: jest.fn(),
+    },
+    navControls: {
+      registerLeft: jest.fn(),
+      registerRight: jest.fn(),
+      getLeft$: jest.fn(),
+      getRight$: jest.fn(),
+    },
     setBrand: jest.fn(),
     getBrand$: jest.fn(),
     setIsVisible: jest.fn(),
@@ -54,34 +74,17 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
-const createStartContractMock = (): jest.Mocked<ChromeStart> => ({
-  navLinks: {
-    getNavLinks$: jest.fn(),
-    clear: jest.fn(),
-    has: jest.fn(),
-    get: jest.fn(),
-    getAll: jest.fn(),
-    showOnly: jest.fn(),
-    update: jest.fn(),
-    enableForcedAppSwitcherNavigation: jest.fn(),
-    getForceAppSwitcherNavigation$: jest.fn(),
-  },
-});
-
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = {
-    setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockReturnValue(createSetupContractMock());
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 
 export const chromeServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

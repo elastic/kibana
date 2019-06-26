@@ -13,12 +13,6 @@
     style="display: none;">
 </div>
 
-<div ng-if="agg.error" class="form-group">
-  <p class="visEditorAggParam__error ng-binding">
-    {{agg.error}}
-  </p>
-</div>
-
 <div ng-if="agg.schema.deprecate" class="form-group">
   <p ng-show="agg.schema.deprecateMessage" class="visEditorAggParam__error">
     {{ agg.schema.deprecateMessage }}
@@ -32,6 +26,14 @@
   >
   </p>
 </div>
+
+<vis-agg-control-react-wrapper
+  ng-if="agg.schema.editorComponent"
+  agg-params="agg.params"
+  component="agg.schema.editorComponent"
+  editor-state-params="state.params"
+  set-value="onParamChange"
+/>
 
 <vis-agg-select
   agg="agg"

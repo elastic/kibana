@@ -1,0 +1,97 @@
+[role="xpack"]
+[[xpack-logs-configuring]]
+
+:ecs-link: {ecs-ref}[Elastic Common Schema (ECS)]
+
+== Configuring the Logs UI
+
+The `filebeat-*` index pattern is used to query data by default. If your logs
+are located in a different set of indices, use a different timestamp field, or
+contain parsed fields which you want to expose as individual columns, you can
+adjust the source configuration via the user interface or the {kib}
+configuration file.
+
+NOTE: Logs and Infrastructure share a common data source definition in
+each space. Changes in one of them can influence the data displayed in the
+other.
+
+[float]
+=== Configure source
+
+*Configure source* can be accessed via
+image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
+in the toolbar.
+
+[role="screenshot"]
+image::logs/images/logs-configure-source.png[Configure Logs UI source button in Kibana]
+
+This opens the source configuration fly-out dialog with multiple tabs, where
+you can inspect and adjust various index settings and log column configuration.
+
+TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration
+changes performed via *Configure source* are specific to that space. You can
+therefore easily make different subsets of the data available by creating
+multiple spaces with different data source configurations.
+
+[float]
+[[logs-read-only-access]]
+==== Read only access
+When you have insufficient privileges to change the source configuration, the
+following indicator in Kibana will be displayed, and the buttons to change the
+source configuration won't be visible. For more information, see
+<<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::logs/images/read-only-badge.png[Example of Logs' read only access indicator in Kibana's header]
+
+[float]
+==== Indices and fields configuration
+
+The *Indices and fields* tab provides access to the following configuration
+items:
+
+* *Name*: The name of the source configuration.
+* *Indices*: The patterns of the Elasticsearch indices to read metrics and logs
+  from.
+* *Fields*: The names of particular fields in the indices that need to be known
+  to the Infrastructure and Logs UIs in order to query and interpret the data
+  correctly.
+
+[role="screenshot"]
+image::logs/images/logs-configure-source-dialog-indices-tab.png[Configure logs UI source indices and fields dialog in Kibana]
+
+[float]
+==== Log columns configuration
+
+The *Log columns* tab enables you to change the set of columns that are
+displayed in the Logs UI. By default the following columns are shown:
+
+* *Timestamp*: The log entry's timestamp as defined in the `timestamp` field.
+* *events.dataset*: The event dataset as indicated by this {ecs-link} field.
+* *Message*: The message extracted from the document. The exact content of that
+  field depends on the type of log message. If no special type is detected, the
+  {ecs-link} field `message` is used.
+
+[role="screenshot"]
+image::logs/images/logs-configure-source-dialog-log-columns-tab.png[Configure logs UI source columns dialog in Kibana]
+
+To add a new column, click
+image:logs/images/logs-configure-source-dialog-add-column-button.png[Add column]
+above the list. This will cause a popover to be shown in which you can filter a
+list of the available fields and select one for inclusion:
+
+[role="screenshot"]
+image::logs/images/logs-configure-source-dialog-add-column-popover.png[Configure logs UI source add columns popover in Kibana]
+
+To remove a column, click
+image:logs/images/logs-configure-source-dialog-remove-column-button.png[Remove column]
+in the respective entry. The list must contain at least one column to apply the
+changes.
+
+[float]
+=== Configuration file
+
+The settings in the configuration file are used as a fallback when no other
+configuration for that space has been defined. They are located in the
+configuration namespace `xpack.infra.sources.default`. See
+<<logs-ui-settings-kb>> for a complete list of the possible entries.

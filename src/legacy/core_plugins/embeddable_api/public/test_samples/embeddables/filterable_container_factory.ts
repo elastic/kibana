@@ -29,7 +29,7 @@ export class FilterableContainerFactory extends EmbeddableFactory<FilterableCont
   public readonly type = FILTERABLE_CONTAINER;
 
   public getDisplayName() {
-    return i18n.translate('kbn.embeddable.samples.filterable.displayName', {
+    return i18n.translate('embeddableApi.samples.filterableContainer.displayName', {
       defaultMessage: 'filterable dashboard',
     });
   }

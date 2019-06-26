@@ -29,79 +29,19 @@ const setupFakeBasePath: SetupTap = injectedMetadata => {
   injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
 };
 
-describe('getBasePath', () => {
+describe('basePath.get()', () => {
   it('returns an empty string if no basePath is injected', () => {
     const { http } = setup(injectedMetadata => {
-      injectedMetadata.getBasePath.mockReturnValue('');
+      injectedMetadata.getBasePath.mockReturnValue(undefined as any);
     });
 
-    expect(http.getBasePath()).toBe('');
+    expect(http.basePath.get()).toBe('');
   });
 
   it('returns the injected basePath', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.getBasePath()).toBe('/foo/bar');
-  });
-});
-
-describe('prependBasePath', () => {
-  it('adds the base path to the path if it is relative and starts with a slash', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.prependBasePath('/a/b')).toBe('/foo/bar/a/b');
-  });
-
-  it('leaves the query string and hash of path unchanged', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.prependBasePath('/a/b?x=y#c/d/e')).toBe('/foo/bar/a/b?x=y#c/d/e');
-  });
-
-  it('returns the path unchanged if it does not start with a slash', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.prependBasePath('a/b')).toBe('a/b');
-  });
-
-  it('returns the path unchanged it it has a hostname', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.prependBasePath('http://localhost:5601/a/b')).toBe('http://localhost:5601/a/b');
-  });
-});
-
-describe('removeBasePath', () => {
-  it('removes the basePath if relative path starts with it', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.removeBasePath('/foo/bar/a/b')).toBe('/a/b');
-  });
-
-  it('leaves query string and hash intact', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.removeBasePath('/foo/bar/a/b?c=y#1234')).toBe('/a/b?c=y#1234');
-  });
-
-  it('ignores urls with hostnames', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.removeBasePath('http://localhost:5601/foo/bar/a/b')).toBe(
-      'http://localhost:5601/foo/bar/a/b'
-    );
-  });
-
-  it('returns slash if path is just basePath', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.removeBasePath('/foo/bar')).toBe('/');
-  });
-
-  it('returns full path if basePath is not its own segment', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.removeBasePath('/foo/barhop')).toBe('/foo/barhop');
+    expect(http.basePath.get()).toBe('/foo/bar');
   });
 });
 

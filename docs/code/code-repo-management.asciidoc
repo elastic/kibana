@@ -9,13 +9,13 @@ image::images/code-repo-management.png[]
 ==== Add and delete a repo
 The <<code-getting-started, Getting Started>> provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine tune the hostname of the git clone URL in your `kibana.yml` file.
 
-For security reasons, Code allows only a few trusted hostnames, such as github.com, by default. You can add SSH key to {kib} to clone private repo.
+For security reasons, Code allows only a few trusted hostnames, such as github.com, by default. You can add an SSH key to {kib} to clone private repos.
 
 Deleting a repo removes it from local storage and the Elasticsearch index.
 
 [float]
 ==== Reindex a repo
-*Code* automatically reindexes an imported repo, but in some cases you might need to manually refresh the index. For example, you might refresh an index  after a new language server is installed. Or, you might want to immediately update the index to the HEAD revision. Click *Reindex* to initiate a reindex.
+*Code* automatically reindexes an imported repo at set intervals, but in some cases you might need to manually refresh the index. For example, you might refresh an index  after a new language server is installed. Or, you might want to immediately update the index to the HEAD revision. Click *Reindex* to initiate a reindex.
 
 [float]
 ==== Clone URL management

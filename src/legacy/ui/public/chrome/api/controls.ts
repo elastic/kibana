@@ -18,9 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
-const newPlatformChrome = npSetup.core.chrome;
+const newPlatformChrome = npStart.core.chrome;
 
 export function initChromeControlsApi(chrome: { [key: string]: any }) {
   // cache of chrome visibility state

@@ -5,14 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { networkTopNFlowQuery } from '../../../../plugins/siem/public/containers/network_top_n_flow/index.gql_query';
+import { networkTopNFlowQuery } from '../../../../legacy/plugins/siem/public/containers/network_top_n_flow/index.gql_query';
 import {
   Direction,
   FlowDirection,
   FlowTarget,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowFields,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const EDGE_LENGTH = 10;

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './brush_event.test.mocks';
+
 jest.mock('ui/chrome',
   () => ({
     getBasePath: () => `/some/base/path`,
@@ -27,7 +29,7 @@ jest.mock('ui/chrome',
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now' };
             case 'timepicker:refreshIntervalDefaults':
-              return { display: 'Off', pause: false, value: 0 };
+              return { pause: false, value: 0 };
             default:
               throw new Error(`Unexpected config key: ${key}`);
           }

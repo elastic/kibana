@@ -10,7 +10,8 @@ export default function statusPageFunctonalTests({ getService, getPageObjects }:
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'statusPage', 'home']);
 
-  describe('Status Page', () => {
+  describe('Status Page', function() {
+    this.tags('smoke');
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => await esArchiver.unload('empty_kibana'));
 

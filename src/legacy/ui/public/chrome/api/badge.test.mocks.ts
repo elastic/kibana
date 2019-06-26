@@ -19,9 +19,9 @@
 
 import { chromeServiceMock } from '../../../../../core/public/mocks';
 
-export const newPlatformChrome = chromeServiceMock.createSetupContract();
+export const newPlatformChrome = chromeServiceMock.createStartContract();
 jest.doMock('ui/new_platform', () => ({
-  npSetup: {
+  npStart: {
     core: { chrome: newPlatformChrome },
   },
 }));

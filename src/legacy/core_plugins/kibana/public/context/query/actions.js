@@ -108,17 +108,16 @@ export function QueryActionsProvider(Private, Promise) {
     }
 
     setLoadingStatus(state)(type);
+    const [sortField, sortDir] = sort;
 
     return Promise.try(() => (
       fetchSurroundingDocs(
         type,
         indexPatternId,
-        sort[0],
-        sort[1],
-        anchor.fields[sort[0]][0],
-        anchor.sort[0],
+        anchor,
+        sortField,
         tieBreakerField,
-        anchor.sort[1],
+        sortDir,
         count,
         filters
       )

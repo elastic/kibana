@@ -17,10 +17,19 @@
  * under the License.
  */
 
-import { Query } from 'ui/embeddable';
+import { EmbeddableFactory } from 'ui/embeddable';
 import { AppState } from 'ui/state_management/app_state';
+import { UIRegistry } from 'ui/registry/_registry';
 import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { AppState as TAppState } from 'ui/state_management/app_state';
 import { DashboardViewMode } from './dashboard_view_mode';
+
+export interface EmbeddableFactoryRegistry extends UIRegistry<EmbeddableFactory> {
+  byName: { [key: string]: EmbeddableFactory };
+}
+
+export type NavAction = (menuItem: any, navController: any, anchorElement: any) => void;
 
 export interface GridData {
   w: number;
@@ -110,3 +119,30 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
+
+export type ConfirmModalFn = (
+  message: string,
+  confirmOptions: {
+    onConfirm: () => void;
+    onCancel: () => void;
+    confirmButtonText: string;
+    cancelButtonText: string;
+    defaultFocusedButton: string;
+    title: string;
+  }
+) => void;
+
+export type AddFilterFn = (
+  {
+    field,
+    value,
+    operator,
+    index,
+  }: {
+    field: string;
+    value: string;
+    operator: string;
+    index: string;
+  },
+  appState: TAppState
+) => void;

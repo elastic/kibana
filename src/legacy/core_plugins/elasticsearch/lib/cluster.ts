@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { Request } from 'hapi';
 import { errors } from 'elasticsearch';
-import { CallAPIOptions, ClusterClient } from 'kibana/server';
+import { CallAPIOptions, ClusterClient, FakeRequest } from 'kibana/server';
 
 export class Cluster {
   public readonly errors = errors;
@@ -26,7 +27,7 @@ export class Cluster {
   constructor(private readonly clusterClient: ClusterClient) {}
 
   public callWithRequest = async (
-    req: { headers?: Record<string, string> } = {},
+    req: Request | FakeRequest,
     endpoint: string,
     clientParams?: Record<string, unknown>,
     options?: CallAPIOptions

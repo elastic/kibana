@@ -11,7 +11,7 @@
   includePaths: [
     'package.json',
     'x-pack/package.json',
-    'x-pack/plugins/*/package.json',
+    'x-pack/legacy/plugins/*/package.json',
     'packages/*/package.json',
     'test/plugin_functional/plugins/*/package.json',
     'test/interpreter_functional/plugins/*/package.json',
@@ -143,12 +143,21 @@
         packagePatterns: [
           '(\\b|_)webpack(\\b|_)',
           '(\\b|_)loader(\\b|_)',
+          '(\\b|_)acorn(\\b|_)',
+          '(\\b|_)terser(\\b|_)',
         ],
         packageNames: [
           'mini-css-extract-plugin',
           '@types/mini-css-extract-plugin',
           'chokidar',
           '@types/chokidar',
+        ],
+      },
+      {
+        groupSlug: 'vega',
+        groupName: 'vega related packages',
+        packagePatterns: [
+          '(\\b|_)vega(\\b|_)',
         ],
       },
       {
@@ -213,6 +222,15 @@
           '@types/microsoft__api-extractor',
         ],
         enabled: false,
+      },
+      {
+        groupSlug: 'jsts',
+        groupName: 'jsts related packages',
+        packageNames: [
+          'jsts',
+          '@types/jsts',
+        ],
+        allowedVersions: '^1.6.2',
       },
       {
         groupSlug: 'json-stable-stringify',

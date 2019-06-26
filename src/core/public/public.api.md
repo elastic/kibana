@@ -8,7 +8,7 @@ import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public (undocumented)
 export interface ApplicationSetup {
@@ -76,6 +76,20 @@ export interface ChromeBreadcrumb {
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
 // @public (undocumented)
+export interface ChromeNavControl {
+    // (undocumented)
+    mount(targetDomElement: HTMLElement): () => void;
+    // (undocumented)
+    order?: number;
+}
+
+// @public
+export interface ChromeNavControls {
+    registerLeft(navControl: ChromeNavControl): void;
+    registerRight(navControl: ChromeNavControl): void;
+}
+
+// @public (undocumented)
 export interface ChromeNavLink {
     readonly active?: boolean;
     readonly baseUrl: string;
@@ -92,13 +106,60 @@ export interface ChromeNavLink {
     readonly url?: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export type ChromeSetup = ReturnType<ChromeService['setup']>;
+// @public
+export interface ChromeNavLinks {
+    enableForcedAppSwitcherNavigation(): void;
+    get(id: string): ChromeNavLink | undefined;
+    getAll(): Array<Readonly<ChromeNavLink>>;
+    getForceAppSwitcherNavigation$(): Observable<boolean>;
+    getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
+    has(id: string): boolean;
+    showOnly(id: string): void;
+    update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
+}
 
 // @public (undocumented)
-export type ChromeStart = ReturnType<ChromeService['start']>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>>;
+
+// @public
+export interface ChromeRecentlyAccessed {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: No member was found with name "basePath"
+    add(link: string, label: string, id: string): void;
+    get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>;
+    get(): ChromeRecentlyAccessedHistoryItem[];
+}
+
+// @public (undocumented)
+export interface ChromeRecentlyAccessedHistoryItem {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    label: string;
+    // (undocumented)
+    link: string;
+}
+
+// @public (undocumented)
+export interface ChromeStart {
+    addApplicationClass(className: string): void;
+    getApplicationClasses$(): Observable<string[]>;
+    getBadge$(): Observable<ChromeBadge | undefined>;
+    getBrand$(): Observable<ChromeBrand>;
+    getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+    getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
+    getIsCollapsed$(): Observable<boolean>;
+    getIsVisible$(): Observable<boolean>;
+    navControls: ChromeNavControls;
+    navLinks: ChromeNavLinks;
+    recentlyAccessed: ChromeRecentlyAccessed;
+    removeApplicationClass(className: string): void;
+    setBadge(badge?: ChromeBadge): void;
+    setBrand(brand: ChromeBrand): void;
+    setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+    setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+    setIsCollapsed(isCollapsed: boolean): void;
+    setIsVisible(isVisible: boolean): void;
+}
 
 // @internal (undocumented)
 export interface CoreContext {
@@ -107,13 +168,9 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    chrome: ChromeSetup;
-    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     http: HttpSetup;
-    // (undocumented)
-    i18n: I18nSetup;
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -127,6 +184,8 @@ export interface CoreStart {
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
+    docLinks: DocLinksStart;
+    // (undocumented)
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
@@ -134,6 +193,8 @@ export interface CoreStart {
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
+    // (undocumented)
+    uiSettings: UiSettingsStart;
 }
 
 // @internal
@@ -149,6 +210,97 @@ export class CoreSystem {
     // (undocumented)
     stop(): void;
     }
+
+// @public (undocumented)
+export interface DocLinksStart {
+    // (undocumented)
+    readonly DOC_LINK_VERSION: string;
+    // (undocumented)
+    readonly ELASTIC_WEBSITE_URL: string;
+    // (undocumented)
+    readonly links: {
+        readonly filebeat: {
+            readonly base: string;
+            readonly installation: string;
+            readonly configuration: string;
+            readonly elasticsearchOutput: string;
+            readonly startup: string;
+            readonly exportedFields: string;
+        };
+        readonly auditbeat: {
+            readonly base: string;
+        };
+        readonly metricbeat: {
+            readonly base: string;
+        };
+        readonly heartbeat: {
+            readonly base: string;
+        };
+        readonly logstash: {
+            readonly base: string;
+        };
+        readonly functionbeat: {
+            readonly base: string;
+        };
+        readonly winlogbeat: {
+            readonly base: string;
+        };
+        readonly aggs: {
+            readonly date_histogram: string;
+            readonly date_range: string;
+            readonly filter: string;
+            readonly filters: string;
+            readonly geohash_grid: string;
+            readonly histogram: string;
+            readonly ip_range: string;
+            readonly range: string;
+            readonly significant_terms: string;
+            readonly terms: string;
+            readonly avg: string;
+            readonly avg_bucket: string;
+            readonly max_bucket: string;
+            readonly min_bucket: string;
+            readonly sum_bucket: string;
+            readonly cardinality: string;
+            readonly count: string;
+            readonly cumulative_sum: string;
+            readonly derivative: string;
+            readonly geo_bounds: string;
+            readonly geo_centroid: string;
+            readonly max: string;
+            readonly median: string;
+            readonly min: string;
+            readonly moving_avg: string;
+            readonly percentile_ranks: string;
+            readonly serial_diff: string;
+            readonly std_dev: string;
+            readonly sum: string;
+            readonly top_hits: string;
+        };
+        readonly scriptedFields: {
+            readonly scriptFields: string;
+            readonly scriptAggs: string;
+            readonly painless: string;
+            readonly painlessApi: string;
+            readonly painlessSyntax: string;
+            readonly luceneExpressions: string;
+        };
+        readonly indexPatterns: {
+            readonly loadingData: string;
+            readonly introduction: string;
+        };
+        readonly kibana: string;
+        readonly siem: string;
+        readonly query: {
+            readonly luceneQuerySyntax: string;
+            readonly queryDsl: string;
+            readonly kueryQuerySyntax: string;
+        };
+        readonly date: {
+            readonly dateMath: string;
+        };
+    };
+}
 
 // Warning: (ae-missing-release-tag) "ErrorToastOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
@@ -197,6 +349,12 @@ export interface HttpServiceBase {
     // (undocumented)
     addLoadingCount(count$: Observable<number>): void;
     // (undocumented)
+    basePath: {
+        get: () => string;
+        prepend: (url: string) => string;
+        remove: (url: string) => string;
+    };
+    // (undocumented)
     delete: HttpHandler;
     // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
     // 
@@ -204,8 +362,6 @@ export interface HttpServiceBase {
     fetch: HttpHandler;
     // (undocumented)
     get: HttpHandler;
-    // (undocumented)
-    getBasePath(): string;
     // (undocumented)
     getLoadingCount$(): Observable<number>;
     // (undocumented)
@@ -219,13 +375,9 @@ export interface HttpServiceBase {
     // (undocumented)
     post: HttpHandler;
     // (undocumented)
-    prependBasePath(path: string): string;
-    // (undocumented)
     put: HttpHandler;
     // (undocumented)
     removeAllInterceptors(): void;
-    // (undocumented)
-    removeBasePath(path: string): string;
     // (undocumented)
     stop(): void;
 }
@@ -237,14 +389,11 @@ export type HttpSetup = HttpServiceBase;
 export type HttpStart = HttpServiceBase;
 
 // @public
-export interface I18nSetup {
+export interface I18nStart {
     Context: ({ children }: {
         children: React.ReactNode;
     }) => JSX.Element;
 }
-
-// @public (undocumented)
-export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {
@@ -355,7 +504,6 @@ export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 export class ToastsApi {
     constructor(deps: {
         uiSettings: UiSettingsSetup;
-        i18n: I18nSetup;
     });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
@@ -405,6 +553,9 @@ export class UiSettingsClient {
 
 // @public (undocumented)
 export type UiSettingsSetup = UiSettingsClient;
+
+// @public (undocumented)
+export type UiSettingsStart = UiSettingsClient;
 
 // @public (undocumented)
 export interface UiSettingsState {

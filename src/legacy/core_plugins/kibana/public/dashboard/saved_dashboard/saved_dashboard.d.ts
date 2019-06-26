@@ -21,23 +21,25 @@ import { SearchSource } from 'ui/courier';
 import { SavedObject } from 'ui/saved_objects/saved_object';
 import moment from 'moment';
 import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { Filter } from '@kbn/es-query';
 
 export interface SavedObjectDashboard extends SavedObject {
   id?: string;
   copyOnSave: boolean;
   timeRestore: boolean;
-  // These optionally being moment objects rather than strings seems more like a bug than by design. It's due to
-  // some code in udpate_saved_dashboard that should probably get cleaned up.
-  timeTo: string | moment.Moment | undefined;
-  timeFrom: string | moment.Moment | undefined;
+  timeTo?: string;
+  timeFrom?: string;
   title: string;
   description?: string;
   panelsJSON: string;
-  optionsJSON: string | undefined;
+  optionsJSON?: string;
   // TODO: write a migration to rid of this, it's only around for bwc.
   uiStateJSON?: string;
   lastSavedTitle: string;
   searchSource: SearchSource;
   destroy: () => void;
   refreshInterval?: RefreshInterval;
+  getQuery(): Query;
+  getFilters(): Filter[];
 }

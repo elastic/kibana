@@ -129,16 +129,18 @@
             >
               <header class="dscTimechart__header">
                 <div class="small">
-                  <span
+                  <label
+                    for="dscResultsIntervalSelector"
                     tooltip="{{::'kbn.discover.howToChangeTheTimeTooltip' | i18n: {defaultMessage: 'To change the time, click the clock icon in the navigation bar'} }}"
                   >
                     {{toMoment(timeRange.from)}} - {{toMoment(timeRange.to)}}
-                  </span>
+                  </label>
 
                   &mdash;
 
                   <span class="form-inline">
                     <select
+                      id="dscResultsIntervalSelector"
                       class="dscResults__interval form-control"
                       ng-model="state.interval"
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"

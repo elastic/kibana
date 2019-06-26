@@ -30,11 +30,10 @@ import {
 
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
-import { createRegistry } from '../../../create_registry';
 import { EmbeddableFactory } from '../../../embeddables';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 
-const embeddableFactories = createRegistry<EmbeddableFactory>();
+const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 
 let container: FilterableContainer;

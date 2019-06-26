@@ -50,6 +50,12 @@ interface PackageGroup {
    * should be ignored.
    */
   readonly enabled?: false;
+
+  /**
+   * A semver range defining allowed versions for a package group
+   * https://renovatebot.com/docs/configuration-options/#allowedversions
+   */
+  readonly allowedVersions?: string;
 }
 
 export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
@@ -112,8 +118,13 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
 
   {
     name: 'webpack',
-    packageWords: ['webpack', 'loader'],
+    packageWords: ['webpack', 'loader', 'acorn', 'terser'],
     packageNames: ['mini-css-extract-plugin', 'chokidar'],
+  },
+
+  {
+    name: 'vega',
+    packageWords: ['vega'],
   },
 
   {
@@ -137,6 +148,12 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     name: 'api-documenter',
     packageNames: ['@microsoft/api-documenter', '@microsoft/api-extractor'],
     enabled: false,
+  },
+
+  {
+    name: 'jsts',
+    packageNames: ['jsts'],
+    allowedVersions: '^1.6.2',
   },
 ];
 

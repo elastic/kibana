@@ -20,3 +20,5 @@ type MethodKeysOf<T> = {
 }[keyof T];
 
 type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
+
+declare module 'axios/lib/adapters/xhr';

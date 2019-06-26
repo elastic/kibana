@@ -20,14 +20,20 @@
 import * as Url from 'url';
 
 import { i18n } from '@kbn/i18n';
-import * as Rx from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { IconType } from '@elastic/eui';
-import { InjectedMetadataSetup } from '../injected_metadata';
-import { NotificationsSetup } from '../notifications';
-import { NavLinksService } from './nav_links/nav_links_service';
+
+import { InjectedMetadataStart } from '../injected_metadata';
+import { NotificationsStart } from '../notifications';
 import { ApplicationStart } from '../application';
 import { HttpStart } from '../http';
+
+import { ChromeNavLinks, NavLinksService } from './nav_links';
+import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
+import { NavControlsService, ChromeNavControls } from './nav_controls';
+
+export { ChromeNavControls, ChromeRecentlyAccessed };
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -63,36 +69,40 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
-interface SetupDeps {
-  injectedMetadata: InjectedMetadataSetup;
-  notifications: NotificationsSetup;
-}
-
 interface StartDeps {
   application: ApplicationStart;
   http: HttpStart;
+  injectedMetadata: InjectedMetadataStart;
+  notifications: NotificationsStart;
 }
 
 /** @internal */
 export class ChromeService {
-  private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
+  private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
+  private readonly recentlyAccessed = new RecentlyAccessedService();
 
   public constructor({ browserSupportsCsp }: ConstructorParams) {
     this.browserSupportsCsp = browserSupportsCsp;
   }
 
-  public setup({ injectedMetadata, notifications }: SetupDeps) {
+  public async start({
+    application,
+    http,
+    injectedMetadata,
+    notifications,
+  }: StartDeps): Promise<ChromeStart> {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
-    const brand$ = new Rx.BehaviorSubject<ChromeBrand>({});
-    const isVisible$ = new Rx.BehaviorSubject(true);
-    const isCollapsed$ = new Rx.BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
-    const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
-    const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
-    const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
-    const badge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);
+    const brand$ = new BehaviorSubject<ChromeBrand>({});
+    const isVisible$ = new BehaviorSubject(true);
+    const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
+    const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
+    const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
+    const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -103,20 +113,12 @@ export class ChromeService {
     }
 
     return {
-      /**
-       * Set the brand configuration. Normally the `logo` property will be rendered as the
-       * CSS background for the home link in the chrome navigation, but when the page is
-       * rendered in a small window the `smallLogo` will be used and rendered at about
-       * 45px wide.
-       *
-       * example:
-       *
-       *    chrome.setBrand({
-       *      logo: 'url(/plugins/app/logo.png) center no-repeat'
-       *      smallLogo: 'url(/plugins/app/logo-small.png) center no-repeat'
-       *    })
-       *
-       */
+      navControls: this.navControls.start(),
+      navLinks: this.navLinks.start({ application, http }),
+      recentlyAccessed: await this.recentlyAccessed.start({ http }),
+
+      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
+
       setBrand: (brand: ChromeBrand) => {
         brand$.next(
           Object.freeze({
@@ -126,32 +128,18 @@ export class ChromeService {
         );
       },
 
-      /**
-       * Get an observable of the current brand information.
-       */
-      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
-
-      /**
-       * Set the temporary visibility for the chrome. This does nothing if the chrome is hidden
-       * by default and should be used to hide the chrome for things like full-screen modes
-       * with an exit button.
-       */
-      setIsVisible: (visibility: boolean) => {
-        isVisible$.next(visibility);
-      },
-
-      /**
-       * Get an observable of the current visibility state of the chrome.
-       */
       getIsVisible$: () =>
         isVisible$.pipe(
           map(visibility => (FORCE_HIDDEN ? false : visibility)),
           takeUntil(this.stop$)
         ),
 
-      /**
-       * Set the collapsed state of the chrome navigation.
-       */
+      setIsVisible: (visibility: boolean) => {
+        isVisible$.next(visibility);
+      },
+
+      getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
+
       setIsCollapsed: (isCollapsed: boolean) => {
         isCollapsed$.next(isCollapsed);
         if (isCollapsed) {
@@ -161,78 +149,41 @@ export class ChromeService {
         }
       },
 
-      /**
-       * Get an observable of the current collapsed state of the chrome.
-       */
-      getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
+      getApplicationClasses$: () =>
+        applicationClasses$.pipe(
+          map(set => [...set]),
+          takeUntil(this.stop$)
+        ),
 
-      /**
-       * Add a className that should be set on the application container.
-       */
       addApplicationClass: (className: string) => {
         const update = new Set([...applicationClasses$.getValue()]);
         update.add(className);
         applicationClasses$.next(update);
       },
 
-      /**
-       * Remove a className added with `addApplicationClass()`. If className is unknown it is ignored.
-       */
       removeApplicationClass: (className: string) => {
         const update = new Set([...applicationClasses$.getValue()]);
         update.delete(className);
         applicationClasses$.next(update);
       },
 
-      /**
-       * Get the current set of classNames that will be set on the application container.
-       */
-      getApplicationClasses$: () =>
-        applicationClasses$.pipe(
-          map(set => [...set]),
-          takeUntil(this.stop$)
-        ),
-      /**
-       * Get an observable of the current badge
-       */
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
-      /**
-       * Override the current badge
-       */
-      setBadge: (badge: ChromeBadge | undefined) => {
+      setBadge: (badge: ChromeBadge) => {
         badge$.next(badge);
       },
 
-      /**
-       * Get an observable of the current list of breadcrumbs
-       */
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
-      /**
-       * Override the current set of breadcrumbs
-       */
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbs$.next(newBreadcrumbs);
       },
 
-      /**
-       * Get an observable of the current custom help conttent
-       */
       getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
 
-      /**
-       * Override the current set of breadcrumbs
-       */
       setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
         helpExtension$.next(helpExtension);
       },
-    };
-  }
-
-  public start({ application, http }: StartDeps) {
-    return {
-      navLinks: this.navLinks.start({ application, http }),
     };
   }
 
@@ -243,7 +194,103 @@ export class ChromeService {
 }
 
 /** @public */
-export type ChromeSetup = ReturnType<ChromeService['setup']>;
+export interface ChromeStart {
+  /** {@inheritdoc ChromeNavLinks} */
+  navLinks: ChromeNavLinks;
+  /** {@inheritdoc ChromeNavControls} */
+  navControls: ChromeNavControls;
+  /** {@inheritdoc ChromeRecentlyAccessed} */
+  recentlyAccessed: ChromeRecentlyAccessed;
 
-/** @public */
-export type ChromeStart = ReturnType<ChromeService['start']>;
+  /**
+   * Get an observable of the current brand information.
+   */
+  getBrand$(): Observable<ChromeBrand>;
+
+  /**
+   * Set the brand configuration.
+   *
+   * @remarks
+   * Normally the `logo` property will be rendered as the
+   * CSS background for the home link in the chrome navigation, but when the page is
+   * rendered in a small window the `smallLogo` will be used and rendered at about
+   * 45px wide.
+   *
+   * @example
+   * ```js
+   * chrome.setBrand({
+   *   logo: 'url(/plugins/app/logo.png) center no-repeat'
+   *   smallLogo: 'url(/plugins/app/logo-small.png) center no-repeat'
+   * })
+   * ```
+   *
+   */
+  setBrand(brand: ChromeBrand): void;
+
+  /**
+   * Get an observable of the current visibility state of the chrome.
+   */
+  getIsVisible$(): Observable<boolean>;
+
+  /**
+   * Set the temporary visibility for the chrome. This does nothing if the chrome is hidden
+   * by default and should be used to hide the chrome for things like full-screen modes
+   * with an exit button.
+   */
+  setIsVisible(isVisible: boolean): void;
+
+  /**
+   * Get an observable of the current collapsed state of the chrome.
+   */
+  getIsCollapsed$(): Observable<boolean>;
+
+  /**
+   * Set the collapsed state of the chrome navigation.
+   */
+  setIsCollapsed(isCollapsed: boolean): void;
+
+  /**
+   * Get the current set of classNames that will be set on the application container.
+   */
+  getApplicationClasses$(): Observable<string[]>;
+
+  /**
+   * Add a className that should be set on the application container.
+   */
+  addApplicationClass(className: string): void;
+
+  /**
+   * Remove a className added with `addApplicationClass()`. If className is unknown it is ignored.
+   */
+  removeApplicationClass(className: string): void;
+
+  /**
+   * Get an observable of the current badge
+   */
+  getBadge$(): Observable<ChromeBadge | undefined>;
+
+  /**
+   * Override the current badge
+   */
+  setBadge(badge?: ChromeBadge): void;
+
+  /**
+   * Get an observable of the current list of breadcrumbs
+   */
+  getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+
+  /**
+   * Override the current set of breadcrumbs
+   */
+  setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+
+  /**
+   * Get an observable of the current custom help conttent
+   */
+  getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
+
+  /**
+   * Override the current set of custom help content
+   */
+  setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+}

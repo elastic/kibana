@@ -97,7 +97,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
               label={
                 <FormattedMessage
                   defaultMessage="Show panel title"
-                  id="embeddable.customizePanel.showTitle"
+                  id="embeddableApi.customizePanel.modal.showTitle"
                 />
               }
               onChange={this.onHideTitleToggle}
@@ -105,7 +105,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
           </EuiFormRow>
           <EuiFormRow
             label={this.props.intl.formatMessage({
-              id: 'kbn.dashboard.panel.optionsMenuForm.panelTitleFormRowLabel',
+              id: 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
               defaultMessage: 'Panel title',
             })}
           >
@@ -119,7 +119,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
               value={this.state.title || ''}
               onChange={e => this.updateTitle(e.target.value)}
               aria-label={this.props.intl.formatMessage({
-                id: 'kbn.embeddable.panel.optionsMenuForm.panelTitleInputAriaLabel',
+                id: 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
                 defaultMessage: 'Enter a custom title for your panel',
               })}
               append={
@@ -129,7 +129,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
                   disabled={this.state.hideTitle}
                 >
                   <FormattedMessage
-                    id="kbn.dashboard.panel.optionsMenuForm.resetCustomDashboardButtonLabel"
+                    id="embeddableApi.customizePanel.modal.optionsMenuForm.resetCustomDashboardButtonLabel"
                     defaultMessage="Reset"
                   />
                 </EuiButtonEmpty>
@@ -142,11 +142,17 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
             onClick={() => this.props.updateTitle(this.props.embeddable.getOutput().title)}
           >
             {' '}
-            <FormattedMessage id="kbn.embeddables.customizePanel.cancel" defaultMessage="Cancel" />
+            <FormattedMessage
+              id="embeddableApi.customizePanel.modal.cancel"
+              defaultMessage="Cancel"
+            />
           </EuiButtonEmpty>
 
           <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
-            <FormattedMessage id="kbn.embeddables.customizePanel.save" defaultMessage="Save" />
+            <FormattedMessage
+              id="embeddableApi.customizePanel.modal.saveButtonTitle"
+              defaultMessage="Save"
+            />
           </EuiButton>
         </EuiModalFooter>
       </React.Fragment>

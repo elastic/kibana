@@ -22,7 +22,7 @@ import { npSetup } from 'ui/new_platform';
 const newPlatformHttp = npSetup.core.http;
 
 export function initChromeBasePathApi(chrome: { [key: string]: any }) {
-  chrome.getBasePath = newPlatformHttp.getBasePath.bind(newPlatformHttp);
-  chrome.addBasePath = newPlatformHttp.prependBasePath.bind(newPlatformHttp);
-  chrome.removeBasePath = newPlatformHttp.removeBasePath.bind(newPlatformHttp);
+  chrome.getBasePath = newPlatformHttp.basePath.get;
+  chrome.addBasePath = newPlatformHttp.basePath.prepend;
+  chrome.removeBasePath = newPlatformHttp.basePath.remove;
 }

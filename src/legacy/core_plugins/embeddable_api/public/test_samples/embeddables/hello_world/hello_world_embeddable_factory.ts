@@ -38,7 +38,7 @@ export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
   }
 
   public getDisplayName() {
-    return i18n.translate('kbn.embeddable.samples.helloworld.displayName', {
+    return i18n.translate('embeddableApi.samples.helloworld.displayName', {
       defaultMessage: 'hello world',
     });
   }

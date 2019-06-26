@@ -24,7 +24,7 @@ import moment from 'moment';
  * 9ns -> 000000009
  * 10000ns -> 0000010000
  */
-export function extractNanoSeconds(timeFieldValue: string = ''): string {
+export function extractNanos(timeFieldValue: string = ''): string {
   const fractionSeconds = timeFieldValue.split('.')[1].replace('Z', '');
   return fractionSeconds.length !== 9 ? fractionSeconds.padEnd(9, '0') : fractionSeconds;
 }
@@ -33,7 +33,7 @@ export function extractNanoSeconds(timeFieldValue: string = ''): string {
  * extract the nanoseconds as string of a given ISO formatted timestamp
  */
 export function convertIsoToNanosAsStr(isoValue: string): string {
-  const nanos = extractNanoSeconds(isoValue);
+  const nanos = extractNanos(isoValue);
   const millis = convertIsoToMillis(isoValue);
   return `${millis}${nanos.substr(3, 6)}`;
 }

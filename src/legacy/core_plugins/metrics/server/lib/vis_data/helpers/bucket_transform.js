@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { parseSettings } from './parse_settings';
 import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
 import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { MODEL_SCRIPTS } from './moving_fn_scripts';
 
 function checkMetric(metric, fields) {
   fields.forEach(field => {
@@ -199,21 +199,14 @@ export const bucketTransform = {
 
   moving_average: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const body = {
-      moving_avg: {
+
+    return {
+      moving_fn: {
         buckets_path: getBucketsPath(bucket.field, metrics),
-        model: bucket.model || 'simple',
-        gap_policy: 'skip', // seems sane
+        window: bucket.window,
+        script: MODEL_SCRIPTS[bucket.model_type](bucket),
       },
     };
-    if (bucket.gap_policy) body.moving_avg.gap_policy = bucket.gap_policy;
-    if (bucket.window) body.moving_avg.window = Number(bucket.window);
-    if (bucket.minimize) body.moving_avg.minimize = Boolean(bucket.minimize);
-    if (bucket.predict) body.moving_avg.predict = Number(bucket.predict);
-    if (bucket.settings) {
-      body.moving_avg.settings = parseSettings(bucket.settings);
-    }
-    return body;
   },
 
   calculation: (bucket, metrics, bucketSize) => {

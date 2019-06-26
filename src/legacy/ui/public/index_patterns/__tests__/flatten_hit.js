@@ -19,40 +19,39 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { IndexPatternsFlattenHitProvider } from '../_flatten_hit';
+import { flattenHitWrapper } from '../_flatten_hit';
+
+const indexPattern = {
+  fields: {
+    byName: {
+      'tags.text': { type: 'string' },
+      'tags.label': { type: 'string' },
+      'message': { type: 'string' },
+      'geo.coordinates': { type: 'geo_point' },
+      'geo.dest': { type: 'string' },
+      'geo.src': { type: 'string' },
+      'bytes': { type: 'number' },
+      '@timestamp': { type: 'date' },
+      'team': { type: 'nested' },
+      'team.name': { type: 'string' },
+      'team.role': { type: 'string' },
+      'user': { type: 'conflict' },
+      'user.name': { type: 'string' },
+      'user.id': { type: 'conflict' },
+      'delta': { type: 'number', scripted: true }
+    }
+  }
+};
 
 describe('IndexPattern#flattenHit()', function () {
   let flattenHit;
-  let config;
   let hit;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    const indexPattern = {
-      fields: {
-        byName: {
-          'tags.text': { type: 'string' },
-          'tags.label': { type: 'string' },
-          'message': { type: 'string' },
-          'geo.coordinates': { type: 'geo_point' },
-          'geo.dest': { type: 'string' },
-          'geo.src': { type: 'string' },
-          'bytes': { type: 'number' },
-          '@timestamp': { type: 'date' },
-          'team': { type: 'nested' },
-          'team.name': { type: 'string' },
-          'team.role': { type: 'string' },
-          'user': { type: 'conflict' },
-          'user.name': { type: 'string' },
-          'user.id': { type: 'conflict' },
-          'delta': { type: 'number', scripted: true }
-        }
-      }
-    };
+  beforeEach(ngMock.inject(function () {
 
-    flattenHit = Private(IndexPatternsFlattenHitProvider)(indexPattern);
 
-    config = $injector.get('config');
+    flattenHit = flattenHitWrapper(indexPattern, []);
 
     hit = {
       _source: {
@@ -154,14 +153,14 @@ describe('IndexPattern#flattenHit()', function () {
   });
 
   it('ignores fields that start with an _ and are not in the metaFields', function () {
-    config.set('metaFields', ['_metaKey']);
+    flattenHit = flattenHitWrapper(indexPattern, ['_metaKey']);
     hit.fields._notMetaKey = [100];
     const flat = flattenHit(hit);
     expect(flat).to.not.have.property('_notMetaKey');
   });
 
   it('includes underscore-prefixed keys that are in the metaFields', function () {
-    config.set('metaFields', ['_metaKey']);
+    flattenHit = flattenHitWrapper(indexPattern, ['_metaKey']);
     hit.fields._metaKey = [100];
     const flat = flattenHit(hit);
     expect(flat).to.have.property('_metaKey', 100);
@@ -170,18 +169,18 @@ describe('IndexPattern#flattenHit()', function () {
   it('adapts to changes in the metaFields', function () {
     hit.fields._metaKey = [100];
 
-    config.set('metaFields', ['_metaKey']);
+    flattenHit = flattenHitWrapper(indexPattern, ['_metaKey']);
     let flat = flattenHit(hit);
     expect(flat).to.have.property('_metaKey', 100);
 
-    config.set('metaFields', []);
+    flattenHit = flattenHitWrapper(indexPattern, []);
     flat = flattenHit(hit);
     expect(flat).to.not.have.property('_metaKey');
   });
 
   it('handles fields that are not arrays, like _timestamp', function () {
     hit.fields._metaKey = 20000;
-    config.set('metaFields', ['_metaKey']);
+    flattenHit = flattenHitWrapper(indexPattern, ['_metaKey']);
     const flat = flattenHit(hit);
     expect(flat).to.have.property('_metaKey', 20000);
   });

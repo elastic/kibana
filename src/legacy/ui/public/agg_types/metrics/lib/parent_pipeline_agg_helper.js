@@ -18,6 +18,7 @@
  */
 
 import metricAggTemplate from '../../controls/sub_agg.html';
+import { MetricAggParamEditor } from '../../controls/metric_agg';
 import _ from 'lodash';
 import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
@@ -33,7 +34,7 @@ const metricAggSchema = (new Schemas([
     group: 'none',
     name: 'metricAgg',
     title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-      defaultMessage: 'Metric Agg'
+      defaultMessage: 'Metric agg'
     }),
     hideCustomLabel: true,
     aggFilter: metricAggFilter
@@ -47,7 +48,14 @@ const parentPipelineAggHelper = {
   params: function () {
     return [
       {
+        name: 'metricAgg',
+        editorComponent: MetricAggParamEditor,
+        default: 'custom',
+        write: parentPipelineAggWriter
+      },
+      {
         name: 'customMetric',
+        editor: metricAggTemplate,
         type: AggConfig,
         default: null,
         serialize: function (customMetric) {
@@ -64,18 +72,12 @@ const parentPipelineAggHelper = {
           return metricAgg;
         },
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
-        write: _.noop
+        write: _.noop,
+        controller: parentPipelineAggController
       },
       {
         name: 'buckets_path',
         write: _.noop
-      },
-      {
-        name: 'metricAgg',
-        editor: metricAggTemplate,
-        default: 'custom',
-        controller: parentPipelineAggController,
-        write: parentPipelineAggWriter
       }
     ];
   },

@@ -45,7 +45,6 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { attachAction } from '../triggers/attach_action';
-import { createRegistry } from '../create_registry';
 import { EmbeddableFactory } from '../embeddables';
 
 const editModeAction = new EditModeAction();
@@ -55,7 +54,7 @@ attachAction(triggerRegistry, {
   actionId: editModeAction.id,
 });
 
-const embeddableFactories = createRegistry<EmbeddableFactory>();
+const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
 
 test('HelloWorldContainer initializes embeddables', async done => {

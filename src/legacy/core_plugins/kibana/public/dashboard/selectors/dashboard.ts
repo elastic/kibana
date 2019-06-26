@@ -18,9 +18,12 @@
  */
 
 import _ from 'lodash';
-import { ContainerState, EmbeddableMetadata, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { ContainerState, EmbeddableMetadata } from 'ui/embeddable';
 import { EmbeddableCustomization } from 'ui/embeddable/types';
 import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { TimeRange } from 'ui/timefilter/time_history';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import {
   DashboardMetadata,
@@ -109,7 +112,7 @@ export const getMaximizedPanelId = (dashboard: DashboardState): PanelId | undefi
 
 export const getTimeRange = (dashboard: DashboardState): TimeRange => dashboard.view.timeRange;
 
-export const getRefreshConfig = (dashboard: DashboardState): RefreshConfig =>
+export const getRefreshConfig = (dashboard: DashboardState): RefreshInterval =>
   dashboard.view.refreshConfig;
 
 export const getFilters = (dashboard: DashboardState): Filter[] => dashboard.view.filters;
