@@ -135,7 +135,7 @@ export function ListSettings() {
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
               label="Beta"
-              tooltipContent="This module is not GA. Please help us by reporting any bugs."
+              tooltipContent="This feature is not GA. Please help us by reporting any bugs."
             />
           </EuiFlexItem>
           {hasConfigurations ? (
@@ -159,13 +159,13 @@ export function ListSettings() {
         <EuiSpacer size="m" />
 
         <EuiCallOut
-          title="APM Central Configuration (BETA)"
+          title="Agent Central Configuration (BETA)"
           iconType="iInCircle"
         >
           <p>
-            We're excited to bring you a first look at how you can manage your
-            services by updating agent configurations directly from the APM UI.
-            Read more on this new feature.
+            We're excited to bring you a first look at how you can control your
+            services by fine-tuning agent configurations directly from Kibana.
+            Learn more about this new feature.
           </p>
         </EuiCallOut>
 
@@ -175,16 +175,14 @@ export function ListSettings() {
           <ManagedTable columns={COLUMNS} items={data} initialPageSize={50} />
         ) : (
           <EuiEmptyPrompt
-            iconType="editorStrike"
-            title={<h2>Nothing to see here.</h2>}
+            iconType="controlsHorizontal"
+            title={<h2>No configurations found.</h2>}
             body={
               <>
                 <p>
-                  Let's change that! Central configuration enables you to
-                  configure specific variables in your agents based on your
-                  environment directly from the APM UI. To begin with, you can
-                  change the transaction sample rate and sync the change to your
-                  services.
+                  Let's change that! You can fine-tune variables in your agents
+                  based on your environment directly from Kibana. Get started by
+                  creating your first configuration.
                 </p>
               </>
             }

@@ -11,7 +11,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiButton,
-  EuiFieldNumber
+  EuiFieldNumber,
+  EuiTitle,
+  EuiSpacer
 } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -81,7 +83,16 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
           onSubmit();
         }}
       >
-        <EuiFormRow label="Service name">
+        <EuiTitle size="xs">
+          <h3>Service</h3>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          label="Name"
+          helpText="Choose the service you want to configure."
+        >
           <EuiSelect
             isLoading={serviceNamesStatus === 'loading'}
             options={serviceNames.map(text => ({ text }))}
@@ -95,9 +106,10 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
         </EuiFormRow>
 
         <EuiFormRow
-          label="Service environment"
+          label="Environment"
+          helpText="Choosing 'All environments' creates a configuration for each."
           error={
-            'The selected environment is not allowed, because a configuration for the selected service name and environment already exists'
+            'A configuration for the selected service name and environment combination already exists.'
           }
           isInvalid={
             environment != null &&
@@ -116,16 +128,23 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
           />
         </EuiFormRow>
 
+        <EuiTitle size="xs">
+          <h3>Configuration</h3>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
         <EuiFormRow
           label="Transaction sample rate"
-          error={'Sample rate must be between 0 and 1'}
+          helpText="1.0 is 100% of all traces. Default sample rate is 0.05 (5%) for traces."
+          error={'Sample rate must be between 0.00 and 1'}
           isInvalid={isSampleRateValid}
         >
           <EuiFieldNumber
             min={0}
             max={1}
             step={0.1}
-            placeholder="Sample rate... (E.g. 0.2)"
+            placeholder="Set sample rate... (e.g. 0.1)"
             value={sampleRate}
             onChange={e => {
               e.preventDefault();
@@ -137,6 +156,7 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
         </EuiFormRow>
 
         <EuiFormRow>
+          {/* TODO: Move to AddSettingFlyout EuiFlyoutFooter instead */}
           <EuiButton
             type="submit"
             fill
