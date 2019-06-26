@@ -33,6 +33,8 @@ export interface ActionTypeExecutorOptions {
   params: Record<string, any>;
 }
 
+export type ExecutorType = (options: ActionTypeExecutorOptions) => Promise<any>;
+
 export interface ActionType {
   id: string;
   name: string;
@@ -41,5 +43,5 @@ export interface ActionType {
     params?: any;
     config?: any;
   };
-  executor({ services, config, params }: ActionTypeExecutorOptions): Promise<any>;
+  executor: ExecutorType;
 }

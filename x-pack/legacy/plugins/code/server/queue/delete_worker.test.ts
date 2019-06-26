@@ -75,7 +75,7 @@ test('Execute delete job.', async () => {
     esClient as EsClient,
     {
       security: {
-        enableGitCertCheck: false,
+        enableGitCertCheck: true,
       },
     } as ServerOptions,
     {} as GitOperations,
