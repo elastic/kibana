@@ -91,3 +91,14 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
 export { Query } from './query';
 export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';
+
+/** @public static code */
+export { dateHistogramInterval } from '../common/date_histogram_interval';
+/** @public static code */
+export {
+  isValidEsInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  parseEsInterval,
+  ParsedInterval,
+} from '../common/parse_es_interval';
