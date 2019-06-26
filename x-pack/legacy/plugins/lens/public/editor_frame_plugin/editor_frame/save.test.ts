@@ -127,7 +127,6 @@ describe('save editor frame state', () => {
   });
 
   it('redirects to the edit screen if the id changes', async () => {
-    const id = `${Math.random()}`;
     const redirectTo = jest.fn();
     const dispatch = jest.fn();
     await save({
@@ -142,17 +141,16 @@ describe('save editor frame state', () => {
       },
       store: {
         async save() {
-          return { id };
+          return { id: 'bazinga' };
         },
       },
     });
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_PERSISTED_ID', id });
-    expect(redirectTo).toHaveBeenCalledWith(`/edit/${id}`);
+    expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_PERSISTED_ID', id: 'bazinga' });
+    expect(redirectTo).toHaveBeenCalledWith('/edit/bazinga');
   });
 
   it('does not redirect to the edit screen if the id does not change', async () => {
-    const id = `${Math.random()}`;
     const redirectTo = jest.fn();
     const dispatch = jest.fn();
     await save({
@@ -162,13 +160,13 @@ describe('save editor frame state', () => {
       state: {
         title: 'ddd',
         datasource: { activeId: '1', isLoading: false, state: {} },
-        persistedId: id,
+        persistedId: 'foo',
         saving: false,
         visualization: { activeId: '2', state: {} },
       },
       store: {
         async save() {
-          return { id };
+          return { id: 'foo' };
         },
       },
     });
