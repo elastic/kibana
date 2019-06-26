@@ -16,7 +16,7 @@ export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
   args: {
     pattern: i18n.translate('xpack.canvas.functions.replace.args.patternHelpText', {
       defaultMessage:
-        'The text or pattern of a {js} regular expression, eg "{example}". You can use capture groups here.',
+        'The text or pattern of a {js} regular expression. For example, `"{example}"`. You can use capture groups here.',
       values: {
         js: 'JavaScript',
         example: '[aeiou]',
@@ -31,7 +31,7 @@ export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
     }),
     replacement: i18n.translate('xpack.canvas.functions.replace.args.replacementHelpText', {
       defaultMessage:
-        'The replacement for the matching parts of string. Capture groups can be accessed by their index, eg {example}',
+        'The replacement for the matching parts of string. Capture groups can be accessed by their index. For example, `{example}`',
       values: {
         example: '$1',
       },

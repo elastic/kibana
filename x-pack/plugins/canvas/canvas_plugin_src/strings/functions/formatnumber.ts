@@ -11,14 +11,15 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
   help: i18n.translate('xpack.canvas.functions.formatnumberHelpText', {
-    defaultMessage: 'Turn a number into a string using a {numeralJS} format',
+    defaultMessage: 'Format a `number` into a formatted `string` using {numeralJS}. See {url}.',
     values: {
       numeralJS: 'NumeralJS',
+      url: 'http://numeraljs.com/#format',
     },
   }),
   args: {
     format: i18n.translate('xpack.canvas.functions.formatnumber.args.formatHelpText', {
-      defaultMessage: '{numeralJS} format string {url}',
+      defaultMessage: 'A {numeralJS} format string. For example, `"0.0a"` or `"0%"` See {url}.',
       values: {
         numeralJS: 'NumeralJS',
         url: 'http://numeraljs.com/#format',

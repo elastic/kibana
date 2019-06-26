@@ -27,7 +27,8 @@ export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
         'Font settings for the label. Technically you can stick other styles in here too!',
     }),
     label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
-      defaultMessage: `Set {true}/{false} to show/hide label or provide a string to display as the label`,
+      defaultMessage:
+        'To show or hide labels, or provide a string to display as a label, use `{true}` or `{false}`.',
       values: {
         true: 'true',
         false: 'false',

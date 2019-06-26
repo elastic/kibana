@@ -35,10 +35,10 @@ export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
       defaultMessage: "An expression to use in determining the mark's color",
     }),
     size: i18n.translate('xpack.canvas.functions.pointseries.args.sizeHelpText', {
-      defaultMessage: 'For elements that support it, the size of the marks',
+      defaultMessage: 'The size of the marks. Only applicable to supported elements.',
     }),
     text: i18n.translate('xpack.canvas.functions.pointseries.args.textHelpText', {
-      defaultMessage: 'For elements that support it, the text to show in the mark',
+      defaultMessage: 'The text to show on the mark. Only applicable to supported elements.',
     }),
   },
 };

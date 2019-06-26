@@ -37,7 +37,7 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
       },
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
-      defaultMessage: 'Group name for the filter',
+      defaultMessage: 'The group name for the filter',
     }),
   },
 };

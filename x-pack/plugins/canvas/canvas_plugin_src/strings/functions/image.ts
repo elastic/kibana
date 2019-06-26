@@ -11,18 +11,28 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof image>> = {
   help: i18n.translate('xpack.canvas.functions.imageHelpText', {
-    defaultMessage: 'Display an image',
+    defaultMessage:
+      'Display an image. Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
+    values: {
+      base64: 'base64',
+      url: 'URL',
+    },
   }),
   args: {
     dataurl: i18n.translate('xpack.canvas.functions.image.args.dataurlHelpText', {
-      defaultMessage: 'The HTTP(S) URL or base64 data of an image.',
+      defaultMessage: 'The {https} {url} or `{base64}` data {url} of an image.',
+      values: {
+        base64: 'base64',
+        https: 'HTTP(S)',
+        url: 'URL',
+      },
     }),
     mode: i18n.translate('xpack.canvas.functions.image.args.modeHelpText', {
       defaultMessage:
-        '`{contain}` will show the entire image, scaled to fit. ' +
-        '`{cover}` will fill the container with the image, cropping from the sides or ' +
+        '`{contain}` shows the entire image, scaled to fit. ' +
+        '`{cover}` fills the container with the image, cropping from the sides or ' +
         'bottom as needed. ' +
-        '`{stretch}` will resize the height and width of the image to 100% of the container',
+        '`{stretch}` resizes the height and width of the image to 100% of the container',
       values: {
         contain: ImageMode.CONTAIN,
         cover: ImageMode.COVER,

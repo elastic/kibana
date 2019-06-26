@@ -17,7 +17,7 @@ export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
     filterColumn: i18n.translate(
       'xpack.canvas.functions.dropdownControl.args.filterColumnHelpText',
       {
-        defaultMessage: 'The column or field to attach the filter to',
+        defaultMessage: 'The column or field to attach to the filter.',
       }
     ),
     valueColumn: i18n.translate('xpack.canvas.functions.dropdownControl.args.valueColumnHelpText', {
@@ -25,7 +25,7 @@ export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
         'The datatable column from which to extract the unique values for the drop down',
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
-      defaultMessage: 'Group name for the filter',
+      defaultMessage: 'The group name for the filter',
     }),
   },
 };

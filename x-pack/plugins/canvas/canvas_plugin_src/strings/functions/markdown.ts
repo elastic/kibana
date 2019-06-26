@@ -26,8 +26,7 @@ export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
       },
     }),
     font: i18n.translate('xpack.canvas.functions.markdown.args.fontHelpText', {
-      defaultMessage:
-        'Set the {css} font properties, (e.g. {fontFamily}, {fontWeight}). Other {css} styles can be included as well.',
+      defaultMessage: 'Set the {css} font properties. For example, {fontFamily} or {fontWeight}.',
       values: {
         css: 'CSS',
         fontFamily: 'font-family',

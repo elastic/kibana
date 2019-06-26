@@ -15,7 +15,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
   }),
   args: {
     border: i18n.translate('xpack.canvas.functions.containerStyle.args.borderHelpText', {
-      defaultMessage: 'A valid {css} border string',
+      defaultMessage: 'A valid {css} border',
       values: {
         css: 'CSS',
       },
@@ -32,7 +32,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     backgroundColor: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundColorHelpText',
       {
-        defaultMessage: 'A valid {css} background color string',
+        defaultMessage: 'A valid {css} background color',
         values: {
           css: 'CSS',
         },
@@ -41,7 +41,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     backgroundImage: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundImageHelpText',
       {
-        defaultMessage: 'A valid {css} background image string',
+        defaultMessage: 'A valid {css} background image',
         values: {
           css: 'CSS',
         },
@@ -50,7 +50,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     backgroundSize: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundSizeHelpText',
       {
-        defaultMessage: 'A valid {css} background size string',
+        defaultMessage: 'A valid {css} background size',
         values: {
           css: 'CSS',
         },
@@ -59,7 +59,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     backgroundRepeat: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundRepeatHelpText',
       {
-        defaultMessage: 'A valid {css} background repeat string',
+        defaultMessage: 'A valid {css} background repeat',
         values: {
           css: 'CSS',
         },
@@ -70,7 +70,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
         'A number between 0 and 1 that represents the degree of transparency of the element',
     }),
     overflow: i18n.translate('xpack.canvas.functions.containerStyle.args.overflowHelpText', {
-      defaultMessage: 'A valid CSS overflow value',
+      defaultMessage: 'A valid CSS overflow',
     }),
   },
 };

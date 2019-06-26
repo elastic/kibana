@@ -24,7 +24,7 @@ export const help: FunctionHelp<FunctionFactory<typeof render>> = {
       },
     }),
     css: i18n.translate('xpack.canvas.functions.render.args.cssHelpText', {
-      defaultMessage: 'Any block of custom {css} to be scoped to this element.',
+      defaultMessage: 'Any block of custom {css} to be scoped to the element.',
       values: {
         css: 'CSS',
       },

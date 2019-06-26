@@ -12,10 +12,11 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof math>> = {
   help: i18n.translate('xpack.canvas.functions.mathHelpText', {
     defaultMessage:
-      'Interpret a math expression, with a number or {datatable} as context. {Datatable} ' +
+      'Interprets a `{tinymath}` math expression using a number or {datatable} as context. {Datatable} ' +
       'columns are available by their column name. If you pass in a number it is available ' +
-      'as "{value}" (without the quotes)',
+      'as `{value}`.',
     values: {
+      tinymath: 'TinyMath',
       datatable: 'datatable',
       Datatable: 'Datatable',
       value: 'value',
@@ -23,7 +24,7 @@ export const help: FunctionHelp<FunctionFactory<typeof math>> = {
   }),
   args: {
     expression: i18n.translate('xpack.canvas.functions.math.args.expressionHelpText', {
-      defaultMessage: 'An evaluated {tinymath} expression. (See {url})',
+      defaultMessage: 'An evaluated {tinymath} expression. See {url}.',
       values: {
         tinymath: 'TinyMath',
         url:

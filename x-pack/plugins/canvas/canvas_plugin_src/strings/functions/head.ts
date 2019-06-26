@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof head>> = {
   help: i18n.translate('xpack.canvas.functions.headHelpText', {
-    defaultMessage: 'Get the first {n} rows from the {datatable}. Also see `{tail}`',
+    defaultMessage: 'Get the first {n} rows from the {datatable}. See also `{tail}`',
     values: {
       n: 'N',
       datatable: 'datatable',

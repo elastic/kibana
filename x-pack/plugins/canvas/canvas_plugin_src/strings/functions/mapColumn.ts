@@ -19,8 +19,9 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
     }),
     expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
       defaultMessage:
-        'A canvas expression which will be passed each row as a single row {datatable}',
+        'A {canvas} expression that is passed to each row as a single row `{datatable}`',
       values: {
+        canvas: 'Canvas',
         datatable: 'datatable',
       },
     }),

@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof filterrows>> = {
   help: i18n.translate('xpack.canvas.functions.filterrowsHelpText', {
-    defaultMessage: 'Filter rows in a datatable based on the return value of a subexpression.',
+    defaultMessage: 'Filter rows in a datatable based on the return value of a sub-expression.',
   }),
   args: {
     fn: i18n.translate('xpack.canvas.functions.filterrows.args.fnHelpText', {

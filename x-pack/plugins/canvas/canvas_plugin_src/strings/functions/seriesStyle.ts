@@ -13,7 +13,12 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
   help: i18n.translate('xpack.canvas.functions.seriesStyleHelpText', {
     defaultMessage:
       'Creates an object used for describing the properties of a series on a chart. ' +
-      'You would usually use this inside of a charting function',
+      'Use `{seriesStyle}` inside of a charting function, like `{plot}` or `{pie}`.',
+    values: {
+      seriesStyle: 'seriesStyle',
+      pie: 'pie',
+      plot: 'plot',
+    },
   }),
   args: {
     label: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelHelpText', {
@@ -22,7 +27,7 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
         'give the line',
     }),
     color: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorHelpText', {
-      defaultMessage: 'Color to assign the line',
+      defaultMessage: 'The line',
     }),
     lines: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesHelpText', {
       defaultMessage: 'Width of the line',

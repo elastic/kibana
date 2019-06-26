@@ -15,7 +15,7 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
   }),
   args: {
     palette: i18n.translate('xpack.canvas.functions.pie.args.paletteHelpText', {
-      defaultMessage: 'A {palette} object for describing the colors to use on this pie',
+      defaultMessage: 'A {palette} object for describing the colors to use in this pie chart',
       values: {
         palette: 'palette',
       },
@@ -26,19 +26,19 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
     radius: i18n.translate('xpack.canvas.functions.pie.args.radiusHelpText', {
       defaultMessage:
         'Radius of the pie as a percentage (between 0 and 1) of the available ' +
-        'space. Set to `{auto}` to automatically set radius',
+        'space. To automatically set radius, use `"{auto}"`.',
       values: {
         auto: 'auto',
       },
     }),
     hole: i18n.translate('xpack.canvas.functions.pie.args.holeHelpText', {
-      defaultMessage: 'Draw a hole in the pie, 0-100, as a percentage of the pie radius',
+      defaultMessage: 'Draws a hole in the pie, 0-100, as a percentage of the pie radius',
     }),
     labels: i18n.translate('xpack.canvas.functions.pie.args.labelsHelpText', {
-      defaultMessage: 'Show pie labels?',
+      defaultMessage: 'Displays the pie labels.',
     }),
     labelRadius: i18n.translate('xpack.canvas.functions.pie.args.labelRadiusHelpText', {
-      defaultMessage: 'Percentage of area of container to use as radius for the label circle',
+      defaultMessage: 'Percentage of the container area to use as radius for the label circle',
     }),
     font: i18n.translate('xpack.canvas.functions.pie.args.fontHelpText', {
       defaultMessage: 'Label font',
@@ -51,7 +51,7 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
       },
     }),
     tilt: i18n.translate('xpack.canvas.functions.pie.args.tiltHelpText', {
-      defaultMessage: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
+      defaultMessage: 'Percentage of tilt where 1 is fully vertical, and 0 is completely flat.',
     }),
   },
 };

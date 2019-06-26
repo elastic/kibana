@@ -24,7 +24,7 @@ export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
       defaultMessage: 'The default style to use for every series',
     }),
     palette: i18n.translate('xpack.canvas.functions.plot.args.paletteHelpText', {
-      defaultMessage: 'A {palette} object for describing the colors to use on this plot',
+      defaultMessage: 'A {palette} object for describing the colors to use in this chart',
       values: {
         palette: 'palette',
       },

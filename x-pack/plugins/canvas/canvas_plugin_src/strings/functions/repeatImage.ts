@@ -15,24 +15,29 @@ export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
   }),
   args: {
     image: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
-      defaultMessage: 'The image to repeat. Usually a {dataurl} or an asset',
+      defaultMessage:
+        'The image to repeat. Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
       values: {
-        dataurl: 'dataURL',
+        base64: 'base46',
+        url: 'URL',
       },
     }),
     size: i18n.translate('xpack.canvas.functions.repeatImage.args.sizeHelpText', {
       defaultMessage:
-        'The maximum height or width of the image, in pixels. Eg, if you images is taller ' +
-        'than it is wide, this will limit its height',
+        'The maximum height or width of the image, in pixels. ' +
+        'When the image is taller than it is wide, this function limits the height.',
     }),
     max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
-      defaultMessage: 'Maximum number of times the image may repeat',
+      defaultMessage: 'The maximum number of times the image can repeat',
     }),
     emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
       defaultMessage:
-        'Fill the difference between the input and the `{max}` parameter with this image',
+        'Fill the difference between the _context_ and the `{max}` parameter with this image.' +
+        'Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
       values: {
-        max: 'max=',
+        base64: 'base64',
+        max: 'max',
+        url: 'URL',
       },
     }),
   },

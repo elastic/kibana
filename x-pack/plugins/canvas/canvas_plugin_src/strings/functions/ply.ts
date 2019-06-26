@@ -26,7 +26,7 @@ export const help: FunctionHelp<FunctionFactory<typeof ply>> = {
         'An expression to pass each resulting {datatable} into. Tips: \n' +
         ' Expressions must return a {datatable}. Use `as` to turn literals into {datatable}.\n' +
         ' Multiple expressions must return the same number of rows.' +
-        ' If you need to return a differing row count, pipe into another instance of {ply}.\n' +
+        ' If you need to return a different row count, pipe into another instance of {ply}.\n' +
         ' If multiple expressions return the same columns, the last one wins.',
       values: {
         datatable: 'datatable',

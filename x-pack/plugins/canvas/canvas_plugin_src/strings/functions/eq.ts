@@ -15,7 +15,7 @@ export const help: FunctionHelp<FunctionFactory<typeof eq>> = {
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.eq.args.valueHelpText', {
-      defaultMessage: 'The value to compare the context to',
+      defaultMessage: 'The value to compare to the _context_.',
     }),
   },
 };
