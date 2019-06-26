@@ -211,9 +211,10 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
     // recurring task: update the task instance
+    const attempts = result.error ? this.instance.attempts + 1 : 0;
     const state = result.state || this.instance.state || {};
     const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
-    const status = this.instance.attempts < maxAttempts ? 'idle' : 'failed';
+    const status = attempts < maxAttempts ? 'idle' : 'failed';
 
     let runAt;
     if (status === 'failed') {
@@ -232,7 +233,7 @@ export class TaskManagerRunner implements TaskRunner {
       runAt,
       state,
       status,
-      attempts: result.error ? this.instance.attempts + 1 : 0,
+      attempts,
     });
 
     return result;
