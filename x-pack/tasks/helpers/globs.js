@@ -20,14 +20,14 @@ function getPluginPaths(plugins, opts = {}) {
     const serverPath = `${plugin}/**/server`;
     const publicPath = `${plugin}/**/public`;
 
-    const indexPaths = `plugins/${plugin}/${testPath}/*.js`; // index and helpers
-    const commonPaths = `plugins/${commonPath}/**/${testPath}/*.js`;
-    const serverPaths = `plugins/${serverPath}/**/${testPath}/*.js`;
-    const publicPaths = `plugins/${publicPath}/**/${testPath}/*.js`;
+    const indexPaths = `legacy/plugins/${plugin}/${testPath}/*.js`; // index and helpers
+    const commonPaths = `legacy/plugins/${commonPath}/**/${testPath}/*.js`;
+    const serverPaths = `legacy/plugins/${serverPath}/**/${testPath}/*.js`;
+    const publicPaths = `legacy/plugins/${publicPath}/**/${testPath}/*.js`;
 
     paths = paths.concat([indexPaths, commonPaths, serverPaths]);
-    if(plugin === 'code') {
-      paths.push(`plugins/${serverPath}/**/${testPath}/*.ts`);
+    if (plugin === 'code') {
+      paths.push(`legacy/plugins/${serverPath}/**/${testPath}/*.ts`);
     }
     if (opts.browser) {
       paths = paths.concat(publicPaths);
