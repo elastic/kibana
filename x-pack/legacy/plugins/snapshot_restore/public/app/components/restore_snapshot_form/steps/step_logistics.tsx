@@ -409,7 +409,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.partialLabel"
-                defaultMessage="Ignore unavailable indices"
+                defaultMessage="Partial restore"
               />
             }
             checked={partial === undefined ? false : partial}
