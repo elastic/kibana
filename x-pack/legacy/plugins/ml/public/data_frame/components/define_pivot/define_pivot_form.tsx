@@ -281,7 +281,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(search);
 
-  // Advanced Editor State
+  // Advanced editor state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
   const [isAdvancedEditorApplyButtonEnabled, setAdvancedEditorApplyButtonEnabled] = useState(false);
   const [isAdvancedEditorEnabled, setAdvancedEditorEnabled] = useState(
@@ -556,7 +556,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                     aria-label={i18n.translate(
                       'xpack.ml.dataframe.definePivotForm.advancedEditorAriaLabel',
                       {
-                        defaultMessage: 'Advanced Editor',
+                        defaultMessage: 'Advanced editor',
                       }
                     )}
                   />
@@ -571,7 +571,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                   label={i18n.translate(
                     'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchLabel',
                     {
-                      defaultMessage: 'Advanced Editor',
+                      defaultMessage: 'Advanced editor',
                     }
                   )}
                   checked={isAdvancedEditorEnabled}
