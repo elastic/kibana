@@ -6,7 +6,7 @@
 
 export interface CentralConfigurationIntake {
   settings: {
-    sample_rate: number;
+    sample_rate: string;
   };
   service: {
     name: string;

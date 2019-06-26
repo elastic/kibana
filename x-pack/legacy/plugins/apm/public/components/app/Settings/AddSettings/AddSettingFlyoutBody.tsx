@@ -177,7 +177,7 @@ async function saveConfig({
 
     const configuration = {
       settings: {
-        sample_rate: sampleRate
+        sample_rate: sampleRate.toString(10)
       },
       service: {
         name: serviceName,

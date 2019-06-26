@@ -21,7 +21,7 @@ export async function saveConfiguration({
   const { client, config } = setup;
 
   const params = {
-    type: 'index_or_alias', // TODO set correct type
+    type: '_doc',
     refresh: true,
     index: config.get<string>('apm_oss.cmIndex'),
     body: {

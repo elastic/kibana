@@ -40,7 +40,6 @@ export function DeleteModal({
         }`}
         onCancel={onCancel}
         onConfirm={async () => {
-          onConfirm();
           try {
             await deleteCMConfiguration(configToBeDeleted.id);
 
@@ -58,6 +57,7 @@ export function DeleteModal({
               )
             });
           }
+          onConfirm();
         }}
         cancelButtonText="Cancel"
         confirmButtonText="Delete configuration"
