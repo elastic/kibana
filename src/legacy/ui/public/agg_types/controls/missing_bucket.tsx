@@ -17,13 +17,24 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { SwitchParamEditor } from './switch';
 import { isStringType } from '../buckets/migrate_include_exclude_format';
 
 function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
+  const fieldTypeIsNotString = !isStringType(props.agg);
+
+  useEffect(
+    () => {
+      if (fieldTypeIsNotString) {
+        props.setValue(false);
+      }
+    },
+    [fieldTypeIsNotString]
+  );
+
   return (
     <SwitchParamEditor
       dataTestSubj="missingBucketSwitch"
@@ -37,7 +48,7 @@ function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
           'If not in the top N, and you enable "Group other values in separate bucket", ' +
           'Elasticsearch adds the missing values to the "other" bucket.',
       })}
-      disabled={!isStringType(props.agg)}
+      disabled={fieldTypeIsNotString}
       {...props}
     />
   );

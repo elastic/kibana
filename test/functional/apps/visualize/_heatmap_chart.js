@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
+    this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
@@ -37,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');

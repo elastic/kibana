@@ -24,11 +24,12 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 
-import { NavControl } from '../';
 import { HeaderExtension } from './header_extension';
+import { ChromeNavControl } from '../../../../../../../core/public';
 
 interface Props {
-  navControls: NavControl[];
+  navControls: ReadonlyArray<ChromeNavControl>;
+  side: 'left' | 'right';
 }
 
 export class HeaderNavControls extends Component<Props> {
@@ -42,12 +43,11 @@ export class HeaderNavControls extends Component<Props> {
     return navControls.map(this.renderNavControl);
   }
 
-  private renderNavControl = (navControl: NavControl) => (
-    <EuiHeaderSectionItem
-      key={navControl.name}
-      border={navControl.side === 'left' ? 'right' : 'left'}
-    >
-      <HeaderExtension extension={navControl.render} />
+  // It should be performant to use the index as the key since these are unlikely
+  // to change while Kibana is running.
+  private renderNavControl = (navControl: ChromeNavControl, index: number) => (
+    <EuiHeaderSectionItem key={index} border={this.props.side === 'left' ? 'right' : 'left'}>
+      <HeaderExtension extension={navControl.mount} />
     </EuiHeaderSectionItem>
   );
 }

@@ -65,6 +65,12 @@ export default function manageRepositoriesFunctionalTests({
         // Click the delete repository button.
         await PageObjects.code.clickDeleteRepositoryButton();
 
+        await retry.try(async () => {
+          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+        });
+
+        await testSubjects.click('confirmModalConfirmButton');
+
         await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
@@ -100,6 +106,12 @@ export default function manageRepositoriesFunctionalTests({
 
         // Delete the repository
         await PageObjects.code.clickDeleteRepositoryButton();
+
+        await retry.try(async () => {
+          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+        });
+
+        await testSubjects.click('confirmModalConfirmButton');
 
         await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);

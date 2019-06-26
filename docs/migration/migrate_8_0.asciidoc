@@ -42,4 +42,24 @@ for example, `logstash-*`.
 
 *Impact:* To restore the previous behavior, in kibana.yml set `logging.timezone: UTC`.
 
+[float]
+==== `xpack.security.authProviders` is no longer valid
+*Details:* The deprecated `xpack.security.authProviders` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Use `xpack.security.authc.providers` instead.
+
+[float]
+==== `xpack.security.authc.saml.realm` is now mandatory when using the SAML authentication provider
+*Details:* Previously Kibana was choosing the appropriate Elasticsearch SAML realm automatically using the `Assertion Consumer Service`
+URL that it derived from the actual server address. Starting in 8.0.0, the Elasticsearch SAML realm name that Kibana will use should be
+specified explicitly.
+
+*Impact:* Always define `xpack.security.authc.saml.realm` when using the SAML authentication provider.
+
+[float]
+==== `xpack.security.public` is no longer valid
+*Details:* The deprecated `xpack.security.public` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Define `xpack.security.authc.saml.realm` when using the SAML authentication provider instead.
+
 // end::notable-breaking-changes[]

@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
 
         const alertsAll = await alerts.getOverviewAlertsAll();
 
-        alertsAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+        alertsAll.forEach((obj, index) => {
           expect(alertsAll[index].alertIcon).to.be(panelData[index].alertIcon);
           expect(alertsAll[index].alertText).to.be(panelData[index].alertText);
         });
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }) {
         ));
         expect(alertsAll.length).to.be(tableData.length);
 
-        alertsAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
+        alertsAll.forEach((obj, index) => {
           expect(`${alertsAll[index].alertIcon} ${alertsAll[index].alertText}`)
             .to.be(`${tableData[index].alertIcon} ${tableData[index].alertText}`);
         });

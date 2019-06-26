@@ -1,0 +1,51 @@
+[[code-repo-management]]
+== Repo management
+
+Code starts with an overview of your repositories.  You can then use the UI to add, delete, and reindex a repo.
+[role="screenshot"]
+image::images/code-repo-management.png[]
+
+[float]
+==== Add and delete a repo
+The <<code-getting-started, Getting Started>> provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine tune the hostname of the git clone URL in your `kibana.yml` file.
+
+For security reasons, Code allows only a few trusted hostnames, such as github.com, by default. You can add an SSH key to {kib} to clone private repos.
+
+Deleting a repo removes it from local storage and the Elasticsearch index.
+
+[float]
+==== Reindex a repo
+*Code* automatically reindexes an imported repo at set intervals, but in some cases you might need to manually refresh the index. For example, you might refresh an index  after a new language server is installed. Or, you might want to immediately update the index to the HEAD revision. Click *Reindex* to initiate a reindex.
+
+[float]
+==== Clone URL management
+For security reasons, *Code* only allows the following hostnames in the git clone URL by default:
+
+[source,yaml]
+----
+['github.com', 'gitlab.com', 'bitbucket.org', 'gitbox.apache.org', 'eclipse.org']
+----
+
+You can add your own hostname (for example, acme.com) to the whitelist by adding the following line to your `config/kibana.yaml` file:
+
+[source,yaml]
+----
+xpack.code.gitHostWhitelist: [ "github.com", "gitlab.com", "bitbucket.org", "gitbox.apache.org", "eclipse.org", "acme.com" ]
+----
+
+Set `xpack.code.gitHostWhitelist` to [] (empty list) allow any hostname.
+
+You can also control the protocol to use for the clone address. By default, the following protocols are supported: `[ 'https', 'git', 'ssh' ]`. You can change this value by adding the following line to your `config/kibana.yaml` file.  In this example, the user only wants to support the `https` protocol:
+
+[source,yaml]
+----
+xpack.code.gitProtocolWhitelist: [ "https" ]
+----
+
+[float]
+==== Clone repo with SSH key
+If your repo clone requires an SSH key for authentication, put the SSH key in `data/code/credentials/` under the {kib} folder.
+
+
+
+include::code-install-lang-server.asciidoc[]

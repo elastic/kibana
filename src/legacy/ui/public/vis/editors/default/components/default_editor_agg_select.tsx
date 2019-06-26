@@ -19,7 +19,7 @@
 import { get, has } from 'lodash';
 import React, { useEffect } from 'react';
 
-import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
@@ -30,7 +30,7 @@ import { ComboBoxGroupedOption } from '../default_editor_utils';
 interface DefaultEditorAggSelectProps {
   agg: AggConfig;
   aggTypeOptions: AggType[];
-  isSelectInvalid: boolean;
+  showValidation: boolean;
   isSubAggregation: boolean;
   value: AggType;
   setValidity: (isValid: boolean) => void;
@@ -43,7 +43,7 @@ function DefaultEditorAggSelect({
   value,
   setValue,
   aggTypeOptions,
-  isSelectInvalid,
+  showValidation,
   isSubAggregation,
   setTouched,
   setValidity,
@@ -93,23 +93,43 @@ function DefaultEditorAggSelect({
         },
       })
     );
-    setTouched();
   }
+
+  if (agg.error) {
+    errors.push(agg.error);
+  }
+
+  const isValid = !!value && !errors.length && !agg.error;
 
   useEffect(
     () => {
-      // The selector will be invalid when the value is empty.
-      setValidity(!!value);
+      setValidity(isValid);
     },
-    [value]
+    [isValid]
   );
+
+  useEffect(
+    () => {
+      if (errors.length) {
+        setTouched();
+      }
+    },
+    [errors.length]
+  );
+
+  const onChange = (options: EuiComboBoxOptionProps[]) => {
+    const selectedOption = get(options, '0.value');
+    if (selectedOption) {
+      setValue(selectedOption);
+    }
+  };
 
   return (
     <EuiFormRow
       label={label}
       labelAppend={helpLink}
       error={errors}
-      isInvalid={isSelectInvalid}
+      isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       className="visEditorAggSelect__formRow"
     >
@@ -123,10 +143,10 @@ function DefaultEditorAggSelect({
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         onBlur={setTouched}
-        onChange={options => setValue(get(options, '0.value'))}
+        onChange={onChange}
         data-test-subj="defaultEditorAggSelect"
         isClearable={false}
-        isInvalid={isSelectInvalid}
+        isInvalid={showValidation ? !isValid : false}
         fullWidth={true}
       />
     </EuiFormRow>

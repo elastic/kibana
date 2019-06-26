@@ -60,6 +60,16 @@ Saving searches enables you to reload them into Discover and use them as the bas
 for <<visualize, visualizations>>. Saving a search saves both the search query string
 and the currently selected index pattern.
 
+[role="xpack"]
+[[discover-read-only-access]]
+==== Read only access
+When you have insufficient privileges to save searches, the following indicator in Kibana will be
+displayed and the *Save* button won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
+
 ==== Saving a Search
 To save the current search:
 

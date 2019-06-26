@@ -36,9 +36,10 @@ export function MetricsVisProvider(Private) {
 
   return VisFactory.createReactVisualization({
     name: 'metrics',
-    title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'Visual Builder' }),
-    description: i18n.translate('tsvb.kbnVisTypes.metricsDescription',
-      { defaultMessage: 'Build time-series using a visual pipeline interface' }),
+    title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
+    description: i18n.translate('tsvb.kbnVisTypes.metricsDescription', {
+      defaultMessage: 'Build time-series using a visual pipeline interface',
+    }),
     icon: 'visVisualBuilder',
     feedbackMessage: defaultFeedbackMessage,
     visConfig: {
@@ -53,8 +54,9 @@ export function MetricsVisProvider(Private) {
             metrics: [
               {
                 id: '61ca57f2-469d-11e7-af02-69e470af7417',
-                type: 'count'
-              }],
+                type: 'count',
+              },
+            ],
             separate_axis: 0,
             axis_position: 'right',
             formatter: 'number',
@@ -62,8 +64,9 @@ export function MetricsVisProvider(Private) {
             line_width: 1,
             point_size: 1,
             fill: 0.5,
-            stacked: 'none'
-          }],
+            stacked: 'none',
+          },
+        ],
         time_field: '',
         index_pattern: '',
         interval: '',
@@ -71,20 +74,20 @@ export function MetricsVisProvider(Private) {
         axis_formatter: 'number',
         axis_scale: 'normal',
         show_legend: 1,
-        show_grid: 1
+        show_grid: 1,
       },
-      component: require('../components/vis_editor').VisEditor
+      component: require('../components/vis_editor').VisEditor,
     },
     editor: ReactEditorController,
     editorConfig: {
-      component: require('../components/vis_editor').VisEditor
+      component: require('../components/vis_editor').VisEditor,
     },
     options: {
       showQueryBar: false,
       showFilterBar: false,
-      showIndexSelection: false
+      showIndexSelection: false,
     },
     requestHandler: metricsRequestHandler,
-    responseHandler: 'none'
+    responseHandler: 'none',
   });
 }

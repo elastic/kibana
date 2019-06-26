@@ -170,174 +170,170 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
         }
       }
     >
-      <form
-        name="queryBarForm"
+      <div
+        role="search"
       >
         <div
-          role="search"
+          className="kuiLocalSearchAssistedInput"
         >
-          <div
-            className="kuiLocalSearchAssistedInput"
+          <EuiFieldText
+            append={
+              <QueryLanguageSwitcher
+                language="kuery"
+                onSelectLanguage={[Function]}
+              />
+            }
+            aria-activedescendant=""
+            aria-autocomplete="list"
+            aria-controls="kbnTypeahead__items"
+            aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
+            autoComplete="off"
+            autoFocus={false}
+            compressed={false}
+            data-test-subj="queryInput"
+            fullWidth={true}
+            inputRef={[Function]}
+            isLoading={false}
+            onChange={[Function]}
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            placeholder="Search"
+            role="textbox"
+            spellCheck={false}
+            type="text"
+            value="response:200"
           >
-            <EuiFieldText
+            <EuiFormControlLayout
               append={
                 <QueryLanguageSwitcher
                   language="kuery"
                   onSelectLanguage={[Function]}
                 />
               }
-              aria-activedescendant=""
-              aria-autocomplete="list"
-              aria-controls="kbnTypeahead__items"
-              aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-              autoComplete="off"
-              autoFocus={false}
               compressed={false}
-              data-test-subj="queryInput"
               fullWidth={true}
-              inputRef={[Function]}
               isLoading={false}
-              onChange={[Function]}
-              onClick={[Function]}
-              onKeyDown={[Function]}
-              onKeyUp={[Function]}
-              placeholder="Search"
-              role="textbox"
-              spellCheck={false}
-              type="text"
-              value="response:200"
             >
-              <EuiFormControlLayout
-                append={
-                  <QueryLanguageSwitcher
-                    language="kuery"
-                    onSelectLanguage={[Function]}
-                  />
-                }
-                compressed={false}
-                fullWidth={true}
-                isLoading={false}
+              <div
+                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
               >
                 <div
-                  className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    className="euiFormControlLayout__childrenWrapper"
+                  <EuiValidatableControl
+                    className="undefined euiFormControlLayout__child--noStyle"
                   >
-                    <EuiValidatableControl
-                      className="undefined euiFormControlLayout__child--noStyle"
-                    >
-                      <input
-                        aria-activedescendant=""
-                        aria-autocomplete="list"
-                        aria-controls="kbnTypeahead__items"
-                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-                        autoComplete="off"
-                        autoFocus={false}
-                        className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                        data-test-subj="queryInput"
-                        onChange={[Function]}
-                        onClick={[Function]}
-                        onKeyDown={[Function]}
-                        onKeyUp={[Function]}
-                        placeholder="Search"
-                        role="textbox"
-                        spellCheck={false}
-                        type="text"
-                        value="response:200"
-                      />
-                    </EuiValidatableControl>
-                    <EuiFormControlLayoutIcons
-                      isLoading={false}
+                    <input
+                      aria-activedescendant=""
+                      aria-autocomplete="list"
+                      aria-controls="kbnTypeahead__items"
+                      aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
+                      autoComplete="off"
+                      autoFocus={false}
+                      className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                      data-test-subj="queryInput"
+                      onChange={[Function]}
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      onKeyUp={[Function]}
+                      placeholder="Search"
+                      role="textbox"
+                      spellCheck={false}
+                      type="text"
+                      value="response:200"
                     />
-                  </div>
-                  <QueryLanguageSwitcher
-                    className="euiFormControlLayout__append"
-                    language="kuery"
-                    onSelectLanguage={[Function]}
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    isLoading={false}
+                  />
+                </div>
+                <QueryLanguageSwitcher
+                  className="euiFormControlLayout__append"
+                  language="kuery"
+                  onSelectLanguage={[Function]}
+                >
+                  <EuiPopover
+                    anchorPosition="downRight"
+                    button={
+                      <EuiButtonEmpty
+                        color="primary"
+                        iconSide="left"
+                        onClick={[Function]}
+                        size="xs"
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="KQL"
+                          id="data.query.queryBar.kqlLanguageName"
+                          values={Object {}}
+                        />
+                      </EuiButtonEmpty>
+                    }
+                    className="eui-displayBlock"
+                    closePopover={[Function]}
+                    hasArrow={true}
+                    id="popover"
+                    isOpen={false}
+                    ownFocus={true}
+                    panelPaddingSize="m"
+                    withTitle={true}
                   >
-                    <EuiPopover
-                      anchorPosition="downRight"
-                      button={
-                        <EuiButtonEmpty
-                          color="primary"
-                          iconSide="left"
-                          onClick={[Function]}
-                          size="xs"
-                          type="button"
-                        >
-                          <FormattedMessage
-                            defaultMessage="KQL"
-                            id="data.query.queryBar.kqlLanguageName"
-                            values={Object {}}
-                          />
-                        </EuiButtonEmpty>
-                      }
-                      className="eui-displayBlock"
-                      closePopover={[Function]}
-                      hasArrow={true}
-                      id="popover"
-                      isOpen={false}
-                      ownFocus={true}
-                      panelPaddingSize="m"
-                      withTitle={true}
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
                     >
-                      <EuiOutsideClickDetector
-                        isDisabled={true}
-                        onOutsideClick={[Function]}
+                      <div
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        id="popover"
+                        onKeyDown={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
-                          id="popover"
-                          onKeyDown={[Function]}
-                          onMouseDown={[Function]}
-                          onMouseUp={[Function]}
-                          onTouchEnd={[Function]}
-                          onTouchStart={[Function]}
+                          className="euiPopover__anchor"
                         >
-                          <div
-                            className="euiPopover__anchor"
+                          <EuiButtonEmpty
+                            color="primary"
+                            iconSide="left"
+                            onClick={[Function]}
+                            size="xs"
+                            type="button"
                           >
-                            <EuiButtonEmpty
-                              color="primary"
-                              iconSide="left"
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
                               onClick={[Function]}
-                              size="xs"
                               type="button"
                             >
-                              <button
-                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                onClick={[Function]}
-                                type="button"
+                              <span
+                                className="euiButtonEmpty__content"
                               >
                                 <span
-                                  className="euiButtonEmpty__content"
+                                  className="euiButtonEmpty__text"
                                 >
-                                  <span
-                                    className="euiButtonEmpty__text"
+                                  <FormattedMessage
+                                    defaultMessage="KQL"
+                                    id="data.query.queryBar.kqlLanguageName"
+                                    values={Object {}}
                                   >
-                                    <FormattedMessage
-                                      defaultMessage="KQL"
-                                      id="data.query.queryBar.kqlLanguageName"
-                                      values={Object {}}
-                                    >
-                                      KQL
-                                    </FormattedMessage>
-                                  </span>
+                                    KQL
+                                  </FormattedMessage>
                                 </span>
-                              </button>
-                            </EuiButtonEmpty>
-                          </div>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
                         </div>
-                      </EuiOutsideClickDetector>
-                    </EuiPopover>
-                  </QueryLanguageSwitcher>
-                </div>
-              </EuiFormControlLayout>
-            </EuiFieldText>
-          </div>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </EuiPopover>
+                </QueryLanguageSwitcher>
+              </div>
+            </EuiFormControlLayout>
+          </EuiFieldText>
         </div>
-      </form>
+      </div>
       <SuggestionsComponent
         index={null}
         loadMore={[Function]}
@@ -520,174 +516,170 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
         }
       }
     >
-      <form
-        name="queryBarForm"
+      <div
+        role="search"
       >
         <div
-          role="search"
+          className="kuiLocalSearchAssistedInput"
         >
-          <div
-            className="kuiLocalSearchAssistedInput"
+          <EuiFieldText
+            append={
+              <QueryLanguageSwitcher
+                language="lucene"
+                onSelectLanguage={[Function]}
+              />
+            }
+            aria-activedescendant=""
+            aria-autocomplete="list"
+            aria-controls="kbnTypeahead__items"
+            aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
+            autoComplete="off"
+            autoFocus={true}
+            compressed={false}
+            data-test-subj="queryInput"
+            fullWidth={true}
+            inputRef={[Function]}
+            isLoading={false}
+            onChange={[Function]}
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            placeholder="Search"
+            role="textbox"
+            spellCheck={false}
+            type="text"
+            value="response:200"
           >
-            <EuiFieldText
+            <EuiFormControlLayout
               append={
                 <QueryLanguageSwitcher
                   language="lucene"
                   onSelectLanguage={[Function]}
                 />
               }
-              aria-activedescendant=""
-              aria-autocomplete="list"
-              aria-controls="kbnTypeahead__items"
-              aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-              autoComplete="off"
-              autoFocus={true}
               compressed={false}
-              data-test-subj="queryInput"
               fullWidth={true}
-              inputRef={[Function]}
               isLoading={false}
-              onChange={[Function]}
-              onClick={[Function]}
-              onKeyDown={[Function]}
-              onKeyUp={[Function]}
-              placeholder="Search"
-              role="textbox"
-              spellCheck={false}
-              type="text"
-              value="response:200"
             >
-              <EuiFormControlLayout
-                append={
-                  <QueryLanguageSwitcher
-                    language="lucene"
-                    onSelectLanguage={[Function]}
-                  />
-                }
-                compressed={false}
-                fullWidth={true}
-                isLoading={false}
+              <div
+                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
               >
                 <div
-                  className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    className="euiFormControlLayout__childrenWrapper"
+                  <EuiValidatableControl
+                    className="undefined euiFormControlLayout__child--noStyle"
                   >
-                    <EuiValidatableControl
-                      className="undefined euiFormControlLayout__child--noStyle"
-                    >
-                      <input
-                        aria-activedescendant=""
-                        aria-autocomplete="list"
-                        aria-controls="kbnTypeahead__items"
-                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-                        autoComplete="off"
-                        autoFocus={true}
-                        className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                        data-test-subj="queryInput"
-                        onChange={[Function]}
-                        onClick={[Function]}
-                        onKeyDown={[Function]}
-                        onKeyUp={[Function]}
-                        placeholder="Search"
-                        role="textbox"
-                        spellCheck={false}
-                        type="text"
-                        value="response:200"
-                      />
-                    </EuiValidatableControl>
-                    <EuiFormControlLayoutIcons
-                      isLoading={false}
+                    <input
+                      aria-activedescendant=""
+                      aria-autocomplete="list"
+                      aria-controls="kbnTypeahead__items"
+                      aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
+                      autoComplete="off"
+                      autoFocus={true}
+                      className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                      data-test-subj="queryInput"
+                      onChange={[Function]}
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      onKeyUp={[Function]}
+                      placeholder="Search"
+                      role="textbox"
+                      spellCheck={false}
+                      type="text"
+                      value="response:200"
                     />
-                  </div>
-                  <QueryLanguageSwitcher
-                    className="euiFormControlLayout__append"
-                    language="lucene"
-                    onSelectLanguage={[Function]}
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    isLoading={false}
+                  />
+                </div>
+                <QueryLanguageSwitcher
+                  className="euiFormControlLayout__append"
+                  language="lucene"
+                  onSelectLanguage={[Function]}
+                >
+                  <EuiPopover
+                    anchorPosition="downRight"
+                    button={
+                      <EuiButtonEmpty
+                        color="primary"
+                        iconSide="left"
+                        onClick={[Function]}
+                        size="xs"
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Lucene"
+                          id="data.query.queryBar.luceneLanguageName"
+                          values={Object {}}
+                        />
+                      </EuiButtonEmpty>
+                    }
+                    className="eui-displayBlock"
+                    closePopover={[Function]}
+                    hasArrow={true}
+                    id="popover"
+                    isOpen={false}
+                    ownFocus={true}
+                    panelPaddingSize="m"
+                    withTitle={true}
                   >
-                    <EuiPopover
-                      anchorPosition="downRight"
-                      button={
-                        <EuiButtonEmpty
-                          color="primary"
-                          iconSide="left"
-                          onClick={[Function]}
-                          size="xs"
-                          type="button"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Lucene"
-                            id="data.query.queryBar.luceneLanguageName"
-                            values={Object {}}
-                          />
-                        </EuiButtonEmpty>
-                      }
-                      className="eui-displayBlock"
-                      closePopover={[Function]}
-                      hasArrow={true}
-                      id="popover"
-                      isOpen={false}
-                      ownFocus={true}
-                      panelPaddingSize="m"
-                      withTitle={true}
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
                     >
-                      <EuiOutsideClickDetector
-                        isDisabled={true}
-                        onOutsideClick={[Function]}
+                      <div
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        id="popover"
+                        onKeyDown={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
-                          id="popover"
-                          onKeyDown={[Function]}
-                          onMouseDown={[Function]}
-                          onMouseUp={[Function]}
-                          onTouchEnd={[Function]}
-                          onTouchStart={[Function]}
+                          className="euiPopover__anchor"
                         >
-                          <div
-                            className="euiPopover__anchor"
+                          <EuiButtonEmpty
+                            color="primary"
+                            iconSide="left"
+                            onClick={[Function]}
+                            size="xs"
+                            type="button"
                           >
-                            <EuiButtonEmpty
-                              color="primary"
-                              iconSide="left"
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
                               onClick={[Function]}
-                              size="xs"
                               type="button"
                             >
-                              <button
-                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                onClick={[Function]}
-                                type="button"
+                              <span
+                                className="euiButtonEmpty__content"
                               >
                                 <span
-                                  className="euiButtonEmpty__content"
+                                  className="euiButtonEmpty__text"
                                 >
-                                  <span
-                                    className="euiButtonEmpty__text"
+                                  <FormattedMessage
+                                    defaultMessage="Lucene"
+                                    id="data.query.queryBar.luceneLanguageName"
+                                    values={Object {}}
                                   >
-                                    <FormattedMessage
-                                      defaultMessage="Lucene"
-                                      id="data.query.queryBar.luceneLanguageName"
-                                      values={Object {}}
-                                    >
-                                      Lucene
-                                    </FormattedMessage>
-                                  </span>
+                                    Lucene
+                                  </FormattedMessage>
                                 </span>
-                              </button>
-                            </EuiButtonEmpty>
-                          </div>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
                         </div>
-                      </EuiOutsideClickDetector>
-                    </EuiPopover>
-                  </QueryLanguageSwitcher>
-                </div>
-              </EuiFormControlLayout>
-            </EuiFieldText>
-          </div>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </EuiPopover>
+                </QueryLanguageSwitcher>
+              </div>
+            </EuiFormControlLayout>
+          </EuiFieldText>
         </div>
-      </form>
+      </div>
       <SuggestionsComponent
         index={null}
         loadMore={[Function]}
@@ -870,174 +862,170 @@ exports[`QueryBarInput Should render the given query 1`] = `
         }
       }
     >
-      <form
-        name="queryBarForm"
+      <div
+        role="search"
       >
         <div
-          role="search"
+          className="kuiLocalSearchAssistedInput"
         >
-          <div
-            className="kuiLocalSearchAssistedInput"
+          <EuiFieldText
+            append={
+              <QueryLanguageSwitcher
+                language="kuery"
+                onSelectLanguage={[Function]}
+              />
+            }
+            aria-activedescendant=""
+            aria-autocomplete="list"
+            aria-controls="kbnTypeahead__items"
+            aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
+            autoComplete="off"
+            autoFocus={true}
+            compressed={false}
+            data-test-subj="queryInput"
+            fullWidth={true}
+            inputRef={[Function]}
+            isLoading={false}
+            onChange={[Function]}
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            placeholder="Search"
+            role="textbox"
+            spellCheck={false}
+            type="text"
+            value="response:200"
           >
-            <EuiFieldText
+            <EuiFormControlLayout
               append={
                 <QueryLanguageSwitcher
                   language="kuery"
                   onSelectLanguage={[Function]}
                 />
               }
-              aria-activedescendant=""
-              aria-autocomplete="list"
-              aria-controls="kbnTypeahead__items"
-              aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-              autoComplete="off"
-              autoFocus={true}
               compressed={false}
-              data-test-subj="queryInput"
               fullWidth={true}
-              inputRef={[Function]}
               isLoading={false}
-              onChange={[Function]}
-              onClick={[Function]}
-              onKeyDown={[Function]}
-              onKeyUp={[Function]}
-              placeholder="Search"
-              role="textbox"
-              spellCheck={false}
-              type="text"
-              value="response:200"
             >
-              <EuiFormControlLayout
-                append={
-                  <QueryLanguageSwitcher
-                    language="kuery"
-                    onSelectLanguage={[Function]}
-                  />
-                }
-                compressed={false}
-                fullWidth={true}
-                isLoading={false}
+              <div
+                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
               >
                 <div
-                  className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                  className="euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    className="euiFormControlLayout__childrenWrapper"
+                  <EuiValidatableControl
+                    className="undefined euiFormControlLayout__child--noStyle"
                   >
-                    <EuiValidatableControl
-                      className="undefined euiFormControlLayout__child--noStyle"
-                    >
-                      <input
-                        aria-activedescendant=""
-                        aria-autocomplete="list"
-                        aria-controls="kbnTypeahead__items"
-                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
-                        autoComplete="off"
-                        autoFocus={true}
-                        className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
-                        data-test-subj="queryInput"
-                        onChange={[Function]}
-                        onClick={[Function]}
-                        onKeyDown={[Function]}
-                        onKeyUp={[Function]}
-                        placeholder="Search"
-                        role="textbox"
-                        spellCheck={false}
-                        type="text"
-                        value="response:200"
-                      />
-                    </EuiValidatableControl>
-                    <EuiFormControlLayoutIcons
-                      isLoading={false}
+                    <input
+                      aria-activedescendant=""
+                      aria-autocomplete="list"
+                      aria-controls="kbnTypeahead__items"
+                      aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
+                      autoComplete="off"
+                      autoFocus={true}
+                      className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                      data-test-subj="queryInput"
+                      onChange={[Function]}
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      onKeyUp={[Function]}
+                      placeholder="Search"
+                      role="textbox"
+                      spellCheck={false}
+                      type="text"
+                      value="response:200"
                     />
-                  </div>
-                  <QueryLanguageSwitcher
-                    className="euiFormControlLayout__append"
-                    language="kuery"
-                    onSelectLanguage={[Function]}
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    isLoading={false}
+                  />
+                </div>
+                <QueryLanguageSwitcher
+                  className="euiFormControlLayout__append"
+                  language="kuery"
+                  onSelectLanguage={[Function]}
+                >
+                  <EuiPopover
+                    anchorPosition="downRight"
+                    button={
+                      <EuiButtonEmpty
+                        color="primary"
+                        iconSide="left"
+                        onClick={[Function]}
+                        size="xs"
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="KQL"
+                          id="data.query.queryBar.kqlLanguageName"
+                          values={Object {}}
+                        />
+                      </EuiButtonEmpty>
+                    }
+                    className="eui-displayBlock"
+                    closePopover={[Function]}
+                    hasArrow={true}
+                    id="popover"
+                    isOpen={false}
+                    ownFocus={true}
+                    panelPaddingSize="m"
+                    withTitle={true}
                   >
-                    <EuiPopover
-                      anchorPosition="downRight"
-                      button={
-                        <EuiButtonEmpty
-                          color="primary"
-                          iconSide="left"
-                          onClick={[Function]}
-                          size="xs"
-                          type="button"
-                        >
-                          <FormattedMessage
-                            defaultMessage="KQL"
-                            id="data.query.queryBar.kqlLanguageName"
-                            values={Object {}}
-                          />
-                        </EuiButtonEmpty>
-                      }
-                      className="eui-displayBlock"
-                      closePopover={[Function]}
-                      hasArrow={true}
-                      id="popover"
-                      isOpen={false}
-                      ownFocus={true}
-                      panelPaddingSize="m"
-                      withTitle={true}
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
                     >
-                      <EuiOutsideClickDetector
-                        isDisabled={true}
-                        onOutsideClick={[Function]}
+                      <div
+                        className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
+                        id="popover"
+                        onKeyDown={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle eui-displayBlock"
-                          id="popover"
-                          onKeyDown={[Function]}
-                          onMouseDown={[Function]}
-                          onMouseUp={[Function]}
-                          onTouchEnd={[Function]}
-                          onTouchStart={[Function]}
+                          className="euiPopover__anchor"
                         >
-                          <div
-                            className="euiPopover__anchor"
+                          <EuiButtonEmpty
+                            color="primary"
+                            iconSide="left"
+                            onClick={[Function]}
+                            size="xs"
+                            type="button"
                           >
-                            <EuiButtonEmpty
-                              color="primary"
-                              iconSide="left"
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
                               onClick={[Function]}
-                              size="xs"
                               type="button"
                             >
-                              <button
-                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                onClick={[Function]}
-                                type="button"
+                              <span
+                                className="euiButtonEmpty__content"
                               >
                                 <span
-                                  className="euiButtonEmpty__content"
+                                  className="euiButtonEmpty__text"
                                 >
-                                  <span
-                                    className="euiButtonEmpty__text"
+                                  <FormattedMessage
+                                    defaultMessage="KQL"
+                                    id="data.query.queryBar.kqlLanguageName"
+                                    values={Object {}}
                                   >
-                                    <FormattedMessage
-                                      defaultMessage="KQL"
-                                      id="data.query.queryBar.kqlLanguageName"
-                                      values={Object {}}
-                                    >
-                                      KQL
-                                    </FormattedMessage>
-                                  </span>
+                                    KQL
+                                  </FormattedMessage>
                                 </span>
-                              </button>
-                            </EuiButtonEmpty>
-                          </div>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
                         </div>
-                      </EuiOutsideClickDetector>
-                    </EuiPopover>
-                  </QueryLanguageSwitcher>
-                </div>
-              </EuiFormControlLayout>
-            </EuiFieldText>
-          </div>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </EuiPopover>
+                </QueryLanguageSwitcher>
+              </div>
+            </EuiFormControlLayout>
+          </EuiFieldText>
         </div>
-      </form>
+      </div>
       <SuggestionsComponent
         index={null}
         loadMore={[Function]}

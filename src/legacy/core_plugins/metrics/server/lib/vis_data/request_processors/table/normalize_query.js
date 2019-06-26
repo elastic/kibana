@@ -35,7 +35,7 @@ export function normalizeQuery() {
         const agg = get(value, 'aggs.timeseries');
         const meta = {
           ...get(value, 'meta'),
-          seriesId
+          seriesId,
         };
         set(normalizedSeries, `${seriesId}`, agg);
         set(normalizedSeries, `${seriesId}.meta`, meta);

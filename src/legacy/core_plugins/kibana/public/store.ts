@@ -20,7 +20,6 @@
 import { applyMiddleware, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 
-import { QueryLanguageType } from 'ui/embeddable/types';
 import { DashboardViewMode } from './dashboard/dashboard_view_mode';
 import { reducers } from './reducers';
 
@@ -39,7 +38,7 @@ export const store = createStore(
         filters: [],
         hidePanelTitles: false,
         isFullScreenMode: false,
-        query: { language: QueryLanguageType.LUCENE, query: '' },
+        query: { language: 'lucene', query: '' },
         timeRange: { from: 'now-15m', to: 'now' },
         useMargins: true,
         viewMode: DashboardViewMode.VIEW,

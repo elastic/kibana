@@ -20,9 +20,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { last } from 'lodash';
 
-import {
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';
 
 export const PercentileRankValues = props => {
@@ -34,9 +32,8 @@ export const PercentileRankValues = props => {
 
     onChange(model);
   };
-  const onDeleteValue = ({ id }) => onChange(
-    model.filter((item, currentIndex) => id !== currentIndex),
-  );
+  const onDeleteValue = ({ id }) =>
+    onChange(model.filter((item, currentIndex) => id !== currentIndex));
   const onAddValue = () => onChange([...model, '']);
 
   const renderRow = ({ rowModel, disableDelete, disableAdd }) => (
@@ -48,28 +45,32 @@ export const PercentileRankValues = props => {
       disableDelete={disableDelete}
       disableAdd={disableAdd}
       model={rowModel}
-    />);
+    />
+  );
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-      {showOnlyLastRow && renderRow({
-        rowModel: {
-          id: model.length - 1,
-          value: last(model),
-        },
-        disableAdd: true,
-        disableDelete: true
-      })}
-
-      {!showOnlyLastRow && model.map((value, id, array) => (
+      {showOnlyLastRow &&
         renderRow({
           rowModel: {
-            id,
-            value,
+            id: model.length - 1,
+            value: last(model),
           },
-          disableAdd,
-          disableDelete: disableDelete || array.length < 2,
-        })))}
+          disableAdd: true,
+          disableDelete: true,
+        })}
+
+      {!showOnlyLastRow &&
+        model.map((value, id, array) =>
+          renderRow({
+            rowModel: {
+              id,
+              value,
+            },
+            disableAdd,
+            disableDelete: disableDelete || array.length < 2,
+          })
+        )}
     </EuiFlexGroup>
   );
 };

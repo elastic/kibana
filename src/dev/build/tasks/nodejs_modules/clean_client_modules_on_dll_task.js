@@ -71,6 +71,10 @@ export const CleanClientModulesOnDLLTask = {
     const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
 
     for (const relativeEntryPath of dllEntries) {
+      if (relativeEntryPath.includes('@elastic/eui')) {
+        continue;
+      }
+
       const entryPath = `${baseDir}/${relativeEntryPath}`;
 
       // Clean a module included into the dll

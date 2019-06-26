@@ -1,0 +1,14 @@
+.mapFeatureTooltip_table {
+  td {
+    padding: $euiSizeXS;
+  }
+}
+
+.mapFeatureTooltip__propertyLabel {
+  max-width: $euiSizeXL * 3;
+  font-weight: $euiFontWeightSemiBold;
+}
+
+.mapFeatureTooltip__propertyValue {
+  max-width: $euiSizeXL * 5;
+}

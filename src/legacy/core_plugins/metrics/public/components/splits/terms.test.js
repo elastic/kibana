@@ -40,12 +40,12 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
         formatMessage: jest.fn(),
       },
       model: {
-        terms_field: 'OriginCityName'
+        terms_field: 'OriginCityName',
       },
       onChange: jest.fn(),
       indexPattern: 'kibana_sample_data_flights',
       fields: {
-        'kibana_sample_data_flights': [
+        kibana_sample_data_flights: [
           {
             aggregatable: true,
             name: 'OriginCityName',
@@ -53,8 +53,8 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
             searchable: true,
             type: 'string',
             esTypes: ['keyword'],
-          }
-        ]
+          },
+        ],
       },
     };
   });

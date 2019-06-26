@@ -257,7 +257,7 @@ exports[`ObjectsTable should render normally 1`] = `
     size="xs"
   />
   <InjectIntl(TableUI)
-    canDeleteSavedObjectTypes={Array []}
+    canDelete={false}
     filterOptions={
       Array [
         Object {

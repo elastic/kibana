@@ -40,12 +40,13 @@ export function percentileRank(bucket, panel, series) {
       const lastRankValue = last(metric.values);
       const percentileRank = toPercentileNumber(lastRankValue);
 
-      const data = split.timeseries.buckets.map(bucket => (
-        [bucket.key, getAggValue(bucket, {
+      const data = split.timeseries.buckets.map(bucket => [
+        bucket.key,
+        getAggValue(bucket, {
           ...metric,
-          value: percentileRank
-        })]
-      ));
+          value: percentileRank,
+        }),
+      ]);
 
       results.push({
         data,

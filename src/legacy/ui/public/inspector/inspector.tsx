@@ -20,7 +20,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { OverlayRef } from '../../../../core/public';
-import { getNewPlatform } from '../new_platform';
+import { npStart } from '../new_platform';
 import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
@@ -73,7 +73,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
       if an inspector can be shown.`);
   }
 
-  return getNewPlatform().start.core.overlays.openFlyout(
+  return npStart.core.overlays.openFlyout(
     <InspectorPanel views={views} adapters={adapters} title={options.title} />,
     {
       'data-test-subj': 'inspectorPanel',

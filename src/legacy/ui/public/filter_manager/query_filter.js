@@ -28,11 +28,11 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-import { getNewPlatform } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 
 export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState) {
   const queryFilter = {};
-  const { uiSettings } = getNewPlatform().setup.core;
+  const { uiSettings } = npSetup.core;
 
   const update$ = new Subject();
   const fetch$ = new Subject();

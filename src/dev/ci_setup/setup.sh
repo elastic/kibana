@@ -162,7 +162,7 @@ GIT_CHANGES="$(git ls-files --modified)"
 if [ "$GIT_CHANGES" ]; then
   echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
   echo -e "$GIT_CHANGES\n"
-  # exit 1
+  exit 1
 fi
 
 ###
@@ -178,13 +178,29 @@ GIT_CHANGES="$(git ls-files --modified)"
 if [ "$GIT_CHANGES" ]; then
   echo -e "\n${RED}ERROR: 'yarn kbn run build -i @kbn/pm' caused changes to the following files:${C_RESET}\n"
   echo -e "$GIT_CHANGES\n"
-  # exit 1
+  exit 1
+fi
+
+###
+### rebuild kbn-pm distributable to ensure it's not out of date
+###
+echo " -- building renovate config"
+node scripts/build_renovate_config
+
+###
+### verify no git modifications
+###
+GIT_CHANGES="$(git ls-files --modified)"
+if [ "$GIT_CHANGES" ]; then
+  echo -e "\n${RED}ERROR: 'node scripts/build_renovate_config' caused changes to the following files:${C_RESET}\n"
+  echo -e "$GIT_CHANGES\n"
+  exit 1
 fi
 
 ###
 ### github-checks-reporter kill switch. Remove to disable
 ###
-export CHECKS_REPORTER_ACTIVE=false
+export CHECKS_REPORTER_ACTIVE=true
 
 ### only run on pr jobs
 if [[ "$JOB_NAME" != "elastic+kibana+pull-request"* ]] ; then

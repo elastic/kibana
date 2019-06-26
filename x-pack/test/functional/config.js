@@ -60,6 +60,7 @@ import {
   UptimeProvider,
   InfraSourceConfigurationFlyoutProvider,
   InfraLogStreamProvider,
+  MachineLearningProvider,
 } from './services';
 
 import {
@@ -150,6 +151,7 @@ export default async function ({ readConfigFile }) {
       rollup: RollupPageProvider,
       infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
       infraLogStream: InfraLogStreamProvider,
+      ml: MachineLearningProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -190,17 +192,20 @@ export default async function ({ readConfigFile }) {
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
-        '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
-        '--stats.maximumWaitTimeForAllCollectorsInS=0',
+        '--xpack.telemetry.banner=false',
+        '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
+        '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
+        '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
+        '--xpack.encrypted_saved_objects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
       },
     },
     // the apps section defines the urls that
@@ -284,7 +289,7 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'X-Pack Functional Tests',
+      reportName: 'Chrome X-Pack UI Functional Tests',
     },
   };
 }

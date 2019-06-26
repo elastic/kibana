@@ -1,0 +1,19 @@
+{
+  "author": "Elastic",
+  "name": "siem",
+  "version": "8.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "scripts": {
+    "build-graphql-types": "node scripts/generate_types_from_graphql.js"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.110",
+    "@types/react-beautiful-dnd": "^10.0.1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.10",
+    "react-beautiful-dnd": "^10.0.1",
+    "react-markdown": "^4.0.6"
+  }
+}

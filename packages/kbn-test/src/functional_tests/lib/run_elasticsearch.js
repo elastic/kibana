@@ -27,6 +27,7 @@ export async function runElasticsearch({ config, options }) {
   const { log, esFrom } = options;
   const license = config.get('esTestCluster.license');
   const esArgs = config.get('esTestCluster.serverArgs');
+  const esEnvVars = config.get('esTestCluster.serverEnvVars');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
   const cluster = createEsTestCluster({
@@ -41,7 +42,7 @@ export async function runElasticsearch({ config, options }) {
     dataArchive: config.get('esTestCluster.dataArchive'),
   });
 
-  await cluster.start(esArgs);
+  await cluster.start(esArgs, esEnvVars);
 
   if (isSecurityEnabled) {
     await setupUsers(log, config.get('servers.elasticsearch.port'), [

@@ -18,7 +18,7 @@
  */
 
 import { i18n }  from '@kbn/i18n';
-import { toastNotifications, Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
@@ -27,7 +27,6 @@ import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects'
 export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, $rootScope) {
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const notify = new Notifier({ location: 'Vega' });
 
   return class VegaVisualization {
     constructor(el, vis) {
@@ -83,7 +82,11 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
         if (this._vegaView) {
           this._vegaView.onError(error);
         } else {
-          notify.error(error);
+          toastNotifications.addError(error, {
+            title: i18n.translate('vega.visualization.renderErrorTitle', {
+              defaultMessage: 'Vega error',
+            }),
+          });
         }
       }
     }

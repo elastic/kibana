@@ -57,7 +57,7 @@ describe('parseSettings', () => {
       gamma: 0.2,
       period: 5,
       pad: false,
-      type: 'add'
+      type: 'add',
     });
   });
 });

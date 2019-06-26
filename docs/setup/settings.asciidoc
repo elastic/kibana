@@ -128,6 +128,14 @@ store saved searches, visualizations and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 
+`kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
+for autocomplete suggestions from Elasticsearch. This value must be a whole number
+greater than zero.
+
+`kibana.autocompleteTerminateAfter:`:: *Default: "100000"* Maximum number of
+documents loaded by each shard to generate autocomplete suggestions. This value
+must be a whole number greater than zero.
+
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
 stores log output.
 
@@ -304,10 +312,11 @@ disable the License Management user interface.
 `xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the
 Rollup user interface.
 
-`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`.
+`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
+include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]

@@ -22,6 +22,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
 import { uiModules } from '../../modules';
+import template from './kbn_chrome.html';
 
 import {
   notify,
@@ -38,7 +39,7 @@ export function kbnChromeProvider(chrome, internals) {
     .directive('kbnChrome', () => {
       return {
         template() {
-          const $content = $(require('./kbn_chrome.html'));
+          const $content = $(template);
           const $app = $content.find('.application');
 
           if (internals.rootController) {

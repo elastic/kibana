@@ -19,53 +19,102 @@
 
 import { i18n } from '@kbn/i18n';
 
+const durationBaseOptions = [
+  {
+    label: i18n.translate('tsvb.durationOptions.millisecondsLabel', {
+      defaultMessage: 'Milliseconds',
+    }),
+    value: 'ms',
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.secondsLabel', { defaultMessage: 'Seconds' }),
+    value: 's',
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.minutesLabel', { defaultMessage: 'Minutes' }),
+    value: 'm',
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.hoursLabel', { defaultMessage: 'Hours' }),
+    value: 'h',
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.daysLabel', { defaultMessage: 'Days' }),
+    value: 'd',
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.weeksLabel', { defaultMessage: 'Weeks' }),
+    value: 'w',
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.monthsLabel', { defaultMessage: 'Months' }),
+    value: 'M',
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.yearsLabel', { defaultMessage: 'Years' }),
+    value: 'Y',
+  },
+];
+
 export const durationOutputOptions = [
   {
-    label: i18n.translate('tsvb.durationOptions.millisecondsLabel', { defaultMessage: 'milliseconds' }),
-    value: 'ms'
+    label: i18n.translate('tsvb.durationOptions.humanize', { defaultMessage: 'Human readable' }),
+    value: 'humanize',
   },
-  {
-    label: i18n.translate('tsvb.durationOptions.secondsLabel', { defaultMessage: 'seconds' }),
-    value: 's'
-  },
-  {
-    label: i18n.translate('tsvb.durationOptions.minutesLabel', { defaultMessage: 'minutes' }),
-    value: 'm'
-  },
-  {
-    label: i18n.translate('tsvb.durationOptions.hoursLabel', { defaultMessage: 'hours' }),
-    value: 'h'
-  },
-  {
-    label: i18n.translate('tsvb.durationOptions.daysLabel', { defaultMessage: 'days' }),
-    value: 'd'
-  },
-  {
-    label: i18n.translate('tsvb.durationOptions.weeksLabel', { defaultMessage: 'weeks' }),
-    value: 'w'
-  },
-  {
-    label: i18n.translate('tsvb.durationOptions.monthsLabel', { defaultMessage: 'months' }),
-    value: 'M'
-  },
-  {
-    label: i18n.translate('tsvb.durationOptions.yearsLabel', { defaultMessage: 'years' }),
-    value: 'Y'
-  }
+  ...durationBaseOptions,
 ];
 
 export const durationInputOptions = [
   {
-    label: i18n.translate('tsvb.durationOptions.picosecondsLabel', { defaultMessage: 'picoseconds' }),
-    value: 'ps'
+    label: i18n.translate('tsvb.durationOptions.picosecondsLabel', {
+      defaultMessage: 'Picoseconds',
+    }),
+    value: 'ps',
   },
   {
-    label: i18n.translate('tsvb.durationOptions.nanosecondsLabel', { defaultMessage: 'nanoseconds' }),
-    value: 'ns'
+    label: i18n.translate('tsvb.durationOptions.nanosecondsLabel', {
+      defaultMessage: 'Nanoseconds',
+    }),
+    value: 'ns',
   },
   {
-    label: i18n.translate('tsvb.durationOptions.microsecondsLabel', { defaultMessage: 'microseconds' }),
-    value: 'us' },
-  ...durationOutputOptions
+    label: i18n.translate('tsvb.durationOptions.microsecondsLabel', {
+      defaultMessage: 'Microseconds',
+    }),
+    value: 'us',
+  },
+  ...durationBaseOptions,
 ];
 
+export const inputFormats = {
+  ps: 'picoseconds',
+  ns: 'nanoseconds',
+  us: 'microseconds',
+  ms: 'milliseconds',
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+  d: 'days',
+  w: 'weeks',
+  M: 'months',
+  Y: 'years',
+};
+
+export const outputFormats = {
+  humanize: 'humanize',
+  ms: 'asMilliseconds',
+  s: 'asSeconds',
+  m: 'asMinutes',
+  h: 'asHours',
+  d: 'asDays',
+  w: 'asWeeks',
+  M: 'asMonths',
+  Y: 'asYears',
+};
+
+export const isDuration = format => {
+  const splittedFormat = format.split(',');
+  const [input, output] = splittedFormat;
+
+  return Boolean(inputFormats[input] && outputFormats[output]) && splittedFormat.length === 3;
+};

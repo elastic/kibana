@@ -165,9 +165,16 @@ export class WebElementWrapper {
         await delay(100);
       }
     } else {
-      // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
-      await this.driver.executeScript(`arguments[0].select();`, this._webElement);
-      await this.pressKeys(this.Keys.BACK_SPACE);
+      if (this.browserType === Browsers.Chrome) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
+        await this.driver.executeScript(`arguments[0].select();`, this._webElement);
+        await this.pressKeys(this.Keys.BACK_SPACE);
+      } else {
+        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await this.pressKeys([selectionKey, 'a']);
+        await this.pressKeys(this.Keys.NULL); // Release modifier keys
+        await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
+      }
     }
   }
 

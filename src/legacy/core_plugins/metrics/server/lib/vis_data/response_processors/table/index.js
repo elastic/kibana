@@ -34,6 +34,5 @@ export const processors = [
   stdSibling,
   math,
   seriesAgg,
-  dropLastBucketFn
+  dropLastBucketFn,
 ];
-

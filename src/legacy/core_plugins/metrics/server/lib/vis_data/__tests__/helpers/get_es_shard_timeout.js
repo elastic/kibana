@@ -29,11 +29,11 @@ describe('getEsShardTimeout', () => {
         newPlatform: {
           setup: {
             core: {
-              elasticsearch: { legacy: { config$: of({ shardTimeout: moment.duration(12345) }) } }
-            }
-          }
-        }
-      }
+              elasticsearch: { legacy: { config$: of({ shardTimeout: moment.duration(12345) }) } },
+            },
+          },
+        },
+      },
     };
 
     const timeout = await getEsShardTimeout(req);

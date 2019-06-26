@@ -8,6 +8,7 @@ Not to worry, we've created this guide to help you get the most out of Elastic A
 
 APM is available via the navigation sidebar in {Kib}.
 
+* <<filters,Filters>>
 * <<services,Services overview>>
 * <<traces,Traces overview>>
 * <<transactions,Transaction overview>>
@@ -16,6 +17,8 @@ APM is available via the navigation sidebar in {Kib}.
 * <<metrics,Metrics overview>>
 * <<machine-learning-integration,Machine learning integration>>
 * <<query-bar,Advanced queries>>
+
+include::filters.asciidoc[]
 
 include::services.asciidoc[]
 
@@ -29,4 +32,4 @@ include::errors.asciidoc[]
 
 include::metrics.asciidoc[]
 
-include::query-bar.asciidoc[]
+include::advanced-queries.asciidoc[]

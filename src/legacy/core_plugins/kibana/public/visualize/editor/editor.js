@@ -26,14 +26,13 @@ import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 
 import { capabilities } from 'ui/capabilities';
-import 'ui/apply_filters';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { migrateAppState } from './lib';
@@ -53,10 +52,8 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
-import { data } from 'plugins/data';
-data.search.loadLegacyDirectives();
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -135,7 +132,6 @@ function VisEditor(
   kbnBaseUrl,
   localStorage
 ) {
-  const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
@@ -508,7 +504,7 @@ function VisEditor(
               // url, not the unsaved one.
               chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-              const lastDashboardAbsoluteUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:dashboard').url;
+              const lastDashboardAbsoluteUrl = npStart.core.chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);
