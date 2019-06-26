@@ -42,14 +42,16 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
       return {
         title: shortcutKeyMap.help,
         description: osShortcuts.reduce((acc: JSX.Element[], shortcut, i): JSX.Element[] => {
+          // replace +'s with spaces so we can display the plus symbol for the plus key
+          shortcut = shortcut.replace(/\+/g, ' ');
           if (i !== 0) {
             acc.push(<span key={getId('span')}> or </span>);
           }
           acc.push(
             <span key={getId('span')}>
               {getPrettyShortcut(shortcut)
-                .split(/(\+)/g) // splits the array by '+' and keeps the '+'s as elements in the array
-                .map(key => (key === '+' ? ` ` : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
+                .split(/( )/g)
+                .map(key => (key === ' ' ? key : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
             </span>
           );
           return acc;

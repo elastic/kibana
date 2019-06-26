@@ -7,11 +7,18 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
+import { hasDirtyState } from '../../../selectors/map_selectors';
 import {
   setSelectedLayer,
   removeSelectedLayer,
   removeTrackedLayerStateForSelectedLayer
 } from '../../../actions/store_actions';
+
+function mapStateToProps(state = {}) {
+  return {
+    hasStateChanged: hasDirtyState(state)
+  };
+}
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -31,5 +38,5 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const connectedFlyoutFooter = connect(null, mapDispatchToProps)(FlyoutFooter);
+const connectedFlyoutFooter = connect(mapStateToProps, mapDispatchToProps)(FlyoutFooter);
 export { connectedFlyoutFooter as FlyoutFooter };

@@ -20,6 +20,7 @@ import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { TEXT_FILE_LIMIT } from '../../common/file';
+import { ReferenceType } from '../../model/commit';
 
 export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   async function repoExists(req: hapi.Request, repoUri: string) {
@@ -99,10 +100,16 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
             }
             const lines = extractLines(blob.content(), fromLine, toLine);
             const lang = await detectLanguage(path, lines);
-            return h.response(lines).type(`text/${lang || 'plain'}`);
+            return h
+              .response(lines)
+              .type(`text/plain`)
+              .header('lang', lang);
           } else if (blob.content().length <= TEXT_FILE_LIMIT) {
             const lang = await detectLanguage(path, blob.content());
-            return h.response(blob.content()).type(`text/${lang || 'plain'}`);
+            return h
+              .response(blob.content())
+              .type(`text/plain'`)
+              .header('lang', lang);
           } else {
             return h.response('').type(`text/big`);
           }
@@ -206,7 +213,11 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
         const repository = await gitOps.openRepo(uri);
         const references = await repository.getReferences(Reference.TYPE.DIRECT);
         const referenceInfos = await Promise.all(references.map(referenceInfo));
-        return referenceInfos.filter(info => info !== null);
+        return referenceInfos.filter(
+          info =>
+            info !== null &&
+            (info.type === ReferenceType.REMOTE_BRANCH || info.type === ReferenceType.TAG)
+        );
       } catch (e) {
         if (e.isBoom) {
           return e;

@@ -27,10 +27,14 @@ interface OverviewPageProps {
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
+export type UptimeSearchBarQueryChangeHandler = (
+  queryChangedEvent: { query?: { text: string }; queryText?: string }
+) => void;
 
 export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
-  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
+    UptimeSettingsContext
+  );
   const [params, updateUrl] = useUrlParams(history, location);
   const { dateRangeStart, dateRangeEnd, search } = params;
 
@@ -47,23 +51,25 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   }, []);
 
   const filterQueryString = search || '';
+  let error: any;
+  let filters: any | undefined;
+  try {
+    // toESQuery will throw errors
+    if (filterQueryString) {
+      filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
+    }
+  } catch (e) {
+    error = e;
+  }
   const sharedProps = {
     dateRangeStart,
     dateRangeEnd,
-    filters: search ? JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString)) : undefined,
+    filters,
   };
 
-  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
-    try {
-      if (query && typeof query.text !== 'undefined') {
-        updateUrl({ search: query.text });
-      }
-      if (refreshApp) {
-        refreshApp();
-      }
-    } catch (e) {
-      updateUrl({ search: '' });
-    }
+  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
+    updateUrl({ search: queryText || '' });
+    refreshApp();
   };
 
   const linkParameters = stringifyUrlParams(params);
@@ -73,13 +79,21 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
         <FilterBar
           currentQuery={filterQueryString}
+          error={error}
           updateQuery={updateQuery}
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <Snapshot colors={colors} variables={sharedProps} />
+        <Snapshot
+          absoluteStartDate={absoluteStartDate}
+          absoluteEndDate={absoluteEndDate}
+          colors={colors}
+          variables={sharedProps}
+        />
         <EuiSpacer size="s" />
         <MonitorList
+          absoluteStartDate={absoluteStartDate}
+          absoluteEndDate={absoluteEndDate}
           basePath={basePath}
           dangerColor={colors.danger}
           dateRangeStart={dateRangeStart}

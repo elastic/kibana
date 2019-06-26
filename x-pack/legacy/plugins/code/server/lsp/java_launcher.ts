@@ -30,19 +30,26 @@ export class JavaLauncher extends AbstractLauncher {
   }
 
   createExpander(proxy: LanguageServerProxy, builtinWorkspace: boolean, maxWorkspace: number) {
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-      initialOptions: {
-        settings: {
-          'java.import.gradle.enabled': this.options.security.enableGradleImport,
-          'java.import.maven.enabled': this.options.security.enableMavenImport,
-          'java.autobuild.enabled': false,
+    return new RequestExpander(
+      proxy,
+      builtinWorkspace,
+      maxWorkspace,
+      this.options,
+      {
+        initialOptions: {
+          settings: {
+            'java.import.gradle.enabled': this.options.security.enableGradleImport,
+            'java.import.maven.enabled': this.options.security.enableMavenImport,
+            'java.autobuild.enabled': false,
+          },
         },
-      },
-    } as InitializeOptions);
+      } as InitializeOptions,
+      this.log
+    );
   }
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.awaitServerConnection().catch(this.log.debug);
+    proxy.startServerConnection();
   }
 
   async getPort(): Promise<number> {
