@@ -45,21 +45,30 @@ require('ui/modules')
 
         this.saveSettings = () => {
           const prevSettings = getAutocomplete();
+          const prevPolling = getPolling();
+
           this.vals = updateSettings(this.vals);
 
-          // Find which, if any, autocomplete settings have changed.
-          const settingsDiff = Object.keys(prevSettings).filter(key => prevSettings[key] !== this.vals.autocomplete[key]);
-
-          // Retrieve autocomplete info if the user has changed one of the autocomplete settings or
-          // has turned on polling.
-          if (settingsDiff.length > 0 || getPolling()) {
+          // We'll only retrieve settings if polling is on.
+          if (getPolling()) {
+            // Find which, if any, autocomplete settings have changed.
+            const settingsDiff = Object.keys(prevSettings).filter(key => prevSettings[key] !== this.vals.autocomplete[key]);
             const changedSettings = settingsDiff.reduce((changedSettingsAccum, setting) => {
               changedSettingsAccum[setting] = this.vals.autocomplete[setting];
               return changedSettingsAccum;
             }, {});
 
-            // Update autocomplete info based on changes so new settings takes effect immediately.
-            mappings.retrieveAutoCompleteInfo(changedSettings);
+            const isSettingsChanged = settingsDiff.length > 0;
+            const isPollingChanged = prevPolling !== getPolling();
+
+            if (isSettingsChanged) {
+              // If the user has changed one of the autocomplete settings, then we'll fetch just the
+              // ones which have changed.
+              mappings.retrieveAutoCompleteInfo(changedSettings);
+            } else if (isPollingChanged) {
+              // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
+              mappings.retrieveAutoCompleteInfo();
+            }
           }
 
           $scope.kbnTopNav.close();

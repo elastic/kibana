@@ -25,6 +25,7 @@ import { uiModules } from '../../../modules';
 import aggGroupTemplate from './agg_group.html';
 import { move } from '../../../utils/collection';
 import { aggGroupNameMaps } from './agg_group_names';
+import { AggConfig } from '../../agg_config';
 
 import '../../draggable/draggable_container';
 import '../../draggable/draggable_item';
@@ -43,12 +44,6 @@ uiModules
         $scope.groupNameLabel = aggGroupNameMaps()[$scope.groupName];
         $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
         $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
-        // We use `editorState` to access the state of the editor in the options panels.
-        // There are some aggregations (dot size metric) that needs to set parameters on the
-        // editorState too. Since we have the editor state here available as `state`, we're just
-        // binding it to the same name `editorState` so the controls look the same if they are in
-        // the data tab or within any other options tab.
-        $scope.$bind('editorState', 'state');
 
         $scope.$watchMulti([
           'schemas',
@@ -67,11 +62,6 @@ uiModules
             stats.max += schema.max;
             stats.deprecate = schema.deprecate;
           });
-
-          $scope.availableSchema = $scope.schemas.filter(function (schema) {
-            const count = _.where($scope.group, { schema }).length;
-            if (count < schema.max) return true;
-          });
         });
 
         function reorderFinished() {
@@ -89,6 +79,16 @@ uiModules
           $scope.dragging = false;
           reorderFinished();
         });
+
+        $scope.addSchema = function (schema) {
+          const aggConfig = new AggConfig($scope.state.aggs, {
+            schema,
+            id: AggConfig.nextId($scope.state.aggs),
+          });
+          aggConfig.brandNew = true;
+
+          $scope.state.aggs.push(aggConfig);
+        };
       }
     };
 
