@@ -1,12 +1,12 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusually high increases in authentication attempts (beta)",
+  "description": "SIEM Auditbeat: Detect unusually high number of authentication attempts (beta)",
   "groups": ["siem"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high rate of authentication attempts",
+        "detector_description": "high number of authentication attempts",
         "function": "high_non_zero_count",
         "partition_field_name": "host.name"
       }
