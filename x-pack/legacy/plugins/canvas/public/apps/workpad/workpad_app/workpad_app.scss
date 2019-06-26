@@ -30,8 +30,10 @@ $canvasLayoutFontSize: $euiFontSizeS;
 .canvasLayout__stageHeader {
   flex-grow: 0;
   flex-basis: auto;
-  padding: $euiSizeM $euiSize $euiSizeS $euiSize;
+  padding: ($euiSizeXS +1px) $euiSize $euiSizeXS $euiSize;
   font-size: $canvasLayoutFontSize;
+  border-bottom: $euiBorderThin;
+  background: $euiColorLightestShade;
 }
 
 .canvasLayout__stageContent {
@@ -60,6 +62,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
   background: $euiColorLightestShade;
   display: flex;
   position: relative;
+  border-left: $euiBorderThin;
 
   .euiPanel {
     margin-bottom: $euiSizeS;

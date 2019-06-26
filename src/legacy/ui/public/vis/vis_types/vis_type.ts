@@ -21,7 +21,7 @@ import { IconType } from '@elastic/eui';
 import { RequestHandler, ResponseHandler, Vis } from '..';
 import { Status } from '../update_status';
 
-export class VisualizationController {
+export declare class VisualizationController {
   constructor(element: HTMLElement, vis: Vis);
   public render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
   public destroy(): void;
