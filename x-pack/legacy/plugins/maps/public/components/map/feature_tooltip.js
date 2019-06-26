@@ -64,6 +64,15 @@ export class FeatureTooltip extends React.Component {
     });
   };
 
+  _onCloseTooltip = () => {
+    this.setState({
+      layerIdFilter: ALL_LAYERS,
+      pageNumber: DEFAULT_PAGE_NUMBER
+    }, () => {
+      this.props.closeTooltip();
+    });
+  };
+
   _loadUniqueLayers = async () => {
 
     const uniqueLayerIds = [];
@@ -94,7 +103,9 @@ export class FeatureTooltip extends React.Component {
     if (this._isMounted) {
       if (!_.isEqual(this.state.uniqueLayers, options)) {
         this.setState({
-          uniqueLayers: options
+          uniqueLayers: options,
+          layerIdFilter: ALL_LAYERS,
+          pageNumber: DEFAULT_PAGE_NUMBER
         });
       }
     }
@@ -166,7 +177,7 @@ export class FeatureTooltip extends React.Component {
             defaultMessage: 'Filter on property'
           })}
           onClick={() => {
-            this.props.closeTooltip();
+            this._onCloseTooltip();
             const filterAction = tooltipProperty.getFilterAction();
             filterAction();
           }}
@@ -283,7 +294,7 @@ export class FeatureTooltip extends React.Component {
     return (
       <EuiTextAlign textAlign="center">
         <EuiButtonIcon
-          onClick={this.props.closeTooltip}
+          onClick={this._onCloseTooltip}
           iconType="cross"
           aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
             defaultMessage: 'Close tooltip'
@@ -317,6 +328,10 @@ export class FeatureTooltip extends React.Component {
 
   _renderPagination(filteredFeatures) {
 
+    if (filteredFeatures.length === 1) {
+      return null;
+    }
+
     if (!this.props.showFeatureList) {
       return (
         <EuiTextAlign textAlign="center">
@@ -342,8 +357,8 @@ export class FeatureTooltip extends React.Component {
       <Fragment>
         {this._renderCloseButton()}
         {this._renderProperties(filteredFeatures)}
-        {this._renderLayerFilterBox()}
         {this._renderPagination(filteredFeatures)}
+        {this._renderLayerFilterBox()}
       </Fragment>
     );
   }

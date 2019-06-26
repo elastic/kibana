@@ -156,11 +156,8 @@ export class MBMapContainer extends React.Component {
     const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const features = this._getIdsForFeatures(mbFeatures);
-    console.log('f', features);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.LOCKED,
-      // layerId: layer.getId(),
-      // featureId: targetMbFeataure.properties[FEATURE_ID_PROPERTY_NAME],
       features: features,
       location: popupAnchorLocation
     });
