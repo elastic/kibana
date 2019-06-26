@@ -18,7 +18,7 @@
     "classnames": "2.2.5",
     "focus-trap-react": "^3.1.1",
     "lodash": "3.10.1",
-    "prop-types": "15.5.8",
+    "prop-types": "15.6.0",
     "react": "^16.2.0",
     "react-ace": "^5.9.0",
     "react-color": "^2.13.8",
