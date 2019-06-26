@@ -7,7 +7,12 @@
 import { get, set, sortBy } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter } from './adapter_types';
-import { MonitorSummary, SummaryHistogram, Check } from '../../../../common/graphql/types';
+import {
+  MonitorSummary,
+  SummaryHistogram,
+  Check,
+  SnapshotCount,
+} from '../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 
@@ -23,7 +28,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     this.database = database;
   }
 
-  private async runEntitySieveQuery(
+  private async runLegacyMonitorStatesQuery(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
@@ -43,7 +48,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         aggs: {
           monitors: {
             composite: {
-              size: 5000,
+              size: 100,
               sources: [
                 {
                   monitor_id: {
@@ -193,7 +198,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     return { afterKey, result, statusFilter };
   }
 
-  private getMonitorBuckets(queryResult: any, statusFilter: any) {
+  private getMonitorBuckets(queryResult: any, statusFilter?: any) {
     let monitors = get(queryResult, 'aggregations.monitors.buckets', []);
     if (statusFilter) {
       monitors = monitors.filter(
@@ -209,13 +214,19 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<MonitorSummary[]> {
-    const { result, statusFilter } = await this.runEntitySieveQuery(
-      request,
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
-    const monitors: any[] = this.getMonitorBuckets(result, statusFilter);
+    const monitors: any[] = [];
+    let searchAfter: any | null = null;
+    do {
+      const { result, statusFilter, afterKey } = await this.runLegacyMonitorStatesQuery(
+        request,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        searchAfter
+      );
+      monitors.push(...this.getMonitorBuckets(result, statusFilter));
+      searchAfter = afterKey;
+    } while (searchAfter && monitors.length < 200);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
@@ -241,7 +252,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         state,
       };
     });
-    const histogramMap = await this.getHistogramForMonitors(request, 'now-15m', 'now', monitorIds);
+    const histogramMap = await this.getHistogramForMonitors(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      monitorIds
+    );
     return summaries.map(summary => ({
       ...summary,
       histogram: histogramMap[summary.monitor_id],
@@ -400,19 +416,21 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null
-  ): Promise<{ up: number; down: number }> {
+  ): Promise<SnapshotCount> {
     // TODO: adapt this to the states index in future release
     // const { count } = await this.database.count(request, { index: 'heartbeat-states-8.0.0' });
-
     // return { count };
-    const count = {
+
+    const count: SnapshotCount = {
       up: 0,
       down: 0,
+      mixed: 0,
+      total: 0,
     };
 
-    let searchAfter: any | undefined;
+    let searchAfter: any | null = null;
     do {
-      const { afterKey, result, statusFilter } = await this.runEntitySieveQuery(
+      const { afterKey, result, statusFilter } = await this.runLegacyMonitorStatesQuery(
         request,
         dateRangeStart,
         dateRangeEnd,
@@ -420,19 +438,20 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         searchAfter
       );
       searchAfter = afterKey;
-      this.getMonitorBuckets(result, statusFilter).reduce(
-        (acc: { up: number; down: number }, monitor: any) => {
-          const status = get<string | undefined>(monitor, 'state.value.monitor.status', undefined);
-          if (status === 'up') {
-            acc.up += 1;
-          } else if (status === 'down') {
-            acc.down += 1;
-          }
-          return acc;
-        },
-        count
-      );
-    } while (searchAfter);
+      this.getMonitorBuckets(result, statusFilter).reduce((acc: SnapshotCount, monitor: any) => {
+        const status = get<string | undefined>(monitor, 'state.value.monitor.status', undefined);
+        if (status === 'up') {
+          acc.up++;
+        } else if (status === 'down') {
+          acc.down++;
+        } else if (status === 'mixed') {
+          // console.log(JSON.stringify(monitor, null, 2));
+          acc.mixed++;
+        }
+        acc.total++;
+        return acc;
+      }, count);
+    } while (searchAfter !== null);
     return count;
   }
 

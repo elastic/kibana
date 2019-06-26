@@ -17,9 +17,12 @@ snapshot: getSnapshot(
   dateRangeEnd: $dateRangeEnd
   filters: $filters
 ) {
-  up
-  down
-  total
+  counts {
+    down
+    mixed
+    up
+    total
+  }
   histogram {
       upCount
       downCount

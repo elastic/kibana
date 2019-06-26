@@ -95,7 +95,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       };
     },
     async getSnapshot(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
-      const { up, down, total } = await libs.monitors.getSnapshotCount(
+      const counts = await libs.monitorStates.getSummaryCount(
         req,
         dateRangeStart,
         dateRangeEnd,
@@ -103,9 +103,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       );
 
       return {
-        up,
-        down,
-        total,
+        counts,
         histogram: await libs.pings.getPingHistogram(req, dateRangeStart, dateRangeEnd, filters),
       };
     },

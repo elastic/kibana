@@ -79,7 +79,7 @@ export const SnapshotComponent = ({
                       defaultMessage: 'Up',
                     })}
                     textAlign="center"
-                    title={data.snapshot.up}
+                    title={data.snapshot.counts.up}
                     titleColor="secondary"
                   />
                 </EuiFlexItem>
@@ -89,17 +89,29 @@ export const SnapshotComponent = ({
                       defaultMessage: 'Down',
                     })}
                     textAlign="center"
-                    title={data.snapshot.down}
+                    title={data.snapshot.counts.down}
                     titleColor="danger"
                   />
                 </EuiFlexItem>
+                {data.snapshot.counts.mixed > 0 ? (
+                  <EuiFlexItem>
+                    <EuiStat
+                      description={i18n.translate('xpack.uptime.snapshot.stats.mixedDescription', {
+                        defaultMessage: 'Mixed',
+                      })}
+                      textAlign="center"
+                      title={data.snapshot.counts.mixed}
+                      titleColor="subdued"
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem>
                   <EuiStat
                     description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
                       defaultMessage: 'Total',
                     })}
                     textAlign="center"
-                    title={data.snapshot.total}
+                    title={data.snapshot.counts.total}
                     titleColor="subdued"
                   />
                 </EuiFlexItem>

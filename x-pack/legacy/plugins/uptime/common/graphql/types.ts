@@ -394,13 +394,19 @@ export interface MonitorSeriesPoint {
 }
 
 export interface Snapshot {
-  up?: number | null;
-
-  down?: number | null;
-
-  total?: number | null;
+  counts: SnapshotCount;
 
   histogram: HistogramDataPoint[];
+}
+
+export interface SnapshotCount {
+  up: number;
+
+  down: number;
+
+  mixed: number;
+
+  total: number;
 }
 
 export interface HistogramDataPoint {
