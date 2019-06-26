@@ -288,7 +288,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
-  it('should allow switching to incompatible fields for the current operation and switch to a compatible one', () => {
+  it('should switch operations when selecting a field that requires another operation', () => {
     wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
 
     openPopover();

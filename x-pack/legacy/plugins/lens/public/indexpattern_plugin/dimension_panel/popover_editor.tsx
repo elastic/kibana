@@ -52,14 +52,14 @@ function getOperationTypes(
   return _.uniq([...validOperationTypes, ...possibleOperationTypes], 'operationType');
 }
 
-export interface SettingsProps extends IndexPatternDimensionPanelProps {
+export interface PopoverEditorProps extends IndexPatternDimensionPanelProps {
   selectedColumn?: IndexPatternColumn;
   filteredColumns: IndexPatternColumn[];
 }
 
-export function Settings(props: SettingsProps) {
+export function PopoverEditor(props: PopoverEditorProps) {
   const { selectedColumn, filteredColumns, state, columnId, setState } = props;
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [
     incompatibleSelectedOperationType,
     setInvalidOperationType,
@@ -120,7 +120,7 @@ export function Settings(props: SettingsProps) {
         <EuiLink
           className="lnsConfigPanel__summaryLink"
           onClick={() => {
-            setSettingsOpen(true);
+            setPopoverOpen(true);
           }}
           data-test-subj="indexPattern-configure-dimension"
         >
@@ -131,9 +131,9 @@ export function Settings(props: SettingsProps) {
               })}
         </EuiLink>
       }
-      isOpen={isSettingsOpen}
+      isOpen={isPopoverOpen}
       closePopover={() => {
-        setSettingsOpen(false);
+        setPopoverOpen(false);
         setInvalidOperationType(null);
       }}
       anchorPosition="leftUp"

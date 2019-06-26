@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
 import classNames from 'classnames';
@@ -32,7 +32,6 @@ export function FieldSelect({
   onChangeColumn,
   onDeleteColumn,
 }: FieldSelectProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
   const fieldColumns = filteredColumns.filter(hasField) as FieldBasedIndexPatternColumn[];
 
   const uniqueColumnsByField = sortByField(
@@ -46,15 +45,6 @@ export function FieldSelect({
         .concat(fieldColumns),
       col => col.sourceField
     )
-  );
-
-  useEffect(
-    () => {
-      if (!selectedColumn && incompatibleSelectedOperationType && inputRef.current) {
-        inputRef.current.focus();
-      }
-    },
-    [selectedColumn, incompatibleSelectedOperationType]
   );
 
   function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
@@ -110,11 +100,6 @@ export function FieldSelect({
   return (
     <EuiComboBox
       fullWidth
-      inputRef={el => {
-        if (el) {
-          inputRef.current = el;
-        }
-      }}
       data-test-subj="indexPattern-dimension-field"
       placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
         defaultMessage: 'Field',

@@ -109,7 +109,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       });
     orderOptions.push({
       value: toValue({ type: 'alphabetical' }),
-      text: 'Alphabetical',
+      text: i18n.translate('xpack.lens.indexPattern.terms.orderAlphabetical', {
+        defaultMessage: 'Alphabetical',
+      }),
     });
     return (
       <EuiForm>
@@ -127,10 +129,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setState(updateColumnParam(state, currentColumn, 'size', Number(e.target.value)))
             }
-            aria-label="Number of values"
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
+              defaultMessage: 'Number of values',
+            })}
           />
         </EuiFormRow>
-        <EuiFormRow label="Order by">
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+            defaultMessage: 'Order by',
+          })}
+        >
           <EuiSelect
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
@@ -139,8 +147,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
                 updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
               )
             }
-            aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
-              defaultMessage: 'Number of values',
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+              defaultMessage: 'Order by',
             })}
           />
         </EuiFormRow>

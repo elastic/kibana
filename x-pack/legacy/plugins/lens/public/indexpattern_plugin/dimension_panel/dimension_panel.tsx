@@ -17,7 +17,7 @@ import {
 } from '../indexpattern';
 
 import { getPotentialColumns } from '../operations';
-import { Settings } from './settings';
+import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, hasField, deleteColumn } from '../state_helpers';
 
@@ -66,7 +66,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={true}>
-            <Settings
+            <PopoverEditor
               {...props}
               selectedColumn={selectedColumn}
               filteredColumns={filteredColumns}
