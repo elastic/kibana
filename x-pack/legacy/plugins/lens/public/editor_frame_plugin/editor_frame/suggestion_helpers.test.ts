@@ -5,7 +5,7 @@
  */
 
 import { getSuggestions } from './suggestion_helpers';
-import { createMockVisualization } from '../mocks';
+import { createMockVisualization, createMockDatasource } from '../mocks';
 import { TableSuggestion } from '../../types';
 
 const generateSuggestion = (datasourceSuggestionId: number = 1, state = {}) => ({
@@ -34,7 +34,8 @@ describe('suggestion helpers', () => {
         },
       },
       'vis1',
-      {}
+      {},
+      createMockDatasource().publicAPIMock
     );
     expect(suggestions).toHaveLength(1);
     expect(suggestions[0].state).toBe(suggestedState);
@@ -79,7 +80,8 @@ describe('suggestion helpers', () => {
         },
       },
       'vis1',
-      {}
+      {},
+      createMockDatasource().publicAPIMock
     );
     expect(suggestions).toHaveLength(3);
   });
@@ -123,7 +125,8 @@ describe('suggestion helpers', () => {
         },
       },
       'vis1',
-      {}
+      {},
+      createMockDatasource().publicAPIMock
     );
     expect(suggestions[0].score).toBe(0.8);
     expect(suggestions[1].score).toBe(0.6);
@@ -142,7 +145,8 @@ describe('suggestion helpers', () => {
         vis2: mockVisualization2,
       },
       'vis1',
-      {}
+      {},
+      createMockDatasource().publicAPIMock
     );
     expect(mockVisualization1.getSuggestions.mock.calls[0][0].tables[0]).toBe(table1);
     expect(mockVisualization1.getSuggestions.mock.calls[0][0].tables[1]).toBe(table2);
@@ -191,7 +195,8 @@ describe('suggestion helpers', () => {
         },
       },
       'vis1',
-      {}
+      {},
+      createMockDatasource().publicAPIMock
     );
     expect(suggestions[0].datasourceState).toBe(tableState1);
     expect(suggestions[1].datasourceState).toBe(tableState2);
@@ -201,6 +206,7 @@ describe('suggestion helpers', () => {
   it('should pass the state of the currently active visualization to getSuggestions', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
+    const datasourcePublicAPI = createMockDatasource().publicAPIMock;
     const currentState = {};
     getSuggestions(
       [generateSuggestion(1), generateSuggestion(2)],
@@ -209,17 +215,20 @@ describe('suggestion helpers', () => {
         vis2: mockVisualization2,
       },
       'vis1',
-      currentState
+      currentState,
+      datasourcePublicAPI
     );
     expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         state: currentState,
-      })
+      }),
+      datasourcePublicAPI
     );
     expect(mockVisualization2.getSuggestions).not.toHaveBeenCalledWith(
       expect.objectContaining({
         state: currentState,
-      })
+      }),
+      datasourcePublicAPI
     );
   });
 });

@@ -6,8 +6,9 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { State } from './types';
+import { DatasourcePublicAPI } from '../types';
 
-export const toExpression = (state: State): Ast => ({
+export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => ({
   type: 'expression',
   chain: [
     {
@@ -62,6 +63,10 @@ export const toExpression = (state: State): Ast => ({
                   position: [state.y.position],
                   accessors: state.y.accessors,
                   hide: [Boolean(state.y.hide)],
+                  labels: state.y.accessors.map(accessor => {
+                    const operation = datasource.getOperationForColumnId(accessor);
+                    return operation ? operation.label : accessor;
+                  }),
                 },
               },
             ],
