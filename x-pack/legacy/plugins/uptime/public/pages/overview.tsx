@@ -9,11 +9,10 @@ import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, ErrorList, FilterBar, Snapshot } from '../components/functional';
+import { EmptyState, FilterBar, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { MonitorList, Criteria } from '../components/functional/monitor_list';
 
 interface OverviewPageProps {
@@ -99,8 +98,6 @@ export const OverviewPage = ({
     });
   };
 
-  const linkParameters = stringifyUrlParams(params);
-
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
@@ -138,8 +135,6 @@ export const OverviewPage = ({
             // sortDirection: monitorListSortDirection,
           }}
         />
-        <EuiSpacer size="s" />
-        <ErrorList linkParameters={linkParameters} variables={sharedProps} />
       </EmptyState>
     </Fragment>
   );
