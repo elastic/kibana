@@ -15,5 +15,5 @@ export interface HttpServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [isListening](./kibana-plugin-server.httpservicestart.islistening.md) | <code>() =&gt; boolean</code> | Indicates if http server is listening on a port |
+|  [isListening](./kibana-plugin-server.httpservicestart.islistening.md) | <code>(port: number) =&gt; boolean</code> | Indicates if http server is listening on a given port |
 

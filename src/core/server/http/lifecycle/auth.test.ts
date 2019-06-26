@@ -22,10 +22,14 @@ import { adoptToHapiAuthFormat } from './auth';
 import { httpServerMock } from '../http_server.mocks';
 
 describe('adoptToHapiAuthFormat', () => {
-  it('Should allow authenticating a user identity with given credentials', async () => {
-    const credentials = {};
+  it('allows to associate arbitrary data with an incoming request', async () => {
+    const authData = {
+      state: { foo: 'bar' },
+      headers: { authorization: 'baz' },
+    };
     const authenticatedMock = jest.fn();
-    const onAuth = adoptToHapiAuthFormat((req, t) => t.authenticated(credentials));
+    const onSuccessMock = jest.fn();
+    const onAuth = adoptToHapiAuthFormat((req, t) => t.authenticated(authData), onSuccessMock);
     await onAuth(
       httpServerMock.createRawRequest(),
       httpServerMock.createRawResponseToolkit({
@@ -34,12 +38,17 @@ describe('adoptToHapiAuthFormat', () => {
     );
 
     expect(authenticatedMock).toBeCalledTimes(1);
-    expect(authenticatedMock).toBeCalledWith({ credentials });
+    expect(authenticatedMock).toBeCalledWith({ credentials: authData.state });
+
+    expect(onSuccessMock).toBeCalledTimes(1);
+    const [[, onSuccessData]] = onSuccessMock.mock.calls;
+    expect(onSuccessData).toEqual(authData);
   });
 
   it('Should allow redirecting to specified url', async () => {
     const redirectUrl = '/docs';
-    const onAuth = adoptToHapiAuthFormat((req, t) => t.redirected(redirectUrl));
+    const onSuccessMock = jest.fn();
+    const onAuth = adoptToHapiAuthFormat((req, t) => t.redirected(redirectUrl), onSuccessMock);
     const takeoverSymbol = {};
     const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
     const result = await onAuth(
@@ -51,11 +60,14 @@ describe('adoptToHapiAuthFormat', () => {
 
     expect(redirectMock).toBeCalledWith(redirectUrl);
     expect(result).toBe(takeoverSymbol);
+    expect(onSuccessMock).not.toHaveBeenCalled();
   });
 
   it('Should allow to specify statusCode and message for Boom error', async () => {
-    const onAuth = adoptToHapiAuthFormat((req, t) =>
-      t.rejected(new Error('not found'), { statusCode: 404 })
+    const onSuccessMock = jest.fn();
+    const onAuth = adoptToHapiAuthFormat(
+      (req, t) => t.rejected(new Error('not found'), { statusCode: 404 }),
+      onSuccessMock
     );
     const result = (await onAuth(
       httpServerMock.createRawRequest(),
@@ -65,6 +77,7 @@ describe('adoptToHapiAuthFormat', () => {
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('not found');
     expect(result.output.statusCode).toBe(404);
+    expect(onSuccessMock).not.toHaveBeenCalled();
   });
 
   it('Should return Boom.internal error error if interceptor throws', async () => {

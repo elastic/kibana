@@ -85,6 +85,7 @@ function create(opts) {
 
   return function (cfg, data) {
     const isUserDefinedYAxis = cfg.setYExtents;
+    const defaultYExtents = cfg.defaultYExtents;
     const config = _.cloneDeep(cfg);
     _.defaultsDeep(config, {
       chartTitle: {},
@@ -110,6 +111,7 @@ function create(opts) {
             type: config.scale,
             setYExtents: config.setYExtents,
             defaultYExtents: config.defaultYExtents,
+            boundsMargin: defaultYExtents ? config.boundsMargin : 0,
             min: isUserDefinedYAxis ? config.yAxis.min : undefined,
             max: isUserDefinedYAxis ? config.yAxis.max : undefined,
             mode: mode

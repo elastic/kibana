@@ -15,6 +15,7 @@
   // SASSTODO: Find an actual solution
   .euiFlyout {
     top: $euiHeaderChildSize;
+    height: calc(100% - #{$euiHeaderChildSize});
   }
 }
 

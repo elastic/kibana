@@ -16,6 +16,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -328,11 +329,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('layerAddForm');
     }
 
-    async cancelLayerAdd() {
+    async cancelLayerAdd(layerName) {
       log.debug(`Cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
+        if (layerName) {
+          await this.waitForLayerDeleted(layerName);
+        }
       }
     }
 
@@ -355,14 +359,13 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     // Returns first layer by default
-    async selectVectorLayer(vectorLayerName = '') {
-      log.debug(`Select vector layer ${vectorLayerName}`);
-      const optionsStringList = await comboBox.getOptionsList('emsVectorComboBox');
-      const selectedVectorLayer = vectorLayerName
-        ? vectorLayerName
-        : optionsStringList.trim().split('\n')[0];
-      await comboBox.set('emsVectorComboBox', selectedVectorLayer);
-      return selectedVectorLayer;
+    async selectVectorLayer(vectorLayerName) {
+      log.debug(`Select EMS vector layer ${vectorLayerName}`);
+      if (!vectorLayerName) {
+        throw new Error(`You did not provide the EMS layer to select`);
+      }
+      await comboBox.set('emsVectorComboBox', vectorLayerName);
+      await this.waitForLayersToLoad();
     }
 
     async removeLayer(layerName) {
@@ -436,6 +439,19 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
       await PageObjects.timePicker.pauseAutoRefresh();
       await this.waitForLayersToLoad();
+    }
+
+    async lockTooltipAtPosition(xOffset, yOffset) {
+      await retry.try(async () => {
+        const mapContainerElement = await testSubjects.find('mapContainer');
+        await browser.moveMouseTo(mapContainerElement, xOffset, yOffset);
+        await browser.clickMouseButton(mapContainerElement, xOffset, yOffset);
+        // Close button is only displayed with tooltip is locked
+        const hasCloseButton = await testSubjects.exists('mapTooltipCloseButton');
+        if (!hasCloseButton) {
+          throw new Error('Tooltip is not locked at position');
+        }
+      });
     }
   }
   return new GisPage();

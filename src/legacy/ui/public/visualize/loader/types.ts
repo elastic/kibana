@@ -17,36 +17,13 @@
  * under the License.
  */
 
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
-
-export interface TimeRange {
-  from: string;
-  to: string;
-}
-
-export interface FilterMeta {
-  disabled: boolean;
-}
-
-export interface Filter {
-  meta: FilterMeta;
-  query?: object;
-}
-
-export type Filters = Filter[];
-
-export enum QueryLanguageType {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
-
-export interface Query {
-  language: QueryLanguageType;
-  query: string;
-}
 
 export interface VisSavedObject {
   vis: Vis;
@@ -96,7 +73,7 @@ export interface VisualizeLoaderParams {
   /**
    * Specifies the filters that should be applied to that visualization.
    */
-  filters?: Filters;
+  filters?: Filter[];
   /**
    * The query that should apply to that visualization.
    */

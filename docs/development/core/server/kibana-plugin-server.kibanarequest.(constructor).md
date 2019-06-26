@@ -9,7 +9,7 @@ Constructs a new instance of the `KibanaRequest` class
 <b>Signature:</b>
 
 ```typescript
-constructor(request: Request, params: Params, query: Query, body: Body);
+constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
 ```
 
 ## Parameters
@@ -20,4 +20,5 @@ constructor(request: Request, params: Params, query: Query, body: Body);
 |  params | <code>Params</code> |  |
 |  query | <code>Query</code> |  |
 |  body | <code>Body</code> |  |
+|  withoutSecretHeaders | <code>boolean</code> |  |
 

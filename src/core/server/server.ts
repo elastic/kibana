@@ -61,7 +61,9 @@ export class Server {
     const httpSetup = await this.http.setup();
     this.registerDefaultRoute(httpSetup);
 
-    const elasticsearchServiceSetup = await this.elasticsearch.setup();
+    const elasticsearchServiceSetup = await this.elasticsearch.setup({
+      http: httpSetup,
+    });
 
     const pluginsSetup = await this.plugins.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -83,11 +85,9 @@ export class Server {
   }
 
   public async start() {
-    const httpStart = await this.http.start();
     const pluginsStart = await this.plugins.start({});
 
     const coreStart = {
-      http: httpStart,
       plugins: pluginsStart,
     };
 
@@ -96,6 +96,7 @@ export class Server {
       plugins: mapToObject(pluginsStart.contracts),
     });
 
+    await this.http.start();
     return coreStart;
   }
 

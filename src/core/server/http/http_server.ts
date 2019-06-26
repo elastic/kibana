@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, Server, ServerOptions } from 'hapi';
+import { Request, Server } from 'hapi';
 
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
@@ -32,11 +32,11 @@ import {
 } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthStateStorage } from './auth_state_storage';
+import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 
 export interface HttpServerSetup {
   server: Server;
-  options: ServerOptions;
   registerRouter: (router: Router) => void;
   /**
    * To define custom authentication and/or authorization mechanism for incoming requests.
@@ -73,6 +73,7 @@ export interface HttpServerSetup {
   auth: {
     get: AuthStateStorage['get'];
     isAuthenticated: AuthStateStorage['isAuthenticated'];
+    getAuthHeaders: AuthHeadersStorage['get'];
   };
 }
 
@@ -83,9 +84,11 @@ export class HttpServer {
   private authRegistered = false;
 
   private readonly authState: AuthStateStorage;
+  private readonly authHeaders: AuthHeadersStorage;
 
   constructor(private readonly log: Logger) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
+    this.authHeaders = new AuthHeadersStorage();
   }
 
   public isListening() {
@@ -110,7 +113,6 @@ export class HttpServer {
     this.setupBasePathRewrite(config, basePathService);
 
     return {
-      options: serverOptions,
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
@@ -120,6 +122,7 @@ export class HttpServer {
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
+        getAuthHeaders: this.authHeaders.get,
       },
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
@@ -151,7 +154,8 @@ export class HttpServer {
 
     await this.server.start();
     const serverPath = this.config!.rewriteBasePath || this.config!.basePath || '';
-    this.log.debug(`http server running at ${this.server.info.uri}${serverPath}`);
+    this.log.info('http server running');
+    this.log.debug(`http server listening on ${this.server.info.uri}${serverPath}`);
   }
 
   public async stop() {
@@ -223,7 +227,13 @@ export class HttpServer {
     );
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, this.authState.set),
+      authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers }) => {
+        this.authState.set(req, state);
+        this.authHeaders.set(req, headers);
+        // we mutate headers only for the backward compatibility with the legacy platform.
+        // where some plugin read directly from headers to identify whether a user is authenticated.
+        Object.assign(req.headers, headers);
+      }),
     }));
     this.server.auth.strategy('session', 'login');
 

@@ -20,7 +20,9 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createBulkCreateRoute } from './bulk_create';
-import { SavedObjectsClientMock } from '../service/saved_objects_client.mock';
+// Disable lint errors for imports from src/core/* until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsClientMock } from '../../../../core/server/saved_objects/service/saved_objects_client.mock';
 
 describe('POST /api/saved_objects/_bulk_create', () => {
   let server: Hapi.Server;

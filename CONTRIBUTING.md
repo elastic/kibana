@@ -173,9 +173,9 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-### Running Elasticsearch
+### Running Elasticsearch Locally
 
-There are a few options when it comes to running Elasticsearch:
+There are a few options when it comes to running Elasticsearch locally:
 
 #### Nightly snapshot (recommended)
 
@@ -213,6 +213,26 @@ node scripts/makelogs --auth <username>:<password>
 > The default username and password combination are `elastic:changeme`
 
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
+### Running Elasticsearch Remotely
+
+You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (**Elasticians: you do! Check with your team about where to find credentials**)
+
+You'll need to [create a `kibana.dev.yml`](#customizing-configkibanadevyml) and add the following to it:
+
+```
+elasticsearch.hosts:
+  - {{ url }}
+elasticsearch.username: {{ username }}
+elasticsearch.password: {{ password }}
+elasticsearch.ssl.verificationMode: none
+```
+
+If many other users will be interacting with your remote cluster, you'll want to add the following to avoid causing conflicts:
+
+```
+kibana.index: '.{YourGitHubHandle}-kibana'
+xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
+```
 
 ### Running Kibana
 
@@ -382,10 +402,10 @@ To execute both server and browser tests, but skip linting, use `yarn test:quick
 yarn test:quick
 ```
 
-Use `yarn test:server` when you want to run only the server tests.
+Use `yarn test:mocha` when you want to run the mocha tests.
 
 ```bash
-yarn test:server
+yarn test:mocha
 ```
 
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
@@ -424,7 +444,7 @@ This should work super if you're using the [Kibana plugin generator](https://git
 To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-yarn test:server
+yarn test:mocha
 yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
 
@@ -489,8 +509,8 @@ Kibana publishes major, minor and patch releases periodically through the year. 
 To include your change in the Release Notes:
 
 1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
-1. Label the PR with the targeted version (ex: `v7.3.0`).
-1. Label the PR with the appropriate GitHub labels:
+2. Label the PR with the targeted version (ex: `v7.3.0`).
+3. Label the PR with the appropriate GitHub labels:
     * For a new feature or functionality, use `release_note:enhancement`.
     * For an external-facing fix, use `release_note:fix`. Exception: docs, build, and test fixes do not go in the Release Notes. Neither fixes for issues that were only on `master` and never have been released.
     * For a deprecated feature, use `release_note:deprecation`.

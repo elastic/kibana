@@ -37,7 +37,7 @@ import {
   EuiButton,
   EuiTitle,
 } from '@elastic/eui';
-import { SavedObjectAttributes } from 'src/legacy/server/saved_objects';
+import { SavedObjectAttributes } from 'src/core/server/saved_objects';
 import { EmbeddableFactoryRegistry } from '../types';
 
 interface Props {
