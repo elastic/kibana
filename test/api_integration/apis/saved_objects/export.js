@@ -139,7 +139,7 @@ export default function ({ getService }) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'child "type" fails because ["type" at position 0 fails because ' +
-                  '["0" must be one of [config, index-pattern, visualization, search, dashboard, url]]]',
+                  '["0" must be one of [config, query, index-pattern, visualization, search, dashboard, url]]]',
                 validation: {
                   source: 'payload',
                   keys: ['type.0'],
