@@ -18,11 +18,7 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import {
-  EventsTable,
-  UncommonProcessTable,
-  KpiHostDetailsComponent,
-} from '../../components/page/hosts';
+import { EventsTable, UncommonProcessTable, KpiHostsComponent } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
@@ -48,7 +44,7 @@ const HostOverviewManage = manageQuery(HostOverview);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const EventsTableManage = manageQuery(EventsTable);
-const KpiHostDetailsManage = manageQuery(KpiHostDetailsComponent);
+const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;

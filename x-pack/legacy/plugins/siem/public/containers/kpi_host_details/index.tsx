@@ -24,12 +24,12 @@ export interface KpiHostDetailsArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface KpiHostDetailsProps extends QueryTemplateProps {
+export interface QueryKpiHostDetailsProps extends QueryTemplateProps {
   children: (args: KpiHostDetailsArgs) => React.ReactNode;
   hostName: string;
 }
 
-export const KpiHostDetailsQuery = React.memo<KpiHostDetailsProps>(
+export const KpiHostDetailsQuery = React.memo<QueryKpiHostDetailsProps>(
   ({
     id = 'kpiHostDetailsQuery',
     children,

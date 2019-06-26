@@ -4,33 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
-import { KpiHostDetailsData } from '../../../../graphql/types';
-import {
-  StatItemsComponent,
-  StatItemsProps,
-  useKpiMatrixStatus,
-  StatItems,
-} from '../../../stat_items';
 import * as i18n from './translations';
-
-const kpiWidgetHeight = 247;
+import { StatItems } from '../../../stat_items';
 
 const euiColorVis0 = '#00B3A4';
 const euiColorVis2 = '#DB1374';
 const euiColorVis3 = '#490092';
 const euiColorVis9 = '#920000';
 
-interface KpiHostDetailsProps {
-  data: KpiHostDetailsData;
-  loading: boolean;
-}
-
-const fieldTitleMapping: Readonly<StatItems[]> = [
+export const kpiHostDetailsMapping: Readonly<StatItems[]> = [
   {
     key: 'authentication',
     fields: [
@@ -79,26 +61,3 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
     description: i18n.UNIQUE_IPS,
   },
 ];
-
-const FlexGroupSpinner = styled(EuiFlexGroup)`
-   {
-    min-height: ${kpiWidgetHeight}px;
-  }
-`;
-
-export const KpiHostDetailsComponent = ({ data, loading }: KpiHostDetailsProps) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldTitleMapping, data);
-  return loading ? (
-    <FlexGroupSpinner justifyContent="center" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </FlexGroupSpinner>
-  ) : (
-    <EuiFlexGroup>
-      {statItemsProps.map(mappedStatItemProps => {
-        return <StatItemsComponent {...mappedStatItemProps} />;
-      })}
-    </EuiFlexGroup>
-  );
-};
