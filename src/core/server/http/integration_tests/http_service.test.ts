@@ -59,8 +59,7 @@ describe('http service', () => {
       it('runs auth for legacy routes and proxy request to legacy server route handlers', async () => {
         const { http } = await root.setup();
         const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
-          const headers = req.getFilteredHeaders(['authorization']);
-          if (headers.authorization) {
+          if (req.headers.authorization) {
             const user = { id: '42' };
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
@@ -90,8 +89,7 @@ describe('http service', () => {
         const token = 'Basic: name:password';
         const { http } = await root.setup();
         const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
-          const headers = req.getFilteredHeaders(['authorization']);
-          if (headers.authorization) {
+          if (req.headers.authorization) {
             const user = { id: '42' };
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
@@ -129,8 +127,7 @@ describe('http service', () => {
 
         const { http } = await root.setup();
         const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
-          const headers = req.getFilteredHeaders(['authorization']);
-          if (headers.authorization) {
+          if (req.headers.authorization) {
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
             return t.authenticated({ state: user });
