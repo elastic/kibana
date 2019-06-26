@@ -28,6 +28,7 @@ import {
   BASE_PATH,
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
+  SNAPSHOT_STATE,
 } from '../../../../constants';
 import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository } from '../../../../services/navigation';
@@ -214,6 +215,12 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                   href={`#${BASE_PATH}/restore_snapshot/${repositoryName}/${snapshotId}`}
                   fill
                   color="primary"
+                  isDisabled={
+                    !(
+                      snapshotDetails.state === SNAPSHOT_STATE.SUCCESS ||
+                      snapshotDetails.state === SNAPSHOT_STATE.PARTIAL
+                    )
+                  }
                 >
                   <FormattedMessage
                     id="xpack.snapshotRestore.snapshotDetails.restoreButtonLabel"

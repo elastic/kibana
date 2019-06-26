@@ -154,8 +154,15 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
               ? i18n.translate('xpack.snapshotRestore.snapshotList.table.actionRestoreTooltip', {
                   defaultMessage: 'Restore',
                 })
+              : state === SNAPSHOT_STATE.IN_PROGRESS
+              ? i18n.translate(
+                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInProgressTooltip',
+                  {
+                    defaultMessage: `Can't restore in-progress snapshot`,
+                  }
+                )
               : i18n.translate(
-                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledTooltip',
+                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInvalidTooltip',
                   {
                     defaultMessage: `Can't restore invalid snapshot`,
                   }
