@@ -60,7 +60,7 @@ export const metric = () => ({
       types: ['range'],
       multi: true,
       help: i18n.translate('metricVis.function.colorRange.help', {
-        defaultMessage: 'Color ranges: array of objects with from and to property.'
+        defaultMessage: 'A range object specifying groups of values to which different colors should be applied.'
       })
     },
     useRanges: {
@@ -136,6 +136,8 @@ export const metric = () => ({
       throw new Error ('colorRange must be provided when using percentage');
     }
 
+    const fontSize = parseInt(args.font.spec.fontSize);
+
     return {
       type: 'render',
       as: 'visualization',
@@ -158,7 +160,7 @@ export const metric = () => ({
               bgColor: args.colorMode === 'Background',
               labelColor: args.colorMode === 'Labels',
               subText: args.subText,
-              fontSize: parseInt(args.font.spec.fontSize),
+              fontSize,
             }
           },
           dimensions,

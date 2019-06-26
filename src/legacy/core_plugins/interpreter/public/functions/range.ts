@@ -18,30 +18,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaDatatable, Range } from '../../common/types';
+import { ExpressionFunction } from '../../types';
 
-export const range = () => ({
-  name: 'range',
+const name = 'range';
+
+type Context = KibanaDatatable | null;
+
+interface Arguments {
+  from: number;
+  to: number;
+}
+
+type Return = Range; // imported from type
+
+export const range = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name,
   help: i18n.translate('interpreter.function.range.help', {
-    defaultMessage: 'Generates range object'
+    defaultMessage: 'Generates range object',
   }),
   type: 'range',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
   args: {
     from: {
       types: ['number'],
       help: i18n.translate('interpreter.function.range.from.help', {
-        defaultMessage: 'range from'
+        defaultMessage: 'Start of range',
       }),
       required: true,
     },
     to: {
       types: ['number'],
       help: i18n.translate('interpreter.function.range.to.help', {
-        defaultMessage: 'range to'
+        defaultMessage: 'End of range',
       }),
       required: true,
     },

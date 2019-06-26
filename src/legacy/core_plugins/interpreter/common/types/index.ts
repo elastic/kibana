@@ -61,3 +61,4 @@ export * from './kibana_datatable';
 export * from './pointseries';
 export * from './render';
 export * from './style';
+export * from './range';

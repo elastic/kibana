@@ -205,7 +205,7 @@ export const escapeString = (data: string): string => {
   return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
-export const prepareString = (variable: string, data: string): string => {
+export const prepareString = (variable: string, data?: string): string => {
   if (data === undefined) {
     return '';
   }
@@ -313,7 +313,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       });
     }
 
-    metrics.forEach((metric: any) => {
+    metrics.forEach((metric: SchemaConfig) => {
       expr += prepareDimension('metric', metric);
     });
 

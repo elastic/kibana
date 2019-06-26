@@ -39,7 +39,7 @@ export const range = (): ExpressionType<typeof name, Range> => ({
     },
   },
   to: {
-    render: (value: Range): Render<{}> => {
+    render: (value: Range): Render<{ text: string }> => {
       const text = `from ${value.from} to ${value.to}`;
       return {
         type: 'render',
