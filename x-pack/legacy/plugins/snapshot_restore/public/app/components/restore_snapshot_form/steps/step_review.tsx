@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCodeEditor,
   EuiFlexGrid,
@@ -20,11 +18,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { serializeRestoreSettings } from '../../../../../common/lib';
+import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
 }) => {
+  const {
+    core: { i18n },
+  } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const {
     indices,
     renamePattern,

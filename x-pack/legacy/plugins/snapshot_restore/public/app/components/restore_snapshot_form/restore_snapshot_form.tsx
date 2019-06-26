@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import { RestoreValidation, validateRestore } from '../../services/validation';
+import { useAppDependencies } from '../../index';
 import {
   RestoreSnapshotStepLogistics,
   RestoreSnapshotStepSettings,
@@ -37,6 +37,12 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
   clearSaveError,
   onSave,
 }) => {
+  const {
+    core: {
+      i18n: { FormattedMessage },
+    },
+  } = useAppDependencies();
+
   // Step state
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);

@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 import { RestoreSettings } from '../../../../common/types';
 import { UNMODIFIABLE_INDEX_SETTINGS, UNREMOVABLE_INDEX_SETTINGS } from '../../../app/constants';
+import { useAppDependencies } from '../../index';
 
 export interface RestoreValidation {
   isValid: boolean;
@@ -17,6 +17,10 @@ const isStringEmpty = (str: string | null): boolean => {
 };
 
 export const validateRestore = (restoreSettings: RestoreSettings): RestoreValidation => {
+  const {
+    core: { i18n },
+  } = useAppDependencies();
+
   const {
     indices,
     renamePattern,

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiStepsHorizontal } from '@elastic/eui';
+import { useAppDependencies } from '../../index';
 
 interface Props {
   currentStep: number;
@@ -18,6 +18,10 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
   maxCompletedStep,
   updateCurrentStep,
 }) => {
+  const {
+    core: { i18n },
+  } = useAppDependencies();
+
   const steps = [
     {
       title: i18n.translate('xpack.snapshotRestore.restoreForm.navigation.stepLogisticsName', {
