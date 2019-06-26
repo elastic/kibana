@@ -20,7 +20,7 @@
 /* eslint-disable max-classes-per-file */
 
 // @ts-ignore
-import { register, registryFactory, Registry } from '@kbn/interpreter/common';
+import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common';
 
 // @ts-ignore
 import { routes } from './server/routes';
@@ -30,9 +30,6 @@ import { typeSpecs as types } from '../../../plugins/data/common/expressions/exp
 
 import { Type } from './common';
 import { Legacy } from '../../../../kibana';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Fn } = require('@kbn/interpreter/common');
 
 export class TypesRegistry extends Registry<any, any> {
   wrapper(obj: any) {

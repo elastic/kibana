@@ -19,16 +19,6 @@
 
 import sinon from 'sinon';
 
-const resetRegistry = (registry: any) => {
-  registry.wrapper = sinon.stub();
-  registry.register = sinon.stub();
-  registry.toJS = sinon.stub();
-  registry.toArray = sinon.stub();
-  registry.get = sinon.stub();
-  registry.getProp = sinon.stub();
-  registry.reset = sinon.stub();
-};
-
 export const functionsRegistry = {};
 export const renderersRegistry = {};
 export const typesRegistry = {};
@@ -38,6 +28,15 @@ export const registries = {
   types: typesRegistry,
 };
 
+const resetRegistry = (registry: any) => {
+  registry.wrapper = sinon.stub();
+  registry.register = sinon.stub();
+  registry.toJS = sinon.stub();
+  registry.toArray = sinon.stub();
+  registry.get = sinon.stub();
+  registry.getProp = sinon.stub();
+  registry.reset = sinon.stub();
+};
 const resetAll = () => Object.values(registries).forEach(resetRegistry);
 
 resetAll();

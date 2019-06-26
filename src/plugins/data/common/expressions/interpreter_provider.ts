@@ -16,19 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
+
+// @ts-ignore
+import { fromExpression, getType, getByAlias, castProvider } from '@kbn/interpreter/src/common';
+
 import { createError } from './create_error';
 import { ExpressionAST } from './types';
 
 export { createError };
-
-const {
-  fromExpression,
-  getType,
-  getByAlias,
-  castProvider,
-} = require('@kbn/interpreter/src/common');
 
 export function interpreterProvider(config: any) {
   const { functions, types } = config;
