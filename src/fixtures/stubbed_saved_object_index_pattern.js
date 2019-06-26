@@ -18,7 +18,7 @@
  */
 
 import stubbedLogstashFields from './logstash_fields';
-import { SimpleSavedObject } from '../legacy/ui/public/saved_objects/simple_saved_object';
+import { SimpleSavedObject } from '../core/public';
 
 const mockLogstashFields = stubbedLogstashFields();
 

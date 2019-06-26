@@ -19,8 +19,8 @@
 
 import { find } from 'lodash';
 import { SavedObjectAttributes } from 'src/core/server';
-import { SavedObjectsClient } from './saved_objects_client';
-import { SimpleSavedObject } from './simple_saved_object';
+import { SavedObjectsClient } from 'src/core/public';
+import { SimpleSavedObject } from 'src/core/public';
 
 /**
  * Returns an object matching a given title

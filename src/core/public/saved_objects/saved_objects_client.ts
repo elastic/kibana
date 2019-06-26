@@ -28,9 +28,15 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
 } from 'src/core/server';
-import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
-import { kfetch, KFetchQuery } from '../kfetch';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
+import { kfetch, KFetchQuery } from '../../../legacy/ui/public/kfetch';
+import {
+  keysToCamelCaseShallow,
+  keysToSnakeCaseShallow,
+} from '../../../legacy/ui/public/utils/case_conversion';
+import {
+  isAutoCreateIndexError,
+  showAutoCreateIndexErrorPage,
+} from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
 
 interface RequestParams {

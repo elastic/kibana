@@ -70,6 +70,8 @@ import { DocLinksStart } from './doc_links';
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
 
+export { SimpleSavedObject, SavedObjectsClient } from './saved_objects';
+
 /**
  * Core services exposed to the `Plugin` setup lifecycle
  *
