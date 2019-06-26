@@ -456,6 +456,46 @@ export class RemoteClusterForm extends Component {
     return null;
   }
 
+  renderSaveErrorFeedback() {
+    const { saveError } = this.props;
+
+    if (saveError) {
+      const { message, cause } = saveError;
+
+      let errorBody;
+
+      if (cause) {
+        if (cause.length === 1) {
+          errorBody = (
+            <p>{cause[0]}</p>
+          );
+        } else {
+          errorBody = (
+            <ul>
+              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+            </ul>
+          );
+        }
+      }
+
+      return (
+        <Fragment>
+          <EuiCallOut
+            title={message}
+            icon="cross"
+            color="warning"
+          >
+            {errorBody}
+          </EuiCallOut>
+
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
+
+    return null;
+  }
+
   renderErrors = () => {
     const {
       areErrorsVisible,
@@ -548,6 +588,8 @@ export class RemoteClusterForm extends Component {
 
     return (
       <Fragment>
+        {this.renderSaveErrorFeedback()}
+
         <EuiForm>
           <EuiDescribedFormGroup
             title={(
