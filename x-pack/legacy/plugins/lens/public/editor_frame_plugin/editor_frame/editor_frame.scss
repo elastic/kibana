@@ -21,7 +21,6 @@
 }
 
 .lnsSidebar--right {
-  flex: 1 0 0;
   min-width: ($euiSize * 18);
 }
 
@@ -43,7 +42,7 @@
     .lnsPageContentHeader {
       padding: $euiSize;
       border-bottom: $euiBorderThin;
-      margin-bottom: 0 !important;
+      margin-bottom: 0;
     }
 
     .lnsPageContentBody {
