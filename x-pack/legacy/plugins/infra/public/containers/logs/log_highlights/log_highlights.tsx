@@ -6,7 +6,7 @@
 
 import createContainer from 'constate-latest';
 import React, { useContext, useEffect, useState } from 'react';
-import { withLogPosition } from '../../../containers/logs/with_log_position';
+import { withStreamItems } from '../../../containers/logs/with_stream_items';
 import { withLogFilter } from '../../../containers/logs/with_log_filter';
 import { TimeKey } from '../../../../common/time';
 import { LogEntryHighlightsQuery } from '../../../graphql/types';
@@ -86,21 +86,15 @@ export const LogHighlightsState = createContainer(useLogHighlightsState);
 
 // Bridges Redux container state with Hooks state. Once state is moved fully from
 // Redux to Hooks this can be removed.
-export const LogHighlightsPositionBridge = withLogPosition(
-  ({
-    firstVisiblePosition,
-    lastVisiblePosition,
-  }: {
-    firstVisiblePosition: TimeKey | null;
-    lastVisiblePosition: TimeKey | null;
-  }) => {
+export const LogHighlightsPositionBridge = withStreamItems(
+  ({ entriesStart, entriesEnd }: { entriesStart: TimeKey | null; entriesEnd: TimeKey | null }) => {
     const { setStartKey, setEndKey } = useContext(LogHighlightsState.Context);
     useEffect(
       () => {
-        setStartKey(firstVisiblePosition);
-        setEndKey(lastVisiblePosition);
+        setStartKey(entriesStart);
+        setEndKey(entriesEnd);
       },
-      [firstVisiblePosition, lastVisiblePosition]
+      [entriesStart, entriesEnd]
     );
 
     return null;

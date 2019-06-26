@@ -20,6 +20,8 @@ export const withStreamItems = connect(
     hasMoreBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart(state),
     hasMoreAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd(state),
     lastLoadedTime: logEntriesSelectors.selectEntriesLastLoadedTime(state),
+    entriesStart: logEntriesSelectors.selectEntriesStart(state),
+    entriesEnd: logEntriesSelectors.selectEntriesEnd(state),
     items: selectItems(state),
   }),
   bindPlainActionCreators({
