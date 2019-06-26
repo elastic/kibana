@@ -20,15 +20,16 @@
 import chrome from 'ui/chrome';
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { i18n } from '@kbn/i18n';
-import { ReactEditorControllerProvider } from './editor_controller';
+import { createEditorController } from './editor_controller';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import { visFactory } from '../../visualizations/public';
 
 import { PANEL_TYPES } from '../common/panel_types';
 
 const uiSettings = chrome.getUiSettingsClient();
+const savedObjectsClient = chrome.getSavedObjectsClient();
 
-const ReactEditorController = new ReactEditorControllerProvider(uiSettings).handler;
+const EditorController = createEditorController(uiSettings, savedObjectsClient);
 const metricsRequestHandler = new MetricsRequestHandlerProvider(uiSettings).handler;
 
 export const MetricsVis = visFactory.createReactVisualization({
@@ -75,7 +76,7 @@ export const MetricsVis = visFactory.createReactVisualization({
     },
     component: require('./components/vis_editor').VisEditor,
   },
-  editor: ReactEditorController,
+  editor: EditorController,
   editorConfig: {
     component: require('./components/vis_editor').VisEditor,
   },
