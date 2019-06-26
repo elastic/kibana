@@ -100,7 +100,7 @@ export const basicHandlerCreators = {
   },
 };
 
-// handlers for group and ungroup
+// handlers for alignment and distribution
 export const alignmentDistributionHandlerCreators = Object.assign(
   {},
   ...[
