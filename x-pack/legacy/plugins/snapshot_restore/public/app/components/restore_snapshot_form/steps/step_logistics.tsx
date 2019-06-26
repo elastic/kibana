@@ -47,11 +47,13 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
   const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(restoreIndices));
   const [indicesOptions, setIndicesOptions] = useState<Option[]>(
-    snapshotIndices.map(index => ({
-      label: index,
-      checked:
-        isAllIndices || (restoreIndices && restoreIndices.includes(index)) ? 'on' : undefined,
-    }))
+    snapshotIndices.map(
+      (index): Option => ({
+        label: index,
+        checked:
+          isAllIndices || (restoreIndices && restoreIndices.includes(index)) ? 'on' : undefined,
+      })
+    )
   );
 
   // State for setting renaming indices patterns
@@ -141,7 +143,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepLogistics.allIndicesLabel"
-                  defaultMessage="All indices"
+                  defaultMessage="All indices, including system indices"
                 />
               }
               checked={isAllIndices}
@@ -177,7 +179,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           restoreIndices && restoreIndices.length > 0 ? (
                             <EuiLink
                               onClick={() => {
-                                indicesOptions.forEach(option => {
+                                indicesOptions.forEach((option: Option) => {
                                   option.checked = undefined;
                                 });
                                 updateRestoreSettings({ indices: [] });
@@ -195,7 +197,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           ) : (
                             <EuiLink
                               onClick={() => {
-                                indicesOptions.forEach(option => {
+                                indicesOptions.forEach((option: Option) => {
                                   option.checked = 'on';
                                 });
                                 updateRestoreSettings({ indices: [...snapshotIndices] });

@@ -8,7 +8,7 @@ import { SnapshotRecovery, SnapshotRecoveryShardEs } from '../../../common/types
 import { deserializeRecoveryShard } from '../../lib';
 
 export function registerRecoveryRoutes(router: Router) {
-  router.get('recovery', getAllHandler);
+  router.get('recoveries', getAllHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (req, callWithRequest) => {
@@ -21,23 +21,47 @@ export const getAllHandler: RouterRouteHandler = async (req, callWithRequest) =>
     human: true,
   });
 
-  // Filter to snapshot-recovered shards only and sort by index name, then shard id
-  Object.keys(recoveryByIndexName)
-    .sort()
-    .forEach(index => {
-      const recovery = recoveryByIndexName[index];
-      const snapshotShards = (recovery.shards || [])
-        .filter(shard => shard.type === 'SNAPSHOT')
-        .sort((a, b) => a.id - b.id)
-        .map(shard => deserializeRecoveryShard(shard));
+  // Filter to snapshot-recovered shards only
+  Object.keys(recoveryByIndexName).forEach(index => {
+    const recovery = recoveryByIndexName[index];
+    let latestActivityTimeInMillis: number = 0;
+    let latestEndTimeInMillis: number | null = null;
+    const snapshotShards = (recovery.shards || [])
+      .filter(shard => shard.type === 'SNAPSHOT')
+      .sort((a, b) => a.id - b.id)
+      .map(shard => {
+        const deserializedShard = deserializeRecoveryShard(shard);
+        const { startTimeInMillis, stopTimeInMillis } = deserializedShard;
 
-      if (snapshotShards.length > 0) {
-        snapshotRecoveries.push({
-          index,
-          shards: snapshotShards,
-        });
-      }
-    });
+        // Set overall latest activity time
+        latestActivityTimeInMillis = Math.max(
+          startTimeInMillis || 0,
+          stopTimeInMillis || 0,
+          latestActivityTimeInMillis
+        );
+
+        // Set overall end time
+        if (stopTimeInMillis === undefined) {
+          latestEndTimeInMillis = null;
+        } else if (latestEndTimeInMillis === null || stopTimeInMillis > latestEndTimeInMillis) {
+          latestEndTimeInMillis = stopTimeInMillis;
+        }
+
+        return deserializedShard;
+      });
+
+    if (snapshotShards.length > 0) {
+      snapshotRecoveries.push({
+        index,
+        latestActivityTimeInMillis,
+        shards: snapshotShards,
+        isComplete: latestEndTimeInMillis !== null,
+      });
+    }
+  });
+
+  // Sort by latest activity
+  snapshotRecoveries.sort((a, b) => b.latestActivityTimeInMillis - a.latestActivityTimeInMillis);
 
   return snapshotRecoveries;
 };

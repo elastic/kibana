@@ -148,11 +148,18 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       }),
       actions: [
         {
-          render: ({ snapshot, repository }: SnapshotDetails) => {
-            const label = i18n.translate(
-              'xpack.snapshotRestore.snapshotList.table.actionRestoreTooltip',
-              { defaultMessage: 'Restore' }
-            );
+          render: ({ snapshot, repository, state }: SnapshotDetails) => {
+            const canRestore = state === SNAPSHOT_STATE.SUCCESS || state === SNAPSHOT_STATE.PARTIAL;
+            const label = canRestore
+              ? i18n.translate('xpack.snapshotRestore.snapshotList.table.actionRestoreTooltip', {
+                  defaultMessage: 'Restore',
+                })
+              : i18n.translate(
+                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledTooltip',
+                  {
+                    defaultMessage: `Can't restore invalid snapshot`,
+                  }
+                );
             return (
               <EuiToolTip content={label}>
                 <EuiButtonIcon
@@ -167,6 +174,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                   color="primary"
                   data-test-subj="srsnapshotListRestoreActionButton"
                   href={`#${BASE_PATH}/restore_snapshot/${repository}/${snapshot}`}
+                  isDisabled={!canRestore}
                 />
               </EuiToolTip>
             );

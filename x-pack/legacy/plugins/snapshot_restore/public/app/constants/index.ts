@@ -104,3 +104,4 @@ export const UIM_SNAPSHOT_DELETE = 'snapshot_delete';
 export const UIM_SNAPSHOT_DELETE_MANY = 'snapshot_delete_many';
 export const UIM_RESTORE_CREATE = 'restore_create';
 export const UIM_RECOVERY_LIST_LOAD = 'recovery_list_load';
+export const UIM_RECOVERY_LIST_EXPAND_INDEX = 'recovery_list_expand_index';

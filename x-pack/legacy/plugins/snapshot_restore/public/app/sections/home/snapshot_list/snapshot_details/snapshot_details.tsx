@@ -21,7 +21,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 
 import { SectionError, SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
@@ -35,7 +34,7 @@ import { linkToRepository } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositoryName: string;
   snapshotId: string;
   onClose: () => void;

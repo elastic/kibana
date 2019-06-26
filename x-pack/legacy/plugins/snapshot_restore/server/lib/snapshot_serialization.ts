@@ -66,7 +66,7 @@ export function deserializeSnapshotDetails(
     versionId,
     version,
     indices: [...indices].sort(),
-    includeGlobalState: Boolean(includeGlobalState) ? 1 : 0,
+    includeGlobalState,
     state,
     startTime,
     startTimeInMillis,

@@ -8,7 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
-import { BASE_PATH, Section } from '../../constants';
+import { BASE_PATH } from '../../constants';
 import { SectionError, SectionLoading, RestoreSnapshotForm } from '../../components';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
@@ -29,7 +29,6 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const section = 'snapshots' as Section;
 
   // Set breadcrumb
   useEffect(() => {
@@ -64,15 +63,16 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
     setIsSaving(true);
     setSaveError(null);
     const { error } = await executeRestore(repositoryName, snapshotId, restoreSettings);
-    setIsSaving(false);
     if (error) {
+      setIsSaving(false);
       setSaveError(error);
     } else {
-      history.push(
-        `${BASE_PATH}/${section}/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
-          snapshotId
-        )}`
-      );
+      // Wait a few seconds before redirecting so that restore information has time to
+      // populate into master node
+      setTimeout(() => {
+        setIsSaving(false);
+        history.push(`${BASE_PATH}/recovery`);
+      }, 5 * 1000);
     }
   };
 

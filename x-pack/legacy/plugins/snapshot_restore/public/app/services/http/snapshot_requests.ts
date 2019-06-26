@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { API_BASE_PATH } from '../../../../common/constants';
-import { MINIMUM_TIMEOUT_MS, UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
+import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
 import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
@@ -13,7 +13,6 @@ export const useLoadSnapshots = () =>
     path: httpService.addBasePath(`${API_BASE_PATH}snapshots`),
     method: 'get',
     initialData: [],
-    timeout: MINIMUM_TIMEOUT_MS,
   });
 
 export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>

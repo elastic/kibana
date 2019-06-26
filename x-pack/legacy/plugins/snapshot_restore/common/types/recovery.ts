@@ -6,7 +6,9 @@
 
 export interface SnapshotRecovery {
   index: string;
+  latestActivityTimeInMillis: number;
   shards: Array<Partial<SnapshotRecoveryShard>>;
+  isComplete: boolean;
 }
 
 export interface SnapshotRecoveryShard {

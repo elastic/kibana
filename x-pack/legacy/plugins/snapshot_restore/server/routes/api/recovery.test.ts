@@ -37,8 +37,18 @@ describe('[Snapshot and Restore API Routes] Recovery', () => {
       };
       const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
       const expectedResponse = [
-        { index: 'fooIndex', shards: [{}] },
-        { index: 'barIndex', shards: [{}, {}] },
+        {
+          index: 'fooIndex',
+          shards: [{}],
+          isComplete: false,
+          latestActivityTimeInMillis: 0,
+        },
+        {
+          index: 'barIndex',
+          shards: [{}, {}],
+          isComplete: false,
+          latestActivityTimeInMillis: 0,
+        },
       ];
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
