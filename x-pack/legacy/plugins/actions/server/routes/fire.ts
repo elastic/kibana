@@ -24,12 +24,14 @@ interface FireRouteOptions {
   getServices: GetServicesFunction;
 }
 
-// eslint-disable-next-line import/no-default-export
 export function fireRoute({ server, actionTypeRegistry, getServices }: FireRouteOptions) {
   server.route({
     method: 'POST',
     path: '/api/action/{id}/_fire',
     options: {
+      response: {
+        emptyStatusCode: 204,
+      },
       validate: {
         options: {
           abortEarly: false,
@@ -46,7 +48,7 @@ export function fireRoute({ server, actionTypeRegistry, getServices }: FireRoute
           .required(),
       },
     },
-    async handler(request: FireRequest) {
+    async handler(request: FireRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const { params } = request.payload;
       const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
@@ -61,7 +63,7 @@ export function fireRoute({ server, actionTypeRegistry, getServices }: FireRoute
         services: getServices(request.getBasePath(), { savedObjectsClient }),
         encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
       });
-      return { success: true };
+      return h.response();
     },
   });
 }

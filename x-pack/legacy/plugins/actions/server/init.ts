@@ -42,14 +42,12 @@ export function init(server: Legacy.Server) {
       headers: {},
       getBasePath: () => basePath,
     };
-    return Object.assign(
-      {
-        log: server.log,
-        callCluster: callWithInternalUser,
-        savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
-      },
-      overwrites
-    );
+    return {
+      log: server.log,
+      callCluster: callWithInternalUser,
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+      ...overwrites,
+    };
   }
 
   const { taskManager } = server;

@@ -50,23 +50,18 @@ const taskInstanceMock = {
 beforeEach(() => jest.resetAllMocks());
 
 test('executes the task by calling the executor with proper parameters', async () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { execute } = require('./execute');
-  execute.mockResolvedValueOnce({ success: true });
+  const { execute: mockExecute } = jest.requireMock('./execute');
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
   const runner = createTaskRunner({ taskInstance: taskInstanceMock });
   const runnerResult = await runner.run();
 
   expect(runnerResult).toBeUndefined();
-  expect(execute).toHaveBeenCalledTimes(1);
-
-  const executeCall = execute.mock.calls[0][0];
-  expect(executeCall.namespace).toBe('test');
-  expect(executeCall.actionTypeRegistry).toBeTruthy();
-  expect(executeCall.encryptedSavedObjectsPlugin).toBeTruthy();
-  expect(executeCall.actionId).toBe('2');
-  expect(executeCall.services).toBeTruthy();
-  expect(executeCall.params).toEqual({
-    baz: true,
+  expect(mockExecute).toHaveBeenCalledWith({
+    namespace: 'test',
+    actionId: '2',
+    actionTypeRegistry,
+    encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
+    services: expect.anything(),
+    params: { baz: true },
   });
 });

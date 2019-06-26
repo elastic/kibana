@@ -64,11 +64,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(200)
+        .expect(204)
         .then((resp: any) => {
-          expect(resp.body).to.eql({
-            success: true,
-          });
+          expect(resp.body).to.eql({});
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
@@ -148,11 +146,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(200)
+        .expect(204)
         .then((resp: any) => {
-          expect(resp.body).to.eql({
-            success: true,
-          });
+          expect(resp.body).to.eql({});
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
@@ -195,39 +191,35 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     it(`should return 404 when action doesn't exist`, async () => {
-      await supertest
+      const { body: response } = await supertest
         .post('/api/action/1/_fire')
         .set('kbn-xsrf', 'foo')
         .send({
           params: { foo: true },
         })
-        .expect(404)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Saved object [action/1] not found',
-          });
-        });
+        .expect(404);
+      expect(response).to.eql({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Saved object [action/1] not found',
+      });
     });
 
     it('should return 400 when payload is empty and invalid', async () => {
-      await supertest
+      const { body: response } = await supertest
         .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
         .send({})
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'child "params" fails because ["params" is required]',
-            validation: {
-              source: 'payload',
-              keys: ['params'],
-            },
-          });
-        });
+        .expect(400);
+      expect(response).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'child "params" fails because ["params" is required]',
+        validation: {
+          source: 'payload',
+          keys: ['params'],
+        },
+      });
     });
   });
 }

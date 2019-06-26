@@ -60,37 +60,22 @@ test('successfully executes', async () => {
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await execute(executeParams);
 
-  expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-  expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mock.calls[0])
-    .toMatchInlineSnapshot(`
-Array [
-  "action",
-  "1",
-  Object {
-    "namespace": "some-namespace",
-  },
-]
-`);
-  expect(actionTypeRegistry.get).toHaveBeenCalledTimes(1);
-  expect(actionTypeRegistry.get.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "test",
-]
-`);
-  expect(actionType.executor).toHaveBeenCalledTimes(1);
-  const executorCall = actionType.executor.mock.calls[0][0];
-  expect(executorCall.services).toBeTruthy();
-  expect(executorCall.config).toMatchInlineSnapshot(`
-Object {
-  "bar": true,
-  "baz": true,
-}
-`);
-  expect(executorCall.params).toMatchInlineSnapshot(`
-Object {
-  "foo": true,
-}
-`);
+  expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action',
+    '1',
+    { namespace: 'some-namespace' }
+  );
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    services: expect.anything(),
+    config: {
+      bar: true,
+      baz: true,
+    },
+    params: { foo: true },
+  });
 });
 
 test('provides empty config when actionTypeConfig and / or actionTypeConfigSecrets is empty', async () => {

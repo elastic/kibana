@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ActionType, GetServicesFunction } from './types';
-import { TaskManager } from '../../task_manager';
+import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
@@ -18,6 +18,7 @@ interface ConstructorOptions {
 }
 
 export class ActionTypeRegistry {
+  private readonly taskRunCreatorFunction: TaskRunCreatorFunction;
   private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
   private readonly actionTypes: Map<string, ActionType> = new Map();
@@ -27,6 +28,11 @@ export class ActionTypeRegistry {
     this.getServices = getServices;
     this.taskManager = taskManager;
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
+    this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
+      actionTypeRegistry: this,
+      getServices: this.getServices,
+      encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
+    });
   }
 
   /**
@@ -55,11 +61,7 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         type: `actions:${actionType.id}`,
-        createTaskRunner: getCreateTaskRunnerFunction({
-          actionTypeRegistry: this,
-          getServices: this.getServices,
-          encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
-        }),
+        createTaskRunner: this.taskRunCreatorFunction,
       },
     });
   }
