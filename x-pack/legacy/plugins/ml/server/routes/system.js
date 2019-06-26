@@ -8,6 +8,7 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
+import { privilegesProvider } from '../lib/check_privileges';
 import { mlLog } from '../client/log';
 
 import { wrapError } from '../client/errors';
@@ -73,6 +74,23 @@ export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xp
           resp.upgradeInProgress = upgradeInProgress;
           return resp;
         }
+      } catch (error) {
+        return wrapError(error);
+      }
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
+    path: '/api/ml/ml_privileges',
+    async handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      try {
+        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin);
+        return await getPrivileges();
       } catch (error) {
         return wrapError(error);
       }
