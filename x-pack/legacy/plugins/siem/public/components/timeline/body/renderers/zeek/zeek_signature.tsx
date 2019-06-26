@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -20,9 +20,11 @@ import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
 
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
