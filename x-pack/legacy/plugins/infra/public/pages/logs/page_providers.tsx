@@ -21,7 +21,9 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
       <SourceConfigurationFlyoutState.Provider>
         <LogViewConfiguration.Provider>
           <LogFlyout.Provider>
-            <LogHighlightsState.Provider>{children}</LogHighlightsState.Provider>
+            <LogHighlightsState.Provider sourceId={sourceId}>
+              {children}
+            </LogHighlightsState.Provider>
           </LogFlyout.Provider>
         </LogViewConfiguration.Provider>
       </SourceConfigurationFlyoutState.Provider>

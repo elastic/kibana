@@ -19,7 +19,7 @@ interface WithLogFilterProps {
   indexPattern: StaticIndexPattern;
 }
 
-const withLogFilter = connect(
+export const withLogFilter = connect(
   (state: State) => ({
     filterQuery: logFilterSelectors.selectLogFilterQuery(state),
     filterQueryDraft: logFilterSelectors.selectLogFilterQueryDraft(state),

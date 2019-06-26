@@ -48,7 +48,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   return (
     <>
       <ReduxSourceIdBridge sourceId={sourceId} />
-      <LogHighlightsBridge />
+      <LogHighlightsBridge indexPattern={derivedIndexPattern} />
       <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
       <WithLogMinimapUrlState />

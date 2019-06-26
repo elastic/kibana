@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useState } from 'react';
-import { EuiPopover, EuiButton, EuiFieldText } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiFieldText } from '@elastic/eui';
 
 interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
@@ -35,9 +35,15 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({ onChange }
     [setHighlightTerm, onChange]
   );
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
+    <EuiButtonEmpty
+      color="text"
+      size="xs"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={togglePopover}
+    >
       Highlights
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 
   return (
