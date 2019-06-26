@@ -11,15 +11,13 @@
  */
 
 import expect from '@kbn/expect';
+import ApolloClient from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
 
-import { allTimelinesQuery } from '../../../../../legacy/plugins/siem/public/containers/timeline/all/index.gql_query';
 import { deleteTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/delete/persist.gql_query';
 import { persistTimelineFavoriteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/favorite/persist.gql_query';
 import { persistTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/persist.gql_query';
-import {
-  GetAllTimeline,
-  TimelineResult,
-} from '../../../../../legacy/plugins/siem/public/graphql/types';
+import { TimelineResult } from '../../../../../legacy/plugins/siem/public/graphql/types';
 
 import { KbnTestProvider } from '../types';
 
@@ -34,16 +32,7 @@ const timelinePersistenceTests: KbnTestProvider = ({ getService }) => {
     describe('Persist a timeline', () => {
       it('Create a timeline just with a title', async () => {
         const titleToSaved = 'hello title';
-        const response = await client.mutate<any>({
-          mutation: persistTimelineMutation,
-          variables: {
-            timelineId: null,
-            version: null,
-            timeline: {
-              title: titleToSaved,
-            },
-          },
-        });
+        const response = await createBasicTimeline(client, titleToSaved);
         const { savedObjectId, title, version } =
           response.data && response.data.persistTimeline.timeline;
 
@@ -188,96 +177,68 @@ const timelinePersistenceTests: KbnTestProvider = ({ getService }) => {
       });
 
       it('Update a timeline with a new title', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+        const titleToSaved = 'hello title';
+        const response = await createBasicTimeline(client, titleToSaved);
+        const { savedObjectId, version } = response.data && response.data.persistTimeline.timeline;
+
+        const newTitle = 'new title';
+        const responseToTest = await client.mutate<any>({
+          mutation: persistTimelineMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            timelineId: savedObjectId,
+            version,
+            timeline: {
+              title: newTitle,
+            },
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0] != null
-        ) {
-          const { savedObjectId, version } = responseData.data.getAllTimeline.timeline[0]!;
-          const newTitle = 'new title';
-          const response = await client.mutate<any>({
-            mutation: persistTimelineMutation,
-            variables: {
-              timelineId: savedObjectId,
-              version,
-              timeline: {
-                title: newTitle,
-              },
-            },
-          });
 
-          expect(response.data!.persistTimeline.timeline.savedObjectId).to.be(savedObjectId);
-          expect(response.data!.persistTimeline.timeline.title).to.be(newTitle);
-          expect(response.data!.persistTimeline.timeline.version).to.be(version);
-        }
+        expect(responseToTest.data!.persistTimeline.timeline.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.data!.persistTimeline.timeline.title).to.be(newTitle);
+        expect(responseToTest.data!.persistTimeline.timeline.version).to.not.be.eql(version);
       });
     });
 
     describe('Persist favorite', () => {
       it('to an existing timeline', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+        const titleToSaved = 'hello title';
+        const response = await createBasicTimeline(client, titleToSaved);
+        const { savedObjectId, version } = response.data && response.data.persistTimeline.timeline;
+
+        const responseToTest = await client.mutate<any>({
+          mutation: persistTimelineFavoriteMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            timelineId: savedObjectId,
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0] != null
-        ) {
-          const { savedObjectId, version } = responseData.data.getAllTimeline.timeline[0]!;
 
-          const response = await client.mutate<any>({
-            mutation: persistTimelineFavoriteMutation,
-            variables: {
-              timelineId: savedObjectId,
-            },
-          });
-
-          expect(response.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-          expect(response.data!.persistTimeline.favorite.length).to.be(1);
-          expect(response.data!.persistTimeline.version).to.be(version);
-        }
+        expect(responseToTest.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.data!.persistFavorite.favorite.length).to.be(1);
+        expect(responseToTest.data!.persistFavorite.version).to.not.be.eql(version);
       });
 
       it('to Unfavorite an existing timeline', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+        const titleToSaved = 'hello title';
+        const response = await createBasicTimeline(client, titleToSaved);
+        const { savedObjectId, version } = response.data && response.data.persistTimeline.timeline;
+
+        await client.mutate<any>({
+          mutation: persistTimelineFavoriteMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            timelineId: savedObjectId,
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0] != null
-        ) {
-          const { savedObjectId, version } = responseData.data.getAllTimeline.timeline[0]!;
 
-          const response = await client.mutate<any>({
-            mutation: persistTimelineFavoriteMutation,
-            variables: {
-              timelineId: savedObjectId,
-            },
-          });
+        const responseToTest = await client.mutate<any>({
+          mutation: persistTimelineFavoriteMutation,
+          variables: {
+            timelineId: savedObjectId,
+          },
+        });
 
-          expect(response.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-          expect(response.data!.persistTimeline.favorite.length).to.be.empty();
-          expect(response.data!.persistTimeline.version).to.be(version);
-        }
+        expect(responseToTest.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.data!.persistFavorite.favorite).to.be.empty();
+        expect(responseToTest.data!.persistFavorite.version).to.not.be.eql(version);
       });
 
       it('to a timeline without a timelineId', async () => {
@@ -296,54 +257,42 @@ const timelinePersistenceTests: KbnTestProvider = ({ getService }) => {
 
     describe('Delete', () => {
       it('one timeline', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+        const titleToSaved = 'hello title';
+        const response = await createBasicTimeline(client, titleToSaved);
+        const { savedObjectId } = response.data && response.data.persistTimeline.timeline;
+
+        const responseToTest = await client.mutate<any>({
+          mutation: deleteTimelineMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            id: [savedObjectId],
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0] != null
-        ) {
-          const { savedObjectId } = responseData.data.getAllTimeline.timeline[0]!;
 
-          const response = await client.mutate<any>({
-            mutation: deleteTimelineMutation,
-            variables: {
-              id: [savedObjectId],
-            },
-          });
-
-          expect(response.data!.deleteTimeline).to.be(true);
-        }
+        expect(responseToTest.data!.deleteTimeline).to.be(true);
       });
 
       it('multiple timeline', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+        const titleToSaved = 'hello title';
+        const response1 = await createBasicTimeline(client, titleToSaved);
+        const savedObjectId1 =
+          response1.data && response1.data.persistTimeline.timeline
+            ? response1.data.persistTimeline.timeline.savedObjectId
+            : '';
+
+        const response2 = await createBasicTimeline(client, titleToSaved);
+        const savedObjectId2 =
+          response2.data && response2.data.persistTimeline.timeline
+            ? response2.data.persistTimeline.timeline.savedObjectId
+            : '';
+
+        const responseToTest = await client.mutate<any>({
+          mutation: deleteTimelineMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            id: [savedObjectId1, savedObjectId2],
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0
-        ) {
-          const response = await client.mutate<any>({
-            mutation: deleteTimelineMutation,
-            variables: {
-              id: responseData.data.getAllTimeline.timeline.map(t => t!.savedObjectId),
-            },
-          });
 
-          expect(response.data!.deleteTimeline).to.be(true);
-        }
+        expect(responseToTest.data!.deleteTimeline).to.be(true);
       });
     });
   });
@@ -357,3 +306,15 @@ const omitTypename = (key: string, value: keyof TimelineResult) =>
 
 const omitTypenameInTimeline = (timeline: TimelineResult) =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
+
+const createBasicTimeline = async (client: ApolloClient<InMemoryCache>, titleToSaved: string) =>
+  await client.mutate<any>({
+    mutation: persistTimelineMutation,
+    variables: {
+      timelineId: null,
+      version: null,
+      timeline: {
+        title: titleToSaved,
+      },
+    },
+  });

@@ -7,9 +7,7 @@
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
-import { allTimelinesQuery } from '../../../../../legacy/plugins/siem/public/containers/timeline/all/index.gql_query';
 import { persistTimelineNoteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/notes/persist.gql_query';
-import { GetAllTimeline } from '../../../../../legacy/plugins/siem/public/graphql/types';
 
 import { KbnTestProvider } from '../types';
 
@@ -42,78 +40,57 @@ const notesPersistenceTests: KbnTestProvider = ({ getService }) => {
         expect(version).to.not.be.empty();
       });
 
-      it('if noteId exist return existing timelineId, timelineVersion noteId and version', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+      it('if noteId exist update note and return existing noteId and new version', async () => {
+        const myNote = 'world test';
+        const response = await client.mutate<any>({
+          mutation: persistTimelineNoteMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            noteId: null,
+            version: null,
+            note: { note: myNote, timelineId: null },
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0] != null &&
-          responseData.data.getAllTimeline.timeline[0]!.notes &&
-          responseData.data.getAllTimeline.timeline[0]!.notes.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0]!.notes![0] != null
-        ) {
-          const {
-            note,
-            noteId,
-            timelineId,
-            timelineVersion,
-            version,
-          } = responseData.data.getAllTimeline.timeline![0]!.notes![0];
-          const myNote = 'new world test';
-          const response = await client.mutate<any>({
-            mutation: persistTimelineNoteMutation,
-            variables: {
-              noteId,
-              version,
-              note: { note: myNote, timelineId },
-            },
-          });
 
-          expect(response.data!.persistNote.note).to.be(note);
-          expect(response.data!.persistNote.noteId).to.be(noteId);
-          expect(response.data!.persistNote.timelineId).to.be(timelineId);
-          expect(response.data!.persistNote.timelineVersion).to.be(timelineVersion);
-          expect(response.data!.persistNote.version).to.be(version);
-        }
+        const { noteId, timelineId, version } = response.data && response.data.persistNote.note;
+
+        const myNewNote = 'new world test';
+        const responseToTest = await client.mutate<any>({
+          mutation: persistTimelineNoteMutation,
+          variables: {
+            noteId,
+            version,
+            note: { note: myNewNote, timelineId },
+          },
+        });
+
+        expect(responseToTest.data!.persistNote.note.note).to.be(myNewNote);
+        expect(responseToTest.data!.persistNote.note.noteId).to.be(noteId);
+        expect(responseToTest.data!.persistNote.note.version).to.not.be.eql(version);
       });
     });
 
     describe('Delete a note', () => {
       it('one note', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+        const myNote = 'world test';
+        const response = await client.mutate<any>({
+          mutation: persistTimelineNoteMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            noteId: null,
+            version: null,
+            note: { note: myNote, timelineId: null },
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0] != null &&
-          responseData.data.getAllTimeline.timeline[0]!.notes &&
-          responseData.data.getAllTimeline.timeline[0]!.notes.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0]!.notes![0] != null
-        ) {
-          const { noteId } = responseData.data.getAllTimeline.timeline![0]!.notes![0];
 
-          const response = await client.mutate<any>({
-            mutation: deleteNoteMutation,
-            variables: {
-              noteId,
-            },
-          });
+        const { noteId } = response.data && response.data.persistNote.note;
 
-          expect(response.data).to.be(true);
-        }
+        const responseToTest = await client.mutate<any>({
+          mutation: deleteNoteMutation,
+          variables: {
+            id: [noteId],
+          },
+        });
+
+        expect(responseToTest.data!.deleteNote).to.be(true);
       });
     });
   });
@@ -123,7 +100,7 @@ const notesPersistenceTests: KbnTestProvider = ({ getService }) => {
 export default notesPersistenceTests;
 
 const deleteNoteMutation = gql`
-  mutation deleteNote($noteId: ID!) {
-    deleteNote(id: $noteId)
+  mutation DeleteNoteMutation($id: [ID!]!) {
+    deleteNote(id: $id)
   }
 `;

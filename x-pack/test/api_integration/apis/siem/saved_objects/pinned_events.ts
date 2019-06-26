@@ -6,9 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { allTimelinesQuery } from '../../../../../legacy/plugins/siem/public/containers/timeline/all/index.gql_query';
 import { persistTimelinePinnedEventMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/pinned_event/persist.gql_query';
-import { GetAllTimeline } from '../../../../../legacy/plugins/siem/public/graphql/types';
 
 import { KbnTestProvider } from '../types';
 
@@ -42,32 +40,25 @@ const pinnedEventsPersistenceTests: KbnTestProvider = ({ getService }) => {
 
     describe('Unpinned an event', () => {
       it('return null', async () => {
-        const responseData = await client.query<GetAllTimeline.Query>({
-          query: allTimelinesQuery,
+        const response = await client.mutate<any>({
+          mutation: persistTimelinePinnedEventMutation,
           variables: {
-            search: '',
-            pageInfo: { pageIndex: 1, pageSize: 10 },
-            sort: { sortField: 'updated', sortOrder: 'desc' },
+            pinnedEventId: null,
+            eventId: 'bv4QSGsB9v5HJNSH-7fi',
           },
         });
-        if (
-          responseData.data.getAllTimeline.timeline &&
-          responseData.data.getAllTimeline.timeline.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0] != null &&
-          responseData.data.getAllTimeline.timeline[0]!.pinnedEventIds &&
-          responseData.data.getAllTimeline.timeline[0]!.pinnedEventIds.length > 0 &&
-          responseData.data.getAllTimeline.timeline[0]!.pinnedEventIds![0] != null
-        ) {
-          const response = await client.mutate<any>({
-            mutation: persistTimelinePinnedEventMutation,
-            variables: {
-              pinnedEventId: responseData.data.getAllTimeline.timeline[0]!.pinnedEventIds![0],
-              eventId: 'bv4QSGsB9v5HJNSH-7fi',
-            },
-          });
+        const { eventId, pinnedEventId } =
+          response.data && response.data.persistPinnedEventOnTimeline;
 
-          expect(response.data!.persistPinnedEventOnTimeline).to.be(null);
-        }
+        const responseToTest = await client.mutate<any>({
+          mutation: persistTimelinePinnedEventMutation,
+          variables: {
+            pinnedEventId,
+            eventId,
+          },
+        });
+
+        expect(responseToTest.data!.persistPinnedEventOnTimeline).to.be(null);
       });
     });
   });

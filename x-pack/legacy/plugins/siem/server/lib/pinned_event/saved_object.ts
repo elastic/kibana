@@ -99,44 +99,50 @@ export class PinnedEvent {
   ): Promise<PinnedEventSavedObject | null> {
     try {
       if (pinnedEventId == null) {
-        let timelineVersionSavedObject = null;
-        if (timelineId == null) {
-          const timelineResult = convertSavedObjectToSavedTimeline(
-            await this.libs.savedObjects
-              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-              .create(
-                timelineSavedObjectType,
-                pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-              )
+        const timelineVersionSavedObject =
+          timelineId == null
+            ? await (async () => {
+                const timelineResult = convertSavedObjectToSavedTimeline(
+                  await this.libs.savedObjects
+                    .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+                    .create(
+                      timelineSavedObjectType,
+                      pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+                    )
+                );
+                timelineId = timelineResult.savedObjectId;
+                return timelineResult.version;
+              })()
+            : null;
+
+        if (timelineId != null) {
+          const allPinnedEventId = await this.getAllPinnedEventsByTimelineId(request, timelineId);
+          const isPinnedAlreadyExisting = allPinnedEventId.filter(
+            pinnedEvent => pinnedEvent.eventId === eventId
           );
-          timelineId = timelineResult.savedObjectId;
-          timelineVersionSavedObject = timelineResult.version;
+          if (isPinnedAlreadyExisting.length === 0) {
+            const savedPinnedEvent: SavedPinnedEvent = {
+              eventId,
+              timelineId,
+            };
+            // create Pinned Event on Timeline
+            return convertSavedObjectToSavedPinnedEvent(
+              await this.libs.savedObjects
+                .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+                .create(
+                  pinnedEventSavedObjectType,
+                  pickSavedPinnedEvent(
+                    pinnedEventId,
+                    savedPinnedEvent,
+                    request[internalFrameworkRequest].auth || null
+                  )
+                ),
+              timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
+            );
+          }
+          return isPinnedAlreadyExisting[0];
         }
-        const allPinnedEventId = await this.getAllPinnedEventsByTimelineId(request, timelineId);
-        const isPinnedAlreadyExisting = allPinnedEventId.filter(
-          pinnedEvent => pinnedEvent.eventId === eventId
-        );
-        if (isPinnedAlreadyExisting.length === 0) {
-          const savedPinnedEvent: SavedPinnedEvent = {
-            eventId,
-            timelineId,
-          };
-          // create Pinned Event on Timeline
-          return convertSavedObjectToSavedPinnedEvent(
-            await this.libs.savedObjects
-              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-              .create(
-                pinnedEventSavedObjectType,
-                pickSavedPinnedEvent(
-                  pinnedEventId,
-                  savedPinnedEvent,
-                  request[internalFrameworkRequest].auth || null
-                )
-              ),
-            timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
-          );
-        }
-        return isPinnedAlreadyExisting[0];
+        throw new Error('You can NOT pinned event without a timelineID');
       }
       // Delete Pinned Event on Timeline
       await this.deletePinnedEventOnTimeline(request, [pinnedEventId]);

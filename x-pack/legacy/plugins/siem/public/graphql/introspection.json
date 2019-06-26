@@ -8805,12 +8805,6 @@
                   }
                 },
                 "defaultValue": null
-              },
-              {
-                "name": "version",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
               }
             ],
             "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },

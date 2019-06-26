@@ -106,7 +106,6 @@ export const addTimelineNoteToEvent = ({
 interface AddTimelineParams {
   id: string;
   timeline: TimelineResult;
-  // timelineById: TimelineById;
 }
 
 /**
@@ -114,9 +113,7 @@ interface AddTimelineParams {
  * and default the value to what need to be if values are null
  */
 export const addTimelineToStore = ({ id, timeline }: AddTimelineParams): TimelineById => ({
-  // As right now, We are not managing multiple timeline
-  // for simplification, we do not need the line below
-  // ...timelineById,
+  //  TODO: revisit this when we support multiple timelines
   [id]: {
     ...defaultsDeep(timelineDefaults, pickBy(v => !isNil(v), timeline)),
     id: timeline.savedObjectId || '',

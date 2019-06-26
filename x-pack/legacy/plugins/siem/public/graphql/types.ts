@@ -1949,8 +1949,6 @@ export interface PersistNoteMutationArgs {
 }
 export interface DeleteNoteMutationArgs {
   id: string[];
-
-  version?: string | null;
 }
 export interface DeleteNoteByTimelineIdMutationArgs {
   timelineId: string;
