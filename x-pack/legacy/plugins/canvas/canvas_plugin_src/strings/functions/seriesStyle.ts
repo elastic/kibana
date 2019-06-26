@@ -43,13 +43,13 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
     }),
     stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
       defaultMessage:
-        'Should we stack the series? This is the stack "id". Series with the same ' +
-        'stack id will be stacked together',
+        'The stack ID, which specifies if the series is stacked. ' +
+        'Series with the same stack ID are stacked together.',
     }),
     horizontalBars: i18n.translate(
       'xpack.canvas.functions.seriesStyle.args.horizontalBarsHelpText',
       {
-        defaultMessage: 'Sets the orientation of bars in the chart to horizontal',
+        defaultMessage: 'Sets the orientation of the bars in the chart to horizontal',
       }
     ),
   },

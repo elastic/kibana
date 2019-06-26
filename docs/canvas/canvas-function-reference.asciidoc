@@ -1724,7 +1724,7 @@ Default: `false`
 
 |`horizontalBars`
 |`boolean`
-|Sets the orientation of bars in the chart to horizontal 
+|Sets the orientation of the bars in the chart to horizontal 
 
 Default: `false`
 |===
