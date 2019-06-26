@@ -233,7 +233,32 @@ export class ChromeService {
   }
 }
 
-/** @public */
+/**
+ * ChromeStart allows plugins to customize the global chrome header UI and
+ * enrich the UX with additional information about the current location of the
+ * browser.
+ *
+ * @remarks
+ * While ChromeStart exposes many APIs, they should be used sparingly and the
+ * developer should understand how they affect other plugins and applications.
+ *
+ * @example
+ * How to add a recently accessed item to the sidebar:
+ * ```ts
+ * core.chrome.recentlyAccessed.add('/app/map/1234', 'Map 1234', '1234');
+ * ```
+ *
+ * @example
+ * How to set the help dropdown extension:
+ * ```tsx
+ * core.chrome.setHelpExtension(elem => {
+ *   ReactDOM.render(<MyHelpComponent />, elem);
+ *   return () => ReactDOM.unmountComponentAtNode(elem);
+ * });
+ * ```
+ *
+ * @public
+ */
 export interface ChromeStart {
   /** {@inheritdoc ChromeNavLinks} */
   navLinks: ChromeNavLinks;

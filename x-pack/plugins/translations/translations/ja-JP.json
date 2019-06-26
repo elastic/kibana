@@ -8781,7 +8781,6 @@
     "xpack.security.management.users.userNameColumnName": "ユーザー名",
     "xpack.security.management.users.usersTitle": "ユーザー",
     "xpack.security.management.usersTitle": "ユーザー",
-    "xpack.security.navControl.logoutLabel": "ログアウト",
     "xpack.security.navControlComponent.accountMenuAriaLabel": "アカウントメニュー",
     "xpack.security.navControlComponent.editProfileLinkText": "プロフィールを編集",
     "xpack.security.navControlComponent.logoutLinkText": "ログアウト",

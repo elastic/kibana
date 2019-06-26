@@ -7352,7 +7352,6 @@
     "xpack.security.management.users.userNameColumnName": "用户名",
     "xpack.security.management.users.usersTitle": "用户",
     "xpack.security.management.usersTitle": "用户",
-    "xpack.security.navControl.logoutLabel": "注销",
     "xpack.security.navControlComponent.accountMenuAriaLabel": "帐户菜单",
     "xpack.security.navControlComponent.editProfileLinkText": "编辑配置文件",
     "xpack.security.navControlComponent.logoutLinkText": "注销",
