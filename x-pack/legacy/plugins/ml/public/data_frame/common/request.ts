@@ -14,6 +14,8 @@ import { DefinePivotExposedState } from '../components/define_pivot/define_pivot
 import { JobDetailsExposedState } from '../components/job_details/job_details_form';
 
 import {
+  getEsAggFromAggConfig,
+  getEsAggFromGroupByConfig,
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
@@ -136,19 +138,13 @@ export function getDataFramePreviewRequest(
         }
       }
       request.pivot.group_by[g.aggName] = dateHistogramAgg;
+    } else {
+      request.pivot.group_by[g.aggName] = getEsAggFromGroupByConfig(g);
     }
   });
 
   aggs.forEach(agg => {
-    const aggConfig = { ...agg };
-
-    delete aggConfig.agg;
-    delete aggConfig.aggName;
-    delete aggConfig.dropDownName;
-
-    request.pivot.aggregations[agg.aggName] = {
-      [agg.agg]: aggConfig,
-    };
+    request.pivot.aggregations[agg.aggName] = getEsAggFromAggConfig(agg);
   });
 
   return request;

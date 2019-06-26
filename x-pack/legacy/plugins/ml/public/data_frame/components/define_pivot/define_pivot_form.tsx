@@ -14,6 +14,7 @@ import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiCodeEditor,
+  EuiConfirmModal,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +22,7 @@ import {
   EuiFormHelpText,
   EuiFormRow,
   EuiLink,
+  EuiOverlayMask,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -38,10 +40,7 @@ import {
   DropDownLabel,
   getPivotQuery,
   getDataFramePreviewRequest,
-  isGroupByDateHistogram,
-  isGroupByHistogram,
   isKibanaContext,
-  isPivotAggsConfigWithUiSupport,
   KibanaContext,
   KibanaContextValue,
   PivotAggDict,
@@ -283,6 +282,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const pivotQuery = getPivotQuery(search);
 
   // Advanced Editor State
+  const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
   const [isAdvancedEditorApplyButtonEnabled, setAdvancedEditorApplyButtonEnabled] = useState(false);
   const [isAdvancedEditorEnabled, setAdvancedEditorEnabled] = useState(
     defaults.isAdvancedEditorEnabled
@@ -305,7 +305,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
-      Object.entries(pivotConfig.group_by).map(d => {
+      Object.entries(pivotConfig.group_by).forEach(d => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotGroupByDict;
         const aggConfigKeys = Object.keys(aggConfig);
@@ -322,7 +322,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
     const newAggList: PivotAggsConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.aggregations !== undefined) {
-      Object.entries(pivotConfig.aggregations).map(d => {
+      Object.entries(pivotConfig.aggregations).forEach(d => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotAggDict;
         const aggConfigKeys = Object.keys(aggConfig);
@@ -341,6 +341,15 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setAdvancedEditorConfig(prettyPivotConfig);
     setAdvancedEditorConfigLastApplied(prettyPivotConfig);
     setAdvancedEditorApplyButtonEnabled(false);
+  };
+
+  const toggleAdvancedEditor = () => {
+    setAdvancedEditorConfig(advancedEditorConfig);
+    setAdvancedEditorEnabled(!isAdvancedEditorEnabled);
+    setAdvancedEditorApplyButtonEnabled(false);
+    if (isAdvancedEditorEnabled === false) {
+      setAdvancedEditorConfigLastApplied(advancedEditorConfig);
+    }
   };
 
   // metadata.branch corresponds to the version used in documentation links.
@@ -384,17 +393,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       });
     },
     [
-      pivotAggsArr
-        .map(d => `${d.agg} ${isPivotAggsConfigWithUiSupport(d) ? d.field : ''} ${d.aggName}`)
-        .join(' '),
-      pivotGroupByArr
-        .map(
-          d =>
-            `${d.agg} ${d.field} ${isGroupByHistogram(d) ? d.interval : ''} ${
-              isGroupByDateHistogram(d) ? d.calendar_interval : ''
-            } ${d.aggName}`
-        )
-        .join(' '),
+      JSON.stringify(pivotAggsArr),
+      JSON.stringify(pivotGroupByArr),
       isAdvancedEditorEnabled,
       search,
       valid,
@@ -576,14 +576,54 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                   )}
                   checked={isAdvancedEditorEnabled}
                   onChange={() => {
-                    setAdvancedEditorConfig(advancedEditorConfig);
-                    setAdvancedEditorEnabled(!isAdvancedEditorEnabled);
-                    setAdvancedEditorApplyButtonEnabled(false);
-                    if (isAdvancedEditorEnabled === false) {
-                      setAdvancedEditorConfigLastApplied(advancedEditorConfig);
+                    if (isAdvancedEditorEnabled && isAdvancedEditorApplyButtonEnabled) {
+                      setAdvancedEditorSwitchModalVisible(true);
+                      return;
                     }
+
+                    toggleAdvancedEditor();
                   }}
                 />
+                {isAdvancedEditorSwitchModalVisible && (
+                  <EuiOverlayMask>
+                    <EuiConfirmModal
+                      title={i18n.translate(
+                        'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalTitle',
+                        {
+                          defaultMessage: 'Unapplied changes',
+                        }
+                      )}
+                      onCancel={() => setAdvancedEditorSwitchModalVisible(false)}
+                      onConfirm={() => {
+                        setAdvancedEditorSwitchModalVisible(false);
+                        toggleAdvancedEditor();
+                      }}
+                      cancelButtonText={i18n.translate(
+                        'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalCancelButtonText',
+                        {
+                          defaultMessage: 'Cancel',
+                        }
+                      )}
+                      confirmButtonText={i18n.translate(
+                        'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalConfirmButtonText',
+                        {
+                          defaultMessage: 'Disable advanced editor',
+                        }
+                      )}
+                      buttonColor="danger"
+                      defaultFocusedButton="confirm"
+                    >
+                      <p>
+                        {i18n.translate(
+                          'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalBodyText',
+                          {
+                            defaultMessage: `The changes in the advanced editor's haven't been applied yet. By disabling the advanced editor you will lose your edits.`,
+                          }
+                        )}
+                      </p>
+                    </EuiConfirmModal>
+                  </EuiOverlayMask>
+                )}
               </EuiFlexItem>
               {isAdvancedEditorEnabled && (
                 <EuiButton

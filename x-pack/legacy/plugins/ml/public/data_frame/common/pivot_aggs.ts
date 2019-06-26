@@ -87,3 +87,15 @@ export type PivotAggsConfig = PivotAggsConfigBase | PivotAggsConfigWithUiSupport
 
 export type PivotAggsConfigWithUiSupportDict = Dictionary<PivotAggsConfigWithUiSupport>;
 export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
+
+export function getEsAggFromAggConfig(groupByConfig: PivotAggsConfigBase): PivotAgg {
+  const esAgg = { ...groupByConfig };
+
+  delete esAgg.agg;
+  delete esAgg.aggName;
+  delete esAgg.dropDownName;
+
+  return {
+    [groupByConfig.agg]: esAgg,
+  };
+}

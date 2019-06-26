@@ -23,6 +23,7 @@ import {
   AggName,
   isAggName,
   isPivotAggsConfigWithUiSupport,
+  getEsAggFromAggConfig,
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
   PIVOT_SUPPORTED_AGGS,
@@ -53,17 +54,22 @@ export const PopoverForm: React.SFC<Props> = ({
     isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
 
-  const optionsArr = dictionaryToArray(options);
-  const availableFields: SelectOption[] = optionsArr
-    .filter(o => o.agg === defaultData.agg)
-    .map(o => {
-      return { text: o.field };
-    });
-  const availableAggs: SelectOption[] = optionsArr
-    .filter(o => isPivotAggsConfigWithUiSupport(defaultData) && o.field === defaultData.field)
-    .map(o => {
-      return { text: o.agg };
-    });
+  const availableFields: SelectOption[] = [];
+  const availableAggs: SelectOption[] = [];
+
+  if (!isUnsupportedAgg) {
+    const optionsArr = dictionaryToArray(options);
+    optionsArr
+      .filter(o => o.agg === defaultData.agg)
+      .forEach(o => {
+        availableFields.push({ text: o.field });
+      });
+    optionsArr
+      .filter(o => isPivotAggsConfigWithUiSupport(defaultData) && o.field === defaultData.field)
+      .forEach(o => {
+        availableAggs.push({ text: o.agg });
+      });
+  }
 
   let aggNameError = '';
 
@@ -139,7 +145,7 @@ export const PopoverForm: React.SFC<Props> = ({
           theme="github"
           width="100%"
           height="200px"
-          value={JSON.stringify(defaultData, null, 2)}
+          value={JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
           setOptions={{ fontSize: '12px', showLineNumbers: false }}
           isReadOnly
           aria-label="Read only code editor"
