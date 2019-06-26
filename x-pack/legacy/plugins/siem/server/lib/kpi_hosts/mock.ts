@@ -5,7 +5,6 @@
  */
 
 import { RequestBasicOptions } from '../framework/types';
-import { RequestKpiHostDetailsOptions } from './types';
 
 const FROM = new Date('2019-05-03T13:24:00.660Z').valueOf();
 const TO = new Date('2019-05-04T13:24:00.660Z').valueOf();
@@ -23,10 +22,10 @@ export const mockKpiHostsOptions: RequestBasicOptions = {
     },
   },
   timerange: { interval: '12h', to: TO, from: FROM },
-  filterQuery: {},
+  filterQuery: undefined,
 };
 
-export const mockKpiHostDetailsOptions: RequestKpiHostDetailsOptions = {
+export const mockKpiHostDetailsOptions: RequestBasicOptions = {
   defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
     fields: {
@@ -39,8 +38,7 @@ export const mockKpiHostDetailsOptions: RequestKpiHostDetailsOptions = {
     },
   },
   timerange: { interval: '12h', to: TO, from: FROM },
-  filterQuery: {},
-  hostName: 'beats-ci-immutable-ubuntu-1604-1560970771368235343',
+  filterQuery: { term: { 'host.name': 'beats-ci-immutable-ubuntu-1604-1560970771368235343' } },
 };
 
 export const mockKpiHostsRequest = {
@@ -65,8 +63,7 @@ export const mockKpiHostDetailsRequest = {
     variables: {
       sourceId: 'default',
       timerange: { interval: '12h', from: FROM, to: TO },
-      filterQuery: '',
-      hostName: 'internal-ci-immutable-debian-9-1561441475088662137',
+      filterQuery: { term: { 'host.name': 'beats-ci-immutable-ubuntu-1604-1560970771368235343' } },
     },
     query:
       'fragment KpiHostDetailsChartFields on KpiHostHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiHostDetailsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!, $hostName: String!) {\n  source(id: $sourceId) {\n    id\n    KpiHostDetails(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex, hostName: $hostName) {\n      authSuccess\n      authSuccessHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
@@ -498,7 +495,7 @@ export const mockKpiHostDetailsUniqueIpsQuery = [
   {
     aggregations: mockUniqueIpsAggs,
     query: {
-      bool: { filter: [mockTimerangeFilter, mockHostNameFilter] },
+      bool: { filter: [mockHostNameFilter, mockTimerangeFilter] },
     },
     size: 0,
     track_total_hits: false,
@@ -548,7 +545,7 @@ export const mockKpiHostDetailsAuthQuery = [
     aggs: mockAuthAggs,
     query: {
       bool: {
-        filter: [mockAuthFilter, mockTimerangeFilter, mockHostNameFilter],
+        filter: [mockHostNameFilter, mockAuthFilter, mockTimerangeFilter],
       },
     },
     size: 0,

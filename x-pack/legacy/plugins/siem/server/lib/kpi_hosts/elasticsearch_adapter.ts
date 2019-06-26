@@ -18,7 +18,6 @@ import {
   KpiHostHistogram,
   KpiHostGeneralHistogramCount,
   KpiHostAuthHistogramCount,
-  RequestKpiHostDetailsOptions,
   KpiHostDetailsData,
   KpiHostsUniqueIpsHit,
   KpiHostsHostsHit,
@@ -117,7 +116,7 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
 
   public async getKpiHostDetails(
     request: FrameworkRequest,
-    options: RequestKpiHostDetailsOptions
+    options: RequestBasicOptions
   ): Promise<KpiHostDetailsData> {
     const uniqueIpsQuery: KpiHostsESMSearchBody[] = buildUniqueIpsQuery(options);
     const authQuery: KpiHostsESMSearchBody[] = buildAuthQuery(options);

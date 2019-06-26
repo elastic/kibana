@@ -17,7 +17,6 @@ export const kpiHostDetailsQuery = gql`
     $timerange: TimerangeInput!
     $filterQuery: String
     $defaultIndex: [String!]!
-    $hostName: String!
   ) {
     source(id: $sourceId) {
       id
@@ -25,7 +24,6 @@ export const kpiHostDetailsQuery = gql`
         timerange: $timerange
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
-        hostName: $hostName
       ) {
         authSuccess
         authSuccessHistogram {

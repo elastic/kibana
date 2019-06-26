@@ -18,17 +18,11 @@ export interface KpiHostDetailsData {
   uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
 }
 
-export interface RequestKpiHostDetailsOptions extends RequestBasicOptions {
-  hostName: string;
-}
-
-export type RequestKpiHostsOptions = RequestBasicOptions | RequestKpiHostDetailsOptions;
-
 export interface KpiHostsAdapter {
   getKpiHosts(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiHostsData>;
   getKpiHostDetails(
     request: FrameworkRequest,
-    options: RequestKpiHostDetailsOptions
+    options: RequestBasicOptions
   ): Promise<KpiHostDetailsData>;
 }
 

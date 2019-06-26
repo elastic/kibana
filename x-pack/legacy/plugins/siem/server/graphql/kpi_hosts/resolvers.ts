@@ -38,7 +38,7 @@ export const createKpiHostsResolvers = (
       return libs.kpiHosts.getKpiHosts(req, options);
     },
     async KpiHostDetails(source, args, { req }, info) {
-      const options = { ...createOptions(source, args, info), hostName: args.hostName };
+      const options = { ...createOptions(source, args, info) };
       return libs.kpiHosts.getKpiHostDetails(req, options);
     },
   },

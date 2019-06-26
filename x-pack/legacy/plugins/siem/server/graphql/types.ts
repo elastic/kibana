@@ -1932,8 +1932,6 @@ export interface KpiHostDetailsSourceArgs {
   filterQuery?: string | null;
 
   defaultIndex: string[];
-
-  hostName: string;
 }
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
@@ -2766,8 +2764,6 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
 
     defaultIndex: string[];
-
-    hostName: string;
   }
 
   export type NetworkTopNFlowResolver<

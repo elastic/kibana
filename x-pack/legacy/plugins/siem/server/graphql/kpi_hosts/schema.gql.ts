@@ -49,7 +49,6 @@ export const kpiHostsSchema = gql`
       timerange: TimerangeInput!
       filterQuery: String
       defaultIndex: [String!]!
-      hostName: String!
     ): KpiHostDetailsData!
   }
 `;

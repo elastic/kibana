@@ -101,7 +101,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
                       <KpiHostDetailsQuery
                         sourceId="default"
-                        hostName={hostName}
+                        filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                         skip={isInitializing}
                         startDate={from}
                         endDate={to}

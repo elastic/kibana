@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isKpiHostDetailsOptions } from './helpers';
+import { isKpiHostDetailsQuery } from './helpers';
 import { mockKpiHostsOptions, mockKpiHostDetailsOptions } from './mock';
 
 describe('helpers', () => {
@@ -12,7 +12,7 @@ describe('helpers', () => {
     'isHostDetails',
     (option, expected) => {
       test(`it should tell if it is kpiHostDetails option`, () => {
-        expect(isKpiHostDetailsOptions(option)).toBe(expected);
+        expect(isKpiHostDetailsQuery(option)).toBe(expected);
       });
     }
   );

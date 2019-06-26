@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestKpiHostDetailsOptions } from './types';
 import { RequestBasicOptions } from '../framework';
 
-export const isKpiHostDetailsOptions = (
-  options: RequestBasicOptions | RequestKpiHostDetailsOptions
-): options is RequestKpiHostDetailsOptions => {
-  return (options as RequestKpiHostDetailsOptions).hostName !== undefined;
+export const isKpiHostDetailsQuery = (options: RequestBasicOptions): boolean => {
+  return options.filterQuery !== undefined && Object.keys(options.filterQuery).length > 0;
 };

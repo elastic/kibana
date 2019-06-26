@@ -26,20 +26,10 @@ export interface KpiHostDetailsArgs {
 
 export interface QueryKpiHostDetailsProps extends QueryTemplateProps {
   children: (args: KpiHostDetailsArgs) => React.ReactNode;
-  hostName: string;
 }
 
 export const KpiHostDetailsQuery = React.memo<QueryKpiHostDetailsProps>(
-  ({
-    id = 'kpiHostDetailsQuery',
-    children,
-    endDate,
-    filterQuery,
-    skip,
-    sourceId,
-    startDate,
-    hostName,
-  }) => (
+  ({ id = 'kpiHostDetailsQuery', children, endDate, filterQuery, skip, sourceId, startDate }) => (
     <Query<GetKpiHostDetailsQuery.Query, GetKpiHostDetailsQuery.Variables>
       query={kpiHostDetailsQuery}
       fetchPolicy="cache-and-network"
@@ -54,7 +44,6 @@ export const KpiHostDetailsQuery = React.memo<QueryKpiHostDetailsProps>(
         },
         filterQuery: createFilter(filterQuery),
         defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-        hostName,
       }}
     >
       {({ data, loading, refetch }) => {
