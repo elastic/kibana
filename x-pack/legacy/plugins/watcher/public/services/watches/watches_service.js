@@ -15,7 +15,7 @@ export class WatchesService {
   }
 
   getWatchList() {
-    return npStart.core.http.get(`${this.basePath}/watches`)
+    return npStart.core.http.get('/watches')
       .then(response => response.data.watches)
       .then(watches => watches.map(watch => {
         return Watch.fromUpstreamJson(watch);
@@ -35,7 +35,7 @@ export class WatchesService {
     const body = {
       watchIds
     };
-    return npStart.core.http.post(`${this.basePath}/watches/delete`, body)
+    return npStart.core.http.post('/watches/delete', body)
       .then(response => response.data.results);
   }
 }
