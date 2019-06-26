@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { MetricsRequestHandlerProvider } from './request_handler';
+import { createMetricsRequestHandler } from './request_handler';
 import { i18n } from '@kbn/i18n';
 import { createEditorController } from './editor_controller';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
@@ -30,7 +30,7 @@ const uiSettings = chrome.getUiSettingsClient();
 const savedObjectsClient = chrome.getSavedObjectsClient();
 
 const EditorController = createEditorController(uiSettings, savedObjectsClient);
-const metricsRequestHandler = new MetricsRequestHandlerProvider(uiSettings).handler;
+const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
 
 export const MetricsVis = visFactory.createReactVisualization({
   name: 'metrics',
