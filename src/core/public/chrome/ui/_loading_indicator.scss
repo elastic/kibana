@@ -1,3 +1,7 @@
+$kbnLoadingIndicatorBackgroundSize: $euiSizeXXL * 10;
+$kbnLoadingIndicatorColor1: tint($euiColorAccent, 15%);
+$kbnLoadingIndicatorColor2: tint($euiColorAccent, 60%);
+
 /**
  * 1. Position this loader on top of the content.
  * 2. Make sure indicator isn't wider than the screen.

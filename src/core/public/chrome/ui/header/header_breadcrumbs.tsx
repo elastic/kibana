@@ -17,27 +17,32 @@
  * under the License.
  */
 
-import { EuiBetaBadge } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
+import {
+  // @ts-ignore
+  EuiHeaderBreadcrumbs,
+} from '@elastic/eui';
+import { ChromeBreadcrumb } from '../../chrome_service';
+
 interface Props {
-  badge$: Rx.Observable<ChromeBadge | undefined>;
+  appTitle?: string;
+  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
 }
 
 interface State {
-  badge: ChromeBadge | undefined;
+  breadcrumbs: ChromeBreadcrumb[];
 }
 
-import { ChromeBadge } from '../../../../../../../core/public';
-
-export class HeaderBadge extends Component<Props, State> {
+export class HeaderBreadcrumbs extends Component<Props, State> {
   private subscription?: Rx.Subscription;
 
   constructor(props: Props) {
     super(props);
 
-    this.state = { badge: undefined };
+    this.state = { breadcrumbs: [] };
   }
 
   public componentDidMount() {
@@ -45,7 +50,7 @@ export class HeaderBadge extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
-    if (prevProps.badge$ === this.props.badge$) {
+    if (prevProps.breadcrumbs$ === this.props.breadcrumbs$) {
       return;
     }
 
@@ -58,28 +63,15 @@ export class HeaderBadge extends Component<Props, State> {
   }
 
   public render() {
-    if (this.state.badge == null) {
-      return null;
-    }
-
     return (
-      <div className="chrHeaderBadge__wrapper">
-        <EuiBetaBadge
-          data-test-subj="headerBadge"
-          data-test-badge-label={this.state.badge.text}
-          tabIndex={0}
-          label={this.state.badge.text}
-          tooltipContent={this.state.badge.tooltip}
-          iconType={this.state.badge.iconType}
-        />
-      </div>
+      <EuiHeaderBreadcrumbs breadcrumbs={this.getBreadcrumbs()} data-test-subj="breadcrumbs" />
     );
   }
 
   private subscribe() {
-    this.subscription = this.props.badge$.subscribe(badge => {
+    this.subscription = this.props.breadcrumbs$.subscribe(breadcrumbs => {
       this.setState({
-        badge,
+        breadcrumbs,
       });
     });
   }
@@ -87,7 +79,25 @@ export class HeaderBadge extends Component<Props, State> {
   private unsubscribe() {
     if (this.subscription) {
       this.subscription.unsubscribe();
-      this.subscription = undefined;
+      delete this.subscription;
     }
+  }
+
+  private getBreadcrumbs() {
+    let breadcrumbs = this.state.breadcrumbs;
+
+    if (breadcrumbs.length === 0 && this.props.appTitle) {
+      breadcrumbs = [{ text: this.props.appTitle }];
+    }
+
+    return breadcrumbs.map((breadcrumb, i) => ({
+      ...breadcrumb,
+      'data-test-subj': classNames(
+        'breadcrumb',
+        breadcrumb['data-test-subj'],
+        i === 0 && 'first',
+        i === breadcrumbs.length - 1 && 'last'
+      ),
+    }));
   }
 }
