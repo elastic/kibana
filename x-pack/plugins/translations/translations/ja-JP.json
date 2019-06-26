@@ -1315,7 +1315,6 @@
     "kbn.dashboard.panel.customizePanelTitle": "パネルをカスタマイズ",
     "kbn.dashboard.panel.dashboardPanelAriaLabel": "ダッシュボードパネル: {title}",
     "kbn.dashboard.panel.inspectorPanel.displayName": "検査",
-    "kbn.dashboard.panel.invalidVersionErrorMessage": "無効なバージョン {version}、{semver} が必要です",
     "kbn.dashboard.panel.noEmbeddableFactoryErrorMessage": "このパネルを並べ替える機能が欠けています。",
     "kbn.dashboard.panel.noFoundEmbeddableFactoryErrorMessage": "パネルタイプ {panelType} をレンダリングする機能がありません",
     "kbn.dashboard.panel.optionsMenu.optionsContextMenuTitle": "オプション",
