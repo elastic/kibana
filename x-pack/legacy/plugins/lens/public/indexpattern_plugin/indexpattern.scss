@@ -2,27 +2,37 @@
   max-width: 600px;
 }
 
-.lnsFieldListPanel {
+.lnsIndexPatternDataPanel__header {
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  align-items: center;
+  height: $euiSize * 3;
+  margin-top: -$euiSizeS;
+
+
+  & > .lnsIndexPatternDataPanel__changeLink {
+    flex: 0 0 auto;
+    margin-right: $euiSize;
+  }
+
+  & > h4 {
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
-.lnsFieldListPanel__searchWrapper {
+.lnsIndexPatternDataPanel {
+  width: 100%;
+  height: 100%;
   padding: $euiSize $euiSize 0;
 }
 
 .lnsFieldListPanel__list {
   @include euiOverflowShadow($euiPageBackgroundColor);
-  overflow: visible hidden;
+  @include euiScrollBar;
+  height: 100%;
+  overflow: visible auto;
   margin-top: 2px; // form control shadow
-
-  .lnsFieldListPanel__listOverflow {
-    @include euiScrollBar;
-    overflow: visible auto;
-    height: 100%;
-    padding: $euiSizeS $euiSize;
-  }
 }
 
 .lnsFieldListPanel__field {
@@ -44,6 +54,5 @@
 }
 
 .lnsFieldListPanel__fieldName {
-  @include euiTextTruncate;
   margin-left: $euiSizeXS;
 }
