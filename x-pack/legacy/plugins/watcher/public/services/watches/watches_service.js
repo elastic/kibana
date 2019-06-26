@@ -7,15 +7,15 @@
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../../common/constants';
 import { Watch } from 'plugins/watcher/models/watch';
+import { npStart } from 'ui/new_platform';
 
 export class WatchesService {
-  constructor($http) {
-    this.$http = $http;
+  constructor() {
     this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
   }
 
   getWatchList() {
-    return this.$http.get(`${this.basePath}/watches`)
+    return npStart.core.http.get(`${this.basePath}/watches`)
       .then(response => response.data.watches)
       .then(watches => watches.map(watch => {
         return Watch.fromUpstreamJson(watch);
@@ -35,7 +35,7 @@ export class WatchesService {
     const body = {
       watchIds
     };
-    return this.$http.post(`${this.basePath}/watches/delete`, body)
+    return npStart.core.http.post(`${this.basePath}/watches/delete`, body)
       .then(response => response.data.results);
   }
 }
