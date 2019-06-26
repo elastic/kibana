@@ -5,7 +5,7 @@
  */
 import { RestoreSettings } from '../../../../common/types';
 import { UNMODIFIABLE_INDEX_SETTINGS, UNREMOVABLE_INDEX_SETTINGS } from '../../../app/constants';
-import { useAppDependencies } from '../../index';
+import { textService } from '../text';
 
 export interface RestoreValidation {
   isValid: boolean;
@@ -17,10 +17,7 @@ const isStringEmpty = (str: string | null): boolean => {
 };
 
 export const validateRestore = (restoreSettings: RestoreSettings): RestoreValidation => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-
+  const i18n = textService.i18n;
   const {
     indices,
     renamePattern,
