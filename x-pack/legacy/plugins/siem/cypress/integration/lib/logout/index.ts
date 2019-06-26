@@ -6,9 +6,6 @@
 
 import { LOGOUT_LINK, USER_MENU } from './selectors';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 export const logout = () => {
   cy.get(USER_MENU).click();
 

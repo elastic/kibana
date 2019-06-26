@@ -9,9 +9,6 @@ import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../hosts/selectors';
 
 import { TIMELINE_DATA_PROVIDERS, TIMELINE_TOGGLE_BUTTON } from './selectors';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 /** Wait up to this many ms for the timeline to render data providers that were dropped in the timeline */
 export const TIMELINE_RENDER_DATA_PROVIDERS_TIMEOUT = 10 * 1000;
 

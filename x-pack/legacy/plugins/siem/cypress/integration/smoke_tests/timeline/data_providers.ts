@@ -16,9 +16,6 @@ import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 describe('timeline data providers', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);

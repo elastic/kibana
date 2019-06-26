@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 const primaryButton = 0;
 
 /**

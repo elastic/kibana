@@ -14,9 +14,6 @@ import {
 } from '../../lib/navigation/selectors';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 describe('top-level navigation common to all pages in the SIEM app', () => {
   afterEach(() => {
     logout();

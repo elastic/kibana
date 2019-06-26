@@ -6,9 +6,6 @@
 
 import { login } from '../login/helpers';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 const KIBANA_LOGO_TIMEOUT = 10 * 1000;
 
 /**

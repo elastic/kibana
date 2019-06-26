@@ -10,9 +10,6 @@ import { LOGIN_PAGE } from '../urls';
 
 import { DEFAULT_SPACE_BUTTON, PASSWORD, USERNAME } from './selectors';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 /**
  * The `username` and `password` values in the `elasticsearch` section of this
  * file will be used to login to Kibana

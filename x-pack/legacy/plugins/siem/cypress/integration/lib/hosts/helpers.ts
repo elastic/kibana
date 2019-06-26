@@ -6,9 +6,6 @@
 
 import { ALL_HOSTS_WIDGET } from './selectors';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 /** Wait this long for the for the `All Hosts` widget on the `Hosts` page to load */
 const ALL_HOSTS_TIMEOUT = 10 * 1000;
 

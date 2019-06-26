@@ -10,9 +10,6 @@ import { clearFetch, stubApi } from '../../lib/fixtures/helpers';
 import { HOST_STATS, NETWORK_STATS, STAT_AUDITD } from '../../lib/overview/selectors';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 
-/* eslint-disable spaced-comment */
-/// <reference types="cypress"/>
-
 describe('Overview Page', () => {
   beforeEach(() => {
     clearFetch();
