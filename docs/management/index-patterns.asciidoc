@@ -91,16 +91,19 @@ You can perform the following actions:
 Use the field dropdown menu to limit to display to a specific field. 
 See <<managing-fields, Managing fields>> for more detailed information. 
 
+[[set-default-pattern]]
 * *Set the default index pattern.* {kib} uses a badge to make users 
 aware of which index pattern is the default. The first pattern 
 you create is automatically designated as the default pattern. The default 
 index pattern is loaded when you view the Discover tab.  
 
+[[reload-fields]]
 * *Reload the index fields list.* You can reload the index fields list to 
 pick up any newly-added fields. Doing so also resets Kibana’s popularity counters 
 for the fields. The popularity counters keep track of the fields 
 you’ve used most often in {kib} and are used to sort fields in lists.
 
+[[delete-pattern]]
 * *Delete the index pattern.* This action removes the pattern from the list of 
 Saved Objects in {kib}. You will not be able to recover field formatters, 
 scripted fields, source filters, and field popularity data associated with the index pattern.
