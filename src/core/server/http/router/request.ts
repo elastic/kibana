@@ -18,7 +18,6 @@
  */
 
 import { Url } from 'url';
-import { IncomingMessage } from 'http';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
@@ -159,16 +158,6 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
  */
 export const ensureRawRequest = (request: KibanaRequest | Request) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
-
-/**
- * Returns http.IncomingMessage that is used an identifier for New Platform KibanaRequest
- * and Legacy platform Hapi Request.
- * Exposed while New platform supports Legacy Platform.
- * @internal
- */
-export const getIncomingMessage = (request: KibanaRequest | Request): IncomingMessage => {
-  return ensureRawRequest(request).raw.req;
-};
 
 function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
