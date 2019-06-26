@@ -77,12 +77,20 @@ export class FeatureTooltip extends React.Component {
 
     const uniqueLayerIds = [];
     for (let i = 0; i < this.props.tooltipState.features.length; i++) {
-      if (uniqueLayerIds.indexOf(this.props.tooltipState.features[i].layerId) < 0) {
-        uniqueLayerIds.push(this.props.tooltipState.features[i].layerId);
+      let index = uniqueLayerIds.findIndex(({ layerId }) => {
+        return layerId === this.props.tooltipState.features[i].layerId;
+      });
+      if (index < 0) {
+        uniqueLayerIds.push({
+          layerId: this.props.tooltipState.features[i].layerId,
+          count: 0
+        });
+        index = uniqueLayerIds.length - 1;
       }
+      uniqueLayerIds[index].count++;
     }
 
-    const layers = uniqueLayerIds.map(layerId => {
+    const layers = uniqueLayerIds.map(({ layerId }) => {
       return this.props.findLayerById(layerId);
     });
 
@@ -91,12 +99,11 @@ export class FeatureTooltip extends React.Component {
     });
 
     const layerNames = await Promise.all(layerNamePromises);
-
-
     const options = layers.map((layer, index) => {
       return {
         displayName: layerNames[index],
-        id: layer.getId()
+        id: layer.getId(),
+        count: uniqueLayerIds[index].count
       };
     });
 
@@ -141,7 +148,7 @@ export class FeatureTooltip extends React.Component {
     let properties;
     try {
       properties = await this.props.loadFeatureProperties({ layerId: nextLayerId, featureId: nextFeatureId });
-    } catch(error) {
+    } catch (error) {
       if (this._isMounted) {
         this.setState({
           properties: [],
@@ -164,7 +171,7 @@ export class FeatureTooltip extends React.Component {
   };
 
   _renderFilterCell(tooltipProperty) {
-    if (!this.props.showFilterButtons || !tooltipProperty.isFilterable())  {
+    if (!this.props.showFilterButtons || !tooltipProperty.isFilterable()) {
       return null;
     }
 
@@ -215,7 +222,7 @@ export class FeatureTooltip extends React.Component {
       });
       return (
         <EuiTextAlign textAlign="center">
-          <EuiLoadingSpinner size="m" />
+          <EuiLoadingSpinner size="m"/>
           {loadingMsg}
         </EuiTextAlign>
       );
@@ -262,10 +269,10 @@ export class FeatureTooltip extends React.Component {
       return null;
     }
 
-    const layerOptions = this.state.uniqueLayers.map(({ id, displayName })=> {
+    const layerOptions = this.state.uniqueLayers.map(({ id, displayName, count }) => {
       return {
         value: id,
-        inputDisplay: (<EuiText>{displayName}</EuiText>)
+        inputDisplay: (<EuiText>({count}) {displayName}</EuiText>)
       };
     });
 
