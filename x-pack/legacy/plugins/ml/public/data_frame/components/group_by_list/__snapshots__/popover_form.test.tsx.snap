@@ -13,6 +13,7 @@ exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
     error={false}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    helpText=""
     isInvalid={false}
     label="Group by name"
     labelType="label"
