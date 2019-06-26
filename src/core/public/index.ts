@@ -65,6 +65,7 @@ import { OverlayRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsStart, UiSettingsState } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import { DocLinksStart } from './doc_links';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -103,6 +104,8 @@ export interface CoreStart {
   application: Pick<ApplicationStart, 'capabilities'>;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
+  /** {@link DocLinksStart} */
+  docLinks: DocLinksStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /** {@link I18nStart} */
@@ -130,6 +133,7 @@ export interface InternalCoreStart extends CoreStart {
 export {
   ApplicationSetup,
   ApplicationStart,
+  DocLinksStart,
   HttpServiceBase,
   HttpSetup,
   HttpStart,

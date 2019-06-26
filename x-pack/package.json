@@ -187,6 +187,7 @@
     "@samverschueren/stream-to-observable": "^0.3.0",
     "@scant/router": "^0.1.0",
     "@slack/client": "^4.8.0",
+    "@slack/webhook": "^5.0.0",
     "@turf/boolean-contains": "6.0.1",
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.6.5",
