@@ -60,7 +60,9 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
     },
     {
       id: 'job-messages',
-      name: 'Messages',
+      name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobMessagesLabel', {
+        defaultMessage: 'Messages',
+      }),
       content: <TransformMessagesPane transformId={item.id} lastUpdate={lastUpdate} />,
     },
   ];
