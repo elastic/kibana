@@ -124,11 +124,10 @@ export class LspIncrementalIndexer extends LspIndexer {
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
     try {
-      const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
+      const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
         this.repoUri,
         HEAD
       );
-      const workspaceDir = workspaceRepo.workdir();
       if (this.diff) {
         for (const f of this.diff.files) {
           yield {

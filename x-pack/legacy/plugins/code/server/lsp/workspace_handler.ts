@@ -91,25 +91,20 @@ export class WorkspaceHandler {
       await this.checkCommit(bareRepo, targetCommit);
       revision = defaultBranch;
     }
-    let workspaceRepo: Repository;
+    let workspace;
     if (await this.workspaceExists(bareRepo, repositoryUri, revision)) {
-      workspaceRepo = await this.updateWorkspace(repositoryUri, revision, targetCommit);
+      workspace = await this.updateWorkspace(repositoryUri, revision, targetCommit);
     } else {
-      workspaceRepo = await this.cloneWorkspace(bareRepo, repositoryUri, revision, targetCommit);
+      workspace = await this.cloneWorkspace(bareRepo, repositoryUri, revision, targetCommit);
     }
+    const workspaceHeadCommit = workspace.workspaceHeadCommit;
+    const workspaceDir = workspace.workspaceDir;
 
-    const workspaceHeadCommit = await workspaceRepo.getHeadCommit();
-    if (workspaceHeadCommit.sha() !== targetCommit.sha()) {
-      const commit = await workspaceRepo.getCommit(targetCommit.sha());
-      this.log.info(`checkout ${workspaceRepo.workdir()} to commit ${targetCommit.sha()}`);
-      // @ts-ignore
-      const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
-      if (result !== undefined && result !== GitError.CODE.OK) {
-        throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
-      }
-    }
-    this.setWorkspaceRevision(workspaceRepo, workspaceHeadCommit);
-    return { workspaceRepo, workspaceRevision: workspaceHeadCommit.sha().substring(0, 7) };
+    this.setWorkspaceRevision(workspaceDir, workspace.workspaceHeadCommit);
+    return {
+      workspaceDir,
+      workspaceRevision: workspaceHeadCommit.sha().substring(0, 7),
+    };
   }
 
   public async listWorkspaceFolders(repoUri: string) {
@@ -315,16 +310,16 @@ export class WorkspaceHandler {
   private async resolveUri(uri: string) {
     if (uri.startsWith('git://')) {
       const { repoUri, file, revision } = parseLspUrl(uri)!;
-      const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, revision);
+      const { workspaceDir, workspaceRevision } = await this.openWorkspace(repoUri, revision);
       if (file) {
-        const isValidPath = await this.checkFile(workspaceRepo, file);
+        const isValidPath = await this.checkFile(workspaceDir, file);
         if (!isValidPath) {
           throw new Error('invalid file path in requests.');
         }
       }
       return {
-        workspacePath: workspaceRepo.workdir(),
-        filePath: this.fileUrl(path.resolve(workspaceRepo.workdir(), file || '/')),
+        workspacePath: workspaceDir,
+        filePath: this.fileUrl(path.resolve(workspaceDir, file || '/')),
         uri,
         workspaceRevision,
       };
@@ -375,15 +370,11 @@ export class WorkspaceHandler {
     return `workspace-${repoName}`;
   }
 
-  private async updateWorkspace(
-    repositoryUri: string,
-    revision: string,
-    targetCommit: Commit
-  ): Promise<Repository> {
+  private async updateWorkspace(repositoryUri: string, revision: string, targetCommit: Commit) {
     const workspaceDir = await this.revisionDir(repositoryUri, revision);
     const workspaceRepo = await Repository.open(workspaceDir);
-    const workspaceHead = await workspaceRepo.getHeadCommit();
-    if (workspaceHead.sha() !== targetCommit.sha()) {
+    const workspaceHeadCommit = await workspaceRepo.getHeadCommit();
+    if (workspaceHeadCommit.sha() !== targetCommit.sha()) {
       const commit = await workspaceRepo.getCommit(targetCommit.sha());
       this.log.info(`Checkout workspace ${workspaceDir} to ${targetCommit.sha()}`);
       // @ts-ignore
@@ -392,7 +383,7 @@ export class WorkspaceHandler {
         throw Boom.internal(`Reset workspace to commit ${targetCommit.sha()} failed.`);
       }
     }
-    return workspaceRepo;
+    return { workspaceHeadCommit, workspaceDir };
   }
 
   private async cloneWorkspace(
@@ -400,7 +391,7 @@ export class WorkspaceHandler {
     repositoryUri: string,
     revision: string,
     targetCommit: Commit
-  ): Promise<Repository> {
+  ) {
     const workspaceDir = await this.revisionDir(repositoryUri, revision);
     this.log.info(`Create workspace ${workspaceDir} from url ${bareRepo.path()}`);
     const parentDir = path.dirname(workspaceDir);
@@ -431,7 +422,7 @@ export class WorkspaceHandler {
         throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
       }
     }
-    return workspaceRepo;
+    return { workspaceHeadCommit, workspaceDir };
   }
 
   private async getWorktree(bareRepo: Repository, workTreeName: string) {
@@ -457,8 +448,8 @@ export class WorkspaceHandler {
     }
   }
 
-  private setWorkspaceRevision(workspaceRepo: Repository, headCommit: Commit) {
-    const workspaceRelativePath = path.relative(this.workspacePath, workspaceRepo.workdir());
+  private setWorkspaceRevision(workspaceDir: string, headCommit: Commit) {
+    const workspaceRelativePath = path.relative(this.workspacePath, workspaceDir);
     this.revisionMap[workspaceRelativePath] = headCommit.sha().substring(0, 7);
   }
 
@@ -470,9 +461,10 @@ export class WorkspaceHandler {
    * @param workspaceRepo
    * @param filePath
    */
-  private async checkFile(workspaceRepo: Repository, filePath: string) {
-    const headCommit = await workspaceRepo.getHeadCommit();
+  private async checkFile(workspaceDir: string, filePath: string) {
+    const workspaceRepo = await Repository.open(workspaceDir);
     try {
+      const headCommit = await workspaceRepo.getHeadCommit();
       const entry = await headCommit.getEntry(filePath);
       switch (entry.filemode()) {
         case TreeEntry.FILEMODE.TREE:
