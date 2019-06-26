@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore No typings for EuiSearchBar
-import { EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCode,
+  EuiFlexItem,
+  EuiFlexGroup,
+  // @ts-ignore EuiSearchBar not typed yet
+  EuiSearchBar,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
 import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
@@ -21,6 +29,7 @@ interface FilterBarQueryResult {
 
 interface FilterBarProps {
   currentQuery?: string;
+  error?: any;
   updateQuery: UptimeSearchBarQueryChangeHandler;
 }
 
@@ -28,7 +37,7 @@ type Props = FilterBarProps & UptimeGraphQLQueryProps<FilterBarQueryResult>;
 
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) => {
+export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: Props) => {
   if (!data || !data.filterBar) {
     return <FilterBarLoading />;
   }
@@ -134,16 +143,41 @@ export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) =
     },
   ];
   return (
-    <div data-test-subj="xpack.uptime.filterBar">
-      <EuiSearchBar
-        box={{ incremental: false }}
-        className="euiFlexGroup--gutterSmall"
-        onChange={updateQuery}
-        filters={filters}
-        query={currentQuery}
-        schema={filterBarSearchSchema}
-      />
-    </div>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <div data-test-subj="xpack.uptime.filterBar">
+          <EuiSearchBar
+            box={{
+              incremental: false,
+              placeholder: currentQuery,
+            }}
+            className="euiFlexGroup--gutterSmall"
+            onChange={updateQuery}
+            filters={filters}
+            query={error || currentQuery === '' ? undefined : currentQuery}
+            schema={filterBarSearchSchema}
+          />
+        </div>
+      </EuiFlexItem>
+      {!!error && (
+        <EuiFlexItem>
+          <EuiCallOut title={error.name || ''} color="danger" iconType="cross">
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.uptime.filterBar.errorCalloutMessage"
+                    defaultMessage="{codeBlock} cannot be parsed"
+                    values={{ codeBlock: <EuiCode>{currentQuery}</EuiCode> }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              {!!error.message && <EuiFlexItem>{error.message}</EuiFlexItem>}
+            </EuiFlexGroup>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 

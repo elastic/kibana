@@ -28,10 +28,10 @@ interface Job {
   startTime: number;
 }
 
-enum WorkspaceStatus {
-  Uninitialized,
-  Initializing,
-  Initialized,
+export enum WorkspaceStatus {
+  Uninitialized = 'Uninitialized',
+  Initializing = 'Initializing',
+  Initialized = 'Initialized',
 }
 
 interface Workspace {
@@ -300,7 +300,7 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   private updateWorkspace(workspacePath: string) {
-    this.getWorkspace(workspacePath).status = Date.now();
+    this.getWorkspace(workspacePath).lastAccess = Date.now();
   }
 
   private hasWorkspacePath(workspacePath: string) {
@@ -327,5 +327,12 @@ export class RequestExpander implements ILanguageServerHandler {
       this.workspaces.set(p, ws);
     }
     return ws;
+  }
+
+  initializeState(workspaceDir: string): WorkspaceStatus {
+    if (this.hasWorkspacePath(workspaceDir)) {
+      return this.getWorkspace(workspaceDir).status;
+    }
+    return WorkspaceStatus.Uninitialized;
   }
 }

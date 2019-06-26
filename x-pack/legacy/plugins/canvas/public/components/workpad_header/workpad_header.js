@@ -24,6 +24,7 @@ import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
 import { WorkpadExport } from './workpad_export';
+import { WorkpadZoom } from './workpad_zoom';
 
 export class WorkpadHeader extends React.PureComponent {
   static propTypes = {
@@ -130,6 +131,9 @@ export class WorkpadHeader extends React.PureComponent {
                     isDisabled={!canUserWrite}
                   />
                 </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <WorkpadZoom />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

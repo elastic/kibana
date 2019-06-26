@@ -66,7 +66,6 @@ const mockLayer = {
 
 const defaultProps = {
   selectedLayer: mockLayer,
-  hasStateChanged: () => {},
   fitToBounds: () => {},
 };
 
