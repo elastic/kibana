@@ -17,14 +17,31 @@
  * under the License.
  */
 
-require('./sense_help_example');
-import template from './help.html';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nContext } from 'ui/i18n';
+import { HelpPanel } from '../components/help_panel';
 
-require('ui/modules')
-  .get('app/sense')
-  .directive('senseHelp', function () {
-    return {
-      restrict: 'E',
-      template
-    };
-  });
+let isOpen = false;
+
+export function showHelpPanel(): () => void {
+  const onClose = () => {
+    if (!container) return;
+    ReactDOM.unmountComponentAtNode(container);
+    isOpen = false;
+  };
+
+  const container = document.getElementById('consoleHelpPanel');
+
+  if (container && !isOpen) {
+    isOpen = true;
+    const element = (
+      <I18nContext>
+        <HelpPanel onClose={onClose} />
+      </I18nContext>
+    );
+    ReactDOM.render(element, container);
+  }
+
+  return onClose;
+}

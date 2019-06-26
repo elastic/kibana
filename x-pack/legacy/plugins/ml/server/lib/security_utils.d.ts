@@ -4,13 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-let upgradeInProgress = false;
-
-export function setUpgradeInProgress(show) {
-  upgradeInProgress = show;
-}
-
-export function isUpgradeInProgress() {
-  return upgradeInProgress;
-}
+export function isSecurityDisabled(xpackMainPlugin: any): boolean;

@@ -1607,16 +1607,15 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@11.3.2":
-  version "11.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.3.2.tgz#d578ab2d6ebe9c85a445376fad190564d43bcdb4"
-  integrity sha512-lnf7ZCEI443uwXJX9rWD/nK10asBTFOmd8HiH1Mn6iggOBchk4QCrI8XDqfJRp2bUqMetBGI6Az7WgqF4uZsEw==
+"@elastic/eui@12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-12.1.0.tgz#bc826bca75035464b2a60582ec0e2d36bd7820e9"
+  integrity sha512-HjIWQNkCFSNHyoU9nSeM+YPs+B1uD7cwRJnZ7Xc8LlBQOWX10nQ8MSdA4RcKdhvFpf5B9fjtfv1Q8/UiOVXP7w==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
     "@types/react-beautiful-dnd" "^10.1.0"
     classnames "^2.2.5"
-    core-js "^2.5.1"
     highlight.js "^9.12.0"
     html "^1.0.0"
     keymirror "^0.1.1"
@@ -17044,10 +17043,10 @@ jsts@1.1.2:
   resolved "https://registry.yarnpkg.com/jsts/-/jsts-1.1.2.tgz#d205d2cc8393081d9e484ae36282110695edc230"
   integrity sha1-0gXSzIOTCB2eSErjYoIRBpXtwjA=
 
-jsts@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/jsts/-/jsts-2.0.4.tgz#5fb91aaea070ebedf0121454ed90b074027e8241"
-  integrity sha512-YCfCuEgG9ynMFazjIH0YAtliFlaIcYmRqBY6EQP+VjNDEjuu4Il+91RDQWP4hAS7TXOeN/NYF/OL7Fmvg69pKg==
+jsts@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/jsts/-/jsts-1.6.2.tgz#c0efc885edae06ae84f78cbf2a0110ba929c5925"
+  integrity sha512-JNfDQk/fo5MeXx4xefvCyHZD22/DHowHr5K07FdgCJ81MEqn02HsDV5FQvYTz60ZIOv/+hhGbsVzXX5cuDWWlA==
 
 jsx-ast-utils@^2.0.1:
   version "2.0.1"
