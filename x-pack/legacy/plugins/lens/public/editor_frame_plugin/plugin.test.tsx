@@ -15,7 +15,6 @@ import {
 import { SavedObjectStore, Document } from '../persistence';
 import { shallow, mount } from 'enzyme';
 
-// import chrome from 'ui/chrome';
 jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
 }));
