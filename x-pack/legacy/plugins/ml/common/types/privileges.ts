@@ -36,35 +36,35 @@ export interface Privileges {
   canStartStopDataFrameJob: boolean;
 }
 
-export function getDefaultPrivileges(enabled: boolean = false): Privileges {
+export function getDefaultPrivileges(): Privileges {
   return {
     // Anomaly Detection
-    canGetJobs: enabled,
-    canCreateJob: enabled,
-    canDeleteJob: enabled,
-    canOpenJob: enabled,
-    canCloseJob: enabled,
-    canForecastJob: enabled,
-    canGetDatafeeds: enabled,
-    canStartStopDatafeed: enabled,
-    canUpdateJob: enabled,
-    canUpdateDatafeed: enabled,
-    canPreviewDatafeed: enabled,
+    canGetJobs: false,
+    canCreateJob: false,
+    canDeleteJob: false,
+    canOpenJob: false,
+    canCloseJob: false,
+    canForecastJob: false,
+    canGetDatafeeds: false,
+    canStartStopDatafeed: false,
+    canUpdateJob: false,
+    canUpdateDatafeed: false,
+    canPreviewDatafeed: false,
     // Calendars
-    canGetCalendars: enabled,
-    canCreateCalendar: enabled,
-    canDeleteCalendar: enabled,
+    canGetCalendars: false,
+    canCreateCalendar: false,
+    canDeleteCalendar: false,
     // Filters
-    canGetFilters: enabled,
-    canCreateFilter: enabled,
-    canDeleteFilter: enabled,
+    canGetFilters: false,
+    canCreateFilter: false,
+    canDeleteFilter: false,
     // File Data Visualizer
-    canFindFileStructure: enabled,
+    canFindFileStructure: false,
     // Data Frames
-    canGetDataFrameJobs: enabled,
-    canDeleteDataFrameJob: enabled,
-    canPreviewDataFrameJob: enabled,
-    canCreateDataFrameJob: enabled,
-    canStartStopDataFrameJob: enabled,
+    canGetDataFrameJobs: false,
+    canDeleteDataFrameJob: false,
+    canPreviewDataFrameJob: false,
+    canCreateDataFrameJob: false,
+    canStartStopDataFrameJob: false,
   };
 }

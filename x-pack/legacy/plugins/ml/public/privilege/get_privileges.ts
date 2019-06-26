@@ -19,7 +19,7 @@ export function getPrivileges(): Promise<Privileges> {
         resolve(privileges);
       })
       .catch(() => {
-        reject(getDefaultPrivileges(false));
+        reject(getDefaultPrivileges());
       });
   });
 }

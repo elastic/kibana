@@ -22,7 +22,7 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
   async function getPrivileges(): Promise<Response> {
     // get the default privileges, forced to be false.
-    let privileges = getDefaultPrivileges(false);
+    const privileges = getDefaultPrivileges();
 
     const upgradeInProgress = await isUpgradeInProgress();
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
@@ -36,7 +36,7 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
       } else {
         // if no upgrade is in progress,
         // get all privileges forced to true
-        privileges = getDefaultPrivileges(true);
+        Object.keys(privileges).forEach(k => (privileges[k as keyof Privileges] = true));
       }
     } else {
       // security enabled
@@ -51,7 +51,6 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
     }
     return { privileges, upgradeInProgress };
   }
-
   return { getPrivileges };
 }
 
