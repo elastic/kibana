@@ -10,7 +10,6 @@ import { errors as compare } from './compare';
 import { errors as containerStyle } from './containerStyle';
 import { errors as csv } from './csv';
 import { errors as date } from './date';
-import { errors as font } from './font';
 import { errors as getCell } from './getCell';
 import { errors as joinRows } from './join_rows';
 import { errors as image } from './image';
@@ -29,7 +28,6 @@ export const getFunctionErrors = () => ({
   containerStyle,
   csv,
   date,
-  font,
   getCell,
   image,
   joinRows,
