@@ -32,11 +32,11 @@ export class CtagsLauncher extends AbstractLauncher {
     builtinWorkspace: boolean,
     maxWorkspace: number
   ): RequestExpander {
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {}, this.log);
   }
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.awaitServerConnection();
+    proxy.startServerConnection();
   }
 
   async getPort(): Promise<number> {

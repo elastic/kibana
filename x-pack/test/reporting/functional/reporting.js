@@ -294,7 +294,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('becomes available when saved', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
-          await PageObjects.visualize.clickBucket('X-Axis');
+          await PageObjects.visualize.clickBucket('X-axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
           await PageObjects.visualize.saveVisualization('my viz');

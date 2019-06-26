@@ -84,6 +84,7 @@ export function maps(kibana) {
       },
       mappings,
       migrations,
+      visTypes: ['plugins/maps/register_vis_type_alias'],
     },
     config(Joi) {
       return Joi.object({

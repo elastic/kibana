@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
 import { ChildProcess } from 'child_process';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ILanguageServerLauncher } from './language_server_launcher';
@@ -16,6 +17,9 @@ import { LanguageServerStartFailed } from '../../common/lsp_error_codes';
 
 let seqNo = 1;
 
+const OOM_SCORE_ADJ = 667;
+const OOM_ADJ = 10;
+
 export const ServerStartFailed = new ResponseError(
   LanguageServerStartFailed,
   'Launch language server failed.'
@@ -23,10 +27,10 @@ export const ServerStartFailed = new ResponseError(
 
 export abstract class AbstractLauncher implements ILanguageServerLauncher {
   running: boolean = false;
-  private _currentPid: number = -1;
+  private currentPid: number = -1;
   private child: ChildProcess | null = null;
-  private _startTime: number = -1;
-  private _proxyConnected: boolean = false;
+  private startTime: number = -1;
+  private proxyConnected: boolean = false;
   protected readonly log: Logger;
   private spawnTimes: number = 0;
   private launchReject?: ((reason?: any) => void);
@@ -57,18 +61,12 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         }
       });
     } else {
-      child = await this.spawnProcess(installationPath, port, log);
-      this.spawnTimes += 1;
-      this.child = child;
-      log.debug('spawned a child process ' + child.pid);
-      this._currentPid = child.pid;
-      this._startTime = Date.now();
-      this.running = true;
+      child = await this.doSpawnProcess(installationPath, port, log);
       this.onProcessExit(child, () => {
         if (!proxy.isClosed) this.reconnect(proxy, installationPath);
       });
       proxy.onDisconnected(async () => {
-        this._proxyConnected = false;
+        this.proxyConnected = false;
         if (!proxy.isClosed) {
           log.debug('proxy disconnected, reconnecting');
           setTimeout(async () => {
@@ -90,7 +88,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     this.startConnect(proxy);
     await new Promise((resolve, reject) => {
       proxy.onConnected(() => {
-        this._proxyConnected = true;
+        this.proxyConnected = true;
         resolve();
       });
       this.launchReject = err => {
@@ -104,10 +102,10 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   private onProcessExit(child: ChildProcess, reconnectFn: () => void) {
     const pid = child.pid;
     child.on('exit', () => {
-      if (this._currentPid === pid) {
+      if (this.currentPid === pid) {
         this.running = false;
         // if the process exited before proxy connected, then we reconnect
-        if (!this._proxyConnected) {
+        if (!this.proxyConnected) {
           reconnectFn();
         }
       }
@@ -133,7 +131,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     if (this.options.lsp.detach) {
       this.startConnect(proxy);
     } else {
-      const processExpired = () => Date.now() - this._startTime > this.startupTimeout;
+      const processExpired = () => Date.now() - this.startTime > this.startupTimeout;
       if (child && !child.killed && !processExpired()) {
         this.startConnect(proxy);
       } else {
@@ -144,12 +142,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           }
           const port = await this.getPort();
           proxy.changePort(port);
-          this.child = await this.spawnProcess(installationPath, port, this.log);
-          this.spawnTimes += 1;
-          this.log.debug('spawned a child process ' + this.child.pid);
-          this._currentPid = this.child.pid;
-          this._startTime = Date.now();
-          this.running = true;
+          this.child = await this.doSpawnProcess(installationPath, port, this.log);
           this.onProcessExit(this.child, () => this.reconnect(proxy, installationPath, child));
           this.startConnect(proxy);
         } else {
@@ -161,10 +154,37 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     }
   }
 
+  private async doSpawnProcess(
+    installationPath: string,
+    port: number,
+    log: Logger
+  ): Promise<ChildProcess> {
+    const child = await this.spawnProcess(installationPath, port, log);
+    const pid = child.pid;
+    this.currentPid = pid;
+    this.log.debug('spawned a child process ' + pid);
+    this.spawnTimes += 1;
+    this.startTime = Date.now();
+    this.running = true;
+    if (this.options.lsp.oomScoreAdj && process.platform === 'linux') {
+      try {
+        // clone form https://github.com/elastic/ml-cpp/blob/4dd90fa93338667b681364657222715f81c9868a/lib/core/CProcessPriority_Linux.cc
+        fs.writeFileSync(`/proc/${pid}/oom_score_adj`, `${OOM_SCORE_ADJ}\n`);
+        this.log.debug(`wrote oom_score_adj of process ${pid} to ${OOM_SCORE_ADJ}`);
+        fs.writeFileSync(`/proc/${pid}/oom_adj`, `${OOM_ADJ}\n`);
+        this.log.debug(`wrote oom_adj of process ${pid} to ${OOM_ADJ}`);
+      } catch (e) {
+        this.log.error('write oom_score_adj failed');
+        this.log.error(e);
+      }
+    }
+    return child;
+  }
+
   abstract async getPort(): Promise<number>;
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.connect().catch(this.log.debug);
+    proxy.connect();
   }
 
   /**
@@ -202,7 +222,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           return child.killed;
         })
         .finally(() => {
-          if (this._currentPid === child.pid) this.running = false;
+          if (this.currentPid === child.pid) this.running = false;
         });
     }
   }

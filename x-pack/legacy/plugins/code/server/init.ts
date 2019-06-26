@@ -15,7 +15,7 @@ import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
 import { InstallManager } from './lsp/install_manager';
-import { LanguageServers, LanguageServersDeveloping } from './lsp/language_servers';
+import { JAVA } from './lsp/language_servers';
 import { LspService } from './lsp/lsp_service';
 import { CancellationSerivce, CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './queue';
 import { RepositoryConfigController } from './repository_config_controller';
@@ -152,10 +152,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     enableLangserversDeveloping: devMode,
   }));
   // Enable the developing language servers in development mode.
-  if (devMode === true) {
-    LanguageServers.push(...LanguageServersDeveloping);
-    const JavaLanguageServer = LanguageServers.find(d => d.name === 'Java');
-    JavaLanguageServer!.downloadUrl = _.partialRight(JavaLanguageServer!.downloadUrl!, devMode);
+  if (devMode) {
+    JAVA.downloadUrl = _.partialRight(JAVA!.downloadUrl!, devMode);
   }
 
   // Initialize git operations
