@@ -7,9 +7,10 @@
   "defaultIndexPattern": "winlogbeat-*",
   "query": {
     "bool": {
-      "filter": {
-        "term": { "event.action": "Process Create (rule: ProcessCreate)" }
-      }
+      "filter": [
+        { "term": { "event.action": "Process Create (rule: ProcessCreate)" } },
+        { "term": { "agent.type": "winlogbeat" } }
+      ]
     }
   },
   "jobs": [

@@ -17,11 +17,7 @@
             "minimum_should_match" : 1
           }
         },
-        {
-          "term": {
-            "agent.type": "auditbeat"
-          }
-        }
+        { "term": { "agent.type": "auditbeat" } }
       ]
     }
   },
