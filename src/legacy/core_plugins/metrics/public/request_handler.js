@@ -21,9 +21,12 @@ import { validateInterval } from './lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
+import chrome from 'ui/chrome';
+
+const uiSettings = chrome.getUiSettingsClient();
 
 const MetricsRequestHandlerProvider = function(config) {
-  const timezone = timezoneProvider();
+  const timezone = timezoneProvider(uiSettings)();
 
   return {
     name: 'metrics',
