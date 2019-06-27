@@ -18,7 +18,7 @@ pipeline {
       agent { label 'linux || immutable' } 
       steps {
         dir("${env.BASE_DIR}"){
-          sh """#!/usr/local/bin/runbld
+          sh '''#!/usr/local/bin/runbld
 
             set -euo pipefail
             source /usr/local/bin/bash_standard_lib.sh
@@ -41,7 +41,7 @@ pipeline {
 
             unset VAULT_ROLE_ID VAULT_SECRET_ID VAULT_TOKEN
             set -x # DISABLE 'PRINT-ALL-COMMANDS' mode in bash.
-          """
+            '''
         }
       }
     }
