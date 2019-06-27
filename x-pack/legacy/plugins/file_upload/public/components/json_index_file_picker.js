@@ -135,12 +135,11 @@ export class JsonIndexFilePicker extends Component {
   }
 
   render() {
-    const { fileParsingProgress, fileUploadError, fileRef } = this.state;
+    const { fileParsingProgress, fileUploadError } = this.state;
 
     return (
       <Fragment>
         {fileParsingProgress ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
-        {fileRef && !fileUploadError ? null : null}
 
         <EuiFormRow
           label={
