@@ -5,8 +5,9 @@
  */
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import chrome from 'ui/chrome';
 
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -17,6 +18,7 @@ import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_exp
 import { WithSource } from '../../containers/with_source';
 import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
 import { Source } from '../../containers/source';
+import { fetch } from '../../utils/fetch';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './snapshot';
 
@@ -24,65 +26,76 @@ interface InfrastructurePageProps extends RouteComponentProps {
   intl: InjectedIntl;
 }
 
-export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePageProps) => (
-  <Source.Provider sourceId="default">
-    <SourceConfigurationFlyoutState.Provider>
-      <ColumnarPage>
-        <DocumentTitle
-          title={intl.formatMessage({
-            id: 'xpack.infra.homePage.documentTitle',
-            defaultMessage: 'Infrastructure',
-          })}
-        />
-
-        <HelpCenterContent
-          feedbackLink="https://discuss.elastic.co/c/infrastructure"
-          feedbackLinkText={intl.formatMessage({
-            id: 'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
-            defaultMessage: 'Provide feedback for Infrastructure',
-          })}
-        />
-
-        <RoutedTabs
-          tabs={[
-            {
-              title: intl.formatMessage({
-                id: 'xpack.infra.homePage.inventoryTabTitle',
-                defaultMessage: 'Inventory',
-              }),
-              path: `${match.path}/inventory`,
-            },
-            {
-              title: intl.formatMessage({
-                id: 'xpack.infra.homePage.metricsExplorerTabTitle',
-                defaultMessage: 'Metrics Explorer',
-              }),
-              path: `${match.path}/metrics-explorer`,
-            },
-          ]}
-        />
-
-        <Switch>
-          <Route path={`${match.path}/inventory`} component={SnapshotPage} />
-          <Route
-            path={`${match.path}/metrics-explorer`}
-            render={props => (
-              <WithSource>
-                {({ configuration, derivedIndexPattern }) => (
-                  <MetricsExplorerOptionsContainer.Provider>
-                    <WithMetricsExplorerOptionsUrlState />
-                    <MetricsExplorerPage
-                      derivedIndexPattern={derivedIndexPattern}
-                      source={configuration}
-                      {...props}
-                    />
-                  </MetricsExplorerOptionsContainer.Provider>
-                )}
-              </WithSource>
-            )}
+export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePageProps) => {
+  // Generate an index pattern if one doesn't exist the moment the app starts.
+  // This will prevent clicking on "Open in visualize" from redirecting to the
+  // index pattern page
+  useEffect(
+    () => {
+      fetch.get(`${chrome.getBasePath()}/api/infra/generate_index_pattern`);
+    },
+    [] // Only run on initial render
+  );
+  return (
+    <Source.Provider sourceId="default">
+      <SourceConfigurationFlyoutState.Provider>
+        <ColumnarPage>
+          <DocumentTitle
+            title={intl.formatMessage({
+              id: 'xpack.infra.homePage.documentTitle',
+              defaultMessage: 'Infrastructure',
+            })}
           />
-        </Switch>
-      </ColumnarPage>
-    </SourceConfigurationFlyoutState.Provider>
-  </Source.Provider>
-));
+
+          <HelpCenterContent
+            feedbackLink="https://discuss.elastic.co/c/infrastructure"
+            feedbackLinkText={intl.formatMessage({
+              id: 'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
+              defaultMessage: 'Provide feedback for Infrastructure',
+            })}
+          />
+
+          <RoutedTabs
+            tabs={[
+              {
+                title: intl.formatMessage({
+                  id: 'xpack.infra.homePage.inventoryTabTitle',
+                  defaultMessage: 'Inventory',
+                }),
+                path: `${match.path}/inventory`,
+              },
+              {
+                title: intl.formatMessage({
+                  id: 'xpack.infra.homePage.metricsExplorerTabTitle',
+                  defaultMessage: 'Metrics Explorer',
+                }),
+                path: `${match.path}/metrics-explorer`,
+              },
+            ]}
+          />
+
+          <Switch>
+            <Route path={`${match.path}/inventory`} component={SnapshotPage} />
+            <Route
+              path={`${match.path}/metrics-explorer`}
+              render={props => (
+                <WithSource>
+                  {({ configuration, derivedIndexPattern }) => (
+                    <MetricsExplorerOptionsContainer.Provider>
+                      <WithMetricsExplorerOptionsUrlState />
+                      <MetricsExplorerPage
+                        derivedIndexPattern={derivedIndexPattern}
+                        source={configuration}
+                        {...props}
+                      />
+                    </MetricsExplorerOptionsContainer.Provider>
+                  )}
+                </WithSource>
+              )}
+            />
+          </Switch>
+        </ColumnarPage>
+      </SourceConfigurationFlyoutState.Provider>
+    </Source.Provider>
+  );
+});

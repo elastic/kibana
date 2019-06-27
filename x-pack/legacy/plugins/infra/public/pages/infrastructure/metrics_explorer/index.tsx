@@ -5,14 +5,13 @@
  */
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_explorer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/toolbar';
 import { SourceQuery } from '../../../../common/graphql/types';
 import { NoData } from '../../../components/empty_states';
-import { fetch } from '../../../utils/fetch';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 
 interface MetricsExplorerPageProps {
@@ -41,16 +40,6 @@ export const MetricsExplorerPage = injectI18n(
       handleRefresh,
       handleLoadMore,
     } = useMetricsExplorerState(source, derivedIndexPattern);
-
-    // Generate an index pattern if one doesn't exist the moment the app starts.
-    // This will prevent clicking on "Open in visualize" from redirecting to the
-    // index pattern page
-    useEffect(
-      () => {
-        fetch.get('../api/infra/generate_index_pattern');
-      },
-      [true] // Only run on initial render
-    );
 
     return (
       <div>
