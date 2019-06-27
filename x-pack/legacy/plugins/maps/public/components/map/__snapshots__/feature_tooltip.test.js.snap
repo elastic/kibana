@@ -1,9 +1,185 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FeatureTooltip (single) should not show close button and not show filter button 1`] = `
+exports[`FeatureTooltip (multi) should not show close button / should show count 1`] = `
 <Fragment>
   <FeatureProperties
-    featureId="feature"
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+  <EuiHorizontalRule />
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTextAlign
+        textAlign="center"
+      >
+        <EuiText>
+          <b>
+            1
+          </b>
+           of 
+          <b>
+            3
+          </b>
+        </EuiText>
+      </EuiTextAlign>
+    </EuiFlexItem>
+    <EuiFlexItem />
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`FeatureTooltip (multi) should show close button / should show count / should show arrows / should show layer filter 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTextAlign
+        textAlign="center"
+      >
+        <EuiButtonIcon
+          aria-label="Close tooltip"
+          color="primary"
+          data-test-subj="mapTooltipCloseButton"
+          iconSize="m"
+          iconType="cross"
+          onClick={[Function]}
+          type="button"
+        />
+      </EuiTextAlign>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+  <EuiHorizontalRule />
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTextAlign
+        textAlign="center"
+      >
+        <EuiText>
+          <b>
+            1
+          </b>
+           of 
+          <b>
+            3
+          </b>
+        </EuiText>
+      </EuiTextAlign>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiIconTip
+        aria-label="Info"
+        content="Use the query bar on top to filter down the results."
+        type="iInCircle"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={3}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`FeatureTooltip (multi) should show close button / should show count 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTextAlign
+        textAlign="center"
+      >
+        <EuiButtonIcon
+          aria-label="Close tooltip"
+          color="primary"
+          data-test-subj="mapTooltipCloseButton"
+          iconSize="m"
+          iconType="cross"
+          onClick={[Function]}
+          type="button"
+        />
+      </EuiTextAlign>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
+    loadFeatureProperties={[Function]}
+    onCloseTooltip={[Function]}
+    showFilterButtons={false}
+  />
+  <EuiHorizontalRule />
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTextAlign
+        textAlign="center"
+      >
+        <EuiText>
+          <b>
+            1
+          </b>
+           of 
+          <b>
+            3
+          </b>
+        </EuiText>
+      </EuiTextAlign>
+    </EuiFlexItem>
+    <EuiFlexItem />
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`FeatureTooltip (single) should not show close button 1`] = `
+<Fragment>
+  <FeatureProperties
+    featureId="feature1"
+    layerId="layer1"
     loadFeatureProperties={[Function]}
     onCloseTooltip={[Function]}
     showFilterButtons={false}
@@ -11,7 +187,7 @@ exports[`FeatureTooltip (single) should not show close button and not show filte
 </Fragment>
 `;
 
-exports[`FeatureTooltip (single) should show both filter buttons and close button 1`] = `
+exports[`FeatureTooltip (single) should show close button 1`] = `
 <Fragment>
   <EuiFlexGroup
     justifyContent="spaceBetween"
@@ -38,91 +214,11 @@ exports[`FeatureTooltip (single) should show both filter buttons and close butto
     </EuiFlexItem>
   </EuiFlexGroup>
   <FeatureProperties
-    featureId="feature"
-    loadFeatureProperties={[Function]}
-    onCloseTooltip={[Function]}
-    showFilterButtons={true}
-  />
-</Fragment>
-`;
-
-exports[`FeatureTooltip (single) should show close button, but not filter button 1`] = `
-<Fragment>
-  <EuiFlexGroup
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    />
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiTextAlign
-        textAlign="center"
-      >
-        <EuiButtonIcon
-          aria-label="Close tooltip"
-          color="primary"
-          data-test-subj="mapTooltipCloseButton"
-          iconSize="m"
-          iconType="cross"
-          onClick={[Function]}
-          type="button"
-        />
-      </EuiTextAlign>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <FeatureProperties
-    featureId="feature"
+    featureId="feature1"
+    layerId="layer1"
     loadFeatureProperties={[Function]}
     onCloseTooltip={[Function]}
     showFilterButtons={false}
-  />
-</Fragment>
-`;
-
-exports[`FeatureTooltip (single) should show error message if unable to load tooltip content 1`] = `
-<Fragment>
-  <EuiFlexGroup
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    />
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiTextAlign
-        textAlign="center"
-      >
-        <EuiButtonIcon
-          aria-label="Close tooltip"
-          color="primary"
-          data-test-subj="mapTooltipCloseButton"
-          iconSize="m"
-          iconType="cross"
-          onClick={[Function]}
-          type="button"
-        />
-      </EuiTextAlign>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <FeatureProperties
-    featureId="feature"
-    loadFeatureProperties={[Function]}
-    onCloseTooltip={[Function]}
-    showFilterButtons={true}
-  />
-</Fragment>
-`;
-
-exports[`FeatureTooltip (single) should show only filter button for filterable properties 1`] = `
-<Fragment>
-  <FeatureProperties
-    featureId="feature"
-    loadFeatureProperties={[Function]}
-    onCloseTooltip={[Function]}
-    showFilterButtons={true}
   />
 </Fragment>
 `;

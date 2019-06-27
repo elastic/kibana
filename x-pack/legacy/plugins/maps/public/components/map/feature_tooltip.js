@@ -69,13 +69,13 @@ export class FeatureTooltip extends React.Component {
   _loadUniqueLayers = async () => {
 
     const uniqueLayerIds = [];
-    for (let i = 0; i < this.props.tooltipState.features.length; i++) {
+    for (let i = 0; i < this.props.features.length; i++) {
       let index = uniqueLayerIds.findIndex(({ layerId }) => {
-        return layerId === this.props.tooltipState.features[i].layerId;
+        return layerId === this.props.features[i].layerId;
       });
       if (index < 0) {
         uniqueLayerIds.push({
-          layerId: this.props.tooltipState.features[i].layerId,
+          layerId: this.props.features[i].layerId,
           count: 0
         });
         index = uniqueLayerIds.length - 1;
@@ -130,14 +130,17 @@ export class FeatureTooltip extends React.Component {
 
   _renderLayerFilterBox() {
 
+    console.log('SHOW FILTER BOX');
     if (!this.props.showFeatureList) {
       return null;
     }
 
     if (!this.state.uniqueLayers || this.state.uniqueLayers.length < 2) {
+      console.log('SKIP');
       return null;
     }
 
+    console.log('SHOW FILTER LYOPTIONS');
     const layerOptions = this.state.uniqueLayers.map(({ id, displayName, count }) => {
       return {
         value: id,
@@ -232,10 +235,10 @@ export class FeatureTooltip extends React.Component {
 
   _filterFeatures() {
     if (this.state.layerIdFilter === ALL_LAYERS) {
-      return this.props.tooltipState.features;
+      return this.props.features;
     }
 
-    return this.props.tooltipState.features.filter((feature) => {
+    return this.props.features.filter((feature) => {
       return feature.layerId === this.state.layerIdFilter;
     });
   }
