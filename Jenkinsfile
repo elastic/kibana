@@ -11,13 +11,11 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    stage('Setup and Build OSS') {
+    stage('bootstrap') {
       agent { label 'linux || immutable' } // Not on the master lightweight executor:   
       steps {
-        // deleteDir()
         dir("${env.BASE_DIR}"){
-          // Runs src/dev/ci_setup/extract_bootstrap_cache.sh, src/dev/ci_setup/setup.sh, and src/dev/ci_setup/checkout_sibling_es.sh
-          // setup.sh bootstraps the app, so we can stash from here
+          dumpEnv()
           sh './.ci/run.sh' 
         }
       }
@@ -26,9 +24,9 @@ pipeline {
       agent { label 'linux || immutable' } 
       options { skipDefaultCheckout() }
       steps {
-        // deleteDir()
+        deleteDir()
         // sh './test/scripts/jenkins_unit.sh'
-        sh 'echo "Not implemented yet"'
+        sh 'echo "Download workspace cache"'
       }
     }
 
