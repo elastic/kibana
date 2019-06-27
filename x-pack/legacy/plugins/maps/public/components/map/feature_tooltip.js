@@ -10,7 +10,8 @@ import {
   EuiText,
   EuiTextAlign,
   EuiPagination,
-  EuiSuperSelect,
+  EuiSelect,
+  EuiIcon,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem
@@ -43,8 +44,9 @@ export class FeatureTooltip extends React.Component {
     this._isMounted = false;
   }
 
-  _onLayerChange = (layerId) => {
+  _onLayerChange = (e) => {
 
+    const layerId = e.target.value;
     if (this.state.layerIdFilter === layerId) {
       return;
     }
@@ -138,28 +140,31 @@ export class FeatureTooltip extends React.Component {
     const layerOptions = this.state.uniqueLayers.map(({ id, displayName, count }) => {
       return {
         value: id,
-        inputDisplay: (<EuiText>({count}) {displayName}</EuiText>)
+        text: `(${count}) ${displayName}`
       };
     });
 
     const options = [
       {
         value: ALL_LAYERS,
-        inputDisplay: (<EuiText>All layers</EuiText>)
+        text: i18n.translate('xpack.maps.tooltip.allLayersLabel', {
+          defaultMessage: 'All layers'
+        })
       },
       ...layerOptions
     ];
 
     return (
-      <EuiSuperSelect
+      <EuiSelect
         options={options}
         onChange={this._onLayerChange}
         valueOfSelected={this.state.layerIdFilter}
+        aria-label={i18n.translate('xpack.maps.tooltip.layerFilterLabel', {
+          defaultMessage: 'Filter results by layer'
+        })}
       />
     );
-
   }
-
 
   _renderHeader() {
 
@@ -258,6 +263,9 @@ export class FeatureTooltip extends React.Component {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             {pageNumberReadout}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiIcon type="ilnCircle" size="s"/>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {cycleArrows}
