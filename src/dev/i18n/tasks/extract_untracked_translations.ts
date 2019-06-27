@@ -92,13 +92,13 @@ export async function extractUntrackedMessagesTask({
   }
 }
 
-export function extractUntrackedMessages(srcPaths: string[], config: I18nConfig) {
-  return srcPaths.map(srcPath => ({
-    title: `Checking untracked messages in ${srcPath}`,
-    task: async (context: { reporter: ErrorReporter }) => {
-      const { reporter } = context;
+export function extractUntrackedMessages(inputPaths: string[]) {
+  return inputPaths.map(inputPath => ({
+    title: `Checking untracked messages in ${inputPath}`,
+    task: async (context: { reporter: ErrorReporter; config: I18nConfig }) => {
+      const { reporter, config } = context;
       const initialErrorsNumber = reporter.errors.length;
-      const result = await extractUntrackedMessagesTask({ path: srcPath, config, reporter });
+      const result = await extractUntrackedMessagesTask({ path: inputPath, config, reporter });
       if (reporter.errors.length === initialErrorsNumber) {
         return result;
       }

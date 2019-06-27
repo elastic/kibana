@@ -32,11 +32,20 @@ export async function getTranslationPaths({ cwd, glob }) {
   const configFiles = await Promise.all(
     entries
       .map(entry => resolve(cwd, entry))
-      .map(configFilePath => readFileAsync(configFilePath, 'utf8'))
+      .map(async configFilePath => ({
+        path: configFilePath,
+        content: await readFileAsync(configFilePath, 'utf8')
+      }))
   );
 
   return configFiles
-    .map(configFile => JSON.parse(configFile))
+    .map(({ content, path }) => {
+      try {
+        return JSON.parse(content);
+      } catch (err) {
+        throw new Error(`Failed to parse .i18nrc.json file at ${path}`);
+      }
+    })
     .reduce((acc, configFile) => acc.concat(...configFile.translations), [])
     .map(translationPath => resolve(cwd, translationPath));
 }
@@ -44,12 +53,14 @@ export async function getTranslationPaths({ cwd, glob }) {
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
   const localeRegExp = new RegExp(`${locale}.json$`);
+  const pluginPaths = config.get('plugins.paths');
 
   const translationPaths = await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),
       glob: `.i18nrc.json`,
     }),
+    ...pluginPaths.map(cwd => getTranslationPaths({ glob: `.i18nrc.json`, cwd })),
     getTranslationPaths({
       cwd: fromRoot('plugins'),
       glob: `*/.i18nrc.json`,
@@ -60,12 +71,10 @@ export async function i18nMixin(kbnServer, server, config) {
     }),
   ]);
 
-
   const currentTranslationPaths = [].concat(...translationPaths)
     .filter(translationPath => localeRegExp.test(translationPath));
 
   i18nLoader.registerTranslationFiles(currentTranslationPaths);
-
   const translations = await i18nLoader.getTranslationsByLocale(locale);
   i18n.init(Object.freeze({
     locale,

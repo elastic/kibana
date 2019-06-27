@@ -21,14 +21,7 @@ import chalk from 'chalk';
 import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 import { createFailError } from '../../run';
 
-export function extractDefaultMessages({
-  path,
-  config,
-}: {
-  path?: string | string[];
-  config: I18nConfig;
-}) {
-  const inputPaths = Array.isArray(path) ? path : [path || './'];
+export function extractDefaultMessages(config: I18nConfig, inputPaths: string[]) {
   const filteredPaths = filterConfigPaths(inputPaths, config) as string[];
   if (filteredPaths.length === 0) {
     throw createFailError(

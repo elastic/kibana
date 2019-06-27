@@ -20,46 +20,48 @@
 import { resolve } from 'path';
 
 // @ts-ignore
-import { normalizePath, readFileAsync } from '.';
-// @ts-ignore
-import rootConfig from '../../../.i18nrc.json';
+import { arrayify, normalizePath, readFileAsync } from '.';
 
 export interface I18nConfig {
   paths: Record<string, string>;
   exclude: string[];
   translations: string[];
+  prefix?: string;
 }
 
-/**
- * Merges root .i18nrc.json config with any other additional configs (e.g. from
- * third-party plugins).
- * @param configPaths List of config paths.
- */
-export async function mergeConfigs(configPaths: string | string[] = []) {
-  const mergedConfig: I18nConfig = { exclude: [], translations: [], ...rootConfig };
-
-  for (const configPath of Array.isArray(configPaths) ? configPaths : [configPaths]) {
-    const additionalConfig: I18nConfig = {
-      paths: {},
-      exclude: [],
-      translations: [],
-      ...JSON.parse(await readFileAsync(resolve(configPath))),
-    };
-
-    for (const [namespace, path] of Object.entries(additionalConfig.paths)) {
-      mergedConfig.paths[namespace] = normalizePath(resolve(configPath, '..', path));
-    }
-
-    for (const exclude of additionalConfig.exclude) {
-      mergedConfig.exclude.push(normalizePath(resolve(configPath, '..', exclude)));
-    }
-
-    for (const translations of additionalConfig.translations) {
-      mergedConfig.translations.push(normalizePath(resolve(configPath, '..', translations)));
+export async function checkConfigNamespacePrefix(configPath: string) {
+  const { prefix, paths } = JSON.parse(await readFileAsync(resolve(configPath)));
+  for (const [namespace] of Object.entries(paths)) {
+    if (prefix && prefix !== namespace.split('.')[0]) {
+      throw new Error(`namespace ${namespace} must be prefixed with ${prefix} in ${configPath}`);
     }
   }
+}
 
-  return mergedConfig;
+export async function mergeConfig(
+  configPath: string,
+  config: I18nConfig = { exclude: [], translations: [], paths: {} }
+) {
+  const additionalConfig: I18nConfig = {
+    paths: {},
+    exclude: [],
+    translations: [],
+    ...JSON.parse(await readFileAsync(resolve(configPath))),
+  };
+
+  for (const [namespace, path] of Object.entries(additionalConfig.paths)) {
+    config.paths[namespace] = normalizePath(resolve(configPath, '..', path));
+  }
+
+  for (const exclude of additionalConfig.exclude) {
+    config.exclude.push(normalizePath(resolve(configPath, '..', exclude)));
+  }
+
+  for (const translations of additionalConfig.translations) {
+    config.translations.push(normalizePath(resolve(configPath, '..', translations)));
+  }
+
+  return config;
 }
 
 /**
