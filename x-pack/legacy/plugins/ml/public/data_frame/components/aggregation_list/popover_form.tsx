@@ -8,15 +8,24 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCodeEditor,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+} from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../common/types/common';
 
 import {
   AggName,
   isAggName,
+  isPivotAggsConfigWithUiSupport,
+  getEsAggFromAggConfig,
   PivotAggsConfig,
-  PivotAggsConfigDict,
+  PivotAggsConfigWithUiSupportDict,
   PIVOT_SUPPORTED_AGGS,
 } from '../../common';
 
@@ -27,7 +36,7 @@ interface SelectOption {
 interface Props {
   defaultData: PivotAggsConfig;
   otherAggNames: AggName[];
-  options: PivotAggsConfigDict;
+  options: PivotAggsConfigWithUiSupportDict;
   onChange(d: PivotAggsConfig): void;
 }
 
@@ -37,21 +46,30 @@ export const PopoverForm: React.SFC<Props> = ({
   onChange,
   options,
 }) => {
+  const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
+
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
-  const [field, setField] = useState(defaultData.field);
+  const [field, setField] = useState(
+    isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
+  );
 
-  const optionsArr = dictionaryToArray(options);
-  const availableFields: SelectOption[] = optionsArr
-    .filter(o => o.agg === defaultData.agg)
-    .map(o => {
-      return { text: o.field };
-    });
-  const availableAggs: SelectOption[] = optionsArr
-    .filter(o => o.field === defaultData.field)
-    .map(o => {
-      return { text: o.agg };
-    });
+  const availableFields: SelectOption[] = [];
+  const availableAggs: SelectOption[] = [];
+
+  if (!isUnsupportedAgg) {
+    const optionsArr = dictionaryToArray(options);
+    optionsArr
+      .filter(o => o.agg === defaultData.agg)
+      .forEach(o => {
+        availableFields.push({ text: o.field });
+      });
+    optionsArr
+      .filter(o => isPivotAggsConfigWithUiSupport(defaultData) && o.field === defaultData.field)
+      .forEach(o => {
+        availableAggs.push({ text: o.agg });
+      });
+  }
 
   let aggNameError = '';
 
@@ -77,6 +95,14 @@ export const PopoverForm: React.SFC<Props> = ({
       <EuiFormRow
         error={!validAggName && [aggNameError]}
         isInvalid={!validAggName}
+        helpText={
+          isUnsupportedAgg
+            ? i18n.translate('xpack.ml.dataframe.agg.popoverForm.unsupportedAggregationHelpText', {
+                defaultMessage:
+                  'Only the aggregation name can be edited in this form. Please use the advanced editor to edit the other parts of the aggregation.',
+              })
+            : ''
+        }
         label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.nameLabel', {
           defaultMessage: 'Aggregation name',
         })}
@@ -112,6 +138,18 @@ export const PopoverForm: React.SFC<Props> = ({
             onChange={e => setField(e.target.value)}
           />
         </EuiFormRow>
+      )}
+      {isUnsupportedAgg && (
+        <EuiCodeEditor
+          mode="json"
+          theme="github"
+          width="100%"
+          height="200px"
+          value={JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
+          setOptions={{ fontSize: '12px', showLineNumbers: false }}
+          isReadOnly
+          aria-label="Read only code editor"
+        />
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton
