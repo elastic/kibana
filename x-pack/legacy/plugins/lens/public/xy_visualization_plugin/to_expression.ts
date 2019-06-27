@@ -16,7 +16,6 @@ export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast
       function: 'lens_xy_chart',
       arguments: {
         seriesType: [state.seriesType],
-        title: [state.title],
         legend: [
           {
             type: 'expression',
