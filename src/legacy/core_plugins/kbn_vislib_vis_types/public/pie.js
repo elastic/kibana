@@ -18,17 +18,18 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import pieTemplate from './editors/pie.html';
 
-export default function HistogramVisType(Private, i18n) {
+export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'pie',
-    title: i18n('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
+    title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
     icon: 'visPie',
-    description: i18n('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
+    description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
     visConfig: {
       defaults: {
         type: 'pie',
@@ -68,7 +69,7 @@ export default function HistogramVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice Size' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice size' }),
           min: 1,
           max: 1,
           aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
@@ -79,8 +80,7 @@ export default function HistogramVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'segment',
-          icon: 'fa fa-scissors',
-          title: i18n('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split Slices' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split slices' }),
           min: 0,
           max: Infinity,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -88,8 +88,7 @@ export default function HistogramVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'split',
-          icon: 'fa fa-th',
-          title: i18n('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split Chart' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split chart' }),
           mustBeFirst: true,
           min: 0,
           max: 1,

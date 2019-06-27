@@ -21,34 +21,37 @@ import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-
-import { BasePathService } from '../base_path/base_path_service';
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { HttpService } from './http_service';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
 
-function setupService() {
-  const httpService = new HttpService();
-  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
-  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+const setupFakeBasePath: SetupTap = injectedMetadata => {
+  injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
+};
 
-  injectedMetadata.getBasePath.mockReturnValueOnce('http://localhost/myBase');
+describe('basePath.get()', () => {
+  it('returns an empty string if no basePath is injected', () => {
+    const { http } = setup(injectedMetadata => {
+      injectedMetadata.getBasePath.mockReturnValue(undefined as any);
+    });
 
-  const basePath = new BasePathService().setup({ injectedMetadata });
-  const http = httpService.setup({ basePath, fatalErrors, injectedMetadata });
+    expect(http.basePath.get()).toBe('');
+  });
 
-  return { httpService, fatalErrors, http };
-}
+  it('returns the injected basePath', () => {
+    const { http } = setup(setupFakeBasePath);
 
-describe('http requests', async () => {
+    expect(http.basePath.get()).toBe('/foo/bar');
+  });
+});
+
+describe('http requests', () => {
   afterEach(() => {
     fetchMock.restore();
   });
 
   it('should use supplied request method', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.post('*', {});
     await http.fetch('/my/path', { method: 'POST' });
@@ -57,18 +60,18 @@ describe('http requests', async () => {
   });
 
   it('should use supplied Content-Type', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path', { headers: { 'Content-Type': 'CustomContentType' } });
 
     expect(fetchMock.lastOptions()!.headers).toMatchObject({
-      'Content-Type': 'CustomContentType',
+      'content-type': 'CustomContentType',
     });
   });
 
   it('should use supplied pathname and querystring', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path', { query: { a: 'b' } });
@@ -77,7 +80,7 @@ describe('http requests', async () => {
   });
 
   it('should use supplied headers', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path', {
@@ -85,14 +88,14 @@ describe('http requests', async () => {
     });
 
     expect(fetchMock.lastOptions()!.headers).toEqual({
-      'Content-Type': 'application/json',
+      'content-type': 'application/json',
       'kbn-version': 'kibanaVersion',
-      myHeader: 'foo',
+      myheader: 'foo',
     });
   });
 
   it('should return response', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', { foo: 'bar' });
 
@@ -102,7 +105,7 @@ describe('http requests', async () => {
   });
 
   it('should prepend url with basepath by default', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path');
@@ -111,7 +114,7 @@ describe('http requests', async () => {
   });
 
   it('should not prepend url with basepath when disabled', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('my/path', { prependBasePath: false });
@@ -120,23 +123,25 @@ describe('http requests', async () => {
   });
 
   it('should make request with defaults', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path');
 
-    expect(fetchMock.lastOptions()!).toMatchObject({
+    const lastCall = fetchMock.lastCall();
+
+    expect(lastCall!.request.credentials).toBe('same-origin');
+    expect(lastCall![1]).toMatchObject({
       method: 'GET',
-      credentials: 'same-origin',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         'kbn-version': 'kibanaVersion',
       },
     });
   });
 
   it('should reject on network error', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     expect.assertions(1);
     fetchMock.get('*', { status: 500 });
@@ -145,7 +150,7 @@ describe('http requests', async () => {
   });
 
   it('should contain error message when throwing response', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', { status: 404, body: { foo: 'bar' } });
 
@@ -162,7 +167,7 @@ describe('http requests', async () => {
   });
 
   it('should support get() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.get('/my/path', { method: 'POST' });
@@ -171,7 +176,7 @@ describe('http requests', async () => {
   });
 
   it('should support head() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.head('*', {});
     await http.head('/my/path', { method: 'GET' });
@@ -180,7 +185,7 @@ describe('http requests', async () => {
   });
 
   it('should support post() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.post('*', {});
     await http.post('/my/path', { method: 'GET', body: '{}' });
@@ -189,7 +194,7 @@ describe('http requests', async () => {
   });
 
   it('should support put() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.put('*', {});
     await http.put('/my/path', { method: 'GET', body: '{}' });
@@ -198,7 +203,7 @@ describe('http requests', async () => {
   });
 
   it('should support patch() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.patch('*', {});
     await http.patch('/my/path', { method: 'GET', body: '{}' });
@@ -207,7 +212,7 @@ describe('http requests', async () => {
   });
 
   it('should support delete() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.delete('*', {});
     await http.delete('/my/path', { method: 'GET' });
@@ -216,7 +221,7 @@ describe('http requests', async () => {
   });
 
   it('should support options() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.mock('*', { method: 'OPTIONS' });
     await http.options('/my/path', { method: 'GET' });
@@ -225,7 +230,7 @@ describe('http requests', async () => {
   });
 
   it('should make requests for NDJSON content', async () => {
-    const { http } = setupService();
+    const { http } = setup();
     const content = readFileSync(join(__dirname, '_import_objects.ndjson'), { encoding: 'utf-8' });
     const body = new FormData();
 
@@ -250,9 +255,261 @@ describe('http requests', async () => {
   });
 });
 
-describe('addLoadingCount()', async () => {
+describe('interception', () => {
+  const { http } = setup();
+
+  beforeEach(() => {
+    fetchMock.get('*', { foo: 'bar' });
+  });
+
+  afterEach(() => {
+    fetchMock.restore();
+    http.removeAllInterceptors();
+  });
+
+  it('should make request and receive response', async () => {
+    http.intercept({});
+
+    const body = await http.fetch('/my/path');
+
+    expect(fetchMock.called()).toBe(true);
+    expect(body).toEqual({ foo: 'bar' });
+  });
+
+  it('should be able to manipulate request instance', async () => {
+    http.intercept({
+      request(request) {
+        request.headers.set('Content-Type', 'CustomContentType');
+      },
+    });
+    http.intercept({
+      request(request) {
+        return new Request('/my/route', request);
+      },
+    });
+
+    const body = await http.fetch('/my/path');
+
+    expect(fetchMock.called()).toBe(true);
+    expect(body).toEqual({ foo: 'bar' });
+    expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      'content-type': 'CustomContentType',
+    });
+    expect(fetchMock.lastUrl()).toBe('/my/route');
+  });
+
+  it('should call interceptors in correct order', async () => {
+    const order: string[] = [];
+
+    http.intercept({
+      request() {
+        order.push('Request 1');
+      },
+      response() {
+        order.push('Response 1');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 2');
+      },
+      response() {
+        order.push('Response 2');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 3');
+      },
+      response() {
+        order.push('Response 3');
+      },
+    });
+
+    const body = await http.fetch('/my/path');
+
+    expect(fetchMock.called()).toBe(true);
+    expect(body).toEqual({ foo: 'bar' });
+    expect(order).toEqual([
+      'Request 3',
+      'Request 2',
+      'Request 1',
+      'Response 1',
+      'Response 2',
+      'Response 3',
+    ]);
+  });
+
+  it('should skip remaining interceptors when controller halts during request', async () => {
+    const order: string[] = [];
+
+    http.intercept({
+      request() {
+        order.push('Request 1');
+      },
+      response() {
+        order.push('Response 1');
+      },
+    });
+    http.intercept({
+      request(request, controller) {
+        controller.halt();
+        order.push('Request 2');
+      },
+      response() {
+        order.push('Response 2');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 3');
+      },
+      response() {
+        order.push('Response 3');
+      },
+    });
+
+    await expect(http.fetch('/my/wat')).rejects.toThrow(/HTTP Intercept Halt/);
+    expect(fetchMock.called()).toBe(false);
+    expect(order).toEqual(['Request 3', 'Request 2']);
+  });
+
+  it('should skip remaining interceptors when controller halts during response', async () => {
+    const order: string[] = [];
+
+    http.intercept({
+      request() {
+        order.push('Request 1');
+      },
+      response(response, controller) {
+        controller.halt();
+        order.push('Response 1');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 2');
+      },
+      response() {
+        order.push('Response 2');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 3');
+      },
+      response() {
+        order.push('Response 3');
+      },
+    });
+
+    await expect(http.fetch('/my/wat')).rejects.toThrow(/HTTP Intercept Halt/);
+    expect(fetchMock.called()).toBe(true);
+    expect(order).toEqual(['Request 3', 'Request 2', 'Request 1', 'Response 1']);
+  });
+
+  it('should not fetch if exception occurs during request interception', async () => {
+    const order: string[] = [];
+
+    http.intercept({
+      request() {
+        order.push('Request 1');
+      },
+      requestError() {
+        order.push('RequestError 1');
+      },
+      response() {
+        order.push('Response 1');
+      },
+      responseError() {
+        order.push('ResponseError 1');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 2');
+        throw new Error('Interception Error');
+      },
+      response() {
+        order.push('Response 2');
+      },
+      responseError() {
+        order.push('ResponseError 2');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 3');
+      },
+      response() {
+        order.push('Response 3');
+      },
+      responseError() {
+        order.push('ResponseError 3');
+      },
+    });
+
+    await expect(http.fetch('/my/wat')).rejects.toThrow(/Interception Error/);
+    expect(fetchMock.called()).toBe(false);
+    expect(order).toEqual([
+      'Request 3',
+      'Request 2',
+      'RequestError 1',
+      'ResponseError 1',
+      'ResponseError 2',
+      'ResponseError 3',
+    ]);
+  });
+
+  it('should succeed if request throws but caught by interceptor', async () => {
+    const order: string[] = [];
+
+    http.intercept({
+      request() {
+        order.push('Request 1');
+      },
+      requestError({ request }) {
+        order.push('RequestError 1');
+        return new Request('/my/route', request);
+      },
+      response() {
+        order.push('Response 1');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 2');
+        throw new Error('Interception Error');
+      },
+      response() {
+        order.push('Response 2');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 3');
+      },
+      response() {
+        order.push('Response 3');
+      },
+    });
+
+    await expect(http.fetch('/my/route')).resolves.toEqual({ foo: 'bar' });
+    expect(fetchMock.called()).toBe(true);
+    expect(order).toEqual([
+      'Request 3',
+      'Request 2',
+      'RequestError 1',
+      'Response 1',
+      'Response 2',
+      'Response 3',
+    ]);
+  });
+});
+
+describe('addLoadingCount()', () => {
   it('subscribes to passed in sources, unsubscribes on stop', () => {
-    const { httpService, http } = setupService();
+    const { httpService, http } = setup();
 
     const unsubA = jest.fn();
     const subA = jest.fn().mockReturnValue(unsubA);
@@ -275,23 +532,23 @@ describe('addLoadingCount()', async () => {
   });
 
   it('adds a fatal error if source observables emit an error', async () => {
-    const { http, fatalErrors } = setupService();
+    const { http, fatalErrors } = setup();
 
     http.addLoadingCount(Rx.throwError(new Error('foo bar')));
     expect(fatalErrors.add.mock.calls).toMatchSnapshot();
   });
 
   it('adds a fatal error if source observable emits a negative number', async () => {
-    const { http, fatalErrors } = setupService();
+    const { http, fatalErrors } = setup();
 
     http.addLoadingCount(Rx.of(1, 2, 3, 4, -9));
     expect(fatalErrors.add.mock.calls).toMatchSnapshot();
   });
 });
 
-describe('getLoadingCount$()', async () => {
+describe('getLoadingCount$()', () => {
   it('emits 0 initially, the right count when sources emit their own count, and ends with zero', async () => {
-    const { httpService, http } = setupService();
+    const { httpService, http } = setup();
 
     const countA$ = new Rx.Subject<number>();
     const countB$ = new Rx.Subject<number>();
@@ -318,7 +575,7 @@ describe('getLoadingCount$()', async () => {
   });
 
   it('only emits when loading count changes', async () => {
-    const { httpService, http } = setupService();
+    const { httpService, http } = setup();
 
     const count$ = new Rx.Subject<number>();
     const promise = http

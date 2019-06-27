@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Geo Coordinates');
-        await PageObjects.visualize.clickBucket('Geo Coordinates');
+        await PageObjects.visualize.clickBucket('Geo coordinates');
         log.debug('Click aggregation Geohash');
         await PageObjects.visualize.selectAggregation('Geohash');
         log.debug('Click field geo.coordinates');
@@ -236,6 +236,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('zoom warning behavior', function describeIndexTests() {
+      // Zoom warning is only applicable to OSS
+      this.tags(['skipCloud', 'skipFirefox']);
 
       const waitForLoading = false;
       let zoomWarningEnabled;

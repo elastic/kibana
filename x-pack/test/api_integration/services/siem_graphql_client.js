@@ -10,25 +10,36 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
-import introspectionQueryResultData from '../../../plugins/siem/public/graphql/introspection.json';
+import introspectionQueryResultData from '../../../legacy/plugins/siem/public/graphql/introspection.json';
 
-export function SiemGraphQLProvider({ getService }) {
+export function SiemGraphQLClientProvider({ getService }) {
+  return new SiemGraphQLClientFactoryProvider({ getService })();
+}
+
+export function SiemGraphQLClientFactoryProvider({ getService }) {
   const config = getService('config');
-  const kbnURL = formatUrl(config.get('servers.kibana'));
+  const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
 
-  return new ApolloClient({
-    cache: new InMemoryCache({
-      fragmentMatcher: new IntrospectionFragmentMatcher({
-        introspectionQueryResultData,
-      }),
-    }),
-    link: new HttpLink({
+  return function ({ username = superUsername, password = superPassword, basePath = null } = {}) {
+    const kbnURLWithoutAuth = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+    const httpLink = new HttpLink({
       credentials: 'same-origin',
       fetch,
       headers: {
         'kbn-xsrf': 'xxx',
+        authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
       },
-      uri: `${kbnURL}/api/siem/graphql`,
-    }),
-  });
+      uri: `${kbnURLWithoutAuth}${basePath || ''}/api/siem/graphql`,
+    });
+
+    return new ApolloClient({
+      cache: new InMemoryCache({
+        fragmentMatcher: new IntrospectionFragmentMatcher({
+          introspectionQueryResultData,
+        }),
+      }),
+      link: httpLink,
+    });
+  };
 }

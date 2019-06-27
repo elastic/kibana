@@ -5,12 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { networkDnsQuery } from '../../../../plugins/siem/public/containers/network_dns/index.gql_query';
+import { networkDnsQuery } from '../../../../legacy/plugins/siem/public/containers/network_dns/index.gql_query';
 import {
   Direction,
   GetNetworkDnsQuery,
   NetworkDnsFields,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const networkDnsTests: KbnTestProvider = ({ getService }) => {
@@ -41,6 +41,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
                 limit: 10,
                 cursor: null,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -71,6 +72,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
                 limit: 10,
                 cursor: null,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {

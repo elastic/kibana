@@ -86,7 +86,7 @@ const defaultProps = {
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
-  canDeleteSavedObjectTypes: ['visualization']
+  canDelete: true
 };
 
 describe('Table', () => {
@@ -127,9 +127,9 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`restricts which saved objects can be deleted based on type`, () => {
+  it(`prevents saved objects from being deleted`, () => {
     const selectedSavedObjects = [{ type: 'visualization' }, { type: 'search' }, { type: 'index-pattern' }];
-    const customizedProps = { ...defaultProps, selectedSavedObjects, canDeleteSavedObjectTypes: ['visualization'] };
+    const customizedProps = { ...defaultProps, selectedSavedObjects, canDelete: false };
     const component = shallowWithIntl(
       <Table.WrappedComponent
         {...customizedProps}

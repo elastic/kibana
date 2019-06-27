@@ -21,7 +21,7 @@ jest.mock('ui/visualize/loader/visualize_loader', () => ({}));
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import VisEditorVisualization from './vis_editor_visualization';
+import { VisEditorVisualization } from './vis_editor_visualization';
 
 describe('getVisualizeLoader', () => {
   let updateStub;
@@ -31,8 +31,8 @@ describe('getVisualizeLoader', () => {
     const handlerMock = {
       update: updateStub,
       data$: {
-        subscribe: () => {}
-      }
+        subscribe: () => {},
+      },
     };
     const loaderMock = {
       embedVisualizationWithSavedObject: () => handlerMock,
@@ -41,16 +41,14 @@ describe('getVisualizeLoader', () => {
   });
 
   it('should not call _handler.update until getVisualizeLoader returns _handler', async () => {
-    const wrapper = mountWithIntl(
-      <VisEditorVisualization />
-    );
+    const wrapper = mountWithIntl(<VisEditorVisualization />);
 
     // Set prop to force DOM change and componentDidUpdate to be triggered
     wrapper.setProps({
       timeRange: {
         from: '2019-03-20T20:35:37.637Z',
-        to: '2019-03-23T18:40:16.486Z'
-      }
+        to: '2019-03-23T18:40:16.486Z',
+      },
     });
 
     expect(updateStub).not.toHaveBeenCalled();
@@ -62,8 +60,8 @@ describe('getVisualizeLoader', () => {
     wrapper.setProps({
       timeRange: {
         from: 'now/d',
-        to: 'now/d'
-      }
+        to: 'now/d',
+      },
     });
 
     expect(updateStub).toHaveBeenCalled();

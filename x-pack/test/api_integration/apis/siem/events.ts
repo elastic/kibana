@@ -6,14 +6,14 @@
 
 import expect from '@kbn/expect';
 
-import { eventsQuery } from '../../../../plugins/siem/public/containers/events/index.gql_query';
-import { LastEventTimeGqlQuery } from '../../../../plugins/siem/public/containers/events/last_event_time/last_event_time.gql_query';
+import { eventsQuery } from '../../../../legacy/plugins/siem/public/containers/events/index.gql_query';
+import { LastEventTimeGqlQuery } from '../../../../legacy/plugins/siem/public/containers/events/last_event_time/last_event_time.gql_query';
 
 import {
   Direction,
   GetEventsQuery,
   GetLastEventTimeQuery,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -53,6 +53,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sortFieldId: 'timestamp',
                 direction: Direction.desc,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -83,6 +84,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sortFieldId: 'timestamp',
                 direction: Direction.desc,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -91,6 +93,34 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             expect(events.edges.length).to.be(EDGE_LENGTH);
             expect(events.totalCount).to.be(TOTAL_COUNT);
             expect(events.edges[0]!.node.host!.name).to.eql([HOST_NAME]);
+          });
+      });
+      it('Make sure that timestamp is returned in the Events query', () => {
+        return client
+          .query<GetEventsQuery.Query>({
+            query: eventsQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              pagination: {
+                limit: 2,
+                cursor: CURSOR_ID,
+                tiebreaker: '193',
+              },
+              sortField: {
+                sortFieldId: 'timestamp',
+                direction: Direction.desc,
+              },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            },
+          })
+          .then(resp => {
+            const events = resp.data.source.Events;
+            expect(events.edges[0]!.node.timestamp).to.eql('2019-02-19T20:42:29.965Z');
           });
       });
     });
@@ -106,6 +136,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'hosts',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -125,6 +156,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'network',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -145,6 +177,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 details: {
                   hostName: 'zeek-sensor-amsterdam',
                 },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -164,6 +197,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'ipDetails',
                 details: { ip: '138.68.4.250' },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -186,6 +220,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'hosts',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -205,6 +240,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'network',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -225,6 +261,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 details: {
                   hostName: 'raspberrypi',
                 },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -244,6 +281,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'ipDetails',
                 details: { ip: '54.239.219.228' },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -266,6 +304,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'hosts',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -286,6 +325,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 details: {
                   hostName: 'demo-stack-nginx-01',
                 },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {

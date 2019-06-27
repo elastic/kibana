@@ -184,19 +184,20 @@ export default function (program) {
       .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
-      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
   command
     .action(async function (opts) {
-      if (opts.dev) {
+      if (opts.dev && opts.devConfig !== false) {
         try {
           const kbnDevConfig = fromRoot('config/kibana.dev.yml');
           if (statSync(kbnDevConfig).isFile()) {
             opts.config.push(kbnDevConfig);
           }
         } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+          // ignore, kibana.dev.yml does not exist
         }
       }
 
@@ -213,6 +214,7 @@ export default function (program) {
           repl: !!opts.repl,
           basePath: !!opts.basePath,
           optimize: !!opts.optimize,
+          oss: !!opts.oss,
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,

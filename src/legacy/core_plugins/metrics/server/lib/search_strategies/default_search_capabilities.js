@@ -16,16 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { convertIntervalToUnit, parseInterval } from '../vis_data/helpers/unit_to_seconds';
+import {
+  convertIntervalToUnit,
+  parseInterval,
+  getSuitableUnit,
+} from '../vis_data/helpers/unit_to_seconds';
 
 const getTimezoneFromRequest = request => {
   return request.payload.timerange.timezone;
 };
 
 export class DefaultSearchCapabilities {
-  constructor(request, batchRequestsSupport, fieldsCapabilities = {}) {
+  constructor(request, fieldsCapabilities = {}) {
     this.request = request;
-    this.batchRequestsSupport = batchRequestsSupport;
     this.fieldsCapabilities = fieldsCapabilities;
   }
 
@@ -61,6 +64,10 @@ export class DefaultSearchCapabilities {
 
   parseInterval(interval) {
     return parseInterval(interval);
+  }
+
+  getSuitableUnit(intervalInSeconds) {
+    return getSuitableUnit(intervalInSeconds);
   }
 
   convertIntervalToUnit(intervalString, unit) {

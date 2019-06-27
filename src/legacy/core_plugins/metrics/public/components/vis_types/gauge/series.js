@@ -19,13 +19,20 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import ColorPicker from '../../color_picker';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { ColorPicker } from '../../color_picker';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import Split from '../../split';
+import { Split } from '../../split';
 import { SeriesDragHandler } from '../../series_drag_handler';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import createTextHandler from '../../lib/create_text_handler';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 
@@ -42,7 +49,7 @@ function GaugeSeriesUi(props) {
     selectedTab,
     visible,
     intl,
-    uiRestrictions
+    uiRestrictions,
   } = props;
 
   const defaults = { label: '' };
@@ -85,20 +92,15 @@ function GaugeSeriesUi(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
     body = (
       <div className="tvbSeries__body">
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'metrics'}
-            onClick={() => props.switchTab('metrics')}
-          >
-            <FormattedMessage
-              id="tsvb.gauge.dataTab.metricsButtonLabel"
-              defaultMessage="Metrics"
-            />
+          <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
+            <FormattedMessage id="tsvb.gauge.dataTab.metricsButtonLabel" defaultMessage="Metrics" />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
@@ -117,50 +119,58 @@ function GaugeSeriesUi(props) {
   }
 
   const colorPicker = (
-    <ColorPicker
-      disableTrash={true}
-      onChange={props.onChange}
-      name="color"
-      value={model.color}
-    />
+    <ColorPicker disableTrash={true} onChange={props.onChange} name="color" value={model.color} />
   );
 
   return (
-    <div
-      className={`${props.className}`}
-      style={props.style}
-    >
+    <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({ id: 'tsvb.gauge.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.gauge.editor.toggleEditorAriaLabel',
+              defaultMessage: 'Toggle series editor',
+            })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          { colorPicker }
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{colorPicker}</EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({ id: 'tsvb.gauge.editor.labelPlaceholder', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.gauge.editor.labelPlaceholder',
+              defaultMessage: 'Label',
+            })}
             value={model.label}
           />
         </EuiFlexItem>
 
-        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
+        <SeriesDragHandler
+          dragHandleProps={props.dragHandleProps}
+          hideDragHandler={props.disableDelete}
+        />
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
-            deleteTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
-            cloneTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
+            addTooltip={intl.formatMessage({
+              id: 'tsvb.gauge.editor.addSeriesTooltip',
+              defaultMessage: 'Add Series',
+            })}
+            deleteTooltip={intl.formatMessage({
+              id: 'tsvb.gauge.editor.deleteSeriesTooltip',
+              defaultMessage: 'Delete Series',
+            })}
+            cloneTooltip={intl.formatMessage({
+              id: 'tsvb.gauge.editor.cloneSeriesTooltip',
+              defaultMessage: 'Clone Series',
+            })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
@@ -170,10 +180,9 @@ function GaugeSeriesUi(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      { body }
+      {body}
     </div>
   );
-
 }
 
 GaugeSeriesUi.propTypes = {
@@ -196,7 +205,7 @@ GaugeSeriesUi.propTypes = {
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
-const GaugeSeries = injectI18n(GaugeSeriesUi);
-export default GaugeSeries;
+export const GaugeSeries = injectI18n(GaugeSeriesUi);

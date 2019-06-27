@@ -22,7 +22,7 @@ import sinon from 'sinon';
 
 import { initChromeNavApi } from '../nav';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { absoluteToParsedUrl } from '../../../url/absolute_to_parsed_url';
 
 const basePath = '/someBasePath';
@@ -52,7 +52,7 @@ describe('chrome nav apis', function () {
   }());
 
   beforeEach(() => {
-    coreNavLinks = getNewPlatform().start.core.chrome.navLinks;
+    coreNavLinks = npStart.core.chrome.navLinks;
     sinon.stub(coreNavLinks, 'update').callsFake((linkId, updateAttrs) => {
       const link = fakedLinks.find(({ id }) => id === linkId);
       for (const key of Object.keys(updateAttrs)) {

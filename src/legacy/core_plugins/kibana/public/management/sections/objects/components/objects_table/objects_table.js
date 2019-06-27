@@ -73,6 +73,7 @@ class ObjectsTableUI extends Component {
     basePath: PropTypes.string.isRequired,
     perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
+    confirmModalPromise: PropTypes.func.isRequired,
     services: PropTypes.array.isRequired,
     uiCapabilities: PropTypes.object.isRequired,
     goInspectObject: PropTypes.func.isRequired,
@@ -81,9 +82,7 @@ class ObjectsTableUI extends Component {
 
   constructor(props) {
     super(props);
-    this.savedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      return this.props.uiCapabilities.savedObjectsManagement[type].read;
-    });
+    this.savedObjectTypes = POSSIBLE_TYPES;
 
     this.state = {
       totalCount: 0,
@@ -418,6 +417,7 @@ class ObjectsTableUI extends Component {
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={this.props.newIndexPatternUrl}
         savedObjectTypes={this.props.savedObjectTypes}
+        confirmModalPromise={this.props.confirmModalPromise}
       />
     );
   }
@@ -675,10 +675,6 @@ class ObjectsTableUI extends Component {
       view: `${type} (${savedObjectCounts[type] || 0})`,
     }));
 
-    const canDeleteSavedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      return this.props.uiCapabilities.savedObjectsManagement[type].delete;
-    });
-
     return (
       <EuiPageContent
         horizontalPosition="center"
@@ -704,7 +700,7 @@ class ObjectsTableUI extends Component {
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
-          canDeleteSavedObjectTypes={canDeleteSavedObjectTypes}
+          canDelete={this.props.uiCapabilities.savedObjectsManagement.delete}
           onDelete={this.onDelete}
           goInspectObject={this.props.goInspectObject}
           pageIndex={page}

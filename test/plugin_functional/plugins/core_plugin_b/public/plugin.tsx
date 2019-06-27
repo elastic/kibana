@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, PluginSetupContext } from 'kibana/public';
+import { Plugin, CoreSetup } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {
@@ -32,7 +32,7 @@ export interface CorePluginBDeps {
 
 export class CorePluginBPlugin
   implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
-  public setup(core: PluginSetupContext, deps: CorePluginBDeps) {
+  public setup(core: CoreSetup, deps: CorePluginBDeps) {
     window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
   }
 

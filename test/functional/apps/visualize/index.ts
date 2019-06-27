@@ -53,8 +53,9 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_experimental_vis'));
       loadTestFile(require.resolve('./_gauge_chart'));
       loadTestFile(require.resolve('./_heatmap_chart'));
-      loadTestFile(require.resolve('./_input_control_vis'));
+      loadTestFile(require.resolve('./input_control_vis'));
       loadTestFile(require.resolve('./_histogram_request_start'));
+      loadTestFile(require.resolve('./_metric_chart'));
     });
 
     describe('', function() {
@@ -79,7 +80,9 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_tsvb_chart'));
+      loadTestFile(require.resolve('./_tsvb_time_series'));
       loadTestFile(require.resolve('./_tsvb_markdown'));
+      loadTestFile(require.resolve('./_tsvb_table'));
       loadTestFile(require.resolve('./_vega_chart'));
     });
   });

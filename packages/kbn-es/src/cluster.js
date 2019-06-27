@@ -33,6 +33,19 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 
+// listen to data on stream until map returns anything but undefined
+const first = (stream, map) =>
+  new Promise(resolve => {
+    const onData = data => {
+      const result = map(data);
+      if (result !== undefined) {
+        resolve(result);
+        stream.removeListener('data', onData);
+      }
+    };
+    stream.on('data', onData);
+  });
+
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
     this._log = log;
@@ -158,14 +171,15 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     await Promise.race([
-      // await the "started" log message
-      new Promise(resolve => {
-        this._process.stdout.on('data', data => {
+      // wait for native realm to be setup and es to be started
+      Promise.all([
+        first(this._process.stdout, data => {
           if (/started/.test(data)) {
-            resolve();
+            return true;
           }
-        });
-      }),
+        }),
+        this._nativeRealmSetup,
+      ]),
 
       // await the outcome of the process in case it exits before starting
       this._outcome.then(() => {
@@ -184,6 +198,12 @@ exports.Cluster = class Cluster {
    */
   async run(installPath, options = {}) {
     this._exec(installPath, options);
+
+    // log native realm setup errors so they aren't uncaught
+    this._nativeRealmSetup.catch(error => {
+      this._log.error(error);
+      this.stop();
+    });
 
     // await the final outcome of the process
     await this._outcome;
@@ -238,45 +258,51 @@ exports.Cluster = class Cluster {
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
+      env: {
+        ...process.env,
+        ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
+        ...(options.esEnvVars || {}),
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
+    // parse log output to find http port
+    const httpPort = first(this._process.stdout, data => {
+      const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
+
+      if (match) {
+        return match[1];
+      }
+    });
+
+    // once the http port is available setup the native realm
+    this._nativeRealmSetup = httpPort.then(async port => {
+      const nativeRealm = new NativeRealm(options.password, port, this._log);
+      await nativeRealm.setPasswords(options);
+    });
+
+    // parse and forward es stdout to the log
     this._process.stdout.on('data', data => {
       const lines = parseEsLog(data.toString());
       lines.forEach(line => {
         this._log.info(line.formattedMessage);
-
-        // once we have the port we can stop checking for it
-        if (this.httpPort) {
-          return;
-        }
-
-        const httpAddressMatch = line.message.match(
-          /HttpServer.+publish_address {[0-9.]+:([0-9]+)/
-        );
-
-        if (httpAddressMatch) {
-          this.httpPort = httpAddressMatch[1];
-          new NativeRealm(options.password, this.httpPort, this._log).setPasswords(options);
-        }
       });
     });
 
+    // forward es stderr to the log
     this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
 
-    this._outcome = new Promise((resolve, reject) => {
-      this._process.once('exit', code => {
-        if (this._stopCalled) {
-          resolve();
-          return;
-        }
-        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
-        if (code > 0 && !(code === 143 || code === 130)) {
-          reject(createCliError(`ES exited with code ${code}`));
-        } else {
-          resolve();
-        }
-      });
+    // observe the exit code of the process and reflect in _outcome promies
+    const exitCode = new Promise(resolve => this._process.once('exit', resolve));
+    this._outcome = exitCode.then(code => {
+      if (this._stopCalled) {
+        return;
+      }
+
+      // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
+      if (code > 0 && !(code === 143 || code === 130)) {
+        throw createCliError(`ES exited with code ${code}`);
+      }
     });
   }
 };

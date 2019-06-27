@@ -14,7 +14,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
-  describe('security feature controls', () => {
+  describe('security feature controls', function() {
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load('canvas/default');
     });

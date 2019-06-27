@@ -17,25 +17,14 @@
  * under the License.
  */
 
-import { VislibVisualizationsPointSeriesProvider } from './point_series';
-import { VislibVisualizationsPieChartProvider } from './pie_chart';
-import { GaugeChartProvider } from './gauge_chart';
+import { PointSeries } from './point_series';
+import { PieChart } from './pie_chart';
+import { GaugeChart } from './gauge_chart';
 
-export function VislibVisualizationsVisTypesProvider(Private) {
-
-  /**
-   * Provides the visualizations for the vislib
-   *
-   * @module vislib
-   * @submodule VisTypeFactory
-   * @param Private {Object} Loads any function as an angular module
-   * @return {Function} Returns an Object of Visualization classes
-   */
-  return {
-    pie: Private(VislibVisualizationsPieChartProvider),
-    point_series: Private(VislibVisualizationsPointSeriesProvider),
-    gauge: Private(GaugeChartProvider),
-    goal: Private(GaugeChartProvider),
-    metric: Private(GaugeChartProvider)
-  };
-}
+export const visTypes = {
+  pie: PieChart,
+  point_series: PointSeries,
+  gauge: GaugeChart,
+  goal: GaugeChart,
+  metric: GaugeChart
+};

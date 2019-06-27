@@ -1,0 +1,50 @@
+[[filters]]
+=== Filters
+
+Global filters are ways you can filter your data within the APM UI.
+They are available in the Services, Transactions, Errors, Metrics, and Traces views,
+and any filter applied will persist as you move between pages.
+
+[role="screenshot"]
+image::apm/images/global-filters.png[Global filters available in the APM UI in Kibana]
+
+[float]
+==== Global time range
+
+The <<set-time-filter,global time range filter>> in {kib} restricts APM data to a specific time period.
+
+[float]
+[[query-bar]]
+==== Query bar
+
+The query bar is a powerful data query feature.
+Similar to the query bar in {kibana-ref}/discover.html[Discover],
+it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in.
+It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include.
+You can select the query bar and hit the down arrow on your keyboard to begin seeing recommendations.
+
+See <<query-bar,advanced queries>> for more information and sample queries.
+
+[float]
+[[environment-selector]]
+==== Service environment filter
+
+The environment selector is a global filter for `service.environment`.
+It allows you to view only relevant data, and is especially useful for separating development from production environments.
+By default, all environments are displayed. If there are no environment options, you'll see "not defined".
+
+Service environments are defined when configuring your APM agents.
+It's very important to be consistent when naming environments in your agents.
+See the documentation for each agent you're using to learn how to configure service environments:
+
+|===
+|*Environment configuration*
+v|*Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]
+*Java:* {apm-java-ref}/config-core.html#config-environment[`environment`]
+*Python:* {apm-py-ref}/configuration.html#config-environment[`environment`]
+*Ruby:* {apm-ruby-ref}/configuration.html#config-environment[`environment`]
+*Real User Monitoring:* {apm-rum-ref}/configuration.html#environment[`environment`]
+|===
+
+// Add to above table when docs are ready
+// *Node.js:* {apm-node-ref}/configuration.html#environment[`environment`]

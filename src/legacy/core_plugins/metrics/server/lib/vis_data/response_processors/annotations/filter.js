@@ -42,7 +42,8 @@ export const makeFilter = by =>
  * @param {*} filterValue
  * @return {Array} filtered array
  */
-export const annotationFilter = (annotations, filterValue) => annotations.filter(({ key }) => key <= filterValue);
+export const annotationFilter = (annotations, filterValue) =>
+  annotations.filter(({ key }) => key <= filterValue);
 
 /**
  * @type {Function}

@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -46,23 +46,35 @@ const StandardDeviationAggUi = props => {
 
   const modeOptions = [
     {
-      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.rawLabel', defaultMessage: 'Raw' }),
-      value: 'raw'
+      label: intl.formatMessage({
+        id: 'tsvb.stdDeviation.modeOptions.rawLabel',
+        defaultMessage: 'Raw',
+      }),
+      value: 'raw',
     },
     {
-      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
-      value: 'upper'
+      label: intl.formatMessage({
+        id: 'tsvb.stdDeviation.modeOptions.upperBoundLabel',
+        defaultMessage: 'Upper Bound',
+      }),
+      value: 'upper',
     },
     {
-      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
-      value: 'lower'
+      label: intl.formatMessage({
+        id: 'tsvb.stdDeviation.modeOptions.lowerBoundLabel',
+        defaultMessage: 'Lower Bound',
+      }),
+      value: 'lower',
     },
   ];
 
   if (panel.type !== 'table') {
     modeOptions.push({
-      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
-      value: 'band'
+      label: intl.formatMessage({
+        id: 'tsvb.stdDeviation.modeOptions.boundsBandLabel',
+        defaultMessage: 'Bounds Band',
+      }),
+      value: 'band',
     });
   }
 
@@ -70,7 +82,8 @@ const StandardDeviationAggUi = props => {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
   const selectedModeOption = modeOptions.find(option => {
     return model.mode === option.value;
@@ -104,10 +117,7 @@ const StandardDeviationAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={(<FormattedMessage
-              id="tsvb.stdDeviation.fieldLabel"
-              defaultMessage="Field"
-            />)}
+            label={<FormattedMessage id="tsvb.stdDeviation.fieldLabel" defaultMessage="Field" />}
           >
             <FieldSelect
               fields={fields}
@@ -122,24 +132,15 @@ const StandardDeviationAggUi = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('sigma')}
-            label={(<FormattedMessage
-              id="tsvb.stdDeviation.sigmaLabel"
-              defaultMessage="Sigma"
-            />)}
+            label={<FormattedMessage id="tsvb.stdDeviation.sigmaLabel" defaultMessage="Sigma" />}
           >
-            <EuiFieldText
-              value={model.sigma}
-              onChange={handleTextChange('sigma')}
-            />
+            <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('mode')}
-            label={(<FormattedMessage
-              id="tsvb.stdDeviation.modeLabel"
-              defaultMessage="Mode"
-            />)}
+            label={<FormattedMessage id="tsvb.stdDeviation.modeLabel" defaultMessage="Mode" />}
           >
             <EuiComboBox
               options={modeOptions}

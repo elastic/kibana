@@ -19,26 +19,21 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { SwitchParamEditor } from './switch';
 
-function MinDocCountParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
-  const label = i18n.translate('common.ui.aggTypes.showEmptyBucketsLabel', {
-    defaultMessage: 'Show empty buckets',
-  });
-
-  const content = i18n.translate('common.ui.aggTypes.showEmptyBucketsTooltip', {
-    defaultMessage: 'Show all buckets, not only the buckets with results',
-  });
-
+function MinDocCountParamEditor(props: AggParamEditorProps<boolean>) {
   return (
-    <div className="visEditorSidebar__aggParamFormRow">
-      <EuiToolTip content={content} delay="long" position="right">
-        <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
-      </EuiToolTip>
-      <EuiSpacer size="s" />
-    </div>
+    <SwitchParamEditor
+      displayLabel={i18n.translate('common.ui.aggTypes.showEmptyBucketsLabel', {
+        defaultMessage: 'Show empty buckets',
+      })}
+      displayToolTip={i18n.translate('common.ui.aggTypes.showEmptyBucketsTooltip', {
+        defaultMessage: 'Show all buckets, not only the buckets with results',
+      })}
+      {...props}
+    />
   );
 }
 

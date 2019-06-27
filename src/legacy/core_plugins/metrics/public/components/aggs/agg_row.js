@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { last } from 'lodash';
-import AddDeleteButtons from '../add_delete_buttons';
+import { AddDeleteButtons } from '../add_delete_buttons';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { SeriesDragHandler } from '../series_drag_handler';
@@ -38,21 +38,33 @@ function AggRowUi(props) {
 
   return (
     <div className="tvbAggRow">
-      <EuiFlexGroup data-test-subj="aggRow" gutterSize="s" alignItems="flexStart" responsive={false}>
+      <EuiFlexGroup
+        data-test-subj="aggRow"
+        gutterSize="s"
+        alignItems="flexStart"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon className="tvbAggRow__visibilityIcon" type={iconType} color={iconColor} />
         </EuiFlexItem>
-        <EuiFlexItem className="tvbAggRow__children">
-          {props.children}
-        </EuiFlexItem>
+        <EuiFlexItem className="tvbAggRow__children">{props.children}</EuiFlexItem>
 
-        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
+        <SeriesDragHandler
+          dragHandleProps={props.dragHandleProps}
+          hideDragHandler={props.disableDelete}
+        />
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             testSubj="addMetric"
-            addTooltip={intl.formatMessage({ id: 'tsvb.aggRow.addMetricButtonTooltip', defaultMessage: 'Add Metric' })}
-            deleteTooltip={intl.formatMessage({ id: 'tsvb.aggRow.deleteMetricButtonTooltip', defaultMessage: 'Delete Metric' })}
+            addTooltip={intl.formatMessage({
+              id: 'tsvb.aggRow.addMetricButtonTooltip',
+              defaultMessage: 'Add Metric',
+            })}
+            deleteTooltip={intl.formatMessage({
+              id: 'tsvb.aggRow.deleteMetricButtonTooltip',
+              defaultMessage: 'Delete Metric',
+            })}
             onAdd={props.onAdd}
             onDelete={props.onDelete}
             disableDelete={props.disableDelete}
@@ -72,5 +84,4 @@ AggRowUi.propTypes = {
   dragHandleProps: PropTypes.object,
 };
 
-const AggRow = injectI18n(AggRowUi);
-export default AggRow;
+export const AggRow = injectI18n(AggRowUi);

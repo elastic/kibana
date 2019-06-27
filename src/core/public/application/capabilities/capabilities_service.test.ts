@@ -17,88 +17,30 @@
  * under the License.
  */
 
-// @ts-ignore
-import fetchMock from 'fetch-mock/es5/client';
-
 import { InjectedMetadataService } from '../../injected_metadata';
 import { CapabilitiesService } from './capabilities_service';
-import { basePathServiceMock } from '../../base_path/base_path_service.mock';
 
 describe('#start', () => {
-  const basePath = basePathServiceMock.createStartContract();
-  basePath.addToPath.mockImplementation(str => str);
   const injectedMetadata = new InjectedMetadataService({
     injectedMetadata: {
-      vars: {
-        uiCapabilities: {
-          foo: { feature: true },
-          bar: { feature: true },
+      version: 'kibanaVersion',
+      capabilities: {
+        catalogue: {},
+        management: {},
+        navLinks: {
+          app1: true,
+          app2: false,
         },
+        foo: { feature: true },
+        bar: { feature: true },
       },
     } as any,
   }).start();
   const apps = [{ id: 'app1' }, { id: 'app2', capabilities: { app2: { feature: true } } }] as any;
 
-  beforeEach(() => {
-    fetchMock.post('/api/capabilities', (url: string, options: any) => ({
-      body: options.body,
-      status: 200,
-    }));
-  });
-
-  afterEach(() => {
-    fetchMock.restore();
-  });
-
-  it('calls backend API with merged capabilities', async () => {
-    const service = new CapabilitiesService();
-    await service.start({ apps, basePath, injectedMetadata });
-    expect(fetchMock.calls()).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/capabilities",
-    Object {
-      "body": "{\\"capabilities\\":{\\"navLinks\\":{\\"app2\\":true,\\"app1\\":true},\\"management\\":{},\\"catalogue\\":{},\\"app2\\":{\\"feature\\":true}}}",
-      "credentials": "same-origin",
-      "headers": Object {
-        "kbn-xsrf": "xxx",
-      },
-      "method": "POST",
-    },
-  ],
-]
-`);
-  });
-
-  it('returns capabilities from backend', async () => {
-    const service = new CapabilitiesService();
-    expect((await service.start({ apps, basePath, injectedMetadata })).capabilities)
-      .toMatchInlineSnapshot(`
-Object {
-  "app2": Object {
-    "feature": true,
-  },
-  "catalogue": Object {},
-  "management": Object {},
-  "navLinks": Object {
-    "app1": true,
-    "app2": true,
-  },
-}
-`);
-  });
-
   it('filters available apps based on returned navLinks', async () => {
-    fetchMock.post(
-      '/api/capabilities',
-      (url: string, options: any) => ({
-        body: JSON.stringify({ capabilities: { navLinks: { app1: true, app2: false } } }),
-        status: 200,
-      }),
-      { overwriteRoutes: true }
-    );
     const service = new CapabilitiesService();
-    expect((await service.start({ apps, basePath, injectedMetadata })).availableApps).toEqual([
+    expect((await service.start({ apps, injectedMetadata })).availableApps).toEqual([
       { id: 'app1' },
     ]);
   });
@@ -107,7 +49,6 @@ Object {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
       apps,
-      basePath,
       injectedMetadata,
     });
 

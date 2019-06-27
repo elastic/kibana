@@ -14,6 +14,7 @@
             "name": "",
             "status": "down"
           },
+          "observer": null,
           "url": { "domain": "localhost", "full": "http://localhost:12349/" }
         },
         "upSeries": [
@@ -70,6 +71,7 @@
             "name": "",
             "status": "down"
           },
+          "observer": null,
           "url": { "domain": "www.example.com", "full": "http://www.example.com/" }
         },
         "upSeries": [

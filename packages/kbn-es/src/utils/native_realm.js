@@ -29,10 +29,13 @@ exports.NativeRealm = class NativeRealm {
     this._log = log;
   }
 
-  async setPassword(username, password = this._elasticPassword) {
-    this._log.info(`setting ${chalk.bold(username)} password to ${chalk.bold(password)}`);
+  async setPassword(username, password = this._elasticPassword, { attempt = 1 } = {}) {
+    await this._autoRetry(async () => {
+      this._log.info(
+        (attempt > 1 ? `attempt ${attempt}: ` : '') +
+          `setting ${chalk.bold(username)} password to ${chalk.bold(password)}`
+      );
 
-    try {
       await this._client.security.changePassword({
         username,
         refresh: 'wait_for',
@@ -40,11 +43,7 @@ exports.NativeRealm = class NativeRealm {
           password,
         },
       });
-    } catch (e) {
-      this._log.error(
-        chalk.red(`unable to set password for ${chalk.bold(username)}: ${e.message}`)
-      );
-    }
+    });
   }
 
   async setPasswords(options) {
@@ -53,13 +52,18 @@ exports.NativeRealm = class NativeRealm {
       return;
     }
 
-    (await this.getReservedUsers()).forEach(user => {
-      this.setPassword(user, options[`password.${user}`]);
-    });
+    const reservedUsers = await this.getReservedUsers();
+    await Promise.all(
+      reservedUsers.map(async user => {
+        await this.setPassword(user, options[`password.${user}`]);
+      })
+    );
   }
 
   async getReservedUsers() {
-    const users = await this._client.security.getUser();
+    const users = await this._autoRetry(async () => {
+      return await this._client.security.getUser();
+    });
 
     return Object.keys(users.body).reduce((acc, user) => {
       if (users.body[user].metadata._reserved === true) {
@@ -71,12 +75,34 @@ exports.NativeRealm = class NativeRealm {
 
   async isSecurityEnabled() {
     try {
-      const {
-        body: { features },
-      } = await this._client.xpack.info({ categories: 'features' });
-      return features.security && features.security.enabled && features.security.available;
-    } catch (e) {
-      return false;
+      return await this._autoRetry(async () => {
+        const {
+          body: { features },
+        } = await this._client.xpack.info({ categories: 'features' });
+        return features.security && features.security.enabled && features.security.available;
+      });
+    } catch (error) {
+      if (error.meta && error.meta.statusCode === 400) {
+        return false;
+      }
+
+      throw error;
+    }
+  }
+
+  async _autoRetry(fn, attempt = 1) {
+    try {
+      return await fn(attempt);
+    } catch (error) {
+      if (attempt >= 3) {
+        throw error;
+      }
+
+      this._log.warning(
+        'assuming [elastic] user not available yet, waiting 1.5 seconds and trying again'
+      );
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      return await this._autoRetry(fn, attempt + 1);
     }
   }
 };

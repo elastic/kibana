@@ -17,13 +17,42 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../base_path';
+import { Observable } from 'rxjs';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
+import { HttpInterceptController } from './http_intercept_controller';
+import { HttpFetchError } from './http_fetch_error';
 
+/** @public */
+export interface HttpServiceBase {
+  stop(): void;
+  basePath: {
+    get: () => string;
+    prepend: (url: string) => string;
+    remove: (url: string) => string;
+  };
+  intercept(interceptor: HttpInterceptor): () => void;
+  removeAllInterceptors(): void;
+  fetch: HttpHandler;
+  delete: HttpHandler;
+  get: HttpHandler;
+  head: HttpHandler;
+  options: HttpHandler;
+  patch: HttpHandler;
+  post: HttpHandler;
+  put: HttpHandler;
+  addLoadingCount(count$: Observable<number>): void;
+  getLoadingCount$(): Observable<number>;
+}
+/** @public */
+export type HttpSetup = HttpServiceBase;
+/** @public */
+export type HttpStart = HttpServiceBase;
+/** @public */
 export interface HttpHeadersInit {
   [name: string]: any;
 }
+/** @public */
 export interface HttpRequestInit {
   body?: BodyInit | null;
   cache?: RequestCache;
@@ -39,17 +68,56 @@ export interface HttpRequestInit {
   signal?: AbortSignal | null;
   window?: any;
 }
-export interface Deps {
-  basePath: BasePathSetup;
+/** @public */
+export interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
+  fatalErrors: FatalErrorsSetup | null;
 }
+/** @public */
 export interface HttpFetchQuery {
   [key: string]: string | number | boolean | undefined;
 }
+/** @public */
 export interface HttpFetchOptions extends HttpRequestInit {
   query?: HttpFetchQuery;
   prependBasePath?: boolean;
   headers?: HttpHeadersInit;
 }
-export type HttpBody = BodyInit | null;
+/** @public */
+export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+/** @public */
+export type HttpBody = BodyInit | null | any;
+/** @public */
+export interface HttpResponse {
+  request: Request;
+  response?: Response;
+  body?: HttpBody;
+}
+/** @public */
+export interface HttpErrorResponse extends HttpResponse {
+  error: Error | HttpFetchError;
+}
+/** @public */
+export interface HttpErrorRequest {
+  request?: Request;
+  error: Error;
+}
+/** @public */
+export interface HttpInterceptor {
+  request?(
+    request: Request,
+    controller: HttpInterceptController
+  ): Promise<Request> | Request | void;
+  requestError?(
+    httpErrorRequest: HttpErrorRequest,
+    controller: HttpInterceptController
+  ): Promise<Request> | Request | void;
+  response?(
+    httpResponse: HttpResponse,
+    controller: HttpInterceptController
+  ): Promise<HttpResponse> | HttpResponse | void;
+  responseError?(
+    httpErrorResponse: HttpErrorResponse,
+    controller: HttpInterceptController
+  ): Promise<HttpResponse> | HttpResponse | void;
+}

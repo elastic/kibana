@@ -18,6 +18,7 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
@@ -32,7 +33,7 @@ import editorConfigTemplate from './timelion_vis_params.html';
 // register the provider with the visTypes registry so that other know it exists
 VisTypesRegistryProvider.register(TimelionVisProvider);
 
-export default function TimelionVisProvider(Private, i18n) {
+export default function TimelionVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
 
@@ -42,7 +43,7 @@ export default function TimelionVisProvider(Private, i18n) {
     name: 'timelion',
     title: 'Timelion',
     icon: 'visTimelion',
-    description: i18n('timelion.timelionDescription', {
+    description: i18n.translate('timelion.timelionDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
     visConfig: {

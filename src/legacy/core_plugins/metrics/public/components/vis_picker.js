@@ -34,7 +34,7 @@ function VisPickerItem(props) {
       onClick={() => props.onClick(type)}
       data-test-subj={`${type}TsvbTypeBtn`}
     >
-      { label }
+      {label}
     </EuiTab>
   );
 }
@@ -43,22 +43,40 @@ VisPickerItem.propTypes = {
   label: PropTypes.string,
   onClick: PropTypes.func,
   type: PropTypes.string,
-  selected: PropTypes.bool
+  selected: PropTypes.bool,
 };
 
-const VisPicker = injectI18n(function (props) {
-  const handleChange = (type) => {
+export const VisPicker = injectI18n(function(props) {
+  const handleChange = type => {
     props.onChange({ type });
   };
 
   const { model, intl } = props;
   const tabs = [
-    { type: PANEL_TYPES.TIMESERIES, label: intl.formatMessage({ id: 'tsvb.visPicker.timeSeriesLabel', defaultMessage: 'Time Series' }) },
-    { type: PANEL_TYPES.METRIC, label: intl.formatMessage({ id: 'tsvb.visPicker.metricLabel', defaultMessage: 'Metric' }) },
-    { type: PANEL_TYPES.TOP_N, label: intl.formatMessage({ id: 'tsvb.visPicker.topNLabel', defaultMessage: 'Top N' }) },
-    { type: PANEL_TYPES.GAUGE, label: intl.formatMessage({ id: 'tsvb.visPicker.gaugeLabel', defaultMessage: 'Gauge' }) },
+    {
+      type: PANEL_TYPES.TIMESERIES,
+      label: intl.formatMessage({
+        id: 'tsvb.visPicker.timeSeriesLabel',
+        defaultMessage: 'Time Series',
+      }),
+    },
+    {
+      type: PANEL_TYPES.METRIC,
+      label: intl.formatMessage({ id: 'tsvb.visPicker.metricLabel', defaultMessage: 'Metric' }),
+    },
+    {
+      type: PANEL_TYPES.TOP_N,
+      label: intl.formatMessage({ id: 'tsvb.visPicker.topNLabel', defaultMessage: 'Top N' }),
+    },
+    {
+      type: PANEL_TYPES.GAUGE,
+      label: intl.formatMessage({ id: 'tsvb.visPicker.gaugeLabel', defaultMessage: 'Gauge' }),
+    },
     { type: PANEL_TYPES.MARKDOWN, label: 'Markdown' },
-    { type: PANEL_TYPES.TABLE, label: intl.formatMessage({ id: 'tsvb.visPicker.tableLabel', defaultMessage: 'Table' }) }
+    {
+      type: PANEL_TYPES.TABLE,
+      label: intl.formatMessage({ id: 'tsvb.visPicker.tableLabel', defaultMessage: 'Table' }),
+    },
   ].map(item => {
     return (
       <VisPickerItem
@@ -70,17 +88,10 @@ const VisPicker = injectI18n(function (props) {
     );
   });
 
-  return (
-    <EuiTabs>
-      { tabs }
-    </EuiTabs>
-  );
-
+  return <EuiTabs>{tabs}</EuiTabs>;
 });
 
 VisPicker.propTypes = {
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
-
-export default VisPicker;

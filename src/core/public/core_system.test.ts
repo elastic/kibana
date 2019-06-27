@@ -18,14 +18,12 @@
  */
 
 import {
-  BasePathServiceConstructor,
   ChromeServiceConstructor,
   FatalErrorsServiceConstructor,
   HttpServiceConstructor,
   I18nServiceConstructor,
   InjectedMetadataServiceConstructor,
   LegacyPlatformServiceConstructor,
-  MockBasePathService,
   MockChromeService,
   MockFatalErrorsService,
   MockHttpService,
@@ -40,6 +38,9 @@ import {
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
   MockApplicationService,
+  MockDocLinksService,
+  MockRenderingService,
+  RenderingServiceConstructor,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -78,10 +79,10 @@ describe('constructor', () => {
     expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(BasePathServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -169,19 +170,9 @@ describe('#setup()', () => {
     expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls basePath#setup()', async () => {
-    await setupCore();
-    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
-  });
-
   it('calls uiSettings#setup()', async () => {
     await setupCore();
     expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls i18n#setup()', async () => {
-    await setupCore();
-    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls fatalErrors#setup()', async () => {
@@ -192,11 +183,6 @@ describe('#setup()', () => {
   it('calls notifications#setup()', async () => {
     await setupCore();
     expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls chrome#setup()', async () => {
-    await setupCore();
-    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls plugin#setup()', async () => {
@@ -216,16 +202,28 @@ describe('#start()', () => {
     await core.start();
   }
 
-  it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', async () => {
+  it('clears the children of the rootDomElement and appends container for rendering service with #kibana-body, notifications, overlays', async () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>foo bar</p>';
     await startCore(root);
-    expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
+    expect(root.innerHTML).toMatchInlineSnapshot(
+      `"<div id=\\"kibana-body\\"></div><div></div><div></div>"`
+    );
   });
 
   it('calls application#start()', async () => {
     await startCore();
     expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls docLinks#start()', async () => {
+    await startCore();
+    expect(MockDocLinksService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls uiSettings#start()', async () => {
+    await startCore();
+    expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {
@@ -243,6 +241,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
+      overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -260,6 +259,15 @@ describe('#start()', () => {
   it('calls overlays#start()', async () => {
     await startCore();
     expect(MockOverlayService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls rendering#start()', async () => {
+    await startCore();
+    expect(MockRenderingService.start).toHaveBeenCalledTimes(1);
+    expect(MockRenderingService.start).toHaveBeenCalledWith({
+      chrome: expect.any(Object),
+      targetDomElement: expect.any(HTMLElement),
+    });
   });
 });
 
@@ -325,22 +333,41 @@ describe('#stop()', () => {
   });
 });
 
-describe('LegacyPlatform targetDomElement', () => {
-  it('only mounts the element when start, after setting up the legacyPlatformService', async () => {
+describe('RenderingService targetDomElement', () => {
+  it('only mounts the element when start, after setting up the renderingService', async () => {
     const rootDomElement = document.createElement('div');
     const core = createCoreSystem({
       rootDomElement,
     });
 
     let targetDomElementParentInStart: HTMLElement | null;
-    MockLegacyPlatformService.start.mockImplementation(async ({ targetDomElement }) => {
+    MockRenderingService.start.mockImplementation(({ targetDomElement }) => {
       targetDomElementParentInStart = targetDomElement.parentElement;
+      return { legacyTargetDomElement: document.createElement('div') };
     });
 
-    // setting up the core system should mount the targetDomElement as a child of the rootDomElement
+    // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();
     await core.start();
     expect(targetDomElementParentInStart!).toBe(rootDomElement);
+  });
+});
+
+describe('LegacyPlatformService targetDomElement', () => {
+  it('only mounts the element when start, after setting up the legacyPlatformService', async () => {
+    const core = createCoreSystem();
+
+    let targetDomElementInStart: HTMLElement | null;
+    MockLegacyPlatformService.start.mockImplementation(({ targetDomElement }) => {
+      targetDomElementInStart = targetDomElement;
+    });
+
+    await core.setup();
+    await core.start();
+    // Starting the core system should pass the legacyTargetDomElement to the LegacyPlatformService
+    const renderingLegacyTargetDomElement =
+      MockRenderingService.start.mock.results[0].value.legacyTargetDomElement;
+    expect(targetDomElementInStart!).toBe(renderingLegacyTargetDomElement);
   });
 });
 
@@ -359,7 +386,7 @@ describe('Notifications targetDomElement', () => {
       }
     );
 
-    // setting up and starting the core system should mount the targetDomElement as a child of the rootDomElement
+    // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();
     await core.start();
     expect(targetDomElementParentInStart!).toBe(rootDomElement);

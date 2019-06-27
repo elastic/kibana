@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import FieldSelect from './aggs/field_select';
-import createSelectHandler from './lib/create_select_handler';
-import createTextHandler from './lib/create_text_handler';
-import YesNo from './yes_no';
+import { FieldSelect } from './aggs/field_select';
+import { createSelectHandler } from './lib/create_select_handler';
+import { createTextHandler } from './lib/create_text_handler';
+import { YesNo } from './yes_no';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -50,26 +50,28 @@ export const IndexPattern = props => {
     default_index_pattern: '',
     [indexPatternName]: '*',
     [intervalName]: 'auto',
-    [dropBucketName]: 1
+    [dropBucketName]: 1,
   };
 
   const htmlId = htmlIdGenerator();
-
   const model = { ...defaults, ...props.model };
+  const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
+
   return (
     <div className={props.className}>
       <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
-            label={(<FormattedMessage
-              id="tsvb.indexPatternLabel"
-              defaultMessage="Index pattern"
-            />)}
-            helpText={(model.default_index_pattern && !model[indexPatternName] && <FormattedMessage
-              id="tsvb.indexPattern.searchByDefaultIndex"
-              defaultMessage="Default index pattern is used. To query all indexes use *"
-            />)}
+            label={<FormattedMessage id="tsvb.indexPatternLabel" defaultMessage="Index pattern" />}
+            helpText={
+              isDefaultIndexPatternUsed && (
+                <FormattedMessage
+                  id="tsvb.indexPattern.searchByDefaultIndex"
+                  defaultMessage="Default index pattern is used. To query all indexes use *"
+                />
+              )
+            }
             fullWidth
           >
             <EuiFieldText
@@ -85,10 +87,9 @@ export const IndexPattern = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('timeField')}
-            label={(<FormattedMessage
-              id="tsvb.indexPattern.timeFieldLabel"
-              defaultMessage="Time field"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.indexPattern.timeFieldLabel" defaultMessage="Time field" />
+            }
             fullWidth
           >
             <FieldSelect
@@ -99,6 +100,7 @@ export const IndexPattern = props => {
               onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
+              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
               fullWidth
             />
           </EuiFormRow>
@@ -106,15 +108,16 @@ export const IndexPattern = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('interval')}
-            label={(<FormattedMessage
-              id="tsvb.indexPattern.intervalLabel"
-              defaultMessage="Interval"
-            />)}
-            helpText={(<FormattedMessage
-              id="tsvb.indexPattern.intervalHelpText"
-              defaultMessage="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
-              description="auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
-            />)}
+            label={
+              <FormattedMessage id="tsvb.indexPattern.intervalLabel" defaultMessage="Interval" />
+            }
+            helpText={
+              <FormattedMessage
+                id="tsvb.indexPattern.intervalHelpText"
+                defaultMessage="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
+                description="auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
+              />
+            }
           >
             <EuiFieldText
               disabled={props.disabled}
@@ -132,11 +135,7 @@ export const IndexPattern = props => {
             />
           </EuiFormLabel>
           <EuiSpacer size="s" />
-          <YesNo
-            value={model[dropBucketName]}
-            name={dropBucketName}
-            onChange={props.onChange}
-          />
+          <YesNo value={model[dropBucketName]} name={dropBucketName} onChange={props.onChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -154,5 +153,5 @@ IndexPattern.propTypes = {
   onChange: PropTypes.func.isRequired,
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
 };

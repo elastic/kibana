@@ -75,3 +75,16 @@ export interface Config {
    */
   toRaw(): Record<string, any>;
 }
+
+const pathDelimiter = '.';
+export function hasConfigPathIntersection(leafPath: string, rootPath: string) {
+  if (!leafPath) {
+    throw new Error('leafPath cannot be empty');
+  }
+  if (!rootPath) {
+    throw new Error('rootPath cannot be empty');
+  }
+  const leafSegments = leafPath.split(pathDelimiter);
+  const rootSegments = rootPath.split(pathDelimiter);
+  return rootSegments.every((rootSegment, index) => leafSegments[index] === rootSegment);
+}

@@ -30,16 +30,23 @@ import { FieldParamType } from '../param_types';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
+interface FieldParamEditorProps extends AggParamEditorProps<FieldParamType> {
+  customError?: string;
+  customLabel?: string;
+}
+
 function FieldParamEditor({
   agg,
   aggParam,
+  customError,
+  customLabel,
   indexedFields = [],
   showValidation,
   value,
   setTouched,
   setValidity,
   setValue,
-}: AggParamEditorProps<FieldParamType>) {
+}: FieldParamEditorProps) {
   const selectedOptions: ComboBoxGroupedOption[] = value
     ? [{ label: value.displayName, value }]
     : [];
@@ -56,6 +63,10 @@ function FieldParamEditor({
   };
   const errors = [];
 
+  if (customError) {
+    errors.push(customError);
+  }
+
   if (!indexedFields.length) {
     errors.push(
       i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
@@ -70,7 +81,7 @@ function FieldParamEditor({
     setTouched();
   }
 
-  const isValid = !!value && !!indexedFields.length;
+  const isValid = !!value && !errors.length;
 
   useEffect(
     () => {
@@ -79,9 +90,24 @@ function FieldParamEditor({
     [isValid]
   );
 
+  useEffect(() => {
+    // set field if only one available
+    if (indexedFields.length !== 1) {
+      return;
+    }
+
+    const options = indexedFields[0].options;
+
+    if (!options) {
+      setValue(indexedFields[0].value);
+    } else if (options.length === 1) {
+      setValue(options[0].value);
+    }
+  }, []);
+
   return (
     <EuiFormRow
-      label={label}
+      label={customLabel || label}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}

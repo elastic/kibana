@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from '../../server';
-import { BasePathSetup, BasePathStart } from '../base_path';
-import { ChromeSetup, ChromeStart } from '../chrome';
+import { omit } from 'lodash';
+
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreContext } from '../core_system';
-import { FatalErrorsSetup } from '../fatal_errors';
-import { I18nSetup, I18nStart } from '../i18n';
-import { NotificationsSetup, NotificationsStart } from '../notifications';
-import { UiSettingsSetup } from '../ui_settings';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { OverlayStart } from '../overlays';
-import { ApplicationStart } from '../application';
-import { HttpSetup, HttpStart } from '../http';
+import { CoreSetup, CoreStart } from '../';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -38,36 +32,6 @@ import { HttpSetup, HttpStart } from '../http';
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
-
-/**
- * The available core services passed to a plugin's `Plugin#setup` method.
- *
- * @public
- */
-export interface PluginSetupContext {
-  basePath: BasePathSetup;
-  chrome: ChromeSetup;
-  fatalErrors: FatalErrorsSetup;
-  http: HttpSetup;
-  i18n: I18nSetup;
-  notifications: NotificationsSetup;
-  uiSettings: UiSettingsSetup;
-}
-
-/**
- * The available core services passed to a plugin's `Plugin#start` method.
- *
- * @public
- */
-export interface PluginStartContext {
-  application: Pick<ApplicationStart, 'capabilities'>;
-  chrome: ChromeStart;
-  basePath: BasePathStart;
-  http: HttpStart;
-  i18n: I18nStart;
-  notifications: NotificationsStart;
-  overlays: OverlayStart;
-}
 
 /**
  * Provides a plugin-specific context passed to the plugin's construtor. This is currently
@@ -94,17 +58,19 @@ export function createPluginInitializerContext(
  * @param plugin
  * @internal
  */
-export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginSetupContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
+>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): PluginSetupContext {
+): CoreSetup {
   return {
     http: deps.http,
-    basePath: deps.basePath,
-    chrome: deps.chrome,
     fatalErrors: deps.fatalErrors,
-    i18n: deps.i18n,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
   };
@@ -120,20 +86,26 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
  * @param plugin
  * @internal
  */
-export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginStartContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
+>(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): PluginStartContext {
+): CoreStart {
   return {
     application: {
       capabilities: deps.application.capabilities,
     },
-    chrome: deps.chrome,
-    basePath: deps.basePath,
+    docLinks: deps.docLinks,
     http: deps.http,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
+    uiSettings: deps.uiSettings,
   };
 }

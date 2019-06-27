@@ -62,7 +62,7 @@ export function createEsTestCluster(options = {}) {
       return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
-    async start(esArgs = []) {
+    async start(esArgs = [], esEnvVars) {
       let installPath;
 
       if (esFrom === 'source') {
@@ -87,6 +87,7 @@ export function createEsTestCluster(options = {}) {
           'discovery.type=single-node',
           ...esArgs,
         ],
+        esEnvVars,
       });
     }
 

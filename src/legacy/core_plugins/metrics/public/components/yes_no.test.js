@@ -21,30 +21,32 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import sinon from 'sinon';
-import YesNo from './yes_no';
+import { YesNo } from './yes_no';
 
 describe('YesNo', () => {
   it('call onChange={handleChange} on yes', () => {
     const handleChange = sinon.spy();
-    const wrapper = shallowWithIntl(
-      <YesNo name="test" onChange={handleChange} />
-    );
-    wrapper.find('EuiRadio').first().simulate('change');
+    const wrapper = shallowWithIntl(<YesNo name="test" onChange={handleChange} />);
+    wrapper
+      .find('EuiRadio')
+      .first()
+      .simulate('change');
     expect(handleChange.calledOnce).to.equal(true);
     expect(handleChange.firstCall.args[0]).to.eql({
-      test: 1
+      test: 1,
     });
   });
 
   it('call onChange={handleChange} on no', () => {
     const handleChange = sinon.spy();
-    const wrapper = shallowWithIntl(
-      <YesNo name="test" onChange={handleChange} />
-    );
-    wrapper.find('EuiRadio').last().simulate('change');
+    const wrapper = shallowWithIntl(<YesNo name="test" onChange={handleChange} />);
+    wrapper
+      .find('EuiRadio')
+      .last()
+      .simulate('change');
     expect(handleChange.calledOnce).to.equal(true);
     expect(handleChange.firstCall.args[0]).to.eql({
-      test: 0
+      test: 0,
     });
   });
 });

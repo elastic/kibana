@@ -23,7 +23,7 @@ const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filt
 /* Last query handler in the chain. You can use this handler
  * as the last place where you can modify the "doc" (request body) object before sending it to ES.
  */
-export default function normalizeQuery() {
+export function normalizeQuery() {
   return () => doc => {
     const series = get(doc, 'aggs.pivot.aggs');
     const normalizedSeries = {};
@@ -35,7 +35,7 @@ export default function normalizeQuery() {
         const agg = get(value, 'aggs.timeseries');
         const meta = {
           ...get(value, 'meta'),
-          seriesId
+          seriesId,
         };
         set(normalizedSeries, `${seriesId}`, agg);
         set(normalizedSeries, `${seriesId}.meta`, meta);

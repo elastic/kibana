@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import getAggValue from '../../helpers/get_agg_value';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
+import { getAggValue } from '../../helpers/get_agg_value';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentileRank(resp, panel, series, meta) {
+export function percentileRank(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
 
@@ -33,12 +33,13 @@ export default function percentileRank(resp, panel, series, meta) {
 
     getSplits(resp, panel, series, meta).forEach(split => {
       (metric.values || []).forEach(percentileRank => {
-        const data = split.timeseries.buckets.map(bucket => (
-          [bucket.key, getAggValue(bucket, {
+        const data = split.timeseries.buckets.map(bucket => [
+          bucket.key,
+          getAggValue(bucket, {
             ...metric,
-            value: toPercentileNumber(percentileRank)
-          })]
-        ));
+            value: toPercentileNumber(percentileRank),
+          }),
+        ]);
 
         results.push({
           data,

@@ -17,13 +17,13 @@
  * under the License.
  */
 import { last } from 'lodash';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
-import getAggValue from '../../helpers/get_agg_value';
+import { getAggValue } from '../../helpers/get_agg_value';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentileRank(bucket, panel, series) {
+export function percentileRank(bucket, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
 
@@ -40,12 +40,13 @@ export default function percentileRank(bucket, panel, series) {
       const lastRankValue = last(metric.values);
       const percentileRank = toPercentileNumber(lastRankValue);
 
-      const data = split.timeseries.buckets.map(bucket => (
-        [bucket.key, getAggValue(bucket, {
+      const data = split.timeseries.buckets.map(bucket => [
+        bucket.key,
+        getAggValue(bucket, {
           ...metric,
-          value: percentileRank
-        })]
-      ));
+          value: percentileRank,
+        }),
+      ]);
 
       results.push({
         data,

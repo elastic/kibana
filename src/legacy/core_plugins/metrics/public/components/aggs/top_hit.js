@@ -18,13 +18,13 @@
  */
 
 import React from 'react';
-import AggRow from './agg_row';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
 import { i18n } from '@kbn/i18n';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -113,14 +113,15 @@ const TopHitAggUi = props => {
   };
   const model = { ...defaults, ...props.model };
   const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) ||
-    panel.index_pattern;
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const aggWithOptionsRestrictFields = [
     PANEL_TYPES.TABLE,
     PANEL_TYPES.METRIC,
-    PANEL_TYPES.MARKDOWN
-  ].includes(panel.type) ? [ES_TYPES.NUMBER, ES_TYPES.KEYWORD, ES_TYPES.STRING] : [ES_TYPES.NUMBER];
+    PANEL_TYPES.MARKDOWN,
+  ].includes(panel.type)
+    ? [ES_TYPES.NUMBER, ES_TYPES.KEYWORD, ES_TYPES.STRING]
+    : [ES_TYPES.NUMBER];
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -152,10 +153,7 @@ const TopHitAggUi = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.topHit.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.topHit.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -168,10 +166,7 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.fieldLabel"
-              defaultMessage="Field"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.fieldLabel" defaultMessage="Field" />}
           >
             <FieldSelect
               fields={fields}
@@ -185,16 +180,13 @@ const TopHitAggUi = props => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m"/>
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('size')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.sizeLabel"
-              defaultMessage="Size"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.sizeLabel" defaultMessage="Size" />}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -210,10 +202,12 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('agg_with')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.aggregateWithLabel"
-              defaultMessage="Aggregate with"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.topHit.aggregateWithLabel"
+                defaultMessage="Aggregate with"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -230,10 +224,7 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('order_by')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.orderByLabel"
-              defaultMessage="Order by"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.orderByLabel" defaultMessage="Order by" />}
           >
             <FieldSelect
               restrict={ORDER_DATE_RESTRICT_FIELDS}
@@ -247,10 +238,7 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('order')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.orderLabel"
-              defaultMessage="Order"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.orderLabel" defaultMessage="Order" />}
           >
             <EuiComboBox
               isClearable={false}

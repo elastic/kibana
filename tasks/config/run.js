@@ -29,7 +29,7 @@ module.exports = function (grunt) {
     return {
       options: {
         wait: false,
-        ready: /Server running/,
+        ready: /http server running/,
         quiet: false,
         failOnError: false
       },
@@ -148,7 +148,7 @@ module.exports = function (grunt) {
       ]
     }),
 
-    // used by the test:server task
+    // used by the test:mocha task
     //    runs all node.js/server mocha tests
     mocha: scriptWithGithubChecks({
       title: 'Mocha tests',
@@ -189,6 +189,7 @@ module.exports = function (grunt) {
       flags: [
         ...browserTestServerFlags,
         '--dev',
+        '--no-dev-config',
         '--no-watch',
         '--no-base-path',
         '--optimize.watchPort=5611',
@@ -268,11 +269,17 @@ module.exports = function (grunt) {
       ],
     }),
 
-    licenses: gruntTaskWithGithubChecks('Licenses', 'licenses'),
+    licenses: scriptWithGithubChecks({
+      title: 'Check licenses',
+      cmd: NODE,
+      args: [
+        'scripts/check_licenses',
+        '--dev',
+      ],
+    }),
+
     verifyDependencyVersions:
       gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
-    test_server:
-      gruntTaskWithGithubChecks('Server tests', 'test:server'),
     test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
     test_jest_integration:
       gruntTaskWithGithubChecks('Jest integration tests', 'test:jest_integration'),

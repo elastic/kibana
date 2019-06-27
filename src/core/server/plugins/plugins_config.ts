@@ -20,26 +20,23 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Env } from '../config';
 
-const pluginsSchema = schema.object({
-  initialize: schema.boolean({ defaultValue: true }),
+export type PluginsConfigType = TypeOf<typeof config.schema>;
 
-  /**
-   * Defines an array of directories where another plugin should be loaded from.
-   * Should only be used in a development environment.
-   */
-  paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
-});
-
-export type PluginsConfigType = TypeOf<typeof pluginsSchema>;
 export const config = {
   path: 'plugins',
-  schema: pluginsSchema,
+  schema: schema.object({
+    initialize: schema.boolean({ defaultValue: true }),
+
+    /**
+     * Defines an array of directories where another plugin should be loaded from.
+     * Should only be used in a development environment.
+     */
+    paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  }),
 };
 
 /** @internal */
 export class PluginsConfig {
-  public static schema = pluginsSchema;
-
   /**
    * Indicates whether or not plugins should be initialized.
    */

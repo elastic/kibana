@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { ConfigWithSchema, EnvironmentMode } from '../config';
+import { EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
-import { ClusterClient } from '../elasticsearch';
-import { HttpServiceSetup } from '../http';
 import { LoggerFactory } from '../logging';
 import { PluginWrapper, PluginManifest } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * Context that's available to plugins during initialization stage.
@@ -36,39 +34,10 @@ export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
-    create: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config>;
-    createIfExists: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config | undefined>;
+    create: <Schema>() => Observable<Schema>;
+    createIfExists: <Schema>() => Observable<Schema | undefined>;
   };
 }
-
-/**
- * Context passed to the plugins `setup` method.
- *
- * @public
- */
-export interface PluginSetupContext {
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-  };
-  http: {
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnRequest: HttpServiceSetup['registerOnRequest'];
-    getBasePathFor: HttpServiceSetup['getBasePathFor'];
-    setBasePathFor: HttpServiceSetup['setBasePathFor'];
-  };
-}
-
-/**
- * Context passed to the plugins `start` method.
- *
- * @public
- */
-export interface PluginStartContext {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -113,11 +82,11 @@ export function createPluginInitializerContext(
        * @param ConfigClass A class (not an instance of a class) that contains a
        * static `schema` that we validate the config at the given `path` against.
        */
-      create(ConfigClass) {
-        return coreContext.configService.atPath(pluginManifest.configPath, ConfigClass);
+      create() {
+        return coreContext.configService.atPath(pluginManifest.configPath);
       },
-      createIfExists(ConfigClass) {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath, ConfigClass);
+      createIfExists() {
+        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
       },
     },
   };
@@ -141,17 +110,18 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): PluginSetupContext {
+): CoreSetup {
   return {
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
     },
     http: {
+      registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
-      registerOnRequest: deps.http.registerOnRequest,
-      getBasePathFor: deps.http.getBasePathFor,
-      setBasePathFor: deps.http.setBasePathFor,
+      registerOnPostAuth: deps.http.registerOnPostAuth,
+      basePath: deps.http.basePath,
+      createNewServer: deps.http.createNewServer,
     },
   };
 }
@@ -172,6 +142,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): PluginStartContext {
+): CoreStart {
   return {};
 }

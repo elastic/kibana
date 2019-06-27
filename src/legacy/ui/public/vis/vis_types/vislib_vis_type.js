@@ -24,16 +24,15 @@ import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import { CUSTOM_LEGEND_VIS_TYPES } from './vislib_vis_legend';
-import { BaseVisTypeProvider } from './base_vis_type';
+import { BaseVisType } from './base_vis_type';
 import VislibProvider from '../../vislib';
 import { VisFiltersProvider } from '../vis_filters';
 import $ from 'jquery';
 import { defaultsDeep } from 'lodash';
 
-export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
+export function VislibVisTypeProvider(Private, $rootScope, $compile) {
   const vislib = Private(VislibProvider);
   const visFilters = Private(VisFiltersProvider);
-  const BaseVisType = Private(BaseVisTypeProvider);
 
   const legendClassName = {
     top: 'visLib--legend-top',
@@ -127,9 +126,6 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         opts.responseHandlerConfig = { asAggConfigResults: true };
       }
       opts.events = defaultsDeep({}, opts.events, {
-        filterBucket: {
-          defaultAction: visFilters.filter,
-        },
         brush: {
           defaultAction: visFilters.brush,
         }

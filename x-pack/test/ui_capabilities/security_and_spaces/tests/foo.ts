@@ -6,9 +6,11 @@
 
 import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import {
+  GetUICapabilitiesFailureReason,
+  UICapabilitiesService,
+} from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
-import { assertDeeplyFalse } from '../../common/lib/assert_deeply_false';
 
 // eslint-disable-next-line import/no-default-export
 export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -23,14 +25,14 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
           credentials: { username: user.username, password: user.password },
           spaceId: space.id,
         });
-        expect(uiCapabilities.success).to.be(true);
-        expect(uiCapabilities.value).to.have.property('foo');
         switch (scenario.id) {
           // these users have a read/write view
           case 'superuser at everything_space':
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
             expect(uiCapabilities.value!.foo).to.eql({
               create: true,
               edit: true,
@@ -42,6 +44,8 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
             expect(uiCapabilities.value!.foo).to.eql({
               create: false,
               edit: false,
@@ -58,6 +62,8 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
             expect(uiCapabilities.value!.foo).to.eql({
               create: false,
               edit: false,
@@ -65,8 +71,9 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
               show: false,
             });
             break;
-          // if we don't have access at the space itself, all ui
-          // capabilities should be false
+          // if we don't have access at the space itself, we're
+          // redirected to the space selector and the ui capabilities
+          // are largely irrelevant because they won't be consumed
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -75,7 +82,10 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
-            assertDeeplyFalse(uiCapabilities.value!.foo);
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(
+              GetUICapabilitiesFailureReason.RedirectedToRoot
+            );
             break;
           default:
             throw new UnreachableError(scenario);

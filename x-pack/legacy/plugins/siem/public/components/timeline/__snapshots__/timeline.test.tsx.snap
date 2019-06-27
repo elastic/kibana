@@ -1,0 +1,752 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Timeline rendering renders correctly against snapshot 1`] = `
+<Component
+  browserFields={
+    Object {
+      "agent": Object {
+        "fields": Object {
+          "agent.ephemeral_id": Object {
+            "aggregatable": true,
+            "category": "agent",
+            "description": "Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but \`agent.id\` does not.",
+            "example": "8a4f500f",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "agent.ephemeral_id",
+            "searchable": true,
+            "type": "string",
+          },
+          "agent.hostname": Object {
+            "aggregatable": true,
+            "category": "agent",
+            "description": null,
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "agent.hostname",
+            "searchable": true,
+            "type": "string",
+          },
+          "agent.id": Object {
+            "aggregatable": true,
+            "category": "agent",
+            "description": "Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.",
+            "example": "8a4f500d",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "agent.id",
+            "searchable": true,
+            "type": "string",
+          },
+          "agent.name": Object {
+            "aggregatable": true,
+            "category": "agent",
+            "description": "Name of the agent. This is a name that can be given to an agent. This can be helpful if for example two Filebeat instances are running on the same host but a human readable separation is needed on which Filebeat instance data is coming from. If no name is given, the name is often left empty.",
+            "example": "foo",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "agent.name",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "auditd": Object {
+        "fields": Object {
+          "auditd.data.a0": Object {
+            "aggregatable": true,
+            "category": "auditd",
+            "description": null,
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+            ],
+            "name": "auditd.data.a0",
+            "searchable": true,
+            "type": "string",
+          },
+          "auditd.data.a1": Object {
+            "aggregatable": true,
+            "category": "auditd",
+            "description": null,
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+            ],
+            "name": "auditd.data.a1",
+            "searchable": true,
+            "type": "string",
+          },
+          "auditd.data.a2": Object {
+            "aggregatable": true,
+            "category": "auditd",
+            "description": null,
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+            ],
+            "name": "auditd.data.a2",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "base": Object {
+        "fields": Object {
+          "@timestamp": Object {
+            "aggregatable": true,
+            "category": "base",
+            "description": "Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.",
+            "example": "2016-05-23T08:05:34.853Z",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "@timestamp",
+            "searchable": true,
+            "type": "date",
+          },
+        },
+      },
+      "client": Object {
+        "fields": Object {
+          "client.address": Object {
+            "aggregatable": true,
+            "category": "client",
+            "description": "Some event client addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the \`.address\` field. Then it should be duplicated to \`.ip\` or \`.domain\`, depending on which one it is.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "client.address",
+            "searchable": true,
+            "type": "string",
+          },
+          "client.bytes": Object {
+            "aggregatable": true,
+            "category": "client",
+            "description": "Bytes sent from the client to the server.",
+            "example": "184",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "client.bytes",
+            "searchable": true,
+            "type": "number",
+          },
+          "client.domain": Object {
+            "aggregatable": true,
+            "category": "client",
+            "description": "Client domain.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "client.domain",
+            "searchable": true,
+            "type": "string",
+          },
+          "client.geo.country_iso_code": Object {
+            "aggregatable": true,
+            "category": "client",
+            "description": "Country ISO code.",
+            "example": "CA",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "client.geo.country_iso_code",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "cloud": Object {
+        "fields": Object {
+          "cloud.account.id": Object {
+            "aggregatable": true,
+            "category": "cloud",
+            "description": "The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.",
+            "example": "666777888999",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "cloud.account.id",
+            "searchable": true,
+            "type": "string",
+          },
+          "cloud.availability_zone": Object {
+            "aggregatable": true,
+            "category": "cloud",
+            "description": "Availability zone in which this host is running.",
+            "example": "us-east-1c",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "cloud.availability_zone",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "container": Object {
+        "fields": Object {
+          "container.id": Object {
+            "aggregatable": true,
+            "category": "container",
+            "description": "Unique container id.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "container.id",
+            "searchable": true,
+            "type": "string",
+          },
+          "container.image.name": Object {
+            "aggregatable": true,
+            "category": "container",
+            "description": "Name of the image the container was built on.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "container.image.name",
+            "searchable": true,
+            "type": "string",
+          },
+          "container.image.tag": Object {
+            "aggregatable": true,
+            "category": "container",
+            "description": "Container image tag.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "container.image.tag",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "destination": Object {
+        "fields": Object {
+          "destination.address": Object {
+            "aggregatable": true,
+            "category": "destination",
+            "description": "Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the \`.address\` field. Then it should be duplicated to \`.ip\` or \`.domain\`, depending on which one it is.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "destination.address",
+            "searchable": true,
+            "type": "string",
+          },
+          "destination.bytes": Object {
+            "aggregatable": true,
+            "category": "destination",
+            "description": "Bytes sent from the destination to the source.",
+            "example": "184",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "destination.bytes",
+            "searchable": true,
+            "type": "number",
+          },
+          "destination.domain": Object {
+            "aggregatable": true,
+            "category": "destination",
+            "description": "Destination domain.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "destination.domain",
+            "searchable": true,
+            "type": "string",
+          },
+          "destination.ip": Object {
+            "aggregatable": true,
+            "category": "destination",
+            "description": "IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.",
+            "example": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "destination.ip",
+            "searchable": true,
+            "type": "ip",
+          },
+          "destination.port": Object {
+            "aggregatable": true,
+            "category": "destination",
+            "description": "Port of the destination.",
+            "example": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "destination.port",
+            "searchable": true,
+            "type": "long",
+          },
+        },
+      },
+      "event": Object {
+        "fields": Object {
+          "event.end": Object {
+            "aggregatable": true,
+            "category": "event",
+            "description": "event.end contains the date when the event ended or when the activity was last observed.",
+            "example": null,
+            "indexes": Array [
+              "auditbeat-*",
+              "filebeat-*",
+              "packetbeat-*",
+              "winlogbeat-*",
+            ],
+            "name": "event.end",
+            "searchable": true,
+            "type": "date",
+          },
+        },
+      },
+      "source": Object {
+        "fields": Object {
+          "source.ip": Object {
+            "aggregatable": true,
+            "category": "source",
+            "description": "IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.",
+            "example": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "source.ip",
+            "searchable": true,
+            "type": "ip",
+          },
+          "source.port": Object {
+            "aggregatable": true,
+            "category": "source",
+            "description": "Port of the source.",
+            "example": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "source.port",
+            "searchable": true,
+            "type": "long",
+          },
+        },
+      },
+    }
+  }
+  columns={
+    Array [
+      Object {
+        "aggregatable": true,
+        "category": "base",
+        "columnHeaderType": "not-filtered",
+        "description": "Date/time when the event originated.
+For log events this is the date/time when the event was generated, and not when it was read.
+Required field for all events.",
+        "example": "2016-05-23T08:05:34.853Z",
+        "id": "@timestamp",
+        "type": "date",
+        "width": 240,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "event",
+        "columnHeaderType": "not-filtered",
+        "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
+        "example": "7",
+        "id": "event.severity",
+        "type": "long",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "event",
+        "columnHeaderType": "not-filtered",
+        "description": "Event category.
+This contains high-level information about the contents of the event. It is more generic than \`event.action\`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.",
+        "example": "user-management",
+        "id": "event.category",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "event",
+        "columnHeaderType": "not-filtered",
+        "description": "The action captured by the event.
+This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
+        "example": "user-password-change",
+        "id": "event.action",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "host",
+        "columnHeaderType": "not-filtered",
+        "description": "Name of the host.
+It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
+        "example": "",
+        "id": "host.name",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "source",
+        "columnHeaderType": "not-filtered",
+        "description": "IP address of the source.
+Can be one or multiple IPv4 or IPv6 addresses.",
+        "example": "",
+        "id": "source.ip",
+        "type": "ip",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "destination",
+        "columnHeaderType": "not-filtered",
+        "description": "IP address of the destination.
+Can be one or multiple IPv4 or IPv6 addresses.",
+        "example": "",
+        "id": "destination.ip",
+        "type": "ip",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "user",
+        "columnHeaderType": "not-filtered",
+        "description": "Short name or login of the user.",
+        "example": "albert",
+        "id": "user.name",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": true,
+        "category": "base",
+        "columnHeaderType": "not-filtered",
+        "description": "Each document has an _id that uniquely identifies it",
+        "example": "Y-6TfmcB0WOhS6qyMv3s",
+        "id": "_id",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "aggregatable": false,
+        "category": "base",
+        "columnHeaderType": "not-filtered",
+        "description": "For log events the message field contains the log message.
+In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
+        "example": "Hello World",
+        "id": "message",
+        "type": "text",
+        "width": 180,
+      },
+    ]
+  }
+  dataProviders={
+    Array [
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 1",
+        "kqlQuery": "",
+        "name": "Provider 1",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 1",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 2",
+        "kqlQuery": "",
+        "name": "Provider 2",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 2",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 3",
+        "kqlQuery": "",
+        "name": "Provider 3",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 3",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 4",
+        "kqlQuery": "",
+        "name": "Provider 4",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 4",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 5",
+        "kqlQuery": "",
+        "name": "Provider 5",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 5",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 6",
+        "kqlQuery": "",
+        "name": "Provider 6",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 6",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 7",
+        "kqlQuery": "",
+        "name": "Provider 7",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 7",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 8",
+        "kqlQuery": "",
+        "name": "Provider 8",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 8",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 9",
+        "kqlQuery": "",
+        "name": "Provider 9",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 9",
+        },
+      },
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "id-Provider 10",
+        "kqlQuery": "",
+        "name": "Provider 10",
+        "queryMatch": Object {
+          "field": "name",
+          "operator": ":",
+          "value": "Provider 10",
+        },
+      },
+    ]
+  }
+  end={1521862432253}
+  flyoutHeaderHeight={60}
+  flyoutHeight={980}
+  id="foo"
+  indexPattern={
+    Object {
+      "fields": Array [
+        Object {
+          "aggregatable": true,
+          "name": "@timestamp",
+          "searchable": true,
+          "type": "date",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "@version",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.ephemeral_id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.hostname",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test1",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test2",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test3",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test4",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test5",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test6",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test7",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+      ],
+      "title": "filebeat-*,auditbeat-*,packetbeat-*",
+    }
+  }
+  isLive={false}
+  itemsPerPage={5}
+  itemsPerPageOptions={
+    Array [
+      5,
+      10,
+      20,
+    ]
+  }
+  kqlMode="search"
+  kqlQueryExpression=""
+  onChangeDataProviderKqlQuery={[MockFunction]}
+  onChangeDroppableAndProvider={[MockFunction]}
+  onChangeItemsPerPage={[MockFunction]}
+  onDataProviderEdited={[MockFunction]}
+  onDataProviderRemoved={[MockFunction]}
+  onToggleDataProviderEnabled={[MockFunction]}
+  onToggleDataProviderExcluded={[MockFunction]}
+  show={true}
+  sort={
+    Object {
+      "columnId": "@timestamp",
+      "sortDirection": "desc",
+    }
+  }
+  start={1521830963132}
+/>
+`;

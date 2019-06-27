@@ -10,7 +10,7 @@ import {
   EDIT_USERS_PATH,
   ROLES_PATH,
   EDIT_ROLES_PATH,
-} from '../../../../plugins/security/public/views/management/management_urls';
+} from '../../../../legacy/plugins/security/public/views/management/management_urls';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -18,7 +18,9 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', () => {
+  describe('Management', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();

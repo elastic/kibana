@@ -1,7 +1,7 @@
 [[spaces-api-get]]
 === Get Space
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
 
 Retrieves all {kib} spaces, or a specific space.
 
@@ -22,7 +22,7 @@ GET /api/spaces/space
 
 ===== Response
 
-A successful call returns a response code of `200` and a response body containing a JSON 
+A successful call returns a response code of `200` and a response body containing a JSON
 representation of the spaces.
 
 [source,js]
@@ -67,7 +67,7 @@ GET /api/spaces/space/marketing
 
 ===== Response
 
-A successful call returns a response code of `200` and a response body containing a JSON 
+A successful call returns a response code of `200` and a response body containing a JSON
 representation of the space.
 
 [source,js]

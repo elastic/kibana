@@ -23,7 +23,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
             "scripFields": <EuiLink
               color="primary"
               href="(docLink for scriptedFields.scriptFields)"
-              target="_window"
+              target="_blank"
               type="button"
             >
               <FormattedMessage
@@ -39,7 +39,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
             "scriptsInAggregation": <EuiLink
               color="primary"
               href="(docLink for scriptedFields.scriptAggs)"
-              target="_window"
+              target="_blank"
               type="button"
             >
               <FormattedMessage

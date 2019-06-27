@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { uncommonProcessesQuery } from '../../../../plugins/siem/public/containers/uncommon_processes/index.gql_query';
-import { GetUncommonProcessesQuery } from '../../../../plugins/siem/public/graphql/types';
+import { uncommonProcessesQuery } from '../../../../legacy/plugins/siem/public/containers/uncommon_processes/index.gql_query';
+import { GetUncommonProcessesQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -41,6 +41,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           pagination: {
             limit: 1,
           },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         },
       });
       expect(UncommonProcesses.edges.length).to.be(1);
@@ -63,6 +64,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           pagination: {
             limit: 2,
           },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         },
       });
       expect(UncommonProcesses.edges.length).to.be(2);
@@ -85,6 +87,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           pagination: {
             limit: 1,
           },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         },
       });
       expect(UncommonProcesses.totalCount).to.be(TOTAL_COUNT);
@@ -107,6 +110,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           pagination: {
             limit: 1,
           },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         },
       });
       const expected: GetUncommonProcessesQuery.Node = {

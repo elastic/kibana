@@ -33,15 +33,15 @@ import * as Rx from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreSetup } from 'kibana/public';
+import { InternalCoreStart } from 'kibana/public';
 
 import { fatalError } from 'ui/notify';
 import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
 // @ts-ignore
-import { UrlOverflowServiceProvider } from '../error_url_overflow';
-import { getNewPlatform } from '../new_platform';
+import { UrlOverflowService } from '../error_url_overflow';
+import { npStart } from '../new_platform';
 import { toastNotifications } from '../notify';
 // @ts-ignore
 import { isSystemApiRequest } from '../system_api';
@@ -49,7 +49,7 @@ import { isSystemApiRequest } from '../system_api';
 const URL_LIMIT_WARN_WITHIN = 1000;
 
 export const configureAppAngularModule = (angularModule: IModule) => {
-  const newPlatform = getNewPlatform().setup.core;
+  const newPlatform = npStart.core;
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
   forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
@@ -77,9 +77,9 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .run($setupUrlOverflowHandling(newPlatform));
 };
 
-const getEsUrl = (newPlatform: CoreSetup) => {
+const getEsUrl = (newPlatform: InternalCoreStart) => {
   const a = document.createElement('a');
-  a.href = newPlatform.basePath.addToPath('/elasticsearch');
+  a.href = newPlatform.http.basePath.prepend('/elasticsearch');
   const protocolPort = /https/.test(a.protocol) ? 443 : 80;
   const port = a.port || protocolPort;
   return {
@@ -90,13 +90,15 @@ const getEsUrl = (newPlatform: CoreSetup) => {
   };
 };
 
-const setupCompileProvider = (newPlatform: CoreSetup) => ($compileProvider: ICompileProvider) => {
+const setupCompileProvider = (newPlatform: InternalCoreStart) => (
+  $compileProvider: ICompileProvider
+) => {
   if (!newPlatform.injectedMetadata.getLegacyMetadata().devMode) {
     $compileProvider.debugInfoEnabled(false);
   }
 };
 
-const setupLocationProvider = (newPlatform: CoreSetup) => (
+const setupLocationProvider = (newPlatform: InternalCoreStart) => (
   $locationProvider: ILocationProvider
 ) => {
   $locationProvider.html5Mode({
@@ -108,7 +110,7 @@ const setupLocationProvider = (newPlatform: CoreSetup) => (
   $locationProvider.hashPrefix('');
 };
 
-export const $setupXsrfRequestInterceptor = (newPlatform: CoreSetup) => {
+export const $setupXsrfRequestInterceptor = (newPlatform: InternalCoreStart) => {
   const version = newPlatform.injectedMetadata.getLegacyMetadata().version;
 
   // Configure jQuery prefilter
@@ -143,7 +145,7 @@ export const $setupXsrfRequestInterceptor = (newPlatform: CoreSetup) => {
  * @param  {HttpService} $http
  * @return {undefined}
  */
-const capture$httpLoadingCount = (newPlatform: CoreSetup) => (
+const capture$httpLoadingCount = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $http: IHttpService
 ) => {
@@ -164,7 +166,7 @@ const capture$httpLoadingCount = (newPlatform: CoreSetup) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the breadcrumbs if we switch to a Kibana app that does not use breadcrumbs correctly
  */
-const $setupBreadcrumbsAutoClear = (newPlatform: CoreSetup) => (
+const $setupBreadcrumbsAutoClear = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -211,7 +213,7 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreSetup) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the badge if we switch to a Kibana app that does not use the badge correctly
  */
-const $setupBadgeAutoClear = (newPlatform: CoreSetup) => (
+const $setupBadgeAutoClear = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -251,7 +253,7 @@ const $setupBadgeAutoClear = (newPlatform: CoreSetup) => (
  * the helpExtension if we switch to a Kibana app that does not set its own
  * helpExtension
  */
-const $setupHelpExtensionAutoClear = (newPlatform: CoreSetup) => (
+const $setupHelpExtensionAutoClear = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -283,13 +285,13 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreSetup) => (
   });
 };
 
-const $setupUrlOverflowHandling = (newPlatform: CoreSetup) => (
+const $setupUrlOverflowHandling = (newPlatform: InternalCoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
   Private: any,
   config: any
 ) => {
-  const urlOverflow = Private(UrlOverflowServiceProvider);
+  const urlOverflow = new UrlOverflowService();
   const check = () => {
     // disable long url checks when storing state in session storage
     if (config.get('state:storeInSessionStorage')) {
