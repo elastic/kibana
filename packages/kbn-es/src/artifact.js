@@ -284,6 +284,8 @@ exports.Artifact = class Artifact {
       new Transform({
         transform(chunk, encoding, cb) {
           contentLength += Buffer.byteLength(chunk);
+          const downloadedMB = Math.round(contentLength / (1024 * 1024));
+          process.stdout.write(`Downloaded ${downloadedMB} MB\r`);
 
           if (first500Bytes.length < 500) {
             first500Bytes = Buffer.concat(
