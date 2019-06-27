@@ -19,6 +19,7 @@
 
 import { HttpService } from './http_service';
 import { HttpSetup } from './types';
+import { BehaviorSubject } from 'rxjs';
 
 type ServiceSetupMockType = jest.Mocked<HttpSetup> & {
   basePath: jest.Mocked<HttpSetup['basePath']>;
@@ -39,7 +40,7 @@ const createServiceMock = (): ServiceSetupMockType => ({
     remove: jest.fn(),
   },
   addLoadingCount: jest.fn(),
-  getLoadingCount$: jest.fn(),
+  getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
   stop: jest.fn(),
   intercept: jest.fn(),
   removeAllInterceptors: jest.fn(),
