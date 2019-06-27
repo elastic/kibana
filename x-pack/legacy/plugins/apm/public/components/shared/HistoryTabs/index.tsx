@@ -7,10 +7,10 @@
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { units, px } from '../../../style/variables';
 import { matchPath, Route, RouteComponentProps } from 'react-router-dom';
 import { useLocation } from '../../../hooks/useLocation';
 import { history } from '../../../utils/history';
+import { units, px } from '../../../style/variables';
 
 export interface IHistoryTab {
   path: string;
