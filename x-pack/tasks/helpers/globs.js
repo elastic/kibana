@@ -31,9 +31,11 @@ function getPluginPaths(plugins, opts = {}) {
     if (plugin === 'code') {
       paths.push(`plugins/${serverPath}/**/${testPath}/*.ts`);
     }
+
     if (plugin === 'canvas') {
-      paths.push(`!${serverPaths}`);
+      paths.push(`!legacy/plugins/${plugin}/canvas_plugin_src/functions/server/__tests__/**/*.js`);
     }
+
     if (opts.browser) {
       paths = paths.concat(publicPaths);
     }
