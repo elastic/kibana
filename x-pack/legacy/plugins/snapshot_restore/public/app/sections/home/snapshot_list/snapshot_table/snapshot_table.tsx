@@ -177,10 +177,10 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                       values: { name: snapshot },
                     }
                   )}
-                  iconType="exportAction"
+                  iconType="importAction"
                   color="primary"
                   data-test-subj="srsnapshotListRestoreActionButton"
-                  href={`#${BASE_PATH}/restore_snapshot/${repository}/${snapshot}`}
+                  href={`#${BASE_PATH}/restore/${repository}/${snapshot}`}
                   isDisabled={!canRestore}
                 />
               </EuiToolTip>

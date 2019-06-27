@@ -212,14 +212,12 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={`#${BASE_PATH}/restore_snapshot/${repositoryName}/${snapshotId}`}
+                  href={`#${BASE_PATH}/restore/${repositoryName}/${snapshotId}`}
                   fill
                   color="primary"
                   isDisabled={
-                    !(
-                      snapshotDetails.state === SNAPSHOT_STATE.SUCCESS ||
-                      snapshotDetails.state === SNAPSHOT_STATE.PARTIAL
-                    )
+                    snapshotDetails.state !== SNAPSHOT_STATE.SUCCESS &&
+                    snapshotDetails.state !== SNAPSHOT_STATE.PARTIAL
                   }
                 >
                   <FormattedMessage

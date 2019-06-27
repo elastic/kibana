@@ -17,14 +17,24 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
-import { UIM_RECOVERY_LIST_LOAD } from '../../../constants';
+import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRecoveries } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { RecoveryTable } from './recovery_table';
 
-const INTERVAL_OPTIONS: number[] = [10 * 1000, 30 * 1000, 60 * 1000, 5 * 60 * 1000];
+const ONE_SECOND_MS = 1000;
+const TEN_SECONDS_MS = 10 * 1000;
+const THIRTY_SECONDS_MS = 30 * 1000;
+const ONE_MINUTE_MS = 60 * 1000;
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
+const INTERVAL_OPTIONS: number[] = [
+  TEN_SECONDS_MS,
+  THIRTY_SECONDS_MS,
+  ONE_MINUTE_MS,
+  FIVE_MINUTES_MS,
+];
 export const RecoveryList: React.FunctionComponent = () => {
   const {
     core: {
@@ -44,7 +54,7 @@ export const RecoveryList: React.FunctionComponent = () => {
   // Track component loaded
   const { trackUiMetric } = uiMetricService;
   useEffect(() => {
-    trackUiMetric(UIM_RECOVERY_LIST_LOAD);
+    trackUiMetric(UIM_RESTORE_LIST_LOAD);
   }, []);
 
   let content;
@@ -114,13 +124,20 @@ export const RecoveryList: React.FunctionComponent = () => {
                     id="xpack.snapshotRestore.recoveryList.intervalMenuButtonText"
                     defaultMessage="Refresh data every {interval}"
                     values={{
-                      interval: (
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.recoveryList.intervalMenu.intervalValue"
-                          defaultMessage="{seconds, plural, one {# second} other {# seconds}}"
-                          values={{ seconds: Math.ceil(currentInterval / 1000) }}
-                        />
-                      ),
+                      interval:
+                        currentInterval >= ONE_MINUTE_MS ? (
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.recoveryList.intervalMenu.minutesIntervalValue"
+                            defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
+                            values={{ minutes: Math.ceil(currentInterval / ONE_MINUTE_MS) }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.recoveryList.intervalMenu.secondsIntervalValue"
+                            defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                            values={{ seconds: Math.ceil(currentInterval / ONE_SECOND_MS) }}
+                          />
+                        ),
                     }}
                   />
                 </EuiButtonEmpty>
@@ -141,17 +158,17 @@ export const RecoveryList: React.FunctionComponent = () => {
                       setIsIntervalMenuOpen(false);
                     }}
                   >
-                    {interval >= 60 * 1000 ? (
+                    {interval >= ONE_MINUTE_MS ? (
                       <FormattedMessage
-                        id="xpack.snapshotRestore.recoveryList.intervalMenu.intervalValue"
+                        id="xpack.snapshotRestore.recoveryList.intervalMenu.minutesIntervalValue"
                         defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
-                        values={{ minutes: Math.ceil(interval / (60 * 1000)) }}
+                        values={{ minutes: Math.ceil(interval / ONE_MINUTE_MS) }}
                       />
                     ) : (
                       <FormattedMessage
-                        id="xpack.snapshotRestore.recoveryList.intervalMenu.intervalValue"
+                        id="xpack.snapshotRestore.recoveryList.intervalMenu.secondsIntervalValue"
                         defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
-                        values={{ seconds: Math.ceil(interval / 1000) }}
+                        values={{ seconds: Math.ceil(interval / ONE_SECOND_MS) }}
                       />
                     )}
                   </EuiContextMenuItem>

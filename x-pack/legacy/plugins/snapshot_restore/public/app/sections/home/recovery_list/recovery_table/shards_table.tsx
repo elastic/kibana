@@ -29,6 +29,36 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
 
+  const Progress = ({
+    total,
+    recovered,
+    percent,
+  }: {
+    total: number;
+    recovered: number;
+    percent: string;
+  }) => (
+    <EuiToolTip
+      position="top"
+      content={i18n.translate(
+        'xpack.snapshotRestore.recoveryList.shardTable.progressTooltipLabel',
+        {
+          defaultMessage: '{recovered} of {total} restored',
+          values: {
+            recovered,
+            total,
+          },
+        }
+      )}
+    >
+      <EuiText size="xs" textAlign="center" style={{ width: '100%' }}>
+        <EuiProgress value={total === 0 ? 1 : recovered} max={total === 0 ? 1 : total} size="xs" />
+        <EuiSpacer size="xs" />
+        {percent}
+      </EuiText>
+    </EuiToolTip>
+  );
+
   const columns = [
     {
       field: 'id',
@@ -139,33 +169,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
       render: (
         bytesTotal: SnapshotRecoveryShard['bytesTotal'],
         { bytesRecovered, bytesPercent }: SnapshotRecoveryShard
-      ) => {
-        return (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.snapshotRestore.recoveryList.shardTable.bytesTooltipLabel',
-              {
-                defaultMessage: '{recovered} out of {total} recovered',
-                values: {
-                  recovered: bytesRecovered,
-                  total: bytesTotal,
-                },
-              }
-            )}
-          >
-            <EuiText size="xs" textAlign="center" style={{ width: '100%' }}>
-              <EuiProgress
-                value={bytesTotal === 0 ? 1 : bytesRecovered}
-                max={bytesTotal === 0 ? 1 : bytesTotal}
-                size="xs"
-              />
-              <EuiSpacer size="xs" />
-              {bytesPercent}
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
+      ) => <Progress total={bytesTotal} recovered={bytesRecovered} percent={bytesPercent} />,
     },
     {
       field: 'filesTotal',
@@ -175,69 +179,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
       render: (
         filesTotal: SnapshotRecoveryShard['filesTotal'],
         { filesRecovered, filesPercent }: SnapshotRecoveryShard
-      ) => {
-        return (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.snapshotRestore.recoveryList.shardTable.filesTooltipLabel',
-              {
-                defaultMessage: '{recovered} out of {total} recovered',
-                values: {
-                  recovered: filesRecovered,
-                  total: filesTotal,
-                },
-              }
-            )}
-          >
-            <EuiText size="xs" textAlign="center" style={{ width: '100%' }}>
-              <EuiProgress
-                value={filesTotal === 0 ? 1 : filesRecovered}
-                max={filesTotal === 0 ? 1 : filesTotal}
-                size="xs"
-              />
-              <EuiSpacer size="xs" />
-              {filesPercent}
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
-    },
-    {
-      field: 'translogTotal',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.translogColumnTitle', {
-        defaultMessage: 'Translog',
-      }),
-      render: (
-        translogTotal: SnapshotRecoveryShard['translogTotal'],
-        { translogRecovered, translogPercent }: SnapshotRecoveryShard
-      ) => {
-        return (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.snapshotRestore.recoveryList.shardTable.filesTooltipLabel',
-              {
-                defaultMessage: '{recovered} out of {total} recovered',
-                values: {
-                  recovered: translogRecovered,
-                  total: translogTotal,
-                },
-              }
-            )}
-          >
-            <EuiText size="xs" textAlign="center">
-              <EuiProgress
-                value={translogTotal === 0 ? 1 : translogRecovered}
-                max={translogTotal === 0 ? 1 : translogTotal}
-                size="xs"
-              />
-              <EuiSpacer size="xs" />
-              {translogPercent}
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
+      ) => <Progress total={filesTotal} recovered={filesRecovered} percent={filesPercent} />,
     },
   ];
 

@@ -70,19 +70,18 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
   };
 
   const updateCurrentStep = (step: number) => {
-    if (!validation.isValid) {
+    if (maxCompletedStep < step - 1) {
       return;
     }
     setCurrentStep(step);
+    setMaxCompletedStep(step - 1);
     clearSaveError();
   };
 
   const onBack = () => {
-    if (!validation.isValid) {
-      return;
-    }
     const previousStep = currentStep - 1;
     setCurrentStep(previousStep);
+    setMaxCompletedStep(previousStep - 1);
     clearSaveError();
   };
 
@@ -115,6 +114,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
           restoreSettings={restoreSettings}
           updateRestoreSettings={updateRestoreSettings}
           errors={validation.errors}
+          updateCurrentStep={updateCurrentStep}
         />
         <EuiSpacer size="l" />
 
@@ -128,11 +128,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
         <EuiFlexGroup>
           {currentStep > 1 ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                onClick={() => onBack()}
-                disabled={!validation.isValid}
-              >
+              <EuiButtonEmpty iconType="arrowLeft" onClick={() => onBack()}>
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.backButtonLabel"
                   defaultMessage="Back"

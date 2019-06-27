@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
@@ -69,7 +70,8 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
                 id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
                 defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
                 values={{ count: hiddenIndicesCount }}
-              />
+              />{' '}
+              <EuiIcon type="arrowDown" />
             </EuiLink>
           </EuiTitle>
         </li>
@@ -91,6 +93,20 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             </EuiTitle>
           </li>
         ))}
+        {hiddenIndicesCount ? (
+          <li key="hiddenIndicesCount">
+            <EuiTitle size="xs">
+              <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.snapshotDetails.itemIndicesCollapseAllLink"
+                  defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+                  values={{ count: hiddenIndicesCount }}
+                />{' '}
+                <EuiIcon type="arrowUp" />
+              </EuiLink>
+            </EuiTitle>
+          </li>
+        ) : null}
       </ul>
     ) : null;
 

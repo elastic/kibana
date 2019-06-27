@@ -90,7 +90,6 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
                 settings: unmodifiableSettings.map((setting: string, index: number) =>
                   index === 0 ? `${setting} ` : setting
                 ),
-                count: unmodifiableSettings.length,
               },
             }
           )
@@ -129,7 +128,6 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
             settings: unremovableSettings.map((setting: string, index: number) =>
               index === 0 ? `${setting} ` : setting
             ),
-            count: unremovableSettings.length,
           },
         })
       );

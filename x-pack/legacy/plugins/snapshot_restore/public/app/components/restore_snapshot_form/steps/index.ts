@@ -11,6 +11,7 @@ export interface StepProps {
   restoreSettings: RestoreSettings;
   updateRestoreSettings: (updatedSettings: Partial<RestoreSettings>) => void;
   errors: RestoreValidation['errors'];
+  updateCurrentStep: (step: number) => void;
 }
 
 export { RestoreSnapshotStepLogistics } from './step_logistics';

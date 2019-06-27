@@ -16,6 +16,9 @@ import {
   EuiTabbedContent,
   EuiText,
   EuiTitle,
+  EuiLink,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
@@ -23,6 +26,7 @@ import { StepProps } from './';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
+  updateCurrentStep,
 }) => {
   const {
     core: { i18n },
@@ -48,7 +52,19 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.sectionLogisticsTitle"
             defaultMessage="Logistics"
-          />
+          />{' '}
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.editStepTooltip"
+                defaultMessage="Edit"
+              />
+            }
+          >
+            <EuiLink onClick={() => updateCurrentStep(1)}>
+              <EuiIcon type="pencil" />
+            </EuiLink>
+          </EuiToolTip>
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -190,7 +206,19 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.sectionSettingsTitle"
             defaultMessage="Index settings"
-          />
+          />{' '}
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.editStepTooltip"
+                defaultMessage="Edit"
+              />
+            }
+          >
+            <EuiLink onClick={() => updateCurrentStep(2)}>
+              <EuiIcon type="pencil" />
+            </EuiLink>
+          </EuiToolTip>
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />

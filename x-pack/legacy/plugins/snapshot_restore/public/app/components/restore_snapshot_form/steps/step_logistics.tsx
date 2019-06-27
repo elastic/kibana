@@ -96,7 +96,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             iconType="help"
           >
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistics.docsButtonLabel"
+              id="xpack.snapshotRestore.restoreForm.stepLogistics.docsButtonLabel"
               defaultMessage="Logistics docs"
             />
           </EuiButtonEmpty>
@@ -262,7 +262,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesDescription"
-            defaultMessage="Renames indices on restore. Example patterns:"
+            defaultMessage="Renames indices on restore."
           />
         }
         idAria="stepLogisticsRenameIndicesDescription"

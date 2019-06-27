@@ -81,7 +81,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             iconType="help"
           >
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepSettings.docsButtonLabel"
+              id="xpack.snapshotRestore.restoreForm.stepSettings.docsButtonLabel"
               defaultMessage="Index settings docs"
             />
           </EuiButtonEmpty>
@@ -294,11 +294,10 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                       if (!normalizedSettingName) {
                         return;
                       }
-                      if (
-                        !Boolean(
-                          flattenedOptions.find(({ label }) => label === normalizedSettingName)
-                        )
-                      ) {
+                      const isCustomSetting = !Boolean(
+                        flattenedOptions.find(({ label }) => label === normalizedSettingName)
+                      );
+                      if (isCustomSetting) {
                         setIgnoreIndexSettingsOptions([
                           { label: normalizedSettingName },
                           ...ignoreIndexSettingsOptions,

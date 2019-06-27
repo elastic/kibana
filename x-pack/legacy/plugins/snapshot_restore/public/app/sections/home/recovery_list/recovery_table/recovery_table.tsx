@@ -9,7 +9,7 @@ import { sortByOrder } from 'lodash';
 import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { SnapshotRecovery } from '../../../../../../common/types';
-import { UIM_RECOVERY_LIST_EXPAND_INDEX } from '../../../../constants';
+import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { formatDate } from '../../../../services/text';
@@ -80,7 +80,7 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
     if (newItemIdToExpandedRowMap[index]) {
       delete newItemIdToExpandedRowMap[index];
     } else {
-      trackUiMetric(UIM_RECOVERY_LIST_EXPAND_INDEX);
+      trackUiMetric(UIM_RESTORE_LIST_EXPAND_INDEX);
       newItemIdToExpandedRowMap[index] = <ShardsTable shards={shards} />;
     }
     setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);

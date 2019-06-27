@@ -5,6 +5,15 @@
  */
 import { RestoreSettings, RestoreSettingsEs } from '../types';
 
+const removeUndefinedSettings = (settings: RestoreSettingsEs): RestoreSettingsEs => {
+  return Object.entries(settings).reduce((sts: RestoreSettingsEs, [key, value]) => {
+    if (value !== undefined) {
+      sts[key as keyof RestoreSettingsEs] = value;
+    }
+    return sts;
+  }, {});
+};
+
 export function serializeRestoreSettings(restoreSettings: RestoreSettings): RestoreSettingsEs {
   const {
     indices,
@@ -21,7 +30,8 @@ export function serializeRestoreSettings(restoreSettings: RestoreSettings): Rest
     try {
       parsedIndexSettings = JSON.parse(indexSettings);
     } catch (e) {
-      // Silently swallow parsing errors
+      // Silently swallow parsing errors since parsing validation is done on client
+      // so we should never reach this point
     }
   }
 
@@ -35,10 +45,5 @@ export function serializeRestoreSettings(restoreSettings: RestoreSettings): Rest
     ignore_index_settings: ignoreIndexSettings,
   };
 
-  return Object.entries(settings).reduce((sts: RestoreSettingsEs, [key, value]) => {
-    if (value !== undefined) {
-      sts[key as keyof RestoreSettingsEs] = value;
-    }
-    return sts;
-  }, {});
+  return removeUndefinedSettings(settings);
 }

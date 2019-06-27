@@ -5,7 +5,15 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EuiCallOut,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { useAppDependencies } from '../index';
 import { deleteSnapshots } from '../services/http';
 
@@ -164,10 +172,39 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
           <p>
             <FormattedMessage
               id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
-              defaultMessage="Recovery operations associated with {count, plural, one {this snapshot} other {these snapshots}} will stop."
+              defaultMessage="Restore operations associated with {count, plural, one {this snapshot} other {these snapshots}} will stop."
               values={{ count: snapshotIds.length }}
             />
           </p>
+          {!isSingle && isDeleting ? (
+            <Fragment>
+              <EuiCallOut
+                color="warning"
+                title={
+                  <Fragment>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiLoadingSpinner />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutTitle"
+                          defaultMessage="Deleting snapshots"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </Fragment>
+                }
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
+                    defaultMessage="This may take a few minutes."
+                  />
+                </p>
+              </EuiCallOut>
+            </Fragment>
+          ) : null}
         </EuiConfirmModal>
       </EuiOverlayMask>
     );

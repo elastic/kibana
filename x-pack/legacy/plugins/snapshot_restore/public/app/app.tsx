@@ -87,7 +87,7 @@ export const App: React.FunctionComponent = () => {
     );
   }
 
-  const sections: Section[] = ['repositories', 'snapshots', 'recovery'];
+  const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
   const sectionsRegex = sections.join('|');
 
   return (
@@ -102,12 +102,12 @@ export const App: React.FunctionComponent = () => {
         />
         <Redirect
           exact
-          from={`${BASE_PATH}/restore_snapshot/:repositoryName`}
+          from={`${BASE_PATH}/restore/:repositoryName`}
           to={`${BASE_PATH}/snapshots`}
         />
         <Route
           exact
-          path={`${BASE_PATH}/restore_snapshot/:repositoryName/:snapshotId*`}
+          path={`${BASE_PATH}/restore/:repositoryName/:snapshotId*`}
           component={RestoreSnapshot}
         />
         <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />

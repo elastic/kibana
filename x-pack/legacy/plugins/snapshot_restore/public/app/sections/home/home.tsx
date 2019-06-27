@@ -68,11 +68,11 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
-      id: 'recovery',
+      id: 'restore_status',
       name: (
         <FormattedMessage
-          id="xpack.snapshotRestore.home.recoveryTabTitle"
-          defaultMessage="Recovery Status"
+          id="xpack.snapshotRestore.home.restoreTabTitle"
+          defaultMessage="Restore Status"
         />
       ),
     },
@@ -157,7 +157,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
             component={SnapshotList}
           />
-          <Route exact path={`${BASE_PATH}/recovery`} component={RecoveryList} />
+          <Route exact path={`${BASE_PATH}/restore_status`} component={RecoveryList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

@@ -71,7 +71,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
       // populate into master node
       setTimeout(() => {
         setIsSaving(false);
-        history.push(`${BASE_PATH}/recovery`);
+        history.push(`${BASE_PATH}/restore_status`);
       }, 5 * 1000);
     }
   };
