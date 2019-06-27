@@ -74,11 +74,15 @@ export class FilterManager {
       appFilters.splice(i, 1);
     });
 
-    return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
+    return FilterManager.mergeFilters(appFilters, globalFilters);
   }
 
   private filtersUpdated(newFilters: Filter[]): boolean {
     return !_.isEqual(this.filters, newFilters);
+  }
+
+  private static mergeFilters(appFilters: Filter[], globalFilters: Filter[]): Filter[] {
+    return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
@@ -161,18 +165,22 @@ export class FilterManager {
     FilterManager.setFiltersStore(filters, store);
 
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
-    const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
-    const partitionFilters = this.getPartitionedFilters();
-    partitionFilters.appFilters.push(...newPartitionedFilters.appFilters);
-    partitionFilters.globalFilters.push(...newPartitionedFilters.globalFilters);
 
-    const newFilters = this.mergeIncomingFilters(partitionFilters);
+    // This is where we add new filters to the correct place (app \ global)
+    const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
+    const currentFilters = this.getPartitionedFilters();
+    currentFilters.appFilters.push(...newPartitionedFilters.appFilters);
+    currentFilters.globalFilters.push(...newPartitionedFilters.globalFilters);
+
+    const newFilters = this.mergeIncomingFilters(currentFilters);
     this.handleStateUpdate(newFilters);
   }
 
   public async setFilters(newFilters: Filter[]) {
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, newFilters);
-    this.handleStateUpdate(mappedFilters);
+    const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
+    const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
+    this.handleStateUpdate(mergedFilters);
   }
 
   public removeFilter(filter: Filter) {
