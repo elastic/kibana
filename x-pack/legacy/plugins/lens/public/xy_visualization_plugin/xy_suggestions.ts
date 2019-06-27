@@ -6,8 +6,15 @@
 
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
+import {
+  SuggestionRequest,
+  VisualizationSuggestion,
+  TableColumn,
+  TableSuggestion,
+  DatasourcePublicAPI,
+} from '../types';
 import { State } from './types';
+import { toExpression } from './to_expression';
 
 const columnSortOrder = {
   date: 0,
@@ -22,7 +29,8 @@ const columnSortOrder = {
  * @param opts
  */
 export function getSuggestions(
-  opts: SuggestionRequest<State>
+  opts: SuggestionRequest<State>,
+  datasource: DatasourcePublicAPI
 ): Array<VisualizationSuggestion<State>> {
   return opts.tables
     .filter(
@@ -35,10 +43,13 @@ export function getSuggestions(
         columns.some(col => col.operation.dataType === 'number') &&
         !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
     )
-    .map(table => getSuggestionForColumns(table));
+    .map(table => getSuggestionForColumns(datasource, table));
 }
 
-function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestion<State> {
+function getSuggestionForColumns(
+  datasource: DatasourcePublicAPI,
+  table: TableSuggestion
+): VisualizationSuggestion<State> {
   const [buckets, values] = partition(
     prioritizeColumns(table.columns),
     col => col.operation.isBucketed
@@ -46,10 +57,10 @@ function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestio
 
   if (buckets.length >= 1) {
     const [x, splitBy] = buckets;
-    return getSuggestion(table.datasourceSuggestionId, x, values, splitBy);
+    return getSuggestion(datasource, table.datasourceSuggestionId, x, values, splitBy);
   } else {
     const [x, ...yValues] = values;
-    return getSuggestion(table.datasourceSuggestionId, x, yValues);
+    return getSuggestion(datasource, table.datasourceSuggestionId, x, yValues);
   }
 }
 
@@ -63,6 +74,7 @@ function prioritizeColumns(columns: TableColumn[]) {
 }
 
 function getSuggestion(
+  datasource: DatasourcePublicAPI,
   datasourceSuggestionId: number,
   xValue: TableColumn,
   yValues: TableColumn[],
@@ -75,28 +87,49 @@ function getSuggestion(
   // TODO: Localize the title, label, etc
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
+  const state: State = {
+    title,
+    legend: { isVisible: true, position: Position.Right },
+    seriesType: isDate ? 'line' : 'bar',
+    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
+    stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
+    x: {
+      accessor: xValue.columnId,
+      position: Position.Bottom,
+      showGridlines: false,
+      title: xTitle,
+    },
+    y: {
+      accessors: yValues.map(col => col.columnId),
+      position: Position.Left,
+      showGridlines: false,
+      title: yTitle,
+    },
+  };
+
   return {
     title,
     score: 1,
     datasourceSuggestionId,
-    state: {
-      title,
-      legend: { isVisible: true, position: Position.Right },
-      seriesType: isDate ? 'line' : 'bar',
-      splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
-      stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
-      x: {
-        accessor: xValue.columnId,
-        position: Position.Bottom,
-        showGridlines: false,
-        title: xTitle,
+    state,
+    previewIcon: isDate ? 'visLine' : 'visBar',
+    previewExpression: toExpression(
+      {
+        ...state,
+        x: {
+          ...state.x,
+          hide: true,
+        },
+        y: {
+          ...state.y,
+          hide: true,
+        },
+        legend: {
+          ...state.legend,
+          isVisible: false,
+        },
       },
-      y: {
-        accessors: yValues.map(col => col.columnId),
-        position: Position.Left,
-        showGridlines: false,
-        title: yTitle,
-      },
-    },
+      datasource
+    ),
   };
 }

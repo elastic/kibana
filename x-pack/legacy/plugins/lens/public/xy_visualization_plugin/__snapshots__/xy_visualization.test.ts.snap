@@ -40,6 +40,9 @@ Object {
                   "accessor": Array [
                     "a",
                   ],
+                  "hide": Array [
+                    false,
+                  ],
                   "position": Array [
                     "bottom",
                   ],
@@ -65,6 +68,9 @@ Object {
                   "accessors": Array [
                     "b",
                     "c",
+                  ],
+                  "hide": Array [
+                    false,
                   ],
                   "labels": Array [
                     "b",

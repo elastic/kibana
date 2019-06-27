@@ -1,3 +1,4 @@
+
 .lnsPage {
   padding: 0;
   position: absolute;
@@ -71,3 +72,5 @@
   justify-content: center;
   overflow-x: hidden;
 }
+
+@import './suggestion_panel.scss';

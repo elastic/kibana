@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Visualization, DatasourceSuggestion } from '../../types';
+import { Ast } from '@kbn/interpreter/common';
+import { Visualization, DatasourceSuggestion, DatasourcePublicAPI } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -13,6 +14,8 @@ export interface Suggestion {
   score: number;
   title: string;
   state: unknown;
+  previewExpression?: Ast | string;
+  previewIcon: string;
 }
 
 /**
@@ -27,7 +30,8 @@ export function getSuggestions(
   datasourceTableSuggestions: DatasourceSuggestion[],
   visualizationMap: Record<string, Visualization>,
   activeVisualizationId: string | null,
-  visualizationState: unknown
+  visualizationState: unknown,
+  datasourcePublicAPI: DatasourcePublicAPI
 ): Suggestion[] {
   const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
 
@@ -35,10 +39,13 @@ export function getSuggestions(
     Object.entries(visualizationMap)
       .map(([visualizationId, visualization]) => {
         return visualization
-          .getSuggestions({
-            tables: datasourceTables,
-            state: visualizationId === activeVisualizationId ? visualizationState : undefined,
-          })
+          .getSuggestions(
+            {
+              tables: datasourceTables,
+              state: visualizationId === activeVisualizationId ? visualizationState : undefined,
+            },
+            datasourcePublicAPI
+          )
           .map(({ datasourceSuggestionId, ...suggestion }) => ({
             ...suggestion,
             visualizationId,
