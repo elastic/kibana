@@ -25,7 +25,7 @@ import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
 
-export class MetricsPlugin {
+export class Plugin {
   public setup(core: InternalCoreSetup) {
     const { http } = core;
     fieldsRoutes(http.server);

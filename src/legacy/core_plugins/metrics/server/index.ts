@@ -18,8 +18,8 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
-import { MetricsPlugin } from './plugin';
+import { Plugin } from './plugin';
 
-export function metricsPlugin(initializerContext: PluginInitializerContext) {
-  return new MetricsPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin();
 }
