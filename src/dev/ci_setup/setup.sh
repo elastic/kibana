@@ -155,47 +155,31 @@ fi
 echo " -- installing node.js dependencies"
 yarn kbn bootstrap --prefer-offline
 
-###
-### verify no git modifications
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  exit 1
+noChanges () {
+  GIT_CHANGES="$(git ls-files --modified)"
+  if [ "$GIT_CHANGES" ]; then
+    echo -e $1
+    echo -e "$GIT_CHANGES\n"
+    exit 1
+  fi 
 fi
+  fi 
+}
+noChanges "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
 
 ###
 ### rebuild kbn-pm distributable to ensure it's not out of date
 ###
 echo " -- building kbn-pm distributable"
 yarn kbn run build -i @kbn/pm
-
-###
-### verify no git modifications
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'yarn kbn run build -i @kbn/pm' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  exit 1
-fi
+noChanges "\n${RED}ERROR: 'yarn kbn run build -i @kbn/pm' caused changes to the following files:${C_RESET}\n"
 
 ###
 ### rebuild kbn-pm distributable to ensure it's not out of date
 ###
 echo " -- building renovate config"
 node scripts/build_renovate_config
-
-###
-### verify no git modifications
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'node scripts/build_renovate_config' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  exit 1
-fi
+noChanges "\n${RED}ERROR: 'node scripts/build_renovate_config' caused changes to the following files:${C_RESET}\n"
 
 ###
 ### github-checks-reporter kill switch. Remove to disable

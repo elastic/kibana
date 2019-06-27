@@ -5,7 +5,7 @@ trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
 yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 
-node scripts/build --debug --oss;
+# node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
 
