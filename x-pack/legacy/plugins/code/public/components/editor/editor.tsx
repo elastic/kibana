@@ -113,17 +113,13 @@ export class EditorComponent extends React.Component<IProps> {
     } = this.props.match.params;
     const prevContent = prevProps.file && prevProps.file.content;
     const qs = this.props.location.search;
-    if (this.editor && qs !== prevProps.location.search) {
-      this.updateGutterClickHandler(uri, revision, path, qs);
-    }
+    this.updateGutterClickHandler(uri, revision, path, qs);
     if (!this.props.revealPosition && this.monaco) {
       this.monaco.clearLineSelection();
     }
     if (prevContent !== file.content) {
       this.loadText(file.content!, uri, path, file.lang!, revision).then(() => {
-        if (this.editor && qs !== prevProps.location.search) {
-          this.updateGutterClickHandler(uri, revision, path, qs);
-        }
+        this.updateGutterClickHandler(uri, revision, path, qs);
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
