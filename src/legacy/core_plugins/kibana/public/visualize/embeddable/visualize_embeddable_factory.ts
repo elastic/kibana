@@ -54,13 +54,12 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
         type: 'visualization',
         getIconForSavedObject: savedObject => {
-          return (
-            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
-          );
+          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type];
+          return (visType && visType.icon) || 'visualizeApp';
         },
         getTooltipForSavedObject: savedObject => {
-          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title;
-          return `${savedObject.attributes.title} (${visType})`;
+          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type];
+          return `${savedObject.attributes.title} ${visType ? `(${visType.title})` : ''}`;
         },
         showSavedObject: savedObject => {
           if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
