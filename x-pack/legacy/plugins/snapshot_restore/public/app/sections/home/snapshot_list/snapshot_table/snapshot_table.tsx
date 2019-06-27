@@ -270,17 +270,13 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
               color="danger"
               data-test-subj="srSnapshotListBulkDeleteActionButton"
             >
-              {selectedItems.length === 1 ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.snapshotList.table.deleteSingleRepositoryButton"
-                  defaultMessage="Delete snapshot"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.snapshotList.table.deleteMultipleRepositoriesButton"
-                  defaultMessage="Delete snapshots"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.table.deleteSnapshotButton"
+                defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
+                values={{
+                  count: selectedItems.length,
+                }}
+              />
             </EuiButton>
           );
         }}

@@ -117,7 +117,7 @@ export const RecoveryList: React.FunctionComponent = () => {
                       interval: (
                         <FormattedMessage
                           id="xpack.snapshotRestore.recoveryList.intervalMenu.intervalValue"
-                          defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                          defaultMessage="{seconds, plural, one {# second} other {# seconds}}"
                           values={{ seconds: Math.ceil(currentInterval / 1000) }}
                         />
                       ),

@@ -136,30 +136,17 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
             />
           }
           confirmButtonText={
-            isSingle ? (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.confirmSingleButtonLabel"
-                defaultMessage="Delete snapshot"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.confirmMultipleButtonLabel"
-                defaultMessage="Delete snapshots"
-              />
-            )
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.confirmButtonLabel"
+              defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
+              values={{ count: snapshotIds.length }}
+            />
           }
           confirmButtonDisabled={isDeleting}
           buttonColor="danger"
           data-test-subj="srdeleteSnapshotConfirmationModal"
         >
-          {isSingle ? (
-            <p>
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleDescription"
-                defaultMessage="Recovery operations associated with this snapshot will stop."
-              />
-            </p>
-          ) : (
+          {!isSingle ? (
             <Fragment>
               <p>
                 <FormattedMessage
@@ -172,14 +159,15 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
                   <li key={`${repository}/${snapshot}`}>{snapshot}</li>
                 ))}
               </ul>
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
-                  defaultMessage="Recovery operations associated with these snapshots will stop."
-                />
-              </p>
             </Fragment>
-          )}
+          ) : null}
+          <p>
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
+              defaultMessage="Recovery operations associated with {count, plural, one {this snapshot} other {these snapshots}} will stop."
+              values={{ count: snapshotIds.length }}
+            />
+          </p>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
