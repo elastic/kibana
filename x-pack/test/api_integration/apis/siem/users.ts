@@ -5,13 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { usersQuery } from '../../../../plugins/siem/public/containers/users/index.gql_query';
+import { usersQuery } from '../../../../legacy/plugins/siem/public/containers/users/index.gql_query';
 import {
   Direction,
   UsersFields,
   FlowTarget,
   GetUsersQuery,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -37,6 +37,7 @@ const usersTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               ip: IP,
               flowTarget: FlowTarget.destination,
               sort: { field: UsersFields.name, direction: Direction.asc },

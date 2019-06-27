@@ -19,20 +19,23 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import chrome from 'ui/chrome';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
-import VisEditorVisualization from './vis_editor_visualization';
-import Visualization from './visualization';
-import VisPicker from './vis_picker';
-import PanelConfig from './panel_config';
-import brushHandler from '../lib/create_brush_handler';
+import { fromKueryExpression } from '@kbn/es-query';
+import { VisEditorVisualization } from './vis_editor_visualization';
+import { Visualization } from './visualization';
+import { VisPicker } from './vis_picker';
+import { PanelConfig } from './panel_config';
+import { brushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
+const queryOptions = chrome.getUiSettingsClient().get('query:allowLeadingWildcards');
 
-class VisEditor extends Component {
+export class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
@@ -66,7 +69,18 @@ class VisEditor extends Component {
     this.props.vis.updateState();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  handleChange = async (partialModel) => {
+  isValidKueryQuery = filterQuery => {
+    if (filterQuery && filterQuery.language === 'kuery') {
+      try {
+        fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
+      } catch (error) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  handleChange = async partialModel => {
     if (isEmpty(partialModel)) {
       return;
     }
@@ -76,7 +90,6 @@ class VisEditor extends Component {
       ...partialModel,
     };
     let dirty = true;
-
     if (this.state.autoApply || hasTypeChanged) {
       this.updateVisState();
 
@@ -85,13 +98,13 @@ class VisEditor extends Component {
 
     if (this.props.isEditorMode) {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
-
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns)
-          .then(visFields => this.setState({
+        fetchFields(extractedIndexPatterns).then(visFields =>
+          this.setState({
             visFields,
             extractedIndexPatterns,
-          }));
+          })
+        );
       }
     }
 
@@ -106,7 +119,7 @@ class VisEditor extends Component {
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = (event) => {
+  handleAutoApplyToggle = event => {
     this.setState({ autoApply: event.target.checked });
   };
 
@@ -138,7 +151,7 @@ class VisEditor extends Component {
       return (
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange}/>
+            <VisPicker model={model} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}
@@ -198,5 +211,3 @@ VisEditor.propTypes = {
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
 };
-
-export default VisEditor;

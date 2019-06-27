@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import percentile from '../percentile';
+import { percentile } from '../percentile';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -27,7 +27,7 @@ describe('percentile(resp, panel, series)', () => {
   let resp;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       chart_type: 'line',
@@ -38,15 +38,17 @@ describe('percentile(resp, panel, series)', () => {
       color: 'rgb(255, 0, 0)',
       id: 'test',
       split_mode: 'everything',
-      metrics: [{
-        id: 'pct',
-        type: 'percentile',
-        field: 'cpu',
-        percentiles: [
-          { id: '10-90', mode: 'band', value: 10, percentile: 90, shade: 0.2 },
-          { id: '50', mode: 'line', value: 50 }
-        ]
-      }]
+      metrics: [
+        {
+          id: 'pct',
+          type: 'percentile',
+          field: 'cpu',
+          percentiles: [
+            { id: '10-90', mode: 'band', value: 10, percentile: 90, shade: 0.2 },
+            { id: '50', mode: 'line', value: 50 },
+          ],
+        },
+      ],
     };
     resp = {
       aggregations: {
@@ -59,9 +61,9 @@ describe('percentile(resp, panel, series)', () => {
                   values: {
                     '10.0': 1,
                     '50.0': 2.5,
-                    '90.0': 5
-                  }
-                }
+                    '90.0': 5,
+                  },
+                },
               },
               {
                 key: 2,
@@ -69,14 +71,14 @@ describe('percentile(resp, panel, series)', () => {
                   values: {
                     '10.0': 1.2,
                     '50.0': 2.7,
-                    '90.0': 5.3
-                  }
-                }
-              }
-            ]
-          }
-        }
-      }
+                    '90.0': 5.3,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
     };
   });
 
@@ -104,10 +106,7 @@ describe('percentile(resp, panel, series)', () => {
     });
     expect(results[0]).to.have.property('points');
     expect(results[0].points).to.eql({ show: false });
-    expect(results[0].data).to.eql([
-      [1, 1],
-      [2, 1.2]
-    ]);
+    expect(results[0].data).to.eql([[1, 1], [2, 1.2]]);
 
     expect(results[1]).to.have.property('id', 'test:10-90:90');
     expect(results[1]).to.have.property('color', 'rgb(255, 0, 0)');
@@ -121,10 +120,7 @@ describe('percentile(resp, panel, series)', () => {
     });
     expect(results[1]).to.have.property('points');
     expect(results[1].points).to.eql({ show: false });
-    expect(results[1].data).to.eql([
-      [1, 5],
-      [2, 5.3]
-    ]);
+    expect(results[1].data).to.eql([[1, 5], [2, 5.3]]);
 
     expect(results[2]).to.have.property('id', 'test:50');
     expect(results[2]).to.have.property('color', 'rgb(255, 0, 0)');
@@ -135,23 +131,16 @@ describe('percentile(resp, panel, series)', () => {
       fill: 0,
       lineWidth: 1,
       show: true,
-      steps: false
+      steps: false,
     });
     expect(results[2]).to.have.property('bars');
     expect(results[2].bars).to.eql({
       fill: 0,
       lineWidth: 1,
-      show: false
+      show: false,
     });
     expect(results[2]).to.have.property('points');
     expect(results[2].points).to.eql({ show: true, lineWidth: 1, radius: 1 });
-    expect(results[2].data).to.eql([
-      [1, 2.5],
-      [2, 2.7]
-    ]);
-
-
+    expect(results[2].data).to.eql([[1, 2.5], [2, 2.7]]);
   });
-
 });
-

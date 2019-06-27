@@ -30,7 +30,7 @@ const aggFns = {
   avg: values => sum(values) / values.length,
 };
 
-export default (row, metric) => {
+export const getAggValue = (row, metric) => {
   // Extended Stats
   if (includes(EXTENDED_STATS_TYPES, metric.type)) {
     const isStdDeviation = /^std_deviation/.test(metric.type);
@@ -49,11 +49,7 @@ export default (row, metric) => {
     case METRIC_TYPES.PERCENTILE_RANK:
       const percentileRankKey = toPercentileNumber(`${metric.value}`);
 
-      return (
-        row[metric.id] &&
-        row[metric.id].values &&
-        row[metric.id].values[percentileRankKey]
-      );
+      return row[metric.id] && row[metric.id].values && row[metric.id].values[percentileRankKey];
     case METRIC_TYPES.TOP_HIT:
       if (row[metric.id].doc_count === 0) {
         return null;

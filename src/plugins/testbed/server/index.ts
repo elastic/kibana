@@ -20,13 +20,7 @@
 import { map, mergeMap } from 'rxjs/operators';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import {
-  Logger,
-  PluginInitializerContext,
-  PluginName,
-  PluginSetupContext,
-  PluginStartContext,
-} from 'kibana/server';
+import { CoreSetup, CoreStart, Logger, PluginInitializerContext, PluginName } from 'kibana/server';
 
 export const config = {
   schema: schema.object({
@@ -43,11 +37,9 @@ class Plugin {
     this.log = this.initializerContext.logger.get();
   }
 
-  public setup(setupContext: PluginSetupContext, deps: Record<PluginName, unknown>) {
+  public setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
     this.log.debug(
-      `Setting up TestBed with core contract [${Object.keys(setupContext)}] and deps [${Object.keys(
-        deps
-      )}]`
+      `Setting up TestBed with core contract [${Object.keys(core)}] and deps [${Object.keys(deps)}]`
     );
 
     return {
@@ -57,22 +49,22 @@ class Plugin {
           return `Some exposed data derived from config: ${configValue.secret}`;
         })
       ),
-      pingElasticsearch$: setupContext.elasticsearch.adminClient$.pipe(
+      pingElasticsearch$: core.elasticsearch.adminClient$.pipe(
         mergeMap(client => client.callAsInternalUser('ping'))
       ),
     };
   }
 
-  public start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
+  public start(core: CoreStart, deps: Record<PluginName, unknown>) {
     this.log.debug(
       `Starting up TestBed testbed with core contract [${Object.keys(
-        startContext
+        core
       )}] and deps [${Object.keys(deps)}]`
     );
 
     return {
       getStartContext() {
-        return startContext;
+        return core;
       },
     };
   }

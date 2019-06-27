@@ -20,9 +20,9 @@
 import Joi from 'joi';
 import { Server } from 'hapi';
 
-import { CapabilitiesModifier } from '.';
 import { Capabilities } from '../../../core/public';
-import { mergeCapabilities } from './merge_capabilities';
+import { CapabilitiesModifier } from './capabilities_mixin';
+import { resolveCapabilities } from './resolve_capabilities';
 
 export const registerCapabilitiesRoute = (
   server: Server,
@@ -40,15 +40,14 @@ export const registerCapabilitiesRoute = (
       },
     },
     async handler(request) {
-      let { capabilities } = request.payload as { capabilities: Capabilities };
-      capabilities = mergeCapabilities({ ...defaultCapabilities }, capabilities);
-
-      for (const provider of modifiers) {
-        capabilities = await provider(request, capabilities);
-      }
-
+      const { capabilities } = request.payload as { capabilities: Capabilities };
       return {
-        capabilities,
+        capabilities: await resolveCapabilities(
+          request,
+          modifiers,
+          defaultCapabilities,
+          capabilities
+        ),
       };
     },
   });

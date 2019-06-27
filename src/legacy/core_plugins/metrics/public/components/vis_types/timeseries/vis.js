@@ -22,10 +22,10 @@ import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { MarkdownSimple } from 'ui/markdown';
 
-import tickFormatter from '../../lib/tick_formatter';
+import { tickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Timeseries from '../../../visualizations/components/timeseries';
-import replaceVars from '../../lib/replace_vars';
+import { Timeseries } from '../../../visualizations/components/timeseries';
+import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
@@ -34,15 +34,14 @@ function hasSeparateAxis(row) {
   return row.separate_axis;
 }
 
-class TimeseriesVisualization extends Component {
-
+export class TimeseriesVisualization extends Component {
   getInterval = () => {
     const { visData, model } = this.props;
 
     return getInterval(visData, model);
-  }
+  };
 
-  xaxisFormatter = (val) => {
+  xaxisFormatter = val => {
     const { scaledDataFormat, dateFormat } = this.props.visData;
     if (!scaledDataFormat || !dateFormat) return val;
     const formatter = createXaxisFormatter(this.getInterval(), scaledDataFormat, dateFormat);
@@ -50,7 +49,10 @@ class TimeseriesVisualization extends Component {
   };
 
   componentDidUpdate() {
-    if (this.showToastNotification && this.notificationReason !== this.showToastNotification.reason) {
+    if (
+      this.showToastNotification &&
+      this.notificationReason !== this.showToastNotification.reason
+    ) {
       if (this.notification) {
         toastNotifications.remove(this.notification);
       }
@@ -78,60 +80,68 @@ class TimeseriesVisualization extends Component {
 
     if (model.annotations && Array.isArray(model.annotations)) {
       annotations = model.annotations.map(annotation => {
-        const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
-          .map(item => [item.key, item.docs]);
+        const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, []).map(item => [
+          item.key,
+          item.docs,
+        ]);
         return {
           id: annotation.id,
           color: annotation.color,
           icon: annotation.icon,
           series: data.map(s => {
-            return [s[0], s[1].map(doc => {
-              const vars = replaceVars(annotation.template, null, doc);
+            return [
+              s[0],
+              s[1].map(doc => {
+                const vars = replaceVars(annotation.template, null, doc);
 
-              if (vars instanceof Error) {
-                this.showToastNotification = vars.error.caused_by;
+                if (vars instanceof Error) {
+                  this.showToastNotification = vars.error.caused_by;
 
-                return annotation.template;
-              }
+                  return annotation.template;
+                }
 
-              return vars;
-            })];
-          })
+                return vars;
+              }),
+            ];
+          }),
         };
       });
     }
     const seriesModel = model.series.map(s => _.cloneDeep(s));
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
-    const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
+    const formatter = tickFormatter(
+      _.get(firstSeries, 'formatter'),
+      _.get(firstSeries, 'value_template'),
+      this.props.getConfig
+    );
 
     const mainAxis = {
       position: model.axis_position,
       tickFormatter: formatter,
       axisFormatter: _.get(firstSeries, 'formatter', 'number'),
-      axisFormatterTemplate: _.get(firstSeries, 'value_template')
+      axisFormatterTemplate: _.get(firstSeries, 'value_template'),
     };
-
 
     if (model.axis_min) mainAxis.min = model.axis_min;
     if (model.axis_max) mainAxis.max = model.axis_max;
     if (model.axis_scale === 'log') {
       mainAxis.mode = 'log';
-      mainAxis.transform = value => value > 0 ? Math.log(value) / Math.LN10 : null;
+      mainAxis.transform = value => (value > 0 ? Math.log(value) / Math.LN10 : null);
       mainAxis.inverseTransform = value => Math.pow(10, value);
     }
 
     const yaxes = [mainAxis];
 
-
     seriesModel.forEach(s => {
       series
         .filter(r => _.startsWith(r.id, s.id))
-        .forEach(r => r.tickFormatter = tickFormatter(s.formatter, s.value_template, this.props.getConfig));
+        .forEach(
+          r =>
+            (r.tickFormatter = tickFormatter(s.formatter, s.value_template, this.props.getConfig))
+        );
 
       if (s.hide_in_legend) {
-        series
-          .filter(r => _.startsWith(r.id, s.id))
-          .forEach(r => delete r.label);
+        series.filter(r => _.startsWith(r.id, s.id)).forEach(r => delete r.label);
       }
       if (s.stacked !== 'none') {
         series
@@ -157,7 +167,7 @@ class TimeseriesVisualization extends Component {
               return item.data[index][1] + acc;
             }, 0);
             seriesData.forEach(item => {
-              item.data[index][1] = rowSum && item.data[index][1] / rowSum || 0;
+              item.data[index][1] = (rowSum && item.data[index][1] / rowSum) || 0;
             });
           });
         }
@@ -168,7 +178,7 @@ class TimeseriesVisualization extends Component {
 
     let axisCount = 1;
     if (seriesModel.some(hasSeparateAxis)) {
-      seriesModel.forEach((row) => {
+      seriesModel.forEach(row => {
         if (row.separate_axis) {
           axisCount++;
 
@@ -179,10 +189,8 @@ class TimeseriesVisualization extends Component {
             position: row.axis_position,
             tickFormatter: formatter,
             axisFormatter: row.axis_formatter,
-            axisFormatterTemplate: row.value_template
+            axisFormatterTemplate: row.value_template,
           };
-
-
 
           if (row.axis_min != null) yaxis.min = row.axis_min;
           if (row.axis_max != null) yaxis.max = row.axis_max;
@@ -214,9 +222,9 @@ class TimeseriesVisualization extends Component {
       showGrid: Boolean(model.show_grid),
       legend: Boolean(model.show_legend),
       xAxisFormatter: this.xaxisFormatter,
-      onBrush: (ranges) => {
+      onBrush: ranges => {
         if (this.props.onBrush) this.props.onBrush(ranges);
-      }
+      },
     };
 
     if (interval) {
@@ -225,12 +233,10 @@ class TimeseriesVisualization extends Component {
 
     return (
       <div className="tvbVis" style={style}>
-        <Timeseries {...params}/>
+        <Timeseries {...params} />
       </div>
     );
-
   }
-
 }
 
 TimeseriesVisualization.propTypes = {
@@ -241,7 +247,5 @@ TimeseriesVisualization.propTypes = {
   onChange: PropTypes.func,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };
-
-export default TimeseriesVisualization;

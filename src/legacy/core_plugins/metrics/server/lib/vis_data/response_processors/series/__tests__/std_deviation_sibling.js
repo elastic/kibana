@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import stdDeviationSibling from '../std_deviation_sibling';
+import { stdDeviationSibling } from '../std_deviation_sibling';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -27,7 +27,7 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
   let resp;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       chart_type: 'line',
@@ -42,15 +42,15 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
         {
           id: 'avgcpu',
           type: 'avg',
-          field: 'cpu'
+          field: 'cpu',
         },
         {
           id: 'sib',
           type: 'std_deviation_bucket',
           mode: 'band',
-          field: 'avgcpu'
-        }
-      ]
+          field: 'avgcpu',
+        },
+      ],
     };
     resp = {
       aggregations: {
@@ -59,23 +59,23 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
             std_deviation: 0.23,
             std_deviation_bounds: {
               upper: 0.7,
-              lower: 0.01
-            }
+              lower: 0.01,
+            },
           },
           timeseries: {
             buckets: [
               {
                 key: 1,
-                avgcpu: { value: 0.23 }
+                avgcpu: { value: 0.23 },
               },
               {
                 key: 2,
-                avgcpu: { value: 0.22 }
-              }
-            ]
-          }
-        }
-      }
+                avgcpu: { value: 0.22 },
+              },
+            ],
+          },
+        },
+      },
     };
   });
 
@@ -95,10 +95,7 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
       color: 'rgb(255, 0, 0)',
       lines: { show: true, fill: false, lineWidth: 0 },
       points: { show: false },
-      data: [
-        [ 1, 0.01 ],
-        [ 2, 0.01 ]
-      ]
+      data: [[1, 0.01], [2, 0.01]],
     });
 
     expect(results[1]).to.eql({
@@ -108,16 +105,7 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
       fillBetween: 'test:lower',
       lines: { show: true, fill: 0.5, lineWidth: 0 },
       points: { show: false },
-      data: [
-        [ 1, 0.7 ],
-        [ 2, 0.7 ]
-      ]
+      data: [[1, 0.7], [2, 0.7]],
     });
-
   });
-
 });
-
-
-
-

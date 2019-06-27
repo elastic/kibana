@@ -18,14 +18,13 @@
  */
 
 import _ from 'lodash';
-import chrome from '../chrome';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
-export function formatHit(indexPattern, defaultFormat) {
+export function formatHitProvider(indexPattern, defaultFormat) {
 
   function convert(hit, val, fieldName) {
     const field = indexPattern.fields.byName[fieldName];
@@ -33,7 +32,7 @@ export function formatHit(indexPattern, defaultFormat) {
     const parsedUrl = {
       origin: window.location.origin,
       pathname: window.location.pathname,
-      basePath: chrome.getBasePath(),
+      basePath: indexPattern.fieldsFetcher.apiClient.basePath,
     };
     return field.format.getConverterFor('html')(val, field, hit, parsedUrl);
   }
@@ -73,7 +72,7 @@ export function formatHit(indexPattern, defaultFormat) {
     }
 
     const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
-    return partials[fieldName] = convert(hit, val, fieldName);
+    return convert(hit, val, fieldName);
   };
 
   return formatHit;

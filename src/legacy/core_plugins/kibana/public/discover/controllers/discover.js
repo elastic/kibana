@@ -40,9 +40,9 @@ import { timefilter } from 'ui/timefilter';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
-import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import { DocTitleProvider } from 'ui/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import { docTitle } from 'ui/doc_title';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
@@ -70,7 +70,7 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 data.search.loadLegacyDirectives();
 
 const fetchStatuses = {
@@ -116,7 +116,7 @@ uiRoutes
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, $location, Private) {
+      ip: function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -185,7 +185,6 @@ function discoverController(
   $timeout,
   $window,
   AppState,
-  Notifier,
   Private,
   Promise,
   config,
@@ -197,13 +196,9 @@ function discoverController(
   const visualizeLoader = Private(VisualizeLoaderProvider);
   let visualizeHandler;
   const Vis = Private(VisProvider);
-  const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
+  const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const filterManager = Private(FilterManagerProvider);
-  const notify = new Notifier({
-    location: 'Discover'
-  });
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const inspectorAdapters = {
@@ -319,7 +314,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async (menuItem, navController, anchorElement) => {
+      run: async (menuItem, navController, anchorElement) => { // eslint-disable-line no-unused-vars
         const sharingData = await this.getSharingData();
         showShareContextMenu({
           anchorElement,
@@ -718,7 +713,13 @@ function discoverController(
         logInspectorRequest();
         return courier.fetch();
       })
-      .catch(notify.error);
+      .catch((error) => {
+        toastNotifications.addError(error, {
+          title: i18n.translate('kbn.discover.discoverError', {
+            defaultMessage: 'Discover error',
+          }),
+        });
+      });
   };
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
@@ -799,7 +800,11 @@ function discoverController(
         if (fetchError) {
           $scope.fetchError = fetchError;
         } else {
-          notify.error(error);
+          toastNotifications.addError(error, {
+            title: i18n.translate('kbn.discover.errorLoadingData', {
+              defaultMessage: 'Error loading data',
+            }),
+          });
         }
 
         // Restart. This enables auto-refresh functionality.

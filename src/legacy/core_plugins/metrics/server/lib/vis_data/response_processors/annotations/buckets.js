@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 export function getAnnotationBuckets(resp, annotation) {
   return get(resp, `aggregations.${annotation.id}.buckets`, [])
-    .filter(bucket => bucket.hits.hits.total)
-    .map((bucket) => {
-      return {
-        key: bucket.key,
-        docs: bucket.hits.hits.hits.map(doc => doc._source)
-      };
-    });
+    .filter(bucket => !isEmpty(bucket.hits.hits.hits))
+    .map(bucket => ({
+      key: bucket.key,
+      docs: bucket.hits.hits.hits.map(doc => doc._source),
+    }));
 }

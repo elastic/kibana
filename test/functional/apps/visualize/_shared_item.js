@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('data-shared-item', function indexPatternCreation() {
+  // https://github.com/elastic/kibana/issues/37130
+  describe.skip('data-shared-item', function indexPatternCreation() {
     before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToApp('visualize');

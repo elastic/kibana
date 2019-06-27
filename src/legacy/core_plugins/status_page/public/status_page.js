@@ -20,15 +20,14 @@
 import 'ui/autoload/styles';
 import 'ui/i18n';
 import chrome from 'ui/chrome';
-import { onStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { destroyStatusPage, renderStatusPage } from './components/render';
+import template from 'plugins/status_page/status_page.html';
 
-onStart(({ core }) => {
-  core.chrome.navLinks.enableForcedAppSwitcherNavigation();
-});
+npStart.core.chrome.navLinks.enableForcedAppSwitcherNavigation();
 
 chrome
-  .setRootTemplate(require('plugins/status_page/status_page.html'))
+  .setRootTemplate(template)
   .setRootController('ui', function ($scope, buildNum, buildSha) {
     $scope.$$postDigest(() => {
       renderStatusPage(buildNum, buildSha.substr(0, 8));

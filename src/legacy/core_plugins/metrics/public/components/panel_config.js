@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import timeseries from './panel_config/timeseries';
-import metric from './panel_config/metric';
-import topN from './panel_config/top_n';
-import table from './panel_config/table';
-import gauge from './panel_config/gauge';
-import markdown from './panel_config/markdown';
+import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
+import { MetricPanelConfig as metric } from './panel_config/metric';
+import { TopNPanelConfig as topN } from './panel_config/top_n';
+import { TablePanelConfig as table } from './panel_config/table';
+import { GaugePanelConfig as gauge } from './panel_config/gauge';
+import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const types = {
@@ -33,10 +33,10 @@ const types = {
   metric,
   top_n: topN,
   gauge,
-  markdown
+  markdown,
 };
 
-function PanelConfig(props) {
+export function PanelConfig(props) {
   const { model } = props;
   const component = types[model.type];
   if (component) {
@@ -49,7 +49,8 @@ function PanelConfig(props) {
         defaultMessage="Missing panel config for &ldquo;{modelType}&rdquo;"
         values={{ modelType: model.type }}
       />
-    </div>);
+    </div>
+  );
 }
 
 PanelConfig.propTypes = {
@@ -59,5 +60,3 @@ PanelConfig.propTypes = {
   dateFormat: PropTypes.string,
   visData$: PropTypes.object,
 };
-
-export default PanelConfig;

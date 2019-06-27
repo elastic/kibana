@@ -20,11 +20,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { assign } from 'lodash';
-import AggSelect from '../agg_select';
-import FieldSelect from '../field_select';
-import AggRow from '../agg_row';
-import createChangeHandler from '../../lib/create_change_handler';
-import createSelectHandler from '../../lib/create_select_handler';
+import { AggSelect } from '../agg_select';
+import { FieldSelect } from '../field_select';
+import { AggRow } from '../agg_row';
+import { createChangeHandler } from '../../lib/create_change_handler';
+import { createSelectHandler } from '../../lib/create_select_handler';
 import { PercentileRankValues } from './percentile_rank_values';
 
 import {
@@ -45,16 +45,19 @@ export const PercentileRankAgg = props => {
   const defaults = { values: [''] };
   const model = { ...defaults, ...props.model };
 
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
   const isTablePanel = panel.type === 'table';
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
-  const handlePercentileRankValuesChange = (values) => {
-    handleChange(assign({}, model, {
-      values,
-    }));
+  const handlePercentileRankValuesChange = values => {
+    handleChange(
+      assign({}, model, {
+        values,
+      })
+    );
   };
 
   return (
@@ -85,10 +88,7 @@ export const PercentileRankAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={(<FormattedMessage
-              id="tsvb.percentileRank.fieldLabel"
-              defaultMessage="Field"
-            />)}
+            label={<FormattedMessage id="tsvb.percentileRank.fieldLabel" defaultMessage="Field" />}
           >
             <FieldSelect
               fields={fields}
@@ -101,7 +101,7 @@ export const PercentileRankAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer/>
+      <EuiSpacer />
       <PercentileRankValues
         disableAdd={isTablePanel}
         disableDelete={isTablePanel}

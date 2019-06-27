@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import buildProcessorFunction from '../build_processor_function';
-import processors from '../request_processors/series';
+import { buildProcessorFunction } from '../build_processor_function';
+import { processors } from '../request_processors/series';
 
 /**
  * Builds series request body

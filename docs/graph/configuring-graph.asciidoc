@@ -21,8 +21,8 @@ might be deleted after a workspace is saved, there's no practical basis for
 checking permissions for the data in a saved workspace.
 
 For this reason, you can configure the save policy for graph workspaces to
-ensure appropriate handling of your data. You can allow users to save
-only the configuration information for a graph, require users to
+ensure appropriate handling of your data. You can allow all users to save
+only the configuration information for a graph, require all users to
 explicitly include the workspace data, or completely disable the ability
 to save a workspace.
 
@@ -46,6 +46,16 @@ default policy.
 `configAndDataWithConsent`::
 Only the configuration is saved unless the user
 explicitly selects the include data option.
+
+[float]
+=== Using Security to Grant Access
+You can also use security to grant read only or all access to different roles.
+When security is used to grant read only access, the following  indicator in Kibana
+will be displayed. For more information on granting access to Kibana see
+<<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::graph/images/graph-read-only-badge.png[Example of Graph's read only access indicator in Kibana's header]
 
 [float]
 [[disable-drill-down]]

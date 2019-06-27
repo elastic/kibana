@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Plugin, PluginSetupContext } from 'kibana/public';
+import { Plugin, CoreSetup } from 'kibana/public';
 
 export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePluginAPluginStart> {
-  public setup(core: PluginSetupContext, deps: {}) {
+  public setup(core: CoreSetup, deps: {}) {
     return {
       getGreeting() {
         return 'Hello from Plugin A!';

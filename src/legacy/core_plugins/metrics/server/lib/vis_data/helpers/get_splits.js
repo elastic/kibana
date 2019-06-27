@@ -18,17 +18,16 @@
  */
 
 import Color from 'color';
-import calculateLabel from '../../../../common/calculate_label';
+import { calculateLabel } from '../../../../common/calculate_label';
 import _ from 'lodash';
-import getLastMetric from './get_last_metric';
-import getSplitColors from './get_split_colors';
+import { getLastMetric } from './get_last_metric';
+import { getSplitColors } from './get_split_colors';
 import { formatKey } from './format_key';
 
 const getTimeSeries = (resp, series) =>
-  _.get(resp, `aggregations.timeseries`) ||
-  _.get(resp, `aggregations.${series.id}.timeseries`);
+  _.get(resp, `aggregations.timeseries`) || _.get(resp, `aggregations.${series.id}.timeseries`);
 
-export default function getSplits(resp, panel, series, meta) {
+export function getSplits(resp, panel, series, meta) {
   if (!meta) {
     meta = _.get(resp, `aggregations.${series.id}.meta`);
   }
@@ -55,7 +54,7 @@ export default function getSplits(resp, panel, series, meta) {
         bucket.id = `${series.id}:${filter.id}`;
         bucket.key = filter.id;
         bucket.color = filter.color;
-        bucket.label = filter.label || filter.filter || '*';
+        bucket.label = filter.label || filter.filter.query || '*';
         bucket.meta = meta;
         return bucket;
       });
@@ -82,5 +81,3 @@ export default function getSplits(resp, panel, series, meta) {
     },
   ];
 }
-
-

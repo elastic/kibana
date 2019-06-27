@@ -5,13 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { tlsQuery } from '../../../../plugins/siem/public/containers/tls/index.gql_query';
+import { tlsQuery } from '../../../../legacy/plugins/siem/public/containers/tls/index.gql_query';
 import {
   Direction,
   TlsFields,
   FlowTarget,
   GetTlsQuery,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -55,6 +55,7 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
                 limit: 10,
                 cursor: null,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -83,6 +84,7 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
                 limit: 10,
                 cursor: null,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {

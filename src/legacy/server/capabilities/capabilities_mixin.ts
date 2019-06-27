@@ -23,6 +23,7 @@ import { Capabilities } from '../../../core/public';
 import KbnServer from '../kbn_server';
 import { registerCapabilitiesRoute } from './capabilities_route';
 import { mergeCapabilities } from './merge_capabilities';
+import { resolveCapabilities } from './resolve_capabilities';
 
 export type CapabilitiesModifier = (
   request: Request,
@@ -47,6 +48,19 @@ export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
           .map(provider => provider(server))
       ))
     );
+
+    server.decorate('request', 'getCapabilities', function() {
+      // Get legacy nav links
+      const navLinks = server.getUiNavLinks().reduce(
+        (acc, spec) => ({
+          ...acc,
+          [spec._id]: true,
+        }),
+        {} as Record<string, boolean>
+      );
+
+      return resolveCapabilities(this, modifiers, defaultCapabilities, { navLinks });
+    });
 
     registerCapabilitiesRoute(server, defaultCapabilities, modifiers);
   });

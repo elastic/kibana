@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { getPhraseScript } from '@kbn/es-query';
 
 // Adds a filter to a passed state

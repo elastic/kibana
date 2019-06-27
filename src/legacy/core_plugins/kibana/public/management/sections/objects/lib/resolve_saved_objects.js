@@ -50,7 +50,7 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
     }
   }
 }
-async function importIndexPattern(doc, indexPatterns, overwriteAll) {
+async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModalPromise) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
   const emptyPattern = await indexPatterns.get();
   const {
@@ -76,7 +76,26 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll) {
   addJsonFieldToIndexPattern(importedIndexPattern, typeMeta, 'typeMeta', title);
   Object.assign(emptyPattern, importedIndexPattern);
 
-  const newId = await emptyPattern.create(true, !overwriteAll);
+  let newId = await emptyPattern.create(overwriteAll);
+  if (!newId) {
+    // We can override and we want to prompt for confirmation
+    try {
+      await confirmModalPromise(
+        i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
+          defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
+        {
+          title: i18n.translate('kbn.management.indexPattern.confirmOverwriteTitle', {
+            defaultMessage: 'Overwrite {type}?',
+            values: { type },
+          }),
+          confirmButtonText: i18n.translate('kbn.management.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' }),
+        }
+      );
+      newId = await emptyPattern.create(true);
+    } catch (err) {
+      return;
+    }
+  }
   indexPatterns.cache.clear(newId);
   return newId;
 }
@@ -170,7 +189,7 @@ export async function resolveSavedSearches(savedSearches, services, indexPattern
   return importCount;
 }
 
-export async function resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns) {
+export async function resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns, confirmModalPromise) {
   const docTypes = groupByType(savedObjects);
 
   // Keep track of how many we actually import because the user
@@ -183,7 +202,8 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
       const importedIndexPatternId = await importIndexPattern(
         indexPatternDoc,
         indexPatterns,
-        overwriteAll
+        overwriteAll,
+        confirmModalPromise
       );
       if (importedIndexPatternId) {
         importedObjectCount++;

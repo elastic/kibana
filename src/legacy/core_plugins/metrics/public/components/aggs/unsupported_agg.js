@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import AggRow from './agg_row';
+import { AggRow } from './agg_row';
 import React from 'react';
 import { EuiCode, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,7 +37,7 @@ export function UnsupportedAgg(props) {
           <FormattedMessage
             id="tsvb.unsupportedAgg.aggIsNotSupportedDescription"
             defaultMessage="The {modelType} aggregation is no longer supported."
-            values={{ modelType: (<EuiCode>{props.model.type}</EuiCode>) }}
+            values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
           />
         </span>
       </EuiTitle>

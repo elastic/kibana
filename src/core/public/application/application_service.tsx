@@ -20,7 +20,6 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { CapabilitiesStart, CapabilitiesService, Capabilities } from './capabilities';
 import { InjectedMetadataStart } from '../injected_metadata';
-import { BasePathStart } from '../base_path';
 
 interface BaseApp {
   id: string;
@@ -106,7 +105,6 @@ export interface ApplicationStart {
 }
 
 interface StartDeps {
-  basePath: BasePathStart;
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -130,14 +128,13 @@ export class ApplicationService {
     };
   }
 
-  public async start({ basePath, injectedMetadata }: StartDeps): Promise<ApplicationStart> {
+  public async start({ injectedMetadata }: StartDeps): Promise<ApplicationStart> {
     this.apps$.complete();
     this.legacyApps$.complete();
 
     const apps = [...this.apps$.value, ...this.legacyApps$.value];
     const { capabilities, availableApps } = await this.capabilities.start({
       apps,
-      basePath,
       injectedMetadata,
     });
 

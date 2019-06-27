@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import { HttpService, HttpSetup, HttpStart } from './http_service';
+import { HttpService } from './http_service';
+import { HttpSetup } from './types';
+import { BehaviorSubject } from 'rxjs';
 
-const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
+type ServiceSetupMockType = jest.Mocked<HttpSetup> & {
+  basePath: jest.Mocked<HttpSetup['basePath']>;
+};
+
+const createServiceMock = (): ServiceSetupMockType => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -28,15 +34,31 @@ const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
   patch: jest.fn(),
   delete: jest.fn(),
   options: jest.fn(),
+  basePath: {
+    get: jest.fn(),
+    prepend: jest.fn(),
+    remove: jest.fn(),
+  },
   addLoadingCount: jest.fn(),
-  getLoadingCount$: jest.fn(),
-});
-const createStartContractMock = (): jest.Mocked<HttpStart> => undefined;
-const createMock = (): jest.Mocked<PublicMethodsOf<HttpService>> => ({
-  setup: jest.fn().mockReturnValue(createSetupContractMock()),
-  start: jest.fn().mockReturnValue(createStartContractMock()),
+  getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
   stop: jest.fn(),
+  intercept: jest.fn(),
+  removeAllInterceptors: jest.fn(),
 });
+
+const createSetupContractMock = () => createServiceMock();
+const createStartContractMock = () => createServiceMock();
+
+const createMock = () => {
+  const mocked: jest.Mocked<Required<HttpService>> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
 
 export const httpServiceMock = {
   create: createMock,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
 import {
   EsProvider,
   EsSupertestWithoutAuthProvider,
@@ -11,7 +12,8 @@ import {
   UsageAPIProvider,
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
-  SiemGraphQLProvider,
+  SiemGraphQLClientProvider,
+  SiemGraphQLClientFactoryProvider,
   InfraOpsSourceConfigurationProvider,
 } from './services';
 
@@ -20,16 +22,11 @@ import {
   SpacesServiceProvider,
 } from '../common/services';
 
-export default async function ({ readConfigFile }) {
-  const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
-  );
-  const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
-  );
-  const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
-  );
+export async function getApiIntegrationConfig({ readConfigFile }) {
+
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
+  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
 
   return {
     testFiles: [require.resolve('./apis')],
@@ -41,7 +38,8 @@ export default async function ({ readConfigFile }) {
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
       infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
       infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
-      siemGraphQLClient: SiemGraphQLProvider,
+      siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
+      siemGraphQLClient: SiemGraphQLClientProvider,
       infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
@@ -50,6 +48,7 @@ export default async function ({ readConfigFile }) {
       chance: kibanaAPITestsConfig.get('services.chance'),
       security: SecurityServiceProvider,
       spaces: SpacesServiceProvider,
+      retry: xPackFunctionalTestsConfig.get('services.retry'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
@@ -60,6 +59,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
       ],
     },
     esTestCluster: {
@@ -71,3 +71,5 @@ export default async function ({ readConfigFile }) {
     },
   };
 }
+
+export default getApiIntegrationConfig;

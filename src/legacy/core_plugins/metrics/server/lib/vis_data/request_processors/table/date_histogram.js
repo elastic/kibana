@@ -18,17 +18,17 @@
  */
 
 import { set } from 'lodash';
-import getBucketSize from '../../helpers/get_bucket_size';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
-import getTimerange from '../../helpers/get_timerange';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
+import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 
-export default function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
+export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
-    const { timeField, interval } = getIntervalAndTimefield(panel);
+    const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
-    const { from, to }  = getTimerange(req);
-    const  timezone = capabilities.searchTimezone;
+    const { from, to } = getTimerange(req);
+    const timezone = capabilities.searchTimezone;
 
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
@@ -39,13 +39,13 @@ export default function dateHistogram(req, panel, esQueryConfig, indexPatternObj
         time_zone: timezone,
         extended_bounds: {
           min: from.valueOf(),
-          max: to.valueOf()
-        }
+          max: to.valueOf(),
+        },
       });
       set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
         timeField,
         intervalString,
-        bucketSize
+        bucketSize,
       });
     });
     return next(doc);

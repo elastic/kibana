@@ -45,7 +45,13 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async toggleContextMenu(parent) {
       log.debug('toggleContextMenu');
-      await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      // Sometimes Geckodriver throws MoveTargetOutOfBoundsError here
+      // https://github.com/mozilla/geckodriver/issues/776
+      try {
+        await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      } catch(err) {
+        log.error(err);
+      }
       const toggleMenuItem = await this.findContextMenu(parent);
       await toggleMenuItem.click();
     }

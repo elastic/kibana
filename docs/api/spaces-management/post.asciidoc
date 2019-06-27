@@ -1,7 +1,7 @@
 [[spaces-api-post]]
 === Create Space
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
 
 Creates a new {kib} space. To update an existing space, use the PUT command.
 
@@ -9,7 +9,7 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Request
 
-To create a space, issue a POST request to the 
+To create a space, issue a POST request to the
 `/api/spaces/space` endpoint.
 
 [source,js]

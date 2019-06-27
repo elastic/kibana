@@ -21,12 +21,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { includes } from 'lodash';
 import { injectI18n } from '@kbn/i18n/react';
-import {
-  EuiComboBox,
-} from '@elastic/eui';
-import calculateSiblings from '../lib/calculate_siblings';
-import calculateLabel from '../../../common/calculate_label';
-import basicAggs from '../../../common/basic_aggs';
+import { EuiComboBox } from '@elastic/eui';
+import { calculateSiblings } from '../lib/calculate_siblings';
+import { calculateLabel } from '../../../common/calculate_label';
+import { basicAggs } from '../../../common/basic_aggs';
 import { toPercentileNumber } from '../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../common/metric_types';
 
@@ -46,11 +44,7 @@ function createTypeFilter(restrict, exclude) {
 export function filterRows(includeSiblings) {
   return row => {
     if (includeSiblings) {
-      return (
-        !/^series/.test(row.type) &&
-        !/^percentile/.test(row.type) &&
-        row.type !== 'math'
-      );
+      return !/^series/.test(row.type) && !/^percentile/.test(row.type) && row.type !== 'math';
     }
     return (
       !/_bucket$/.test(row.type) &&
@@ -62,7 +56,19 @@ export function filterRows(includeSiblings) {
 }
 
 function MetricSelectUi(props) {
-  const { additionalOptions, restrict, metric, metrics, onChange, value, exclude, includeSiblings, clearable, intl, ...rest } = props;
+  const {
+    additionalOptions,
+    restrict,
+    metric,
+    metrics,
+    onChange,
+    value,
+    exclude,
+    includeSiblings,
+    clearable,
+    intl,
+    ...rest
+  } = props;
 
   const calculatedMetrics = metrics.filter(createTypeFilter(restrict, exclude));
 
@@ -116,7 +122,10 @@ function MetricSelectUi(props) {
 
   return (
     <EuiComboBox
-      placeholder={intl.formatMessage({ id: 'tsvb.metricSelect.selectMetricPlaceholder', defaultMessage: 'Select metric…' })}
+      placeholder={intl.formatMessage({
+        id: 'tsvb.metricSelect.selectMetricPlaceholder',
+        defaultMessage: 'Select metric…',
+      })}
       options={allOptions}
       selectedOptions={selectedOptions}
       onChange={onChange}
@@ -145,5 +154,4 @@ MetricSelectUi.propTypes = {
   includeSiblings: PropTypes.bool,
 };
 
-const MetricSelect = injectI18n(MetricSelectUi);
-export default MetricSelect;
+export const MetricSelect = injectI18n(MetricSelectUi);

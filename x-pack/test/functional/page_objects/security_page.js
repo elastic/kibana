@@ -12,7 +12,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
@@ -45,6 +44,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           await find.clickByCssSelector(rawDataTabLocator);
         }
         await retry.try(async () => {
+          if (await find.existsByCssSelector(rawDataTabLocator)) {
+            await find.clickByCssSelector(rawDataTabLocator);
+          }
           await PageObjects.error.expectForbidden();
         });
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
@@ -76,7 +78,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async initTests() {
       log.debug('SecurityPage:initTests');
       await esArchiver.load('empty_kibana');
-      await kibanaServer.uiSettings.disableToastAutohide();
       await esArchiver.loadIfNeeded('logstash_functional');
       browser.setWindowSize(1600, 1000);
     }
@@ -359,7 +360,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             await testSubjects.click('restrictFieldsQuery0');
 
             // have to remove the '*'
-            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
+            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"] svg.euiIcon')
               .then(function () {
                 return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
               });

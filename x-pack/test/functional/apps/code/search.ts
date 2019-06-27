@@ -17,6 +17,7 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
 
   describe('Search', () => {
     const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
+    const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
     const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
     const languageFilterListSelector = 'codeSearchLanguageFilterList codeSearchLanguageFilterItem';
 
@@ -36,7 +37,6 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
 
       it('Trigger symbols in typeahead', async () => {
         log.debug('Trigger symbols in typeahead');
-        // Fill in the search query bar with a common prefix of symbols.
         await PageObjects.code.fillSearchQuery('user');
 
         await retry.tryForTime(5000, async () => {
@@ -45,6 +45,27 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
 
           expect(await symbols[0].getVisibleText()).to.equal('user');
           expect(await symbols[1].getVisibleText()).to.equal('passport.User');
+        });
+      });
+
+      it('File typeahead should be case insensitive', async () => {
+        log.debug('File typeahead should be case insensitive');
+        await PageObjects.code.fillSearchQuery('LICENSE');
+
+        await retry.tryForTime(5000, async () => {
+          const symbols = await testSubjects.findAll(fileTypeaheadListSelector);
+          expect(symbols).to.have.length(1);
+
+          expect(await symbols[0].getVisibleText()).to.equal('LICENSE');
+        });
+
+        await PageObjects.code.fillSearchQuery('license');
+
+        await retry.tryForTime(5000, async () => {
+          const symbols = await testSubjects.findAll(fileTypeaheadListSelector);
+          expect(symbols).to.have.length(1);
+
+          expect(await symbols[0].getVisibleText()).to.equal('LICENSE');
         });
       });
 

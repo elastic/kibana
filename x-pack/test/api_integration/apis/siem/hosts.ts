@@ -12,10 +12,10 @@ import {
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
-} from '../../../../plugins/siem/public/graphql/types';
-import { HostOverviewQuery } from '../../../../plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
-import { HostFirstLastSeenGqlQuery } from './../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
-import { HostsTableQuery } from './../../../../plugins/siem/public/containers/hosts/hosts_table.gql_query';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
+import { HostOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
+import { HostFirstLastSeenGqlQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
+import { HostsTableQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -46,6 +46,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             sort: {
               field: HostsFields.lastSeen,
               direction: Direction.asc,
@@ -79,6 +80,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               field: HostsFields.lastSeen,
               direction: Direction.asc,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             pagination: {
               limit: 2,
               cursor: '1',
@@ -140,6 +142,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {
@@ -155,6 +158,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
           variables: {
             sourceId: 'default',
             hostName: 'zeek-sensor-san-francisco',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {

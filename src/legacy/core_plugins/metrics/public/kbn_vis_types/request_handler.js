@@ -22,7 +22,7 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
 
-const MetricsRequestHandlerProvider = function (Private, config) {
+const MetricsRequestHandlerProvider = function(Private, config) {
   const timezone = Private(timezoneProvider)();
 
   return {

@@ -52,6 +52,12 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      */
     public async setElement(comboBoxElement: WebElementWrapper, value: string): Promise<void> {
       log.debug(`comboBox.setElement, value: ${value}`);
+      const isOptionSelected = await this.isOptionSelected(comboBoxElement, value);
+
+      if (isOptionSelected) {
+        return;
+      }
+
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
@@ -219,6 +225,24 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         );
         await toggleBtn.click();
       }
+    }
+
+    /**
+     * check if option is already selected
+     *
+     * @param comboBoxElement
+     * @param value
+     */
+    public async isOptionSelected(
+      comboBoxElement: WebElementWrapper,
+      value: string
+    ): Promise<boolean> {
+      log.debug(`comboBox.isOptionSelected, value: ${value}`);
+      const selectedOptions = await comboBoxElement.findAllByClassName(
+        'euiComboBoxPill',
+        WAIT_FOR_EXISTS_TIME
+      );
+      return selectedOptions.length === 1 && (await selectedOptions[0].getVisibleText()) === value;
     }
   }
 

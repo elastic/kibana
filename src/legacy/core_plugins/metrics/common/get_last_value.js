@@ -17,20 +17,15 @@
  * under the License.
  */
 
-import { isArray, findLast } from 'lodash';
+import { isArray, last } from 'lodash';
 
 const DEFAULT_VALUE = 0;
+const extractValue = data => (data && data[1]) || null;
 
-export default (data, defaultValue = DEFAULT_VALUE) => {
+export const getLastValue = (data, defaultValue = DEFAULT_VALUE) => {
   if (!isArray(data)) {
-    return data;
+    return data || defaultValue;
   }
 
-  const extractValue = data => data && data[1] || null;
-
-  // If the last value is zero or null because of a partial bucket or
-  // some kind of timeshift weirdness we will show the second to last.
-  const lastValid = findLast(data, item => extractValue(item));
-
-  return extractValue(lastValid) || defaultValue;
+  return extractValue(last(data)) || defaultValue;
 };

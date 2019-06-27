@@ -19,13 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import aggToComponent from '../lib/agg_to_component';
+import { aggToComponent } from '../lib/agg_to_component';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 
-function Agg(props) {
+export function Agg(props) {
   const { model, uiRestrictions } = props;
 
   let Component = aggToComponent[model.type];
@@ -42,10 +42,7 @@ function Agg(props) {
   };
 
   return (
-    <div
-      className={props.className}
-      style={style}
-    >
+    <div className={props.className} style={style}>
       <Component
         fields={props.fields}
         disableDelete={props.disableDelete}
@@ -76,5 +73,3 @@ Agg.propTypes = {
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
 };
-
-export default Agg;

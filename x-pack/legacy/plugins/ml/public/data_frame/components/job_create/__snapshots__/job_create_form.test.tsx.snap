@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <JobCreateForm /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "combinedQuery": Object {},
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "id": "the-index-pattern-id",
+          "title": "the-index-pattern-title",
+        },
+        "currentSavedSearch": Object {},
+        "indexPatterns": Object {},
+        "kbnBaseUrl": "url",
+        "kibanaConfig": Object {},
+      }
+    }
+  >
+    <Component
+      createIndexPattern={false}
+      jobConfig={Object {}}
+      jobId="the-job-id"
+      onChange={[Function]}
+      overrides={
+        Object {
+          "created": false,
+          "indexPatternId": undefined,
+          "started": false,
+        }
+      }
+    />
+  </ContextProvider>
+</div>
+`;
