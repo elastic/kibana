@@ -23,6 +23,8 @@ For more workpad inspiration, go to the link:elastic.co[Elastic Blog] where we s
 
 To personalize your workpad, use the editor on the right.
 
+. Add a *Name* to your workpad, for example, `My Canvas workpad`.
+
 . In the *Width* and *Height* fields, specify the size of your workpad. 
 
 . Select the layout for your workpad. 
@@ -31,16 +33,20 @@ For example, click *720p* for a traditional presentation layout.
 
 . Click the *Background color* picker, then select the background color for your workpad.
 
+//TODO ask Catherine for cool video image, then insert here
+
+TIP: To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
+
+////
+Add the following text to a more appropriate place.
 . Add more pages to your workpad, then select the page transition.
 
 .. Click *Page 1*, then click the *+* icon.
 
 .. From the *Transition* drop-down list, select the page transition you want to use. 
+////
 
-. To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
-
-//TODO ask Catherine for cool video image, then insert here
-
+//TODO After the Canvas content is built out, move the following content to the end.
 [float]
 === Share your workpad
 
