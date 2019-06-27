@@ -103,6 +103,31 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
   });
+
+  $scope.refreshConfig = getInitialRefreshConfig({
+    mapStateJSON: savedMap.mapStateJSON,
+    globalState: globalState,
+  });
+  syncAppAndGlobalState();
+
+  $scope.indexPatterns = [];
+  $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
+    $scope.query = query;
+    $scope.time = dateRange;
+    syncAppAndGlobalState();
+
+    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+  };
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    $scope.refreshConfig = {
+      isPaused,
+      interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval
+    };
+    syncAppAndGlobalState();
+
+    store.dispatch(setRefreshConfig($scope.refreshConfig));
+  };
+
   /*
     START QueryBar replacement with SearchBar
     Saved Queries required moving the query bar state caching to the search bar. Using the search bar instead of the query bar in Maps requires obscuring the filter functionality within the app.
@@ -143,6 +168,15 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     syncAppAndGlobalState();
   };
 
+  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+    if (!newSavedQuery) return;
+    $state.savedQuery = newSavedQuery.id;
+
+    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      updateStateFromSavedQuery(newSavedQuery);
+    }
+  });
+
   $scope.$watch('state.savedQuery', newSavedQueryId => {
     if (!newSavedQueryId) {
       $scope.savedQuery = undefined;
@@ -157,31 +191,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     });
   });
   /* end Saved Queries */
-
-  $scope.refreshConfig = getInitialRefreshConfig({
-    mapStateJSON: savedMap.mapStateJSON,
-    globalState: globalState,
-  });
-  syncAppAndGlobalState();
-
-  $scope.indexPatterns = [];
-  $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
-    $scope.query = query;
-    $scope.time = dateRange;
-    syncAppAndGlobalState();
-
-    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
-  };
-  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
-    $scope.refreshConfig = {
-      isPaused,
-      interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval
-    };
-    syncAppAndGlobalState();
-
-    store.dispatch(setRefreshConfig($scope.refreshConfig));
-  };
-
   function renderMap() {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
