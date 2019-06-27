@@ -1531,10 +1531,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-6.0.1.tgz#dd3fd512946870d941baf16402ec82741d680ae9"
-  integrity sha512-31n/ceU5b0USc2Mfbli+/xBadjWCbakP2Nr/KjIWaJCMIljY/VXkeSWL//CK+wA3T19utyxQWlP+s2B9Ol0isA==
+"@elastic/charts@^7.0.1":
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-7.0.1.tgz#0ddc6d5444def8ed5d45c4113359c311e1e15fb7"
+  integrity sha512-cscQcKB1nxPNipdPeMi14fi5ALdSywz2MYOn1UHmStiFBeaFuwt3Ncog/HJhtJG1Dgjqs0yvqpB92lkja+UmQQ==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
