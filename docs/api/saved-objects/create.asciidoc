@@ -1,6 +1,5 @@
 [[saved-objects-api-create]]
 === Create saved object API
-
 ++++
 <titleabbrev>Create object</titleabbrev>
 ++++
@@ -74,5 +73,4 @@ A successful call returns a response code of `200` and the API returns the follo
 }
 --------------------------------------------------
 
-<1> When `my-pattern` is unspecified in the path, a unique ID is automatically
-generated.
+<1> When `my-pattern` is unspecified in the path, a unique ID is automatically generated.
