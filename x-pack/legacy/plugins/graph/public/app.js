@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import 'ace';
@@ -55,6 +56,10 @@ import { capabilities } from 'ui/capabilities';
 import saveTemplate from './templates/save_workspace.html';
 import loadTemplate from './templates/load_workspace.html';
 import settingsTemplate from './templates/settings.html';
+
+import './directives/graph_load';
+import './directives/graph_save';
+import './directives/graph_settings';
 
 const app = uiModules.get('app/graph');
 
@@ -836,7 +841,11 @@ app.controller('graphuiPlugin', function (
           defaultMessage: 'Save this workspace',
         }),
         disableButton: function () {return $scope.selectedFields.length === 0;},
-        template: saveTemplate,
+        run: () => {
+          const curState = $scope.menus.showSave;
+          $scope.closeMenus();
+          $scope.menus.showSave = !curState;
+        },
         testId: 'graphSaveButton',
       });
     } else {
@@ -867,7 +876,11 @@ app.controller('graphuiPlugin', function (
     tooltip: i18n.translate('xpack.graph.topNavMenu.loadWorkspaceTooltip', {
       defaultMessage: 'Load a saved workspace',
     }),
-    template: loadTemplate,
+    run: () => {
+      const curState = $scope.menus.showLoad;
+      $scope.closeMenus();
+      $scope.menus.showLoad = !curState;
+    },
     testId: 'graphOpenButton',
   });
   // if deleting is disabled using uiCapabilities, we don't want to render the delete
@@ -919,7 +932,7 @@ app.controller('graphuiPlugin', function (
           );
         }
       });
-    }else {
+    } else {
       $scope.topNavMenu.push({
         key: 'delete',
         disableButton: true,
@@ -945,9 +958,24 @@ app.controller('graphuiPlugin', function (
     description: i18n.translate('xpack.graph.topNavMenu.settingsAriaLabel', {
       defaultMessage: 'Settings',
     }),
-    template: settingsTemplate
+    run: () => {
+      const curState = $scope.menus.showSettings;
+      $scope.closeMenus();
+      $scope.menus.showSettings = !curState;
+    },
   });
 
+  $scope.menus = {
+    showSave: false,
+    showLoad: false,
+    showSettings: false,
+  };
+
+  $scope.closeMenus = () => {
+    _.forOwn($scope.menus, function (value, key) {
+      $scope.menus[key] = false;
+    });
+  };
 
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {
