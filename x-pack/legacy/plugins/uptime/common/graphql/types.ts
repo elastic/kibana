@@ -24,6 +24,8 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
+  getSnapshotHistogram: HistogramDataPoint[];
+
   getMonitorChartsData?: MonitorChart | null;
   /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
@@ -384,8 +386,6 @@ export interface Snapshot {
   down?: number | null;
 
   total?: number | null;
-
-  histogram: HistogramDataPoint[];
 }
 
 export interface HistogramDataPoint {
@@ -520,6 +520,13 @@ export interface GetMonitorsQueryArgs {
   filters?: string | null;
 }
 export interface GetSnapshotQueryArgs {
+  dateRangeStart: string;
+
+  dateRangeEnd: string;
+
+  filters?: string | null;
+}
+export interface GetSnapshotHistogramQueryArgs {
   dateRangeStart: string;
 
   dateRangeEnd: string;

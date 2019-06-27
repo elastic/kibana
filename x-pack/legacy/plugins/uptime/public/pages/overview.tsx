@@ -5,11 +5,18 @@
  */
 
 // @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiSearchBar, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
+import {
+  EmptyState,
+  ErrorList,
+  FilterBar,
+  MonitorList,
+  Snapshot,
+  SnapshotHistogram,
+} from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
@@ -84,12 +91,25 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <Snapshot
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
-          colors={colors}
-          variables={sharedProps}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={4}>
+            <Snapshot
+              absoluteStartDate={absoluteStartDate}
+              absoluteEndDate={absoluteEndDate}
+              colors={colors}
+              variables={sharedProps}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={8}>
+            <SnapshotHistogram
+              absoluteStartDate={absoluteStartDate}
+              absoluteEndDate={absoluteEndDate}
+              successColor={colors.success}
+              dangerColor={colors.danger}
+              variables={sharedProps}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <MonitorList
           absoluteStartDate={absoluteStartDate}
