@@ -27,6 +27,7 @@ import {
   CodeHomePageProvider,
   RollupPageProvider,
   UptimePageProvider,
+  LicenseManagementPageProvider,
 } from './page_objects';
 
 import {
@@ -108,7 +109,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
-      resolve(__dirname, './apps/index_patterns')
+      resolve(__dirname, './apps/index_patterns'),
+      resolve(__dirname, './apps/license_management')
     ],
 
     // define the name and providers for services that should be
@@ -174,6 +176,7 @@ export default async function ({ readConfigFile }) {
       code: CodeHomePageProvider,
       uptime: UptimePageProvider,
       rollup: RollupPageProvider,
+      licenseManagement: LicenseManagementPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -270,6 +273,10 @@ export default async function ({ readConfigFile }) {
       rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/',
+      },
+      licenseManagement: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/license_management',
       },
       apm: {
         pathname: '/app/apm',
