@@ -184,7 +184,6 @@ Array [
       "alertInstances": Object {},
       "alertTypeState": Object {},
       "previousStartedAt": null,
-      "startedAt": 2019-02-12T21:01:22.479Z,
     },
     "taskType": "alerting:123",
   },
