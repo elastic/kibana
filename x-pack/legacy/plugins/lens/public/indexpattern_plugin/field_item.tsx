@@ -16,50 +16,49 @@ import { DataType } from '../types';
 
 export interface FieldItemProps {
   field: IndexPatternField;
-  draggable: boolean;
   highlight?: string;
 }
 
-export function FieldItem({ field, highlight, draggable }: FieldItemProps) {
-  const fieldParts = (
-    field.name + '.fsdfsd.sdfsdfs.sdfsdfsd.fsdfsfsd.fsdfsdfsd.dsfsdfsdfsd.sdfsdfsdf.sdfsdf'
-  ).split('.');
-  const item = (
-    <>
+function highglightedPart(completeHighlight: string | undefined, part: string) {
+  if (!completeHighlight) {
+    return '';
+  }
+
+  if (completeHighlight.includes(part)) {
+    return part;
+  }
+
+  const lastHighlightPart = completeHighlight.split('.').pop();
+
+  if (lastHighlightPart && part.startsWith(lastHighlightPart)) {
+    return lastHighlightPart;
+  }
+
+  return completeHighlight;
+}
+
+export function FieldItem({ field, highlight }: FieldItemProps) {
+  const fieldParts = field.name.split('.');
+  const wrappableHighlightableFieldName = _.flatten(
+    fieldParts.map((part, index) => [
+      <span key={part}>
+        <EuiHighlight search={highglightedPart(highlight, part)}>{part}</EuiHighlight>
+        {index !== fieldParts.length - 1 ? '.' : ''}
+      </span>,
+      index !== fieldParts.length - 1 ? <wbr key={`${part}-wbr`} /> : null,
+    ])
+  );
+
+  return (
+    <DragDrop
+      value={field}
+      draggable
+      className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${field.type}`}
+    >
       <FieldIcon type={field.type as DataType} />
       <span className="lnsFieldListPanel__fieldName" title={field.name}>
-        {_.flatten(
-          fieldParts.map((part, index) => [
-            <span key={part}>
-              <EuiHighlight
-                // TODO solve in a sane way
-                search={
-                  highlight && highlight.includes(part)
-                    ? part
-                    : highlight && part.startsWith(highlight.split('.').reverse()[0])
-                    ? highlight.split('.').reverse()[0]
-                    : highlight
-                }
-              >
-                {part}
-              </EuiHighlight>
-              {index !== fieldParts.length - 1 ? '.' : ''}
-            </span>,
-            index !== fieldParts.length - 1 ? <wbr key={`${part}-wbr`} /> : null,
-          ])
-        )}
+        {wrappableHighlightableFieldName}
       </span>
-    </>
+    </DragDrop>
   );
-  const className = `lnsFieldListPanel__field lnsFieldListPanel__field-btn-${field.type}`;
-
-  if (draggable) {
-    return (
-      <DragDrop value={field} draggable className={className}>
-        {item}
-      </DragDrop>
-    );
-  } else {
-    return <div className={className}>{item}</div>;
-  }
 }

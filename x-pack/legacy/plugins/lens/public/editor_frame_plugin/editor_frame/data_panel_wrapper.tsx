@@ -5,16 +5,7 @@
  */
 
 import React, { useMemo, memo, useContext, useState } from 'react';
-import {
-  EuiSelect,
-  EuiComboBox,
-  EuiTitle,
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-} from '@elastic/eui';
+import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { DatasourceDataPanelProps, Datasource } from '../../../public';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
@@ -49,41 +40,45 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   return (
     <>
-      <EuiPopover
-        id="datasource-switch"
-        className="lnsDatasourceSwitch"
-        button={
-          <EuiButtonIcon
-            aria-label="Switch to datasource"
+      {Object.keys(props.datasourceMap).length > 1 && (
+        <EuiPopover
+          id="datasource-switch"
+          className="lnsDatasourceSwitch"
+          button={
+            <EuiButtonIcon
+              aria-label="Switch to datasource"
+              title="Switch to datasource"
+              data-test-subj="datasource-switch"
+              onClick={() => setDatasourceSwitcher(true)}
+              iconType="gear"
+            />
+          }
+          isOpen={showDatasourceSwitcher}
+          closePopover={() => setDatasourceSwitcher(false)}
+          panelPaddingSize="none"
+          anchorPosition="rightUp"
+        >
+          <EuiContextMenuPanel
             title="Switch to datasource"
-            onClick={() => setDatasourceSwitcher(true)}
-            iconType="gear"
+            items={Object.keys(props.datasourceMap).map(datasourceId => (
+              <EuiContextMenuItem
+                key={datasourceId}
+                data-test-subj={`datasource-switch-${datasourceId}`}
+                icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
+                onClick={() => {
+                  setDatasourceSwitcher(false);
+                  props.dispatch({
+                    type: 'SWITCH_DATASOURCE',
+                    newDatasourceId: datasourceId,
+                  });
+                }}
+              >
+                {datasourceId}
+              </EuiContextMenuItem>
+            ))}
           />
-        }
-        isOpen={showDatasourceSwitcher}
-        closePopover={() => setDatasourceSwitcher(false)}
-        panelPaddingSize="none"
-        anchorPosition="rightUp"
-      >
-        <EuiContextMenuPanel
-          title="Switch to datasource"
-          items={Object.keys(props.datasourceMap).map(datasourceId => (
-            <EuiContextMenuItem
-              key={datasourceId}
-              icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
-              onClick={() => {
-                setDatasourceSwitcher(false);
-                props.dispatch({
-                  type: 'SWITCH_DATASOURCE',
-                  newDatasourceId: datasourceId,
-                });
-              }}
-            >
-              {datasourceId}
-            </EuiContextMenuItem>
-          ))}
-        />
-      </EuiPopover>
+        </EuiPopover>
+      )}
       {props.activeDatasource && !props.datasourceIsLoading && (
         <NativeRenderer
           className="lnsSidebarContainer"

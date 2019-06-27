@@ -9,7 +9,7 @@
 
   & > .lnsIndexPatternDataPanel__changeLink {
     flex: 0 0 auto;
-    margin-right: $euiSize;
+    margin: 0 $euiSize;
   }
 
   & > h4 {
@@ -27,10 +27,15 @@
 
 .lnsFieldListPanel__list {
   @include euiOverflowShadow($euiPageBackgroundColor);
-  @include euiScrollBar;
+  height: 100%;
+  margin-top: 2px; // form control shadow
+}
+
+.lnsFieldListPanel__overflow {
+  padding-top: $euiSizeS;
   height: 100%;
   overflow: visible auto;
-  margin-top: 2px; // form control shadow
+  @include euiScrollBar;
 }
 
 .lnsFieldListPanel__field {

@@ -21,8 +21,10 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
   EuiPopover,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField } from './indexpattern';
 import { ChildDragDropProvider } from '../drag_drop';
@@ -48,20 +50,40 @@ const fieldTypeNames: Record<DataType, string> = {
 };
 
 export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-  const [fieldsFilter, setFieldsFilter] = useState('');
-  const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
-  const [isTypeFilterOpen, setTypeFilterOpen] = useState(false);
+  const [nameFilter, setNameFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState<DataType[]>([]);
 
-  function filterFields(field: IndexPatternField) {
+  const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
+  const [isTypeFilterOpen, setTypeFilterOpen] = useState(false);
+
+  if (Object.keys(props.state.indexPatterns).length === 0) {
     return (
-      field.name.toLowerCase().includes(fieldsFilter.toLowerCase()) &&
-      supportedFieldTypes.includes(field.type)
+      <EuiFlexGroup gutterSize="s" className="lnsIndexPatternDataPanel" direction="column">
+        <EuiFlexItem grow={null}>
+          <EuiCallOut
+            data-test-subj="indexPattern-no-indexpatterns"
+            title={i18n.translate('xpack.lens.indexPattern.noPatternsLabel', {
+              defaultMessage: 'No index patterns',
+            })}
+            color="warning"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.lens.indexPattern.noPatternsLabel"
+                defaultMessage="Please create an index pattern or switch to another data source"
+              />
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   const filteredFields = props.state.indexPatterns[props.state.currentIndexPatternId].fields.filter(
-    filterFields
+    (field: IndexPatternField) =>
+      field.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
+      supportedFieldTypes.includes(field.type)
   );
 
   const availableFieldTypes = _.uniq(filteredFields.map(({ type }) => type));
@@ -80,11 +102,17 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                   </h4>
                 </EuiTitle>
                 <EuiButtonEmpty
+                  data-test-subj="indexPattern-switch-link"
                   className="lnsIndexPatternDataPanel__changeLink"
                   onClick={() => setShowIndexPatternSwitcher(true)}
                   size="xs"
                 >
-                  (change)
+                  (
+                  <FormattedMessage
+                    id="xpack.lens.indexPatterns.changePatternLabel"
+                    defaultMessage="change"
+                  />
+                  )
                 </EuiButtonEmpty>
               </>
             ) : (
@@ -129,16 +157,18 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem grow={true}>
               <EuiFieldSearch
-                placeholder={i18n.translate('xpack.viz_editor.indexPatterns.filterByNameLabel', {
+                placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                   defaultMessage: 'Search fields',
                   description:
                     'Search the list of fields in the index pattern for the provided text',
                 })}
-                value={fieldsFilter}
+                value={nameFilter}
                 onChange={e => {
-                  setFieldsFilter(e.target.value);
+                  setNameFilter(e.target.value);
                 }}
-                aria-label="Search fields"
+                aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
+                  defaultMessage: 'Search fields',
+                })}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -153,13 +183,13 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                     <EuiFilterButton
                       onClick={() => setTypeFilterOpen(!isTypeFilterOpen)}
                       iconType="arrowDown"
-                      data-test-subj="savedObjectFinderFilterButton"
+                      data-test-subj="indexPatternTypeFilterButton"
                       isSelected={isTypeFilterOpen}
                       numFilters={availableFieldTypes.length}
                       hasActiveFilters={availableFilteredTypes.length > 0}
                       numActiveFilters={availableFilteredTypes.length}
                     >
-                      {i18n.translate('xpack.lens.indexpattern.typefilter', {
+                      {i18n.translate('xpack.lens.indexPatterns.typeFilterLabel', {
                         defaultMessage: 'Types',
                       })}
                     </EuiFilterButton>
@@ -189,21 +219,16 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
             </EuiFlexItem>
           </EuiFlexGroup>
           <div className="lnsFieldListPanel__list">
-            {props.state.currentIndexPatternId &&
-              props.state.indexPatterns[props.state.currentIndexPatternId].fields
-                .filter(filterFields)
+            <div className="lnsFieldListPanel__overflow">
+              {filteredFields
                 .filter(
                   field => typeFilter.length === 0 || typeFilter.includes(field.type as DataType)
                 )
                 .sort(sortFields)
                 .map(field => (
-                  <FieldItem
-                    key={field.name}
-                    field={field}
-                    draggable
-                    highlight={fieldsFilter.toLowerCase()}
-                  />
+                  <FieldItem key={field.name} field={field} highlight={nameFilter.toLowerCase()} />
                 ))}
+            </div>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -478,6 +478,10 @@ Object {
       instance.update();
     });
 
+    afterEach(() => {
+      instance.unmount();
+    });
+
     it('should have initialized only the initial datasource and visualization', () => {
       expect(mockDatasource.initialize).toHaveBeenCalled();
       expect(mockDatasource2.initialize).not.toHaveBeenCalled();
@@ -488,9 +492,12 @@ Object {
 
     it('should initialize other datasource on switch', async () => {
       act(() => {
-        instance
-          .find('select[data-test-subj="datasource-switch"]')
-          .simulate('change', { target: { value: 'testDatasource2' } });
+        instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
+      });
+      act(() => {
+        (document.querySelector(
+          '[data-test-subj="datasource-switch-testDatasource2"]'
+        ) as HTMLButtonElement).click();
       });
       expect(mockDatasource2.initialize).toHaveBeenCalled();
     });
@@ -499,9 +506,11 @@ Object {
       const initialState = {};
       mockDatasource2.initialize.mockResolvedValue(initialState);
 
-      instance
-        .find('select[data-test-subj="datasource-switch"]')
-        .simulate('change', { target: { value: 'testDatasource2' } });
+      instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
+
+      (document.querySelector(
+        '[data-test-subj="datasource-switch-testDatasource2"]'
+      ) as HTMLButtonElement).click();
 
       await waitForPromises();
 
