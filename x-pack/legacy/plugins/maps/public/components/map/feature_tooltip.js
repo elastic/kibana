@@ -243,7 +243,7 @@ export class FeatureTooltip extends React.Component {
 
     const pageNumberReadout =   (
       <EuiTextAlign textAlign="center">
-        <EuiText>{(this.state.pageNumber + 1)} of {filteredFeatures.length}</EuiText>
+        <EuiText><b>{(this.state.pageNumber + 1)}</b> of <b>{filteredFeatures.length}</b></EuiText>
       </EuiTextAlign>
     );
 
