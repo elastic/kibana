@@ -24,7 +24,7 @@ export const REACT_APP_ROOT_ID = 'react-apm-root';
 
 const MainContainer = styled.div`
   min-width: ${px(unit * 50)};
-  padding: ${px(units.plus)};
+  // padding: ${px(units.plus)};
   min-height: calc(100vh - ${topNavHeight});
 `;
 
