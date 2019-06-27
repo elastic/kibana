@@ -17,7 +17,6 @@ import {
   featuresRoute,
   settingsRoute,
 } from './server/routes/api/v1';
-import { i18n } from '@kbn/i18n';
 
 import { registerOssFeatures } from './server/lib/register_oss_features';
 import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
