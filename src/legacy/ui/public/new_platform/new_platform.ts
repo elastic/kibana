@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { InternalCoreSetup, InternalCoreStart } from '../../../core/public';
+import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
 
 export const npSetup = {
   core: (null as unknown) as InternalCoreSetup,

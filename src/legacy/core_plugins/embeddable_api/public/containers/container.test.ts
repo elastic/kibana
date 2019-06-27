@@ -18,7 +18,7 @@
  */
 
 import '../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
+import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';

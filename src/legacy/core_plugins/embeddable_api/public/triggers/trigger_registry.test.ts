@@ -18,7 +18,7 @@
  */
 
 import '../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
+import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import { triggerRegistry } from '../triggers';
 import { HELLO_WORLD_ACTION_ID } from '../test_samples';

@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from './mocks';
 
-export const npStart = { core: coreMock.createStart() };
-export const npSetup = { core: coreMock.createSetup() };
+export const coreSetupMock = coreMock.createSetup();
+export const coreStartMock = coreMock.createStart();
+
+jest.doMock('ui/new_platform', () => {
+  return {
+    npStart: { core: coreStartMock },
+    npSetup: { core: coreSetupMock },
+  };
+});
