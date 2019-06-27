@@ -440,6 +440,24 @@ describe('filter_manager', () => {
       expect(globalStateStub.filters.length).toBe(3);
     });
 
+    test('should de-dupe globalStateStub filters being set', async () => {
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      const f2 = _.cloneDeep(f1);
+      await filterManager.setFilters([f1, f2]);
+      expect(filterManager.getAppFilters()).toHaveLength(0);
+      expect(filterManager.getGlobalFilters()).toHaveLength(1);
+      expect(filterManager.getFilters()).toHaveLength(1);
+    });
+
+    test('should de-dupe appStateStub filters being set', async () => {
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = _.cloneDeep(f1);
+      await filterManager.setFilters([f1, f2]);
+      expect(filterManager.getAppFilters()).toHaveLength(1);
+      expect(filterManager.getGlobalFilters()).toHaveLength(0);
+      expect(filterManager.getFilters()).toHaveLength(1);
+    });
+
     test('should mutate global filters on appStateStub filter changes', async function() {
       const idx = 1;
       await filterManager.addFilters(readyFilters, true);
