@@ -19,9 +19,14 @@ interface Response {
   privileges: Privileges;
   upgradeInProgress: boolean;
   isPlatinumLicense: boolean;
+  mlEnabledInSpace: boolean;
 }
 
-export function privilegesProvider(callWithRequest: callWithRequestType, xpackMainPlugin: any) {
+export function privilegesProvider(
+  callWithRequest: callWithRequestType,
+  xpackMainPlugin: any,
+  isMlEnabled: () => Promise<boolean>
+) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
   async function getPrivileges(): Promise<Response> {
     // get the default privileges, forced to be false.
@@ -31,6 +36,7 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
     const license = checkLicense(xpackMainPlugin.info);
     const isPlatinumLicense = license.licenseType === LICENSE_TYPE.PLATINUM;
+    const mlEnabledInSpace = await isMlEnabled();
 
     const setGettingPrivileges = isPlatinumLicense
       ? setPlatinumGettingPrivileges
@@ -39,6 +45,12 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
     const setActionPrivileges = isPlatinumLicense
       ? setPlatinumActionPrivileges
       : setBasicActionPrivileges;
+
+    if (mlEnabledInSpace === false) {
+      // if ML isn't enabled in the current space,
+      // return with the default privileges (all false)
+      return { privileges, upgradeInProgress, isPlatinumLicense, mlEnabledInSpace };
+    }
 
     if (securityDisabled === true) {
       if (upgradeInProgress === true) {
@@ -63,7 +75,7 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
         setActionPrivileges(cluster, privileges);
       }
     }
-    return { privileges, upgradeInProgress, isPlatinumLicense };
+    return { privileges, upgradeInProgress, isPlatinumLicense, mlEnabledInSpace };
   }
   return { getPrivileges };
 }
