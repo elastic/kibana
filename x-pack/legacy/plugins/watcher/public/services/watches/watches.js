@@ -9,18 +9,18 @@ import { ROUTES } from '../../../common/constants';
 import { Watch } from 'plugins/watcher/models/watch';
 import { kfetch } from '../../../../../../../src/legacy/ui/public/kfetch';
 
-export class WatchesService {
-  constructor() {
-    this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
-  }
+function getBasePath() {
+  return chrome.addBasePath(ROUTES.API_ROOT);
+}
 
+export const watches = {
   getWatchList() {
-    return kfetch({ pathname: `${this.basePath}/watches` })
+    return kfetch({ pathname: `${getBasePath()}/watches` })
       .then(response => response.watches)
-      .then(watches => watches.map(watch => {
-        return Watch.fromUpstreamJson(watch);
-      }));
-  }
+      .then(watches => watches.map(watch =>
+        Watch.fromUpstreamJson(watch)
+      ));
+  },
 
   /**
    * Delete a collection of watches
@@ -32,10 +32,11 @@ export class WatchesService {
     // $http.delete does not take the request body as the 2nd argument. Instead it expects the 2nd
     // argument to be a request options object, one of which can be the request body (data). We also
     // need to explicitly define the content type of the data.
-    const body = {
-      watchIds
-    };
-    return kfetch({ pathname: `${this.basePath}/watches/delete`, method: 'POST', body: JSON.stringify(body) })
+    return kfetch({
+      pathname: `${getBasePath()}/watches/delete`,
+      method: 'POST',
+      body: JSON.stringify({ watchIds })
+    })
       .then(response => response.results);
   }
-}
+};

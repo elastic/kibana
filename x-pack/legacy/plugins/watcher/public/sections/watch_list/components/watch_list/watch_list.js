@@ -17,14 +17,13 @@ import 'ui/react_components';
 import 'ui/table_info';
 import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/components/forbidden_message';
-import 'plugins/watcher/services/watches';
 import 'plugins/watcher/services/license';
+import { watches } from '../../../../services/watches';
 
 const app = uiModules.get('xpack/watcher');
 
 app.directive('watchList', function ($injector) {
   const pagerFactory = $injector.get('pagerFactory');
-  const watchesService = $injector.get('xpackWatcherWatchesService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
   const confirmModal = $injector.get('confirmModal');
   const $interval = $injector.get('$interval');
@@ -84,7 +83,8 @@ app.directive('watchList', function ($injector) {
       }
 
       loadWatches = () => {
-        Promise.all([watchesService.getWatchList()])
+        // wrapping promise for angular digest cycle
+        Promise.all([watches.getWatchList()])
           .then(([watches]) => {
             this.watches = watches;
             this.forbidden = false;
@@ -162,7 +162,7 @@ app.directive('watchList', function ($injector) {
         const numWatchesToDelete = this.watchesBeingDeleted.length;
 
         const watchIds = this.watchesBeingDeleted.map(watch => watch.id);
-        return watchesService.deleteWatches(watchIds)
+        return watches.deleteWatches(watchIds)
           .then(results => {
             const numSuccesses = results.numSuccesses;
             const numErrors = results.numErrors;
