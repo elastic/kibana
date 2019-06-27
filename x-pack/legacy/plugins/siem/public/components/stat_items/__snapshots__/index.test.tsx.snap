@@ -8,7 +8,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
       "getState": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(observable): [Function],
+      Symbol(Symbol.observable): [Function],
     }
   }
 >
@@ -123,7 +123,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
       "getState": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(observable): [Function],
+      Symbol(Symbol.observable): [Function],
     }
   }
 >
@@ -241,7 +241,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
       "getState": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(observable): [Function],
+      Symbol(Symbol.observable): [Function],
     }
   }
 >
