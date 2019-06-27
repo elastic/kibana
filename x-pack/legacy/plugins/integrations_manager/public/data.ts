@@ -7,7 +7,7 @@
 import { npStart } from 'ui/new_platform';
 import { HttpHandler } from 'src/core/public/http';
 import { IntegrationInfo, IntegrationList } from '../common/types';
-import { API_INTEGRATIONS_INFO, API_INTEGRATIONS_LIST } from '../common/constants';
+import { RouteName, getNamedPath } from '../common/routes';
 
 let _fetch: HttpHandler = npStart.core.http.fetch;
 
@@ -16,14 +16,14 @@ export function setClient(client: HttpHandler): void {
 }
 
 export async function getIntegrationsList(): Promise<IntegrationList> {
-  const path = API_INTEGRATIONS_LIST;
+  const path = getNamedPath(RouteName.API_LIST);
   const list: IntegrationList = await _fetch(path);
 
   return list;
 }
 
 export async function getIntegrationInfoByKey(pkgkey: string): Promise<IntegrationInfo> {
-  const path = API_INTEGRATIONS_INFO.replace('{pkgkey}', pkgkey);
+  const path = getNamedPath(RouteName.API_INFO, pkgkey);
   const info: IntegrationInfo = await _fetch(path);
 
   return info;

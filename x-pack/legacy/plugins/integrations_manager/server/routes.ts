@@ -3,21 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  PLUGIN_ID,
-  API_INTEGRATIONS_LIST,
-  API_INTEGRATIONS_INFO,
-  API_SAVED_OBJECTS_DETAIL,
-  API_SAVED_OBJECTS_ROOT,
-  SAVED_OBJECT_TYPE,
-} from '../common/constants';
+import { PLUGIN_ID } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
+import { getNamedRoute, RouteName } from '../common/routes';
 import { fetchInfo, fetchList, getArchiveInfo } from './registry';
 import { getClient } from './saved_objects';
 
-interface PostRequest extends Request {
-  payload: {
-    body: string;
+interface PackageRequest extends Request {
+  params: {
+    pkgkey: string;
   };
 }
 
@@ -25,21 +19,21 @@ interface PostRequest extends Request {
 export const routes: ServerRoute[] = [
   {
     method: 'GET',
-    path: API_INTEGRATIONS_LIST,
+    path: getNamedRoute(RouteName.API_LIST).path,
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: fetchList,
   },
   {
     method: 'GET',
-    path: API_INTEGRATIONS_INFO,
+    path: getNamedRoute(RouteName.API_INFO).path,
     options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => fetchInfo(req.params.pkgkey),
+    handler: async (req: PackageRequest) => fetchInfo(req.params.pkgkey),
   },
   {
     method: 'GET',
-    path: `${API_INTEGRATIONS_INFO}.zip`,
+    path: getNamedRoute(RouteName.API_ZIP).path,
     options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => {
+    handler: async (req: PackageRequest) => {
       const { pkgkey } = req.params;
       const paths = await getArchiveInfo(`${pkgkey}.zip`);
       return { meta: { pkgkey, paths } };
@@ -47,9 +41,9 @@ export const routes: ServerRoute[] = [
   },
   {
     method: 'GET',
-    path: `${API_INTEGRATIONS_INFO}.tar.gz`,
+    path: getNamedRoute(RouteName.API_TGZ).path,
     options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => {
+    handler: async (req: PackageRequest) => {
       const { pkgkey } = req.params;
       const paths = await getArchiveInfo(`${pkgkey}.tar.gz`);
       return { meta: { pkgkey, paths } };
