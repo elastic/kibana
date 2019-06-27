@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 
 // @ts-ignore
-import { arrayify, normalizePath, readFileAsync } from '.';
+import { normalizePath, readFileAsync } from '.';
 
 export interface I18nConfig {
   paths: Record<string, string>;
