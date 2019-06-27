@@ -156,7 +156,7 @@ export class IndexSettings extends Component {
             })}
             size="s"
           >
-            <ul style={{ 'margin-bottom': 0 }}>
+            <ul style={{ marginBottom: 0 }}>
               <li>
                 {i18n.translate('xpack.fileUpload.indexSettings.guidelines.mustBeNewIndex', {
                   defaultMessage: 'Must be a new index',
