@@ -156,7 +156,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleDescription"
-                defaultMessage="Any recovery operations associated with this snapshot will be stopped."
+                defaultMessage="Recovery operations associated with this snapshot will stop."
               />
             </p>
           ) : (
@@ -175,7 +175,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
               <p>
                 <FormattedMessage
                   id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
-                  defaultMessage="Any recovery operations associated with these snapshots will be stopped."
+                  defaultMessage="Recovery operations associated with these snapshots will stop."
                 />
               </p>
             </Fragment>

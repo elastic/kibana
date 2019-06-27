@@ -73,7 +73,7 @@ export const App: React.FunctionComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.app.deniedPermissionDescription"
-                defaultMessage="To use Snapshot Repositories, you must have {clusterPrivilegesCount,
+                defaultMessage="To use Snapshot and Restore, you must have {clusterPrivilegesCount,
                   plural, one {this cluster privilege} other {these cluster privileges}}: {clusterPrivileges}."
                 values={{
                   clusterPrivileges: missingClusterPrivileges.join(', '),

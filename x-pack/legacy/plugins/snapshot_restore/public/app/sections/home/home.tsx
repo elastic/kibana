@@ -72,7 +72,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       name: (
         <FormattedMessage
           id="xpack.snapshotRestore.home.recoveryTabTitle"
-          defaultMessage="Recovery status"
+          defaultMessage="Recovery Status"
         />
       ),
     },
@@ -109,7 +109,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreDocsLinkText"
-                  defaultMessage="Snapshot docs"
+                  defaultMessage="Snapshot and Restore docs"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>

@@ -112,7 +112,7 @@ export const RecoveryList: React.FunctionComponent = () => {
                 >
                   <FormattedMessage
                     id="xpack.snapshotRestore.recoveryList.intervalMenuButtonText"
-                    defaultMessage="Refresh data every: {interval}"
+                    defaultMessage="Refresh data every {interval}"
                     values={{
                       interval: (
                         <FormattedMessage

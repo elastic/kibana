@@ -167,12 +167,12 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
                 {isSaving ? (
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreForm.savingButtonLabel"
-                    defaultMessage="Executing…"
+                    defaultMessage="Restoring…"
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreForm.submitButtonLabel"
-                    defaultMessage="Execute restore"
+                    defaultMessage="Restore snapshot"
                   />
                 )}
               </EuiButton>

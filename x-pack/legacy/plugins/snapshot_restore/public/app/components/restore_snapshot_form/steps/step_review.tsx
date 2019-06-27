@@ -87,34 +87,46 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
       </EuiFlexGroup>
 
       {renamePattern || renameReplacement ? (
-        <EuiFlexGroup>
-          {renamePattern ? (
-            <EuiFlexItem>
-              <EuiDescriptionList textStyle="reverse">
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.renamePatternLabel"
-                    defaultMessage="Rename indices capture pattern"
-                  />
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{renamePattern}</EuiDescriptionListDescription>
-              </EuiDescriptionList>
-            </EuiFlexItem>
-          ) : null}
-          {renameReplacement ? (
-            <EuiFlexItem>
-              <EuiDescriptionList textStyle="reverse">
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.renameReplacementLabel"
-                    defaultMessage="Rename indices replacement pattern"
-                  />
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{renameReplacement}</EuiDescriptionListDescription>
-              </EuiDescriptionList>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.sectionRenameTitle"
+                defaultMessage="Rename indices"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup>
+            {renamePattern ? (
+              <EuiFlexItem>
+                <EuiDescriptionList textStyle="reverse">
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.renamePatternLabel"
+                      defaultMessage="Capture pattern"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>{renamePattern}</EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            ) : null}
+            {renameReplacement ? (
+              <EuiFlexItem>
+                <EuiDescriptionList textStyle="reverse">
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.renameReplacementLabel"
+                      defaultMessage="Replacement pattern"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>{renameReplacement}</EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </Fragment>
       ) : null}
 
       {partial !== undefined || includeGlobalState !== undefined ? (
@@ -150,7 +162,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.includeGlobalStateLabel"
-                    defaultMessage="Include global state"
+                    defaultMessage="Restore global state"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
@@ -191,7 +203,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indexSettingsLabel"
-                    defaultMessage="Modify index settings"
+                    defaultMessage="Modify"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
@@ -221,7 +233,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.ignoreIndexSettingsLabel"
-                    defaultMessage="Reset index settings"
+                    defaultMessage="Reset"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>

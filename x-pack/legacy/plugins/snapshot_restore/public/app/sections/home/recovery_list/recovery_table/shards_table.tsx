@@ -146,7 +146,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
             content={i18n.translate(
               'xpack.snapshotRestore.recoveryList.shardTable.bytesTooltipLabel',
               {
-                defaultMessage: 'Recovered: {recovered}, Total: {total}',
+                defaultMessage: '{recovered} out of {total} recovered',
                 values: {
                   recovered: bytesRecovered,
                   total: bytesTotal,
@@ -182,7 +182,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
             content={i18n.translate(
               'xpack.snapshotRestore.recoveryList.shardTable.filesTooltipLabel',
               {
-                defaultMessage: 'Recovered: {recovered}, Total: {total}',
+                defaultMessage: '{recovered} out of {total} recovered',
                 values: {
                   recovered: filesRecovered,
                   total: filesTotal,
@@ -218,7 +218,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
             content={i18n.translate(
               'xpack.snapshotRestore.recoveryList.shardTable.filesTooltipLabel',
               {
-                defaultMessage: 'Recovered: {recovered}, Total: {total}',
+                defaultMessage: '{recovered} out of {total} recovered',
                 values: {
                   recovered: translogRecovered,
                   total: translogTotal,

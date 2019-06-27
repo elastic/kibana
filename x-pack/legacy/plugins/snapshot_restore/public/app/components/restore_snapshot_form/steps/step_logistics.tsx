@@ -16,7 +16,6 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { Option } from '@elastic/eui/src/components/selectable/types';
@@ -86,15 +85,6 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               />
             </h3>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepLogisticsDescription"
-                defaultMessage="Define indices to restore and overall restore settings."
-              />
-            </p>
-          </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -129,9 +119,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesDescription"
-            defaultMessage="The restore operation creates new indices if they do not exist.
-              Existing indices can only be restored if it's closed and has the same number of shards as
-              the index in the snapshot."
+            defaultMessage="Creates new indices if they don’t exist. Restores existing indices
+              if they are closed and have the same number of shards as the snapshot index."
           />
         }
         idAria="stepLogisticsIndicesDescription"
@@ -196,7 +185,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             >
                               <FormattedMessage
                                 id="xpack.snapshotRestore.restoreForm.stepLogistics.deselectAllIndicesLink"
-                                defaultMessage="De-select all"
+                                defaultMessage="Deselect all"
                               />
                             </EuiLink>
                           ) : (
@@ -273,7 +262,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesDescription"
-            defaultMessage="Rename indices when they are restored."
+            defaultMessage="Renames indices on restore. Example patterns:"
           />
         }
         idAria="stepLogisticsRenameIndicesDescription"
@@ -394,7 +383,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.partialDescription"
-            defaultMessage="Allow restore of indices that don't have snapshots of all shards."
+            defaultMessage="Allows restore of indices that don’t have snapshots of all shards."
           />
         }
         idAria="stepLogisticsPartialDescription"
@@ -425,7 +414,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateTitle"
-                defaultMessage="Include global state"
+                defaultMessage="Restore global state"
               />
             </h3>
           </EuiTitle>
@@ -433,9 +422,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
-            defaultMessage="Restored templates that don't currently exist in the cluster are added
-              and existing templates with the same name are overriden by the restored templates.
-              Restored persistent settings are added to the existing persistent settings."
+            defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
+              templates with the same name. Also restores persistent settings."
           />
         }
         idAria="stepLogisticsIncludeGlobalStateDescription"
@@ -449,7 +437,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             snapshotIncludeGlobalState ? null : (
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDisabledDescription"
-                defaultMessage="Global state is not available in this snapshot"
+                defaultMessage="Not available for this snapshot."
               />
             )
           }
@@ -458,7 +446,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateLabel"
-                defaultMessage="Include global state"
+                defaultMessage="Restore global state"
               />
             }
             checked={includeGlobalState === undefined ? false : includeGlobalState}

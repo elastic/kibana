@@ -15,7 +15,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
@@ -67,19 +66,10 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepSettingsTitle"
-                defaultMessage="Index settings (optional)"
+                defaultMessage="Index settings"
               />
             </h3>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepSettingsDescription"
-                defaultMessage="Change index settings during the restore process."
-              />
-            </p>
-          </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -114,7 +104,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsDescription"
-            defaultMessage="Modify some index settings during the restore process."
+            defaultMessage="Overrides index settings during restore."
           />
         }
         idAria="stepSettingsIndexSettingsDescription"
@@ -226,7 +216,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepSettings.ignoreIndexSettingsDescription"
-            defaultMessage="Reset some index settings back to default during the restore process."
+            defaultMessage="Resets selected settings to default during restore. "
           />
         }
         idAria="stepSettingsIgnoreIndexSettingsDescription"

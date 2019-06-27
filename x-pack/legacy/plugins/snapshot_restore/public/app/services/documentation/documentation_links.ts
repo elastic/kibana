@@ -46,7 +46,7 @@ class DocumentationLinksService {
   }
 
   public getRestoreDocUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#_restore`;
+    return `${this.esDocBasePath}/modules-snapshots.html#restore-snapshot`;
   }
 
   public getRestoreIndexSettingsUrl() {

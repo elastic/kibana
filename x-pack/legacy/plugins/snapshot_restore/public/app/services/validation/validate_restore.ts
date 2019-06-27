@@ -40,7 +40,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
   if (Array.isArray(indices) && indices.length === 0) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.restoreValidation.indicesRequiredError', {
-        defaultMessage: 'At least one index is required.',
+        defaultMessage: 'You must select at least one index.',
       })
     );
   }
@@ -48,7 +48,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
   if (renamePattern !== undefined && isStringEmpty(renamePattern)) {
     validation.errors.renamePattern.push(
       i18n.translate('xpack.snapshotRestore.restoreValidation.renamePatternRequiredError', {
-        defaultMessage: 'A capture pattern is required.',
+        defaultMessage: 'Capture pattern is required.',
       })
     );
   }
@@ -56,7 +56,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
   if (renameReplacement !== undefined && isStringEmpty(renameReplacement)) {
     validation.errors.renameReplacement.push(
       i18n.translate('xpack.snapshotRestore.restoreValidation.renameReplacementRequiredError', {
-        defaultMessage: 'A replacement pattern is required.',
+        defaultMessage: 'Replacement pattern is required.',
       })
     );
   }
@@ -84,10 +84,13 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
           i18n.translate(
             'xpack.snapshotRestore.restoreValidation.indexSettingsNotModifiableError',
             {
-              defaultMessage: 'These settings are not modifiable: {settings}',
+              defaultMessage: 'You can’t modify: {settings}',
               // @ts-ignore Bug filed: https://github.com/elastic/kibana/issues/39299
               values: {
-                settings: unmodifiableSettings,
+                settings: unmodifiableSettings.map((setting: string, index: number) =>
+                  index === 0 ? `${setting} ` : setting
+                ),
+                count: unmodifiableSettings.length,
               },
             }
           )
@@ -120,10 +123,13 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
     if (unremovableSettings && unremovableSettings.length > 0) {
       validation.errors.ignoreIndexSettings.push(
         i18n.translate('xpack.snapshotRestore.restoreValidation.indexSettingsNotRemovableError', {
-          defaultMessage: 'These settings are not removable: {settings}',
+          defaultMessage: 'You can’t reset: {settings}',
           // @ts-ignore Bug filed: https://github.com/elastic/kibana/issues/39299
           values: {
-            settings: unremovableSettings,
+            settings: unremovableSettings.map((setting: string, index: number) =>
+              index === 0 ? `${setting} ` : setting
+            ),
+            count: unremovableSettings.length,
           },
         })
       );
