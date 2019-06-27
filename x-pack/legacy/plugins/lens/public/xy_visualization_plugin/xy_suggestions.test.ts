@@ -9,12 +9,13 @@ import { TableColumn, VisualizationSuggestion, DatasourcePublicAPI } from '../ty
 import { State } from './types';
 import { Ast } from '@kbn/interpreter/target/common';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import * as generator from '../id_generator';
+import { mockGeneratedIds } from '../id_generator/mock';
+
+jest.mock('../id_generator');
 
 describe('xy_suggestions', () => {
-  const datasource: DatasourcePublicAPI = {
-    ...createMockDatasource().getPublicAPI({}, jest.fn()),
-    generateColumnId: jest.fn(() => 'testcol'),
-  };
+  const datasource: DatasourcePublicAPI = createMockDatasource().getPublicAPI({}, jest.fn());
 
   function numCol(columnId: string): TableColumn {
     return {
@@ -76,6 +77,7 @@ describe('xy_suggestions', () => {
     expect(
       getSuggestions(
         {
+          datasource,
           tables: [
             { datasourceSuggestionId: 0, isMultiRow: true, columns: [dateCol('a')] },
             {
@@ -97,8 +99,10 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests a basic x y chart with date on x', () => {
+    mockGeneratedIds(generator, 'aaa');
     const [suggestion, ...rest] = getSuggestions(
       {
+        datasource,
         tables: [
           {
             datasourceSuggestionId: 0,
@@ -115,7 +119,7 @@ describe('xy_suggestions', () => {
 Object {
   "seriesType": "line",
   "splitSeriesAccessors": Array [
-    "testcol",
+    "aaa",
   ],
   "stackAccessors": Array [],
   "x": "date",
@@ -129,6 +133,7 @@ Object {
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions(
       {
+        datasource,
         tables: [
           {
             datasourceSuggestionId: 1,
@@ -158,8 +163,10 @@ Object {
   });
 
   test('supports multiple suggestions', () => {
+    mockGeneratedIds(generator, 'bbb', 'ccc');
     const [s1, s2, ...rest] = getSuggestions(
       {
+        datasource,
         tables: [
           {
             datasourceSuggestionId: 0,
@@ -182,7 +189,7 @@ Array [
   Object {
     "seriesType": "line",
     "splitSeriesAccessors": Array [
-      "testcol",
+      "bbb",
     ],
     "stackAccessors": Array [],
     "x": "date",
@@ -193,7 +200,7 @@ Array [
   Object {
     "seriesType": "bar",
     "splitSeriesAccessors": Array [
-      "testcol",
+      "ccc",
     ],
     "stackAccessors": Array [],
     "x": "country",
@@ -206,8 +213,10 @@ Array [
   });
 
   test('handles two numeric values', () => {
+    mockGeneratedIds(generator, 'ddd');
     const [suggestion] = getSuggestions(
       {
+        datasource,
         tables: [
           {
             datasourceSuggestionId: 1,
@@ -223,7 +232,7 @@ Array [
 Object {
   "seriesType": "bar",
   "splitSeriesAccessors": Array [
-    "testcol",
+    "ddd",
   ],
   "stackAccessors": Array [],
   "x": "quantity",
@@ -235,8 +244,10 @@ Object {
   });
 
   test('handles unbucketed suggestions', () => {
+    mockGeneratedIds(generator, 'eee');
     const [suggestion] = getSuggestions(
       {
+        datasource,
         tables: [
           {
             datasourceSuggestionId: 1,
@@ -263,7 +274,7 @@ Object {
 Object {
   "seriesType": "bar",
   "splitSeriesAccessors": Array [
-    "testcol",
+    "eee",
   ],
   "stackAccessors": Array [],
   "x": "mybool",
@@ -277,6 +288,7 @@ Object {
   test('adds a preview expression with disabled axes and legend', () => {
     const [suggestion] = getSuggestions(
       {
+        datasource,
         tables: [
           {
             datasourceSuggestionId: 0,

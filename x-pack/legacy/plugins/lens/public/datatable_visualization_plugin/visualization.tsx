@@ -24,6 +24,7 @@ import {
   VisualizationSuggestion,
 } from '../types';
 import { NativeRenderer } from '../native_renderer';
+import { generateId } from '../id_generator';
 
 export interface DatatableVisualizationState {
   columns: Array<{
@@ -117,7 +118,7 @@ export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualiz
           onClick={() => {
             const newColumns = [...state.columns];
             newColumns.push({
-              id: datasource.generateColumnId(),
+              id: generateId(),
               label: '',
             });
             setState({
@@ -141,7 +142,7 @@ export const datatableVisualization: Visualization<
       state || {
         columns: [
           {
-            id: datasource.generateColumnId(),
+            id: generateId(),
             label: '',
           },
         ],

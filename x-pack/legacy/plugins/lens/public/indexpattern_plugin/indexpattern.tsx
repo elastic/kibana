@@ -262,11 +262,6 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           }
           return columnToOperation(state.columns[columnId]);
         },
-        generateColumnId: () => {
-          // TODO: Come up with a more compact form of generating unique column ids
-          return uuid.v4();
-        },
-
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
             <IndexPatternDimensionPanel

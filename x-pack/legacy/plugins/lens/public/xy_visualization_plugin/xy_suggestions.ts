@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { State } from './types';
 import { toExpression } from './to_expression';
+import { generateId } from '../id_generator';
 
 const columnSortOrder = {
   date: 0,
@@ -91,7 +92,7 @@ function getSuggestion(
     title,
     legend: { isVisible: true, position: Position.Right },
     seriesType: isDate ? 'line' : 'bar',
-    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
+    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],
     stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
     x: {
       accessor: xValue.columnId,

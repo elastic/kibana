@@ -20,6 +20,7 @@ import {
 import { State, SeriesType } from './types';
 import { VisualizationProps, Operation } from '../types';
 import { NativeRenderer } from '../native_renderer';
+import { generateId } from '../id_generator';
 
 const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
   {
@@ -184,10 +185,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             onClick={() =>
               setState({
                 ...state,
-                splitSeriesAccessors: [
-                  ...state.splitSeriesAccessors,
-                  datasource.generateColumnId(),
-                ],
+                splitSeriesAccessors: [...state.splitSeriesAccessors, generateId()],
               })
             }
             iconType="plusInCircle"
@@ -321,7 +319,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     ...state,
                     y: {
                       ...state.y,
-                      accessors: [...state.y.accessors, datasource.generateColumnId()],
+                      accessors: [...state.y.accessors, generateId()],
                     },
                   })
                 }

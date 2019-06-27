@@ -13,10 +13,7 @@ const generateSuggestion = (datasourceSuggestionId: number = 1, state = {}) => (
   table: { datasourceSuggestionId, columns: [], isMultiRow: false },
 });
 
-const mockDatasource: DatasourcePublicAPI = {
-  ...createMockDatasource().getPublicAPI({}, jest.fn()),
-  generateColumnId: () => 'splitcolid',
-};
+const mockDatasource: DatasourcePublicAPI = createMockDatasource().getPublicAPI({}, jest.fn());
 
 describe('suggestion helpers', () => {
   it('should return suggestions array', () => {

@@ -14,12 +14,16 @@ import {
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Operation, DataType } from '../types';
+import * as generator from '../id_generator';
+import { mockGeneratedIds } from '../id_generator/mock';
+
+jest.mock('../id_generator');
 
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
       const datasource = createMockDatasource();
-      datasource.publicAPIMock.generateColumnId.mockReturnValueOnce('id');
+      mockGeneratedIds(generator, 'id');
       expect(datatableVisualization.initialize(datasource.publicAPIMock)).toEqual({
         columns: [{ id: 'id', label: '' }],
       });
@@ -30,7 +34,6 @@ describe('Datatable Visualization', () => {
       const expectedState: DatatableVisualizationState = {
         columns: [{ id: 'saved', label: 'label' }],
       };
-      expect(datasource.publicAPIMock.generateColumnId).not.toHaveBeenCalled();
       expect(datatableVisualization.initialize(datasource.publicAPIMock, expectedState)).toEqual(
         expectedState
       );
@@ -138,7 +141,7 @@ describe('Datatable Visualization', () => {
         />
       );
 
-      datasource.publicAPIMock.generateColumnId.mockReturnValueOnce('newId');
+      mockGeneratedIds(generator, 'newId');
 
       act(() => {
         wrapper
