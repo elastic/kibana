@@ -16,18 +16,26 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiButton
+  EuiButton,
+  EuiButtonEmpty
 } from '@elastic/eui';
 import React from 'react';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
+import { Config } from '../ListSettings';
 
 interface Props {
   onClose: () => void;
   onSubmit: () => void;
   isOpen: boolean;
+  selectedConfig: Config | null;
 }
 
-export function AddSettingsFlyout({ onClose, isOpen, onSubmit }: Props) {
+export function AddSettingsFlyout({
+  onClose,
+  isOpen,
+  onSubmit,
+  selectedConfig
+}: Props) {
   if (!isOpen) {
     return null;
   }
@@ -38,7 +46,11 @@ export function AddSettingsFlyout({ onClose, isOpen, onSubmit }: Props) {
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>Create configuration</h2>
+                {selectedConfig ? (
+                  <h2>Edit configuration</h2>
+                ) : (
+                  <h2>Create configuration</h2>
+                )}
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -52,18 +64,25 @@ export function AddSettingsFlyout({ onClose, isOpen, onSubmit }: Props) {
         <EuiFlyoutBody>
           <EuiText>
             <p>
-              Please note only sample rate configuration is supported in this
-              first version. We will extend support for central configuration in
-              future releases. As this feature is in beta, please beware of
-              bugs.
+              This is where you define the configuration you want to sync to
+              your service and agent. This initial version is supported by the
+              Elastic APM Java agent and for sample rate configuration only. We
+              will continue to add support for central configuration for other
+              agents and add more configuration options in future releases.
             </p>
           </EuiText>
           <EuiHorizontalRule margin="m" />
-          <AddSettingFlyoutBody onSubmit={onSubmit} />
+          <AddSettingFlyoutBody
+            selectedConfig={selectedConfig}
+            onSubmit={onSubmit}
+          />
         </EuiFlyoutBody>
         {/* TODO: Add save submit function from AddSettingFlyoutBody */}
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty isDisabled>Cancel</EuiButtonEmpty>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton fill isDisabled>
                 Save configuration

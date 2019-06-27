@@ -13,23 +13,40 @@ import {
   EuiButton,
   EuiFieldNumber,
   EuiTitle,
-  EuiSpacer
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiText
 } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   loadCMServices,
   loadCMEnvironments,
-  saveCMConfiguration
+  saveCMConfiguration,
+  updateCMConfiguration,
+  deleteCMConfiguration
 } from '../../../../services/rest/apm/settings';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { Config } from '../ListSettings';
 
 const ENVIRONMENT_NOT_SET = 'ENVIRONMENT_NOT_SET';
 
-export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
-  const [environment, setEnvironment] = useState<string | undefined>(undefined);
-  const [serviceName, setServiceName] = useState<string | undefined>(undefined);
-  const [sampleRate, setSampleRate] = useState<number | string>('');
+export function AddSettingFlyoutBody({
+  selectedConfig,
+  onSubmit
+}: {
+  selectedConfig: Config | null;
+  onSubmit: () => void;
+}) {
+  const [environment, setEnvironment] = useState<string | undefined>(
+    selectedConfig ? selectedConfig.service.environment : undefined
+  );
+  const [serviceName, setServiceName] = useState<string | undefined>(
+    selectedConfig ? selectedConfig.service.name : undefined
+  );
+  const [sampleRate, setSampleRate] = useState<number | string>(
+    selectedConfig ? parseFloat(selectedConfig.settings.sample_rate) : ''
+  );
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher<
     string[]
   >(loadCMServices, [], { preservePreviousResponse: false });
@@ -47,7 +64,7 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
 
   useEffect(
     () => {
-      if (!isEmpty(serviceNames)) {
+      if (!isEmpty(serviceNames) && !serviceName) {
         setServiceName(serviceNames[0]);
       }
     },
@@ -56,7 +73,7 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
 
   useEffect(
     () => {
-      if (!isEmpty(environments)) {
+      if (!isEmpty(environments) && !environment) {
         setEnvironment(environments[0].name);
       }
     },
@@ -79,7 +96,12 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
       <form
         onSubmit={async event => {
           event.preventDefault();
-          await saveConfig({ environment, serviceName, sampleRate });
+          await saveConfig({
+            environment,
+            serviceName,
+            sampleRate,
+            configurationId: selectedConfig ? selectedConfig.id : undefined
+          });
           onSubmit();
         }}
       >
@@ -97,6 +119,7 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
             isLoading={serviceNamesStatus === 'loading'}
             options={serviceNames.map(text => ({ text }))}
             value={serviceName}
+            disabled={Boolean(selectedConfig)}
             onChange={e => {
               e.preventDefault();
               setServiceName(e.target.value);
@@ -112,15 +135,18 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
             'A configuration for the selected service name and environment combination already exists.'
           }
           isInvalid={
-            environment != null &&
-            !isSelectedEnvironmentValid &&
-            (environmentStatus === 'success' || environmentStatus === 'failure')
+            !selectedConfig &&
+            (environment != null &&
+              !isSelectedEnvironmentValid &&
+              (environmentStatus === 'success' ||
+                environmentStatus === 'failure'))
           }
         >
           <EuiSelect
             isLoading={environmentStatus === 'loading'}
             options={environmentOptions}
             value={environment}
+            disabled={Boolean(selectedConfig)}
             onChange={e => {
               e.preventDefault();
               setEnvironment(e.target.value);
@@ -143,7 +169,7 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
           <EuiFieldNumber
             min={0}
             max={1}
-            step={0.1}
+            step={0.001}
             placeholder="Set sample rate... (e.g. 0.1)"
             value={sampleRate}
             onChange={e => {
@@ -155,6 +181,42 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
           />
         </EuiFormRow>
 
+        {selectedConfig ? (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiTitle size="xs">
+              <h3>
+                <EuiText color="danger">Delete configuration</EuiText>
+              </h3>
+            </EuiTitle>
+
+            <EuiSpacer size="s" />
+
+            <EuiText>
+              <p>
+                If you wish to delete this configuration, please be aware that
+                the agents will continue to use the existing configuration until
+                it syncs with the APM Server.
+              </p>
+            </EuiText>
+
+            <EuiSpacer size="s" />
+
+            <EuiButton
+              fill={false}
+              color="danger"
+              onClick={async () => {
+                await deleteConfig(selectedConfig.id);
+                onSubmit();
+              }}
+            >
+              Delete
+            </EuiButton>
+
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
         <EuiFormRow>
           {/* TODO: Move to AddSettingFlyout EuiFlyoutFooter instead */}
           <EuiButton
@@ -165,7 +227,7 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
               sampleRate == null ||
               sampleRate === '' ||
               environment == null ||
-              !isSelectedEnvironmentValid ||
+              !(selectedConfig || isSelectedEnvironmentValid) ||
               isSampleRateValid
             }
           >
@@ -181,14 +243,34 @@ export function AddSettingFlyoutBody({ onSubmit }: { onSubmit: () => void }) {
   );
 }
 
+async function deleteConfig(configurationId: string) {
+  try {
+    await deleteCMConfiguration(configurationId);
+
+    toastNotifications.addSuccess({
+      title: i18n.translate('xpack.apm.settings.cm.deleteConfigSucceeded', {
+        defaultMessage: 'Config was deleted'
+      })
+    });
+  } catch (error) {
+    toastNotifications.addDanger({
+      title: i18n.translate('xpack.apm.settings.cm.deleteConfigFailed', {
+        defaultMessage: 'Config could not be deleted'
+      })
+    });
+  }
+}
+
 async function saveConfig({
   sampleRate,
   serviceName,
-  environment
+  environment,
+  configurationId
 }: {
   sampleRate: number | string;
   serviceName: string | undefined;
   environment: string | undefined;
+  configurationId?: string;
 }) {
   try {
     if (!isNumber(sampleRate) || !serviceName) {
@@ -206,13 +288,21 @@ async function saveConfig({
       }
     };
 
-    await saveCMConfiguration(configuration);
-
-    toastNotifications.addSuccess({
-      title: i18n.translate('xpack.apm.settings.cm.createConfigSucceeded', {
-        defaultMessage: 'Config was created'
-      })
-    });
+    if (configurationId) {
+      await updateCMConfiguration(configurationId, configuration);
+      toastNotifications.addSuccess({
+        title: i18n.translate('xpack.apm.settings.cm.editConfigSucceeded', {
+          defaultMessage: 'Config was edited'
+        })
+      });
+    } else {
+      await saveCMConfiguration(configuration);
+      toastNotifications.addSuccess({
+        title: i18n.translate('xpack.apm.settings.cm.createConfigSucceeded', {
+          defaultMessage: 'Config was created'
+        })
+      });
+    }
   } catch (error) {
     toastNotifications.addDanger({
       title: i18n.translate('xpack.apm.settings.cm.createConfigFailed', {

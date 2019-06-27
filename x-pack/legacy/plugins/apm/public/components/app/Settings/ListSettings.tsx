@@ -23,16 +23,13 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { CMListAPIResponse } from '../../../../server/lib/settings/cm/list_configurations';
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
-import { DeleteModal } from './DeleteModal';
 import { APMLink } from '../../shared/Links/APMLink';
 
-type Config = CMListAPIResponse[0];
+export type Config = CMListAPIResponse[0];
 
 export function ListSettings() {
   const { data = [], refresh } = useFetcher(loadCMList, []);
-  const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
-    null
-  );
+  const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const COLUMNS: Array<ITableColumn<Config>> = [
@@ -62,16 +59,17 @@ export function ListSettings() {
       render: (value: string) => value
     },
     {
-      name: 'Delete',
+      name: '',
       actions: [
         {
-          name: 'Delete',
-          description: 'Delete this config',
-          icon: 'trash',
-          color: 'danger',
+          name: 'Edit',
+          description: 'Edit this config',
+          icon: 'pencil',
+          color: 'primary',
           type: 'icon',
           onClick: (config: Config) => {
-            setConfigToBeDeleted(config);
+            setSelectedConfig(config);
+            setIsFlyoutOpen(true);
           }
         }
       ]
@@ -89,20 +87,15 @@ export function ListSettings() {
 
   return (
     <>
-      <DeleteModal
-        configToBeDeleted={configToBeDeleted}
-        onCancel={() => {
-          setConfigToBeDeleted(null);
-        }}
-        onConfirm={() => {
-          setConfigToBeDeleted(null);
-          refresh();
-        }}
-      />
       <AddSettingsFlyout
         isOpen={isFlyoutOpen}
-        onClose={() => setIsFlyoutOpen(false)}
+        selectedConfig={selectedConfig}
+        onClose={() => {
+          setSelectedConfig(null);
+          setIsFlyoutOpen(false);
+        }}
         onSubmit={() => {
+          setSelectedConfig(null);
           setIsFlyoutOpen(false);
           refresh();
         }}
