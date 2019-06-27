@@ -212,9 +212,14 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
     // recurring task: update the task instance
+    const startedAt = this.instance.startedAt!;
     const state = result.state || this.instance.state || {};
     const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
-    const status = this.instance.attempts < maxAttempts ? 'idle' : 'failed';
+    const status = this.instance.interval
+      ? 'idle'
+      : this.instance.attempts < maxAttempts
+      ? 'idle'
+      : 'failed';
 
     let runAt;
     if (status === 'failed') {
@@ -223,9 +228,12 @@ export class TaskManagerRunner implements TaskRunner {
     } else {
       runAt =
         result.runAt ||
-        intervalFromNow(this.instance.interval) ||
         // when result.error is truthy, then we're retrying because it failed
-        minutesFromNow(this.instance.attempts * 5); // incrementally backs off an extra 5m per failure
+        (result.error &&
+          (this.definition.getBackpressureDelay
+            ? new Date(Date.now() + this.definition.getBackpressureDelay(this.instance.attempts))
+            : minutesFromNow(this.instance.attempts * 5))) || // incrementally backs off an extra 5m per failure
+        intervalFromDate(startedAt, this.instance.interval)!;
     }
 
     await this.store.update({

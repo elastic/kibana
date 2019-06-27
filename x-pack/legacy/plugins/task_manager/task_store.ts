@@ -305,10 +305,21 @@ export class TaskStore {
                         },
                       },
                       {
-                        range: {
-                          'task.attempts': {
-                            lt: definition.maxAttempts || this.maxAttempts,
-                          },
+                        bool: {
+                          should: [
+                            {
+                              range: {
+                                'task.attempts': {
+                                  lt: definition.maxAttempts || this.maxAttempts,
+                                },
+                              },
+                            },
+                            {
+                              exists: {
+                                field: 'task.interval',
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
