@@ -75,6 +75,8 @@ run(
       );
     }
 
+    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
+
     const list = new Listr([
       {
         title: 'Merging .i18nrc.json files',
@@ -83,11 +85,11 @@ run(
       {
         title: 'Extracting Default Messages',
         task: ({ config }) =>
-          new Listr(extractDefaultMessages(config, path), { exitOnError: true }),
+          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
       },
       {
         title: 'Intregrating Locale File',
-        task: async ({ messages }) => {
+        task: async ({ messages, config }) => {
           await integrateLocaleFiles(messages, {
             sourceFileName: source,
             targetFileName: target,
