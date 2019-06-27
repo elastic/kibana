@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from '../../../server/saved_objects';
+import { SavedObjectAttributes } from 'src/core/server';
 import { SavedObjectMetaData } from '../saved_objects/components/saved_object_finder';
 import { Embeddable } from './embeddable';
 import { EmbeddableState } from './types';

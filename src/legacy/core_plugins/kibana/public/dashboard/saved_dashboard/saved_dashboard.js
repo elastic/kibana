@@ -71,7 +71,6 @@ module.factory('SavedDashboard', function (Private) {
       clearSavedIndexPattern: true
     });
 
-
     this.showInRecentlyAccessed = true;
   }
 
@@ -112,6 +111,16 @@ module.factory('SavedDashboard', function (Private) {
   SavedDashboard.prototype.getFullPath = function () {
     return `/app/kibana#${createDashboardEditUrl(this.id)}`;
   };
+
+  SavedDashboard.prototype.getQuery = function () {
+    return this.searchSource.getOwnField('query') ||
+      { query: '', language: 'kuery' };
+  };
+
+  SavedDashboard.prototype.getFilters = function () {
+    return this.searchSource.getOwnField('filter') || [];
+  };
+
 
   return SavedDashboard;
 });

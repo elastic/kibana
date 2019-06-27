@@ -44,9 +44,9 @@ export default function ({ getService, getPageObjects }) {
         'Metric',
         'Pie',
         'Region Map',
+        'TSVB',
         'Tag Cloud',
         'Timelion',
-        'Timeseries',
         'Vega',
         'Vertical Bar',
       ];

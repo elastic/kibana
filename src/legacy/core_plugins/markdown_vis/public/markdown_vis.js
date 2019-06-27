@@ -43,7 +43,8 @@ function MarkdownVisProvider() {
       component: MarkdownVisWrapper,
       defaults: {
         fontSize: 12,
-        openLinksInNewTab: false
+        openLinksInNewTab: false,
+        markdown: '',
       }
     },
     editorConfig: {

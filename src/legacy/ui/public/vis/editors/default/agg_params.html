@@ -27,6 +27,14 @@
   </p>
 </div>
 
+<vis-agg-control-react-wrapper
+  ng-if="agg.schema.editorComponent"
+  agg-params="agg.params"
+  component="agg.schema.editorComponent"
+  editor-state-params="state.params"
+  set-value="onParamChange"
+/>
+
 <vis-agg-select
   agg="agg"
   is-sub-aggregation="isSubAggregation"

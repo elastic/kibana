@@ -1,0 +1,9 @@
+{
+  "file-upload-telemetry": {
+    "properties": {
+      "filesUploadedTotalCount": {
+        "type": "long"
+      }
+    }
+  }
+}

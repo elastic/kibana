@@ -23,6 +23,9 @@ export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginSt
   public setup(core: CoreSetup, deps: {}) {
     // eslint-disable-next-line no-console
     console.log(`Testbed plugin set up`);
+    return {
+      foo: 'bar',
+    };
   }
 
   public start() {

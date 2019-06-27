@@ -42,7 +42,7 @@ export async function buildContextMenuForActions({
 
   return {
     id: 'mainMenu',
-    title: i18n.translate('embeddableAPI.actionPanel.title', {
+    title: i18n.translate('embeddableApi.actionPanel.title', {
       defaultMessage: 'Options',
     }),
     items: menuItems,

@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { waffleNodesQuery } from '../../../../plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
-import { WaffleNodesQuery } from '../../../../plugins/infra/public/graphql/types';
+import { waffleNodesQuery } from '../../../../legacy/plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
+import { WaffleNodesQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 import { DATES } from './constants';

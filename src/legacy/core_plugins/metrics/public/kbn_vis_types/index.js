@@ -36,7 +36,7 @@ export function MetricsVisProvider(Private) {
 
   return VisFactory.createReactVisualization({
     name: 'metrics',
-    title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'Timeseries' }),
+    title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
     description: i18n.translate('tsvb.kbnVisTypes.metricsDescription', {
       defaultMessage: 'Build time-series using a visual pipeline interface',
     }),

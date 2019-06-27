@@ -9,7 +9,14 @@
       <ng-form vis-editor-agg name="aggForm"></ng-form>
     </div>
 
-    <vis-editor-agg-add ng-if="stats.count === 0" data-test-subj="addAggregationButton"></vis-editor-agg-add>
+    <vis-editor-agg-add
+      ng-if="stats.count === 0"
+      group="group"
+      group-name="groupName"
+      schemas="schemas"
+      stats="stats"
+      add-schema="addSchema">
+    </vis-editor-agg-add>
   </div>
 </div>
 

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import monitorsWithLocation from './graphql/fixtures/monitors_with_location';
-import { monitorListQueryString } from '../../../../plugins/uptime/public/queries';
+import { monitorListQueryString } from '../../../../legacy/plugins/uptime/public/queries';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

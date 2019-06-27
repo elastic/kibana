@@ -80,6 +80,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
             defaultMessage: 'CIDR mask: {mask}',
             values: { mask: mask.value || '*' },
           })}
+          compressed
           isInvalid={showValidation ? mask.isInvalid : false}
           placeholder="*"
           onChange={ev => {

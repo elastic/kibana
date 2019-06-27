@@ -4,10 +4,10 @@
 
 ## HttpServiceStart.isListening property
 
-Indicates if http server is listening on a port
+Indicates if http server is listening on a given port
 
 <b>Signature:</b>
 
 ```typescript
-isListening: () => boolean;
+isListening: (port: number) => boolean;
 ```
