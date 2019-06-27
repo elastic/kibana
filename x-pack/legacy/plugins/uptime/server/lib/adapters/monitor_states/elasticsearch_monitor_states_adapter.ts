@@ -80,8 +80,11 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   map_script: `
                     Map curCheck = new HashMap();
                     String agentId = doc["agent.id"][0];
-                    String ip = doc["monitor.ip"][0];
-                    String agentIdIP = agentId + "-" + ip.toString();
+                    String ip = null;
+                    if (doc["monitor.ip"].length > 0) {
+                      ip = doc["monitor.ip"][0];
+                    }
+                    String agentIdIP = agentId + "-" + (ip == null ? "" : ip.toString());
                     def ts = doc["@timestamp"][0].toInstant().toEpochMilli();
                     
                     def lastCheck = state.checksByAgentIdIP[agentId];
