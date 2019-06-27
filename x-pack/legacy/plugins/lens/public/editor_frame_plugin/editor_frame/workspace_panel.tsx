@@ -47,8 +47,7 @@ export function WorkspacePanel({
       datasourceSuggestions,
       visualizationMap,
       activeVisualizationId,
-      visualizationState,
-      datasourcePublicAPI
+      visualizationState
     );
 
     if (suggestions.length === 0) {

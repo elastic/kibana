@@ -329,8 +329,7 @@ Object {
       expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
           tables: [expectedTable],
-        }),
-        expect.anything()
+        })
       );
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',

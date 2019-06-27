@@ -353,8 +353,8 @@ Object {
       await waitForPromises();
 
       const updatedPublicAPI = {};
-      mockDatasource.getPublicAPI = jest.fn(
-        _ => (updatedPublicAPI as unknown) as DatasourcePublicAPI
+      mockDatasource.getPublicAPI.mockReturnValue(
+        (updatedPublicAPI as unknown) as DatasourcePublicAPI
       );
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]

@@ -113,7 +113,6 @@ Object {
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledTimes(2);
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
-
       expect((expression.chain[0].arguments.y[0] as Ast).chain[0].arguments.labels).toEqual([
         'First',
         'Second',
