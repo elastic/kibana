@@ -5,12 +5,13 @@
  */
 
 import { Watch } from 'plugins/watcher/models/watch';
+import { ROUTES } from '../../../common/constants';
 import { npStart } from 'ui/new_platform';
 const { http } = npStart.core;
 
 export const watches = {
   getWatchList() {
-    return http.get('/watches')
+    return http.get(`${ROUTES.API_ROOT}/watches`)
       .then(response => response.watches)
       .then(watches => watches.map(watch =>
         Watch.fromUpstreamJson(watch)
@@ -27,7 +28,7 @@ export const watches = {
     // $http.delete does not take the request body as the 2nd argument. Instead it expects the 2nd
     // argument to be a request options object, one of which can be the request body (data). We also
     // need to explicitly define the content type of the data.
-    return http.post('/watches/delete', {
+    return http.post(`${ROUTES.API_ROOT}/watches/delete`, {
       body: JSON.stringify({ watchIds })
     })
       .then(response => response.results);
