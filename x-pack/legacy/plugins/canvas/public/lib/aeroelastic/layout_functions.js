@@ -1553,7 +1553,9 @@ export const getDragboxHighlighted = (box, shapes) => {
     return [];
   }
   const filter = insideAABB(box);
-  return shapes.filter(s => s.type !== 'annotation' && filter(s.transformMatrix, s.a, s.b));
+  return shapes.filter(
+    s => s.type !== 'annotation' && !s.parent && filter(s.transformMatrix, s.a, s.b)
+  );
 };
 
 export const getDragBoxAnnotation = (config, box) =>
