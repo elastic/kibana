@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
+import { WhereExpression } from './where_expression';
 
 import {
   indexPatternService,
@@ -29,6 +30,7 @@ export class Join extends Component {
     leftFields: null,
     leftSourceName: '',
     rightFields: undefined,
+    indexPattern: undefined,
     loadError: undefined,
     prevIndexPatternId: getIndexPatternId(this.props),
   };
@@ -92,7 +94,8 @@ export class Join extends Component {
     }
 
     this.setState({
-      rightFields: indexPattern.fields
+      rightFields: indexPattern.fields,
+      indexPattern,
     });
   }
 
@@ -155,6 +158,16 @@ export class Join extends Component {
     });
   }
 
+  _onWhereQueryChange = (whereQuery) => {
+    this.props.onChange({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        whereQuery,
+      },
+    });
+  }
+
   render() {
     const {
       join,
@@ -164,18 +177,33 @@ export class Join extends Component {
       leftSourceName,
       leftFields,
       rightFields,
+      indexPattern,
     } = this.state;
     const right = _.get(join, 'right', {});
     const rightSourceName = right.indexPatternTitle ? right.indexPatternTitle : right.indexPatternId;
+    const isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
 
     let metricsExpression;
-    if (join.leftField && right.indexPatternId && right.term) {
+    if (isJoinConfigComplete) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
           <MetricsExpression
             metrics={right.metrics}
             rightFields={rightFields}
             onChange={this._onMetricsChange}
+          />
+        </EuiFlexItem>
+      );
+    }
+
+    let whereExpression;
+    if (indexPattern && isJoinConfigComplete) {
+      whereExpression = (
+        <EuiFlexItem grow={false}>
+          <WhereExpression
+            indexPattern={indexPattern}
+            whereQuery={join.right.whereQuery}
+            onChange={this._onWhereQueryChange}
           />
         </EuiFlexItem>
       );
@@ -203,6 +231,8 @@ export class Join extends Component {
           </EuiFlexItem>
 
           {metricsExpression}
+
+          {whereExpression}
 
           <EuiButtonIcon
             className="mapJoinItem__delete"
