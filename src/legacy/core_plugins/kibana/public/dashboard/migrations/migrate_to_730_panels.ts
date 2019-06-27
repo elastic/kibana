@@ -19,7 +19,6 @@
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
 import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/embeddable/types';
-import { trackUiMetric } from 'src/legacy/core_plugins/ui_metric/public';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import {
   RawSavedDashboardPanelTo60,
@@ -94,7 +93,6 @@ function migratePre61PanelToLatest(
   uiState?: { [key: string]: { [key: string]: unknown } }
 ): RawSavedDashboardPanel730ToLatest {
   if (panel.col === undefined || panel.row === undefined) {
-    trackUiMetric('MigrationsInvalidData', ['migratePre61PanelToLatest', 'missing col and/or row']);
     throw new Error(
       i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage', {
         defaultMessage:
@@ -143,7 +141,6 @@ function migrate610PanelToLatest(
 ): RawSavedDashboardPanel730ToLatest {
   (['w', 'x', 'h', 'y'] as Array<keyof GridData>).forEach(key => {
     if (panel.gridData[key] === undefined) {
-      trackUiMetric('MigrationsInvalidData', ['migrate610PanelToLatest', 'invalid griddata']);
       throw new Error(
         i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage', {
           defaultMessage:
