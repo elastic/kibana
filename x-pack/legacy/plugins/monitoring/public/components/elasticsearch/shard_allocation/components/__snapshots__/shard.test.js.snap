@@ -11,7 +11,6 @@ exports[`Shard should show for assigned primary shards 1`] = `
 >
   <EuiBadge
     color="primary"
-    iconSide="left"
   >
     0
   </EuiBadge>
@@ -29,7 +28,6 @@ exports[`Shard should show for assigned replica shards 1`] = `
 >
   <EuiBadge
     color="secondary"
-    iconSide="left"
   >
     0
   </EuiBadge>
@@ -47,7 +45,6 @@ exports[`Shard should show for initializing shards 1`] = `
 >
   <EuiBadge
     color="default"
-    iconSide="left"
   >
     0
   </EuiBadge>
@@ -65,7 +62,6 @@ exports[`Shard should show for relocating shards 1`] = `
 >
   <EuiBadge
     color="accent"
-    iconSide="left"
   >
     0
   </EuiBadge>
@@ -83,7 +79,6 @@ exports[`Shard should show unassigned primary shards 1`] = `
 >
   <EuiBadge
     color="danger"
-    iconSide="left"
   >
     0
   </EuiBadge>
@@ -101,7 +96,6 @@ exports[`Shard should show unassigned replica shards 1`] = `
 >
   <EuiBadge
     color="warning"
-    iconSide="left"
   >
     0
   </EuiBadge>

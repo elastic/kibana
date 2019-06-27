@@ -150,13 +150,9 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     const internalRequest = req[internalInfraFrameworkRequest];
     const server = internalRequest.server;
 
-    let url = '/api/metrics/vis/data';
-    if (server.plugins.spaces) {
-      const spaceId = server.plugins.spaces.getSpaceId(internalRequest);
-      if (spaceId !== 'default') {
-        url = `/s/${spaceId}${url}`;
-      }
-    }
+    // getBasePath returns randomized base path AND spaces path
+    const basePath = internalRequest.getBasePath();
+    const url = `${basePath}/api/metrics/vis/data`;
 
     const request = {
       url,
