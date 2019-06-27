@@ -20,6 +20,7 @@
 import minimatch from 'minimatch';
 
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
+import { resolve } from 'path';
 
 export const CleanTask = {
   global: true,
@@ -122,7 +123,7 @@ export const CleanExtraFilesFromModulesTask = {
       // scripts
       '**/*.sh',
       '**/*.bat',
-      '**/*.exe',
+      '**/[!ctags-win32]*.exe',
       '**/Gruntfile.js',
       '**/gulpfile.js',
       '**/Makefile',
@@ -254,4 +255,38 @@ export const CleanEmptyFoldersTask = {
       ]
     );
   },
+};
+
+export const CleanOtherPlatformFilesFromModulesTask = {
+  description: 'Cleaning files of other platforms from node_modules',
+
+  async run(config, log, build) {
+    const getExtraFilesInNodeCtags = platform => {
+      const packageRoot = build.resolvePathForPlatform(platform, 'node_modules/@elastic/node-ctags');
+      // Delete unnecessary packages in node-ctags
+      const paths = [ resolve(packageRoot, 'ctags/build/*') ];
+      const nodeAbi = 'node-v' + process.versions.modules;
+      const excludePathTemplate = resolve(packageRoot, `ctags/build/ctags-${nodeAbi}-{platform}-x64`);
+      let excludePath = '';
+      // keep platform-specific builds
+      if (platform.isWindows()) {
+        excludePath = excludePathTemplate.replace('{platform}', 'win32');
+      } else if (platform.isLinux()) {
+        excludePath = excludePathTemplate.replace('{platform}', 'linux');
+      } else if (platform.isMac()) {
+        excludePath = excludePathTemplate.replace('{platform}', 'darwin');
+      }
+      if (excludePath) {
+        paths.push(`!${excludePath}`);
+      }
+      return paths;
+    };
+    await Promise.all(
+      config.getTargetPlatforms().map(async platform => {
+        if (!build.isOss()) {
+          await deleteAll(getExtraFilesInNodeCtags(platform), log);
+        }
+      })
+    );
+  }
 };

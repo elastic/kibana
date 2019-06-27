@@ -1603,17 +1603,17 @@
     ts-debounce "^1.0.0"
     uuid "^3.3.2"
 
-"@elastic/ctags-langserver@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.0.3.tgz#00da1ff1eb0eaa6df90a5d64c63ea251dc65a520"
-  integrity sha512-DhR+RGeQ8DpRFdEGs5JsSJs70mcrO5RtRyZdI9wbuui7AAhaksrxkJPYmQEELLrbh9KvZ34s4RE2rXe29pltwA==
+"@elastic/ctags-langserver@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.0.5.tgz#2ee09024a5106c548a1ddb52992352c577e38a66"
+  integrity sha512-XEpB60SW4/jo+r7r06Uro5n7Mv1iqWwirqBWtHwhaIV17QKsjU4uRn3RZ7gwm9uHu5kri0RSnu3hfRuSskCyEw==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
+    "@elastic/node-ctags" "1.0.2"
     commander "^2.11.0"
     find-root "^1.1.0"
     grep1 "^0.0.5"
     line-column "^1.0.2"
-    nuclide-prebuilt-libs "^0.5.7"
     vscode-languageserver "^5.2.1"
 
 "@elastic/elasticsearch@^7.0.0-rc.2":
@@ -1747,6 +1747,11 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.0.0.tgz#4d325df333fe1319556bb4d54214098ada1171d4"
   integrity sha512-bbjbEyILPRTRt0xnda18OttLtlkJBPuXx3CjISUSn9jhWqHoFMzfOaZ73D5jxZE2SaFZUrJYfPpqXP6qqPufAQ==
+
+"@elastic/node-ctags@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/node-ctags/-/node-ctags-1.0.2.tgz#447d7694a5598f9413fe2b6f356d56f64f612dfd"
+  integrity sha512-EHhJ0NPlCvYy+gbzBMU4/Z/55hftfdwlAG8JwOy7g0ITmH6rFPanEnzg1WL3/L+pp8OlYHyvDLwmyg0+06y8LQ==
 
 "@elastic/nodegit@0.25.0-alpha.22":
   version "0.25.0-alpha.22"
@@ -20080,11 +20085,6 @@ nth-check@^1.0.2, nth-check@~1.0.1:
   integrity sha512-WeBOdju8SnzPN5vTUJYxYUxLeXpCaVP5i5e0LF8fg7WORF2Wd7wFX/pk0tYZk7s8T+J7VLy0Da6J1+wCT0AtHg==
   dependencies:
     boolbase "~1.0.0"
-
-nuclide-prebuilt-libs@^0.5.7:
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/nuclide-prebuilt-libs/-/nuclide-prebuilt-libs-0.5.7.tgz#6569d2b8c9fcfb94ce00890f5afb62a687c74852"
-  integrity sha512-qur7A1K9+HZkGYs8mYdmCHWRjGZnx92/TR5TrkfkCKkyptjHt4RB1hFgeCG4cxN4mi3axbQdVeTY3i1YSn5XsQ==
 
 null-check@^1.0.0:
   version "1.0.0"
