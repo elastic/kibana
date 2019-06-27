@@ -20,15 +20,15 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
 
-const name = 'markdownvis';
+const name = 'markdownVis';
 
-interface Arguments {
+export interface Arguments {
   markdown: string;
   fontSize: number;
   openLinksInNewTab: boolean;
 }
 
-type Return = Promise<Render<any>>;
+type Return = Promise<Render<{ visType: 'markdown'; visConfig: Arguments }>>;
 
 export const kibanaMarkdown = (): ExpressionFunction<
   typeof name,

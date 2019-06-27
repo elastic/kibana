@@ -19,12 +19,10 @@
 
 import React from 'react';
 import { Markdown } from 'ui/markdown/markdown';
+import { Arguments } from './markdown_fn';
 
-interface MarkdownVisComponentProps {
+interface MarkdownVisComponentProps extends Arguments {
   renderComplete: () => {};
-  markdown: string;
-  fontSize: number;
-  openLinksInNewTab: boolean;
 }
 
 /**

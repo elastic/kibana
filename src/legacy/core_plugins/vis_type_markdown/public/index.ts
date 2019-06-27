@@ -39,9 +39,4 @@ class VisTypeMarkdownPlugin {
   public stop() {}
 }
 
-/**
- * We export visualizations here so that users importing from 'plugins/visualizations'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
 new VisTypeMarkdownPlugin().setup(visualizations);
