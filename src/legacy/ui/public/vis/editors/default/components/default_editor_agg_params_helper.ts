@@ -134,9 +134,9 @@ function getAggTypeOptions(agg: AggConfig, indexPattern: IndexPattern, groupName
 }
 
 /**
- * Calculates a form touched state.
+ * Calculates a ngModel touched state.
  * If an aggregation is not selected, it returns a value of touched agg selector state.
- * Else if there are no agg params, it returns false.
+ * Else if there are no invalid agg params, it returns false.
  * Otherwise it returns true if each invalid param is touched.
  * @param aggType Selected aggregation.
  * @param aggTypeState State of aggregation selector.
@@ -151,13 +151,13 @@ function isInvalidParamsTouched(
     return aggTypeState.touched;
   }
 
-  if (isEmpty(aggParams)) {
+  const invalidParams = Object.values(aggParams).filter(param => !param.validity);
+
+  if (isEmpty(invalidParams)) {
     return false;
   }
 
-  return Object.keys(aggParams)
-    .filter((paramsName: string) => !aggParams[paramsName].validity)
-    .every((paramsName: string) => aggParams[paramsName].touched);
+  return invalidParams.every(param => param.touched);
 }
 
 export { getAggParamsToRender, getError, getAggTypeOptions, isInvalidParamsTouched };
