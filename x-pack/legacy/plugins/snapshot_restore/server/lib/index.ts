@@ -10,4 +10,4 @@ export {
 } from './repository_serialization';
 export { cleanSettings } from './clean_settings';
 export { deserializeSnapshotDetails } from './snapshot_serialization';
-export { deserializeRecoveryShard } from './recovery_serialization';
+export { deserializeRestoreShard } from './restore_serialization';

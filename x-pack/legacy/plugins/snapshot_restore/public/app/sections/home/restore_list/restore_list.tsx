@@ -19,9 +19,9 @@ import {
 import { SectionError, SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { useLoadRecoveries } from '../../../services/http';
+import { useLoadRestores } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
-import { RecoveryTable } from './recovery_table';
+import { RestoreTable } from './restore_table';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;
@@ -35,7 +35,7 @@ const INTERVAL_OPTIONS: number[] = [
   ONE_MINUTE_MS,
   FIVE_MINUTES_MS,
 ];
-export const RecoveryList: React.FunctionComponent = () => {
+export const RestoreList: React.FunctionComponent = () => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -46,8 +46,8 @@ export const RecoveryList: React.FunctionComponent = () => {
   const [isIntervalMenuOpen, setIsIntervalMenuOpen] = useState<boolean>(false);
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);
 
-  // Load recoveries
-  const { error, loading, data: recoveries = [], polling, changeInterval } = useLoadRecoveries(
+  // Load restores
+  const { error, loading, data: restores = [], polling, changeInterval } = useLoadRestores(
     currentInterval
   );
 
@@ -63,8 +63,8 @@ export const RecoveryList: React.FunctionComponent = () => {
     content = (
       <SectionLoading>
         <FormattedMessage
-          id="xpack.snapshotRestore.recoveryList.loadingRecoveriesDescription"
-          defaultMessage="Loading recoveries…"
+          id="xpack.snapshotRestore.restoreList.loadingRestoresDescription"
+          defaultMessage="Loading restores…"
         />
       </SectionLoading>
     );
@@ -73,22 +73,22 @@ export const RecoveryList: React.FunctionComponent = () => {
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.recoveryList.LoadingRecoveriesErrorMessage"
-            defaultMessage="Error loading recoveries"
+            id="xpack.snapshotRestore.restoreList.LoadingRestoresErrorMessage"
+            defaultMessage="Error loading restores"
           />
         }
         error={error}
       />
     );
-  } else if (recoveries && recoveries.length === 0) {
+  } else if (restores && restores.length === 0) {
     content = (
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
           <h1>
             <FormattedMessage
-              id="xpack.snapshotRestore.recoveryList.emptyPromptTitle"
-              defaultMessage="You don't have any snapshot recoveries"
+              id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
+              defaultMessage="You don't have any snapshot restores"
             />
           </h1>
         }
@@ -96,8 +96,8 @@ export const RecoveryList: React.FunctionComponent = () => {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.snapshotRestore.recoveryList.emptyPromptDescription"
-                defaultMessage="Track progress of indices that are recovered from snapshots."
+                id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
+                defaultMessage="Track progress of indices that are restored from snapshots."
               />
             </p>
           </Fragment>
@@ -111,7 +111,7 @@ export const RecoveryList: React.FunctionComponent = () => {
         <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiPopover
-              id="srRecoveryListIntervalMenu"
+              id="srRestoreListIntervalMenu"
               button={
                 <EuiButtonEmpty
                   size="xs"
@@ -121,19 +121,19 @@ export const RecoveryList: React.FunctionComponent = () => {
                   onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}
                 >
                   <FormattedMessage
-                    id="xpack.snapshotRestore.recoveryList.intervalMenuButtonText"
+                    id="xpack.snapshotRestore.restoreList.intervalMenuButtonText"
                     defaultMessage="Refresh data every {interval}"
                     values={{
                       interval:
                         currentInterval >= ONE_MINUTE_MS ? (
                           <FormattedMessage
-                            id="xpack.snapshotRestore.recoveryList.intervalMenu.minutesIntervalValue"
+                            id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
                             defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
                             values={{ minutes: Math.ceil(currentInterval / ONE_MINUTE_MS) }}
                           />
                         ) : (
                           <FormattedMessage
-                            id="xpack.snapshotRestore.recoveryList.intervalMenu.secondsIntervalValue"
+                            id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
                             defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
                             values={{ seconds: Math.ceil(currentInterval / ONE_SECOND_MS) }}
                           />
@@ -160,13 +160,13 @@ export const RecoveryList: React.FunctionComponent = () => {
                   >
                     {interval >= ONE_MINUTE_MS ? (
                       <FormattedMessage
-                        id="xpack.snapshotRestore.recoveryList.intervalMenu.minutesIntervalValue"
+                        id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
                         defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
                         values={{ minutes: Math.ceil(interval / ONE_MINUTE_MS) }}
                       />
                     ) : (
                       <FormattedMessage
-                        id="xpack.snapshotRestore.recoveryList.intervalMenu.secondsIntervalValue"
+                        id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
                         defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
                         values={{ seconds: Math.ceil(interval / ONE_SECOND_MS) }}
                       />
@@ -179,10 +179,10 @@ export const RecoveryList: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>{polling ? <EuiLoadingSpinner size="m" /> : null}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <RecoveryTable recoveries={recoveries || []} />
+        <RestoreTable restores={restores || []} />
       </Fragment>
     );
   }
 
-  return <section data-test-subj="recoveryList">{content}</section>;
+  return <section data-test-subj="restoreList">{content}</section>;
 };

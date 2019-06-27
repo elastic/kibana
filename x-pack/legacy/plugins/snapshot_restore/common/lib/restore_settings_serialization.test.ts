@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { serializeRestoreSettings } from './restore_serialization';
+import { serializeRestoreSettings } from './restore_settings_serialization';
 
-describe('restore_serialization()', () => {
+describe('restore_settings_serialization()', () => {
   it('should serialize blank restore settings', () => {
     expect(serializeRestoreSettings({})).toEqual({});
   });

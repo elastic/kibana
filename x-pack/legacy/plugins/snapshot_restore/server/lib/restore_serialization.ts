@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotRecoveryShard, SnapshotRecoveryShardEs } from '../../common/types';
+import { SnapshotRestoreShard, SnapshotRestoreShardEs } from '../../common/types';
 
-export const deserializeRecoveryShard = (
-  esSnapshotRecoveryShard: SnapshotRecoveryShardEs
-): Partial<SnapshotRecoveryShard> => {
+export const deserializeRestoreShard = (
+  esSnapshotRestoreShard: SnapshotRestoreShardEs
+): Partial<SnapshotRestoreShard> => {
   const {
     id,
     primary,
@@ -29,10 +29,9 @@ export const deserializeRecoveryShard = (
       },
       files: { total: filesTotal, recovered: filesRecovered, percent: filesPercent },
     },
-    translog: { total: translogTotal, recovered: translogRecovered, percent: translogPercent },
-  } = esSnapshotRecoveryShard;
+  } = esSnapshotRestoreShard;
 
-  const snapshotRecoveryShard = {
+  const snapshotRestoreShard = {
     id,
     primary,
     stage,
@@ -53,12 +52,9 @@ export const deserializeRecoveryShard = (
     filesTotal,
     filesRecovered,
     filesPercent,
-    translogTotal,
-    translogRecovered,
-    translogPercent,
   };
 
-  return Object.entries(snapshotRecoveryShard).reduce((shard: any, [key, value]) => {
+  return Object.entries(snapshotRestoreShard).reduce((shard: any, [key, value]) => {
     if (value !== undefined) {
       shard[key] = value;
     }

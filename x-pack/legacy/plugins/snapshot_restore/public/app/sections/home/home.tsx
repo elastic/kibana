@@ -26,7 +26,7 @@ import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
-import { RecoveryList } from './recovery_list';
+import { RestoreList } from './restore_list';
 import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
@@ -157,7 +157,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
             component={SnapshotList}
           />
-          <Route exact path={`${BASE_PATH}/restore_status`} component={RecoveryList} />
+          <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

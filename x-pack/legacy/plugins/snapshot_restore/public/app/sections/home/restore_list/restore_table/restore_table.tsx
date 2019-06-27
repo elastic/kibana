@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { sortByOrder } from 'lodash';
 import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-import { SnapshotRecovery } from '../../../../../../common/types';
+import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { uiMetricService } from '../../../../services/ui_metric';
@@ -16,23 +16,23 @@ import { formatDate } from '../../../../services/text';
 import { ShardsTable } from './shards_table';
 
 interface Props {
-  recoveries: SnapshotRecovery[];
+  restores: SnapshotRestore[];
 }
 
-export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) => {
+export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
 
-  // Track recoveries to show based on sort and pagination state
-  const [currentRecoveries, setCurrentRecoveries] = useState<SnapshotRecovery[]>([]);
+  // Track restores to show based on sort and pagination state
+  const [currentRestores, setCurrentRestores] = useState<SnapshotRestore[]>([]);
 
   // Sort state
   const [sorting, setSorting] = useState<{
     sort: {
-      field: keyof SnapshotRecovery;
+      field: keyof SnapshotRestore;
       direction: 'asc' | 'desc';
     };
   }>({
@@ -46,7 +46,7 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 20,
-    totalItemCount: recoveries.length,
+    totalItemCount: restores.length,
     pageSizeOptions: [10, 20, 50],
   });
 
@@ -73,8 +73,8 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
   };
 
   // Expand or collapse index details
-  const toggleIndexRecoveryDetails = (recovery: SnapshotRecovery) => {
-    const { index, shards } = recovery;
+  const toggleIndexRestoreDetails = (restore: SnapshotRestore) => {
+    const { index, shards } = restore;
     const newItemIdToExpandedRowMap = { ...itemIdToExpandedRowMap };
 
     if (newItemIdToExpandedRowMap[index]) {
@@ -87,10 +87,10 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
   };
 
   // Refresh expanded index details
-  const refreshIndexRecoveryDetails = () => {
+  const refreshIndexRestoreDetails = () => {
     const newItemIdToExpandedRowMap: typeof itemIdToExpandedRowMap = {};
-    recoveries.forEach(recovery => {
-      const { index, shards } = recovery;
+    restores.forEach(restore => {
+      const { index, shards } = restore;
       if (!itemIdToExpandedRowMap[index]) {
         return;
       }
@@ -99,43 +99,43 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
     });
   };
 
-  // Get recoveries to show based on sort and pagination state
-  const getCurrentRecoveries = (): SnapshotRecovery[] => {
-    const newRecoveriesList = [...recoveries];
+  // Get restores to show based on sort and pagination state
+  const getCurrentRestores = (): SnapshotRestore[] => {
+    const newRestoresList = [...restores];
     const {
       sort: { field, direction },
     } = sorting;
     const { pageIndex, pageSize } = pagination;
-    const sortedRecoveries = sortByOrder(newRecoveriesList, [field], [direction]);
-    return sortedRecoveries.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+    const sortedRestores = sortByOrder(newRestoresList, [field], [direction]);
+    return sortedRestores.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
   };
 
-  // Update current recoveries to show if table changes
+  // Update current restores to show if table changes
   useEffect(
     () => {
-      setCurrentRecoveries(getCurrentRecoveries());
+      setCurrentRestores(getCurrentRestores());
     },
     [sorting, pagination]
   );
 
-  // Update current recoveries to show if data changes
+  // Update current restores to show if data changes
   // as well as any expanded index details
   useEffect(
     () => {
       setPagination({
         ...pagination,
-        totalItemCount: recoveries.length,
+        totalItemCount: restores.length,
       });
-      setCurrentRecoveries(getCurrentRecoveries());
-      refreshIndexRecoveryDetails();
+      setCurrentRestores(getCurrentRestores());
+      refreshIndexRestoreDetails();
     },
-    [recoveries]
+    [restores]
   );
 
   const columns = [
     {
       field: 'index',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.table.indexColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.table.indexColumnTitle', {
         defaultMessage: 'Index',
       }),
       truncateText: true,
@@ -143,23 +143,23 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
     },
     {
       field: 'isComplete',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.table.statusColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.table.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
       truncateText: true,
       sortable: true,
-      render: (isComplete: SnapshotRecovery['isComplete']) =>
+      render: (isComplete: SnapshotRestore['isComplete']) =>
         isComplete ? (
           <EuiHealth color="success">
             <FormattedMessage
-              id="xpack.snapshotRestore.recoveryList.table.statusColumn.completeLabel"
+              id="xpack.snapshotRestore.restoreList.table.statusColumn.completeLabel"
               defaultMessage="Complete"
             />
           </EuiHealth>
         ) : (
           <EuiHealth color="warning">
             <FormattedMessage
-              id="xpack.snapshotRestore.recoveryList.table.statusColumn.inProgressLabel"
+              id="xpack.snapshotRestore.restoreList.table.statusColumn.inProgressLabel"
               defaultMessage="In progress"
             />
           </EuiHealth>
@@ -167,19 +167,19 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
     },
     {
       field: 'latestActivityTimeInMillis',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.table.lastActivityTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.table.lastActivityTitle', {
         defaultMessage: 'Last activity',
       }),
       truncateText: true,
       render: (
-        latestActivityTimeInMillis: SnapshotRecovery['latestActivityTimeInMillis'],
-        { isComplete }: SnapshotRecovery
+        latestActivityTimeInMillis: SnapshotRestore['latestActivityTimeInMillis'],
+        { isComplete }: SnapshotRestore
       ) => {
         return isComplete ? (
           formatDate(latestActivityTimeInMillis)
         ) : (
           <FormattedMessage
-            id="xpack.snapshotRestore.recoveryList.table.lastActivityColumn.nowLabel"
+            id="xpack.snapshotRestore.restoreList.table.lastActivityColumn.nowLabel"
             defaultMessage="now"
           />
         );
@@ -187,21 +187,21 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
     },
     {
       field: 'shards',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.table.shardsCompletedTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.table.shardsCompletedTitle', {
         defaultMessage: 'Shards completed',
       }),
       truncateText: true,
-      render: (shards: SnapshotRecovery['shards']) => {
+      render: (shards: SnapshotRestore['shards']) => {
         return shards.filter(shard => Boolean(shard.stopTimeInMillis)).length;
       },
     },
     {
       field: 'shards',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.table.shardsInProgressTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.table.shardsInProgressTitle', {
         defaultMessage: 'Shards in progress',
       }),
       truncateText: true,
-      render: (shards: SnapshotRecovery['shards']) => {
+      render: (shards: SnapshotRestore['shards']) => {
         return shards.filter(shard => !Boolean(shard.stopTimeInMillis)).length;
       },
     },
@@ -209,9 +209,9 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
-      render: (item: SnapshotRecovery) => (
+      render: (item: SnapshotRestore) => (
         <EuiButtonIcon
-          onClick={() => toggleIndexRecoveryDetails(item)}
+          onClick={() => toggleIndexRestoreDetails(item)}
           aria-label={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
           iconType={itemIdToExpandedRowMap[item.index] ? 'arrowUp' : 'arrowDown'}
         />
@@ -221,7 +221,7 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
 
   return (
     <EuiBasicTable
-      items={currentRecoveries}
+      items={currentRestores}
       itemId="index"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
@@ -229,14 +229,14 @@ export const RecoveryTable: React.FunctionComponent<Props> = ({ recoveries }) =>
       sorting={sorting}
       pagination={pagination}
       onChange={onTableChange}
-      rowProps={(recovery: SnapshotRecovery) => ({
+      rowProps={(restore: SnapshotRestore) => ({
         'data-test-subj': 'row',
-        onClick: () => toggleIndexRecoveryDetails(recovery),
+        onClick: () => toggleIndexRestoreDetails(restore),
       })}
       cellProps={(item: any, column: any) => ({
         'data-test-subj': `cell`,
       })}
-      data-test-subj="recoveriesTable"
+      data-test-subj="restoresTable"
     />
   );
 };

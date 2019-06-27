@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RecoveryTable } from './recovery_table';
+export { RestoreList } from './restore_list';

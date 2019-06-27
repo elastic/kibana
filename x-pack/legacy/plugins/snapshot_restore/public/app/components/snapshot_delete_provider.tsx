@@ -9,7 +9,6 @@ import {
   EuiConfirmModal,
   EuiOverlayMask,
   EuiCallOut,
-  EuiSpacer,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,

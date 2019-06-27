@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { flatten } from './flatten';
-export { serializeRestoreSettings } from './restore_serialization';
+export { serializeRestoreSettings } from './restore_settings_serialization';

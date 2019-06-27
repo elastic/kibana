@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { deserializeRecoveryShard } from './recovery_serialization';
-import { SnapshotRecoveryShardEs } from '../../common/types';
+import { deserializeRestoreShard } from './restore_serialization';
+import { SnapshotRestoreShardEs } from '../../common/types';
 
-describe('recovery_serialization', () => {
-  describe('deserializeRecoveryShard()', () => {
-    it('should deserialize a snapshot recovery shard', () => {
+describe('restore_serialization', () => {
+  describe('deserializeRestoreShard()', () => {
+    it('should deserialize a snapshot restore shard', () => {
       expect(
-        deserializeRecoveryShard({
+        deserializeRestoreShard({
           id: 0,
           type: 'SNAPSHOT',
           stage: 'DONE',
@@ -93,22 +93,18 @@ describe('recovery_serialization', () => {
         targetNode: 'some_node_name',
         totalTime: '740ms',
         totalTimeInMillis: 740,
-        translogPercent: '100.0%',
-        translogRecovered: 0,
-        translogTotal: 0,
         version: '8.0.0',
       });
     });
 
     it('should remove undefined properties', () => {
       expect(
-        deserializeRecoveryShard({
+        deserializeRestoreShard({
           type: 'SNAPSHOT',
           source: {},
           target: {},
           index: { size: {}, files: {} },
-          translog: {},
-        } as SnapshotRecoveryShardEs)
+        } as SnapshotRestoreShardEs)
       ).toEqual({});
     });
   });

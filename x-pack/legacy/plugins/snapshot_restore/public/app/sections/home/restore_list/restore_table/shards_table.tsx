@@ -15,12 +15,12 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { SnapshotRecovery, SnapshotRecoveryShard } from '../../../../../../common/types';
+import { SnapshotRestore, SnapshotRestoreShard } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 
 interface Props {
-  shards: SnapshotRecovery['shards'];
+  shards: SnapshotRestore['shards'];
 }
 
 export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
@@ -31,28 +31,25 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
 
   const Progress = ({
     total,
-    recovered,
+    restored,
     percent,
   }: {
     total: number;
-    recovered: number;
+    restored: number;
     percent: string;
   }) => (
     <EuiToolTip
       position="top"
-      content={i18n.translate(
-        'xpack.snapshotRestore.recoveryList.shardTable.progressTooltipLabel',
-        {
-          defaultMessage: '{recovered} of {total} restored',
-          values: {
-            recovered,
-            total,
-          },
-        }
-      )}
+      content={i18n.translate('xpack.snapshotRestore.restoreList.shardTable.progressTooltipLabel', {
+        defaultMessage: '{restored} of {total} restored',
+        values: {
+          restored,
+          total,
+        },
+      })}
     >
       <EuiText size="xs" textAlign="center" style={{ width: '100%' }}>
-        <EuiProgress value={total === 0 ? 1 : recovered} max={total === 0 ? 1 : total} size="xs" />
+        <EuiProgress value={total === 0 ? 1 : restored} max={total === 0 ? 1 : total} size="xs" />
         <EuiSpacer size="xs" />
         {percent}
       </EuiText>
@@ -62,11 +59,11 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
   const columns = [
     {
       field: 'id',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.indexColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.indexColumnTitle', {
         defaultMessage: 'ID',
       }),
       width: '40px',
-      render: (id: SnapshotRecoveryShard['id'], shard: SnapshotRecoveryShard) =>
+      render: (id: SnapshotRestoreShard['id'], shard: SnapshotRestoreShard) =>
         shard.primary ? (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>{id}</EuiFlexItem>
@@ -75,14 +72,14 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
                 position="right"
                 content={
                   <FormattedMessage
-                    id="xpack.snapshotRestore.recoveryList.shardTable.primaryTooltipLabel"
+                    id="xpack.snapshotRestore.restoreList.shardTable.primaryTooltipLabel"
                     defaultMessage="Primary"
                   />
                 }
               >
                 <strong>
                   <FormattedMessage
-                    id="xpack.snapshotRestore.recoveryList.shardTable.primaryAbbreviationText"
+                    id="xpack.snapshotRestore.restoreList.shardTable.primaryAbbreviationText"
                     defaultMessage="P"
                   />
                 </strong>
@@ -95,35 +92,35 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
     },
     {
       field: 'stage',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.stageColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.stageColumnTitle', {
         defaultMessage: 'Stage',
       }),
     },
     {
       field: 'startTimeInMillis',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.startTimeColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.startTimeColumnTitle', {
         defaultMessage: 'Start time',
       }),
-      render: (startTimeInMillis: SnapshotRecoveryShard['startTimeInMillis']) =>
+      render: (startTimeInMillis: SnapshotRestoreShard['startTimeInMillis']) =>
         startTimeInMillis ? formatDate(startTimeInMillis) : <EuiLoadingSpinner size="m" />,
     },
     {
       field: 'stopTimeInMillis',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.endTimeColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.endTimeColumnTitle', {
         defaultMessage: 'End time',
       }),
-      render: (stopTimeInMillis: SnapshotRecoveryShard['stopTimeInMillis']) =>
+      render: (stopTimeInMillis: SnapshotRestoreShard['stopTimeInMillis']) =>
         stopTimeInMillis ? formatDate(stopTimeInMillis) : <EuiLoadingSpinner size="m" />,
     },
     {
       field: 'totalTimeInMillis',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.durationColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.durationColumnTitle', {
         defaultMessage: 'Duration',
       }),
-      render: (totalTimeInMillis: SnapshotRecoveryShard['totalTimeInMillis']) =>
+      render: (totalTimeInMillis: SnapshotRestoreShard['totalTimeInMillis']) =>
         totalTimeInMillis ? (
           <FormattedMessage
-            id="xpack.snapshotRestore.recoveryList.shardTable.durationValue"
+            id="xpack.snapshotRestore.restoreList.shardTable.durationValue"
             defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
             values={{ seconds: Math.ceil(totalTimeInMillis / 1000) }}
           />
@@ -133,53 +130,53 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
     },
     {
       field: 'repository',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.repositoryColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.repositoryColumnTitle', {
         defaultMessage: 'Repository',
       }),
     },
     {
       field: 'snapshot',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.snapshotColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.snapshotColumnTitle', {
         defaultMessage: 'Snapshot',
       }),
     },
     {
       field: 'version',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.versionColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.versionColumnTitle', {
         defaultMessage: 'Version',
       }),
     },
     {
       field: 'targetHost',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.targetHostColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.targetHostColumnTitle', {
         defaultMessage: 'Target host',
       }),
     },
     {
       field: 'targetNode',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.targetNodeColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.targetNodeColumnTitle', {
         defaultMessage: 'Target node',
       }),
     },
     {
       field: 'bytesTotal',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.bytesColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.bytesColumnTitle', {
         defaultMessage: 'Bytes',
       }),
       render: (
-        bytesTotal: SnapshotRecoveryShard['bytesTotal'],
-        { bytesRecovered, bytesPercent }: SnapshotRecoveryShard
-      ) => <Progress total={bytesTotal} recovered={bytesRecovered} percent={bytesPercent} />,
+        bytesTotal: SnapshotRestoreShard['bytesTotal'],
+        { bytesRecovered, bytesPercent }: SnapshotRestoreShard
+      ) => <Progress total={bytesTotal} restored={bytesRecovered} percent={bytesPercent} />,
     },
     {
       field: 'filesTotal',
-      name: i18n.translate('xpack.snapshotRestore.recoveryList.shardTable.filesColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.restoreList.shardTable.filesColumnTitle', {
         defaultMessage: 'Files',
       }),
       render: (
-        filesTotal: SnapshotRecoveryShard['filesTotal'],
-        { filesRecovered, filesPercent }: SnapshotRecoveryShard
-      ) => <Progress total={filesTotal} recovered={filesRecovered} percent={filesPercent} />,
+        filesTotal: SnapshotRestoreShard['filesTotal'],
+        { filesRecovered, filesPercent }: SnapshotRestoreShard
+      ) => <Progress total={filesTotal} restored={filesRecovered} percent={filesPercent} />,
     },
   ];
 
