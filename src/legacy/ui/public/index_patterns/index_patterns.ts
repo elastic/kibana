@@ -67,6 +67,19 @@ export class IndexPatterns {
     }
   };
 
+  getFields = async (fields: string[], refresh: boolean) => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.loadSavedObjects();
+    }
+    if (this.savedObjectsCache) {
+      return this.savedObjectsCache.map(obj => {
+        const result: Record<string, any> = {};
+        fields.forEach(f => (result[f] = _.get(obj, f) || _.get(obj, `attribute.${f}`)));
+        return result;
+      });
+    }
+  };
+
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
