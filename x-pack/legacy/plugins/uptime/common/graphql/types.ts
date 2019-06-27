@@ -532,6 +532,8 @@ export interface GetSnapshotHistogramQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  monitorId?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
   monitorId: string;

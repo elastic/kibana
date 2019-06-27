@@ -64,17 +64,17 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         aggregations: {
           locations: {
             terms: {
-              field: "observer.geo.name",
-              missing: "N/A",
-              size: 1000
-            }
-          }
-        }
+              field: 'observer.geo.name',
+              missing: 'N/A',
+              size: 1000,
+            },
+          },
+        },
       },
     };
     const {
-      hits: { hits, total},
-      aggregations: { locations }
+      hits: { hits, total },
+      aggregations: { locations },
     } = await this.database.search(request, params);
 
     const pings: Ping[] = hits.map(({ _source }: any) => {
@@ -84,7 +84,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const results: PingResults = {
       total: total.value,
-      locations: locations.buckets.map((bucket: {key: string}) => bucket.key),
+      locations: locations.buckets.map((bucket: { key: string }) => bucket.key),
       pings,
     };
 
@@ -174,17 +174,27 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    monitorId?: string | null
   ): Promise<HistogramDataPoint[]> {
     const { statusFilter, query } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
       filters
     );
+
+    const combinedQuery = !monitorId
+      ? query
+      : {
+          bool: {
+            must: [{ match: { 'monitor.id': monitorId } }, query],
+          },
+        };
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query,
+        query: combinedQuery,
         size: 0,
         aggs: {
           timeseries: {

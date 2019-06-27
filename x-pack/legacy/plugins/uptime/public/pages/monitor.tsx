@@ -7,6 +7,7 @@
 import {
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
+  EuiComboBoxOptionProps 
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -23,7 +24,6 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { BaseLocationOptions } from '../components/functional/ping_list';
-import { EuiComboBoxOptionProps } from '@elastic/eui';
 
 interface MonitorPageProps {
   history: { push: any };
@@ -83,7 +83,7 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
       <EuiSpacer size="s" />
       <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} variables={sharedVariables} />
+      <MonitorCharts {...colors} monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
       <PingList
         onSelectedStatusUpdate={(selectedStatus: string | null) =>

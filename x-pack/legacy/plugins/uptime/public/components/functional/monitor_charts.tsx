@@ -6,18 +6,20 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
-import { ChecksChart } from './charts/checks_chart';
+import { UptimeSettingsContext } from '../../contexts';
+import { SnapshotHistogram } from './charts/snapshot_histogram';
 
 interface MonitorChartsQueryResult {
   monitorChartsData?: MonitorChart;
 }
 
 interface MonitorChartsProps {
+  monitorId: string;
   danger: string;
   mean: string;
   range: string;
@@ -27,11 +29,15 @@ interface MonitorChartsProps {
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
 export const MonitorChartsComponent = (props: Props) => {
-  const { danger, data, mean, range, success } = props;
+  const { danger, data, mean, range, success, monitorId } = props;
   if (data && data.monitorChartsData) {
     const {
-      monitorChartsData: { locationDurationLines, status },
+      monitorChartsData: { locationDurationLines },
     } = data;
+
+    const { dateRangeStart, dateRangeEnd, absoluteStartDate, absoluteEndDate, colors } = useContext(
+      UptimeSettingsContext
+    );
 
     return (
       <Fragment>
@@ -44,7 +50,13 @@ export const MonitorChartsComponent = (props: Props) => {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <ChecksChart dangerColor={danger} status={status} successColor={success} />
+            <SnapshotHistogram
+              absoluteStartDate={absoluteStartDate}
+              absoluteEndDate={absoluteEndDate}
+              successColor={colors.success}
+              dangerColor={colors.danger}
+              variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

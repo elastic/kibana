@@ -56,7 +56,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null | undefined
+    filters?: string | null | undefined,
+    monitorId?: string | null | undefined
   ): Promise<HistogramDataPoint[]> {
     throw new Error('Method not implemented.');
   }

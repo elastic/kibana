@@ -125,10 +125,16 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     },
     async getSnapshotHistogram(
       resolver,
-      { dateRangeStart, dateRangeEnd, filters },
+      { dateRangeStart, dateRangeEnd, filters, monitorId },
       { req }
     ): Promise<HistogramDataPoint[]> {
-      return await libs.pings.getPingHistogram(req, dateRangeStart, dateRangeEnd, filters);
+      return await libs.pings.getPingHistogram(
+        req,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        monitorId
+      );
     },
     async getMonitorChartsData(
       resolver,

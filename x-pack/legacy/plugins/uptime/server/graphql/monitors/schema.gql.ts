@@ -154,6 +154,7 @@ export const monitorsSchema = gql`
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
+      monitorId: String
     ): [HistogramDataPoint!]!
 
     getMonitorChartsData(
