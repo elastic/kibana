@@ -6,27 +6,8 @@
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { KpiHostsESMSearchBody } from './types';
 import { RequestBasicOptions } from '../framework';
-const getAuthQueryFilter = () => [
-  {
-    bool: {
-      should: [
-        {
-          match: {
-            'event.type': 'authentication_success',
-          },
-        },
-        {
-          match: {
-            'event.type': 'authentication_failure',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  },
-];
 
-export const buildAuthQuery = ({
+export const buildHostsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
@@ -36,7 +17,6 @@ export const buildAuthQuery = ({
 }: RequestBasicOptions): KpiHostsESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...getAuthQueryFilter(),
     {
       range: {
         [timestamp]: {
@@ -54,47 +34,21 @@ export const buildAuthQuery = ({
       ignoreUnavailable: true,
     },
     {
-      aggs: {
-        authentication_success: {
-          filter: {
-            term: {
-              'event.type': 'authentication_success',
-            },
+      aggregations: {
+        hosts: {
+          cardinality: {
+            field: 'host.name',
           },
         },
-        authentication_success_histogram: {
+        hosts_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
             buckets: '6',
           },
           aggs: {
             count: {
-              filter: {
-                term: {
-                  'event.type': 'authentication_success',
-                },
-              },
-            },
-          },
-        },
-        authentication_failure: {
-          filter: {
-            term: {
-              'event.type': 'authentication_failure',
-            },
-          },
-        },
-        authentication_failure_histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: '6',
-          },
-          aggs: {
-            count: {
-              filter: {
-                term: {
-                  'event.type': 'authentication_failure',
-                },
+              cardinality: {
+                field: 'host.name',
               },
             },
           },
