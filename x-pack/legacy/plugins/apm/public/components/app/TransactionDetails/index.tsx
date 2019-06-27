@@ -42,9 +42,7 @@ export function TransactionDetails() {
         </EuiTitle>
       </ApmHeader>
 
-      <EuiPanel>
-        <TransactionBreakdown />
-      </EuiPanel>
+      <TransactionBreakdown />
 
       <EuiSpacer size="s" />
 

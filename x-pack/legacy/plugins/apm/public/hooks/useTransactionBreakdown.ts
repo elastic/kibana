@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
 import { callApi } from '../services/rest/callApi';
 import { getUiFiltersES } from '../services/ui_filters/get_ui_filters_es';
@@ -33,9 +34,16 @@ export function useTransactionBreakdown() {
     [serviceName, start, end, uiFilters]
   );
 
+  const receivedDataDuringLifetime = useRef(false);
+
+  if (data && data.length) {
+    receivedDataDuringLifetime.current = true;
+  }
+
   return {
     data,
     status,
-    error
+    error,
+    receivedDataDuringLifetime: receivedDataDuringLifetime.current
   };
 }

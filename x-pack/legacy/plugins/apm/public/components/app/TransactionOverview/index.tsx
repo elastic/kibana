@@ -87,12 +87,6 @@ export function TransactionOverview({
 
   return (
     <React.Fragment>
-      <EuiPanel>
-        <TransactionBreakdown />
-      </EuiPanel>
-
-      <EuiSpacer size="s" />
-
       {serviceTransactionTypes.length > 1 ? (
         <EuiFormRow
           id="transaction-type-select-row"
@@ -119,6 +113,10 @@ export function TransactionOverview({
           />
         </EuiFormRow>
       ) : null}
+
+      <TransactionBreakdown />
+
+      <EuiSpacer size="s" />
 
       <TransactionCharts
         hasMLJob={hasMLJob}
