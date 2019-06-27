@@ -370,6 +370,15 @@ describe('ElasticsearchPingsAdapter class', () => {
               filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
             },
           },
+          aggregations: {
+            locations: {
+              terms: {
+                field: 'observer.geo.name',
+                missing: 'N/A',
+                size: 1000,
+              },
+            },
+          },
           sort: [{ '@timestamp': { order: 'desc' } }],
           size: 12,
         },

@@ -14,6 +14,7 @@ describe('MonitorCharts component', () => {
   beforeAll(() => {
     moment.prototype.toLocaleString = jest.fn(() => '2019-06-21 15:29:26');
     moment.prototype.from = jest.fn(() => 'a few moments ago');
+    moment.prototype.fromNow = jest.fn(() => 'a few moments ago');
   });
 
   const chartResponse: { monitorChartsData: MonitorChart } = {
