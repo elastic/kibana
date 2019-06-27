@@ -21,7 +21,7 @@
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 
 // @ts-ignore
-import { fromExpression, getType, getByAlias, castProvider } from '@kbn/interpreter/target/common';
+import { fromExpression, getType, getByAlias, castProvider } from '@kbn/interpreter/common';
 
 import { createError } from './create_error';
 import { ExpressionAST } from './types';
