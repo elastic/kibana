@@ -47,6 +47,7 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     const props: DefinePivotExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
+      isAdvancedEditorEnabled: false,
       search: 'the-query',
       valid: true,
     };
