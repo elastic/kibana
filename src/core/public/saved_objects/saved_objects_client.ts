@@ -28,7 +28,6 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
 } from 'src/core/server';
-import { kfetch, KFetchQuery } from '../../../legacy/ui/public/kfetch';
 import {
   keysToCamelCaseShallow,
   keysToSnakeCaseShallow,
@@ -38,11 +37,12 @@ import {
   showAutoCreateIndexErrorPage,
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
+import { HttpFetchQuery, HttpSetup } from '../http';
 
 interface RequestParams {
   method: 'POST' | 'GET' | 'PUT' | 'DELETE';
   path: string;
-  query?: KFetchQuery;
+  query?: HttpFetchQuery;
   body?: object;
 }
 
@@ -98,14 +98,22 @@ const BATCH_INTERVAL = 100;
 const API_BASE_URL = '/api/saved_objects/';
 
 /**
+ * SavedObjectsClientContract as implemented by the {@link SavedObjectsClient}
+ *
+ * @public
+ */
+export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+
+/**
  * The SavedObjectsClient class acts as a generic data fetcher
  * and data saver for saved objects regardless of type.
  *
- * If possible, this class should be used to load saved objects
- * instead of the SavedObjectLoader class which implements some
- * additional functionality.
+ * @public
  */
 export class SavedObjectsClient {
+  private http: HttpSetup;
+  private batchQueue: BatchQueueEntry[];
+
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
@@ -138,9 +146,8 @@ export class SavedObjectsClient {
     { leading: false }
   );
 
-  private batchQueue: BatchQueueEntry[];
-
-  constructor() {
+  constructor(http: HttpSetup) {
+    this.http = http;
     this.batchQueue = [];
   }
 
@@ -199,9 +206,9 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.
    */
-  public bulkCreate = (objects: BulkCreateOptions[] = [], options: KFetchQuery = {}) => {
+  public bulkCreate = (objects: BulkCreateOptions[] = [], options: HttpFetchQuery = {}) => {
     const path = this.getPath(['_bulk_create']);
-    const query = pick(options, ['overwrite']) as Pick<KFetchQuery, 'overwrite'>;
+    const query = pick(options, ['overwrite']) as Pick<HttpFetchQuery, 'overwrite'>;
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.request({
       method: 'POST',
@@ -362,6 +369,6 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('body not permitted for GET requests'));
     }
 
-    return kfetch({ method, pathname: path, query, body: JSON.stringify(body) });
+    return this.http.fetch(path, { method, query, body: JSON.stringify(body) });
   }
 }

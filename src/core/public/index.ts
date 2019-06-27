@@ -50,7 +50,7 @@ import {
   ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor } from './http';
+import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor, HttpFetchQuery } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
@@ -66,11 +66,11 @@ import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
+import { SavedObjectsClient, SimpleSavedObject, SavedObjectsClientContract } from './saved_objects';
+import { SavedObjectsStart } from './saved_objects/saved_objects_service';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
-
-export { SimpleSavedObject, SavedObjectsClient } from './saved_objects';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -110,6 +110,8 @@ export interface CoreStart {
   docLinks: DocLinksStart;
   /** {@link HttpStart} */
   http: HttpStart;
+  /** {@link SavedObjectsStart} */
+  savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link NotificationsStart} */
@@ -152,6 +154,7 @@ export {
   ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
+  HttpFetchQuery,
   HttpInterceptor,
   HttpServiceBase,
   HttpSetup,
@@ -165,6 +168,10 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsStart,
+  SimpleSavedObject,
   Toast,
   ToastInput,
   ToastsApi,

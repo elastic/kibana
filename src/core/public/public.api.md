@@ -8,6 +8,11 @@ import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { SavedObject } from 'src/core/server';
+import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectReference } from 'src/core/server';
+import { SavedObjectsFindOptions } from 'src/core/server';
+import { SavedObjectsMigrationVersion } from 'src/core/server';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public (undocumented)
@@ -199,6 +204,8 @@ export interface CoreStart {
     // (undocumented)
     overlays: OverlayStart;
     // (undocumented)
+    savedObjects: SavedObjectsStart;
+    // (undocumented)
     uiSettings: UiSettingsClientContract;
 }
 
@@ -327,6 +334,12 @@ export interface FatalErrorInfo {
 export interface FatalErrorsSetup {
     add: (error: string | Error, source?: string) => never;
     get$: () => Rx.Observable<FatalErrorInfo>;
+}
+
+// @public (undocumented)
+export interface HttpFetchQuery {
+    // (undocumented)
+    [key: string]: string | number | boolean | undefined;
 }
 
 // @public (undocumented)
@@ -497,6 +510,64 @@ export interface PluginInitializerContext {
 export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
+
+// @public
+export class SavedObjectsClient {
+    constructor(http: HttpSetup);
+    // Warning: (ae-forgotten-export) The symbol "BulkCreateOptions" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "BatchResponse" needs to be exported by the entry point index.d.ts
+    bulkCreate: (objects?: BulkCreateOptions<SavedObjectAttributes>[], options?: HttpFetchQuery) => Promise<BatchResponse<SavedObjectAttributes>>;
+    bulkGet: (objects?: {
+        id: string;
+        type: string;
+    }[]) => Promise<BatchResponse<SavedObjectAttributes>>;
+    // Warning: (ae-forgotten-export) The symbol "CreateOptions" needs to be exported by the entry point index.d.ts
+    create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: CreateOptions) => Promise<SimpleSavedObject<T>>;
+    delete: (type: string, id: string) => Promise<{}>;
+    // Warning: (ae-forgotten-export) The symbol "FindResults" needs to be exported by the entry point index.d.ts
+    find: <T extends SavedObjectAttributes>(options?: SavedObjectsFindOptions) => Promise<FindResults<T>>;
+    get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+    // Warning: (ae-forgotten-export) The symbol "UpdateOptions" needs to be exported by the entry point index.d.ts
+    update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: UpdateOptions): Promise<SimpleSavedObject<T>>;
+}
+
+// @public
+export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+
+// @public (undocumented)
+export interface SavedObjectsStart {
+    // (undocumented)
+    client: SavedObjectsClientContract;
+}
+
+// @public
+export class SimpleSavedObject<T extends SavedObjectAttributes> {
+    constructor(client: SavedObjectsClient, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    delete(): Promise<{}>;
+    // (undocumented)
+    error: SavedObject<T>['error'];
+    // (undocumented)
+    get(key: string): any;
+    // (undocumented)
+    has(key: string): boolean;
+    // (undocumented)
+    id: SavedObject<T>['id'];
+    // (undocumented)
+    migrationVersion: SavedObject<T>['migrationVersion'];
+    // (undocumented)
+    references: SavedObject<T>['references'];
+    // (undocumented)
+    save(): Promise<SimpleSavedObject<T>>;
+    // (undocumented)
+    set(key: string, value: any): T;
+    // (undocumented)
+    type: SavedObject<T>['type'];
+    // (undocumented)
+    _version?: SavedObject<T>['version'];
+}
 
 export { Toast }
 

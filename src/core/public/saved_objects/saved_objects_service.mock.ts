@@ -17,9 +17,34 @@
  * under the License.
  */
 
-export { SavedObjectRegistryProvider } from './saved_object_registry';
-export { SavedObjectsClientProvider } from './saved_objects_client_provider';
-// @ts-ignore
-export { SavedObjectLoader } from './saved_object_loader';
-export { SimpleSavedObject } from 'src/core/public';
-export { findObjectByTitle } from './find_object_by_title';
+import { SavedObjectsService, SavedObjectsStart } from './saved_objects_service';
+
+const createStartContractMock = () => {
+  const mock: jest.Mocked<SavedObjectsStart> = {
+    client: {
+      create: jest.fn(),
+      bulkCreate: jest.fn(),
+      delete: jest.fn(),
+      bulkGet: jest.fn(),
+      find: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+    },
+  };
+  return mock;
+};
+
+const createMock = () => {
+  const mocked: jest.Mocked<typeof SavedObjectsService> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mocked.start.mockReturnValue(Promise.resolve(createStartContractMock()));
+  return mocked;
+};
+
+export const savedObjectsMock = {
+  create: createMock,
+  createStartContract: createStartContractMock,
+};

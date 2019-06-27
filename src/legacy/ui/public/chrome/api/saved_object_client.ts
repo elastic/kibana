@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export { SavedObjectRegistryProvider } from './saved_object_registry';
-export { SavedObjectsClientProvider } from './saved_objects_client_provider';
-// @ts-ignore
-export { SavedObjectLoader } from './saved_object_loader';
-export { SimpleSavedObject } from 'src/core/public';
-export { findObjectByTitle } from './find_object_by_title';
+import { npStart } from 'ui/new_platform';
+import { Chrome } from '..';
+
+const savedObjectsClient = npStart.core.savedObjects.client;
+
+export function initSavedObjectClient(chrome: Chrome) {
+  chrome.getSavedObjectsClient = function() {
+    return savedObjectsClient;
+  };
+}

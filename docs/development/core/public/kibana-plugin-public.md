@@ -14,6 +14,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Class | Description |
 |  --- | --- |
+|  [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) | The SavedObjectsClient class acts as a generic data fetcher and data saver for saved objects regardless of type. |
+|  [SimpleSavedObject](./kibana-plugin-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) |  |
 |  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 
@@ -40,6 +42,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) |  |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
+|  [HttpFetchQuery](./kibana-plugin-public.httpfetchquery.md) |  |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) |  |
 |  [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
@@ -50,6 +53,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
+|  [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |  |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
 
 ## Type Aliases
@@ -62,6 +66,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
+|  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
 |  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 

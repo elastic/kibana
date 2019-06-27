@@ -43,6 +43,7 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
+import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -89,6 +90,7 @@ beforeEach(() => {
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    savedObjects: savedObjectsMock.createStartContract(),
   };
   mockStartContext = {
     ...omit(mockStartDeps, 'injectedMetadata'),

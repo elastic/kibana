@@ -22,12 +22,13 @@ import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/
 import { SavedObjectsClient } from './saved_objects_client';
 
 /**
- * This class is a very simple wrapper for SavedObjects loaded from the server.
+ * This class is a very simple wrapper for SavedObjects loaded from the server
+ * with the {@link SavedObjectsClient}.
  *
- * It provides basic functionality for updating/deleting/etc. saved objects but
- * doesn't include any type-specific implementations.
+ * It provides basic functionality for creating/saving/deleting saved objects,
+ * but doesn't include any type-specific implementations.
  *
- * For more sophisiticated use cases, the SavedObject class implements additional functions
+ * @public
  */
 export class SimpleSavedObject<T extends SavedObjectAttributes> {
   public attributes: T;

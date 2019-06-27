@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from '../../saved_objects';
+import { CoreService } from 'src/core/types';
+import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_client';
 
-export function initSavedObjectClient(chrome) {
-  const savedObjectClient = new SavedObjectsClient();
-
-  chrome.getSavedObjectsClient = function () {
-    return savedObjectClient;
-  };
+/**
+ * @public
+ */
+export interface SavedObjectsStart {
+  /** {@link SavedObjectsClient} */
+  client: SavedObjectsClientContract;
 }
+
+export const SavedObjectsService: CoreService<void, SavedObjectsStart> = {
+  setup: async function setup() {},
+  start: async function start(http) {
+    return { client: new SavedObjectsClient(http) };
+  },
+  stop: async function stop() {},
+};

@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { SavedObjectsClient } from './saved_objects_client';
+export { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
+export { SavedObjectsStart } from './saved_objects_service';
