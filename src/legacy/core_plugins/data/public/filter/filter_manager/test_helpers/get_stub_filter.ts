@@ -17,10 +17,29 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
-  if (!Array.isArray(values)) {
-    values = [values];
-  }
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
-  filterGen.add(field, values, operation, index);
+export function getFilter(
+  store: FilterStateStore,
+  disabled: boolean,
+  negated: boolean,
+  queryKey: string,
+  queryValue: any
+): Filter {
+  return {
+    $state: {
+      store,
+    },
+    meta: {
+      index: 'logstash-*',
+      disabled,
+      negate: negated,
+      alias: null,
+    },
+    query: {
+      match: {
+        [queryKey]: queryValue,
+      },
+    },
+  };
 }

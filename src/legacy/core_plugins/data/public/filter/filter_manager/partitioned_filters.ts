@@ -17,10 +17,9 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
-  if (!Array.isArray(values)) {
-    values = [values];
-  }
+import { Filter } from '@kbn/es-query';
 
-  filterGen.add(field, values, operation, index);
+export interface PartitionedFilters {
+  globalFilters: Filter[];
+  appFilters: Filter[];
 }

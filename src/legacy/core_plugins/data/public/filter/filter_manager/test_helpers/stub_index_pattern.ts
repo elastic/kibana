@@ -17,10 +17,12 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
-  if (!Array.isArray(values)) {
-    values = [values];
+export class StubIndexPatterns {
+  async get(index: any) {
+    return {
+      fields: {
+        byName: {},
+      },
+    };
   }
-
-  filterGen.add(field, values, operation, index);
 }

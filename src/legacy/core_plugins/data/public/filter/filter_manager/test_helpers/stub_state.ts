@@ -17,10 +17,25 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
-  if (!Array.isArray(values)) {
-    values = [values];
+import sinon from 'sinon';
+
+import { Filter } from '@kbn/es-query';
+import { State } from 'ui/state_management/state';
+
+export class StubState implements State {
+  filters: Filter[];
+  save: sinon.SinonSpy<any[], any>;
+
+  constructor() {
+    this.save = sinon.stub();
+    this.filters = [];
   }
 
-  filterGen.add(field, values, operation, index);
+  getQueryParamName() {
+    return '_a';
+  }
+
+  translateHashToRison(stateHashOrRison: string | string[]): string | string[] {
+    return '';
+  }
 }

@@ -17,10 +17,21 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
-  if (!Array.isArray(values)) {
-    values = [values];
-  }
+import { Filter } from '@kbn/es-query';
 
-  filterGen.add(field, values, operation, index);
+export function getFiltersArray(): Filter[] {
+  return [
+    {
+      query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
+      meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
+    },
+    {
+      query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
+      meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
+    },
+    {
+      query: { match: { _type: { query: 'nginx', type: 'phrase' } } },
+      meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
+    },
+  ];
 }

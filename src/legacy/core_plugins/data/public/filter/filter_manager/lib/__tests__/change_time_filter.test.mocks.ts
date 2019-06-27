@@ -17,10 +17,12 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
-  if (!Array.isArray(values)) {
-    values = [values];
-  }
+import { chromeServiceMock } from '../../../../../../../../core/public/mocks';
 
-  filterGen.add(field, values, operation, index);
-}
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));
