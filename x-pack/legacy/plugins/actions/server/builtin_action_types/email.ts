@@ -26,7 +26,7 @@ const ActionTypeConfig = {
   }),
 };
 
-const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'user', 'from'];
+const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'from'];
 
 export type ActionParamsType = TypeOf<typeof ActionParams.schema>;
 

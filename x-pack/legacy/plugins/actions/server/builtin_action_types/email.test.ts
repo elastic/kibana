@@ -10,8 +10,8 @@ jest.mock('./lib/send_email', () => ({
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import { validateActionTypeConfig, validateActionTypeParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { registerBuiltInActionTypes } from './index';
@@ -36,9 +36,7 @@ function getServices() {
 let actionTypeRegistry: ActionTypeRegistry;
 let actionType: ActionType;
 
-const mockEncryptedSavedObjectsPlugin = {
-  getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
-} as EncryptedSavedObjectsPlugin;
+const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({

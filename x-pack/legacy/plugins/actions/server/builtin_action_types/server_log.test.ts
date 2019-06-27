@@ -7,7 +7,7 @@
 import { ActionType, Services } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { validateActionTypeParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 
@@ -28,9 +28,7 @@ function getServices(): Services {
 
 let actionTypeRegistry: ActionTypeRegistry;
 
-const mockEncryptedSavedObjectsPlugin = {
-  getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
-} as EncryptedSavedObjectsPlugin;
+const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
