@@ -41,7 +41,7 @@ export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
   indexedFields: FieldParamType[];
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
-  value: any;
+  value: unknown;
   visName: string;
 }
 

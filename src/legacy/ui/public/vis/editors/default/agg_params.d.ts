@@ -18,5 +18,5 @@
  */
 
 export interface AggParams {
-  [key: string]: any;
+  [key: string]: unknown;
 }

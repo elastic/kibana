@@ -48,12 +48,12 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
 type EditorParamConfigType = EditorParamConfig & {
-  [key: string]: any;
+  [key: string]: unknown;
 };
 export interface SubAggParamsProp {
   formIsTouched: boolean;
   vis: Vis;
-  onAggParamsChange: (agg: AggParams, paramName: string, value: any) => void;
+  onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   onAggErrorChanged: (agg: AggConfig, error?: string) => void;
 }

@@ -34,9 +34,7 @@ uiModules
       restrict: 'A',
       template: aggTemplate,
       require: ['^form', '^ngModel'],
-      link: function ($scope, $el, attrs, controllers) {
-        const kbnForm = controllers[0];
-        const ngModelCtrl = controllers[1];
+      link: function ($scope, $el, attrs, [kbnForm, ngModelCtrl]) {
         $scope.editorOpen = !!$scope.agg.brandNew;
         $scope.aggIsTooLow = false;
 
