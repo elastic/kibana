@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
-import { ImportError } from './types';
+import { ImportError, ImportResponse } from './types';
 import { validateReferences } from './validate_references';
 import { SavedObjectsClientContract } from '../';
 
@@ -30,12 +30,6 @@ interface ImportSavedObjectsOptions {
   overwrite: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   supportedTypes: string[];
-}
-
-interface ImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: ImportError[];
 }
 
 export async function importSavedObjects({

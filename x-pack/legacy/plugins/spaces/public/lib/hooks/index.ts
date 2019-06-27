@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CopyToSpaceFlyout } from './copy_to_space_flyout';
+export { useKibanaSpaces } from './use_spaces';

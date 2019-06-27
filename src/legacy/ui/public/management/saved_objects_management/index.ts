@@ -19,3 +19,7 @@
 
 export { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
 export { SavedObjectsManagementAction, SavedObjectRecord } from './saved_objects_management_action';
+export {
+  processImportResponse,
+  ProcessedImportResponse,
+} from '../../../../core_plugins/kibana/public/management/sections/objects/lib/process_import_response';

@@ -60,3 +60,9 @@ export interface ImportError {
   title?: string;
   error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
 }
+
+export interface ImportResponse {
+  success: boolean;
+  successCount: number;
+  errors?: ImportError[];
+}
