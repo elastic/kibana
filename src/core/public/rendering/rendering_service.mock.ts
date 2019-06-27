@@ -17,29 +17,25 @@
  * under the License.
  */
 
-import { chromeNavControlsRegistry } from '../../registry/chrome_nav_controls';
-import { uiModules } from '../../modules';
+import { RenderingStart, RenderingService } from './rendering_service';
 
-export function kbnAppendChromeNavControls() {
+const createStartContractMock = () => {
+  const setupContract: jest.Mocked<RenderingStart> = {
+    legacyTargetDomElement: document.createElement('div'),
+  };
+  return setupContract;
+};
 
-  uiModules
-    .get('kibana')
-    .directive('kbnChromeAppendNavControls', function (Private) {
-      return {
-        template: function ($element) {
-          const parts = [$element.html()];
-          const controls = Private(chromeNavControlsRegistry);
+type RenderingServiceContract = PublicMethodsOf<RenderingService>;
+const createMock = () => {
+  const mocked: jest.Mocked<RenderingServiceContract> = {
+    start: jest.fn(),
+  };
+  mocked.start.mockReturnValue(createStartContractMock());
+  return mocked;
+};
 
-          for (const control of controls.inOrder) {
-            parts.unshift(
-              `<!-- nav control ${control.name} -->`,
-              control.template
-            );
-          }
-
-          return parts.join('\n');
-        }
-      };
-    });
-
-}
+export const renderingServiceMock = {
+  create: createMock,
+  createStartContract: createStartContractMock,
+};

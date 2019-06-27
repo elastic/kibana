@@ -41,8 +41,6 @@ import {
   // @ts-ignore
   EuiImage,
   // @ts-ignore
-  EuiListGroupItem,
-  // @ts-ignore
   EuiNavDrawer,
   // @ts-ignore
   EuiNavDrawerGroup,
@@ -52,9 +50,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { HelpExtension } from 'ui/chrome';
-import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -67,24 +62,43 @@ import {
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
   ChromeNavControl,
-} from '../../../../../../../core/public';
+} from '../..';
+import { HttpStart } from '../../../http';
+import { ChromeHelpExtension } from '../../chrome_service';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
 const TRUNCATE_LIMIT: number = 64;
 const TRUNCATE_AT: number = 58;
 
+/**
+ *
+ * @param {string} url - a relative or root relative url.  If a relative path is given then the
+ * absolute url returned will depend on the current page where this function is called from. For example
+ * if you are on page "http://www.mysite.com/shopping/kids" and you pass this function "adults", you would get
+ * back "http://www.mysite.com/shopping/adults".  If you passed this function a root relative path, or one that
+ * starts with a "/", for example "/account/cart", you would get back "http://www.mysite.com/account/cart".
+ * @return {string} the relative url transformed into an absolute url
+ */
+function relativeToAbsolute(url: string) {
+  // convert all link urls to absolute urls
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
+}
+
 function extendRecentlyAccessedHistoryItem(
   navLinks: ChromeNavLink[],
-  recentlyAccessed: ChromeRecentlyAccessedHistoryItem
+  recentlyAccessed: ChromeRecentlyAccessedHistoryItem,
+  basePath: HttpStart['basePath']
 ) {
-  const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
+  const href = relativeToAbsolute(basePath.prepend(recentlyAccessed.link));
   const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase || nl.baseUrl));
 
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {
     const objectTypeForAriaAppendix = navLink.title;
-    titleAndAriaLabel = i18n.translate('common.ui.recentLinks.linkItem.screenReaderLabel', {
+    titleAndAriaLabel = i18n.translate('core.ui.recentLinks.linkItem.screenReaderLabel', {
       defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
       values: {
         recentlyAccessedItemLinklabel: recentlyAccessed.label,
@@ -131,22 +145,28 @@ function truncateRecentItemLabel(label: string): string {
   return label;
 }
 
+export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
+
 interface Props {
-  appTitle?: string;
+  kibanaVersion: string;
+  appTitle$: Rx.Observable<string>;
   badge$: Rx.Observable<ChromeBadge | undefined>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible$: Rx.Observable<boolean>;
+  kibanaDocLink: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<HelpExtension>;
+  helpExtension$: Rx.Observable<ChromeHelpExtension>;
   navControlsLeft$: Rx.Observable<ReadonlyArray<ChromeNavControl>>;
   navControlsRight$: Rx.Observable<ReadonlyArray<ChromeNavControl>>;
   intl: InjectedIntl;
+  basePath: HttpStart['basePath'];
 }
 
 interface State {
+  appTitle: string;
   isVisible: boolean;
   navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
   recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
@@ -163,6 +183,7 @@ class HeaderUI extends Component<Props, State> {
     super(props);
 
     this.state = {
+      appTitle: 'Kibana',
       isVisible: true,
       navLinks: [],
       recentlyAccessed: [],
@@ -174,27 +195,29 @@ class HeaderUI extends Component<Props, State> {
 
   public componentDidMount() {
     this.subscription = Rx.combineLatest(
+      this.props.appTitle$,
       this.props.isVisible$,
       this.props.forceAppSwitcherNavigation$,
       this.props.navLinks$,
       this.props.recentlyAccessed$,
-      this.props.navControlsLeft$,
-      this.props.navControlsRight$
+      // Types for combineLatest only handle up to 6 inferred types so we combine these two separately.
+      Rx.combineLatest(this.props.navControlsLeft$, this.props.navControlsRight$)
     ).subscribe({
       next: ([
+        appTitle,
         isVisible,
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        navControlsLeft,
-        navControlsRight,
+        [navControlsLeft, navControlsRight],
       ]) => {
         this.setState({
+          appTitle,
           isVisible,
           forceNavigation,
           navLinks: navLinks.map(navLink => extendNavLink(navLink)),
           recentlyAccessed: recentlyAccessed.map(ra =>
-            extendRecentlyAccessedHistoryItem(navLinks, ra)
+            extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)
           ),
           navControlsLeft,
           navControlsRight,
@@ -218,7 +241,7 @@ class HeaderUI extends Component<Props, State> {
         onClick={this.onNavClick}
         href={homeHref}
         aria-label={intl.formatMessage({
-          id: 'common.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
+          id: 'core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
           defaultMessage: 'Go to home page',
         })}
       />
@@ -237,8 +260,23 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const { appTitle, badge$, breadcrumbs$, helpExtension$, intl } = this.props;
-    const { isVisible, navLinks, recentlyAccessed, navControlsLeft, navControlsRight } = this.state;
+    const {
+      badge$,
+      basePath,
+      breadcrumbs$,
+      helpExtension$,
+      intl,
+      kibanaDocLink,
+      kibanaVersion,
+    } = this.props;
+    const {
+      appTitle,
+      isVisible,
+      navControlsLeft,
+      navControlsRight,
+      navLinks,
+      recentlyAccessed,
+    } = this.state;
 
     if (!isVisible) {
       return null;
@@ -259,7 +297,7 @@ class HeaderUI extends Component<Props, State> {
               size="s"
               alt=""
               aria-hidden={true}
-              url={chrome.addBasePath(`/${navLink.icon}`)}
+              url={basePath.prepend(`/${navLink.icon}`)}
             />
           ) : (
             undefined
@@ -270,14 +308,14 @@ class HeaderUI extends Component<Props, State> {
     const recentLinksArray = [
       {
         label: intl.formatMessage({
-          id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
+          id: 'core.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
           defaultMessage: 'Recently viewed',
         }),
         iconType: 'clock',
         isDisabled: recentlyAccessed.length > 0 ? false : true,
         flyoutMenu: {
           title: intl.formatMessage({
-            id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle',
+            id: 'core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle',
             defaultMessage: 'Recent items',
           }),
           listItems: recentlyAccessed.map(item => ({
@@ -310,7 +348,7 @@ class HeaderUI extends Component<Props, State> {
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
-              <HeaderHelpMenu helpExtension$={helpExtension$} />
+              <HeaderHelpMenu {...{ helpExtension$, kibanaDocLink, kibanaVersion }} />
             </EuiHeaderSectionItem>
 
             <HeaderNavControls side="right" navControls={navControlsRight} />
