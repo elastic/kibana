@@ -9,7 +9,7 @@ import Boom from 'boom';
 import { LspService } from '../lsp/lsp_service';
 import { GitOperations } from '../git_operations';
 import { CodeServerRouter } from '../security';
-import { RepoFileStatus, StatusReport } from '../../common/repo_file_status';
+import { LangServerType, RepoFileStatus, StatusReport } from '../../common/repo_file_status';
 import { CTAGS, LanguageServerDefinition } from '../lsp/language_servers';
 import { LanguageServerStatus } from '../../common/language_server';
 import { WorkspaceStatus } from '../lsp/request_expander';
@@ -67,7 +67,7 @@ export function statusRoute(
     revision: string
   ) {
     if (def === CTAGS) {
-      report.langServerStatus = RepoFileStatus.GENERIC_LANG;
+      report.langServerType = LangServerType.GENERIC;
     }
     if (lspService.languageServerStatus(def.languages[0]) === LanguageServerStatus.NOT_INSTALLED) {
       report.langServerStatus = RepoFileStatus.LANG_SERVER_NOT_INSTALLED;
@@ -85,7 +85,9 @@ export function statusRoute(
     method: 'GET',
     async handler(req: hapi.Request) {
       const { uri, path, ref } = req.params;
-      const report: StatusReport = {};
+      const report: StatusReport = {
+        langServerType: LangServerType.DEDICATED,
+      };
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
         // Check if the repository already exists

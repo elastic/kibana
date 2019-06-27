@@ -8,7 +8,6 @@ export enum RepoFileStatus {
   LANG_SERVER_IS_INITIALIZING = 'Language server is initializing',
   INDEXING = 'Indexing in progress',
   FILE_NOT_SUPPORTED = 'Current file is not of a supported language',
-  GENERIC_LANG = 'Current file is only covered by generic language server',
   REVISION_NOT_INDEXED = 'Current revision is not indexed',
   LANG_SERVER_NOT_INSTALLED = 'Install additional language server to support current file',
   FILE_IS_TOO_BIG = 'Current file is too big',
@@ -18,6 +17,11 @@ export enum Severity {
   NOTICE,
   WARNING,
   ERROR,
+}
+
+export enum LangServerType {
+  GENERIC = 'Current file is only covered by generic language server',
+  DEDICATED = 'Current file is covered by dedicated language server',
 }
 
 export const REPO_FILE_STATUS_SEVERITY = {
@@ -30,7 +34,7 @@ export const REPO_FILE_STATUS_SEVERITY = {
   [RepoFileStatus.FILE_NOT_SUPPORTED]: {
     severity: Severity.NOTICE,
   },
-  [RepoFileStatus.GENERIC_LANG]: {
+  [LangServerType.GENERIC]: {
     severity: Severity.NOTICE,
   },
   [RepoFileStatus.REVISION_NOT_INDEXED]: {
@@ -47,8 +51,8 @@ export const REPO_FILE_STATUS_SEVERITY = {
 export interface StatusReport {
   repoStatus?: RepoFileStatus.INDEXING | RepoFileStatus.REVISION_NOT_INDEXED;
   fileStatus?: RepoFileStatus.FILE_NOT_SUPPORTED | RepoFileStatus.FILE_IS_TOO_BIG;
+  langServerType: LangServerType;
   langServerStatus?:
-    | RepoFileStatus.GENERIC_LANG
     | RepoFileStatus.LANG_SERVER_IS_INITIALIZING
     | RepoFileStatus.LANG_SERVER_NOT_INSTALLED;
 }
