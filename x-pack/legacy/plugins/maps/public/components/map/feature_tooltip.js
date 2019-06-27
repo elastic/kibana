@@ -10,7 +10,10 @@ import {
   EuiText,
   EuiTextAlign,
   EuiPagination,
-  EuiSuperSelect
+  EuiSuperSelect,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem
 } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -157,6 +160,42 @@ export class FeatureTooltip extends React.Component {
 
   }
 
+
+  _renderHeader() {
+
+    if (!this.props.showCloseButton &&  !this.props.showFeatureList) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {this._renderLayerFilterBox()}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {this._renderCloseButton()}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule />
+      </Fragment>
+    );
+  }
+
+  _renderFooter(filteredFeatures) {
+
+    if (filteredFeatures.length === 1) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiHorizontalRule />
+        {this._renderPagination(filteredFeatures)}
+      </Fragment>
+    );
+  }
+
   _renderCloseButton() {
     if (!this.props.showCloseButton) {
       return null;
@@ -174,6 +213,7 @@ export class FeatureTooltip extends React.Component {
       </EuiTextAlign>
     );
   }
+
 
   _onPageChange = (pageNumber) => {
     this.prevLayerId = null;
@@ -195,35 +235,46 @@ export class FeatureTooltip extends React.Component {
 
   _renderPagination(filteredFeatures) {
 
-    if (filteredFeatures.length === 1) {
-      return null;
-    }
+    const pageNumberReadout =   (
+      <EuiTextAlign textAlign="center">
+        <EuiText>{(this.state.pageNumber + 1)} of {filteredFeatures.length}</EuiText>
+      </EuiTextAlign>
+    );
 
-    if (!this.props.showFeatureList) {
-      return (
-        <EuiTextAlign textAlign="center">
-          <EuiText>1 of {filteredFeatures.length}</EuiText>
-        </EuiTextAlign>
-      );
-    }
-
-    return (
-      <EuiPagination
+    let cycleArrows;
+    if (this.props.showFeatureList) {
+      cycleArrows = (<EuiPagination
         pageCount={filteredFeatures.length}
         activePage={this.state.pageNumber}
         onPageClick={this._onPageChange}
-      />
+        compressed
+      />);
+    } else {
+      cycleArrows = null;
+    }
+
+    return (
+      <Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {pageNumberReadout}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {cycleArrows}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
     );
+
   }
 
   render() {
     const filteredFeatures = this._filterFeatures();
     return (
       <Fragment>
-        {this._renderCloseButton()}
+        {this._renderHeader()}
         {this._renderProperties(filteredFeatures)}
-        {this._renderPagination(filteredFeatures)}
-        {this._renderLayerFilterBox()}
+        {this._renderFooter(filteredFeatures)}
       </Fragment>
     );
   }
