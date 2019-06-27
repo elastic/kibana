@@ -16,15 +16,26 @@ import { i18n } from '@kbn/i18n';
 
 export class GisMap extends Component {
 
+  state = {
+    isRenderTimeoutComplete: false,
+  }
+
   componentDidMount() {
+    this._isMounted = true;
+    this.isRenderTimerStarted = false;
     this.setRefreshTimer();
   }
 
   componentDidUpdate() {
     this.setRefreshTimer();
+    if (this.props.areLayersLoaded && !this.isRenderTimerStarted) {
+      this.isRenderTimerStarted = true;
+      this.startRenderTimer();
+    }
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     this.clearRefreshTimer();
   }
 
@@ -56,6 +67,19 @@ export class GisMap extends Component {
       clearInterval(this.refreshTimerId);
     }
   };
+
+  // Mapbox does not provide any feedback when rendering is complete.
+  // Temporary solution is just to wait set period of time after data has loaded.
+  startRenderTimer = () => {
+    setTimeout(
+      () => {
+        if (this._isMounted) {
+          this.setState({ isRenderTimeoutComplete: true });
+        }
+      },
+      1000
+    );
+  }
 
   render() {
     const {
@@ -112,7 +136,7 @@ export class GisMap extends Component {
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
-        data-render-complete={areLayersLoaded}
+        data-render-complete={areLayersLoaded && this.state.isRenderTimeoutComplete}
         data-shared-item
       >
         <EuiFlexItem className="mapMapWrapper">
