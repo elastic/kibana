@@ -29,6 +29,7 @@ app.directive('watchList', function ($injector) {
   const confirmModal = $injector.get('confirmModal');
   const $interval = $injector.get('$interval');
   const kbnUrl = $injector.get('kbnUrl');
+  const Promise = $injector.get('Promise');
 
   const $filter = $injector.get('$filter');
   const filter = $filter('filter');
@@ -83,8 +84,8 @@ app.directive('watchList', function ($injector) {
       }
 
       loadWatches = () => {
-        watchesService.getWatchList()
-          .then(watches => {
+        Promise.all([watchesService.getWatchList()])
+          .then(([watches]) => {
             this.watches = watches;
             this.forbidden = false;
           })
