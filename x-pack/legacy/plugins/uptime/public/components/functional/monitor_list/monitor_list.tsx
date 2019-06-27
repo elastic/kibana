@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiBadge } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiBadge, EuiIcon, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
 import {
@@ -22,6 +22,7 @@ import { ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
+import { MonitorPageLink } from '../monitor_page_link';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -32,6 +33,7 @@ interface MonitorListProps {
   absoluteEndDate: number;
   dangerColor: string;
   successColor: string;
+  linkParameters?: string;
   // TODO: reintegrate pagination in a future release
   // pageIndex: number;
   // pageSize: number;
@@ -52,6 +54,7 @@ export const MonitorListComponent = (props: Props) => {
     successColor,
     data,
     errors,
+    linkParameters,
     loading,
     // TODO: reintroduce for pagination and sorting
     // onChange,
@@ -166,22 +169,32 @@ export const MonitorListComponent = (props: Props) => {
             },
           },
           {
-            field: 'monitor_id',
-            name: 'ID',
-            sortable: true,
-          },
-          {
             field: 'state.monitor.name',
-            name: 'Name',
+            name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
+              defaultMessage: 'Name',
+            }),
+            render: (name: string, summary: MonitorSummary) => (
+              <MonitorPageLink
+                id={summary.monitor_id}
+                linkParameters={linkParameters}
+                location={undefined}
+              >
+                {name ? name : `Unnamed - ${summary.monitor_id}`}
+              </MonitorPageLink>
+            ),
+            sortable: true,
           },
           {
             field: 'state.url.full',
             name: 'URL',
+            render: (url: string, summary: MonitorSummary) => (
+              <Fragment>
+                <EuiLink href={url} target="_blank" color="text">
+                  {url} <EuiIcon size="s" type="popout" color="subbdued" />
+                </EuiLink>
+              </Fragment>
+            ),
             sortable: true,
-          },
-          {
-            field: 'state.url.scheme',
-            name: 'Type',
           },
           {
             field: 'state.checks',

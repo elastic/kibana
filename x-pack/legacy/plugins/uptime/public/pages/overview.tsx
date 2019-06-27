@@ -14,6 +14,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { MonitorList } from '../components/functional/monitor_list';
+import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface OverviewPageProps {
   basePath: string;
@@ -90,6 +91,8 @@ export const OverviewPage = ({
     refreshApp();
   };
 
+  const linkParameters = stringifyUrlParams(params);
+
   // TODO: reintroduce for pagination and sorting
   // const onMonitorListChange = ({ page: { index, size }, sort: { field, direction } }: Criteria) => {
   //   updateUrl({
@@ -122,6 +125,7 @@ export const OverviewPage = ({
           absoluteEndDate={absoluteEndDate}
           dangerColor={colors.danger}
           implementsCustomErrorState={true}
+          linkParameters={linkParameters}
           successColor={colors.success}
           // TODO: reintegrate pagination in future release
           // pageIndex={monitorListPageIndex}
