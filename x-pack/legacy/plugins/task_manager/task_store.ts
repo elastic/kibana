@@ -21,6 +21,7 @@ import {
   TaskInstance,
   TaskStatus,
 } from './task';
+import { intervalFromNow } from './lib/intervals';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -291,6 +292,8 @@ export class TaskStore {
       query: {
         bool: {
           must: [
+            { range: { 'task.runAt': { lte: 'now' } } },
+            { range: { 'kibana.apiVersion': { lte: API_VERSION } } },
             {
               bool: {
                 should: Object.entries(this.definitions).map(([type, definition]) => ({
@@ -304,7 +307,7 @@ export class TaskStore {
                       {
                         range: {
                           'task.attempts': {
-                            lte: definition.maxAttempts || this.maxAttempts,
+                            lt: definition.maxAttempts || this.maxAttempts,
                           },
                         },
                       },
@@ -313,9 +316,26 @@ export class TaskStore {
                 })),
               },
             },
-            { range: { 'task.runAt': { lte: 'now' } } },
-            { range: { 'kibana.apiVersion': { lte: API_VERSION } } },
-            { term: { 'task.status': 'idle' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'task.status': 'idle' } },
+                  Object.entries(this.definitions).map(([type, definition]) => ({
+                    bool: {
+                      must: [
+                        { term: { 'task.status': 'running' } },
+                        { term: { 'task.taskType': type } },
+                        {
+                          range: {
+                            'task.startedAt': { lte: `now-${definition.timeout}` },
+                          },
+                        },
+                      ],
+                    },
+                  })),
+                ],
+              },
+            },
           ],
         },
       },

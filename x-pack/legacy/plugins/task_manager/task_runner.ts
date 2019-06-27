@@ -11,7 +11,7 @@
  */
 
 import Joi from 'joi';
-import { intervalFromNow, minutesFromNow } from './lib/intervals';
+import { intervalFromNow, minutesFromNow, intervalFromDate } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
 import {
@@ -119,7 +119,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets whether or not this task has run longer than its expiration setting allows.
    */
   public get isExpired() {
-    return this.instance.runAt < new Date();
+    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)! < new Date();
   }
 
   /**
@@ -172,7 +172,7 @@ export class TaskManagerRunner implements TaskRunner {
         ...this.instance,
         status: 'running',
         startedAt: new Date(),
-        runAt: intervalFromNow(this.definition.timeout)!,
+        attempts: this.instance.attempts + 1,
       });
 
       return true;
@@ -212,10 +212,9 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
     // recurring task: update the task instance
-    const attempts = result.error ? this.instance.attempts + 1 : 0;
     const state = result.state || this.instance.state || {};
     const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
-    const status = attempts < maxAttempts ? 'idle' : 'failed';
+    const status = this.instance.attempts < maxAttempts ? 'idle' : 'failed';
 
     let runAt;
     if (status === 'failed') {
@@ -226,7 +225,7 @@ export class TaskManagerRunner implements TaskRunner {
         result.runAt ||
         intervalFromNow(this.instance.interval) ||
         // when result.error is truthy, then we're retrying because it failed
-        minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
+        minutesFromNow(this.instance.attempts * 5); // incrementally backs off an extra 5m per failure
     }
 
     await this.store.update({
@@ -235,7 +234,7 @@ export class TaskManagerRunner implements TaskRunner {
       state,
       status,
       startedAt: null,
-      attempts,
+      attempts: result.error ? this.instance.attempts : 0,
     });
 
     return result;

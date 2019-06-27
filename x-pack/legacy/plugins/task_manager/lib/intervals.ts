@@ -25,6 +25,27 @@ export function intervalFromNow(interval?: string): Date | undefined {
 }
 
 /**
+ * Returns a date that is the specified interval from given date. Currently,
+ * only minute-intervals and second-intervals are supported.
+ *
+ * @param {Date} date - The date to add interval to
+ * @param {string} interval - An interval of the form `Nm` such as `5m`
+ */
+export function intervalFromDate(date: Date, interval?: string): Date | undefined {
+  if (interval === undefined) {
+    return;
+  }
+
+  assertValidInterval(interval);
+
+  if (isSeconds(interval)) {
+    return secondsFromDate(date, parseInterval(interval));
+  }
+
+  return minutesFromDate(date, parseInterval(interval));
+}
+
+/**
  * Returns a date that is mins minutes from now.
  *
  * @param mins The number of mintues from now
@@ -38,6 +59,20 @@ export function minutesFromNow(mins: number): Date {
 }
 
 /**
+ * Returns a date that is mins minutes from given date.
+ *
+ * @param date The date to add minutes to
+ * @param mins The number of mintues from given date
+ */
+export function minutesFromDate(date: Date, mins: number): Date {
+  const result = new Date(date.valueOf());
+
+  result.setMinutes(result.getMinutes() + mins);
+
+  return result;
+}
+
+/**
  * Returns a date that is secs seconds from now.
  *
  * @param secs The number of seconds from now
@@ -48,6 +83,20 @@ export function secondsFromNow(secs: number): Date {
   now.setSeconds(now.getSeconds() + secs);
 
   return now;
+}
+
+/**
+ * Returns a date that is secs seconds from given date.
+ *
+ * @param date The date to add seconds to
+ * @param secs The number of seconds from given date
+ */
+export function secondsFromDate(date: Date, secs: number): Date {
+  const result = new Date(date.valueOf());
+
+  result.setSeconds(result.getSeconds() + secs);
+
+  return result;
 }
 
 /**

@@ -19,7 +19,7 @@ At a high-level, the task manager works like this:
   - `attempts` is less than the configured threshold
 - Attempt to claim the task by using optimistic concurrency to set:
   - status to `running`
-  - `runAt` to now + the timeout specified by the task
+  - `startedAt` to now
 - Execute the task, if the previous claim succeeded
 - If the task fails, increment the `attempts` count and reschedule it
 - If the task succeeds:
@@ -64,7 +64,7 @@ taskManager.registerTaskDefinitions({
     // Optional, human-friendly, more detailed description
     description: 'Amazing!!',
 
-    // Optional, how long, in minutes, the system should wait before
+    // Optional, how long, in minutes or seconds, the system should wait before
     // a running instance of this task is considered to be timed out.
     // This defaults to 5 minutes.
     timeout: '5m',

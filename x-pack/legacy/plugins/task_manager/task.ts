@@ -94,7 +94,7 @@ export interface TaskDefinition {
   description?: string;
 
   /**
-   * How long, in minutes, the system should wait for the task to complete
+   * How long, in minutes or seconds, the system should wait for the task to complete
    * before it is considered to be timed out. (e.g. '5m', the default). If
    * the task takes longer than this, Kibana will send it a kill command and
    * the task will be re-attempted.
