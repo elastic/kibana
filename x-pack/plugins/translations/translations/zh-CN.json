@@ -1070,7 +1070,6 @@
     "kbn.dashboard.panel.removePanel.displayName": "从仪表板删除",
     "kbn.dashboard.panel.toggleExpandPanel.expandedDisplayName": "最小化",
     "kbn.dashboard.panel.toggleExpandPanel.notExpandedDisplayName": "全屏",
-    "kbn.dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage": "无法迁移用于“6.1.0”向后兼容的面板数据，面板不包含预期字段：{key}",
     "kbn.dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage": "无法迁移用于“6.3.0”向后兼容的面板数据，面板不包含预期字段：{key}",
     "kbn.dashboard.savedDashboard.newDashboardTitle": "新建仪表板",
     "kbn.dashboard.savedDashboardsTitle": "仪表板",
