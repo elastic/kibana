@@ -57,7 +57,7 @@ export function TransactionOverview({
   serviceTransactionTypes
 }: Props) {
   const location = useLocation();
-  const { serviceName, transactionType, start, end } = urlParams;
+  const { serviceName, transactionType } = urlParams;
 
   // redirect to first transaction type
   useRedirect(
@@ -88,11 +88,7 @@ export function TransactionOverview({
   return (
     <React.Fragment>
       <EuiPanel>
-        <TransactionBreakdown
-          serviceName={serviceName}
-          start={start}
-          end={end}
-        />
+        <TransactionBreakdown />
       </EuiPanel>
 
       <EuiSpacer size="s" />
