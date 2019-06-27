@@ -287,7 +287,7 @@ const mockHostsReponse = {
 
 export const mockKpiHostsResponse = {
   took: 4405,
-  responses: [mockUniqueIpsResponse, mockAuthResponse, mockHostsReponse],
+  responses: [mockHostsReponse, mockAuthResponse, mockUniqueIpsResponse],
 };
 
 export const mockKpiHostsResult = {
@@ -370,7 +370,7 @@ export const mockKpiHostsResult = {
 
 export const mockKpiHostDetailsResponse = {
   took: 4405,
-  responses: [mockUniqueIpsResponse, mockAuthResponse],
+  responses: [mockAuthResponse, mockUniqueIpsResponse],
 };
 
 export const mockKpiHostDetailsResult = {
@@ -554,9 +554,9 @@ export const mockKpiHostDetailsAuthQuery = [
 ];
 
 export const mockKpiHostsMsearchOptions = {
-  body: [...mockKpiHostsUniqueIpsQuery, ...mockKpiHostsAuthQuery, ...mockHostsQuery],
+  body: [...mockHostsQuery, ...mockKpiHostsAuthQuery, ...mockKpiHostsUniqueIpsQuery],
 };
 
 export const mockKpiHostDetailsMsearchOptions = {
-  body: [...mockKpiHostDetailsUniqueIpsQuery, ...mockKpiHostDetailsAuthQuery],
+  body: [...mockKpiHostDetailsAuthQuery, ...mockKpiHostDetailsUniqueIpsQuery],
 };
