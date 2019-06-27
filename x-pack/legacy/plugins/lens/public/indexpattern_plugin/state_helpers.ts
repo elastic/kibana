@@ -64,11 +64,22 @@ export function updateColumnParam<
 export function changeColumn(
   state: IndexPatternPrivateState,
   columnId: string,
-  newColumn: IndexPatternColumn
+  newColumn: IndexPatternColumn,
+  { keepParams }: { keepParams: boolean } = { keepParams: true }
 ) {
+  const oldColumn = state.columns[columnId];
+
+  const updatedColumn =
+    keepParams &&
+    oldColumn &&
+    oldColumn.operationType === newColumn.operationType &&
+    'params' in oldColumn
+      ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
+      : newColumn;
+
   const newColumns: IndexPatternPrivateState['columns'] = {
     ...state.columns,
-    [columnId]: newColumn,
+    [columnId]: updatedColumn,
   };
 
   return {

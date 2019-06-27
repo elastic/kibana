@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiRange, EuiSelect, EuiContextMenuItem } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
@@ -78,7 +78,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       missingBucketLabel: 'Missing',
     },
   }),
-  contextMenu: ({ state, setState, columnId: currentColumnId }) => {
+  paramEditor: ({ state, setState, columnId: currentColumnId }) => {
     const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
@@ -113,31 +113,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
         defaultMessage: 'Alphabetical',
       }),
     });
-    return [
-      <EuiContextMenuItem
-        data-test-subj="lns-indexPatternSettings-termsOrderBy"
-        key={`orderby-${toValue(currentColumn.params.orderBy)}`}
-      >
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-            defaultMessage: 'Order by',
-          })}
-        >
-          <EuiSelect
-            options={orderOptions}
-            value={toValue(currentColumn.params.orderBy)}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState(
-                updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
-              )
-            }
-          />
-        </EuiFormRow>
-      </EuiContextMenuItem>,
-    ];
-  },
-  inlineOptions: ({ state, setState, columnId: currentColumnId }) => {
-    const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     return (
       <EuiForm>
         <EuiFormRow
@@ -156,6 +131,24 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
               defaultMessage: 'Number of values',
+            })}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+            defaultMessage: 'Order by',
+          })}
+        >
+          <EuiSelect
+            options={orderOptions}
+            value={toValue(currentColumn.params.orderBy)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setState(
+                updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
+              )
+            }
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+              defaultMessage: 'Order by',
             })}
           />
         </EuiFormRow>
