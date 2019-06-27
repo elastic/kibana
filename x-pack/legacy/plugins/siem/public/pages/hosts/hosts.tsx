@@ -36,12 +36,14 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { AnomaliesTable } from '../../components/ml/anomalies_table';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
+
 interface HostsComponentReduxProps {
   filterQuery: string;
 }
@@ -179,6 +181,10 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                         />
                       )}
                     </UncommonProcessesQuery>
+
+                    <EuiSpacer />
+
+                    <AnomaliesTable startDate={from} endDate={to} />
 
                     <EuiSpacer />
 

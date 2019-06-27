@@ -7,13 +7,13 @@
 import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { Anomaly, NarrowDateRange } from './types';
 import { getScoreString } from './get_score_string';
 import { createLink } from './create_link';
 import { PreferenceFormattedDate } from '../formatted_date';
 import { createInfluencers } from './create_influencers';
 import { DescriptionList } from '../../../common/utility_types';
+import * as i18n from './translations';
 
 const LargeScore = styled(EuiText)`
   font-size: 45px;
@@ -29,9 +29,7 @@ export const createDescriptionsList = (
 ): DescriptionList[] => {
   const descriptionList: DescriptionList[] = [
     {
-      title: i18n.translate('xpack.siem.ml.createDescriptionsList.maxAnomalyScoreTitle', {
-        defaultMessage: 'Max Anomaly Score',
-      }),
+      title: i18n.MAX_ANOMALY_SCORE,
       description: (
         <>
           <EuiSpacer size="m" />
@@ -43,9 +41,7 @@ export const createDescriptionsList = (
       title: (
         <>
           <EuiSpacer size="m" />
-          {i18n.translate('xpack.siem.ml.createDescriptionsList.anomalyJobTitle', {
-            defaultMessage: 'Anomaly Job',
-          })}
+          {i18n.ANOMALY_JOB}
         </>
       ),
       description: (
@@ -53,18 +49,14 @@ export const createDescriptionsList = (
           <EuiFlexItem grow={false}>{score.jobId}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink href={createLink(score, startDate, endDate)} target="_blank">
-              {i18n.translate('xpack.siem.ml.createDescriptionsList.viewInMachineLearningLink', {
-                defaultMessage: 'View in Machine Learning',
-              })}
+              {i18n.VIEW_IN_MACHINE_LEARNING}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },
     {
-      title: i18n.translate('xpack.siem.ml.createDescriptionsList.detectedTitle', {
-        defaultMessage: 'Detected',
-      }),
+      title: i18n.DETECTED,
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -77,18 +69,14 @@ export const createDescriptionsList = (
               }}
               target="_blank"
             >
-              {i18n.translate('xpack.siem.ml.createDescriptionsList.narrowToThisDateRangeLink', {
-                defaultMessage: 'Narrow to this date range',
-              })}
+              {i18n.NARROW_TO_THIS_DATE_RANGE}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },
     {
-      title: i18n.translate('xpack.siem.ml.createDescriptionsList.topAnomalySuspectTitle', {
-        defaultMessage: 'Top Anomaly Suspect',
-      }),
+      title: i18n.TOP_ANOMALY_SUSPECT,
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>{`${score.entityName}: “${score.entityValue}”`}</EuiFlexItem>
@@ -96,9 +84,7 @@ export const createDescriptionsList = (
       ),
     },
     {
-      title: i18n.translate('xpack.siem.ml.createDescriptionsList.influencedByTitle', {
-        defaultMessage: 'Influenced By',
-      }),
+      title: i18n.INFLUENCED_BY,
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
           {createInfluencers(score)}

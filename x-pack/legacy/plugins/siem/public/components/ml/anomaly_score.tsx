@@ -17,7 +17,7 @@ interface Args {
   endDate: number;
   narrowDateRange: NarrowDateRange;
   jobKey: string;
-  index: number;
+  index?: number;
   score: Anomaly;
   interval: string;
 }
@@ -28,7 +28,7 @@ const Icon = styled(EuiIcon)`
 `;
 
 export const AnomalyScore = React.memo<Args>(
-  ({ jobKey, startDate, endDate, index, score, interval, narrowDateRange }): JSX.Element => {
+  ({ jobKey, startDate, endDate, index = 0, score, interval, narrowDateRange }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);
     return (
       <>

@@ -17,6 +17,7 @@ interface Args {
   influencers: InfluencerInput[] | null;
   endDate: number;
   startDate: number;
+  threshold?: number;
 }
 
 type Return = [boolean, Anomalies | null];
@@ -36,7 +37,12 @@ export const getTimeZone = (config: Partial<AppKibanaFrameworkAdapter>): string 
   }
 };
 
-export const useAnomaliesTableData = ({ influencers, startDate, endDate }: Args): Return => {
+export const useAnomaliesTableData = ({
+  influencers,
+  startDate,
+  endDate,
+  threshold = 75,
+}: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
@@ -52,7 +58,7 @@ export const useAnomaliesTableData = ({ influencers, startDate, endDate }: Args)
           jobIds: [],
           criteriaFields: [],
           aggregationInterval: 'auto',
-          threshold: 75,
+          threshold,
           earliestMs,
           latestMs,
           influencers: influencersInput,

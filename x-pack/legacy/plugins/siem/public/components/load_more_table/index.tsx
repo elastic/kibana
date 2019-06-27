@@ -96,14 +96,16 @@ interface BasicTableState {
   paginationLoading: boolean;
 }
 
-export interface Columns<T> {
+type Func<T> = (arg: T) => string | number;
+
+export interface Columns<T, U = T> {
   field?: string;
   name: string | React.ReactNode;
   isMobileHeader?: boolean;
-  sortable?: boolean;
+  sortable?: boolean | Func<T>;
   truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T) => void;
+  render?: (item: T, node: U) => void;
   width?: string;
 }
 
@@ -309,7 +311,7 @@ const FooterAction = styled.div`
  *   The getOr is just there to simplify the test
  *   So we do NOT need to wrap it around TestProvider
  */
-const BackgroundRefetch = styled.div`
+export const BackgroundRefetch = styled.div`
   background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
   margin: -5px;
   height: calc(100% + 10px);
