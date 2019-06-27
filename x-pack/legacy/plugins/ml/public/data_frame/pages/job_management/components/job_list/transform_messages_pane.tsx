@@ -11,6 +11,7 @@ import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
+// @ts-ignore
 import { JobIcon } from '../../../../../components/job_message_icon';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

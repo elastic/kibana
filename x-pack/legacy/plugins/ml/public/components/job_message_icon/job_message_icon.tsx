@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { SFC } from 'react';
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-import {
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+interface Props {
+  message: {
+    level: string;
+    text?: string;
+  };
+  showTooltip: boolean;
+}
 
 const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];
 
-export function JobIcon({ message, showTooltip = false }) {
+export const JobIcon: SFC<Props> = ({ message, showTooltip = false }) => {
   if (message !== undefined) {
     let color = 'primary';
     const icon = 'alert';
@@ -30,21 +33,14 @@ export function JobIcon({ message, showTooltip = false }) {
 
     if (showTooltip) {
       return (
-        <EuiToolTip
-          position="bottom"
-          content={message.text}
-        >
+        <EuiToolTip position="bottom" content={message.text}>
           <EuiIcon type={icon} color={color} />
         </EuiToolTip>
       );
     } else {
-      return (<EuiIcon type={icon} color={color} />);
+      return <EuiIcon type={icon} color={color} />;
     }
   } else {
-    return (<span />);
+    return <span />;
   }
-}
-JobIcon.propTypes = {
-  message: PropTypes.object,
-  showTooltip: PropTypes.bool,
 };
