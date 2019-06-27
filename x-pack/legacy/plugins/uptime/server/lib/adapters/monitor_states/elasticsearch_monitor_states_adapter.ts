@@ -23,6 +23,12 @@ const checksSortBy = (c: Check) => [
   get<string>(c, 'monitor.ip'),
 ];
 
+interface LegacyMonitorStatesQueryResult {
+  result: any;
+  statusFilter?: any;
+  afterKey: any | null;
+}
+
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
@@ -34,7 +40,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeEnd: string,
     filters?: string | null,
     searchAfter?: any
-  ): Promise<{ result: any; statusFilter?: any; afterKey?: any }> {
+  ): Promise<LegacyMonitorStatesQueryResult> {
     const { query, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
@@ -194,7 +200,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       set(params, 'body.aggs.monitors.composite.after', searchAfter);
     }
     const result = await this.database.search(request, params);
-    const afterKey = get<any | undefined>(result, 'aggregations.monitors.after_key', undefined);
+    const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     return { afterKey, result, statusFilter };
   }
 
@@ -226,7 +232,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
       searchAfter = afterKey;
-    } while (searchAfter && monitors.length < 200);
+    } while (searchAfter !== null && monitors.length < 200);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
