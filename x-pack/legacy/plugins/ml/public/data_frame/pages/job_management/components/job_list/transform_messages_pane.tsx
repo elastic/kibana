@@ -11,6 +11,7 @@ import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
+import { JobIcon } from '../../../../../components/job_message_icon';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -47,6 +48,11 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId, lastUpdat
   );
 
   const columns = [
+    {
+      name: '',
+      render: (message: any) => <JobIcon message={message} />,
+      width: '5%',
+    },
     {
       name: i18n.translate('xpack.ml.dfJobsList.jobDetails.messagesPane.timeLabel', {
         defaultMessage: 'Time',
