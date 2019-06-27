@@ -17,9 +17,4 @@
  * under the License.
  */
 
-import { uiRegistry } from './_registry';
-
-export const chromeNavControlsRegistry = uiRegistry({
-  name: 'chromeNavControls',
-  order: ['order']
-});
+export { RenderingService, RenderingStart } from './rendering_service';

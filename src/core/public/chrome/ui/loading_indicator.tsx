@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import 'ngreact';
 import React from 'react';
 import classNames from 'classnames';
+import { Subscription } from 'rxjs';
 
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import { HttpStart } from '../../http';
 
-export class LoadingIndicator extends React.Component {
+export interface LoadingIndicatorProps {
+  loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
+}
+
+export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
+  private loadingCountSubscription?: Subscription;
+
   state = {
     visible: false,
   };
 
   componentDidMount() {
-    this._unsub = chrome.loadingCount.subscribe(count => {
+    this.loadingCountSubscription = this.props.loadingCount$.subscribe(count => {
       this.setState({
         visible: count > 0,
       });
@@ -38,8 +43,10 @@ export class LoadingIndicator extends React.Component {
   }
 
   componentWillUnmount() {
-    this._unsub();
-    this._unsub = null;
+    if (this.loadingCountSubscription) {
+      this.loadingCountSubscription.unsubscribe();
+      this.loadingCountSubscription = undefined;
+    }
   }
 
   render() {
@@ -56,7 +63,3 @@ export class LoadingIndicator extends React.Component {
     );
   }
 }
-
-uiModules
-  .get('app/kibana', ['react'])
-  .directive('kbnLoadingIndicator', reactDirective => reactDirective(LoadingIndicator));
