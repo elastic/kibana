@@ -7,7 +7,6 @@ import { PLUGIN_ID } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
 import { getNamedRoute, RouteName } from '../common/routes';
 import { fetchInfo, fetchList, getArchiveInfo } from './registry';
-import { getClient } from './saved_objects';
 
 interface PackageRequest extends Request {
   params: {
@@ -48,31 +47,5 @@ export const routes: ServerRoute[] = [
       const paths = await getArchiveInfo(`${pkgkey}.tar.gz`);
       return { meta: { pkgkey, paths } };
     },
-  },
-  {
-    method: 'GET',
-    path: API_SAVED_OBJECTS_ROOT,
-    options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => getClient(req).find({ type: SAVED_OBJECT_TYPE }),
-  },
-  {
-    method: 'GET',
-    path: API_SAVED_OBJECTS_DETAIL,
-    options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => getClient(req).get(SAVED_OBJECT_TYPE, req.params.oid),
-  },
-  {
-    method: 'POST',
-    path: API_SAVED_OBJECTS_ROOT,
-    options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: PostRequest) =>
-      getClient(req).create(
-        SAVED_OBJECT_TYPE,
-        {
-          is_working: true,
-          other: req.payload.body,
-        },
-        { id: 'TBD', overwrite: true }
-      ),
   },
 ];
