@@ -69,15 +69,17 @@ export function changeColumn(
 ) {
   const oldColumn = state.columns[columnId];
 
+  const updatedColumn =
+    keepParams &&
+    oldColumn &&
+    oldColumn.operationType === newColumn.operationType &&
+    'params' in oldColumn
+      ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
+      : newColumn;
+
   const newColumns: IndexPatternPrivateState['columns'] = {
     ...state.columns,
-    [columnId]:
-      keepParams &&
-      oldColumn &&
-      oldColumn.operationType === newColumn.operationType &&
-      'params' in oldColumn
-        ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
-        : newColumn,
+    [columnId]: updatedColumn,
   };
 
   return {
