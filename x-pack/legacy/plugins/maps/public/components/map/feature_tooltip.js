@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import {
   EuiButtonIcon,
   EuiText,
-  EuiTextAlign,
   EuiPagination,
   EuiSelect,
   EuiIconTip,
@@ -159,6 +158,7 @@ export class FeatureTooltip extends React.Component {
         options={options}
         onChange={this._onLayerChange}
         valueOfSelected={this.state.layerIdFilter}
+        compressed
         aria-label={i18n.translate('xpack.maps.tooltip.layerFilterLabel', {
           defaultMessage: 'Filter results by layer'
         })}
@@ -172,7 +172,7 @@ export class FeatureTooltip extends React.Component {
       return null;
     }
 
-    const divider =  (this.state.uniqueLayers && this.state.uniqueLayers.length > 1) ? <EuiHorizontalRule /> : null;
+    const divider =  (this.state.uniqueLayers && this.state.uniqueLayers.length > 1) ? <EuiHorizontalRule margin="xs" /> : null;
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -196,7 +196,7 @@ export class FeatureTooltip extends React.Component {
 
     return (
       <Fragment>
-        <EuiHorizontalRule />
+        <EuiHorizontalRule margin="xs" />
         {this._renderPagination(filteredFeatures)}
       </Fragment>
     );
@@ -207,16 +207,14 @@ export class FeatureTooltip extends React.Component {
       return null;
     }
     return (
-      <EuiTextAlign textAlign="center">
-        <EuiButtonIcon
-          onClick={this._onCloseTooltip}
-          iconType="cross"
-          aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
-            defaultMessage: 'Close tooltip'
-          })}
-          data-test-subj="mapTooltipCloseButton"
-        />
-      </EuiTextAlign>
+      <EuiButtonIcon
+        onClick={this._onCloseTooltip}
+        iconType="cross"
+        aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
+          defaultMessage: 'Close tooltip'
+        })}
+        data-test-subj="mapTooltipCloseButton"
+      />
     );
   }
 
@@ -242,9 +240,7 @@ export class FeatureTooltip extends React.Component {
   _renderPagination(filteredFeatures) {
 
     const pageNumberReadout =   (
-      <EuiTextAlign textAlign="center">
-        <EuiText><b>{(this.state.pageNumber + 1)}</b> of <b>{filteredFeatures.length}</b></EuiText>
-      </EuiTextAlign>
+      <EuiText size="s"><b>{(this.state.pageNumber + 1)}</b> of <b>{filteredFeatures.length}</b></EuiText>
     );
 
     let cycleArrows;
@@ -262,18 +258,18 @@ export class FeatureTooltip extends React.Component {
     const hint = this.props.showFeatureList ? (<EuiIconTip
       type="iInCircle"
       content={i18n.translate('xpack.maps.tooltip.infoIconHelp', {
-        defaultMessage: 'Use the query bar on top to filter down the results.'
+        defaultMessage: 'Use the query bar to filter results.'
       })}
     />) : null;
 
     return (
       <Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            {pageNumberReadout}
+            {hint}
           </EuiFlexItem>
           <EuiFlexItem>
-            {hint}
+            {pageNumberReadout}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {cycleArrows}
