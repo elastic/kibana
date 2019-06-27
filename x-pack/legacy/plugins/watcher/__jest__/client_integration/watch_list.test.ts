@@ -197,7 +197,7 @@ describe.skip('<WatchList />', () => {
             ).toContain('Delete watch');
           });
 
-          test('should send the correct HTTP request to delete repository', async () => {
+          test('should send the correct HTTP request to delete watch', async () => {
             const { component, actions, table } = testBed;
             const { rows } = table.getMetaData('watchesTable');
 

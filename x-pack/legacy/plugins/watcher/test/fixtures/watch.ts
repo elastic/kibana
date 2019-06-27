@@ -27,6 +27,7 @@ interface Watch {
     lastMetCondition?: Moment;
     lastChecked?: Moment;
     isActive: boolean;
+    actionStatuses?: any[];
   };
 }
 

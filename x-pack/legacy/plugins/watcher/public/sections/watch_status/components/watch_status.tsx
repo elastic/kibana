@@ -241,6 +241,7 @@ export const WatchStatus = ({
                 }}
                 isSelected={tab.id === selectedTab}
                 key={index}
+                data-test-subj="tab"
               >
                 {tab.name}
               </EuiTab>

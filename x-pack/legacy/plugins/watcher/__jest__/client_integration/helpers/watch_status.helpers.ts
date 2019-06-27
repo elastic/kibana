@@ -11,6 +11,7 @@ import {
   findTestSubject,
   TestBed,
   TestBedConfig,
+  nextTick,
 } from '../../../../../../test_utils';
 import { WatchStatus } from '../../../public/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
@@ -28,8 +29,9 @@ const initTestBed = registerTestBed(WatchStatus, testBedConfig);
 
 export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
   actions: {
+    selectTab: (tab: 'execution history' | 'action statuses') => void;
     clickToggleActivationButton: () => void;
-    clickAcknowledgeButton: () => void;
+    clickAcknowledgeButton: (index: number) => void;
     clickDeleteWatchButton: () => void;
     clickWatchExecutionAt: (index: number, tableCellText: string) => void;
   };
@@ -42,6 +44,15 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
    * User Actions
    */
 
+  const selectTab = (tab: 'execution history' | 'action statuses') => {
+    const tabs = ['execution history', 'action statuses'];
+
+    testBed
+      .find('tab')
+      .at(tabs.indexOf(tab))
+      .simulate('click');
+  };
+
   const clickToggleActivationButton = async () => {
     const { component } = testBed;
     const button = testBed.find('toggleWatchActivationButton');
@@ -53,9 +64,12 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
     });
   };
 
-  const clickAcknowledgeButton = async () => {
-    const { component } = testBed;
-    const button = testBed.find('acknowledgeWatchButton');
+  const clickAcknowledgeButton = async (index: number) => {
+    const { component, table } = testBed;
+    const { rows } = table.getMetaData('watchActionStatusTable');
+    const currentRow = rows[index];
+    const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
+    const button = findTestSubject(lastColumn, 'acknowledgeWatchButton');
 
     // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
@@ -79,12 +93,14 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
     const { component, table } = testBed;
     const { rows } = table.getMetaData('watchHistoryTable');
     const currentRow = rows[index];
-    const firstColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
-    const button = findTestSubject(firstColumn, `watchIdColumn-${tableCellText}`);
+    const firstColumn = currentRow.columns[0].reactWrapper;
+
+    const button = findTestSubject(firstColumn, `watchStartTimeColumn-${tableCellText}`);
 
     // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
+      await nextTick(100);
       component.update();
     });
   };
@@ -92,6 +108,7 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
   return {
     ...testBed,
     actions: {
+      selectTab,
       clickToggleActivationButton,
       clickAcknowledgeButton,
       clickDeleteWatchButton,
@@ -110,9 +127,14 @@ export type TestSubjects =
   | 'actionErrorsFlyout.title'
   | 'deleteWatchButton'
   | 'pageTitle'
+  | 'tab'
   | 'toggleWatchActivationButton'
+  | 'watchActionStatusTable'
+  | 'watchActionsTable'
+  | 'watchDetailSection'
   | 'watchHistoryDetailFlyout'
   | 'watchHistoryDetailFlyout.title'
+  | 'watchHistorySection'
   | 'watchHistoryErrorDetailFlyout'
   | 'watchHistoryErrorDetailFlyout.errorMessage'
   | 'watchHistoryErrorDetailFlyout.title'
