@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Logger } from 'target/types/server/saved_objects/migrations/core/migration_logger';
+import { trackUiMetric } from 'src/legacy/core_plugins/ui_metric/public';
 import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
@@ -31,6 +32,7 @@ export function migrations730(
   logger: Logger
 ): DashboardDoc730ToLatest | { [key: string]: unknown } {
   if (!isDashboardDoc(doc)) {
+    trackUiMetric('MigrationsInvalidData', ['migrations730', 'isNotDashboardDoc']);
     // NOTE: we should probably throw an error here... but for now following suit and in the
     // case of errors, just returning the same document.
     return doc;
@@ -42,6 +44,7 @@ export function migrations730(
       moveFiltersToQuery(searchSource)
     );
   } catch (e) {
+    trackUiMetric('MigrationsInvalidData', ['migrations730', 'failed to parse search source']);
     logger.warning(`Exception @ migrations730 while trying to migrate query filters! ${e}`);
     return doc;
   }
@@ -60,6 +63,7 @@ export function migrations730(
 
     delete doc.attributes.uiStateJSON;
   } catch (e) {
+    trackUiMetric('MigrationsInvalidData', ['migrations730', 'failed to migrate panels']);
     logger.warning(`Exception @ migrations730 while trying to migrate dashboard panels! ${e}`);
     return doc;
   }
