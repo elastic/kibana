@@ -999,10 +999,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await markdown.getVisibleText();
     }
 
-    async clickColumns() {
-      await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
-    }
-
     async getVisualizationRenderingCount() {
       const visualizationLoader = await testSubjects.find('visualizationLoader');
       const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
@@ -1232,9 +1228,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickSplitDirection(direction) {
-      const activeParamPanel = await find.byCssSelector('vis-editor-agg-params[aria-hidden="false"]');
-      const button = await testSubjects.findDescendant(`splitBy-${direction}`, activeParamPanel);
-      await button.click();
+      const control = await testSubjects.find('visEditorSplitBy');
+      const radioBtn = await control.findByCssSelector(`[title="${direction}"]`);
+      await radioBtn.click();
     }
 
     async countNestedTables() {

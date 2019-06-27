@@ -211,11 +211,18 @@ export const ml = {
     });
   },
 
-  checkPrivilege(obj) {
+  hasPrivileges(obj) {
     return http({
       url: `${basePath}/_has_privileges`,
       method: 'POST',
       data: obj
+    });
+  },
+
+  checkMlPrivileges() {
+    return http({
+      url: `${basePath}/ml_privileges`,
+      method: 'GET',
     });
   },
 
