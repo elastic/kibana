@@ -2,8 +2,9 @@
 
 set -e
 
-targetBranch="${PR_TARGET_BRANCH:-${GIT_BRANCH#*/}}"
-bootstrapCache="$HOME/.kibana/bootstrap_cache/$targetBranch.tar"
+BRANCH=${GIT_BRANCH/origin\/} # Maybe using `sed` is a better idea
+targetBranch="${PR_TARGET_BRANCH:-${BRANCH#*/}}"
+bootstrapCache="$JENKINS_HOME/.kibana/bootstrap_cache/master.tar"
 
 ###
 ### Extract the bootstrap cache that we create in the packer_cache.sh script

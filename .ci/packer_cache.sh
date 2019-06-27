@@ -36,8 +36,8 @@ cp "node_modules/geckodriver/geckodriver.tar.gz" .geckodriver/geckodriver.tar.gz
 echo "$geckodriverPkgVersion" > .geckodriver/pkgVersion
 
 # archive cacheable directories
-mkdir -p "$HOME/.kibana/bootstrap_cache"
-tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
+mkdir -p "$JENKINS_HOME/.kibana/bootstrap_cache"
+tar -cf "$JENKINS_HOME/.kibana/bootstrap_cache/$branch.tar" \
   node_modules \
   packages/*/node_modules \
   x-pack/node_modules \
@@ -48,7 +48,7 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   .chromedriver \
   .geckodriver;
 
-echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
+echo "created $JENKINS_HOME/.kibana/bootstrap_cache/$branch.tar"
 
 if [ "$branch" == "master" ]; then
   echo "Creating bootstrap cache for 7.x";

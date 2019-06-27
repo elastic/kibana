@@ -11,39 +11,14 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    stage('Bootstrap') {
+    stage('Setup and Build OSS') {
       agent { label 'linux || immutable' } // Not on the master lightweight executor:   
       steps {
+        // deleteDir()
         dir("${env.BASE_DIR}"){
-          // sh """#!/usr/local/bin/runbld
-
-          // set -euo pipefail
-          // source /usr/local/bin/bash_standard_lib.sh
-
-          // set +x
-
-          // # export after define to avoid https://github.com/koalaman/shellcheck/wiki/SC2155
-          // VAULT_TOKEN=$(retry 5 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-          // export VAULT_TOKEN
-
-          // # Set GITHUB_TOKEN for reporting test failures
-          // GITHUB_TOKEN=$(retry 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
-          // export GITHUB_TOKEN
-
-          // KIBANA_CI_REPORTER_KEY=$(retry 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
-          // export KIBANA_CI_REPORTER_KEY
-
-          // PERCY_TOKEN=$(retry 5 vault read -field=value secret/kibana-issues/dev/percy)
-          // export PERCY_TOKEN
-
-          // unset VAULT_ROLE_ID VAULT_SECRET_ID VAULT_TOKEN
-          // set -x
-          // """
-          // // Runs src/dev/ci_setup/extract_bootstrap_cache.sh, src/dev/ci_setup/setup.sh, and src/dev/ci_setup/checkout_sibling_es.sh
-          // // setup.sh bootstraps the app
-          // sh './.ci/run.sh' 
-          dumpEnv()
-          sh 'echo "\n\t### Create and Upload workspace-cache to gcs"'
+          // Runs src/dev/ci_setup/extract_bootstrap_cache.sh, src/dev/ci_setup/setup.sh, and src/dev/ci_setup/checkout_sibling_es.sh
+          // setup.sh bootstraps the app, so we can stash from here
+          sh './.ci/run.sh' 
         }
       }
     }
@@ -51,6 +26,7 @@ pipeline {
       agent { label 'linux || immutable' } 
       options { skipDefaultCheckout() }
       steps {
+        // deleteDir()
         // sh './test/scripts/jenkins_unit.sh'
         sh 'echo "Not implemented yet"'
       }
