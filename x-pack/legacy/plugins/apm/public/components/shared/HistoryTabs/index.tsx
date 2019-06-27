@@ -6,6 +6,8 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
+import { units, px } from '../../../style/variables';
 import { matchPath, Route, RouteComponentProps } from 'react-router-dom';
 import { useLocation } from '../../../hooks/useLocation';
 import { history } from '../../../utils/history';
@@ -28,31 +30,37 @@ function isTabSelected(tab: IHistoryTab, currentPath: string) {
   return currentPath === tab.path;
 }
 
+const PaddingWrapper = styled.div`
+  padding: ${px(units.plus)};
+`;
+
 export function HistoryTabs({ tabs }: HistoryTabsProps) {
   const location = useLocation();
   return (
     <React.Fragment>
-      <EuiTabs>
-        {tabs.map((tab, i) => (
-          <EuiTab
-            onClick={() => history.push({ ...location, pathname: tab.path })}
-            isSelected={isTabSelected(tab, location.pathname)}
-            key={`${tab.path}--${i}`}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      <EuiSpacer />
-      {tabs.map(tab =>
-        tab.render ? (
-          <Route
-            path={tab.routePath || tab.path}
-            render={tab.render}
-            key={tab.path}
-          />
-        ) : null
-      )}
+      <PaddingWrapper>
+        <EuiTabs>
+          {tabs.map((tab, i) => (
+            <EuiTab
+              onClick={() => history.push({ ...location, pathname: tab.path })}
+              isSelected={isTabSelected(tab, location.pathname)}
+              key={`${tab.path}--${i}`}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer />
+        {tabs.map(tab =>
+          tab.render ? (
+            <Route
+              path={tab.routePath || tab.path}
+              render={tab.render}
+              key={tab.path}
+            />
+          ) : null
+        )}
+      </PaddingWrapper>
     </React.Fragment>
   );
 }
