@@ -4,14 +4,12 @@
 <titleabbrev>7.1</titleabbrev>
 ++++
 
-This section discusses the changes that you need to be aware of when migrating
-your application to Kibana 7.1.
-
-See also <<release-highlights>> and <<release-notes>>.
-
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 //tag::notable-breaking-changes[]
+
+There are no breaking changes in 7.1. See the {kibana-ref}/release-notes-7.1.0.html[release notes]
+for a list of enhancements and bug fixes.
 
 // end::notable-breaking-changes[]
