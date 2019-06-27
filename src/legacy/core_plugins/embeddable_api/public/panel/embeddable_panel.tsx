@@ -22,15 +22,14 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { buildContextMenuForActions } from '../context_menu_actions';
 
-import { CONTEXT_MENU_TRIGGER, triggerRegistry } from '../triggers';
+import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { ViewMode } from '../types';
+import { ViewMode, TriggerRegistry, ActionRegistry } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
-import { actionRegistry } from '../actions';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from './panel_header/panel_actions/edit_panel_action';
 import { getActionsForTrigger } from '../get_actions_for_trigger';
@@ -52,7 +51,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
   private mounted: boolean = false;
-  constructor(props: Props) {
+  constructor(props: Props, private triggerRegistry: TriggerRegistry, private actionRegistry: ActionRegistry) {
     super(props);
     const { embeddable } = this.props;
     const viewMode = embeddable.getInput().viewMode
@@ -155,8 +154,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
   private getActionContextMenuPanel = async () => {
     const actions = await getActionsForTrigger(
-      actionRegistry,
-      triggerRegistry,
+      this.actionRegistry,
+      this.triggerRegistry,
       CONTEXT_MENU_TRIGGER,
       {
         embeddable: this.props.embeddable,

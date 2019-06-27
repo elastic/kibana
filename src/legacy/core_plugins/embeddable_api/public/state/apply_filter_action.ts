@@ -21,18 +21,15 @@ import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { Container, ContainerInput } from '../containers';
 import { IEmbeddable } from '../embeddables';
-import { APPLY_FILTER_TRIGGER, triggerRegistry } from '../triggers';
-import { Action, ActionContext } from './action';
-import { actionRegistry } from '../actions';
-import { IncompatibleActionError } from './incompatible_action_error';
+import { Action, ActionContext } from '../actions';
+import { IncompatibleActionError } from '../actions/incompatible_action_error';
 import { IContainer } from '../containers/i_container';
-import { attachAction } from '../triggers/attach_action';
 
 interface ApplyFilterContainerInput extends ContainerInput {
   filters: Filter[];
 }
 
-const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
+export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
 
 function containerAcceptsFilterInput(
   container: IEmbeddable | IContainer | IContainer<ApplyFilterContainerInput>
@@ -85,10 +82,3 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
     });
   }
 }
-
-actionRegistry.set(APPLY_FILTER_ACTION, new ApplyFilterAction());
-
-attachAction(triggerRegistry, {
-  triggerId: APPLY_FILTER_TRIGGER,
-  actionId: APPLY_FILTER_ACTION,
-});

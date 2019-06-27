@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 export { Action, ActionContext } from './action';
 export { IncompatibleActionError } from './incompatible_action_error';
-
-import { Action } from './action';
-export const actionRegistry = new Map<string, Action>();

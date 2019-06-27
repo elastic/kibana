@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_finder';
 import { SavedObjectAttributes } from 'src/core/server';
-import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
+import { SavedObjectMetaData } from '../types';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
-import { IEmbeddable } from './i_embeddable';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;

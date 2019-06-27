@@ -26,12 +26,15 @@ import {
   EmptyEmbeddable,
   RestrictedAction,
 } from './test_samples/index';
-import { actionRegistry, ActionContext } from './actions';
+import { TriggerRegistry, ActionRegistry } from './types';
+import { ActionContext } from './actions';
 import { SAY_HELLO_ACTION } from './test_samples/actions/say_hello_action';
-import { triggerRegistry } from './triggers';
 import { HELLO_WORLD_ACTION_ID } from './test_samples';
 import { getActionsForTrigger } from './get_actions_for_trigger';
 import { attachAction } from './triggers/attach_action';
+
+const triggerRegistry: TriggerRegistry = new Map();
+const actionRegistry: ActionRegistry = new Map();
 
 beforeEach(() => {
   actionRegistry.clear();

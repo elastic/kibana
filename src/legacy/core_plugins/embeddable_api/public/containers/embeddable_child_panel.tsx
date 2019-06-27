@@ -18,13 +18,12 @@
  */
 
 import classNames from 'classnames';
-import _ from 'lodash';
 import React from 'react';
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
-import { ErrorEmbeddable, IEmbeddable } from 'plugins/embeddable_api';
+import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 
 import { Subscription } from 'rxjs';
 import { EmbeddablePanel } from '../panel';

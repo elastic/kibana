@@ -39,13 +39,13 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
-import { EmbeddableFactory } from '../../../../embeddables';
+import { EmbeddableFactoryRegistry } from '../../../../types';
 
 const onClose = jest.fn();
 let container: Container;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
+  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   return new HelloWorldContainer(input, embeddableFactories);
 }

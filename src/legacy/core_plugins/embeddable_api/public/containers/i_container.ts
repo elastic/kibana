@@ -23,8 +23,8 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   EmbeddableFactory,
+  IEmbeddable,
 } from '../embeddables';
-import { IEmbeddable } from '../embeddables/i_embeddable';
 
 export interface PanelState<
   E extends { id: string; [key: string]: unknown } = { id: string; [key: string]: unknown }

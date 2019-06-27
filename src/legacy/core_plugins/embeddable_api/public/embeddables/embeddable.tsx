@@ -17,8 +17,8 @@
  * under the License.
  */
 import { isEqual, cloneDeep } from 'lodash';
-import { Adapters } from 'ui/inspector';
 import * as Rx from 'rxjs';
+import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';

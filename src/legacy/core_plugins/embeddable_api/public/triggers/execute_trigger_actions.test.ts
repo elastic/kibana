@@ -27,12 +27,16 @@ jest.mock('../context_menu_actions/open_context_menu', () => ({
   openContextMenu: (actions: EuiContextMenuPanelDescriptor[]) => jest.fn()(actions),
 }));
 
-import { triggerRegistry } from '../triggers';
-import { Action, ActionContext, actionRegistry } from '../actions';
+import { TriggerRegistry, ActionRegistry } from '../types';
+import { Action, ActionContext } from '../actions';
 import { executeTriggerActions } from './execute_trigger_actions';
 import { ContactCardEmbeddable } from '../test_samples';
 
+
 jest.mock('ui/new_platform');
+
+const triggerRegistry: TriggerRegistry = new Map();
+const actionRegistry: ActionRegistry = new Map();
 
 class TestAction extends Action {
   public readonly type = 'testAction';
@@ -81,7 +85,7 @@ test('executeTriggerActions executes a single action mapped to a trigger', async
     triggerContext: {},
   };
 
-  await executeTriggerActions('MYTRIGGER', context);
+  await executeTriggerActions('MYTRIGGER', context, triggerRegistry, actionRegistry);
 
   expect(executeFn).toBeCalledTimes(1);
   expect(executeFn).toBeCalledWith(context);
@@ -99,7 +103,7 @@ test('executeTriggerActions throws an error if the action id does not exist', as
     embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
     triggerContext: {},
   };
-  await expect(executeTriggerActions('MYTRIGGER', context)).rejects.toThrowError();
+  await expect(executeTriggerActions('MYTRIGGER', context, triggerRegistry, actionRegistry)).rejects.toThrowError();
 });
 
 test('executeTriggerActions does not execute an incompatible action', async () => {
@@ -120,7 +124,7 @@ test('executeTriggerActions does not execute an incompatible action', async () =
     triggerContext: {},
   };
 
-  await executeTriggerActions('MYTRIGGER', context);
+  await executeTriggerActions('MYTRIGGER', context, triggerRegistry, actionRegistry);
   expect(executeFn).toBeCalledTimes(1);
 });
 
@@ -140,6 +144,6 @@ test('executeTriggerActions shows a context menu when more than one action is ma
     triggerContext: {},
   };
 
-  await executeTriggerActions('MYTRIGGER', context);
+  await executeTriggerActions('MYTRIGGER', context, triggerRegistry, actionRegistry);
   expect(executeFn).toBeCalledTimes(0);
 });

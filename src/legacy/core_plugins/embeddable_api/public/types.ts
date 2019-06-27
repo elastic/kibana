@@ -20,6 +20,10 @@
 import { Action } from './actions';
 import { EmbeddableFactory } from './embeddables';
 
+export type TriggerRegistry = Map<string, Trigger>;
+export type ActionRegistry = Map<string, Action>;
+export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
+
 export interface Trigger {
   id: string;
   title?: string;
@@ -48,4 +52,22 @@ export interface EmbeddablePlugin {
   addAction: (action: Action) => void;
   addEmbeddableFactory: (factory: EmbeddableFactory) => void;
   attachAction: (data: { triggerId: string; actionId: string }) => void;
+}
+
+// import { Adapters } from 'ui/inspector';
+// Inlining `Adapters` here as in NP platform we don't want to import from `src/legacy`.
+// TODO: Figure out how to do this import in New Platform, maybe we don't need to
+// TODO: import it at all as the type is too general.
+export interface Adapters {
+  [key: string]: any;
+}
+
+// import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_finder';
+// TODO: Figure out how to do this import in New Platform.
+export interface SavedObjectMetaData<T> {
+  type: string;
+  name: string;
+  getIconForSavedObject(savedObject: any): any;
+  getTooltipForSavedObject?(savedObject: any): any;
+  showSavedObject?(savedObject: any): any;
 }

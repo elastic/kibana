@@ -26,12 +26,13 @@ import {
   HelloWorldContainer,
   CONTACT_CARD_EMBEDDABLE,
 } from '../test_samples';
-import { embeddableFactories } from '../embeddables/embeddable_factories_registry';
+import { EmbeddableFactoryRegistry } from '../types';
 import React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
+  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
   const container = new HelloWorldContainer({ id: 'hello', panels: {} }, embeddableFactories);
   const newEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -67,6 +68,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 });
 
 test(`EmbeddableChildPanel renders an error message if the factory doesn't exist`, async () => {
+  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
   const container = new HelloWorldContainer(
     {
       id: 'hello',

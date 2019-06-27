@@ -21,7 +21,6 @@ export {
   EmbeddableFactory,
   EmbeddableInstanceConfiguration,
   Embeddable,
-  embeddableFactories,
   OutputSpec,
   ErrorEmbeddable,
   EmbeddableInput,
@@ -31,11 +30,10 @@ export {
 
 export { ViewMode, Trigger, EmbeddablePlugin } from './types';
 
-export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
+export { Action, ActionContext, IncompatibleActionError } from './actions';
 
 export {
   APPLY_FILTER_TRIGGER,
-  triggerRegistry,
   executeTriggerActions,
   CONTEXT_MENU_TRIGGER,
   attachAction,

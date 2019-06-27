@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Adapters } from 'ui/inspector';
-import { Observable } from 'rxjs';
+import { Adapters } from '../types';
+ import { Observable } from 'rxjs';
 import { IContainer } from '../containers';
 import { ViewMode } from '../types';
 

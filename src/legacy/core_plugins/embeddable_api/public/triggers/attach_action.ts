@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Trigger } from '../types';
+import { TriggerRegistry } from '../types';
 
 export function attachAction(
-  triggerRegistry: Map<string, Trigger>,
+  triggerRegistry: TriggerRegistry,
   { triggerId, actionId }: { triggerId: string; actionId: string }
 ) {
   const trigger = triggerRegistry.get(triggerId);

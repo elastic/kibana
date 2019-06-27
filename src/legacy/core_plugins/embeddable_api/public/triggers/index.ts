@@ -22,19 +22,3 @@ export { executeTriggerActions } from './execute_trigger_actions';
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
-import { Trigger } from '../types';
-export { Trigger };
-
-export const triggerRegistry = new Map<string, Trigger>();
-
-triggerRegistry.set(CONTEXT_MENU_TRIGGER, {
-  id: CONTEXT_MENU_TRIGGER,
-  title: 'Context menu',
-  actionIds: [],
-});
-
-triggerRegistry.set(APPLY_FILTER_TRIGGER, {
-  id: APPLY_FILTER_TRIGGER,
-  title: 'Filter click',
-  actionIds: [],
-});

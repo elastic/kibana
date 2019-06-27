@@ -33,8 +33,6 @@ import {
 import {
   isErrorEmbeddable,
   ViewMode,
-  actionRegistry,
-  triggerRegistry,
   EmbeddablePanel,
 } from '../../../embeddable_api/public';
 import { mount } from 'enzyme';
@@ -45,18 +43,23 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { attachAction } from '../triggers/attach_action';
-import { EmbeddableFactory } from '../embeddables';
+import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from '../types';
 
 jest.mock('ui/new_platform');
 
+const actionRegistry: ActionRegistry = new Map();
+const triggerRegistry: TriggerRegistry = new Map();
+const embeddableFactories: EmbeddableFactoryRegistry = new Map();
+
 const editModeAction = new EditModeAction();
+
 actionRegistry.set(editModeAction.id, editModeAction);
+
 attachAction(triggerRegistry, {
   triggerId: CONTEXT_MENU_TRIGGER,
   actionId: editModeAction.id,
 });
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
 
 test('HelloWorldContainer initializes embeddables', async done => {
