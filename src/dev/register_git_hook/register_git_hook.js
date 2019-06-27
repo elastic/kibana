@@ -57,7 +57,7 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   set -euo pipefail
 
   # Export Git hook params
-  export GIT_PARAMS="$*"
+  export GIT_PARAMS="$@"
 
   has_node() {
     command -v node >/dev/null 2>&1
@@ -111,15 +111,16 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
     exit 1
   }
 
-  execute_local_precommit_hook() {
-    PRECOMMIT_FILE=".pre-commit"
-    if [ -f \${PRECOMMIT_FILE} ]; then 
+  execute_precommit_hook() {
+    node scripts/precommit_hook
+    PRECOMMIT_FILE="./.git/hooks/pre-commit.local"
+    if [ -x \${PRECOMMIT_FILE} ]; then
       echo "Executing local precommit hook found in \${PRECOMMIT_FILE}" 
-      sh \${PRECOMMIT_FILE}
+      "$PRECOMMIT_FILE" "\${GIT_PARAMS[@]}"
     fi
   }
 
-  node scripts/precommit_hook || execute_local_precommit_hook {
+  execute_precommit_hook || {
     echo "Pre-commit hook failed (add --no-verify to bypass)";
     echo '  For eslint failures you can try running \`node scripts/precommit_hook --fix\`';
     exit 1;
