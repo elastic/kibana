@@ -15,7 +15,8 @@ pipeline {
       environment {
         STAGE = "bootstrap"
       }
-      agent { label any } 
+      // agent { label 'linux || immutable' } 
+      agent any
       steps {
         dir("${env.BASE_DIR}"){
           sh '''#!/usr/local/bin/runbld
