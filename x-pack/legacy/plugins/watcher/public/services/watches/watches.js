@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-import { ROUTES } from '../../../common/constants';
 import { Watch } from 'plugins/watcher/models/watch';
-import { kfetch } from '../../../../../../../src/legacy/ui/public/kfetch';
+import { npStart } from 'ui/new_platform';
 
-function getBasePath() {
-  return chrome.addBasePath(ROUTES.API_ROOT);
-}
+const { http } = npStart.core;
 
 export const watches = {
   getWatchList() {
-    return kfetch({ pathname: `${getBasePath()}/watches` })
+    return http.get('/watches')
       .then(response => response.watches)
       .then(watches => watches.map(watch =>
         Watch.fromUpstreamJson(watch)
@@ -32,9 +28,7 @@ export const watches = {
     // $http.delete does not take the request body as the 2nd argument. Instead it expects the 2nd
     // argument to be a request options object, one of which can be the request body (data). We also
     // need to explicitly define the content type of the data.
-    return kfetch({
-      pathname: `${getBasePath()}/watches/delete`,
-      method: 'POST',
+    return http.post('/watches/delete', {
       body: JSON.stringify({ watchIds })
     })
       .then(response => response.results);

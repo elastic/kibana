@@ -11,7 +11,7 @@ import template from './watch_list_route.html';
 import './components/watch_list';
 import 'plugins/watcher/services/license';
 import { getWatchListBreadcrumbs } from '../../lib/breadcrumbs';
-import { watches } from '../../services/watches';
+import { watches } from 'plugins/watcher/services/watches';
 
 routes
   .when('/management/elasticsearch/watcher/', {
