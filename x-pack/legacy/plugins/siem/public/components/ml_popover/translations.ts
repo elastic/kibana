@@ -33,6 +33,14 @@ export const JOB_DETAILS = i18n.translate('xpack.siem.components.mlPopup.jobDeta
   defaultMessage: 'Job Details',
 });
 
+export const JOB_DETAILS_TOOL_TIP = i18n.translate(
+  'xpack.siem.components.mlPopup.jobDetailsToolTip',
+  {
+    defaultMessage:
+      "Running ML Jobs can be resource intensive. Ensure your cluster's ml nodes are adequately configured before enabling the jobs below.",
+  }
+);
+
 export const SHOW_ALL_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobs', {
   defaultMessage: 'Show all SIEM jobs',
 });

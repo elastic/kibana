@@ -8,33 +8,37 @@ import { useEffect, useState } from 'react';
 import { jobsSummary } from '../api';
 
 interface Job {
-  job_id: string;
-  job_type: string;
-  job_version: string;
-  groups: string[];
+  datafeedId: string;
+  datafeedIndices: string[];
+  datafeedState: string;
   description: string;
-  create_time: number;
-  finished_time: number;
-  model_snapshot_retention_days: number;
-  model_snapshot_id: string;
-  results_index_name: string;
+  earliestTimestampMs: number;
+  groups: string[];
+  hasDatafeed: boolean;
+  id: string;
+  isSingleMetricViewerJob: boolean;
+  jobState: string;
+  latestTimestampMs: number;
+  memory_status: string;
+  processed_record_count: number;
 }
 
-interface JobSummary {
-  count: number;
-  jobs: Job[];
-}
+type Return = [boolean, Job[] | null];
 
-type Return = [boolean, JobSummary | null];
-
-export const useJobSummaryData = (jobIds: string[], fetchAllJobs = false): Return => {
-  const [jobSummaryData, setJobSummaryData] = useState<JobSummary | null>(null);
+export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false): Return => {
+  const [jobSummaryData, setJobSummaryData] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchFunc = async () => {
-    if (jobIds.length || fetchAllJobs) {
-      const data: JobSummary = await jobsSummary(jobIds);
-      setJobSummaryData(data);
+    if (jobIds.length > 0) {
+      const data: Job[] = await jobsSummary(jobIds);
+
+      // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App???
+      const siemJobs = data.reduce((jobs: Job[], job: Job) => {
+        return job.groups.includes('siem') ? [...jobs, job] : jobs;
+      }, []);
+
+      setJobSummaryData(siemJobs);
     }
     setLoading(false);
   };
@@ -44,7 +48,7 @@ export const useJobSummaryData = (jobIds: string[], fetchAllJobs = false): Retur
       setLoading(true);
       fetchFunc();
     },
-    [jobIds.join(',')]
+    [jobIds.join(','), refetchSummaryData]
   );
 
   return [loading, jobSummaryData];

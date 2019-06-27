@@ -130,9 +130,10 @@ export const stopDatafeeds = async (datafeedIds: string[]) => {
  * @param jobIds
  */
 export const jobsSummary = async (jobIds: string[]) => {
-  const response = await fetch(`/api/ml/anomaly_detectors/${jobIds.join(',')}`, {
-    method: 'GET',
+  const response = await fetch('/api/ml/jobs/jobs_summary', {
+    method: 'POST',
     credentials: 'same-origin',
+    body: JSON.stringify({ jobIds }),
     headers: {
       'kbn-xsrf': chrome.getXsrfToken(),
     },
