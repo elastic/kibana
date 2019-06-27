@@ -95,7 +95,12 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  isDataLoaded() {
+  isDataLoaded(zoom) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      // nothing to load
+      return true;
+    }
+
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest || !sourceDataRequest.hasData()) {
       return false;

@@ -225,13 +225,14 @@ export const hasDirtyState = createSelector(
 export const areLayersLoaded = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
-  (layerList, waitingForMapReadyLayerList) => {
+  getMapZoom,
+  (layerList, waitingForMapReadyLayerList, zoom) => {
     if (waitingForMapReadyLayerList.length) {
       return false;
     }
 
     for (let i = 0; i < layerList.length; i++) {
-      if (!layerList[i].isDataLoaded()) {
+      if (!layerList[i].isDataLoaded(zoom)) {
         return false;
       }
     }

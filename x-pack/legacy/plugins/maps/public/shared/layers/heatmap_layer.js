@@ -218,7 +218,12 @@ export class HeatmapLayer extends AbstractLayer {
     return this._style.getLegendDetails(label);
   }
 
-  isDataLoaded() {
+  isDataLoaded(zoom) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      // nothing to load
+      return true;
+    }
+
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest && sourceDataRequest.hasData();
   }
