@@ -566,6 +566,7 @@ describe('TaskStore', () => {
       const task = {
         runAt,
         scheduledAt: runAt,
+        startedAt: null,
         id: 'task:324242',
         params: { hello: 'world' },
         state: { foo: 'bar' },

@@ -9,8 +9,30 @@ import sinon from 'sinon';
 import { TaskPoller } from './task_poller';
 import { TaskStore } from './task_store';
 import { mockLogger, resolvable, sleep } from './test_utils';
+import { TaskDictionary, SanitizedTaskDefinition } from './task';
 
 let store: TaskStore;
+
+const taskDefinitions: TaskDictionary<SanitizedTaskDefinition> = {
+  report: {
+    type: 'report',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+  dernstraight: {
+    type: 'dernstraight',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+  yawn: {
+    type: 'yawn',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+};
 
 describe('TaskPoller', () => {
   beforeEach(() => {
@@ -23,7 +45,7 @@ describe('TaskPoller', () => {
       logger: mockLogger(),
       index: 'tasky',
       maxAttempts: 2,
-      supportedTypes: ['a', 'b', 'c'],
+      definitions: taskDefinitions,
     });
   });
 

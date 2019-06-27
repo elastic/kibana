@@ -29,8 +29,8 @@ export interface AlertServices extends Services {
 }
 
 export interface AlertExecuteOptions {
-  scheduledRunAt: Date;
-  previousScheduledRunAt?: Date;
+  startedAt: Date;
+  previousStartedAt?: Date;
   services: AlertServices;
   params: Record<string, any>;
   state: State;

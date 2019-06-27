@@ -67,6 +67,7 @@ export interface RawTaskDoc {
       taskType: string;
       scheduledAt: Date;
       runAt: Date;
+      startedAt: Date | null;
       interval?: string;
       attempts: number;
       status: TaskStatus;
@@ -178,6 +179,7 @@ export class TaskStore {
                 taskType: { type: 'keyword' },
                 scheduledAt: { type: 'date' },
                 runAt: { type: 'date' },
+                startedAt: { type: 'date' },
                 interval: { type: 'text' },
                 attempts: { type: 'integer' },
                 status: { type: 'keyword' },
@@ -253,6 +255,7 @@ export class TaskStore {
       attempts: 0,
       status: task.status,
       scheduledAt: task.scheduledAt,
+      startedAt: null,
       runAt: task.runAt,
       state: taskInstance.state || {},
     };
@@ -425,6 +428,7 @@ function rawSource(doc: TaskInstance, store: TaskStore) {
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
     scheduledAt: doc.scheduledAt || new Date(),
+    startedAt: doc.startedAt || null,
     runAt: doc.runAt || new Date(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
   };

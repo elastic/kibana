@@ -173,6 +173,13 @@ export interface TaskInstance {
   scheduledAt?: Date;
 
   /**
+   * The date and time that this task started execution. This is used to determine
+   * the "real" runAt that ended up running the task. This value is only set
+   * when status is set to "running".
+   */
+  startedAt?: Date | null;
+
+  /**
    * The date and time that this task is scheduled to be run. It is not
    * guaranteed to run at this time, but it is guaranteed not to run earlier
    * than this. Defaults to immediately.
@@ -251,6 +258,13 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * to run at this time, but it is guaranteed not to run earlier than this.
    */
   runAt: Date;
+
+  /**
+   * The date and time that this task started execution. This is used to determine
+   * the "real" runAt that ended up running the task. This value is only set
+   * when status is set to "running".
+   */
+  startedAt: Date | null;
 
   /**
    * The state passed into the task's run function, and returned by the previous

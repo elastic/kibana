@@ -45,8 +45,9 @@ const mockedTaskInstance: ConcreteTaskInstance = {
   sequenceNumber: 1,
   runAt: mockedLastRunAt,
   scheduledAt: mockedLastRunAt,
+  startedAt: mockedLastRunAt,
   state: {
-    scheduledRunAt: mockedLastRunAt,
+    startedAt: mockedLastRunAt,
   },
   taskType: 'alerting:test',
   params: {
@@ -95,8 +96,7 @@ Object {
   "state": Object {
     "alertInstances": Object {},
     "alertTypeState": undefined,
-    "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
-    "scheduledRunAt": 2019-06-03T18:55:30.982Z,
+    "previousStartedAt": 2019-06-03T18:55:20.982Z,
   },
 }
 `);
@@ -107,7 +107,7 @@ Object {
   "bar": true,
 }
 `);
-  expect(call.scheduledRunAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
+  expect(call.startedAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
   expect(call.services.callCluster).toBeTruthy();

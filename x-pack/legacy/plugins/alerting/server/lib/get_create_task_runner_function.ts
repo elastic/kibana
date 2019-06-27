@@ -66,8 +66,8 @@ export function getCreateTaskRunnerFunction({
           services: alertTypeServices,
           params: validatedAlertTypeParams,
           state: taskInstance.state.alertTypeState || {},
-          scheduledRunAt: taskInstance.state.scheduledRunAt,
-          previousScheduledRunAt: taskInstance.state.previousScheduledRunAt,
+          startedAt: taskInstance.startedAt!,
+          previousStartedAt: taskInstance.state.previousStartedAt,
         });
 
         await Promise.all(
@@ -88,7 +88,7 @@ export function getCreateTaskRunnerFunction({
         );
 
         const nextRunAt = getNextRunAt(
-          new Date(taskInstance.state.scheduledRunAt),
+          new Date(taskInstance.startedAt!),
           alertSavedObject.attributes.interval
         );
 
@@ -96,9 +96,7 @@ export function getCreateTaskRunnerFunction({
           state: {
             alertTypeState,
             alertInstances,
-            // We store nextRunAt ourselves since task manager changes runAt when executing a task
-            scheduledRunAt: nextRunAt,
-            previousScheduledRunAt: taskInstance.state.scheduledRunAt,
+            previousStartedAt: taskInstance.startedAt!,
           },
           runAt: nextRunAt,
         };

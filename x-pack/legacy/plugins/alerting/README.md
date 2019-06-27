@@ -52,8 +52,8 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>**NOTE**: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
-|scheduledRunAt|The date and time the alert type execution was scheduled to be called.|
-|previousScheduledRunAt|The previous date and time the alert type was scheduled to be called.|
+|startedAt|The date and time the alert type started execution.|
+|previousStartedAt|The previous date and time the alert type started execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
 |state|State returned from previous execution. This is the alert level state. What the executor returns will be serialized and provided here at the next execution.|
 
@@ -74,8 +74,8 @@ server.plugins.alerting.registerType({
 			.required(),
 	},
 	async execute({
-		scheduledRunAt,
-		previousScheduledRunAt,
+		startedAt,
+		previousStartedAt,
 		services,
 		params,
 		state,
@@ -133,8 +133,8 @@ server.plugins.alerting.registerType({
 			.required(),
 	},
 	async execute({
-		scheduledRunAt,
-		previousScheduledRunAt,
+		startedAt,
+		previousStartedAt,
 		services,
 		params,
 		state,

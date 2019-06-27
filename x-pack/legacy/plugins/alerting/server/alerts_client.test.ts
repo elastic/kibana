@@ -98,6 +98,7 @@ describe('create()', () => {
       attempts: 1,
       status: 'idle',
       runAt: new Date(),
+      startedAt: null,
       state: {},
       params: {},
     });
@@ -182,8 +183,8 @@ Array [
     "state": Object {
       "alertInstances": Object {},
       "alertTypeState": Object {},
-      "previousScheduledRunAt": null,
-      "scheduledRunAt": 2019-02-12T21:01:22.479Z,
+      "previousStartedAt": null,
+      "startedAt": 2019-02-12T21:01:22.479Z,
     },
     "taskType": "alerting:123",
   },
