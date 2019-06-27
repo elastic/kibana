@@ -6,25 +6,33 @@
 
 import React, { memo, useMemo } from 'react';
 
-import { css } from '../../../../../../common/eui_styled_components';
+import euiStyled, { css } from '../../../../../../common/eui_styled_components';
 import {
   isConstantSegment,
   isFieldSegment,
   LogEntryMessageSegment,
+  LogEntryColumn,
+  LogEntryHighlightColumn,
+  isMessageColumn,
+  isHighlightMessageColumn,
 } from '../../../utils/log_entry';
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
 
 interface LogEntryMessageColumnProps {
-  segments: LogEntryMessageSegment[];
+  columnValue: LogEntryColumn;
+  highlights: LogEntryHighlightColumn[];
+  isHighlighted: boolean;
   isHovered: boolean;
   isWrapped: boolean;
-  isHighlighted: boolean;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ isHighlighted, isHovered, isWrapped, segments }) => {
-    const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
+  ({ columnValue, highlights, isHighlighted, isHovered, isWrapped }) => {
+    const message = useMemo(
+      () => (isMessageColumn(columnValue) ? formatMessage(columnValue.message, highlights) : null),
+      [columnValue, highlights]
+    );
 
     return (
       <MessageColumnContent
@@ -49,6 +57,12 @@ const unwrappedContentStyle = css`
   white-space: pre;
 `;
 
+const HighlightMarker = euiStyled.span`
+  color: ${props =>
+    props.theme.darkMode ? props.theme.eui.euiTextColor : props.theme.eui.euiColorGhost}
+  background-color: ${props => props.theme.eui.euiColorSecondary}
+`;
+
 const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
   isHovered: boolean;
   isHighlighted: boolean;
@@ -61,12 +75,59 @@ const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
   ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
 `;
 
-const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string => {
+const formatMessage = (
+  messageSegments: LogEntryMessageSegment[],
+  highlights: LogEntryHighlightColumn[]
+) =>
+  messageSegments.map((messageSegment, index) =>
+    formatMessageSegment(
+      messageSegment,
+      highlights.map(highlight =>
+        isHighlightMessageColumn(highlight) ? highlight.message[index].highlights : []
+      )
+    )
+  );
+
+const formatMessageSegment = (
+  messageSegment: LogEntryMessageSegment,
+  [firstHighlight = []]: string[][]
+): React.ReactNode => {
   if (isFieldSegment(messageSegment)) {
-    return messageSegment.value;
+    return highlightFieldValue(messageSegment.value, firstHighlight, HighlightMarker);
   } else if (isConstantSegment(messageSegment)) {
     return messageSegment.constant;
   }
 
   return 'failed to format message';
 };
+
+const highlightFieldValue = (
+  value: string,
+  highlightTerms: string[],
+  HighlightComponent: React.ComponentType
+) =>
+  highlightTerms.reduce<React.ReactNode[]>(
+    (fragments, highlightTerm, index) => {
+      const lastFragment = fragments[fragments.length - 1];
+
+      if (typeof lastFragment !== 'string') {
+        return fragments;
+      }
+
+      const highlightTermPosition = lastFragment.indexOf(highlightTerm);
+
+      if (highlightTermPosition > -1) {
+        return [
+          ...fragments.slice(0, fragments.length - 1),
+          lastFragment.slice(0, highlightTermPosition),
+          <HighlightComponent key={`highlight-${highlightTerm}-${index}`}>
+            {highlightTerm}
+          </HighlightComponent>,
+          lastFragment.slice(highlightTermPosition + highlightTerm.length),
+        ];
+      } else {
+        return fragments;
+      }
+    },
+    [value]
+  );

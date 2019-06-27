@@ -188,6 +188,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                                     openFlyoutWithItem={this.handleOpenFlyout}
                                     boundingBoxRef={itemMeasureRef}
                                     logEntry={item.logEntry}
+                                    highlights={item.highlights}
                                     scale={scale}
                                     wrap={wrap}
                                     isHighlighted={

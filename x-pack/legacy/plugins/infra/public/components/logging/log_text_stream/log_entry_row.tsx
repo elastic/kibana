@@ -10,9 +10,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import {
   LogEntry,
-  // LogEntryHighlight,
+  LogEntryHighlight,
+  LogEntryHighlightColumn,
   isFieldColumn,
-  isMessageColumn,
   isTimestampColumn,
 } from '../../../utils/log_entry';
 import {
@@ -33,7 +33,7 @@ interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
-  // highlights: LogEntryHighlight[];
+  highlights: LogEntryHighlight[];
   isHighlighted: boolean;
   logEntry: LogEntry;
   openFlyoutWithItem: (id: string) => void;
@@ -45,7 +45,7 @@ export const LogEntryRow = ({
   boundingBoxRef,
   columnConfigurations,
   columnWidths,
-  // highlights,
+  highlights,
   isHighlighted,
   logEntry,
   openFlyoutWithItem,
@@ -67,8 +67,6 @@ export const LogEntryRow = ({
     logEntry.gid,
   ]);
 
-  // const highlightColumns = logEntry.columns.map()
-
   const logEntryColumnsById = useMemo(
     () =>
       logEntry.columns.reduce<{
@@ -83,6 +81,24 @@ export const LogEntryRow = ({
     [logEntry.columns]
   );
 
+  const highlightsByColumnId = useMemo(
+    () =>
+      highlights.reduce<{
+        [columnId: string]: LogEntryHighlightColumn[];
+      }>(
+        (columnsById, highlight) =>
+          highlight.columns.reduce(
+            (innerColumnsById, column) => ({
+              ...innerColumnsById,
+              [column.columnId]: [...(innerColumnsById[column.columnId] || []), column],
+            }),
+            columnsById
+          ),
+        {}
+      ),
+    [highlights]
+  );
+
   return (
     <LogEntryRowWrapper
       data-test-subj="streamEntry logTextStreamEntry"
@@ -94,7 +110,6 @@ export const LogEntryRow = ({
       onMouseLeave={setItemIsNotHovered}
       scale={scale}
     >
-      {/* logEntry.columns.map((column, columnIndex) => {*/}
       {columnConfigurations.map(columnConfiguration => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
           const column = logEntryColumnsById[columnConfiguration.timestampColumn.id];
@@ -125,14 +140,13 @@ export const LogEntryRow = ({
               key={columnConfiguration.messageColumn.id}
               {...columnWidth}
             >
-              {isMessageColumn(column) ? (
-                <LogEntryMessageColumn
-                  isHighlighted={isHighlighted}
-                  isHovered={isHovered}
-                  isWrapped={wrap}
-                  segments={column.message}
-                />
-              ) : null}
+              <LogEntryMessageColumn
+                columnValue={column}
+                highlights={highlightsByColumnId[column.columnId] || []}
+                isHighlighted={isHighlighted}
+                isHovered={isHovered}
+                isWrapped={wrap}
+              />
             </LogEntryColumn>
           );
         } else if (isFieldLogColumnConfiguration(columnConfiguration)) {

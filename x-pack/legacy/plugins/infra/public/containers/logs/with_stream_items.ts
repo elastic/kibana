@@ -58,7 +58,7 @@ export const WithStreamItems = withStreamItems(
           : props.entries.map(logEntry =>
               createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.gid] || [])
             ),
-      [props.isReloading, props.isAutoReloading, props.entries]
+      [props.isReloading, props.isAutoReloading, props.entries, logEntryHighlightsById]
     );
 
     useEffect(() => {
