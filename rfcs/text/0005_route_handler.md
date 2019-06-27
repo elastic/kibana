@@ -166,7 +166,7 @@ export const kibanaResponseToolkit = {
 
 # Alternatives
 
-- `Route Handler` may adopt to well-known Hapi compatible format.
+- `Route Handler` may adopt well-known Hapi-compatible format.
 - `KibanaResponseToolkit` can expose only one method that allows specifying any type of response body, headers, status without creating additional abstractions and restrictions.
 - `KibanaResponseToolkit` may provide helpers for more granular use-cases, say `
 binary(data: Buffer, type: MimeType, size: number) => KibanaResponse`
