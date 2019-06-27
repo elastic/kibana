@@ -75,14 +75,20 @@ export async function getTransactionBreakdown({
         types: {
           terms: {
             field: 'span.type.keyword',
-            size: 42
+            size: 20,
+            order: {
+              _count: 'desc'
+            }
           },
           aggs: {
             subtypes: {
               terms: {
                 field: 'span.subtype.keyword',
                 missing: '',
-                size: 42
+                size: 20,
+                order: {
+                  _count: 'desc'
+                }
               },
               aggs: {
                 total_self_time_per_subtype: {
@@ -121,7 +127,8 @@ export async function getTransactionBreakdown({
         };
       });
     })
-  );
+    // limit to 20 items because of UI constraints
+  ).slice(0, 20);
 
   return breakdowns;
 }
