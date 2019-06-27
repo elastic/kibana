@@ -58,7 +58,7 @@ export default function ({ getService, updateBaselines }) {
 
       it('with multiple metric data', async () => {
         const expression = 'metricVis metric={visdimension 0} metric={visdimension 1}';
-        await (await expectExpression('metric_multi_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await expectExpression('metric_multi_metric_data', expression, dataContext).toMatchSnapshot();
       });
 
       it('with metric and bucket data', async () => {
