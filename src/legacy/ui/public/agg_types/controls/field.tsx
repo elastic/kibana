@@ -78,7 +78,6 @@ function FieldParamEditor({
         },
       })
     );
-    setTouched();
   }
 
   const isValid = !!value && !errors.length;
@@ -86,6 +85,10 @@ function FieldParamEditor({
   useEffect(
     () => {
       setValidity(isValid);
+
+      if (!!errors.length) {
+        setTouched();
+      }
     },
     [isValid]
   );
