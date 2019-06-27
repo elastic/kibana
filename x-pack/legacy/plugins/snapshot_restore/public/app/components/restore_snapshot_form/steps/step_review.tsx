@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
 import {
   EuiCodeEditor,
   EuiFlexGrid,
@@ -44,6 +44,9 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   const serializedRestoreSettings = serializeRestoreSettings(restoreSettings);
   const { index_settings: serializedIndexSettings } = serializedRestoreSettings;
 
+  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
+  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
+
   const renderSummaryTab = () => (
     <Fragment>
       <EuiSpacer size="m" />
@@ -82,13 +85,40 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
               {indices ? (
                 <EuiText>
                   <ul>
-                    {indices.map(index => (
-                      <li key={index}>
+                    {(isShowingFullIndicesList ? indices : [...indices].splice(0, 10)).map(
+                      index => (
+                        <li key={index}>
+                          <EuiTitle size="xs">
+                            <span>{index}</span>
+                          </EuiTitle>
+                        </li>
+                      )
+                    )}
+                    {hiddenIndicesCount ? (
+                      <li key="hiddenIndicesCount">
                         <EuiTitle size="xs">
-                          <span>{index}</span>
+                          {isShowingFullIndicesList ? (
+                            <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesCollapseAllLink"
+                                defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+                                values={{ count: hiddenIndicesCount }}
+                              />{' '}
+                              <EuiIcon type="arrowUp" />
+                            </EuiLink>
+                          ) : (
+                            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesShowAllLink"
+                                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
+                                values={{ count: hiddenIndicesCount }}
+                              />{' '}
+                              <EuiIcon type="arrowDown" />
+                            </EuiLink>
+                          )}
                         </EuiTitle>
                       </li>
-                    ))}
+                    ) : null}
                   </ul>
                 </EuiText>
               ) : (
