@@ -171,6 +171,7 @@ export class NavControlPopover extends Component<Props, State> {
           },
         }
       ),
+      invisible: true,
       onClose: () => this.props.spacesManager.changeSelectedSpace(space),
     });
 
