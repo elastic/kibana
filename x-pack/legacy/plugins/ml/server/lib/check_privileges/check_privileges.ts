@@ -5,6 +5,7 @@
  */
 
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
+import { XPackMainPlugin } from '../../../../../../legacy/plugins/xpack_main/xpack_main';
 import { callWithRequestType } from '../../../common/types/kibana';
 import { isSecurityDisabled } from '../../lib/security_utils';
 import { upgradeCheckProvider } from './upgrade';
@@ -24,7 +25,7 @@ interface Response {
 
 export function privilegesProvider(
   callWithRequest: callWithRequestType,
-  xpackMainPlugin: any,
+  xpackMainPlugin: XPackMainPlugin,
   isMlEnabled: () => Promise<boolean>
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
