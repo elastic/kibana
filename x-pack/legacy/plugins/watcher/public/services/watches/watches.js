@@ -6,7 +6,6 @@
 
 import { Watch } from 'plugins/watcher/models/watch';
 import { npStart } from 'ui/new_platform';
-
 const { http } = npStart.core;
 
 export const watches = {

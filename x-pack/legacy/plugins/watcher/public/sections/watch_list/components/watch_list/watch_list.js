@@ -17,8 +17,8 @@ import 'ui/react_components';
 import 'ui/table_info';
 import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/components/forbidden_message';
-import 'plugins/watcher/services/license';
 import { watches } from 'plugins/watcher/services/watches';
+import 'plugins/watcher/services/license';
 
 const app = uiModules.get('xpack/watcher');
 
