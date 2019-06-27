@@ -70,7 +70,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
           >
             <p>
               <FormattedMessage
-                id="xpack.lens.indexPattern.noPatternsLabel"
+                id="xpack.lens.indexPattern.noPatternsDescription"
                 defaultMessage="Please create an index pattern or switch to another data source"
               />
             </p>
