@@ -21,6 +21,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
     const createdAlertIds: string[] = [];
 
     before(async () => {
+      await destroyEsTestIndex(es);
       ({ name: esTestIndexName } = await setupEsTestIndex(es));
       await esArchiver.load('actions/basic');
     });

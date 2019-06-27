@@ -27,6 +27,7 @@ import { intervalOptions } from './_interval_options';
 import { TimeIntervalParamEditor } from '../controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
+import { dateHistogramInterval } from '../../../../core_plugins/data/common';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -140,7 +141,19 @@ export const dateHistogramBucketAgg = new BucketAggType({
         const { useNormalizedEsInterval } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
-        output.params.interval = interval.expression;
+        if (interval.expression === '0ms') {
+          // We are hitting this code a couple of times while configuring in editor
+          // with an interval of 0ms because the overall time range has not yet been
+          // set. Since 0ms is not a valid ES interval, we cannot pass it through dateHistogramInterval
+          // below, since it would throw an exception. So in the cases we still have an interval of 0ms
+          // here we simply skip the rest of the method and never write an interval into the DSL, since
+          // this DSL will anyway not be used before we're passing this code with an actual interval.
+          return;
+        }
+        output.params = {
+          ...output.params,
+          ...dateHistogramInterval(interval.expression),
+        };
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {

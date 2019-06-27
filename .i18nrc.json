@@ -8,6 +8,7 @@
     "inputControl": "src/legacy/core_plugins/input_control_vis",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
     "interpreter": "src/legacy/core_plugins/interpreter",
+    "dashboardEmbeddableContainer": "src/legacy/core_plugins/dashboard_embeddable_container",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "embeddableApi": "src/legacy/core_plugins/embeddable_api",
@@ -60,7 +61,7 @@
   },
   "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": [
-    "x-pack/legacy/plugins/translations/translations/zh-CN.json",
-    "x-pack/legacy/plugins/translations/translations/ja-JP.json"
+    "x-pack/plugins/translations/translations/zh-CN.json",
+    "x-pack/plugins/translations/translations/ja-JP.json"
   ]
 }

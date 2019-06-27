@@ -9,7 +9,12 @@ import { inspect } from 'util';
 import { Logger as VsLogger } from 'vscode-jsonrpc';
 
 export class Logger implements VsLogger {
-  constructor(private server: Hapi.Server, private baseTags: string[] = ['code']) {}
+  private readonly verbose: boolean = false;
+  constructor(private server: Hapi.Server, private baseTags: string[] = ['code']) {
+    if (server) {
+      this.verbose = this.server.config().get('xpack.code.verbose');
+    }
+  }
 
   public info(msg: string | any) {
     if (typeof msg !== 'string') {
@@ -17,7 +22,6 @@ export class Logger implements VsLogger {
         colors: process.stdout.isTTY,
       });
     }
-
     this.server.log([...this.baseTags, 'info'], msg);
   }
 
@@ -45,8 +49,11 @@ export class Logger implements VsLogger {
         colors: process.stdout.isTTY,
       });
     }
-
-    this.server.log([...this.baseTags, 'debug'], msg);
+    if (this.verbose) {
+      this.server.log([...this.baseTags, 'info'], msg);
+    } else {
+      this.server.log([...this.baseTags, 'debug'], msg);
+    }
   }
 
   public warn(msg: string | any): void {
@@ -70,8 +77,11 @@ export class Logger implements VsLogger {
         colors: process.stdout.isTTY,
       });
     }
-
-    this.server.log([...this.baseTags, 'debug', 'stdout'], msg);
+    if (this.verbose) {
+      this.server.log([...this.baseTags, 'info', 'stdout'], msg);
+    } else {
+      this.server.log([...this.baseTags, 'debug', 'stdout'], msg);
+    }
   }
 
   // Log subprocess stderr

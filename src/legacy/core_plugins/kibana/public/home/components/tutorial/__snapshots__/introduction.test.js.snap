@@ -105,7 +105,6 @@ exports[`props isBeta 1`] = `
               
             <EuiBetaBadge
               label="Beta"
-              tooltipPosition="top"
             />
           </h2>
         </EuiTitle>

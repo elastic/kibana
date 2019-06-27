@@ -38,17 +38,19 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       };
 
       const mockGetSnapshotsFooResponse = Promise.resolve({
-        snapshots: [
+        responses: [
           {
-            snapshot: 'snapshot1',
+            repository: 'fooRepository',
+            snapshots: [{ snapshot: 'snapshot1' }],
           },
         ],
       });
 
       const mockGetSnapshotsBarResponse = Promise.resolve({
-        snapshots: [
+        responses: [
           {
-            snapshot: 'snapshot2',
+            repository: 'barRepository',
+            snapshots: [{ snapshot: 'snapshot2' }],
           },
         ],
       });
@@ -105,7 +107,12 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
     test('returns snapshot object with repository name if returned from ES', async () => {
       const mockSnapshotGetEsResponse = {
-        snapshots: [{ snapshot }],
+        responses: [
+          {
+            repository,
+            snapshots: [{ snapshot }],
+          },
+        ],
       };
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetEsResponse);
       const expectedResponse = {
@@ -118,10 +125,25 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       expect(response).toEqual(expectedResponse);
     });
 
-    test('throws if ES error (including 404s)', async () => {
-      const callWithRequest = jest.fn().mockImplementation(() => {
-        throw new Error();
-      });
+    test('throws if ES error', async () => {
+      const mockSnapshotGetEsResponse = {
+        responses: [
+          {
+            repository,
+            error: {
+              root_cause: [
+                {
+                  type: 'snapshot_missing_exception',
+                  reason: `[${repository}:${snapshot}] is missing`,
+                },
+              ],
+              type: 'snapshot_missing_exception',
+              reason: `[${repository}:${snapshot}] is missing`,
+            },
+          },
+        ],
+      };
+      const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetEsResponse);
 
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
