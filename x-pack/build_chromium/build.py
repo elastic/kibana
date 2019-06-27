@@ -73,12 +73,16 @@ def archive_file(name):
 # must be bundled with the Chromium executable.
 if platform.system() == 'Linux':
   archive_file('headless_shell')
+  archive_file('libEGL.so')
+  archive_file('libGLESv2.so')
 elif platform.system() == 'Windows':
   archive_file('headless_shell.exe')
   archive_file('dbghelp.dll')
   archive_file('icudtl.dat')
 elif platform.system() == 'Darwin':
   archive_file('headless_shell')
+  archive_file('libswiftshader_libEGL.dylib')
+  archive_file('libswiftshader_libGLESv2.dylib')
   archive_file('Helpers/chrome_crashpad_handler')
 
 archive.close()
