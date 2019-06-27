@@ -33,10 +33,11 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     request: FrameworkRequest,
     options: HostsRequestOptions
   ): Promise<HostsData> {
+    const dsl = buildHostsQuery(options);
     const response = await this.framework.callWithRequest<HostEsData, TermAggregation>(
       request,
       'search',
-      buildHostsQuery(options)
+      dsl
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
@@ -45,8 +46,17 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     const hasNextPage = hostsEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = hostsEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [JSON.stringify(dsl, null, 2)],
+      response: [JSON.stringify(response, null, 2)],
+    };
 
-    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: { value: String(limit) } } };
+    return {
+      inspect,
+      edges,
+      totalCount,
+      pageInfo: { hasNextPage, endCursor: { value: String(limit) } },
+    };
   }
 
   public async getHostOverview(

@@ -24,6 +24,7 @@ import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
+import { InspectButton } from '../inspect';
 
 const DEFAULT_DATA_TEST_SUBJ = 'load-more-table';
 
@@ -81,6 +82,7 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
   headerUnit: string | React.ReactElement;
+  id?: string;
   itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
@@ -213,7 +215,16 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           )}
 
           <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}
+            subtitle={
+              <>
+                <div>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</div>
+                {this.props.id && (
+                  <div>
+                    <InspectButton queryId={this.props.id} title={headerTitle} inspectIndex={0} />
+                  </div>
+                )}
+              </>
+            }
             title={headerTitle}
             tooltip={headerTooltip}
           >

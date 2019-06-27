@@ -106,9 +106,19 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                      {({
+                        hosts,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadMore,
+                        id,
+                        inspect,
+                        refetch,
+                      }) => (
                         <HostsTableManage
                           id={id}
+                          inspect={inspect}
                           indexPattern={indexPattern}
                           refetch={refetch}
                           setQuery={setQuery}

@@ -44,11 +44,23 @@ export interface Policy {
   duration: number; // in ms
 }
 
+interface InspectVariables {
+  inspect: boolean;
+}
+export type RefetchWithParams = ({ inspect }: InspectVariables) => void;
 export type Refetch = () => void;
+
+export interface InspectQuery {
+  dsl: string[];
+  response: string[];
+}
+
 export interface GlobalQuery {
   id: string;
+  isInspected: boolean;
   loading: boolean;
-  refetch: null | Refetch;
+  refetch: null | Refetch | RefetchWithParams;
+  inspect: InspectQuery | null;
 }
 
 export interface InputsRange {

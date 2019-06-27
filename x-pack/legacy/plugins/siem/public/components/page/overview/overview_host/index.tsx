@@ -19,7 +19,17 @@ export interface OwnProps {
   startDate: number;
   endDate: number;
   setQuery: (
-    { id, loading, refetch }: { id: string; loading: boolean; refetch: inputsModel.Refetch }
+    {
+      id,
+      inspect,
+      loading,
+      refetch,
+    }: {
+      id: string;
+      inspect: inputsModel.InspectQuery | null;
+      loading: boolean;
+      refetch: inputsModel.Refetch;
+    }
   ) => void;
 }
 

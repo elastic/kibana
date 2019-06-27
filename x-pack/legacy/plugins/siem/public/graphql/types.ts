@@ -859,6 +859,8 @@ export interface HostsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface HostsEdges {
@@ -893,6 +895,12 @@ export interface CloudInstance {
 
 export interface CloudMachine {
   type?: (string | null)[] | null;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
 }
 
 export interface FirstLastSeenHost {
@@ -2608,6 +2616,7 @@ export namespace GetHostsTableQuery {
     sort: HostsSortField;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2632,6 +2641,8 @@ export namespace GetHostsTableQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -2688,6 +2699,14 @@ export namespace GetHostsTableQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 

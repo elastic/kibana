@@ -40,6 +40,7 @@ describe('Load More Table Component', () => {
         <ReduxStoreProvider store={store}>
           <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
             <HostsTable
+              id="hostsQuery"
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
@@ -61,6 +62,7 @@ describe('Load More Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <HostsTable
+              id="hostsQuery"
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
@@ -79,6 +81,7 @@ describe('Load More Table Component', () => {
           <MockedProvider>
             <TestProviders store={store}>
               <HostsTable
+                id="hostsQuery"
                 indexPattern={mockIndexPattern}
                 loading={false}
                 data={mockData.Hosts.edges}

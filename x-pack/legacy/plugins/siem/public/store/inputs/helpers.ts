@@ -6,7 +6,7 @@
 
 import { get } from 'lodash/fp';
 
-import { InputsModel, TimeRange } from './model';
+import { InputsModel, TimeRange, Refetch, InspectQuery } from './model';
 import { InputsModelId } from './constants';
 
 export const updateInputTimerange = (
@@ -50,6 +50,77 @@ export const toggleLockTimeline = (linkToId: InputsModelId, state: InputsModel):
     timeline: {
       ...state.timeline,
       linkTo: linkToIdAlreadyExist > -1 ? [] : ['global'],
+    },
+  };
+};
+
+interface UpdateQueryParams {
+  id: string;
+  inputId: InputsModelId;
+  inspect: InspectQuery | null;
+  loading: boolean;
+  refetch: Refetch;
+  state: InputsModel;
+}
+
+export const updateQuery = ({
+  inputId,
+  id,
+  inspect,
+  loading,
+  refetch,
+  state,
+}: UpdateQueryParams): InputsModel => {
+  const queryIndex = state[inputId].query.findIndex(q => q.id === id);
+  return {
+    ...state,
+    [inputId]: {
+      ...get(inputId, state),
+      query:
+        queryIndex > -1
+          ? [
+              ...state[inputId].query.slice(0, queryIndex),
+              {
+                id,
+                inspect,
+                isInspected: state[inputId].query[queryIndex].isInspected,
+                loading,
+                refetch,
+              },
+              ...state[inputId].query.slice(queryIndex + 1),
+            ]
+          : [...state[inputId].query, { id, inspect, isInspected: false, loading, refetch }],
+    },
+  };
+};
+
+interface SetIsInspectedParams {
+  id: string;
+  inputId: InputsModelId;
+  isInspected: boolean;
+  state: InputsModel;
+}
+
+export const setIsInspected = ({
+  id,
+  inputId,
+  isInspected,
+  state,
+}: SetIsInspectedParams): InputsModel => {
+  const myQueryIndex = state[inputId].query.findIndex(q => q.id === id);
+  const myQuery = myQueryIndex > -1 ? state[inputId].query[myQueryIndex] : null;
+  return {
+    ...state,
+    [inputId]: {
+      ...get(inputId, state),
+      query:
+        myQueryIndex > -1
+          ? [
+              ...state[inputId].query.slice(0, myQueryIndex),
+              { ...myQuery, isInspected },
+              ...state[inputId].query.slice(myQueryIndex + 1),
+            ]
+          : [...state[inputId].query],
     },
   };
 };

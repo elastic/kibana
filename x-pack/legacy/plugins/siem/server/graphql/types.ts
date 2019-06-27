@@ -888,6 +888,8 @@ export interface HostsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface HostsEdges {
@@ -922,6 +924,12 @@ export interface CloudInstance {
 
 export interface CloudMachine {
   type?: (string | null)[] | null;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
 }
 
 export interface FirstLastSeenHost {
@@ -5203,6 +5211,8 @@ export namespace HostsDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<R = HostsEdges[], Parent = HostsData, Context = SiemContext> = Resolver<
@@ -5220,6 +5230,11 @@ export namespace HostsDataResolvers {
     Parent,
     Context
   >;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = HostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace HostsEdgesResolvers {
@@ -5329,6 +5344,25 @@ export namespace CloudMachineResolvers {
     Parent = CloudMachine,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+}
+
+export namespace InspectResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = Inspect> {
+    dsl?: DslResolver<string[], TypeParent, Context>;
+
+    response?: ResponseResolver<string[], TypeParent, Context>;
+  }
+
+  export type DslResolver<R = string[], Parent = Inspect, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type ResponseResolver<R = string[], Parent = Inspect, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace FirstLastSeenHostResolvers {

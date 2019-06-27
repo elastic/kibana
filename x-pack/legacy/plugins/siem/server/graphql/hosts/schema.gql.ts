@@ -57,6 +57,7 @@ export const hostsSchema = gql`
     edges: [HostsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   type FirstLastSeenHost {
