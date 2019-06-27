@@ -111,7 +111,15 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
     exit 1
   }
 
-  node scripts/precommit_hook || {
+  execute_local_precommit_hook() {
+    PRECOMMIT_FILE=".pre-commit"
+    if [ -f \${PRECOMMIT_FILE} ]; then 
+      echo "Executing local precommit hook found in \${PRECOMMIT_FILE}" 
+      sh \${PRECOMMIT_FILE}
+    fi
+  }
+
+  node scripts/precommit_hook || execute_local_precommit_hook {
     echo "Pre-commit hook failed (add --no-verify to bypass)";
     echo '  For eslint failures you can try running \`node scripts/precommit_hook --fix\`';
     exit 1;
