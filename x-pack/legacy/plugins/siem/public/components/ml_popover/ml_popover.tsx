@@ -32,29 +32,25 @@ const FilterJobsEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: -20px;
 `;
 
+const siemJobPrefix = 'siem-api-';
+
 /**
  * Config Templates w/ corresponding defaultIndexPattern and jobId's of the SIEM Jobs embedded
  * in ML. Added as part of: https://github.com/elastic/kibana/pull/39678/files
  */
 const configTemplates = [
-  // {
-  //   name: 'siem_auditbeat_ecs',
-  //   defaultIndexPattern: 'auditbeat-*',
-  //   jobs: ['rare_process_linux_ecs', 'suspicious_login_activity_ecs'],
-  // },
-  // {
-  //   name: 'siem_winlogbeat_ecs',
-  //   defaultIndexPattern: 'winlogbeat-*',
-  //   jobs: ['rare_process_windows_ecs'],
-  // },
-  // TODO: Test ConfigTemplate -- remove once above PR makes it across the line
   {
-    name: 'auditbeat_process_hosts_ecs',
+    name: 'siem_auditbeat_ecs',
     defaultIndexPattern: 'auditbeat-*',
     jobs: [
-      'siem-api-test-hosts_high_count_process_events_ecs',
-      'siem-api-test-hosts_rare_process_activity_ecs',
+      `${siemJobPrefix}rare_process_linux_ecs`,
+      `${siemJobPrefix}siem-api-test-suspicious_login_activity_ecs`,
     ],
+  },
+  {
+    name: 'siem_winlogbeat_ecs',
+    defaultIndexPattern: 'winlogbeat-*',
+    jobs: [`${siemJobPrefix}siem-api-test-rare_process_windows_ecs`],
   },
 ];
 
@@ -142,6 +138,7 @@ export const MlPopover = React.memo(() => {
                         configTemplate: configTemplate.name,
                         indexPatternName: configTemplate.defaultIndexPattern,
                         groups: ['siem'],
+                        prefix: siemJobPrefix,
                       });
                     })
                   );

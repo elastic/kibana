@@ -14,4 +14,5 @@ export interface MlSetupArgs {
   configTemplate: string;
   indexPatternName: string;
   groups: string[];
+  prefix: string;
 }

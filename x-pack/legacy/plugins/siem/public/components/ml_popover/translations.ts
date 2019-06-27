@@ -37,7 +37,7 @@ export const JOB_DETAILS_TOOL_TIP = i18n.translate(
   'xpack.siem.components.mlPopup.jobDetailsToolTip',
   {
     defaultMessage:
-      "Running ML Jobs can be resource intensive. Ensure your cluster's ml nodes are adequately configured before enabling the jobs below.",
+      "Running ML Jobs can be resource intensive. Ensure your cluster's ml nodes are adequately configured before starting the jobs below.",
   }
 );
 

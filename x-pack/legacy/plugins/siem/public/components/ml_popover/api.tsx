@@ -29,20 +29,22 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
 /**
  * Creates ML Jobs + Datafeeds for the given configTemplate + indexPatternName
  *
- * @param configTemplate
- * @param indexPatternName
- * @param groups
+ * @param configTemplate - name of configTemplate to setup
+ * @param indexPatternName - default index pattern configTemplate should be installed with
+ * @param groups - list of groups to add to jobs being installed
+ * @param prefix - prefix to be added to job name
  */
 export const setupMlJob = async ({
   configTemplate,
   indexPatternName = 'auditbeat-*',
   groups = ['siem'],
+  prefix = 'siem-api-',
 }: MlSetupArgs) => {
   const response = await fetch(`/api/ml/modules/setup/${configTemplate}`, {
     method: 'POST',
     credentials: 'same-origin',
     body: JSON.stringify({
-      prefix: 'siem-api-test-',
+      prefix,
       groups,
       indexPatternName,
       startDatafeed: false,
