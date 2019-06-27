@@ -67,7 +67,7 @@ router.get(...,
 );
 ```
 *KibanaResponseToolkit*  methods allow an end user to adjust the next response parameters:
-- Body. Supported values:`undefined | string | json | Buffer | Stream`.
+- Body. Supported values:`undefined | string | JSONValue | Buffer | Stream`.
 - Status code. 
 - Headers. Supports adjusting [known values](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/node/v10/http.d.ts#L8) and attaching [custom values as well](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/node/v10/http.d.ts#L67)
 
