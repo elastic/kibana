@@ -25,7 +25,7 @@ import { CreateJobButton } from './components/create_job_button';
 import { DataFrameJobList } from './components/job_list';
 
 export const Page: SFC = () => (
-  <EuiPage>
+  <EuiPage data-test-subj="mlPageDataFrame">
     <EuiPageBody>
       <EuiPageContentHeader>
         <EuiPageContentHeaderSection>
