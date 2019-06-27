@@ -151,10 +151,7 @@ export function ListSettings() {
 
         <EuiSpacer size="m" />
 
-        <EuiCallOut
-          title="Agent Central Configuration (BETA)"
-          iconType="iInCircle"
-        >
+        <EuiCallOut title="APM Agent Configuration (BETA)" iconType="iInCircle">
           <p>
             We're excited to bring you a first look at how you can control your
             services by fine-tuning agent configurations directly from Kibana.
