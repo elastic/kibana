@@ -67,6 +67,7 @@ export const LICENSE_WHITELIST = [
   'Unlicense',
   'WTFPL OR ISC',
   'WTFPL',
+  'Nuclide software',
 ];
 
 // The following list only applies to licenses that
@@ -106,4 +107,6 @@ export const LICENSE_OVERRIDES = {
 
   // TODO remove this once we upgrade past or equal to v1.0.2
   'babel-plugin-mock-imports@1.0.1': ['MIT'],
+
+  'nuclide-prebuilt-libs@0.5.7': ['Nuclide software'],
 };

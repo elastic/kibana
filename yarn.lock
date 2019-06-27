@@ -1603,6 +1603,19 @@
     ts-debounce "^1.0.0"
     uuid "^3.3.2"
 
+"@elastic/ctags-langserver@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.0.3.tgz#00da1ff1eb0eaa6df90a5d64c63ea251dc65a520"
+  integrity sha512-DhR+RGeQ8DpRFdEGs5JsSJs70mcrO5RtRyZdI9wbuui7AAhaksrxkJPYmQEELLrbh9KvZ34s4RE2rXe29pltwA==
+  dependencies:
+    "@elastic/lsp-extension" "^0.1.1"
+    commander "^2.11.0"
+    find-root "^1.1.0"
+    grep1 "^0.0.5"
+    line-column "^1.0.2"
+    nuclide-prebuilt-libs "^0.5.7"
+    vscode-languageserver "^5.2.1"
+
 "@elastic/elasticsearch@^7.0.0-rc.2":
   version "7.0.0-rc.2"
   resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.0.0-rc.2.tgz#2fb07978d647a257af3976b170e3f61704ba0a18"
@@ -1701,7 +1714,7 @@
     typescript "~3.3.3333"
     yarn "^1.12.3"
 
-"@elastic/lsp-extension@^0.1.2":
+"@elastic/lsp-extension@^0.1.1", "@elastic/lsp-extension@^0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/lsp-extension/-/lsp-extension-0.1.2.tgz#7356d951d272e833d02a81e13a0ef710f9474195"
   integrity sha512-yDj5Ht5KCHDwBlgrlusmLtV/Yxa5z2f3vMSYbNFotoRMup8345/ZwlFp/zmyl04iFOVpT8ouB34+Ttpzbpd3vA==
@@ -13912,6 +13925,11 @@ graphviz@^0.0.8:
   dependencies:
     temp "~0.4.0"
 
+grep1@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/grep1/-/grep1-0.0.5.tgz#8e185b8f063973e7c465c107938c86f52c34fb74"
+  integrity sha1-jhhbjwY5c+fEZcEHk4yG9Sw0+3Q=
+
 grid-index@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/grid-index/-/grid-index-1.1.0.tgz#97f8221edec1026c8377b86446a7c71e79522ea7"
@@ -17606,6 +17624,14 @@ liftoff@^2.1.0:
     rechoir "^0.6.2"
     resolve "^1.1.7"
 
+line-column@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/line-column/-/line-column-1.0.2.tgz#d25af2936b6f4849172b312e4792d1d987bc34a2"
+  integrity sha1-0lryk2tvSEkXKzEuR5LR2Ye8NKI=
+  dependencies:
+    isarray "^1.0.0"
+    isobject "^2.0.0"
+
 linebreak@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/linebreak/-/linebreak-0.3.0.tgz#0526480a62c05bd679f3e9d99830e09c6a7d0ed6"
@@ -20054,6 +20080,11 @@ nth-check@^1.0.2, nth-check@~1.0.1:
   integrity sha512-WeBOdju8SnzPN5vTUJYxYUxLeXpCaVP5i5e0LF8fg7WORF2Wd7wFX/pk0tYZk7s8T+J7VLy0Da6J1+wCT0AtHg==
   dependencies:
     boolbase "~1.0.0"
+
+nuclide-prebuilt-libs@^0.5.7:
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/nuclide-prebuilt-libs/-/nuclide-prebuilt-libs-0.5.7.tgz#6569d2b8c9fcfb94ce00890f5afb62a687c74852"
+  integrity sha512-qur7A1K9+HZkGYs8mYdmCHWRjGZnx92/TR5TrkfkCKkyptjHt4RB1hFgeCG4cxN4mi3axbQdVeTY3i1YSn5XsQ==
 
 null-check@^1.0.0:
   version "1.0.0"
