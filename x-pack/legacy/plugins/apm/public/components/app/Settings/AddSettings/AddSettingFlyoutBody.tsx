@@ -130,9 +130,9 @@ export function AddSettingFlyoutBody({
 
         <EuiFormRow
           label="Environment"
-          helpText="Choosing 'All environments' creates a configuration for each."
+          helpText="Only a single environment per configuration is supported."
           error={
-            'A configuration for the selected service name and environment combination already exists.'
+            'A configuration for the selected service name and environment already exists.'
           }
           isInvalid={
             !selectedConfig &&
@@ -162,7 +162,7 @@ export function AddSettingFlyoutBody({
 
         <EuiFormRow
           label="Transaction sample rate"
-          helpText="1.0 is 100% of all traces. Default sample rate is 0.05 (5%) for traces."
+          helpText="Choose a rate between 0.00 and 1.0. Default configuration is 1.0 (100& of traces)."
           error={'Sample rate must be between 0.00 and 1'}
           isInvalid={isSampleRateValid}
         >
@@ -170,7 +170,7 @@ export function AddSettingFlyoutBody({
             min={0}
             max={1}
             step={0.001}
-            placeholder="Set sample rate... (e.g. 0.1)"
+            placeholder="Set sample rate"
             value={sampleRate}
             onChange={e => {
               e.preventDefault();
