@@ -104,11 +104,11 @@ function DefaultEditorAggParams({
     allParams,
     initAggParamsState
   );
-  const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, validity: true });
+  const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, valid: true });
 
   const isFormValid =
-    aggType.validity &&
-    Object.keys(paramsState).every((paramsName: string) => paramsState[paramsName].validity);
+    aggType.valid &&
+    Object.keys(paramsState).every((paramsName: string) => paramsState[paramsName].valid);
   const isAllInvalidParamsTouched = isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   // reset validity before component destroyed
@@ -176,11 +176,11 @@ function DefaultEditorAggParams({
         key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
         showValidation={formIsTouched || model.touched}
         onChange={onAggParamsChange}
-        setValidity={validity => {
+        setValidity={valid => {
           onChangeParamsState({
-            type: AGG_PARAMS_ACTION_KEYS.VALIDITY,
+            type: AGG_PARAMS_ACTION_KEYS.VALID,
             paramName: paramInstance.aggParam.name,
-            payload: validity,
+            payload: valid,
           });
         }}
         // setTouched can be called from sub-agg which passes a parameter
@@ -220,19 +220,17 @@ function DefaultEditorAggParams({
         showValidation={formIsTouched || aggType.touched}
         setValue={value => {
           onAggTypeChange(agg, value);
-          // reset touched and validity of params
+          // reset touched and valid of params
           onChangeParamsState({ type: AGG_PARAMS_ACTION_KEYS.RESET });
         }}
         setTouched={() => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, payload: true })}
-        setValidity={validity =>
-          onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALIDITY, payload: validity })
-        }
+        setValidity={valid => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALID, payload: valid })}
       />
 
       {params.basic.map((param: ParamInstance) => {
         const model = paramsState[param.aggParam.name] || {
           touched: false,
-          validity: true,
+          valid: true,
         };
 
         return renderParam(param, model);
@@ -253,7 +251,7 @@ function DefaultEditorAggParams({
             {params.advanced.map((param: ParamInstance) => {
               const model = paramsState[param.aggParam.name] || {
                 touched: false,
-                validity: true,
+                valid: true,
               };
               return renderParam(param, model);
             })}

@@ -21,12 +21,12 @@ import { ParamInstance } from './default_editor_agg_params_helper';
 
 export enum AGG_TYPE_ACTION_KEYS {
   TOUCHED = 'aggTypeTouched',
-  VALIDITY = 'aggTypeValidity',
+  VALID = 'aggTypeValid',
 }
 
 export interface AggTypeState {
   touched: boolean;
-  validity: boolean;
+  valid: boolean;
 }
 
 export interface AggTypeAction {
@@ -38,8 +38,8 @@ function aggTypeReducer(state: AggTypeState, action: AggTypeAction): AggTypeStat
   switch (action.type) {
     case AGG_TYPE_ACTION_KEYS.TOUCHED:
       return { ...state, touched: action.payload };
-    case AGG_TYPE_ACTION_KEYS.VALIDITY:
-      return { ...state, validity: action.payload };
+    case AGG_TYPE_ACTION_KEYS.VALID:
+      return { ...state, valid: action.payload };
     default:
       throw new Error();
   }
@@ -47,13 +47,13 @@ function aggTypeReducer(state: AggTypeState, action: AggTypeAction): AggTypeStat
 
 export enum AGG_PARAMS_ACTION_KEYS {
   TOUCHED = 'aggParamsTouched',
-  VALIDITY = 'aggParamsValidity',
+  VALID = 'aggParamsValid',
   RESET = 'aggParamsReset',
 }
 
 export interface AggParamsItem {
   touched: boolean;
-  validity: boolean;
+  valid: boolean;
 }
 
 export interface AggParamsAction {
@@ -71,7 +71,7 @@ function aggParamsReducer(
   { type, paramName = '', payload }: AggParamsAction
 ): AggParamsState {
   const targetParam = state[paramName] || {
-    validity: true,
+    valid: true,
     touched: false,
   };
   switch (type) {
@@ -83,12 +83,12 @@ function aggParamsReducer(
           touched: payload,
         },
       } as AggParamsState;
-    case AGG_PARAMS_ACTION_KEYS.VALIDITY:
+    case AGG_PARAMS_ACTION_KEYS.VALID:
       return {
         ...state,
         [paramName]: {
           ...targetParam,
-          validity: payload,
+          valid: payload,
         },
       } as AggParamsState;
     case AGG_PARAMS_ACTION_KEYS.RESET:
@@ -101,7 +101,7 @@ function aggParamsReducer(
 function initAggParamsState(params: ParamInstance[]): AggParamsState {
   const state = params.reduce((stateObj: AggParamsState, param: ParamInstance) => {
     stateObj[param.aggParam.name] = {
-      validity: true,
+      valid: true,
       touched: false,
     };
 

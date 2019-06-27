@@ -151,7 +151,7 @@ function isInvalidParamsTouched(
     return aggTypeState.touched;
   }
 
-  const invalidParams = Object.values(aggParams).filter(param => !param.validity);
+  const invalidParams = Object.values(aggParams).filter(param => !param.valid);
 
   if (isEmpty(invalidParams)) {
     return false;
