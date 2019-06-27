@@ -8,8 +8,9 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
 import { mockMsearchOptions, mockOptions, mockRequest, mockResponse, mockResult } from './mock';
+import * as networkEventsQueryDsl from './query_network_events';
+import * as uniqueFlowIdsQueryDsl from './query_unique_flow';
 import * as dnsQueryDsl from './query_dns.dsl';
-import * as generalQueryDsl from './query_general.dsl';
 import * as tlsHandshakesQueryDsl from './query_tls_handshakes.dsl';
 import * as uniquePrvateIpQueryDsl from './query_unique_private_ips.dsl';
 import { KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
@@ -24,7 +25,8 @@ describe('Network Kpi elasticsearch_adapter - getKpiNetwork', () => {
     getIndexPatternsService: jest.fn(),
     getSavedObjectsService: jest.fn(),
   };
-  let mockBuildQuery: jest.SpyInstance;
+  let mockBuildNetworkEventsQuery: jest.SpyInstance;
+  let mockBuildUniqueFlowIdsQuery: jest.SpyInstance;
   let mockBuildUniquePrvateIpsQuery: jest.SpyInstance;
   let mockBuildDnsQuery: jest.SpyInstance;
   let mockBuildTlsHandshakeQuery: jest.SpyInstance;
@@ -37,7 +39,12 @@ describe('Network Kpi elasticsearch_adapter - getKpiNetwork', () => {
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
-      mockBuildQuery = jest.spyOn(generalQueryDsl, 'buildGeneralQuery').mockReturnValue([]);
+      mockBuildNetworkEventsQuery = jest
+        .spyOn(networkEventsQueryDsl, 'buildNetworkEventsQuery')
+        .mockReturnValue([]);
+      mockBuildUniqueFlowIdsQuery = jest
+        .spyOn(uniqueFlowIdsQueryDsl, 'buildUniqueFlowIdsQuery')
+        .mockReturnValue([]);
       mockBuildUniquePrvateIpsQuery = jest
         .spyOn(uniquePrvateIpQueryDsl, 'buildUniquePrvateIpQuery')
         .mockReturnValue([]);
@@ -52,20 +59,23 @@ describe('Network Kpi elasticsearch_adapter - getKpiNetwork', () => {
 
     afterAll(() => {
       mockCallWithRequest.mockReset();
-      mockBuildQuery.mockRestore();
+      mockBuildNetworkEventsQuery.mockRestore();
+      mockBuildUniqueFlowIdsQuery.mockRestore();
       mockBuildUniquePrvateIpsQuery.mockRestore();
+      mockBuildDnsQuery.mockRestore();
+      mockBuildTlsHandshakeQuery.mockRestore();
     });
 
-    test('should build general query with correct option', () => {
-      expect(mockBuildQuery).toHaveBeenCalledWith(mockOptions);
+    test('should build query for network events with correct option', () => {
+      expect(mockBuildNetworkEventsQuery).toHaveBeenCalledWith(mockOptions);
     });
 
-    test('should build query for unique private ip (source) with correct option', () => {
-      expect(mockBuildUniquePrvateIpsQuery).toHaveBeenCalledWith('source', mockOptions);
+    test('should build query for unique flow IDs with correct option', () => {
+      expect(mockBuildUniqueFlowIdsQuery).toHaveBeenCalledWith(mockOptions);
     });
 
-    test('should build query for unique private ip (destination) with correct option', () => {
-      expect(mockBuildUniquePrvateIpsQuery).toHaveBeenCalledWith('destination', mockOptions);
+    test('should build query for unique private ip with correct option', () => {
+      expect(mockBuildUniquePrvateIpsQuery).toHaveBeenCalledWith(mockOptions);
     });
 
     test('should build query for dns with correct option', () => {
