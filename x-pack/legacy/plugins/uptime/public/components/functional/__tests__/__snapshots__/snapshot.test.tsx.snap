@@ -7,6 +7,17 @@ exports[`Snapshot component renders without errors 1`] = `
   <EuiFlexItem
     grow={4}
   >
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Current status"
+          id="xpack.uptime.snapshot.endpointStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
     <EuiPanel
       grow={true}
       hasShadow={false}
@@ -18,17 +29,6 @@ exports[`Snapshot component renders without errors 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiTitle
-            size="xs"
-          >
-            <h5>
-              <FormattedMessage
-                defaultMessage="Current status"
-                id="xpack.uptime.snapshot.endpointStatusTitle"
-                values={Object {}}
-              />
-            </h5>
-          </EuiTitle>
           <EuiSpacer
             size="s"
           />
@@ -70,6 +70,17 @@ exports[`Snapshot component renders without errors 1`] = `
   <EuiFlexItem
     grow={8}
   >
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Status over time"
+          id="xpack.uptime.snapshot.statusOverTimeTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
     <EuiPanel
       grow={true}
       hasShadow={false}
@@ -80,21 +91,9 @@ exports[`Snapshot component renders without errors 1`] = `
         }
       }
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h5>
-          <FormattedMessage
-            defaultMessage="Status over time"
-            id="xpack.uptime.snapshot.statusOverTimeTitle"
-            values={Object {}}
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer
-        size="s"
-      />
       <SnapshotHistogram
+        absoluteEndDate={1548700920000}
+        absoluteStartDate={1548697920000}
         dangerColor="#F050F0"
         histogram={
           Array [

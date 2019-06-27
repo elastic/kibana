@@ -17,5 +17,5 @@ export const documentationLinks = {
   codeSearch: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-search.html`,
   codeOtherFeatures: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-basic-nav.html`,
   semanticNavigation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code-semantic-nav.html`,
-  kibanaRoleManagement: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/_kibana_role_management.html`,
+  kibanaRoleManagement: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-role-management.html`,
 };

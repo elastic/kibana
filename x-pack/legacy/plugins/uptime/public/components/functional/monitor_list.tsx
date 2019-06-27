@@ -5,33 +5,26 @@
  */
 
 import {
-  // @ts-ignore missing type definition
-  EuiHistogramSeries,
   EuiIcon,
-  // @ts-ignore missing type definition
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
-  // @ts-ignore missing type definition
-  EuiSeriesChart,
-  // @ts-ignore missing type definition
-  EuiSeriesChartUtils,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { get } from 'lodash';
 import moment from 'moment';
-import { LatestMonitor, MonitorSeriesPoint, Ping } from '../../../common/graphql/types';
+import { LatestMonitor, Ping, MonitorSeriesPoint } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
-import { MonitorSparkline } from './monitor_sparkline';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
+import { MonitorBarSeries } from './charts';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
@@ -41,10 +34,33 @@ interface MonitorListQueryResult {
 }
 
 interface MonitorListProps {
+  /**
+   * The date/time for the start of the timespan.
+   */
+  absoluteStartDate: number;
+  /**
+   * The date/time for the end of the timespan.
+   */
+  absoluteEndDate: number;
+  /**
+   * The base path Kibana is using.
+   */
   basePath: string;
+  /**
+   * This color will be used to express "down"-related visualizations.
+   */
   dangerColor: string;
+  /**
+   * The string-value currently in use by the date picker's start time.
+   */
   dateRangeStart: string;
+  /**
+   * The string-value currently in use by the date picker's end time.
+   */
   dateRangeEnd: string;
+  /**
+   * The current URL params. These will be passed by links rendered by this component.
+   */
   linkParameters?: string;
 }
 
@@ -58,6 +74,8 @@ const monitorListPagination = {
 };
 
 export const MonitorListComponent = ({
+  absoluteStartDate,
+  absoluteEndDate,
   basePath,
   dangerColor,
   dateRangeStart,
@@ -67,7 +85,7 @@ export const MonitorListComponent = ({
   loading,
 }: Props) => {
   return (
-    <EuiPanel paddingSize="s">
+    <Fragment>
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -76,115 +94,130 @@ export const MonitorListComponent = ({
           />
         </h5>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiInMemoryTable
-        columns={[
-          {
-            field: 'ping.monitor.status',
-            width: '150px',
-            name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
-              defaultMessage: 'Status',
-            }),
-            render: (status: string, monitor: LatestMonitor) => {
-              const timestamp = moment(get<string>(monitor, 'ping.timestamp'));
-              return (
-                <MonitorListStatusColumn
-                  absoluteTime={timestamp.toLocaleString()}
-                  relativeTime={timestamp.fromNow()}
-                  status={status}
-                />
-              );
+      <EuiPanel paddingSize="s">
+        <EuiSpacer size="s" />
+        <EuiInMemoryTable
+          columns={[
+            {
+              field: 'ping.monitor.status',
+              width: '150px',
+              name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+                defaultMessage: 'Status',
+              }),
+              render: (status: string, monitor: LatestMonitor) => {
+                const timestamp = moment(get<string>(monitor, 'ping.timestamp'));
+                return (
+                  <MonitorListStatusColumn
+                    absoluteTime={timestamp.toLocaleString()}
+                    relativeTime={timestamp.fromNow()}
+                    status={status}
+                  />
+                );
+              },
             },
-          },
-          {
-            field: 'ping.monitor.id',
-            name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
-              defaultMessage: 'ID',
-            }),
-            render: (id: string, monitor: LatestMonitor) => (
-              <MonitorPageLink
-                id={id}
-                location={get<string | undefined>(monitor, 'ping.observer.geo.name')}
-                linkParameters={linkParameters}
-              >
-                {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
-                  ? monitor.ping.monitor.name
-                  : id}
-              </MonitorPageLink>
-            ),
-          },
-          {
-            field: 'ping.observer.geo.name',
-            name: i18n.translate('xpack.uptime.monitorList.geoName', {
-              defaultMessage: 'Location',
-              description: 'Users can specify a name for a location',
-            }),
-            render: (locationName: string | null | undefined) =>
-              !!locationName ? (
-                locationName
-              ) : (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
-                  target="_blank"
+            {
+              field: 'ping.monitor.id',
+              name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
+                defaultMessage: 'ID',
+              }),
+              render: (id: string, monitor: LatestMonitor) => (
+                <MonitorPageLink
+                  id={id}
+                  location={get<string | undefined>(monitor, 'ping.observer.geo.name')}
+                  linkParameters={linkParameters}
                 >
-                  {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
-                    defaultMessage: 'Add location',
-                    description:
-                      'Text that instructs the user to navigate to our docs to add a geographic location to their data',
-                  })}
-                  &nbsp;
-                  <EuiIcon size="s" type="popout" />
-                </EuiLink>
+                  {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
+                    ? monitor.ping.monitor.name
+                    : id}
+                </MonitorPageLink>
               ),
-          },
-          {
-            field: 'ping.url.full',
-            name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-              defaultMessage: 'URL',
-            }),
-            render: (url: string, monitor: LatestMonitor) => (
-              <div>
-                <EuiLink href={url} target="_blank" color="text">
-                  {url} <EuiIcon size="s" type="popout" color="subdued" />
-                </EuiLink>
-                {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.ip ? (
-                  <EuiText size="xs" color="subdued">
-                    {monitor.ping.monitor.ip}
-                  </EuiText>
-                ) : null}
-              </div>
-            ),
-          },
-          {
-            field: 'upSeries',
-            width: '180px',
-            align: 'right',
-            name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-              defaultMessage: 'Downtime history',
-            }),
-            render: (downSeries: MonitorSeriesPoint, monitor: LatestMonitor) => (
-              <MonitorSparkline dangerColor={dangerColor} monitor={monitor} />
-            ),
-          },
-          {
-            align: 'right',
-            field: 'ping',
-            width: '110px',
-            name: i18n.translate('xpack.uptime.monitorList.observabilityIntegrationsColumnLabel', {
-              defaultMessage: 'Integrations',
-              description:
-                'The heading column of some action buttons that will take users to other Obsevability apps',
-            }),
-            render: (ping: Ping, monitor: LatestMonitor) => (
-              <MonitorListActionsPopover monitor={monitor} />
-            ),
-          },
-        ]}
-        loading={loading}
-        items={(data && data.monitorStatus && data.monitorStatus.monitors) || []}
-        pagination={monitorListPagination}
-      />
-    </EuiPanel>
+            },
+            {
+              field: 'ping.observer.geo.name',
+              name: i18n.translate('xpack.uptime.monitorList.geoName', {
+                defaultMessage: 'Location',
+                description: 'Users can specify a name for a location',
+              }),
+              render: (locationName: string | null | undefined) =>
+                !!locationName ? (
+                  locationName
+                ) : (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
+                    target="_blank"
+                  >
+                    {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
+                      defaultMessage: 'Add location',
+                      description:
+                        'Text that instructs the user to navigate to our docs to add a geographic location to their data',
+                    })}
+                    &nbsp;
+                    <EuiIcon size="s" type="popout" />
+                  </EuiLink>
+                ),
+            },
+            {
+              field: 'ping.url.full',
+              name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+                defaultMessage: 'URL',
+              }),
+              render: (url: string, monitor: LatestMonitor) => (
+                <div>
+                  <EuiLink href={url} target="_blank" color="text">
+                    {url} <EuiIcon size="s" type="popout" color="subdued" />
+                  </EuiLink>
+                  {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.ip ? (
+                    <EuiText size="xs" color="subdued">
+                      {monitor.ping.monitor.ip}
+                    </EuiText>
+                  ) : null}
+                </div>
+              ),
+            },
+            {
+              field: 'downSeries',
+              width: '180px',
+              align: 'right',
+              name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
+                defaultMessage: 'Downtime history',
+              }),
+              render: (downSeries: MonitorSeriesPoint[] | undefined | null) => {
+                if (!downSeries) {
+                  return null;
+                }
+                return (
+                  <MonitorBarSeries
+                    absoluteStartDate={absoluteStartDate}
+                    absoluteEndDate={absoluteEndDate}
+                    dangerColor={dangerColor}
+                    downSeries={downSeries}
+                  />
+                );
+              },
+            },
+            {
+              align: 'right',
+              field: 'ping',
+              width: '110px',
+              name: i18n.translate(
+                'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
+                {
+                  defaultMessage: 'Integrations',
+                  description:
+                    'The heading column of some action buttons that will take users to other Obsevability apps',
+                }
+              ),
+              render: (ping: Ping, monitor: LatestMonitor) => (
+                <MonitorListActionsPopover monitor={monitor} />
+              ),
+            },
+          ]}
+          loading={loading}
+          items={(data && data.monitorStatus && data.monitorStatus.monitors) || []}
+          pagination={monitorListPagination}
+        />
+      </EuiPanel>
+    </Fragment>
   );
 };
 

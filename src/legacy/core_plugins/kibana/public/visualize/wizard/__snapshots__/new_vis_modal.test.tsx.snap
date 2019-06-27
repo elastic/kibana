@@ -1134,21 +1134,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon
-                                                    visType={
-                                                      Object {
-                                                        "hidden": false,
-                                                        "highlighted": true,
-                                                        "name": "visWithSearch",
-                                                        "requestHandler": "none",
-                                                        "requiresSearch": false,
-                                                        "responseHandler": "none",
-                                                        "stage": "production",
-                                                        "title": "Vis with search",
-                                                        "visualization": [Function],
-                                                      }
-                                                    }
-                                                  >
+                                                  <VisTypeIcon>
                                                     <EuiIcon
                                                       aria-hidden="true"
                                                       color="secondary"
@@ -1228,21 +1214,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon
-                                                    visType={
-                                                      Object {
-                                                        "hidden": false,
-                                                        "highlighted": false,
-                                                        "name": "vis",
-                                                        "requestHandler": "none",
-                                                        "requiresSearch": false,
-                                                        "responseHandler": "none",
-                                                        "stage": "production",
-                                                        "title": "Vis Type 1",
-                                                        "visualization": [Function],
-                                                      }
-                                                    }
-                                                  >
+                                                  <VisTypeIcon>
                                                     <EuiIcon
                                                       aria-hidden="true"
                                                       color="secondary"
@@ -2480,21 +2452,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon
-                                                    visType={
-                                                      Object {
-                                                        "hidden": false,
-                                                        "highlighted": false,
-                                                        "name": "vis",
-                                                        "requestHandler": "none",
-                                                        "requiresSearch": false,
-                                                        "responseHandler": "none",
-                                                        "stage": "production",
-                                                        "title": "Vis Type 1",
-                                                        "visualization": [Function],
-                                                      }
-                                                    }
-                                                  >
+                                                  <VisTypeIcon>
                                                     <EuiIcon
                                                       aria-hidden="true"
                                                       color="secondary"
@@ -2574,21 +2532,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon
-                                                    visType={
-                                                      Object {
-                                                        "hidden": false,
-                                                        "highlighted": false,
-                                                        "name": "visWithSearch",
-                                                        "requestHandler": "none",
-                                                        "requiresSearch": false,
-                                                        "responseHandler": "none",
-                                                        "stage": "production",
-                                                        "title": "Vis with search",
-                                                        "visualization": [Function],
-                                                      }
-                                                    }
-                                                  >
+                                                  <VisTypeIcon>
                                                     <EuiIcon
                                                       aria-hidden="true"
                                                       color="secondary"

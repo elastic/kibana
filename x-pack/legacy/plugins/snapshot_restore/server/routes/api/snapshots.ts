@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
+import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../lib';
 import { SnapshotDetailsEs } from '../../types';
@@ -21,6 +22,11 @@ export const getAllHandler: RouterRouteHandler = async (
   errors: any[];
   repositories: string[];
 }> => {
+  /*
+   * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`
+   * when no repositories bug is fixed: https://github.com/elastic/elasticsearch/issues/43547
+   */
+
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -39,16 +45,23 @@ export const getAllHandler: RouterRouteHandler = async (
     try {
       // If any of these repositories 504 they will cost the request significant time.
       const {
-        snapshots: fetchedSnapshots,
-      }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest('snapshot.get', {
+        responses: fetchedResponses,
+      }: {
+        responses: Array<{
+          repository: 'string';
+          snapshots: SnapshotDetailsEs[];
+        }>;
+      } = await callWithRequest('snapshot.get', {
         repository,
         snapshot: '_all',
         ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
       });
 
       // Decorate each snapshot with the repository with which it's associated.
-      fetchedSnapshots.forEach((snapshot: SnapshotDetailsEs) => {
-        snapshots.push(deserializeSnapshotDetails(repository, snapshot));
+      fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
+        fetchedSnapshots.forEach(snapshot => {
+          snapshots.push(deserializeSnapshotDetails(repository, snapshot));
+        });
       });
 
       repositories.push(repository);
@@ -73,11 +86,23 @@ export const getOneHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<SnapshotDetails> => {
   const { repository, snapshot } = req.params;
-  const { snapshots }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest('snapshot.get', {
+  const {
+    responses: snapshotResponses,
+  }: {
+    responses: Array<{
+      repository: string;
+      snapshots: SnapshotDetailsEs[];
+      error?: any;
+    }>;
+  } = await callWithRequest('snapshot.get', {
     repository,
     snapshot,
   });
 
-  // If the snapshot is missing the endpoint will return a 404, so we'll never get to this point.
-  return deserializeSnapshotDetails(repository, snapshots[0]);
+  if (snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots) {
+    return deserializeSnapshotDetails(repository, snapshotResponses[0].snapshots[0]);
+  }
+
+  // If snapshot doesn't exist, ES will return 200 with an error object, so manually throw 404 here
+  throw wrapCustomError(new Error('Snapshot not found'), 404);
 };

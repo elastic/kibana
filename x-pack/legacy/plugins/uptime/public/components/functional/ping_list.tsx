@@ -169,27 +169,25 @@ export const PingListComponent = ({
 
   return (
     <Fragment>
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.uptime.pingList.checkHistoryTitle"
+                defaultMessage="History"
+              />
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        {!!total && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{total}</EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiPanel paddingSize="s">
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.uptime.pingList.checkHistoryTitle"
-                      defaultMessage="History"
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              {!!total && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{total}</EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem style={{ minWidth: 200 }}>

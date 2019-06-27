@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import DateMath from '@elastic/datemath';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -120,10 +121,14 @@ const Application = (props: UptimeAppProps) => {
             const [
               { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
             ] = useUrlParams(rootRouteProps.history, rootRouteProps.location);
+            const absoluteStartDate = DateMath.parse(dateRangeStart);
+            const absoluteEndDate = DateMath.parse(dateRangeEnd);
             return (
               <ApolloProvider client={client}>
                 <UptimeSettingsContext.Provider
                   value={{
+                    absoluteStartDate: absoluteStartDate ? absoluteStartDate.valueOf() : 0,
+                    absoluteEndDate: absoluteEndDate ? absoluteEndDate.valueOf() : 1,
                     autorefreshInterval,
                     autorefreshIsPaused,
                     basePath,

@@ -23,7 +23,7 @@ const SYMBOLIZE_AS_OPTIONS = [
   {
     value: SYMBOLIZE_AS_CIRCLE,
     text: i18n.translate('xpack.maps.vector.symbolAs.circleLabel', {
-      defaultMessage: 'circle'
+      defaultMessage: 'circle marker'
     })
   },
   {
@@ -123,7 +123,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
   return (
     <EuiFormRow
       label={i18n.translate('xpack.maps.vector.symbolLabel', {
-        defaultMessage: 'Symbol'
+        defaultMessage: 'Symbol type'
       })}
     >
       {renderFormRowContent()}
