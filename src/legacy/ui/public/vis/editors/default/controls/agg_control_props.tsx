@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { AggParams } from '../agg_params';
+import { VisParams, AggParams } from 'ui/vis';
 
 export interface AggControlProps<T> {
   aggParams: AggParams;
-  editorStateParams: AggParams;
+  editorStateParams: VisParams;
   setValue(params: AggParams, paramName: string, value: T): void;
 }
