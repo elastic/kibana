@@ -11,20 +11,43 @@ import { mlPrivileges } from './privileges';
 const xpackMainPluginWithSecurity = {
   info: {
     isAvailable: () => true,
-    feature: () => ({
-      isEnabled: () => true,
-    }),
+    feature: (f: string) => {
+      switch (f) {
+        case 'ml':
+          return { isEnabled: () => true };
+        case 'security':
+          return { isEnabled: () => true };
+      }
+    },
+    license: {
+      isOneOf: () => true,
+      isActive: () => true,
+      getType: () => 'platinum',
+    },
   },
 };
 
 const xpackMainPluginWithOutSecurity = {
   info: {
     isAvailable: () => true,
-    feature: () => ({
-      isEnabled: () => false,
-    }),
+    feature: (f: string) => {
+      switch (f) {
+        case 'ml':
+          return { isEnabled: () => true };
+        case 'security':
+          return { isEnabled: () => false };
+      }
+    },
+    license: {
+      isOneOf: () => true,
+      isActive: () => true,
+      getType: () => 'platinum',
+    },
   },
 };
+
+const mlIsEnabled = async () => true;
+// const mlIsntEnabled = async () => false;
 
 describe('check_privileges', () => {
   describe('getPrivileges() - right number of privileges', () => {
@@ -36,7 +59,11 @@ describe('check_privileges', () => {
 
     test('kibana privileges count', async done => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
       const { privileges } = await getPrivileges();
       const count = Object.keys(privileges).length;
       expect(count).toBe(23);
@@ -47,7 +74,11 @@ describe('check_privileges', () => {
   describe('getPrivileges() with security', () => {
     test('ml_user privileges only', async done => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
       const { privileges, upgradeInProgress } = await getPrivileges();
       expect(upgradeInProgress).toBe(false);
       expect(privileges.canGetJobs).toBe(true);
@@ -78,7 +109,11 @@ describe('check_privileges', () => {
 
     test('full privileges', async done => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
       const { privileges, upgradeInProgress } = await getPrivileges();
       expect(upgradeInProgress).toBe(false);
       expect(privileges.canGetJobs).toBe(true);
@@ -109,7 +144,11 @@ describe('check_privileges', () => {
 
     test('upgrade in progress with full privileges', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
       const { privileges, upgradeInProgress } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
       expect(privileges.canGetJobs).toBe(true);
@@ -140,7 +179,11 @@ describe('check_privileges', () => {
 
     test('upgrade in progress with partial privileges', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
       const { privileges, upgradeInProgress } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
       expect(privileges.canGetJobs).toBe(true);
@@ -173,7 +216,11 @@ describe('check_privileges', () => {
   describe('getPrivileges() without security', () => {
     test('ml_user privileges only', async done => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithOutSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurity,
+        mlIsEnabled
+      );
       const { privileges, upgradeInProgress } = await getPrivileges();
       expect(upgradeInProgress).toBe(false);
       expect(privileges.canGetJobs).toBe(true);
@@ -204,7 +251,11 @@ describe('check_privileges', () => {
 
     test('upgrade in progress with full privileges', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithOutSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurity,
+        mlIsEnabled
+      );
       const { privileges, upgradeInProgress } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
       expect(privileges.canGetJobs).toBe(true);
@@ -235,7 +286,11 @@ describe('check_privileges', () => {
 
     test('upgrade in progress with partial privileges', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithOutSecurity);
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurity,
+        mlIsEnabled
+      );
       const { privileges, upgradeInProgress } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
       expect(privileges.canGetJobs).toBe(true);
