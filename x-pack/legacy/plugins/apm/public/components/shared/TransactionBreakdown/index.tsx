@@ -32,20 +32,10 @@ const NoTransactionsTitle = styled.span`
   font-weight: bold;
 `;
 
-const TransactionBreakdown: React.FC<{
-  serviceName: string;
-  transactionName?: string;
-  start: string | undefined;
-  end: string | undefined;
-}> = ({ serviceName, start, end, transactionName }) => {
+const TransactionBreakdown: React.FC = () => {
   const [showChart, setShowChart] = useState(false);
 
-  const { data, status } = useTransactionBreakdown({
-    serviceName,
-    start,
-    end,
-    transactionName
-  });
+  const { data, status } = useTransactionBreakdown();
 
   const kpis = useMemo(
     () => {

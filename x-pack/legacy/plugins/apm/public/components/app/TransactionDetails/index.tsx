@@ -32,7 +32,7 @@ export function TransactionDetails() {
   const { data: waterfall } = useWaterfall(urlParams);
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
-  const { start, end, serviceName, transactionName } = urlParams;
+  const { transactionName } = urlParams;
 
   return (
     <div>
@@ -42,16 +42,9 @@ export function TransactionDetails() {
         </EuiTitle>
       </ApmHeader>
 
-      {serviceName && transactionName ? (
-        <EuiPanel>
-          <TransactionBreakdown
-            start={start}
-            end={end}
-            serviceName={serviceName}
-            transactionName={transactionName}
-          />
-        </EuiPanel>
-      ) : null}
+      <EuiPanel>
+        <TransactionBreakdown />
+      </EuiPanel>
 
       <EuiSpacer size="s" />
 
