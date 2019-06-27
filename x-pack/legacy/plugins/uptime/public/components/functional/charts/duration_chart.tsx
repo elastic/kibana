@@ -5,7 +5,6 @@
  */
 
 import {
-  AreaSeries,
   Axis,
   Chart,
   CurveType,
@@ -25,14 +24,9 @@ import {
   convertMicrosecondsToMilliseconds as microsToMillis,
   getChartDateLabel,
 } from '../../../lib/helper';
-import {
-  LocationDurationLine,
-  MonitorDurationAreaPoint,
-  MonitorDurationAveragePoint,
-} from '../../../../common/graphql/types';
+import { LocationDurationLine } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { getColorsMap } from './get_colors_map';
-import { position } from 'polished';
 
 interface DurationChartProps {
   /**
@@ -62,32 +56,31 @@ export const DurationChart = ({
   rangeColor,
 }: DurationChartProps) => {
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
-  // this id is used for the area chart representing the max/min of check durations
-  const areaSpecId = getSpecId('area');
-
   // this id is used for the line chart representing the average duration length
   const averageSpecId = getSpecId('average-');
 
   const lineSeries = locationDurationLines.map(ldl => {
     const locationSpecId = getSpecId('loc-avg' + ldl.name);
-    return <LineSeries
-            curve={CurveType.CURVE_MONOTONE_X}
-            customSeriesColors={getColorsMap(meanColor, averageSpecId)}
-            data={ldl.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
-            id={locationSpecId}
-            key={`locline-${ldl.name}`}
-            name={i18n.translate(
-              'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
-              {
-                defaultMessage: ldl.name,
-              }
-            )}
-            xAccessor={0}
-            xScaleType={ScaleType.Time}
-            yAccessors={[1]}
-            yScaleToDataExtent={false}
-            yScaleType={ScaleType.Linear}
-        />
+    return (
+      <LineSeries
+        curve={CurveType.CURVE_MONOTONE_X}
+        customSeriesColors={getColorsMap(meanColor, averageSpecId)}
+        data={ldl.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
+        id={locationSpecId}
+        key={`locline-${ldl.name}`}
+        name={i18n.translate(
+          'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
+          {
+            defaultMessage: ldl.name,
+          }
+        )}
+        xAccessor={0}
+        xScaleType={ScaleType.Time}
+        yAccessors={[1]}
+        yScaleToDataExtent={false}
+        yScaleType={ScaleType.Linear}
+      />
+    );
   });
 
   return (
@@ -103,7 +96,11 @@ export const DurationChart = ({
       </EuiTitle>
       <EuiPanel>
         <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={true} legendPosition={Position.Bottom} />
+          <Settings
+            xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
+            showLegend={true}
+            legendPosition={Position.Bottom}
+          />
           <Axis
             id={getAxisId('bottom')}
             position={Position.Bottom}

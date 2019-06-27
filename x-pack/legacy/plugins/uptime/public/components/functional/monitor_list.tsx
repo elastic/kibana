@@ -121,11 +121,7 @@ export const MonitorListComponent = ({
                 defaultMessage: 'ID',
               }),
               render: (id: string, monitor: LatestMonitor) => (
-                <MonitorPageLink
-                  id={id}
-                  location={undefined}
-                  linkParameters={linkParameters}
-                >
+                <MonitorPageLink id={id} location={undefined} linkParameters={linkParameters}>
                   {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
                     ? monitor.ping.monitor.name
                     : id}

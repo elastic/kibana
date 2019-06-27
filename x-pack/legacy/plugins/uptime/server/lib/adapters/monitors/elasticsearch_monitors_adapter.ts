@@ -25,7 +25,6 @@ import {
 } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-import { keyCodes } from '@elastic/eui';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -89,14 +88,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             aggs: {
               location: {
                 terms: {
-                  field: "observer.geo.name",
-                  missing: "N/A"
+                  field: 'observer.geo.name',
+                  missing: 'N/A',
                 },
                 aggs: {
                   status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
                   duration: { stats: { field: 'monitor.duration.us' } },
-                }
-              }
+                },
+              },
             },
           },
         },
@@ -124,21 +123,23 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       statusMaxCount: 0,
     };
 
-    const linesByLocation: {[key: string]: LocationDurationLine} = {};
+    const linesByLocation: { [key: string]: LocationDurationLine } = {};
     dateBuckets.forEach(dateBucket => {
       const x = get(dateBucket, 'key');
       const docCount = get(dateBucket, 'doc_count', 0);
 
-      dateBucket.location.buckets.forEach((locationBucket: { key: string; duration: { avg: Number; }; }) => {
-        const locationName = locationBucket.key;
-        let ldl: LocationDurationLine = get(linesByLocation, locationName);
-        if (!ldl) {
-          ldl = {name: locationName, line: []};
-          linesByLocation[locationName] = ldl;
-          monitorChartsData.locationDurationLines.push(ldl);
+      dateBucket.location.buckets.forEach(
+        (locationBucket: { key: string; duration: { avg: number } }) => {
+          const locationName = locationBucket.key;
+          let ldl: LocationDurationLine = get(linesByLocation, locationName);
+          if (!ldl) {
+            ldl = { name: locationName, line: [] };
+            linesByLocation[locationName] = ldl;
+            monitorChartsData.locationDurationLines.push(ldl);
+          }
+          ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
         }
-        ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) })
-      });
+      );
 
       monitorChartsData.status.push(
         formatStatusBuckets(x, get(dateBucket, 'status.buckets', []), docCount)

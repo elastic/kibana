@@ -83,7 +83,6 @@ export const PingListComponent = ({
         })
       );
 
-  
   const columns = [
     {
       field: 'monitor.status',
