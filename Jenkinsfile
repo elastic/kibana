@@ -18,7 +18,6 @@ pipeline {
       agent { label 'linux || immutable' } // Not on the master lightweight executor:   
       steps {
         dir("${env.BASE_DIR}"){
-          dumpEnv()
           sh './.ci/run.sh' 
         }
       }
