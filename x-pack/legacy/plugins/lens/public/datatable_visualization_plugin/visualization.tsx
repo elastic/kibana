@@ -158,7 +158,7 @@ export const datatableVisualization: Visualization<
   > {
     return tables.map(table => {
       const title = i18n.translate('xpack.lens.datatable.visualizationOf', {
-        defaultMessage: 'Table: ${operations}',
+        defaultMessage: 'Table: {operations}',
         values: {
           operations: table.columns.map(col => col.operation.label).join(' & '),
         },
@@ -174,6 +174,7 @@ export const datatableVisualization: Visualization<
             label: col.operation.label,
           })),
         },
+        previewIcon: 'visTable',
       };
     });
   },
