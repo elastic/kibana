@@ -71,11 +71,15 @@ export const MonitorPage = ({
         if (setHeadingText) {
           setHeadingText(heading);
         }
-        logMonitorPageLoad();
       });
     },
     [params]
   );
+
+  useEffect(() => {
+    logMonitorPageLoad();
+  }, []);
+
   const sharedVariables = { dateRangeStart, dateRangeEnd, location: geoLocation, monitorId };
   return (
     <Fragment>
