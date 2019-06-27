@@ -7,7 +7,7 @@
 import {
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
-  EuiComboBoxOptionProps 
+  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
