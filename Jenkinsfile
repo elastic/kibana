@@ -14,15 +14,15 @@ pipeline {
     stage('bootstrap') {
       agent { label 'linux || immutable' } 
       environment {
-        PIPELINE-SETUP-DIR = "./.ci/pipeline-setup/"
+        PIPELINE_DIR = "./.ci/pipeline-setup/"
       }
       steps {
         dir("${env.BASE_DIR}"){
           sh 'echo "\n\t### STAGE_NAME: ${STAGE_NAME}"'
 
-          sh '${PIPELINE-SETUP-DIR}extract_bootstrap_cache.sh'
-          sh '${PIPELINE-SETUP-DIR}setup.sh'
-          sh '${PIPELINE-SETUP-DIR}checkout_sibling_es.sh'
+          sh '${PIPELINE_DIR}extract_bootstrap_cache.sh'
+          sh '${PIPELINE_DIR}setup.sh'
+          sh '${PIPELINE_DIR}checkout_sibling_es.sh'
           
           sh 'echo "\n\t### create and upload workspace cache to gcs"'
         }
