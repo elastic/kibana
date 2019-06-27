@@ -41,6 +41,11 @@ describe('ElasticsearchPingsAdapter class', () => {
         },
         hits: mockHits,
       },
+      aggregations: {
+        locations: {
+          buckets: [{ key: 'foo' }],
+        },
+      },
     };
     mockEsCountResult = {
       count: mockHits.length,

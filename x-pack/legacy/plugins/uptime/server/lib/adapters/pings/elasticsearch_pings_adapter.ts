@@ -72,6 +72,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
+
     const {
       hits: { hits, total },
       aggregations: { locations },

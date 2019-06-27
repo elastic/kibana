@@ -34,14 +34,17 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
       pings = pings.filter(ping => ping.monitor && ping.monitor.id === monitorId);
     }
 
-    const locations = this.pingsDB.map( p => {
-      return get<string>(p, 'observer.geo.name')
-    }).filter(p => !p)
+    const locations =
+      this.pingsDB
+        .map(p => {
+          return get<string>(p, 'observer.geo.name');
+        })
+        .filter(p => !p) || [];
     size = size ? size : 10;
     return {
       total: size,
       pings: take(sort ? pings.sort(sortPings(sort)) : pings, size),
-      locations: locations
+      locations,
     };
   }
 
