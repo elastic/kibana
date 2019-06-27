@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
+import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Feature } from '../xpack_main/server/lib/feature_registry';
 import { PLUGIN_ID } from './common/constants';
-import { Server } from './common/types';
 import manifest from './kibana.json';
 import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
@@ -75,12 +75,13 @@ const pluginOptions: LegacyPluginOptions = {
   init(server: Server) {
     server.plugins.xpack_main.registerFeature(feature);
 
-    const coreSetup: CoreSetup = {
-      http: {
-        route: server.route.bind(server),
-      },
-    };
+    // convert hapi instance to KbnServer
+    // `kbnServer.server` is the same hapi instance
+    // `kbnServer.newPlatform` has important values
+    const kbnServer = (server as unknown) as KbnServer;
     const initializerContext: PluginInitializerContext = {};
+    const coreSetup: CoreSetup = kbnServer.newPlatform.setup.core;
+
     new ServerPlugin(initializerContext).setup(coreSetup);
   },
   postInit: undefined,

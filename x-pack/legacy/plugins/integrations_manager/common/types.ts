@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Request, Server, ServerRoute } from 'hapi';
+export { Request, ServerRoute } from 'hapi';
 
 // the contract with the registry
 export type IntegrationList = IntegrationListItem[];
