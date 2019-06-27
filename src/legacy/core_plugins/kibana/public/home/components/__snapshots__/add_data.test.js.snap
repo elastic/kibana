@@ -9,13 +9,13 @@ exports[`apmUiEnabled 1`] = `
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiTitle>
-        <h3>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
         size="s"
@@ -300,13 +300,13 @@ exports[`isNewKibanaInstance 1`] = `
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiTitle>
-        <h3>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
         size="s"
@@ -549,13 +549,13 @@ exports[`mlEnabled 1`] = `
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiTitle>
-        <h3>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
         size="s"
@@ -878,13 +878,13 @@ exports[`render 1`] = `
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiTitle>
-        <h3>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
         size="s"

@@ -18,6 +18,7 @@ exports[`ExplorerNoInfluencersFound snapshot 1`] = `
       />
     </EuiButton>
   }
+  data-test-subj="mlNoJobsFound"
   iconColor="subdued"
   iconType="alert"
   title={

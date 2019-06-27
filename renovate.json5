@@ -224,6 +224,15 @@
         enabled: false,
       },
       {
+        groupSlug: 'jsts',
+        groupName: 'jsts related packages',
+        packageNames: [
+          'jsts',
+          '@types/jsts',
+        ],
+        allowedVersions: '^1.6.2',
+      },
+      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [
