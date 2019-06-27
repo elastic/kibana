@@ -23,18 +23,21 @@ function getSuggestedVisualizationState(
   visualization: Visualization,
   datasource: DatasourcePublicAPI
 ) {
-  const suggestions = visualization.getSuggestions({
-    tables: [
-      {
-        datasourceSuggestionId: 0,
-        isMultiRow: true,
-        columns: datasource.getTableSpec().map(col => ({
-          ...col,
-          operation: datasource.getOperationForColumnId(col.columnId)!,
-        })),
-      },
-    ],
-  });
+  const suggestions = visualization.getSuggestions(
+    {
+      tables: [
+        {
+          datasourceSuggestionId: 0,
+          isMultiRow: true,
+          columns: datasource.getTableSpec().map(col => ({
+            ...col,
+            operation: datasource.getOperationForColumnId(col.columnId)!,
+          })),
+        },
+      ],
+    },
+    datasource
+  );
 
   if (!suggestions.length) {
     return visualization.initialize(datasource);

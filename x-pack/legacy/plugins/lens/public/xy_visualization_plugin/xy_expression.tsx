@@ -140,6 +140,7 @@ export function XYChart({ data, args }: XYChartProps) {
         position={x.position}
         title={x.title}
         showGridLines={x.showGridlines}
+        hide={x.hide}
       />
 
       <Axis
@@ -147,6 +148,7 @@ export function XYChart({ data, args }: XYChartProps) {
         position={y.position}
         title={y.title}
         showGridLines={y.showGridlines}
+        hide={y.hide}
       />
 
       {seriesType === 'line' ? (
