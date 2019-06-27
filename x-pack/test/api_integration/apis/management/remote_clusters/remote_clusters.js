@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { wait } from './lib';
 import { API_BASE_PATH, NODE_SEED } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('Remote Clusters', function () {
     this.tags(['skipCloud']);
@@ -99,21 +99,9 @@ export default function ({ getService }) {
       it('should return an array of remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
-        let totalRuns = 0;
-        const maxWaitTime = 10000;
-        const timeBetweenRuns = 1000;
-        const maxNumberOfRuns = Math.ceil(maxWaitTime / timeBetweenRuns);
-
-        const expectClusterConnected = async () => {
+        await retry.try(async () => {
+          // The API to connect a remote clusters is not synchronous so we need to retry several times to avoid any flakiness.
           const { body } = await supertest.get(uri);
-
-          totalRuns++;
-
-          if ((!body.length || !body[0].isConnected) && totalRuns < maxNumberOfRuns) {
-            // The API to connect a remote clusters is not synchronous so we need to retry several times to avoid any flakiness.
-            // We will wait up to 10 seconds for the connection to occur.
-            return wait().then(expectClusterConnected);
-          }
 
           expect(body).to.eql([
             {
@@ -129,9 +117,7 @@ export default function ({ getService }) {
               isConfiguredByNode: false,
             }
           ]);
-        };
-
-        await expectClusterConnected();
+        });
       });
     });
 
