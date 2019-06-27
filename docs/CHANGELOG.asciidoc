@@ -25,14 +25,10 @@ This section summarizes the changes in each release.
 [[release-notes-7.1.1]]
 == {kib} 7.1.1
 
-There were no changes for this release.
+There are no user-facing changes for this release.
 
 [[release-notes-7.1.0]]
 == {kib} 7.1.0
-
-
-See <<breaking-changes, breaking changes>> for the changes to be aware of 
-when migrating your application from one version of {kib} to another.
 
 [float]
 [[enhancements-7.1.0]]
