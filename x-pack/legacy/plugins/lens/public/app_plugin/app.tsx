@@ -5,39 +5,23 @@
  */
 
 import { I18nProvider } from '@kbn/i18n/react';
-import React, { useState } from 'react';
-import { EuiGlobalToastList, Toast } from '@elastic/eui';
-import uuid from 'uuid';
+import React from 'react';
+import { toastNotifications } from 'ui/notify';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
 export function App({ editorFrame }: { editorFrame: EditorFrameInstance }) {
-  const [state, setState] = useState<Toast[]>([]);
-
   return (
     <I18nProvider>
-      <div>
-        <EuiGlobalToastList
-          toasts={state}
-          dismissToast={toast => setState(state.filter(t => t !== toast))}
-          toastLifeTimeMs={6000}
-        />
-        <NativeRenderer
-          render={editorFrame.mount}
-          nativeProps={{
-            onError: (e: { message: string }) =>
-              setState([
-                ...state,
-                {
-                  id: uuid.v4(),
-                  color: 'danger',
-                  iconType: 'alert',
-                  title: <p>{e.message}</p>,
-                },
-              ]),
-          }}
-        />
-      </div>
+      <NativeRenderer
+        render={editorFrame.mount}
+        nativeProps={{
+          onError: (e: { message: string }) =>
+            toastNotifications.addDanger({
+              title: e.message,
+            }),
+        }}
+      />
     </I18nProvider>
   );
 }
