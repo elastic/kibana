@@ -226,7 +226,7 @@ export const WatchList = () => {
         error={error}
       />
     );
-  } else {
+  } else if (availableWatches) {
     const columns = [
       {
         field: 'id',

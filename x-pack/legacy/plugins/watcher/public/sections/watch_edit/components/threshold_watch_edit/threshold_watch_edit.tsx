@@ -37,6 +37,7 @@ import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
+import { goToWatchList } from '../../../../lib/navigation';
 
 const expressionFieldsWithValidation = [
   'aggField',
@@ -166,6 +167,8 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
     data: { nessage: string; error: string };
   } | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
+
   const { watch, setWatchProperty } = useContext(WatchContext);
 
   const getIndexPatterns = async () => {
@@ -293,6 +296,8 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             >
               <EuiComboBox
                 fullWidth
+                async
+                isLoading={isIndiciesLoading}
                 noSuggestions={!indexOptions.length}
                 options={indexOptions}
                 data-test-subj="indicesComboBox"
@@ -324,7 +329,9 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   setTimeFieldOptions(timeFields);
                 }}
                 onSearchChange={async search => {
+                  setIsIndiciesLoading(true);
                   setIndexOptions(await getIndexOptions(search, indexPatterns));
+                  setIsIndiciesLoading(false);
                 }}
                 onBlur={() => {
                   if (!watch.index) {
@@ -893,7 +900,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={'#/management/elasticsearch/watcher/watches'}>
+            <EuiButtonEmpty onClick={() => goToWatchList()}>
               {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}

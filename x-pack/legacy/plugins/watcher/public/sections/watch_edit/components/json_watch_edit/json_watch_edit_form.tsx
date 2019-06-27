@@ -24,6 +24,7 @@ import { ErrableFormRow, SectionError } from '../../../../components';
 import { putWatchApiUrl } from '../../../../lib/documentation_links';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
+import { goToWatchList } from '../../../../lib/navigation';
 
 export const JsonWatchEditForm = () => {
   const { watch, setWatchProperty } = useContext(WatchContext);
@@ -208,10 +209,7 @@ export const JsonWatchEditForm = () => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="btnCancelWatch"
-              href={'#/management/elasticsearch/watcher/watches'}
-            >
+            <EuiButtonEmpty data-test-subj="btnCancelWatch" onClick={() => goToWatchList()}>
               {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
