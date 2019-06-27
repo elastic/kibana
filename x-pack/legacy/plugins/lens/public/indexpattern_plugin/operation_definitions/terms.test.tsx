@@ -12,8 +12,7 @@ import { EuiRange, EuiSelect } from '@elastic/eui';
 
 describe('terms', () => {
   let state: IndexPatternPrivateState;
-  const InlineOptions = termsOperation.inlineOptions!;
-  const contextMenu = termsOperation.contextMenu!;
+  const InlineOptions = termsOperation.paramEditor!;
 
   beforeEach(() => {
     state = {
@@ -69,10 +68,9 @@ describe('terms', () => {
   describe('popover param editor', () => {
     it('should render current value and options', () => {
       const setStateSpy = jest.fn();
-      const PartialMenu = () => (
-        <>{contextMenu({ state, setState: setStateSpy, columnId: 'col1' })}/></>
+      const instance = shallow(
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
       );
-      const instance = shallow(<PartialMenu />);
 
       expect(instance.find(EuiSelect).prop('value')).toEqual('alphabetical');
       expect(
@@ -85,10 +83,9 @@ describe('terms', () => {
 
     it('should update state with the order value', () => {
       const setStateSpy = jest.fn();
-      const PartialMenu = () => (
-        <>{contextMenu({ state, setState: setStateSpy, columnId: 'col1' })}/></>
+      const instance = shallow(
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
       );
-      const instance = shallow(<PartialMenu />);
 
       instance.find(EuiSelect).prop('onChange')!({
         target: {
@@ -113,9 +110,7 @@ describe('terms', () => {
         },
       });
     });
-  });
 
-  describe('inline param editor', () => {
     it('should render current value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

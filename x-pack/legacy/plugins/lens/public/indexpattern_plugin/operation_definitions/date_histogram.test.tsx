@@ -12,7 +12,7 @@ import { EuiRange } from '@elastic/eui';
 
 describe('date_histogram', () => {
   let state: IndexPatternPrivateState;
-  const InlineOptions = dateHistogramOperation.inlineOptions!;
+  const InlineOptions = dateHistogramOperation.paramEditor!;
 
   beforeEach(() => {
     state = {
