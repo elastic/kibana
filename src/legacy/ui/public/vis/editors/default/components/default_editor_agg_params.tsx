@@ -18,9 +18,9 @@
  */
 
 import React, { useReducer, useEffect } from 'react';
-
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { aggTypes, AggType, AggParam } from 'ui/agg_types';
 import { AggConfig, Vis, VisState, AggParams } from 'ui/vis';
 import { IndexPattern } from 'ui/index_patterns';
@@ -41,7 +41,6 @@ import {
   initAggParamsState,
   AggParamsItem,
 } from './default_editor_agg_params_state';
-
 import { editorConfigProviders } from '../../config/editor_config_providers';
 import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
 // TODO: Below import is temporary, use `react-use` lib instead.
@@ -166,7 +165,7 @@ function DefaultEditorAggParams({
   useEffect(
     () => {
       // when all invalid controls were touched or they are untouched
-      setTouched(!!isAllInvalidParamsTouched);
+      setTouched(isAllInvalidParamsTouched);
     },
     [isAllInvalidParamsTouched]
   );
@@ -223,8 +222,6 @@ function DefaultEditorAggParams({
           onAggTypeChange(agg, value);
           // reset touched and validity of params
           onChangeParamsState({ type: AGG_PARAMS_ACTION_KEYS.RESET });
-          // resent form validity
-          setValidity(true);
         }}
         setTouched={() => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, payload: true })}
         setValidity={validity =>
