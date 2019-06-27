@@ -14,6 +14,7 @@ import {
   DatasourcePublicAPI,
 } from '../types';
 import { State } from './types';
+import { toExpression } from './to_expression';
 
 const columnSortOrder = {
   date: 0,
@@ -28,7 +29,8 @@ const columnSortOrder = {
  * @param opts
  */
 export function getSuggestions(
-  opts: SuggestionRequest<State>
+  opts: SuggestionRequest<State>,
+  datasource: DatasourcePublicAPI
 ): Array<VisualizationSuggestion<State>> {
   return opts.tables
     .filter(
@@ -41,7 +43,7 @@ export function getSuggestions(
         columns.some(col => col.operation.dataType === 'number') &&
         !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
     )
-    .map(table => getSuggestionForColumns(opts.datasource, table));
+    .map(table => getSuggestionForColumns(datasource, table));
 }
 
 function getSuggestionForColumns(
@@ -85,29 +87,49 @@ function getSuggestion(
   // TODO: Localize the title, label, etc
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
+  const state: State = {
+    title,
+    legend: { isVisible: true, position: Position.Right },
+    seriesType: isDate ? 'line' : 'bar',
+    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
+    stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
+    x: {
+      accessor: xValue.columnId,
+      position: Position.Bottom,
+      showGridlines: false,
+      title: xTitle,
+    },
+    y: {
+      accessors: yValues.map(col => col.columnId),
+      position: Position.Left,
+      showGridlines: false,
+      title: yTitle,
+    },
+  };
+
   return {
     title,
     score: 1,
     datasourceSuggestionId,
-    state: {
-      title,
-      legend: { isVisible: true, position: Position.Right },
-      seriesType: isDate ? 'line' : 'bar',
-      splitSeriesAccessors:
-        splitBy && isDate ? [splitBy.columnId] : [datasource.generateColumnId()],
-      stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
-      x: {
-        accessor: xValue.columnId,
-        position: Position.Bottom,
-        showGridlines: false,
-        title: xTitle,
+    state,
+    previewIcon: isDate ? 'visLine' : 'visBar',
+    previewExpression: toExpression(
+      {
+        ...state,
+        x: {
+          ...state.x,
+          hide: true,
+        },
+        y: {
+          ...state.y,
+          hide: true,
+        },
+        legend: {
+          ...state.legend,
+          isVisible: false,
+        },
       },
-      y: {
-        accessors: yValues.map(col => col.columnId),
-        position: Position.Left,
-        showGridlines: false,
-        title: yTitle,
-      },
-    },
+      datasource
+    ),
   };
 }

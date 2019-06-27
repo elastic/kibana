@@ -7,6 +7,7 @@
 import { getSuggestions } from './xy_suggestions';
 import { TableColumn, VisualizationSuggestion, DatasourcePublicAPI } from '../types';
 import { State } from './types';
+import { Ast } from '@kbn/interpreter/target/common';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
 
 describe('xy_suggestions', () => {
@@ -73,29 +74,41 @@ describe('xy_suggestions', () => {
     };
 
     expect(
-      getSuggestions({
-        datasource,
-        tables: [
-          { datasourceSuggestionId: 0, isMultiRow: true, columns: [dateCol('a')] },
-          { datasourceSuggestionId: 1, isMultiRow: true, columns: [strCol('foo'), strCol('bar')] },
-          { datasourceSuggestionId: 2, isMultiRow: false, columns: [strCol('foo'), numCol('bar')] },
-          { datasourceSuggestionId: 3, isMultiRow: true, columns: [unknownCol(), numCol('bar')] },
-        ],
-      })
+      getSuggestions(
+        {
+          tables: [
+            { datasourceSuggestionId: 0, isMultiRow: true, columns: [dateCol('a')] },
+            {
+              datasourceSuggestionId: 1,
+              isMultiRow: true,
+              columns: [strCol('foo'), strCol('bar')],
+            },
+            {
+              datasourceSuggestionId: 2,
+              isMultiRow: false,
+              columns: [strCol('foo'), numCol('bar')],
+            },
+            { datasourceSuggestionId: 3, isMultiRow: true, columns: [unknownCol(), numCol('bar')] },
+          ],
+        },
+        createMockDatasource().publicAPIMock
+      )
     ).toEqual([]);
   });
 
   test('suggests a basic x y chart with date on x', () => {
-    const [suggestion, ...rest] = getSuggestions({
-      datasource,
-      tables: [
-        {
-          datasourceSuggestionId: 0,
-          isMultiRow: true,
-          columns: [numCol('bytes'), dateCol('date')],
-        },
-      ],
-    });
+    const [suggestion, ...rest] = getSuggestions(
+      {
+        tables: [
+          {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            columns: [numCol('bytes'), dateCol('date')],
+          },
+        ],
+      },
+      createMockDatasource().publicAPIMock
+    );
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
@@ -114,16 +127,18 @@ Object {
   });
 
   test('suggests a split x y chart with date on x', () => {
-    const [suggestion, ...rest] = getSuggestions({
-      datasource,
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
-        },
-      ],
-    });
+    const [suggestion, ...rest] = getSuggestions(
+      {
+        tables: [
+          {
+            datasourceSuggestionId: 1,
+            isMultiRow: true,
+            columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+          },
+        ],
+      },
+      createMockDatasource().publicAPIMock
+    );
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
@@ -143,21 +158,23 @@ Object {
   });
 
   test('supports multiple suggestions', () => {
-    const [s1, s2, ...rest] = getSuggestions({
-      datasource,
-      tables: [
-        {
-          datasourceSuggestionId: 0,
-          isMultiRow: true,
-          columns: [numCol('price'), dateCol('date')],
-        },
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('count'), strCol('country')],
-        },
-      ],
-    });
+    const [s1, s2, ...rest] = getSuggestions(
+      {
+        tables: [
+          {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            columns: [numCol('price'), dateCol('date')],
+          },
+          {
+            datasourceSuggestionId: 1,
+            isMultiRow: true,
+            columns: [numCol('count'), strCol('country')],
+          },
+        ],
+      },
+      createMockDatasource().publicAPIMock
+    );
 
     expect(rest).toHaveLength(0);
     expect([suggestionSubset(s1), suggestionSubset(s2)]).toMatchInlineSnapshot(`
@@ -189,16 +206,18 @@ Array [
   });
 
   test('handles two numeric values', () => {
-    const [suggestion] = getSuggestions({
-      datasource,
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('quantity'), numCol('price')],
-        },
-      ],
-    });
+    const [suggestion] = getSuggestions(
+      {
+        tables: [
+          {
+            datasourceSuggestionId: 1,
+            isMultiRow: true,
+            columns: [numCol('quantity'), numCol('price')],
+          },
+        ],
+      },
+      createMockDatasource().publicAPIMock
+    );
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
@@ -216,27 +235,29 @@ Object {
   });
 
   test('handles unbucketed suggestions', () => {
-    const [suggestion] = getSuggestions({
-      datasource,
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [
-            numCol('num votes'),
-            {
-              columnId: 'mybool',
-              operation: {
-                dataType: 'boolean',
-                id: 'mybool',
-                isBucketed: false,
-                label: 'Yes / No',
+    const [suggestion] = getSuggestions(
+      {
+        tables: [
+          {
+            datasourceSuggestionId: 1,
+            isMultiRow: true,
+            columns: [
+              numCol('num votes'),
+              {
+                columnId: 'mybool',
+                operation: {
+                  dataType: 'boolean',
+                  id: 'mybool',
+                  isBucketed: false,
+                  label: 'Yes / No',
+                },
               },
-            },
-          ],
-        },
-      ],
-    });
+            ],
+          },
+        ],
+      },
+      createMockDatasource().publicAPIMock
+    );
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
@@ -251,5 +272,28 @@ Object {
   ],
 }
 `);
+  });
+
+  test('adds a preview expression with disabled axes and legend', () => {
+    const [suggestion] = getSuggestions(
+      {
+        tables: [
+          {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            columns: [numCol('bytes'), dateCol('date')],
+          },
+        ],
+      },
+      createMockDatasource().publicAPIMock
+    );
+
+    const expression = suggestion.previewExpression! as Ast;
+
+    expect(
+      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.isVisible[0]
+    ).toBeFalsy();
+    expect((expression.chain[0].arguments.x[0] as Ast).chain[0].arguments.hide[0]).toBeTruthy();
+    expect((expression.chain[0].arguments.y[0] as Ast).chain[0].arguments.hide[0]).toBeTruthy();
   });
 });

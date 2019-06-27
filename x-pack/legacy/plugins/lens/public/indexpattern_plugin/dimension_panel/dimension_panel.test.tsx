@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { EuiComboBox, EuiContextMenuItem } from '@elastic/eui';
+import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
-import { getPotentialColumns, operationDefinitionMap } from '../operations';
-import { IndexPatternDimensionPanel } from './dimension_panel';
+import { getPotentialColumns } from '../operations';
+import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 
 jest.mock('../state_helpers');
 jest.mock('../operations');
@@ -36,6 +37,12 @@ const expectedIndexPatterns = {
         searchable: true,
       },
       {
+        name: 'memory',
+        type: 'number',
+        aggregatable: true,
+        searchable: true,
+      },
+      {
         name: 'source',
         type: 'string',
         aggregatable: true,
@@ -46,8 +53,18 @@ const expectedIndexPatterns = {
 };
 
 describe('IndexPatternDimensionPanel', () => {
+  let wrapper: ReactWrapper | ShallowWrapper;
   let state: IndexPatternPrivateState;
+  let setState: jest.Mock;
+  let defaultProps: IndexPatternDimensionPanelProps;
   let dragDropContext: DragContextState;
+
+  function openPopover() {
+    wrapper
+      .find('[data-test-subj="indexPattern-configure-dimension"]')
+      .first()
+      .simulate('click');
+  }
 
   beforeEach(() => {
     state = {
@@ -71,21 +88,29 @@ describe('IndexPatternDimensionPanel', () => {
       },
     };
 
+    setState = jest.fn();
+
     dragDropContext = createMockedDragDropContext();
+
+    defaultProps = {
+      dragDropContext,
+      state,
+      setState,
+      columnId: 'col1',
+      filterOperations: () => true,
+    };
 
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount();
+    }
+  });
+
   it('should display a configure button if dimension has no column yet', () => {
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
-        columnId={'col2'}
-        filterOperations={() => true}
-      />
-    );
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
     expect(
       wrapper
         .find('[data-test-subj="indexPattern-configure-dimension"]')
@@ -95,16 +120,7 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should pass the right arguments to getPotentialColumns', async () => {
-    shallow(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
-        columnId={'col1'}
-        filterOperations={() => true}
-        suggestedPriority={1}
-      />
-    );
+    wrapper = shallow(<IndexPatternDimensionPanel {...defaultProps} suggestedPriority={1} />);
 
     expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith(state, 1);
   });
@@ -112,154 +128,56 @@ describe('IndexPatternDimensionPanel', () => {
   it('should call the filterOperations function', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
-    shallow(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
-        columnId={'col2'}
-        filterOperations={filterOperations}
-      />
+    wrapper = shallow(
+      <IndexPatternDimensionPanel {...defaultProps} filterOperations={filterOperations} />
     );
 
     expect(filterOperations).toBeCalled();
   });
 
   it('should show field select combo box on click', () => {
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
-        columnId={'col2'}
-        filterOperations={() => true}
-      />
-    );
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
 
-    wrapper
-      .find('[data-test-subj="indexPattern-configure-dimension"]')
-      .first()
-      .simulate('click');
+    openPopover();
 
     expect(wrapper.find(EuiComboBox)).toHaveLength(1);
   });
 
   it('should not show any choices if the filter returns false', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
+        {...defaultProps}
         columnId={'col2'}
         filterOperations={() => false}
       />
     );
 
-    wrapper
-      .find('[data-test-subj="indexPattern-configure-dimension"]')
-      .first()
-      .simulate('click');
+    openPopover();
 
     expect(wrapper.find(EuiComboBox)!.prop('options')!).toHaveLength(0);
   });
 
-  it('should render the inline options directly', () => {
-    mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
-        columnId={'col1'}
-        filterOperations={() => false}
-      />
-    );
+  it('should list all field names and document as a whole in prioritized order', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
 
-    expect(operationDefinitionMap.date_histogram.inlineOptions as jest.Mock).toHaveBeenCalledTimes(
-      1
-    );
-  });
-
-  it('should not render the settings button if there are no settings or options', () => {
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
-        columnId={'col1'}
-        filterOperations={() => false}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="indexPattern-dimensionPopover-button"]')).toHaveLength(0);
-  });
-
-  it('should render the settings button if there are settings', () => {
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={{
-          ...state,
-          columns: {
-            col1: {
-              operationId: 'op1',
-              label: 'Values of category',
-              dataType: 'string',
-              isBucketed: true,
-
-              // Private
-              operationType: 'terms',
-              params: {
-                orderBy: { type: 'alphabetical' },
-                size: 5,
-              },
-              sourceField: 'category',
-            },
-          },
-        }}
-        setState={() => {}}
-        columnId={'col1'}
-        filterOperations={() => false}
-      />
-    );
-
-    expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="indexPattern-dimensionPopover-button"]').length
-    ).toBe(1);
-  });
-
-  it('should list all field names and document as a whole in sorted order', () => {
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={() => {}}
-        columnId={'col1'}
-        filterOperations={() => true}
-      />
-    );
-
-    wrapper
-      .find('[data-test-subj="indexPattern-configure-dimension"]')
-      .first()
-      .simulate('click');
+    openPopover();
 
     const options = wrapper.find(EuiComboBox).prop('options');
 
     expect(options![0].label).toEqual('Document');
 
     expect(options![1].options!.map(({ label }) => label)).toEqual([
-      'bytes',
-      'source',
       'timestamp',
+      'bytes',
+      'memory',
+      'source',
     ]);
   });
 
-  it('should show all functions that work with the current column', () => {
-    const setState = jest.fn();
-
-    const wrapper = mount(
+  it('should indicate fields which are imcompatible for the operation of the current column', () => {
+    wrapper = mount(
       <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
+        {...defaultProps}
         state={{
           ...state,
           columns: {
@@ -276,31 +194,27 @@ describe('IndexPatternDimensionPanel', () => {
             },
           },
         }}
-        setState={setState}
-        columnId={'col1'}
-        filterOperations={() => true}
       />
     );
 
-    wrapper
-      .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
-      .first()
-      .simulate('click');
+    openPopover();
 
-    expect(wrapper.find(EuiContextMenuItem).map(instance => instance.text())).toEqual([
-      'Minimum',
-      'Maximum',
-      'Average',
-      'Sum',
-    ]);
+    const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options![0].className).toContain('incompatible');
+
+    expect(
+      options![1].options!.filter(({ label }) => label === 'timestamp')[0].className
+    ).toContain('incompatible');
+    expect(
+      options![1].options!.filter(({ label }) => label === 'memory')[0].className
+    ).not.toContain('incompatible');
   });
 
-  it('should update the datasource state on selection of an operation', () => {
-    const setState = jest.fn();
-
-    const wrapper = mount(
+  it('should indicate operations which are incompatible for the field of the current column', () => {
+    wrapper = mount(
       <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
+        {...defaultProps}
         state={{
           ...state,
           columns: {
@@ -317,57 +231,70 @@ describe('IndexPatternDimensionPanel', () => {
             },
           },
         }}
-        setState={setState}
-        columnId={'col1'}
-        filterOperations={() => true}
-        suggestedPriority={1}
       />
     );
 
-    wrapper
-      .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
-      .first()
-      .simulate('click');
+    openPopover();
 
-    wrapper
-      .find('[data-test-subj="lns-indexPatternDimension-min"]')
-      .first()
-      .simulate('click');
+    const options = (wrapper.find(EuiSideNav).prop('items')[0].items as unknown) as Array<{
+      name: string;
+      className: string;
+    }>;
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(options.find(({ name }) => name === 'Minimum')!.className).not.toContain('incompatible');
+
+    expect(options.find(({ name }) => name === 'Date Histogram')!.className).toContain(
+      'incompatible'
+    );
+  });
+
+  it('should keep the operation when switching to another field compatible with this operation', () => {
+    const initialState: IndexPatternPrivateState = {
       ...state,
       columns: {
         ...state.columns,
-        col1: expect.objectContaining({
-          operationType: 'min',
+        col1: {
+          operationId: 'op1',
+          label: 'Max of bytes',
+          dataType: 'number',
+          isBucketed: false,
+
+          // Private
+          operationType: 'max',
           sourceField: 'bytes',
+        },
+      },
+    };
+
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={initialState} />);
+
+    openPopover();
+
+    const comboBox = wrapper.find(EuiComboBox)!;
+    const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'memory')!;
+
+    comboBox.prop('onChange')!([option]);
+
+    expect(setState).toHaveBeenCalledWith({
+      ...initialState,
+      columns: {
+        ...state.columns,
+        col1: expect.objectContaining({
+          operationType: 'max',
+          sourceField: 'memory',
           // Other parts of this don't matter for this test
         }),
       },
     });
   });
 
-  it('should update the datasource state on selection of a field', () => {
-    const setState = jest.fn();
+  it('should switch operations when selecting a field that requires another operation', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
 
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={setState}
-        columnId={'col1'}
-        filterOperations={() => true}
-        suggestedPriority={1}
-      />
-    );
-
-    wrapper
-      .find('[data-test-subj="indexPattern-configure-dimension"]')
-      .first()
-      .simulate('click');
+    openPopover();
 
     const comboBox = wrapper.find(EuiComboBox)!;
-    const option = comboBox.prop('options')![1].options![1];
+    const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
 
     comboBox.prop('onChange')!([option]);
 
@@ -384,24 +311,243 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
-  it('should add a column on selection of a field', () => {
-    const setState = jest.fn();
-
-    const wrapper = mount(
+  it('should keep the field when switching to another operation compatible for this field', () => {
+    wrapper = mount(
       <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={setState}
-        columnId={'col2'}
-        filterOperations={() => true}
-        suggestedPriority={1}
+        {...defaultProps}
+        state={{
+          ...state,
+          columns: {
+            ...state.columns,
+            col1: {
+              operationId: 'op1',
+              label: 'Max of bytes',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'max',
+              sourceField: 'bytes',
+            },
+          },
+        }}
       />
     );
 
+    openPopover();
+
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {
+        ...state.columns,
+        col1: expect.objectContaining({
+          operationType: 'min',
+          sourceField: 'bytes',
+          // Other parts of this don't matter for this test
+        }),
+      },
+    });
+  });
+
+  it('should not set the state if selecting the currently active operation', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+    openPopover();
+
     wrapper
-      .find('[data-test-subj="indexPattern-configure-dimension"]')
-      .first()
+      .find('button[data-test-subj="lns-indexPatternDimension-date_histogram"]')
       .simulate('click');
+
+    expect(setState).not.toHaveBeenCalled();
+  });
+
+  it('should update label on label input changes', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+    openPopover();
+
+    wrapper
+      .find('input[data-test-subj="indexPattern-label-edit"]')
+      .simulate('change', { target: { value: 'New Label' } });
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {
+        ...state.columns,
+        col1: expect.objectContaining({
+          label: 'New Label',
+          // Other parts of this don't matter for this test
+        }),
+      },
+    });
+  });
+
+  describe('transient invalid state', () => {
+    it('should not set the state if selecting an operation incompatible with the current field', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+
+      expect(setState).not.toHaveBeenCalled();
+    });
+
+    it('should show error message in invalid state', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+
+      expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(0);
+
+      expect(setState).not.toHaveBeenCalled();
+    });
+
+    it('should leave error state if a compatible operation is selected', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-date_histogram"]')
+        .simulate('click');
+
+      expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
+    });
+
+    it('should leave error state if the popover gets closed', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+
+      wrapper.find(EuiPopover).prop('closePopover')!();
+
+      openPopover();
+
+      expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
+    });
+
+    it('should indicate fields compatible with selected operation', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+
+      const options = wrapper.find(EuiComboBox).prop('options');
+
+      expect(options![0].className).toContain('incompatible');
+
+      expect(
+        options![1].options!.filter(({ label }) => label === 'timestamp')[0].className
+      ).toContain('incompatible');
+      expect(
+        options![1].options!.filter(({ label }) => label === 'source')[0].className
+      ).not.toContain('incompatible');
+    });
+
+    it('should set datasource state if compatible field is selected for operation', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+
+      const comboBox = wrapper.find(EuiComboBox)!;
+      const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
+
+      comboBox.prop('onChange')!([option]);
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        columns: {
+          col1: expect.objectContaining({
+            sourceField: 'source',
+            operationType: 'terms',
+          }),
+        },
+      });
+    });
+  });
+
+  it('should support selecting the operation before the field', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+    openPopover();
+
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+
+    const comboBox = wrapper.find(EuiComboBox);
+    const options = comboBox.prop('options');
+
+    comboBox.prop('onChange')!([options![1].options![0]]);
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {
+        ...state.columns,
+        col2: expect.objectContaining({
+          sourceField: 'bytes',
+          operationType: 'avg',
+          // Other parts of this don't matter for this test
+        }),
+      },
+      columnOrder: ['col1', 'col2'],
+    });
+  });
+
+  it('should indicate compatible fields when selecting the operation first', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+    openPopover();
+
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+
+    const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options![0].className).toContain('incompatible');
+
+    expect(
+      options![1].options!.filter(({ label }) => label === 'timestamp')[0].className
+    ).toContain('incompatible');
+    expect(
+      options![1].options!.filter(({ label }) => label === 'bytes')[0].className
+    ).not.toContain('incompatible');
+    expect(
+      options![1].options!.filter(({ label }) => label === 'memory')[0].className
+    ).not.toContain('incompatible');
+  });
+
+  it('should show all operations that are not filtered out', () => {
+    wrapper = mount(
+      <IndexPatternDimensionPanel
+        {...defaultProps}
+        filterOperations={op => !op.isBucketed && op.dataType === 'number'}
+      />
+    );
+
+    openPopover();
+
+    expect(
+      wrapper
+        .find(EuiSideNav)
+        .prop('items')[0]
+        .items.map(({ name }) => name)
+    ).toEqual(['Count', 'Maximum', 'Average', 'Sum', 'Minimum']);
+  });
+
+  it('should add a column on selection of a field', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+    openPopover();
 
     const comboBox = wrapper.find(EuiComboBox)!;
     const option = comboBox.prop('options')![1].options![0];
@@ -422,46 +568,33 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should use helper function when changing the function', () => {
-    const setState = jest.fn();
+    const initialState: IndexPatternPrivateState = {
+      ...state,
+      columns: {
+        ...state.columns,
+        col1: {
+          operationId: 'op1',
+          label: 'Max of bytes',
+          dataType: 'number',
+          isBucketed: false,
 
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={{
-          ...state,
-          columns: {
-            ...state.columns,
-            col1: {
-              operationId: 'op1',
-              label: 'Max of bytes',
-              dataType: 'number',
-              isBucketed: false,
+          // Private
+          operationType: 'max',
+          sourceField: 'bytes',
+        },
+      },
+    };
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={initialState} />);
 
-              // Private
-              operationType: 'max',
-              sourceField: 'bytes',
-            },
-          },
-        }}
-        setState={setState}
-        columnId={'col1'}
-        filterOperations={() => true}
-        suggestedPriority={1}
-      />
-    );
-
-    wrapper
-      .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
-      .first()
-      .simulate('click');
+    openPopover();
 
     wrapper
       .find('[data-test-subj="lns-indexPatternDimension-min"]')
       .first()
-      .simulate('click');
+      .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
 
     expect(changeColumn).toHaveBeenCalledWith(
-      expect.anything(),
+      initialState,
       'col1',
       expect.objectContaining({
         sourceField: 'bytes',
@@ -471,23 +604,27 @@ describe('IndexPatternDimensionPanel', () => {
   });
 
   it('should clear the dimension with the clear button', () => {
-    const setState = jest.fn();
-
-    const wrapper = mount(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={setState}
-        columnId={'col1'}
-        filterOperations={() => true}
-      />
-    );
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
 
     const clearButton = wrapper.find(
       'EuiButtonIcon[data-test-subj="indexPattern-dimensionPopover-remove"]'
     );
 
     clearButton.simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {},
+      columnOrder: [],
+    });
+  });
+
+  it('should clear the dimension when removing the selection in field combobox', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
+
+    openPopover();
+
+    wrapper.find(EuiComboBox).prop('onChange')!([]);
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -512,18 +649,10 @@ describe('IndexPatternDimensionPanel', () => {
     }
 
     it('is not droppable if no drag is happening', () => {
-      const component = mount(
-        <IndexPatternDimensionPanel
-          dragDropContext={dragDropContext}
-          state={dragDropState()}
-          setState={() => {}}
-          columnId={'col2'}
-          filterOperations={() => true}
-        />
-      );
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={dragDropState()} />);
 
       expect(
-        component
+        wrapper
           .find('[data-test-subj="indexPattern-dropTarget"]')
           .first()
           .prop('droppable')
@@ -531,21 +660,19 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('is not droppable if the dragged item has no type', () => {
-      const component = shallow(
+      wrapper = shallow(
         <IndexPatternDimensionPanel
+          {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
             dragging: { name: 'bar' },
           }}
           state={dragDropState()}
-          setState={() => {}}
-          columnId={'col2'}
-          filterOperations={() => true}
         />
       );
 
       expect(
-        component
+        wrapper
           .find('[data-test-subj="indexPattern-dropTarget"]')
           .first()
           .prop('droppable')
@@ -553,21 +680,20 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('is not droppable if field is not supported by filterOperations', () => {
-      const component = shallow(
+      wrapper = shallow(
         <IndexPatternDimensionPanel
+          {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
             dragging: { type: 'number', name: 'bar' },
           }}
           state={dragDropState()}
-          setState={() => {}}
-          columnId={'col2'}
           filterOperations={() => false}
         />
       );
 
       expect(
-        component
+        wrapper
           .find('[data-test-subj="indexPattern-dropTarget"]')
           .first()
           .prop('droppable')
@@ -575,21 +701,20 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('is droppable if the field is supported by filterOperations', () => {
-      const component = shallow(
+      wrapper = shallow(
         <IndexPatternDimensionPanel
+          {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
             dragging: { type: 'number', name: 'bar' },
           }}
           state={dragDropState()}
-          setState={() => {}}
-          columnId={'col2'}
           filterOperations={op => op.dataType === 'number'}
         />
       );
 
       expect(
-        component
+        wrapper
           .find('[data-test-subj="indexPattern-dropTarget"]')
           .first()
           .prop('droppable')
@@ -599,21 +724,20 @@ describe('IndexPatternDimensionPanel', () => {
     it('appends the dropped column when a field is dropped', () => {
       const dragging = { type: 'number', name: 'bar' };
       const testState = dragDropState();
-      const setState = jest.fn();
-      const component = shallow(
+      wrapper = shallow(
         <IndexPatternDimensionPanel
+          {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
             dragging,
           }}
           state={testState}
-          setState={setState}
           columnId={'col2'}
           filterOperations={op => op.dataType === 'number'}
         />
       );
 
-      const onDrop = component
+      const onDrop = wrapper
         .find('[data-test-subj="indexPattern-dropTarget"]')
         .first()
         .prop('onDrop') as DropHandler;
@@ -637,21 +761,19 @@ describe('IndexPatternDimensionPanel', () => {
     it('updates a column when a field is dropped', () => {
       const dragging = { type: 'number', name: 'bar' };
       const testState = dragDropState();
-      const setState = jest.fn();
-      const component = shallow(
+      wrapper = shallow(
         <IndexPatternDimensionPanel
+          {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
             dragging,
           }}
           state={testState}
-          setState={setState}
-          columnId={'col1'}
           filterOperations={op => op.dataType === 'number'}
         />
       );
 
-      const onDrop = component
+      const onDrop = wrapper
         .find('[data-test-subj="indexPattern-dropTarget"]')
         .first()
         .prop('onDrop') as DropHandler;
@@ -671,24 +793,22 @@ describe('IndexPatternDimensionPanel', () => {
       );
     });
 
-    it('ignores drops of unsupported fields', () => {
+    it('ignores drops of incompatible fields', () => {
       const dragging = { type: 'number', name: 'baz' };
       const testState = dragDropState();
-      const setState = jest.fn();
-      const component = shallow(
+      wrapper = shallow(
         <IndexPatternDimensionPanel
+          {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
             dragging,
           }}
           state={testState}
-          setState={setState}
-          columnId={'col2'}
           filterOperations={op => op.dataType === 'number'}
         />
       );
 
-      const onDrop = component
+      const onDrop = wrapper
         .find('[data-test-subj="indexPattern-dropTarget"]')
         .first()
         .prop('onDrop') as DropHandler;

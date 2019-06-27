@@ -89,6 +89,48 @@ describe('state_helpers', () => {
         })
       );
     });
+
+    it('should carry over params from old column if the operation type stays the same', () => {
+      const state: IndexPatternPrivateState = {
+        indexPatterns: {},
+        currentIndexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Date histogram of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'timestamp',
+            params: {
+              interval: 'h',
+            },
+          },
+        },
+      };
+      expect(
+        changeColumn(state, 'col2', {
+          operationId: 'op2',
+          label: 'Date histogram of order_date',
+          dataType: 'date',
+          isBucketed: true,
+
+          // Private
+          operationType: 'date_histogram',
+          sourceField: 'order_date',
+          params: {
+            interval: 'w',
+          },
+        }).columns.col1
+      ).toEqual(
+        expect.objectContaining({
+          params: { interval: 'h' },
+        })
+      );
+    });
   });
 
   describe('getColumnOrder', () => {
