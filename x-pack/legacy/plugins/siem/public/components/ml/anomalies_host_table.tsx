@@ -11,10 +11,14 @@ import { useAnomaliesTableData } from './use_anomalies_table_data';
 import { HeaderPanel } from '../header_panel';
 
 import * as i18n from './translations';
-import { getAnomaliesTableColumns } from './get_anomalies_table_columns';
+import { getAnomaliesHostTableColumns } from './get_anomalies_host_table_columns';
 import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
 import { BackgroundRefetch } from '../load_more_table';
 import { LoadingPanel } from '../loading';
+import { getIntervalFromAnomalies } from './get_interval_from_anomalies';
+import { getSizeFromAnomalies } from './get_size_from_anomalies';
+import { dateTimesAreEqual } from './date_time_equality';
+import { AnomaliesTableProps } from './types';
 
 const BasicTableContainer = styled.div`
   position: relative;
@@ -27,30 +31,25 @@ const sorting = {
   },
 };
 
-const pagination = {
-  pageIndex: 0,
-  pageSize: 10,
-  totalItemCount: 1000,
-  pageSizeOptions: [5, 10, 20, 50],
-  hidePerPageOptions: false,
-};
-
-interface Props {
-  startDate: number;
-  endDate: number;
-}
-
-const columns = getAnomaliesTableColumns();
-
-export const AnomaliesTable = React.memo<Props>(
-  ({ startDate, endDate }): JSX.Element => {
+export const AnomaliesHostTable = React.memo<AnomaliesTableProps>(
+  ({ startDate, endDate, narrowDateRange }): JSX.Element => {
     const [loading, tableData] = useAnomaliesTableData({
       influencers: [],
       startDate,
       endDate,
       threshold: 0,
     });
+
     const hosts = convertAnomaliesToHosts(tableData);
+    const interval = getIntervalFromAnomalies(tableData);
+    const columns = getAnomaliesHostTableColumns(startDate, endDate, interval, narrowDateRange);
+    const pagination = {
+      pageIndex: 0,
+      pageSize: 10,
+      totalItemCount: getSizeFromAnomalies(tableData),
+      pageSizeOptions: [5, 10, 20, 50],
+      hidePerPageOptions: false,
+    };
     return (
       <EuiPanel>
         <BasicTableContainer>
@@ -63,7 +62,7 @@ export const AnomaliesTable = React.memo<Props>(
                 text={`${i18n.LOADING} ${i18n.ANOMALIES}`}
                 position="absolute"
                 zIndex={3}
-                data-test-subj="anomalies-table-loading-panel"
+                data-test-subj="anomalies-host-table-loading-panel"
               />
             </>
           )}
@@ -80,5 +79,6 @@ export const AnomaliesTable = React.memo<Props>(
         </BasicTableContainer>
       </EuiPanel>
     );
-  }
+  },
+  dateTimesAreEqual
 );

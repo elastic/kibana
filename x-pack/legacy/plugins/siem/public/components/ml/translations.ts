@@ -76,3 +76,7 @@ export const ENTITY = i18n.translate('xpack.siem.ml.entityTitle', {
 export const DETECTOR = i18n.translate('xpack.siem.ml.detectorTitle', {
   defaultMessage: 'Detector',
 });
+
+export const NETWORK_NAME = i18n.translate('xpack.siem.ml.networkNameTitle', {
+  defaultMessage: 'Network IP',
+});

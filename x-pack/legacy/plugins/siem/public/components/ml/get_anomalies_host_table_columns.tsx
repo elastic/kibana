@@ -7,18 +7,23 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Columns } from '../load_more_table';
-import { AnomaliesByHost, Anomaly } from './types';
+import { AnomaliesByHost, Anomaly, NarrowDateRange } from './types';
 import { getRowItemDraggable } from '../tables/helpers';
-import { getScoreString } from './get_score_string';
 import { EntityDraggable } from './entity_draggable';
-import { createCompoundKey } from './create_compound_key';
+import { createCompoundHostKey } from './create_compound_key';
 import { HostDetailsLink } from '../links';
 
 import * as i18n from './translations';
+import { AnomalyScore } from './anomaly_score';
 
-export const getAnomaliesTableColumns = (): [
+export const getAnomaliesHostTableColumns = (
+  startDate: number,
+  endDate: number,
+  interval: string,
+  narrowDateRange: NarrowDateRange
+): [
   Columns<AnomaliesByHost['hostName'], AnomaliesByHost>,
-  Columns<Anomaly['severity']>,
+  Columns<Anomaly['severity'], AnomaliesByHost>,
   Columns<Anomaly['entityValue'], AnomaliesByHost>,
   Columns<Anomaly['influencers'], AnomaliesByHost>,
   Columns<Anomaly['jobId']>
@@ -31,7 +36,7 @@ export const getAnomaliesTableColumns = (): [
       getRowItemDraggable({
         rowItem: hostName,
         attrName: 'host.name',
-        idPrefix: `anomalies-table-${createCompoundKey(anomaliesByHost)}-hostName`,
+        idPrefix: `anomalies-host-table-${createCompoundHostKey(anomaliesByHost)}-hostName`,
         render: item => <HostDetailsLink hostName={item} />,
       }),
   },
@@ -39,7 +44,16 @@ export const getAnomaliesTableColumns = (): [
     name: i18n.SCORE,
     field: 'anomaly.severity',
     sortable: true,
-    render: severity => getScoreString(severity),
+    render: (_, anomaliesByHost) => (
+      <AnomalyScore
+        startDate={startDate}
+        endDate={endDate}
+        jobKey={createCompoundHostKey(anomaliesByHost)}
+        narrowDateRange={narrowDateRange}
+        interval={interval}
+        score={anomaliesByHost.anomaly}
+      />
+    ),
   },
   {
     name: i18n.ENTITY,
@@ -47,7 +61,7 @@ export const getAnomaliesTableColumns = (): [
     sortable: true,
     render: (entityValue, anomaliesByHost) => (
       <EntityDraggable
-        idPrefix={`anomalies-table-${createCompoundKey(anomaliesByHost)}-entity`}
+        idPrefix={`anomalies-host-table-${createCompoundHostKey(anomaliesByHost)}-entity`}
         entityName={anomaliesByHost.anomaly.entityName}
         entityValue={entityValue}
       />
@@ -63,11 +77,11 @@ export const getAnomaliesTableColumns = (): [
           const entityValue = Object.values(influencer)[0];
           return (
             <EuiFlexItem
-              key={`${entityName}-${entityValue}-${createCompoundKey(anomaliesByHost)}`}
+              key={`${entityName}-${entityValue}-${createCompoundHostKey(anomaliesByHost)}`}
               grow={false}
             >
               <EntityDraggable
-                idPrefix={`anomalies-table-${entityName}-${entityValue}-${createCompoundKey(
+                idPrefix={`anomalies-host-table-${entityName}-${entityValue}-${createCompoundHostKey(
                   anomaliesByHost
                 )}-influencers`}
                 entityName={entityName}

@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnomaliesByHost } from './types';
+import { AnomaliesByHost, AnomaliesByNetwork } from './types';
 
-export const createCompoundKey = (anomaliesByHost: AnomaliesByHost): string => {
+export const createCompoundHostKey = (anomaliesByHost: AnomaliesByHost): string => {
   return `${anomaliesByHost.hostName}-${anomaliesByHost.anomaly.entityName}-${
     anomaliesByHost.anomaly.entityValue
   }-${anomaliesByHost.anomaly.severity}-${anomaliesByHost.anomaly.jobId}`;
+};
+
+export const createCompoundNetworkKey = (anomaliesByNetwork: AnomaliesByNetwork): string => {
+  return `${anomaliesByNetwork.ip}-${anomaliesByNetwork.anomaly.entityName}-${
+    anomaliesByNetwork.anomaly.entityValue
+  }-${anomaliesByNetwork.anomaly.severity}-${anomaliesByNetwork.anomaly.jobId}`;
 };

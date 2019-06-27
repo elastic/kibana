@@ -41,7 +41,7 @@ export const useAnomaliesTableData = ({
   influencers,
   startDate,
   endDate,
-  threshold = 75,
+  threshold = 0,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [loading, setLoading] = useState(true);

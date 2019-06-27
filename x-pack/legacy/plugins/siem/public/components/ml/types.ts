@@ -64,3 +64,17 @@ export interface AnomaliesByHost {
   hostName: string;
   anomaly: Anomaly;
 }
+
+export type DestinationOrSource = 'source.ip' | 'destination.ip';
+
+export interface AnomaliesByNetwork {
+  type: DestinationOrSource;
+  ip: string;
+  anomaly: Anomaly;
+}
+
+export interface AnomaliesTableProps {
+  startDate: number;
+  endDate: number;
+  narrowDateRange: NarrowDateRange;
+}
