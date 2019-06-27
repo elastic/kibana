@@ -115,16 +115,17 @@ const getAPMLink = (logItem: InfraLogItem) => {
     return undefined;
   }
 
-  const nowInSeconds = Math.floor(Date.now() / 1000);
   const timestampField = logItem.fields.find(({ field }) => field === '@timestamp');
-  const timestampInSeconds = timestampField
-    ? Math.floor(Date.parse(timestampField.value) / 1000)
-    : null;
-  const { rangeFrom, rangeTo } = timestampInSeconds
+  const timestamp = timestampField ? timestampField.value : null;
+  const { rangeFrom, rangeTo } = timestamp
     ? (() => {
-        const timeAgoPlus1Minute = nowInSeconds - timestampInSeconds + 60;
-        const timeAgo = nowInSeconds - timestampInSeconds;
-        return { rangeFrom: `now-${timeAgoPlus1Minute}s`, rangeTo: `now-${timeAgo}s` };
+        const from = new Date(timestamp);
+        const to = new Date(timestamp);
+
+        from.setMinutes(from.getMinutes() - 10);
+        to.setMinutes(to.getMinutes() + 10);
+
+        return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
       })()
     : { rangeFrom: 'now-1y', rangeTo: 'now' };
 

@@ -196,7 +196,7 @@ describe('LogEntryActionsMenu component', () => {
     });
 
     it('renders with a trace id filter and timestamp when present in log entry', () => {
-      const timestamp = new Date(Date.now() - 6000 * 1000).toISOString();
+      const timestamp = '2019-06-27T17:44:08.693Z';
       const elementWrapper = mountWithIntl(
         <LogEntryActionsMenu
           logItem={{
@@ -227,7 +227,7 @@ describe('LogEntryActionsMenu component', () => {
       ).toMatchInlineSnapshot(
         `"/app/apm#/traces?kuery=${encodeURIComponent(
           'trace.id:1234567'
-        )}&rangeFrom=now-6060s&rangeTo=now-6000s"`
+        )}&rangeFrom=2019-06-27T17:34:08.693Z&rangeTo=2019-06-27T17:54:08.693Z"`
       );
     });
 
