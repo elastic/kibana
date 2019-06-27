@@ -25,7 +25,7 @@ const xpackMainPluginWithSecurity = {
       getType: () => 'platinum',
     },
   },
-};
+} as any;
 
 const xpackMainPluginWithOutSecurity = {
   info: {
@@ -44,7 +44,7 @@ const xpackMainPluginWithOutSecurity = {
       getType: () => 'platinum',
     },
   },
-};
+} as any;
 
 const xpackMainPluginWithOutSecurityBasicLicense = {
   info: {
@@ -63,7 +63,7 @@ const xpackMainPluginWithOutSecurityBasicLicense = {
       getType: () => 'basic',
     },
   },
-};
+} as any;
 
 const xpackMainPluginWithSecurityBasicLicense = {
   info: {
@@ -82,7 +82,7 @@ const xpackMainPluginWithSecurityBasicLicense = {
       getType: () => 'basic',
     },
   },
-};
+} as any;
 
 const mlIsEnabled = async () => true;
 const mlIsNotEnabled = async () => false;
