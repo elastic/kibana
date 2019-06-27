@@ -169,7 +169,7 @@ function DefaultEditorAggParams({
     return (
       <DefaultEditorAggParam
         key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
-        showValidation={formIsTouched || model.touched ? !model.validity : false}
+        showValidation={formIsTouched || model.touched}
         onChange={onAggParamsChange}
         setValidity={validity => {
           onChangeParamsState({
@@ -212,7 +212,7 @@ function DefaultEditorAggParams({
         value={agg.type}
         aggTypeOptions={groupedAggTypeOptions}
         isSubAggregation={aggIndex >= 1 && groupName === 'buckets'}
-        showValidation={formIsTouched || aggType.touched ? !aggType.validity : false}
+        showValidation={formIsTouched || aggType.touched}
         setValue={value => {
           onAggTypeChange(agg, value);
           // reset touched and validity of params
