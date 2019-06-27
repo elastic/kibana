@@ -9,28 +9,27 @@ exports[`FeatureTooltip (multi) should not show close button / should show count
     onCloseTooltip={[Function]}
     showFilterButtons={false}
   />
-  <EuiHorizontalRule />
+  <EuiHorizontalRule
+    margin="xs"
+  />
   <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
     justifyContent="spaceBetween"
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiTextAlign
-        textAlign="center"
+    <EuiFlexItem>
+      <EuiText
+        size="s"
       >
-        <EuiText>
-          <b>
-            1
-          </b>
-           of 
-          <b>
-            3
-          </b>
-        </EuiText>
-      </EuiTextAlign>
+        <b>
+          1
+        </b>
+         of 
+        <b>
+          3
+        </b>
+      </EuiText>
     </EuiFlexItem>
-    <EuiFlexItem />
     <EuiFlexItem
       grow={false}
     />
@@ -49,19 +48,15 @@ exports[`FeatureTooltip (multi) should show close button / should show count / s
     <EuiFlexItem
       grow={false}
     >
-      <EuiTextAlign
-        textAlign="center"
-      >
-        <EuiButtonIcon
-          aria-label="Close tooltip"
-          color="primary"
-          data-test-subj="mapTooltipCloseButton"
-          iconSize="m"
-          iconType="cross"
-          onClick={[Function]}
-          type="button"
-        />
-      </EuiTextAlign>
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        color="primary"
+        data-test-subj="mapTooltipCloseButton"
+        iconSize="m"
+        iconType="cross"
+        onClick={[Function]}
+        type="button"
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <FeatureProperties
@@ -71,33 +66,26 @@ exports[`FeatureTooltip (multi) should show close button / should show count / s
     onCloseTooltip={[Function]}
     showFilterButtons={false}
   />
-  <EuiHorizontalRule />
+  <EuiHorizontalRule
+    margin="xs"
+  />
   <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
     justifyContent="spaceBetween"
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiTextAlign
-        textAlign="center"
-      >
-        <EuiText>
-          <b>
-            1
-          </b>
-           of 
-          <b>
-            3
-          </b>
-        </EuiText>
-      </EuiTextAlign>
-    </EuiFlexItem>
     <EuiFlexItem>
-      <EuiIconTip
-        aria-label="Info"
-        content="Use the query bar on top to filter down the results."
-        type="iInCircle"
-      />
+      <EuiText
+        size="s"
+      >
+        <b>
+          1
+        </b>
+         of 
+        <b>
+          3
+        </b>
+      </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -124,19 +112,15 @@ exports[`FeatureTooltip (multi) should show close button / should show count 1`]
     <EuiFlexItem
       grow={false}
     >
-      <EuiTextAlign
-        textAlign="center"
-      >
-        <EuiButtonIcon
-          aria-label="Close tooltip"
-          color="primary"
-          data-test-subj="mapTooltipCloseButton"
-          iconSize="m"
-          iconType="cross"
-          onClick={[Function]}
-          type="button"
-        />
-      </EuiTextAlign>
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        color="primary"
+        data-test-subj="mapTooltipCloseButton"
+        iconSize="m"
+        iconType="cross"
+        onClick={[Function]}
+        type="button"
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <FeatureProperties
@@ -146,28 +130,27 @@ exports[`FeatureTooltip (multi) should show close button / should show count 1`]
     onCloseTooltip={[Function]}
     showFilterButtons={false}
   />
-  <EuiHorizontalRule />
+  <EuiHorizontalRule
+    margin="xs"
+  />
   <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
     justifyContent="spaceBetween"
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiTextAlign
-        textAlign="center"
+    <EuiFlexItem>
+      <EuiText
+        size="s"
       >
-        <EuiText>
-          <b>
-            1
-          </b>
-           of 
-          <b>
-            3
-          </b>
-        </EuiText>
-      </EuiTextAlign>
+        <b>
+          1
+        </b>
+         of 
+        <b>
+          3
+        </b>
+      </EuiText>
     </EuiFlexItem>
-    <EuiFlexItem />
     <EuiFlexItem
       grow={false}
     />
@@ -198,19 +181,15 @@ exports[`FeatureTooltip (single) should show close button 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiTextAlign
-        textAlign="center"
-      >
-        <EuiButtonIcon
-          aria-label="Close tooltip"
-          color="primary"
-          data-test-subj="mapTooltipCloseButton"
-          iconSize="m"
-          iconType="cross"
-          onClick={[Function]}
-          type="button"
-        />
-      </EuiTextAlign>
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        color="primary"
+        data-test-subj="mapTooltipCloseButton"
+        iconSize="m"
+        iconType="cross"
+        onClick={[Function]}
+        type="button"
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <FeatureProperties
