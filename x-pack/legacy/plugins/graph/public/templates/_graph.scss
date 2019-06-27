@@ -71,11 +71,7 @@
   fill: $euiColorEmptyShade;
 }
 
-.gphGraph__menus {
-  margin: $euiSizeM;
-}
-
-.gphGraph__bar {
+.gphGraph__menus, .gphGraph__bar {
   margin: $euiSizeM;
 }
 
