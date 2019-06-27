@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { FilterBarComponent } from '../filter_bar';
+import { FilterBarComponent as FilterBar } from '../filter_bar';
 
 describe('FilterBar component', () => {
   const data = {
@@ -33,9 +33,17 @@ describe('FilterBar component', () => {
   it('renders the component without errors', () => {
     currentQuery = undefined;
     const component = shallowWithIntl(
-      <FilterBarComponent
-        currentQuery={currentQuery}
+      <FilterBar currentQuery={currentQuery} data={data} loading={false} updateQuery={jest.fn()} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it(`renders the component's error state when an error prop is passed`, () => {
+    const component = shallowWithIntl(
+      <FilterBar
+        currentQuery="foo:bar:isInvalid"
         data={data}
+        error={{ message: 'testing', name: 'foo', found: 'bar' }}
         loading={false}
         updateQuery={jest.fn()}
       />

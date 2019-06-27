@@ -42,7 +42,7 @@ const mockSearchResults = [
           },
           highlight: {
             content: [
-              'declare namespace Express {\n    interface Request extends Flash {}\n}\n\ninterface Flash {\n    flash(type: _@_string_@_',
+              'declare namespace Express {\n    interface Request extends Flash {}\n}\n\ninterface Flash {\n    flash(type: _@-string-@_',
             ],
           },
         },

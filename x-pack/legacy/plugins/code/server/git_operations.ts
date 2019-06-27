@@ -29,7 +29,7 @@ import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../mode
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
 
-const HEAD = 'HEAD';
+export const HEAD = 'HEAD';
 const REFS_HEADS = 'refs/heads/';
 export const DEFAULT_TREE_CHILDREN_LIMIT = 50;
 
@@ -129,7 +129,7 @@ export class GitOperations {
 
   public async getCommit(uri: RepositoryUri, revision: string): Promise<Commit> {
     const repo = await this.openRepo(uri);
-    if (revision.toUpperCase() === 'HEAD') {
+    if (revision.toUpperCase() === HEAD) {
       return await repo.getHeadCommit();
     }
     // branches and tags
