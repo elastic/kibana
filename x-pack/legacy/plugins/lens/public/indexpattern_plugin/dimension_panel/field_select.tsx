@@ -67,7 +67,7 @@ export function FieldSelect({
         defaultMessage: 'Document',
       }),
       value: { operationId: fieldLessColumn.operationId, dataType: fieldLessColumn.dataType },
-      className: classNames('lnsConfigPanel__fieldOption', {
+      className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
           fieldLessColumn
         ),
@@ -98,9 +98,7 @@ export function FieldSelect({
         .map(({ label, value, compatible }) => ({
           label,
           value,
-          className: classNames('lnsConfigPanel__fieldOption', {
-            'lnsConfigPanel__fieldOption--incompatible': !compatible,
-          }),
+          className: classNames({ 'lnsConfigPanel__fieldOption--incompatible': !compatible }),
         })),
     });
   }

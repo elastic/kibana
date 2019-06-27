@@ -12,11 +12,6 @@
   width: $euiSize * 20;
 }
 
-.lnsConfigPanel__fieldOption {
-  height: auto;
-  display: flex;
-}
-
 .lnsConfigPanel__fieldOption--incompatible {
   color: $euiColorLightShade;
 }
