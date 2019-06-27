@@ -12,7 +12,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const pageObjects = getPageObjects(['common', 'snapshotRestore']);
   const log = getService('log');
 
-  describe('Home page', function () {
+  describe('Home page', function() {
     this.tags('smoke');
     before(async () => {
       await pageObjects.common.navigateToApp('snapshotRestore');

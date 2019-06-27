@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
 export const SnapshotRestorePageProvider = ({
@@ -18,6 +17,6 @@ export const SnapshotRestorePageProvider = ({
     },
     async registerRepositoryButton() {
       return await testSubjects.find('registerRepositoryButton');
-    }
+    },
   };
 };
