@@ -61,7 +61,7 @@
   },
   "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": [
-    "x-pack/legacy/plugins/translations/translations/zh-CN.json",
-    "x-pack/legacy/plugins/translations/translations/ja-JP.json"
+    "x-pack/plugins/translations/translations/zh-CN.json",
+    "x-pack/plugins/translations/translations/ja-JP.json"
   ]
 }
