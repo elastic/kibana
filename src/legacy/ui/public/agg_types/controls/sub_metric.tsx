@@ -20,16 +20,12 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// TODO: Below import is temporary, use `react-use` lib instead.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useUnmount } from '../../../../../plugins/kibana_react/public/util/use_unmount';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
 
 function SubMetricParamEditor({
   agg,
   aggParam,
-  value,
   responseValueAggs,
   state,
   setValue,
@@ -47,9 +43,6 @@ function SubMetricParamEditor({
 
   const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
   const aggGroup = type === 'customMetric' ? 'metrics' : 'buckets';
-
-  // reset validity before component destroyed
-  useUnmount(() => setValidity(true));
 
   useEffect(() => {
     setValue(agg.params[type] || agg.type.params.byName[type].makeAgg(agg));

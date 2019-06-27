@@ -44,6 +44,9 @@ import {
 
 import { editorConfigProviders } from '../../config/editor_config_providers';
 import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
+// TODO: Below import is temporary, use `react-use` lib instead.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -108,6 +111,9 @@ function DefaultEditorAggParams({
     aggType.validity &&
     Object.keys(paramsState).every((paramsName: string) => paramsState[paramsName].validity);
   const isReactFormTouched = getFormTouched(agg.type, aggType, paramsState);
+
+  // reset validity before component destroyed
+  useUnmount(() => setValidity(true));
 
   useEffect(
     () => {

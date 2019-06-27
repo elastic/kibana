@@ -20,9 +20,6 @@
 import React, { useEffect, useState } from 'react';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
-// TODO: Below import is temporary, use `react-use` lib instead.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useUnmount } from '../../../../../plugins/kibana_react/public/util/use_unmount';
 
 function SubAggParamEditor({
   agg,
@@ -34,9 +31,6 @@ function SubAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  // reset validity before component destroyed
-  useUnmount(() => setValidity(true));
-
   useEffect(
     () => {
       // we aren't creating a custom aggConfig
