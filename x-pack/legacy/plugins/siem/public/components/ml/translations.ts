@@ -60,3 +60,19 @@ export const INFLUENCED_BY = i18n.translate(
 export const LOADING = i18n.translate('xpack.siem.ml.loadingDescription', {
   defaultMessage: 'Loading…',
 });
+
+export const HOST_NAME = i18n.translate('xpack.siem.ml.hostNameTitle', {
+  defaultMessage: 'Host Name',
+});
+
+export const SCORE = i18n.translate('xpack.siem.ml.scoreTitle', {
+  defaultMessage: 'Score',
+});
+
+export const ENTITY = i18n.translate('xpack.siem.ml.entityTitle', {
+  defaultMessage: 'Entity',
+});
+
+export const DETECTOR = i18n.translate('xpack.siem.ml.detectorTitle', {
+  defaultMessage: 'Detector',
+});

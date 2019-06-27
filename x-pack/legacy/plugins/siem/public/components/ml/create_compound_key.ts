@@ -6,7 +6,7 @@
 
 import { AnomaliesByHost } from './types';
 
-export const createCompoundKey = (anomaliesByHost: AnomaliesByHost) => {
+export const createCompoundKey = (anomaliesByHost: AnomaliesByHost): string => {
   return `${anomaliesByHost.hostName}-${anomaliesByHost.anomaly.entityName}-${
     anomaliesByHost.anomaly.entityValue
   }-${anomaliesByHost.anomaly.severity}-${anomaliesByHost.anomaly.jobId}`;

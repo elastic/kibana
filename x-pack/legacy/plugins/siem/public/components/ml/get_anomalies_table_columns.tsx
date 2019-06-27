@@ -14,6 +14,8 @@ import { EntityDraggable } from './entity_draggable';
 import { createCompoundKey } from './create_compound_key';
 import { HostDetailsLink } from '../links';
 
+import * as i18n from './translations';
+
 export const getAnomaliesTableColumns = (): [
   Columns<AnomaliesByHost['hostName'], AnomaliesByHost>,
   Columns<Anomaly['severity']>,
@@ -22,7 +24,7 @@ export const getAnomaliesTableColumns = (): [
   Columns<Anomaly['jobId']>
 ] => [
   {
-    name: 'Host Name', // TODO: i18n these
+    name: i18n.HOST_NAME,
     field: 'hostName',
     sortable: true,
     render: (hostName, anomaliesByHost) =>
@@ -34,13 +36,13 @@ export const getAnomaliesTableColumns = (): [
       }),
   },
   {
-    name: 'Score',
+    name: i18n.SCORE,
     field: 'anomaly.severity',
     sortable: true,
     render: severity => getScoreString(severity),
   },
   {
-    name: 'Entity',
+    name: i18n.ENTITY,
     field: 'anomaly.entityValue',
     sortable: true,
     render: (entityValue, anomaliesByHost) => (
@@ -52,8 +54,8 @@ export const getAnomaliesTableColumns = (): [
     ),
   },
   {
+    name: i18n.INFLUENCED_BY,
     field: 'anomaly.influencers',
-    name: 'Influenced By',
     render: (influencers, anomaliesByHost) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {influencers.map(influencer => {
@@ -78,7 +80,7 @@ export const getAnomaliesTableColumns = (): [
     ),
   },
   {
-    name: 'Detector',
+    name: i18n.DETECTOR,
     field: 'anomaly.jobId',
     sortable: true,
   },

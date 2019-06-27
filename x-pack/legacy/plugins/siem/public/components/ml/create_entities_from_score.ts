@@ -6,10 +6,10 @@
 
 import { Anomaly } from './types';
 
-export const createEntityFromRecord = (entity: Record<string, string>) =>
+export const createEntityFromRecord = (entity: Record<string, string>): string =>
   createEntity(Object.keys(entity)[0], Object.values(entity)[0]);
 
-export const createEntity = (entityName: string, entityValue: string) =>
+export const createEntity = (entityName: string, entityValue: string): string =>
   `${entityName}:'${entityValue}'`;
 
 export const createEntitiesFromScore = (score: Anomaly): string => {
