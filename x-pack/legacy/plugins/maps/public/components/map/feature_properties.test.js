@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FeatureTooltip } from './feature_tooltip';
+import { FeatureProperties } from './feature_properties';
 
 class MockTooltipProperty {
   constructor(key, value, isFilterable) {
@@ -32,28 +32,13 @@ class MockTooltipProperty {
   }
 }
 
-class MockLayer {
-
-  constructor(id) {
-    this._id = id;
-  }
-  async getDisplayName() {
-    return `display + ${this._id}`;
-  }
-
-}
-
 const defaultProps = {
   loadFeatureProperties: () => { return []; },
-  findLayerById: (id) => {
-    return new MockLayer(id);
-  },
-  closeTooltip: () => {},
-  showFilterButtons: false,
-  showCloseButton: false,
-  showFeatureList: false
+  featureId: `feature`,
+  layerId: `layer`,
+  onCloseTooltip: () => {},
+  showFilterButtons: false
 };
-
 
 const mockTooltipProperties = [
   new MockTooltipProperty('foo', 'bar', true),
@@ -62,10 +47,11 @@ const mockTooltipProperties = [
 
 describe('FeatureTooltip (single)', async () => {
 
-  test('should not show close button and not show filter button', async () => {
+  test('should not show filter button', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeatureProperties
         {...defaultProps}
+        loadFeatureProperties={() => { return mockTooltipProperties; }}
       />
     );
 
@@ -78,26 +64,10 @@ describe('FeatureTooltip (single)', async () => {
       .toMatchSnapshot();
   });
 
-  test('should show close button, but not filter button', async () => {
-    const component = shallow(
-      <FeatureTooltip
-        {...defaultProps}
-        showCloseButton={true}
-      />
-    );
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component)
-      .toMatchSnapshot();
-  });
 
   test('should show only filter button for filterable properties', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeatureProperties
         {...defaultProps}
         showFilterButtons={true}
         loadFeatureProperties={() => { return mockTooltipProperties; }}
@@ -113,28 +83,10 @@ describe('FeatureTooltip (single)', async () => {
       .toMatchSnapshot();
   });
 
-  test('should show both filter buttons and close button', async () => {
-    const component = shallow(
-      <FeatureTooltip
-        {...defaultProps}
-        showFilterButtons={true}
-        showCloseButton={true}
-        loadFeatureProperties={() => { return mockTooltipProperties; }}
-      />
-    );
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component)
-      .toMatchSnapshot();
-  });
 
   test('should show error message if unable to load tooltip content', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeatureProperties
         {...defaultProps}
         showFilterButtons={true}
         showCloseButton={true}
