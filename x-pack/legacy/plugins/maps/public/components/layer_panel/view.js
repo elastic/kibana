@@ -210,7 +210,7 @@ export class LayerPanel extends React.Component {
         </div>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <FlyoutFooter hasStateChanged={this.props.hasStateChanged}/>
+          <FlyoutFooter />
         </EuiFlyoutFooter>
       </EuiFlexGroup>
     );
