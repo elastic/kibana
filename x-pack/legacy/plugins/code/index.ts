@@ -71,6 +71,8 @@ export const code = (kibana: any) =>
           requestTimeoutMs: Joi.number().default(moment.duration(10, 'second').asMilliseconds()),
           // if we want the language server run in seperately
           detach: Joi.boolean().default(false),
+          // enable oom_score_adj on linux
+          oomScoreAdj: Joi.boolean().default(true),
         }).default(),
         repos: Joi.array().default([]),
         security: Joi.object({
