@@ -7,41 +7,9 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody } from './types';
+import { getIpFilter } from './helpers';
 
-const getGeneralQueryFilter = () => [
-  {
-    bool: {
-      filter: [
-        {
-          bool: {
-            should: [
-              {
-                exists: {
-                  field: 'source.ip',
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [
-              {
-                exists: {
-                  field: 'destination.ip',
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-      ],
-    },
-  },
-];
-
-export const buildGeneralQuery = ({
+export const buildUniqueFlowIdsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
@@ -51,7 +19,7 @@ export const buildGeneralQuery = ({
 }: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...getGeneralQueryFilter(),
+    ...getIpFilter(),
     {
       range: {
         [timestamp]: {
