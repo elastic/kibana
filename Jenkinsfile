@@ -12,6 +12,9 @@ pipeline {
   }
   stages {
     stage('bootstrap') {
+      environment {
+        STAGE = "bootstrap"
+      }
       agent { label 'linux || immutable' } // Not on the master lightweight executor:   
       steps {
         dir("${env.BASE_DIR}"){
@@ -56,12 +59,6 @@ pipeline {
       agent { label 'linux || immutable' } 
       steps {
         sh 'echo "Not implemented yet"'
-        // sh 'env > env.txt' 
-        // script {
-        //   for (String x: readFile('env.txt').split("\r?\n")) {
-        //     println "# ENV VAR: ${x}"
-        //   }
-        // } 
       }
     }
   }
@@ -73,4 +70,6 @@ def dumpEnv = {
       println "# ENV VAR: ${x}"
     }
   }   
+  // Cleanup
+  sh 'rm env.txt' 
 }
