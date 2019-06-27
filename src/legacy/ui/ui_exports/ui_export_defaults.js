@@ -35,7 +35,16 @@ export const UI_EXPORT_DEFAULTS = {
     'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone')
   },
 
-  styleSheetPaths: [],
+  styleSheetPaths:
+    ['light', 'dark'].map(theme => ({
+      theme,
+      localPath: resolve(ROOT, 'src/core/public/index.scss'),
+      publicPath: `core.${theme}.css`,
+      urlImports: {
+        urlBase: 'built_assets/css/',
+        publicDir: resolve(ROOT, 'src/core/public'),
+      }
+    })),
 
   appExtensions: {
     fieldFormatEditors: [

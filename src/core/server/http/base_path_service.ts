@@ -17,33 +17,31 @@
  * under the License.
  */
 import { Request } from 'hapi';
-import { KibanaRequest, getIncomingMessage } from './router';
+import { KibanaRequest, ensureRawRequest } from './router';
 
 import { modifyUrl } from '../../utils';
 
 export class BasePath {
-  private readonly basePathCache = new WeakMap<ReturnType<typeof getIncomingMessage>, string>();
+  private readonly basePathCache = new WeakMap<Request, string>();
 
   constructor(private readonly serverBasePath?: string) {}
 
   public get = (request: KibanaRequest | Request) => {
-    const incomingMessage = getIncomingMessage(request);
-
-    const requestScopePath = this.basePathCache.get(incomingMessage) || '';
+    const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
     const serverBasePath = this.serverBasePath || '';
     return `${serverBasePath}${requestScopePath}`;
   };
 
   // should work only for KibanaRequest as soon as spaces migrate to NP
   public set = (request: KibanaRequest | Request, requestSpecificBasePath: string) => {
-    const incomingMessage = getIncomingMessage(request);
+    const rawRequest = ensureRawRequest(request);
 
-    if (this.basePathCache.has(incomingMessage)) {
+    if (this.basePathCache.has(rawRequest)) {
       throw new Error(
         'Request basePath was previously set. Setting multiple times is not supported.'
       );
     }
-    this.basePathCache.set(incomingMessage, requestSpecificBasePath);
+    this.basePathCache.set(rawRequest, requestSpecificBasePath);
   };
 
   public prepend = (path: string): string => {

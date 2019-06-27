@@ -6,6 +6,7 @@
 
 import {
   EuiBadge,
+  EuiBadgeProps,
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
@@ -19,7 +20,6 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
-import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -40,9 +40,13 @@ export const historyToolTip = 'The chronological history of actions related to t
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
 
-const NotesCountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const NotesCountBadge = styled(EuiBadge)`
+//   margin-left: 5px;
+// `;
+const NotesCountBadge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
+);
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;

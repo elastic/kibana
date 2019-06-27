@@ -199,7 +199,7 @@ export async function requestFile(
     const contentType = response.headers.get('Content-Type');
 
     if (contentType && contentType.startsWith('text/')) {
-      const lang = contentType.split(';')[0].substring('text/'.length);
+      const lang = response.headers.get('lang') || undefined;
       if (lang === 'big') {
         return {
           payload,

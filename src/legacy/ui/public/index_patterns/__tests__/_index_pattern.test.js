@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { IndexedArray } from '../../indexed_array';
 import { IndexPattern } from '../_index_pattern';
 import mockLogstashFields from '../../../../../fixtures/logstash_fields';
-import { fixturesStubbedSavedObjectIndexPatternProvider } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 
 jest.mock('../../errors', () => ({
   SavedObjectNotFound: jest.fn(),
@@ -120,8 +120,6 @@ const config = {
   get: jest.fn(),
 };
 
-const savedObjectsResponse = fixturesStubbedSavedObjectIndexPatternProvider();
-
 // helper function to create index patterns
 function create(id, payload) {
   const indexPattern = new IndexPattern(id, config, savedObjectsClient, patternCache, fieldsFetcher, getIds);
@@ -132,7 +130,7 @@ function create(id, payload) {
 }
 
 function setDocsourcePayload(id, providedPayload) {
-  object = _.defaults(providedPayload || {}, savedObjectsResponse(id));
+  object = _.defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
 }
 
 describe('IndexPattern', () => {
