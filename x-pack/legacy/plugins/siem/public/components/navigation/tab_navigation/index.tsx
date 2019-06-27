@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import * as React from 'react';
-import { getOr } from 'lodash/fp';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import { trackUiAction as track } from '../../../lib/track_usage';
@@ -21,6 +20,7 @@ interface NavTab {
 
 interface TabNavigationProps {
   location: string;
+  search: string;
 }
 
 const navTabs: NavTab[] = [
@@ -86,22 +86,12 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       return res;
     }, '');
 
-  private handleTabClick = (mouseEvent: React.MouseEvent, href: string, id: string) => {
+  private handleTabClick = (id: string) => {
     this.setState(prevState => ({
       ...prevState,
       selectedTabId: id,
     }));
     track(`tab_${id}`);
-    let locationHash = getOr('', 'location.hash', window);
-    if (locationHash.match(/\?(.*)/g)) {
-      locationHash = locationHash.match(/\?(.*)/g)[0];
-    }
-    if (mouseEvent.metaKey) {
-      // command/windows key was held down during the click
-      window.open(href + locationHash);
-    } else {
-      window.location.assign(href + locationHash);
-    }
   };
 
   private renderTabs = () =>
@@ -112,9 +102,11 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
         disabled={tab.disabled}
         isSelected={this.state.selectedTabId === tab.id}
         key={`navigation-${tab.id}`}
-        onClick={(e: React.MouseEvent) => this.handleTabClick(e, tab.href, tab.id)}
+        onClick={() => this.handleTabClick(tab.id)}
       >
-        {tab.name}
+        <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
+          {tab.name}
+        </EuiLink>
       </EuiTab>
     ));
 }
