@@ -16,7 +16,7 @@ bootstrap)
   source src/dev/ci_setup/extract_bootstrap_cache.sh
   source src/dev/ci_setup/setup.sh
   source src/dev/ci_setup/checkout_sibling_es.sh
-  // create and upload workspace cache to gcs
+  # create and upload workspace cache to gcs
 
   ;;
 # build-oss)
@@ -69,8 +69,8 @@ bootstrap)
 #   # default cache
 #   ./test/scripts/jenkins_xpack_firefox_smoke.sh
 #   ;;
-# *)
-#   echo "STAGE '$STAGE' is not implemented."
-#   exit 1
-#   ;;
+*)
+  echo "STAGE '$STAGE' is not implemented."
+  exit 1
+  ;;
 esac
