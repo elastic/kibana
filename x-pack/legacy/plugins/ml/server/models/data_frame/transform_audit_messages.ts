@@ -6,6 +6,7 @@
 
 import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { callWithRequestType } from '../../../common/types/kibana';
+import { TransformMessage } from '../../../common/types/messages';
 
 const SIZE = 1000;
 
@@ -14,13 +15,7 @@ interface Message {
   _type: string;
   _id: string;
   _score: null | number;
-  _source: {
-    transform_id: string;
-    message: string;
-    level: string;
-    timestamp: number;
-    node_name: string;
-  };
+  _source: TransformMessage;
   sort?: any;
 }
 

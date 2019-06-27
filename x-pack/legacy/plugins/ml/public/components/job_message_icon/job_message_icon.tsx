@@ -7,12 +7,10 @@
 import React, { SFC } from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { MessageBasics } from '../../../common/types/messages';
 
 interface Props {
-  message: {
-    level: string;
-    text?: string;
-  };
+  message: MessageBasics;
   showTooltip: boolean;
 }
 

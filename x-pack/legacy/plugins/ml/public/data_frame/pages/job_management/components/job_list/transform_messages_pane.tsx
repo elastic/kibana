@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 // @ts-ignore
 import { JobIcon } from '../../../../../components/job_message_icon';
+import { TransformMessage } from '../../../../../../common/types/messages';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -51,7 +52,7 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId, lastUpdat
   const columns = [
     {
       name: '',
-      render: (message: any) => <JobIcon message={message} />,
+      render: (message: TransformMessage) => <JobIcon message={message} />,
       width: '5%',
     },
     {
