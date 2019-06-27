@@ -113,6 +113,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async get(url: string, insertTimestamp: boolean = true): Promise<void> {
+      await this.loadTestCoverage();
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
           (parsed.query as any)._t = Date.now();
@@ -267,6 +268,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async refresh(): Promise<void> {
+      await this.loadTestCoverage();
       await driver.navigate().refresh();
     }
 
@@ -277,6 +279,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async goBack(): Promise<void> {
+      await this.loadTestCoverage();
       await driver.navigate().back();
     }
 
@@ -496,26 +499,33 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return this.getScrollLeft();
     }
 
-    public async getTestCoverage(): Promise<void> {
+    public async getTestCoverage(): Promise<string> {
       return await driver.executeScript('return window.__coverage__;');
     }
 
     public async loadTestCoverage(): Promise<void> {
       const obj = await this.getTestCoverage();
-      await request(
-        {
-          url: `http://localhost:6969/coverage/client`,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      if (obj !== null) {
+        // eslint-disable-next-line no-console
+        console.log(`sending code coverage`);
+        await request(
+          {
+            url: `http://localhost:6969/coverage/client`,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(obj),
           },
-          body: JSON.stringify(obj),
-        },
-        (error, response, body) => {
-          // eslint-disable-next-line no-console
-          console.log(error);
-        }
-      );
+          (error, response, body) => {
+            // eslint-disable-next-line no-console
+            console.log(`error: ${error}`);
+          }
+        );
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(`no code coverage to send`);
+      }
     }
   }
 

@@ -45,10 +45,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
     });
 
-    after(async () => {
-      await browser.loadTestCoverage();
-    });
-
     it('should show the default request', async () => {
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       await PageObjects.console.collapseHelp();

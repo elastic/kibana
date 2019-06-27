@@ -52,6 +52,11 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     await (driver.manage() as any).setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
+  lifecycle.on('afterEachTest', async () => {
+    const browser = getService('browser');
+    await browser.loadTestCoverage();
+  });
+
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift()!;
     await (driver.manage().window() as any).setRect({ width, height });
