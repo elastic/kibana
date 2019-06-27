@@ -49,7 +49,7 @@ export class UiSettingsService {
     return this.uiSettingsClient;
   }
 
-  public start(): UiSettingsClient {
+  public start(): UiSettingsClientContract {
     return this.uiSettingsClient!;
   }
 
