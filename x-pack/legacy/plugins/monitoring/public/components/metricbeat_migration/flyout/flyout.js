@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from '../../../../../../../src/legacy/ui/public/storage/storage';
+import { Storage } from '../../../../../../../../src/legacy/ui/public/storage';
 import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
