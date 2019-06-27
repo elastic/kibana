@@ -8,11 +8,18 @@ import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink } from './chart_context_menu';
 import { mountWithIntl } from '../../utils/enzyme_helpers';
 import { options, source, timeRange } from '../../utils/fixtures/metrics_explorer';
+import { UICapabilities } from 'ui/capabilities';
 import { InfraNodeType } from '../../graphql/types';
 import DateMath from '@elastic/datemath';
 import { ReactWrapper } from 'enzyme';
 
 const series = { id: 'exmaple-01', rows: [], columns: [] };
+const uiCapabilities: UICapabilities = {
+  navLinks: { show: false },
+  management: { fake: { show: false } },
+  catalogue: { show: false },
+  visualize: { show: true },
+};
 
 const getTestSubject = (component: ReactWrapper, name: string) => {
   return component.find(`[data-test-subj="${name}"]`).hostNodes();
@@ -29,6 +36,7 @@ describe('MetricsExplorerChartContextMenu', () => {
           series={series}
           options={options}
           onFilter={onFilter}
+          uiCapabilities={uiCapabilities}
         />
       );
 
@@ -48,9 +56,9 @@ describe('MetricsExplorerChartContextMenu', () => {
           series={series}
           options={customOptions}
           onFilter={onFilter}
+          uiCapabilities={uiCapabilities}
         />
       );
-
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-ViewNodeMetrics').length).toBe(0);
     });
@@ -62,6 +70,7 @@ describe('MetricsExplorerChartContextMenu', () => {
           source={source}
           series={series}
           options={options}
+          uiCapabilities={uiCapabilities}
         />
       );
 
@@ -79,6 +88,7 @@ describe('MetricsExplorerChartContextMenu', () => {
           series={series}
           options={customOptions}
           onFilter={onFilter}
+          uiCapabilities={uiCapabilities}
         />
       );
 
@@ -94,6 +104,7 @@ describe('MetricsExplorerChartContextMenu', () => {
           source={source}
           series={series}
           options={customOptions}
+          uiCapabilities={uiCapabilities}
         />
       );
 
@@ -101,6 +112,41 @@ describe('MetricsExplorerChartContextMenu', () => {
       expect(
         getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').prop('disabled')
       ).toBeTruthy();
+    });
+
+    it('should not display "Open in Visualize" when unavailble in uiCapabilities', async () => {
+      const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
+      const onFilter = jest.fn().mockImplementation((query: string) => void 0);
+      const component = mountWithIntl(
+        <MetricsExplorerChartContextMenu
+          timeRange={timeRange}
+          source={source}
+          series={series}
+          options={options}
+          onFilter={onFilter}
+          uiCapabilities={customUICapabilities}
+        />
+      );
+
+      component.find('button').simulate('click');
+      expect(getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').length).toBe(0);
+    });
+
+    it('should not display anything when Visualize is disabled and there are no group bys.', async () => {
+      const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
+      const onFilter = jest.fn().mockImplementation((query: string) => void 0);
+      const customOptions = { ...options, groupBy: void 0 };
+      const component = mountWithIntl(
+        <MetricsExplorerChartContextMenu
+          timeRange={timeRange}
+          source={source}
+          series={series}
+          options={customOptions}
+          onFilter={onFilter}
+          uiCapabilities={customUICapabilities}
+        />
+      );
+      expect(component.find('button').length).toBe(0);
     });
   });
 
