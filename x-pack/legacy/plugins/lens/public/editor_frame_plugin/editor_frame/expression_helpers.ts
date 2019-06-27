@@ -7,21 +7,12 @@
 import { Ast, fromExpression } from '@kbn/interpreter/common';
 import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 
-export function buildExpression(
-  visualization: Visualization | null,
-  visualizationState: unknown,
+export function prependDatasourceExpression(
+  visualizationExpression: Ast | string | null,
   datasource: Datasource,
-  datasourceState: unknown,
-  datasourcePublicAPI: DatasourcePublicAPI
+  datasourceState: unknown
 ): Ast | null {
-  if (visualization === null) {
-    return null;
-  }
   const datasourceExpression = datasource.toExpression(datasourceState);
-  const visualizationExpression = visualization.toExpression(
-    visualizationState,
-    datasourcePublicAPI
-  );
 
   if (datasourceExpression === null || visualizationExpression === null) {
     return null;
@@ -39,4 +30,22 @@ export function buildExpression(
     type: 'expression',
     chain: [...parsedDatasourceExpression.chain, ...parsedVisualizationExpression.chain],
   };
+}
+
+export function buildExpression(
+  visualization: Visualization | null,
+  visualizationState: unknown,
+  datasource: Datasource,
+  datasourceState: unknown,
+  datasourcePublicAPI: DatasourcePublicAPI
+): Ast | null {
+  if (visualization === null) {
+    return null;
+  }
+  const visualizationExpression = visualization.toExpression(
+    visualizationState,
+    datasourcePublicAPI
+  );
+
+  return prependDatasourceExpression(visualizationExpression, datasource, datasourceState);
 }
