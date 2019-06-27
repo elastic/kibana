@@ -20,7 +20,7 @@
 import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { npSetup } from 'ui/new_platform';
 
@@ -44,16 +44,9 @@ export class FilterManager {
   private filters: Filter[] = [];
   private updated$: Subject<any> = new Subject();
   private fetch$: Subject<any> = new Subject();
-  private updateSubscription$: Subscription | undefined;
 
   constructor(indexPatterns: IndexPatterns) {
     this.indexPatterns = indexPatterns;
-  }
-
-  destroy() {
-    if (this.updateSubscription$) {
-      this.updateSubscription$.unsubscribe();
-    }
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
