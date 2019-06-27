@@ -207,9 +207,29 @@ const getColumns = showCgroupMetricsElasticsearch => {
   return cols;
 };
 
-export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
+export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
   const columns = getColumns(showCgroupMetricsElasticsearch);
   const { sorting, pagination, onTableChange, setupMode } = props;
+
+  // Merge the nodes data with the setup data if enabled
+  const nodes = props.nodes || [];
+  if (setupMode.enabled && setupMode.data) {
+    // We want to create a seamless experience for the user by merging in the setup data
+    // and the node data from monitoring indices in the likely scenario where some nodes
+    // are using MB collection and some are using no collection
+    const nodesByUuid = nodes.reduce((byUuid, node) => ({
+      ...byUuid,
+      [node.id || node.resolver]: node
+    }), {});
+
+    nodes.push(...Object.entries(setupMode.data.byUuid)
+      .reduce((nodes, [nodeUuid, instance]) => {
+        if (!nodesByUuid[nodeUuid]) {
+          nodes.push(instance.node);
+        }
+        return nodes;
+      }, []));
+  }
 
   let netNewUserMessage = null;
   let disableInternalCollectionForMigrationMessage = null;

@@ -14,10 +14,8 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
 import { I18nContext } from 'ui/i18n';
-import { getClusterFromClusters } from '../../../lib/get_cluster_from_clusters';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { getSetupModeState } from '../../../lib/setup_mode';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -29,7 +27,7 @@ uiRoutes.when('/elasticsearch/nodes', {
   },
   controllerAs: 'elasticsearchNodes',
   controller: class ElasticsearchNodesController extends MonitoringViewBaseEuiTableController {
-    constructor($injector, $scope, monitoringClusters) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const showCgroupMetricsElasticsearch = $injector.get('showCgroupMetricsElasticsearch');
@@ -43,8 +41,6 @@ uiRoutes.when('/elasticsearch/nodes', {
         const globalState = $injector.get('globalState');
         const timeBounds = timefilter.getBounds();
 
-        const setupMode = getSetupModeState();
-
         const getNodes = (clusterUuid = globalState.cluster_uuid) => $http
           .post(`../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`, {
             ccs: globalState.ccs,
@@ -54,24 +50,7 @@ uiRoutes.when('/elasticsearch/nodes', {
             }
           });
 
-        let promise = null;
-        if (setupMode.enabled && !globalState.cluster_uuid) {
-          promise = monitoringClusters()
-            .then(clusters => {
-              if (!clusters || !clusters.length) {
-                return $http.get(`../api/monitoring/v1/live/elasticsearch/nodes`);
-              }
-              const cluster = getClusterFromClusters(clusters, globalState);
-              return getNodes(cluster.cluster_uuid);
-            });
-        }
-        else if (!globalState.cluster_uuid) {
-          return new Promise(resolve => resolve(null));
-        }
-        else {
-          promise = getNodes();
-        }
-
+        const promise = globalState.cluster_uuid ? getNodes() : new Promise(resolve => resolve(null));
         return promise
           .then(response => response.data)
           .catch(err => {
@@ -95,9 +74,7 @@ uiRoutes.when('/elasticsearch/nodes', {
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(data);
-      });
+      $scope.$watch(() => this.data, () => this.renderReact(this.data || {}));
 
       this.renderReact = ({ clusterStatus, nodes }) => {
         super.renderReact(

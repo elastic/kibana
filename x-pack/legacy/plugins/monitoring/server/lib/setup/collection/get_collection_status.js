@@ -288,19 +288,20 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     const internalCollectorsUuidsMap = {};
     const partiallyMigratedUuidsMap = {};
 
+    if (product.name === ELASTICSEARCH_CUSTOM_ID && liveEsNodes.length) {
+      productStatus.byUuid = liveEsNodes.reduce((accum, esNode) => ({
+        ...accum,
+        [esNode.id]: {
+          node: esNode,
+          isNetNewUser: true
+        },
+      }), {});
+    }
+
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
       productStatus.totalUniqueInstanceCount = 0;
       productStatus.detected = detectedProducts[product.name];
-
-      if (product.name === ELASTICSEARCH_CUSTOM_ID && liveEsNodes.length) {
-        productStatus.byUuid = liveEsNodes.reduce((accum, esNode) => ({
-          ...accum,
-          [esNode.id]: {
-            isNetNewUser: true
-          },
-        }), {});
-      }
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
@@ -325,17 +326,33 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
+        ...productStatus.byUuid,
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isInternalCollector: true, ...internalCollectorsUuidsMap[uuid] }
+          [uuid]: {
+            ...internalCollectorsUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
+            isInternalCollector: true,
+            isNetNewUser: false,
+          }
         }), {}),
         ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isPartiallyMigrated: true, ...partiallyMigratedUuidsMap[uuid] }
+          [uuid]: {
+            ...partiallyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
+            isPartiallyMigrated: true,
+            isNetNewUser: false,
+          }
         }), {}),
         ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isFullyMigrated: true, ...fullyMigratedUuidsMap[uuid] }
+          [uuid]: {
+            ...fullyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
+            isFullyMigrated: true,
+            isNetNewUser: false,
+          }
         }), {}),
       };
     }
@@ -380,26 +397,33 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
+        ...productStatus.byUuid,
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: {
+            ...internalCollectorsUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
             isInternalCollector: true,
-            ...internalCollectorsUuidsMap[uuid]
+            isNetNewUser: false,
           }
         }), {}),
         ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: {
+            ...partiallyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
             isPartiallyMigrated: true,
             lastInternallyCollectedTimestamp: internalTimestamps[0],
-            ...partiallyMigratedUuidsMap[uuid]
+            isNetNewUser: false,
           }
         }), {}),
         ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: {
+            ...fullyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
             isFullyMigrated: true,
-            ...fullyMigratedUuidsMap[uuid]
+            isNetNewUser: false
           }
         }), {}),
       };

@@ -7,6 +7,7 @@
 import { handleError } from '../../../../lib/errors/handle_error';
 import { getLivesNodes } from '../../../../lib/elasticsearch/nodes/get_nodes/get_live_nodes';
 
+// TODO: can this go away? I don't think the client needs it anymore
 export function liveEsNodesRoute(server) {
   server.route({
     method: 'GET',

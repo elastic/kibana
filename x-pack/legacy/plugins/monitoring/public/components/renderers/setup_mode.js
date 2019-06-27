@@ -50,7 +50,16 @@ export class SetupModeRenderer extends React.Component {
   render() {
     const { render, productName } = this.props;
     const setupModeState = getSetupModeState();
-    const data = setupModeState.data ? setupModeState.data[productName] : null;
+
+    let data = null;
+    if (setupModeState.data) {
+      if (productName) {
+        data = setupModeState.data[productName];
+      }
+      else {
+        data = setupModeState.data;
+      }
+    }
     const meta = setupModeState.data ? setupModeState.data._meta : null;
 
     return render({
