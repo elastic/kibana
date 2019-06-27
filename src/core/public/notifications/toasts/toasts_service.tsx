@@ -20,7 +20,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { I18nStart } from '../../i18n';
 import { UiSettingsClientContract } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';

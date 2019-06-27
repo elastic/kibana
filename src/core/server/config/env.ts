@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import process from 'process';
+import { resolve, dirname } from 'path';
 
 // `require` is necessary for this to work inside x-pack code as well
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -63,7 +62,8 @@ export class Env {
    * @internal
    */
   public static createDefault(options: EnvOptions): Env {
-    return new Env(process.cwd(), options);
+    const repoRoot = dirname(require.resolve('../../../../package.json'));
+    return new Env(repoRoot, options);
   }
 
   /** @internal */

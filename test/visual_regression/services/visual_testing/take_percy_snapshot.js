@@ -46,7 +46,9 @@ export function takePercySnapshot() {
   }
 
   // cache the dom snapshot containing the images
-  const snapshot = agent.domSnapshot(document);
+  const snapshot = agent.snapshot(document, {
+    widths: [document.documentElement.clientWidth]
+  });
 
   // restore replaced canvases
   for (const { image, canvas } of replacements) {
@@ -59,5 +61,5 @@ export function takePercySnapshot() {
 export const takePercySnapshotWithAgent = `
   ${readFileSync(agentJsFilename(), 'utf8')}
 
-  return (${takePercySnapshot.toString()})();
+  return (${takePercySnapshot.toString()}).apply(null, arguments);
 `;

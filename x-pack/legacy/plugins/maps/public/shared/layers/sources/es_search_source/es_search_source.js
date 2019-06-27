@@ -142,6 +142,21 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSize,
     } = this._descriptor;
 
+    const indexPattern = await this._getIndexPattern();
+
+    const scriptFields = {};
+    searchFilters.fieldNames.forEach(fieldName => {
+      const field = indexPattern.fields.byName[fieldName];
+      if (field && field.scripted) {
+        scriptFields[field.name] = {
+          script: {
+            source: field.script,
+            lang: field.lang
+          }
+        };
+      }
+    });
+
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       entitySplit: {
@@ -162,7 +177,8 @@ export class ESSearchSource extends AbstractESSource {
               _source: {
                 includes: searchFilters.fieldNames
               },
-              size: topHitsSize
+              size: topHitsSize,
+              script_fields: scriptFields,
             }
           }
         }

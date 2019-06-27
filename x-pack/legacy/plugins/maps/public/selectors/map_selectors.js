@@ -203,10 +203,21 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
   }
 );
 
-export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
-  return layerListRaw.some(layerDescriptor => {
-    const currentState = copyPersistentState(layerDescriptor);
-    const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
-  });
-});
+export const hasDirtyState = createSelector(
+  getLayerListRaw,
+  getTransientLayerId,
+  (layerListRaw, transientLayerId) => {
+    if (transientLayerId) {
+      return true;
+    }
+
+    return layerListRaw.some(layerDescriptor => {
+      const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
+      if (!trackedState) {
+        return false;
+      }
+      const currentState = copyPersistentState(layerDescriptor);
+      return !_.isEqual(currentState, trackedState);
+    });
+  }
+);

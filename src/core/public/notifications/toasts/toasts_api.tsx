@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 

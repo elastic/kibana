@@ -7,13 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../../services/ml_api_service';
-import {
-  DataFrameJob,
-  DataFrameJobListRow,
-  DataFrameJobState,
-  DataFrameJobStats,
-  JobId,
-} from '../common';
+import { DataFrameTransformWithId, JobId } from '../../../../../common';
+import { DataFrameJobListRow, DataFrameJobState, DataFrameJobStats } from '../common';
 
 interface DataFrameJobStateStats {
   id: JobId;
@@ -23,7 +18,7 @@ interface DataFrameJobStateStats {
 
 interface GetDataFrameTransformsResponse {
   count: number;
-  transforms: DataFrameJob[];
+  transforms: DataFrameTransformWithId[];
 }
 
 interface GetDataFrameTransformsStatsResponse {
