@@ -95,7 +95,7 @@ export default (kibana) => {
           uiBundles.addPostLoader({
             test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
-            loader: 'istanbul-instrumenter-loader'
+            loader: 'istanbul-instrumenter-loader',
           });
         }
 
@@ -103,13 +103,14 @@ export default (kibana) => {
           id: 'tests',
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
-        });
-
-        uiBundles.extendConfig(webpackConfig => webpackMerge({
-          resolve: {
-            extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
+          extendConfig(webpackConfig) {
+            return webpackMerge({
+              resolve: {
+                extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
+              }
+            }, webpackConfig);
           }
-        }, webpackConfig));
+        });
 
         kbnServer.server.route({
           method: 'GET',

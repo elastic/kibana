@@ -80,7 +80,6 @@ export class UiBundlesController {
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
     this._postLoaders = [];
     this._bundles = [];
-    this._configModifiers = [];
 
     // create a bundle for each uiApp
     for (const uiApp of uiApps) {
@@ -97,6 +96,7 @@ export class UiBundlesController {
       id,
       modules,
       template,
+      extendConfig,
     } = bundleSpec;
 
     if (this._filter.test(id)) {
@@ -105,6 +105,7 @@ export class UiBundlesController {
         modules,
         template,
         controller: this,
+        extendConfig,
       }));
     }
   }
@@ -225,11 +226,7 @@ export class UiBundlesController {
       .map(bundle => bundle.getId());
   }
 
-  extendConfig(configModifier) {
-    this._configModifiers.push(configModifier);
-  }
-
   getExtendedConfig(webpackConfig) {
-    return this._configModifiers.reduce((acc, modifier) => modifier(acc), webpackConfig);
+    return this._bundles.reduce((acc, bundle) => bundle.getExtendedConfig(acc), webpackConfig);
   }
 }
