@@ -12,7 +12,7 @@ export const pingsSchema = gql`
   }
 
   type PingResults {
-    "Total number of matching pings" 
+    "Total number of matching pings"
     total: UnsignedInteger!
     "Unique list of all locations the query matched"
     locations: [String!]!
