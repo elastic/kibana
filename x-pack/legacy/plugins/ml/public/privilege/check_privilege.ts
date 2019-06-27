@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { hasLicenseExpired } from '../license/check_license';
 
-import { Privileges } from './common';
+import { Privileges, getDefaultPrivileges } from '../../common/types/privileges';
 import { getPrivileges } from './get_privileges';
 
-let privileges: Privileges = {};
+let privileges: Privileges = getDefaultPrivileges();
 
 export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
@@ -100,7 +100,7 @@ export function checkCreateDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileg
 
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
-export function checkPermission(privilegeType: string) {
+export function checkPermission(privilegeType: keyof Privileges) {
   const licenseHasExpired = hasLicenseExpired();
   return privileges[privilegeType] === true && licenseHasExpired !== true;
 }
