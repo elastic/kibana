@@ -3,11 +3,9 @@
 > A command line utility for running elasticsearch from source or archive.
 
 ## Getting started
-```
 If running elasticsearch from source, elasticsearch needs to be cloned to a sibling directory of Kibana.
 
 To run, go to the Kibana root and run `node scripts/es --help` to get the latest command line options.
-```
 
 ### Examples
 
@@ -40,17 +38,25 @@ es.run({
 #### Options
 
 ##### options.license
+
 Type: `String`
+
 License type, one of: trial, basic, gold, platinum
 
 ##### options.version
+
 Type: `String`
+
 Desired elasticsearch version
 
 ##### options['source-path']
+
 Type: `String`
+
 Cloned location of elasticsearch repository, used when running from source
 
 ##### options['base-path']
+
 Type: `String`
+
 Location where snapshots are cached
