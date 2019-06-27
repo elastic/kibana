@@ -30,16 +30,16 @@ You can add your own hostname (for example, acme.com) to the whitelist by adding
 
 [source,yaml]
 ----
-xpack.code.gitHostWhitelist: [ "github.com", "gitlab.com", "bitbucket.org", "gitbox.apache.org", "eclipse.org", "acme.com" ]
+xpack.code.security.gitHostWhitelist: [ "github.com", "gitlab.com", "bitbucket.org", "gitbox.apache.org", "eclipse.org", "acme.com" ]
 ----
 
-Set `xpack.code.gitHostWhitelist` to [] (empty list) allow any hostname.
+Set `xpack.code.security.gitHostWhitelist` to [] (empty list) allow any hostname.
 
 You can also control the protocol to use for the clone address. By default, the following protocols are supported: `[ 'https', 'git', 'ssh' ]`. You can change this value by adding the following line to your `config/kibana.yaml` file.  In this example, the user only wants to support the `https` protocol:
 
 [source,yaml]
 ----
-xpack.code.gitProtocolWhitelist: [ "https" ]
+xpack.code.security.gitProtocolWhitelist: [ "https" ]
 ----
 
 [float]
