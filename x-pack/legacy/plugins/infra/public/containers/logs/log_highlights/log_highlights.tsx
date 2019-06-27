@@ -5,9 +5,7 @@
  */
 
 import createContainer from 'constate-latest';
-import React, { useContext, useEffect, useState } from 'react';
-import { withStreamItems } from '../../../containers/logs/with_stream_items';
-import { withLogFilter } from '../../../containers/logs/with_log_filter';
+import { useEffect, useState, useMemo } from 'react';
 import { TimeKey } from '../../../../common/time';
 import { LogEntryHighlightsQuery } from '../../../graphql/types';
 import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
@@ -15,6 +13,10 @@ import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { logEntryHighlightsQuery } from './log_highlights.gql_query';
 
 type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
+
+interface LogEntryHighlightsMap {
+  [entryId: string]: LogEntryHighlights[0]['entries'];
+}
 
 export const useLogHighlightsState = ({
   sourceId,
@@ -82,6 +84,28 @@ export const useLogHighlightsState = ({
     [highlightTerms, startKey, endKey, filterQuery, sourceVersion]
   );
 
+  const logEntryHighlightsById = useMemo(
+    () =>
+      logEntryHighlights
+        ? logEntryHighlights.reduce<LogEntryHighlightsMap>(
+            (accumulatedLogEntryHighlightsById, { entries }) => {
+              return entries.reduce<LogEntryHighlightsMap>(
+                (singleHighlightLogEntriesById, entry) => {
+                  const highlightsForId = singleHighlightLogEntriesById[entry.gid] || [];
+                  return {
+                    ...singleHighlightLogEntriesById,
+                    [entry.gid]: [...highlightsForId, entry],
+                  };
+                },
+                accumulatedLogEntryHighlightsById
+              );
+            },
+            {}
+          )
+        : {},
+    [logEntryHighlights]
+  );
+
   return {
     highlightTerms,
     setHighlightTerms,
@@ -89,45 +113,8 @@ export const useLogHighlightsState = ({
     setEndKey,
     setFilterQuery,
     logEntryHighlights,
+    logEntryHighlightsById,
   };
 };
 
 export const LogHighlightsState = createContainer(useLogHighlightsState);
-
-// Bridges Redux container state with Hooks state. Once state is moved fully from
-// Redux to Hooks this can be removed.
-export const LogHighlightsPositionBridge = withStreamItems(
-  ({ entriesStart, entriesEnd }: { entriesStart: TimeKey | null; entriesEnd: TimeKey | null }) => {
-    const { setStartKey, setEndKey } = useContext(LogHighlightsState.Context);
-    useEffect(
-      () => {
-        setStartKey(entriesStart);
-        setEndKey(entriesEnd);
-      },
-      [entriesStart, entriesEnd]
-    );
-
-    return null;
-  }
-);
-
-export const LogHighlightsFilterQueryBridge = withLogFilter(
-  ({ filterQuery }: { filterQuery: any }) => {
-    const { setFilterQuery } = useContext(LogHighlightsState.Context);
-    useEffect(
-      () => {
-        setFilterQuery(filterQuery);
-      },
-      [filterQuery]
-    );
-
-    return null;
-  }
-);
-
-export const LogHighlightsBridge = ({ indexPattern }: { indexPattern: any }) => (
-  <>
-    <LogHighlightsPositionBridge />
-    <LogHighlightsFilterQueryBridge indexPattern={indexPattern} />
-  </>
-);

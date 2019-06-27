@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_highlights';
-export * from './redux_bridges';
+import { InfraLogEntryHighlightFields } from '../../graphql/types';
+
+export type LogEntryHighlight = InfraLogEntryHighlightFields.Fragment;

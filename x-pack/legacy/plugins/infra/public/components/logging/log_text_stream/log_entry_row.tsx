@@ -10,6 +10,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import {
   LogEntry,
+  // LogEntryHighlight,
   isFieldColumn,
   isMessageColumn,
   isTimestampColumn,
@@ -32,6 +33,7 @@ interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
+  // highlights: LogEntryHighlight[];
   isHighlighted: boolean;
   logEntry: LogEntry;
   openFlyoutWithItem: (id: string) => void;
@@ -43,6 +45,7 @@ export const LogEntryRow = ({
   boundingBoxRef,
   columnConfigurations,
   columnWidths,
+  // highlights,
   isHighlighted,
   logEntry,
   openFlyoutWithItem,
@@ -63,6 +66,8 @@ export const LogEntryRow = ({
     openFlyoutWithItem,
     logEntry.gid,
   ]);
+
+  // const highlightColumns = logEntry.columns.map()
 
   const logEntryColumnsById = useMemo(
     () =>
