@@ -259,19 +259,21 @@ export class FeatureTooltip extends React.Component {
       cycleArrows = null;
     }
 
-    const hint = this.props.showFeatureList ? (<EuiIconTip
-      type="iInCircle"
-      content={i18n.translate('xpack.maps.tooltip.infoIconHelp', {
-        defaultMessage: 'Use the query bar to filter results.'
-      })}
-    />) : null;
+    const hint = (this.props.showFeatureList && filteredFeatures.length > 20) ? (
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          type="iInCircle"
+          content={i18n.translate('xpack.maps.tooltip.infoIconHelp', {
+            defaultMessage: 'Use the query bar to filter results.'
+          })}
+        />
+      </EuiFlexItem>
+    ) : null;
 
     return (
       <Fragment>
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {hint}
-          </EuiFlexItem>
+          {hint}
           <EuiFlexItem>
             {pageNumberReadout}
           </EuiFlexItem>
