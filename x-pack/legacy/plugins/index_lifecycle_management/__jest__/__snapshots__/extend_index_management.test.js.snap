@@ -383,6 +383,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                     <a
                       className="euiLink euiLink--primary"
                       href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                      rel="noreferrer"
                     >
                       testy
                     </a>
@@ -748,6 +749,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                     <a
                       className="euiLink euiLink--primary"
                       href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                      rel="noreferrer"
                     >
                       testy
                     </a>
