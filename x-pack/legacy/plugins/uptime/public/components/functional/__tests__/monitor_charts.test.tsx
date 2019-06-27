@@ -6,10 +6,16 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import moment from 'moment';
 import { MonitorChartsComponent } from '../monitor_charts';
 import { MonitorChart } from '../../../../common/graphql/types';
 
 describe('MonitorCharts component', () => {
+  beforeAll(() => {
+    moment.prototype.toLocaleString = jest.fn(() => '2019-06-21 15:29:26');
+    moment.prototype.from = jest.fn(() => 'a few moments ago');
+  });
+
   const chartResponse: { monitorChartsData: MonitorChart } = {
     monitorChartsData: {
       locationDurationLines: [
