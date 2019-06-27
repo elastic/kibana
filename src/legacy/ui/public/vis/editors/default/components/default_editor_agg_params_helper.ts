@@ -142,7 +142,11 @@ function getAggTypeOptions(agg: AggConfig, indexPattern: IndexPattern, groupName
  * @param aggTypeState State of aggregation selector.
  * @param aggParams State of aggregation parameters.
  */
-function getFormTouched(aggType: AggType, aggTypeState: AggTypeState, aggParams: AggParamsState) {
+function isInvalidParamsTouched(
+  aggType: AggType,
+  aggTypeState: AggTypeState,
+  aggParams: AggParamsState
+) {
   if (!aggType) {
     return aggTypeState.touched;
   }
@@ -151,9 +155,9 @@ function getFormTouched(aggType: AggType, aggTypeState: AggTypeState, aggParams:
     return false;
   }
 
-  return Object.keys(aggParams).every((paramsName: string) =>
-    aggParams[paramsName].validity ? true : aggParams[paramsName].touched
-  );
+  return Object.keys(aggParams)
+    .filter((paramsName: string) => !aggParams[paramsName].validity)
+    .every((paramsName: string) => aggParams[paramsName].touched);
 }
 
-export { getAggParamsToRender, getError, getAggTypeOptions, getFormTouched };
+export { getAggParamsToRender, getError, getAggTypeOptions, isInvalidParamsTouched };

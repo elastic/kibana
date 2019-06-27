@@ -31,7 +31,7 @@ import {
   getError,
   getAggTypeOptions,
   ParamInstance,
-  getFormTouched,
+  isInvalidParamsTouched,
 } from './default_editor_agg_params_helper';
 import {
   aggTypeReducer,
@@ -110,7 +110,7 @@ function DefaultEditorAggParams({
   const isFormValid =
     aggType.validity &&
     Object.keys(paramsState).every((paramsName: string) => paramsState[paramsName].validity);
-  const isReactFormTouched = getFormTouched(agg.type, aggType, paramsState);
+  const isAllInvalidParamsTouched = isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
@@ -166,9 +166,9 @@ function DefaultEditorAggParams({
   useEffect(
     () => {
       // when all invalid controls were touched or they are untouched
-      setTouched(!!isReactFormTouched);
+      setTouched(!!isAllInvalidParamsTouched);
     },
-    [isReactFormTouched]
+    [isAllInvalidParamsTouched]
   );
 
   const renderParam = (paramInstance: ParamInstance, model: AggParamsItem) => {
