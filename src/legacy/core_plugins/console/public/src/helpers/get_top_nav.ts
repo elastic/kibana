@@ -17,61 +17,57 @@
  * under the License.
  */
 
-import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
 import { i18n } from '@kbn/i18n';
-import storage from '../storage';
 
-export function SenseTopNavController(Private) {
-  const KbnTopNavController = Private(KbnTopNavControllerProvider);
+import { IScope } from 'angular';
+import { showSettingsModal } from './settings_show_modal';
 
-  const controller = new KbnTopNavController([
-    {
-      key: 'welcome',
-      label: i18n.translate('console.topNav.welcomeTabLabel', {
-        defaultMessage: 'Welcome'
-      }),
-      hideButton: true,
-      template: `<sense-welcome></sense-welcome>`,
-      testId: 'consoleWelcomeButton',
-    },
+// help
+import { showHelpPanel } from './help_show_panel';
+
+export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
+  return [
     {
       key: 'history',
       label: i18n.translate('console.topNav.historyTabLabel', {
-        defaultMessage: 'History'
+        defaultMessage: 'History',
       }),
       description: i18n.translate('console.topNav.historyTabDescription', {
         defaultMessage: 'History',
       }),
-      template: `<sense-history></sense-history>`,
+      run: () => {
+        toggleHistory();
+      },
       testId: 'consoleHistoryButton',
     },
     {
       key: 'settings',
       label: i18n.translate('console.topNav.settingsTabLabel', {
-        defaultMessage: 'Settings'
+        defaultMessage: 'Settings',
       }),
       description: i18n.translate('console.topNav.settingsTabDescription', {
         defaultMessage: 'Settings',
       }),
-      template: `<sense-settings></sense-settings>`,
+      run: () => {
+        showSettingsModal();
+      },
       testId: 'consoleSettingsButton',
     },
     {
       key: 'help',
       label: i18n.translate('console.topNav.helpTabLabel', {
-        defaultMessage: 'Help'
+        defaultMessage: 'Help',
       }),
       description: i18n.translate('console.topNav.helpTabDescription', {
         defaultMessage: 'Help',
       }),
-      template: `<sense-help></sense-help>`,
+      run: () => {
+        const hideHelpPanel = showHelpPanel();
+        $scope.$on('$destroy', () => {
+          hideHelpPanel();
+        });
+      },
       testId: 'consoleHelpButton',
     },
-  ]);
-
-  if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    controller.open('welcome');
-  }
-
-  return controller;
+  ];
 }
