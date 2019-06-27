@@ -77,7 +77,7 @@ export abstract class EmbeddableFactory<
 
   /**
    * Returns whether the current user should be allowed to edit this type of
-   * embeddable.
+   * embeddable. Most of the time this should be based off the capabilities service.
    */
   public abstract isEditable(): boolean;
 
