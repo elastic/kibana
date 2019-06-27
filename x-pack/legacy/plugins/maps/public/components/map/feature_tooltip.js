@@ -11,7 +11,7 @@ import {
   EuiTextAlign,
   EuiPagination,
   EuiSelect,
-  EuiIcon,
+  EuiIconTip,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem
@@ -172,6 +172,7 @@ export class FeatureTooltip extends React.Component {
       return null;
     }
 
+    const divider =  (this.state.uniqueLayers && this.state.uniqueLayers.length > 1) ? <EuiHorizontalRule /> : null;
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -182,7 +183,7 @@ export class FeatureTooltip extends React.Component {
             {this._renderCloseButton()}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule />
+        {divider}
       </Fragment>
     );
   }
@@ -265,7 +266,12 @@ export class FeatureTooltip extends React.Component {
             {pageNumberReadout}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiIcon type="ilnCircle" size="s"/>
+            <EuiIconTip
+              type="iInCircle"
+              content={i18n.translate('xpack.maps.tooltip.infoIconHelp', {
+                defaultMessage: 'Use the query bar on top to filter down the results.'
+              })}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {cycleArrows}
