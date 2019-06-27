@@ -100,7 +100,10 @@ class UrlPanelContentUI extends Component<Props, State> {
 
         {this.renderShortUrlSwitch()}
 
-        <EuiCopy textToCopy={this.state.url} anchorClassName="kbnShareContextMenu__copyAnchor">
+        <EuiCopy
+          textToCopy={this.state.url || ''}
+          anchorClassName="kbnShareContextMenu__copyAnchor"
+        >
           {(copy: () => void) => (
             <EuiButton
               fill

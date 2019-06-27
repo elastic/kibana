@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Toast, EuiButtonIcon } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import * as React from 'react';
 import uuid from 'uuid';

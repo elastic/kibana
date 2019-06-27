@@ -79,6 +79,10 @@ export class ESJoinSource extends AbstractESSource {
     return this._descriptor.term;
   }
 
+  getWhereQuery() {
+    return this._descriptor.whereQuery;
+  }
+
   _formatMetricKey(metric) {
     const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
     return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;

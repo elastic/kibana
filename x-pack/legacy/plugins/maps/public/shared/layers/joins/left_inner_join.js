@@ -82,5 +82,8 @@ export class LeftInnerJoin {
     return  this._rightSource.getIndexPatternIds();
   }
 
+  getWhereQuery() {
+    return this._rightSource.getWhereQuery();
+  }
 }
 
