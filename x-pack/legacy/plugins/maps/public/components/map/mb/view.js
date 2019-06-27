@@ -152,7 +152,6 @@ export class MBMapContainer extends React.Component {
     }
 
     const targetMbFeataure = mbFeatures[0];
-    // const layer = this._getLayerByMbLayerId(targetMbFeataure.layer.id);
     const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const features = this._getIdsForFeatures(mbFeatures);
@@ -189,13 +188,10 @@ export class MBMapContainer extends React.Component {
       }
     }
 
-    // const layer = this._getLayerByMbLayerId(targetMbFeature.layer.id);
     const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetMbFeature);
     const features = this._getIdsForFeatures(mbFeatures);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.HOVER,
-      // featureId: targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME],
-      // layerId: layer.getId(),
       features: features,
       location: popupAnchorLocation
     });
@@ -226,8 +222,8 @@ export class MBMapContainer extends React.Component {
     }, []);
 
 
-    //ensure all layers that are actually on the map
-    //the raw list may contain layer-ids that have not been added to the map yet.
+    //Ensure that all layers are actually on the map.
+    //The raw list may contain layer-ids that have not been added to the map yet.
     //For example:
     //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
     //during that data-fetch window, the app should not query for layers that do not exist.
