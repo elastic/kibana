@@ -10,6 +10,7 @@ import Joi from 'joi';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNames } from '../lib/settings/cm/get_service_names';
 import { saveConfiguration } from '../lib/settings/cm/save_configuration';
+import { updateConfiguration } from '../lib/settings/cm/update_configuration';
 import { CentralConfigurationIntake } from '../lib/settings/cm/configuration';
 import { searchConfigurations } from '../lib/settings/cm/search';
 import { listConfigurations } from '../lib/settings/cm/list_configurations';
@@ -128,6 +129,30 @@ export function initSettingsApi(core: InternalCoreSetup) {
       const setup = setupRequest(req);
       const configuration = req.payload as CentralConfigurationIntake;
       return await saveConfiguration({
+        configuration,
+        setup
+      }).catch(defaultErrorHandler);
+    }
+  });
+
+  // update configuration
+  server.route({
+    method: 'PUT',
+    path: `/api/apm/settings/cm/{configurationId}`,
+    options: {
+      validate: {
+        query: {
+          _debug: Joi.bool()
+        }
+      },
+      tags: ['access:apm']
+    },
+    handler: async req => {
+      const setup = setupRequest(req);
+      const { configurationId } = req.params;
+      const configuration = req.payload as CentralConfigurationIntake;
+      return await updateConfiguration({
+        configurationId,
         configuration,
         setup
       }).catch(defaultErrorHandler);

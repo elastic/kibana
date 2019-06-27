@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CMUpdateConfigurationAPIResponse } from '../../../../server/lib/settings/cm/update_configuration';
 import { callApi } from '../callApi';
 import { CentralConfigurationIntake } from '../../../../server/lib/settings/cm/configuration';
 import { CMServicesAPIResponse } from '../../../../server/lib/settings/cm/get_service_names';
@@ -33,6 +34,17 @@ export async function saveCMConfiguration(
   return callApi<CMSaveConfigurationAPIResponse>({
     pathname: `/api/apm/settings/cm/new`,
     method: 'POST',
+    body: JSON.stringify(configuration)
+  });
+}
+
+export async function updateCMConfiguration(
+  configurationId: string,
+  configuration: CentralConfigurationIntake
+) {
+  return callApi<CMUpdateConfigurationAPIResponse>({
+    pathname: `/api/apm/settings/cm/${configurationId}`,
+    method: 'PUT',
     body: JSON.stringify(configuration)
   });
 }
