@@ -96,6 +96,7 @@ Object {
     "alertInstances": Object {},
     "alertTypeState": undefined,
     "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
+    "scheduledRunAt": 2019-06-03T18:55:30.982Z,
   },
 }
 `);
