@@ -18,7 +18,7 @@
  */
 
 import React, { FunctionComponent, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { SavedQueryAttributes } from '../../../search/search_bar';
 import { Query } from '../index';
 
