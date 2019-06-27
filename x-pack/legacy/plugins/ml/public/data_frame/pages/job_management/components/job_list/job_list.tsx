@@ -14,14 +14,9 @@ import {
   SortDirection,
 } from '@elastic/eui';
 
-import { moveToDataFrameWizard } from '../../../../common';
+import { JobId, moveToDataFrameWizard } from '../../../../common';
 
-import {
-  DataFrameJobListColumn,
-  DataFrameJobListRow,
-  ItemIdToExpandedRowMap,
-  JobId,
-} from './common';
+import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
@@ -29,13 +24,14 @@ import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
   itemIds: JobId[],
-  dataFrameJobs: DataFrameJobListRow[]
+  dataFrameJobs: DataFrameJobListRow[],
+  lastUpdate: number
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce(
     (m: ItemIdToExpandedRowMap, jobId: JobId) => {
       const item = dataFrameJobs.find(job => job.config.id === jobId);
       if (item !== undefined) {
-        m[jobId] = <ExpandedRow item={item} />;
+        m[jobId] = <ExpandedRow item={item} lastUpdate={lastUpdate} />;
       }
       return m;
     },
@@ -55,9 +51,10 @@ export const DataFrameJobList: SFC = () => {
   const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<JobId[]>([]);
+  const [lastUpdate, setlastUpdate] = useState(Date.now());
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
-  useRefreshInterval(getJobs, setBlockRefresh);
+  useRefreshInterval(getJobs, setBlockRefresh, setlastUpdate);
 
   if (dataFrameJobs.length === 0) {
     return (
@@ -68,6 +65,7 @@ export const DataFrameJobList: SFC = () => {
             Create your first data frame job
           </EuiButtonEmpty>,
         ]}
+        data-test-subj="mlNoDataFrameJobsFound"
       />
     );
   }
@@ -81,7 +79,11 @@ export const DataFrameJobList: SFC = () => {
     },
   };
 
-  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, dataFrameJobs);
+  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(
+    expandedRowItemIds,
+    dataFrameJobs,
+    lastUpdate
+  );
 
   return (
     <ExpandableTable
