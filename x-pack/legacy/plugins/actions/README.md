@@ -122,7 +122,7 @@ Params:
 |---|---|---|
 |id|The id of the action you're trying to get.|string|
 
-#### `GET /api/action/types` List action types
+#### `GET /api/action/types`: List action types
 
 No parameters.
 
@@ -142,6 +142,20 @@ Payload:
 |attributes.actionTypeConfig|The configuration the action type expects. See related action type to see what attributes is expected. This will also validate against the action type if config validation is defined.|object|
 |references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API. See the saved objects API documentation.<br><br>In most cases, you can leave this empty.|Array|
 |version|The document version when read|string|
+
+#### `POST /api/action/{id}/_fire`: Fire action
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the action you're trying to fire.|string|
+
+Payload:
+
+|Property|Description|Type|
+|---|---|---|
+|params|The parameters the action type requires for the execution.|object|
 
 ## Firing actions
 

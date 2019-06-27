@@ -38,6 +38,7 @@ import { help as gte } from './gte';
 import { help as head } from './head';
 import { help as ifFn } from './if';
 import { help as image } from './image';
+import { help as joinRows } from './join_rows';
 import { help as location } from './location';
 import { help as lt } from './lt';
 import { help as lte } from './lte';
@@ -181,6 +182,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   gte,
   head,
   if: ifFn,
+  joinRows,
   image,
   location,
   lt,
