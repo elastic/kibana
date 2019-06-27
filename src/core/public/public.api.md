@@ -8,7 +8,7 @@ import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public (undocumented)
 export interface ApplicationSetup {
@@ -85,6 +85,10 @@ export interface ChromeNavControl {
 
 // @public
 export interface ChromeNavControls {
+    // @internal (undocumented)
+    getLeft$(): Observable<ChromeNavControl[]>;
+    // @internal (undocumented)
+    getRight$(): Observable<ChromeNavControl[]>;
     registerLeft(navControl: ChromeNavControl): void;
     registerRight(navControl: ChromeNavControl): void;
 }
@@ -139,7 +143,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
     link: string;
 }
 
-// @public (undocumented)
+// @public
 export interface ChromeStart {
     addApplicationClass(className: string): void;
     getApplicationClasses$(): Observable<string[]>;
@@ -153,6 +157,7 @@ export interface ChromeStart {
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
     removeApplicationClass(className: string): void;
+    setAppTitle(appTitle: string): void;
     setBadge(badge?: ChromeBadge): void;
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;

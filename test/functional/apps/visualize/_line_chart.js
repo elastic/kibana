@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Field = extension');
       await PageObjects.visualize.selectField('extension.raw');
       log.debug('switch from Rows to Columns');
-      await PageObjects.visualize.clickColumns();
+      await PageObjects.visualize.clickSplitDirection('Columns');
       await PageObjects.visualize.clickGo();
     };
 
