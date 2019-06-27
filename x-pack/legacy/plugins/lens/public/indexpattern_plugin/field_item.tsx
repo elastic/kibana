@@ -28,10 +28,16 @@ function highglightedPart(completeHighlight: string | undefined, part: string) {
     return part;
   }
 
-  const lastHighlightPart = completeHighlight.split('.').pop();
+  const highlightParts = completeHighlight.split('.').filter(highlightPart => highlightPart !== '');
 
-  if (lastHighlightPart && part.startsWith(lastHighlightPart)) {
+  const lastHighlightPart = highlightParts[highlightParts.length - 1];
+  if (part.startsWith(lastHighlightPart)) {
     return lastHighlightPart;
+  }
+
+  const firstHighlightPart = highlightParts[0];
+  if (part.endsWith(firstHighlightPart)) {
+    return firstHighlightPart;
   }
 
   return completeHighlight;
@@ -41,11 +47,11 @@ export function FieldItem({ field, highlight }: FieldItemProps) {
   const fieldParts = field.name.split('.');
   const wrappableHighlightableFieldName = _.flatten(
     fieldParts.map((part, index) => [
-      <span key={part}>
+      <span key={index}>
         <EuiHighlight search={highglightedPart(highlight, part)}>{part}</EuiHighlight>
         {index !== fieldParts.length - 1 ? '.' : ''}
       </span>,
-      index !== fieldParts.length - 1 ? <wbr key={`${part}-wbr`} /> : null,
+      index !== fieldParts.length - 1 ? <wbr key={`${index}-wbr`} /> : null,
     ])
   );
 

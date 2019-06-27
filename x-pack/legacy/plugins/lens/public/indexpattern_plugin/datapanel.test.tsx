@@ -215,6 +215,35 @@ describe('IndexPattern Data Panel', () => {
     ]);
   });
 
+  it('should toggle type if clicked again', async () => {
+    const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
+
+    act(() => {
+      (wrapper
+        .find(EuiContextMenuPanel)
+        .prop('items')!
+        .find(
+          item => (item as ReactElement).props['data-test-subj'] === 'typeFilter-number'
+        )! as ReactElement).props.onClick();
+    });
+
+    act(() => {
+      (wrapper
+        .find(EuiContextMenuPanel)
+        .prop('items')!
+        .find(
+          item => (item as ReactElement).props['data-test-subj'] === 'typeFilter-number'
+        )! as ReactElement).props.onClick();
+    });
+
+    expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      'bytes',
+      'memory',
+      'source',
+      'timestamp',
+    ]);
+  });
+
   it('should filter down by type and by name', async () => {
     const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
 

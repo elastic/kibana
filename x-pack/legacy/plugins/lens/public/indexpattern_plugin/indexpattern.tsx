@@ -11,6 +11,7 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import uuid from 'uuid';
 import { Datasource, DataType } from '..';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -204,7 +205,12 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
-      render(<IndexPatternDataPanel {...props} />, domElement);
+      render(
+        <I18nProvider>
+          <IndexPatternDataPanel {...props} />
+        </I18nProvider>,
+        domElement
+      );
     },
 
     getPublicAPI(state, setState) {
