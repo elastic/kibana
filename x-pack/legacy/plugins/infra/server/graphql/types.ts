@@ -211,11 +211,15 @@ export interface InfraLogEntry {
 }
 /** A special built-in column that contains the log entry's timestamp */
 export interface InfraLogEntryTimestampColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** The timestamp */
   timestamp: number;
 }
 /** A special built-in column that contains the log entry's constructed message */
 export interface InfraLogEntryMessageColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** A list of the formatted log entry segments */
   message: InfraLogMessageSegment[];
 }
@@ -235,6 +239,8 @@ export interface InfraLogMessageConstantSegment {
 }
 /** A column that contains the value of a field of the log entry */
 export interface InfraLogEntryFieldColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** The field name of the column */
   field: string;
   /** The value of the field in the log entry */
@@ -1251,10 +1257,17 @@ export namespace InfraLogEntryResolvers {
 /** A special built-in column that contains the log entry's timestamp */
 export namespace InfraLogEntryTimestampColumnResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryTimestampColumn> {
+    /** The id of the corresponding column configuration */
+    columnId?: ColumnIdResolver<string, TypeParent, Context>;
     /** The timestamp */
     timestamp?: TimestampResolver<number, TypeParent, Context>;
   }
 
+  export type ColumnIdResolver<
+    R = string,
+    Parent = InfraLogEntryTimestampColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type TimestampResolver<
     R = number,
     Parent = InfraLogEntryTimestampColumn,
@@ -1264,10 +1277,17 @@ export namespace InfraLogEntryTimestampColumnResolvers {
 /** A special built-in column that contains the log entry's constructed message */
 export namespace InfraLogEntryMessageColumnResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryMessageColumn> {
+    /** The id of the corresponding column configuration */
+    columnId?: ColumnIdResolver<string, TypeParent, Context>;
     /** A list of the formatted log entry segments */
     message?: MessageResolver<InfraLogMessageSegment[], TypeParent, Context>;
   }
 
+  export type ColumnIdResolver<
+    R = string,
+    Parent = InfraLogEntryMessageColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type MessageResolver<
     R = InfraLogMessageSegment[],
     Parent = InfraLogEntryMessageColumn,
@@ -1317,6 +1337,8 @@ export namespace InfraLogMessageConstantSegmentResolvers {
 /** A column that contains the value of a field of the log entry */
 export namespace InfraLogEntryFieldColumnResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryFieldColumn> {
+    /** The id of the corresponding column configuration */
+    columnId?: ColumnIdResolver<string, TypeParent, Context>;
     /** The field name of the column */
     field?: FieldResolver<string, TypeParent, Context>;
     /** The value of the field in the log entry */
@@ -1325,6 +1347,11 @@ export namespace InfraLogEntryFieldColumnResolvers {
     highlights?: HighlightsResolver<string[], TypeParent, Context>;
   }
 
+  export type ColumnIdResolver<
+    R = string,
+    Parent = InfraLogEntryFieldColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type FieldResolver<
     R = string,
     Parent = InfraLogEntryFieldColumn,

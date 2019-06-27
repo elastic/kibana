@@ -22,7 +22,7 @@ import { LogTextStreamLoadingItemView } from './loading_item_view';
 import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
-import { getColumnWidths, LogEntryColumnWidth } from './log_entry_column';
+import { getColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { useMeasuredCharacterDimensions } from './text_styles';
 
 interface ScrollableLogTextStreamViewProps {
@@ -281,7 +281,7 @@ export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamVie
  */
 const WithColumnWidths: React.FunctionComponent<{
   children: (
-    params: { columnWidths: LogEntryColumnWidth[]; CharacterDimensionsProbe: React.ComponentType }
+    params: { columnWidths: LogEntryColumnWidths; CharacterDimensionsProbe: React.ComponentType }
   ) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;

@@ -288,14 +288,17 @@ const convertLogDocumentToEntry = (
   columns: logColumns.map(logColumn => {
     if (SavedSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
       return {
+        columnId: logColumn.timestampColumn.id,
         timestamp: document.key.time,
       };
     } else if (SavedSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
       return {
+        columnId: logColumn.messageColumn.id,
         message: formatLogMessage(document.fields, document.highlights),
       };
     } else {
       return {
+        columnId: logColumn.fieldColumn.id,
         field: logColumn.fieldColumn.field,
         highlights: [],
         value: stringify(document.fields[logColumn.fieldColumn.field] || null),

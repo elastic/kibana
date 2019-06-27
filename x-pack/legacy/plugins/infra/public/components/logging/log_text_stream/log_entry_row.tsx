@@ -21,7 +21,7 @@ import {
   isFieldLogColumnConfiguration,
 } from '../../../utils/source_configuration';
 import { TextScale } from '../../../../common/log_text_scale';
-import { LogEntryColumn, LogEntryColumnWidth } from './log_entry_column';
+import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
@@ -31,7 +31,7 @@ import { monospaceTextStyle } from './text_styles';
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
   columnConfigurations: LogColumnConfiguration[];
-  columnWidths: LogEntryColumnWidth[];
+  columnWidths: LogEntryColumnWidths;
   isHighlighted: boolean;
   logEntry: LogEntry;
   openFlyoutWithItem: (id: string) => void;
@@ -64,7 +64,19 @@ export const LogEntryRow = ({
     logEntry.gid,
   ]);
 
-  const iconColumnWidth = useMemo(() => columnWidths[columnWidths.length - 1], [columnWidths]);
+  const logEntryColumnsById = useMemo(
+    () =>
+      logEntry.columns.reduce<{
+        [columnId: string]: LogEntry['columns'][0];
+      }>(
+        (columnsById, column) => ({
+          ...columnsById,
+          [column.columnId]: column,
+        }),
+        {}
+      ),
+    [logEntry.columns]
+  );
 
   return (
     <LogEntryRowWrapper
@@ -77,60 +89,75 @@ export const LogEntryRow = ({
       onMouseLeave={setItemIsNotHovered}
       scale={scale}
     >
-      {logEntry.columns.map((column, columnIndex) => {
-        const columnConfiguration = columnConfigurations[columnIndex];
-        const columnWidth = columnWidths[columnIndex];
+      {/* logEntry.columns.map((column, columnIndex) => {*/}
+      {columnConfigurations.map(columnConfiguration => {
+        if (isTimestampLogColumnConfiguration(columnConfiguration)) {
+          const column = logEntryColumnsById[columnConfiguration.timestampColumn.id];
+          const columnWidth = columnWidths[columnConfiguration.timestampColumn.id];
 
-        if (isTimestampColumn(column) && isTimestampLogColumnConfiguration(columnConfiguration)) {
           return (
             <LogEntryColumn
               data-test-subj="logColumn timestampLogColumn"
               key={columnConfiguration.timestampColumn.id}
               {...columnWidth}
             >
-              <LogEntryTimestampColumn
-                isHighlighted={isHighlighted}
-                isHovered={isHovered}
-                time={column.timestamp}
-              />
+              {isTimestampColumn(column) ? (
+                <LogEntryTimestampColumn
+                  isHighlighted={isHighlighted}
+                  isHovered={isHovered}
+                  time={column.timestamp}
+                />
+              ) : null}
             </LogEntryColumn>
           );
-        } else if (
-          isMessageColumn(column) &&
-          isMessageLogColumnConfiguration(columnConfiguration)
-        ) {
+        } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
+          const column = logEntryColumnsById[columnConfiguration.messageColumn.id];
+          const columnWidth = columnWidths[columnConfiguration.messageColumn.id];
+
           return (
             <LogEntryColumn
               data-test-subj="logColumn messageLogColumn"
               key={columnConfiguration.messageColumn.id}
               {...columnWidth}
             >
-              <LogEntryMessageColumn
-                isHighlighted={isHighlighted}
-                isHovered={isHovered}
-                isWrapped={wrap}
-                segments={column.message}
-              />
+              {isMessageColumn(column) ? (
+                <LogEntryMessageColumn
+                  isHighlighted={isHighlighted}
+                  isHovered={isHovered}
+                  isWrapped={wrap}
+                  segments={column.message}
+                />
+              ) : null}
             </LogEntryColumn>
           );
-        } else if (isFieldColumn(column) && isFieldLogColumnConfiguration(columnConfiguration)) {
+        } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
+          const column = logEntryColumnsById[columnConfiguration.fieldColumn.id];
+          const columnWidth = columnWidths[columnConfiguration.fieldColumn.id];
+
           return (
             <LogEntryColumn
-              data-test-subj={`logColumn fieldLogColumn fieldLogColumn:${column.field}`}
+              data-test-subj={`logColumn fieldLogColumn fieldLogColumn:${
+                columnConfiguration.fieldColumn.field
+              }`}
               key={columnConfiguration.fieldColumn.id}
               {...columnWidth}
             >
-              <LogEntryFieldColumn
-                isHighlighted={isHighlighted}
-                isHovered={isHovered}
-                isWrapped={wrap}
-                encodedValue={column.value}
-              />
+              {isFieldColumn(column) ? (
+                <LogEntryFieldColumn
+                  isHighlighted={isHighlighted}
+                  isHovered={isHovered}
+                  isWrapped={wrap}
+                  encodedValue={column.value}
+                />
+              ) : null}
             </LogEntryColumn>
           );
         }
       })}
-      <LogEntryColumn key="logColumn iconLogColumn iconLogColumn:details" {...iconColumnWidth}>
+      <LogEntryColumn
+        key="logColumn iconLogColumn iconLogColumn:details"
+        {...columnWidths[iconColumnId]}
+      >
         <LogEntryDetailsIconColumn
           isHighlighted={isHighlighted}
           isHovered={isHovered}

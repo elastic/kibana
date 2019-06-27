@@ -30,9 +30,11 @@ export const sharedFragments = {
       }
       columns {
         ... on InfraLogEntryTimestampColumn {
+          columnId
           timestamp
         }
         ... on InfraLogEntryMessageColumn {
+          columnId
           message {
             ... on InfraLogMessageFieldSegment {
               field
@@ -44,6 +46,7 @@ export const sharedFragments = {
           }
         }
         ... on InfraLogEntryFieldColumn {
+          columnId
           field
           value
         }
@@ -59,6 +62,7 @@ export const sharedFragments = {
       }
       columns {
         ... on InfraLogEntryMessageColumn {
+          columnId
           message {
             ... on InfraLogMessageFieldSegment {
               field
@@ -67,6 +71,7 @@ export const sharedFragments = {
           }
         }
         ... on InfraLogEntryFieldColumn {
+          columnId
           field
           highlights
         }

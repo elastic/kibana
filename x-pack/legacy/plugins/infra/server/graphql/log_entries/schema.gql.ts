@@ -28,18 +28,24 @@ export const logEntriesSchema = gql`
 
   "A special built-in column that contains the log entry's timestamp"
   type InfraLogEntryTimestampColumn {
+    "The id of the corresponding column configuration"
+    columnId: ID!
     "The timestamp"
     timestamp: Float!
   }
 
   "A special built-in column that contains the log entry's constructed message"
   type InfraLogEntryMessageColumn {
+    "The id of the corresponding column configuration"
+    columnId: ID!
     "A list of the formatted log entry segments"
     message: [InfraLogMessageSegment!]!
   }
 
   "A column that contains the value of a field of the log entry"
   type InfraLogEntryFieldColumn {
+    "The id of the corresponding column configuration"
+    columnId: ID!
     "The field name of the column"
     field: String!
     "The value of the field in the log entry"

@@ -1445,6 +1445,18 @@
         "description": "A special built-in column that contains the log entry's timestamp",
         "fields": [
           {
+            "name": "columnId",
+            "description": "The id of the corresponding column configuration",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "timestamp",
             "description": "The timestamp",
             "args": [],
@@ -1467,6 +1479,18 @@
         "name": "InfraLogEntryMessageColumn",
         "description": "A special built-in column that contains the log entry's constructed message",
         "fields": [
+          {
+            "name": "columnId",
+            "description": "The id of the corresponding column configuration",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "message",
             "description": "A list of the formatted log entry segments",
@@ -1589,6 +1613,18 @@
         "name": "InfraLogEntryFieldColumn",
         "description": "A column that contains the value of a field of the log entry",
         "fields": [
+          {
+            "name": "columnId",
+            "description": "The id of the corresponding column configuration",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "field",
             "description": "The field name of the column",

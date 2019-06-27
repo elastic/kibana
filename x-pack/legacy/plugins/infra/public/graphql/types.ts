@@ -183,11 +183,15 @@ export interface InfraLogEntry {
 }
 /** A special built-in column that contains the log entry's timestamp */
 export interface InfraLogEntryTimestampColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** The timestamp */
   timestamp: number;
 }
 /** A special built-in column that contains the log entry's constructed message */
 export interface InfraLogEntryMessageColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** A list of the formatted log entry segments */
   message: InfraLogMessageSegment[];
 }
@@ -207,6 +211,8 @@ export interface InfraLogMessageConstantSegment {
 }
 /** A column that contains the value of a field of the log entry */
 export interface InfraLogEntryFieldColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** The field name of the column */
   field: string;
   /** The value of the field in the log entry */
@@ -1139,11 +1145,15 @@ export namespace InfraLogEntryFields {
   export type InfraLogEntryTimestampColumnInlineFragment = {
     __typename?: 'InfraLogEntryTimestampColumn';
 
+    columnId: string;
+
     timestamp: number;
   };
 
   export type InfraLogEntryMessageColumnInlineFragment = {
     __typename?: 'InfraLogEntryMessageColumn';
+
+    columnId: string;
 
     message: Message[];
   };
@@ -1168,6 +1178,8 @@ export namespace InfraLogEntryFields {
 
   export type InfraLogEntryFieldColumnInlineFragment = {
     __typename?: 'InfraLogEntryFieldColumn';
+
+    columnId: string;
 
     field: string;
 
@@ -1201,6 +1213,8 @@ export namespace InfraLogEntryHighlightFields {
   export type InfraLogEntryMessageColumnInlineFragment = {
     __typename?: 'InfraLogEntryMessageColumn';
 
+    columnId: string;
+
     message: Message[];
   };
 
@@ -1216,6 +1230,8 @@ export namespace InfraLogEntryHighlightFields {
 
   export type InfraLogEntryFieldColumnInlineFragment = {
     __typename?: 'InfraLogEntryFieldColumn';
+
+    columnId: string;
 
     field: string;
 
