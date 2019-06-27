@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
+import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/embeddable/types';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import {
   RawSavedDashboardPanelTo60,
@@ -92,17 +92,14 @@ function migratePre61PanelToLatest(
   useMargins: boolean,
   uiState?: { [key: string]: { [key: string]: unknown } }
 ): RawSavedDashboardPanel730ToLatest {
-  ['col', 'row'].forEach(key => {
-    if (!_.has(panel, key)) {
-      throw new Error(
-        i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage', {
-          defaultMessage:
-            'Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected field: {key}',
-          values: { key },
-        })
-      );
-    }
-  });
+  if (panel.col === undefined || panel.row === undefined) {
+    throw new Error(
+      i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage', {
+        defaultMessage:
+          'Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected col and/or row fields',
+      })
+    );
+  }
 
   const embeddableConfig = uiState ? uiState[`P-${panel.panelIndex}`] || {} : {};
 
@@ -142,8 +139,8 @@ function migrate610PanelToLatest(
   useMargins: boolean,
   uiState?: { [key: string]: { [key: string]: unknown } }
 ): RawSavedDashboardPanel730ToLatest {
-  ['w', 'x', 'h', 'y'].forEach(key => {
-    if (!_.has(panel.gridData, key)) {
+  (['w', 'x', 'h', 'y'] as Array<keyof GridData>).forEach(key => {
+    if (panel.gridData[key] === undefined) {
       throw new Error(
         i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage', {
           defaultMessage:
