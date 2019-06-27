@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses } from '../../utils/build_query';
+import { KpiHostsESMSearchBody } from './types';
 import { RequestBasicOptions } from '../framework';
 
-import { KpiHostsESMSearchBody } from './types';
-
-export const buildGeneralQuery = ({
+export const buildUniqueIpsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
@@ -36,24 +35,6 @@ export const buildGeneralQuery = ({
     },
     {
       aggregations: {
-        hosts: {
-          cardinality: {
-            field: 'host.name',
-          },
-        },
-        hosts_histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: '6',
-          },
-          aggs: {
-            count: {
-              cardinality: {
-                field: 'host.name',
-              },
-            },
-          },
-        },
         unique_source_ips: {
           cardinality: {
             field: 'source.ip',

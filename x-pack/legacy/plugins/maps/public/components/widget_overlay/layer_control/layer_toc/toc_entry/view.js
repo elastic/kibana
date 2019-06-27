@@ -7,16 +7,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import {
-  EuiIcon,
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiIcon, EuiOverlayMask, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 import { LayerTocActions } from '../../../../../shared/components/layer_toc_actions';
 import { i18n } from '@kbn/i18n';
 
@@ -99,28 +90,18 @@ export class TOCEntry extends React.Component {
 
     return (
       <EuiOverlayMask>
-        <EuiModal
-          onClose={closeModal}
+        <EuiConfirmModal
+          title="Discard changes"
+          onCancel={closeModal}
+          onConfirm={openPanel}
+          cancelButtonText="Do not proceed"
+          confirmButtonText="Proceed and discard changes"
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
         >
-          <EuiModalBody>
-            There are unsaved changes to your layer. Are you sure you want to proceed?
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              onClick={closeModal}
-            >
-              Do not proceed
-            </EuiButtonEmpty>
-
-            <EuiButton
-              onClick={openPanel}
-              fill
-            >
-              Proceed and discard changes
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+          <p>There are unsaved changes to your layer.</p>
+          <p>Are you sure you want to proceed?</p>
+        </EuiConfirmModal>
       </EuiOverlayMask>
     );
   }
