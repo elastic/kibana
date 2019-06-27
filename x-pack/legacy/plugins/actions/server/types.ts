@@ -8,6 +8,8 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
+export type GetServicesFunction = (basePath: string, overwrites?: Partial<Services>) => Services;
+export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 
 export interface SavedObjectReference {
   name: string;
@@ -33,6 +35,8 @@ export interface ActionTypeExecutorOptions {
   params: Record<string, any>;
 }
 
+export type ExecutorType = (options: ActionTypeExecutorOptions) => Promise<any>;
+
 export interface ActionType {
   id: string;
   name: string;
@@ -41,5 +45,5 @@ export interface ActionType {
     params?: any;
     config?: any;
   };
-  executor({ services, config, params }: ActionTypeExecutorOptions): Promise<any>;
+  executor: ExecutorType;
 }

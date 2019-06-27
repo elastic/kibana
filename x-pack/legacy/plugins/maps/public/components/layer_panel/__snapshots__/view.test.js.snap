@@ -102,9 +102,7 @@ exports[`LayerPanel is rendered 1`] = `
   <EuiFlyoutFooter
     className="mapLayerPanel__footer"
   >
-    <FlyoutFooter
-      hasStateChanged={[Function]}
-    />
+    <FlyoutFooter />
   </EuiFlyoutFooter>
 </EuiFlexGroup>
 `;

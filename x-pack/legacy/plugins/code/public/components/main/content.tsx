@@ -31,7 +31,8 @@ import {
   repoUriSelector,
   statusSelector,
 } from '../../selectors';
-import { encodeRevisionString, history } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
+import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { CloneStatus } from './clone_status';
 import { CommitHistory } from './commit_history';

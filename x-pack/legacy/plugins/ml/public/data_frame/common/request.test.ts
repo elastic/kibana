@@ -96,6 +96,7 @@ describe('Data Frame: Common', () => {
     const pivotState: DefinePivotExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
+      isAdvancedEditorEnabled: false,
       search: 'the-query',
       valid: true,
     };

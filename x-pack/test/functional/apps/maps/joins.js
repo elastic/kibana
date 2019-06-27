@@ -127,6 +127,36 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
+    describe('where clause', () => {
+      before(async () => {
+        await PageObjects.maps.setJoinWhereQuery('geo_shapes*', 'prop1 >= 11');
+      });
+
+      after(async () => {
+        await PageObjects.maps.closeLayerPanel();
+      });
+
+      it('should apply query to join request', async () => {
+        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        const requestStats = await inspector.getTableData();
+        const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+        expect(totalHits).to.equal('2');
+        const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        expect(hits).to.equal('0'); // aggregation requests do not return any documents
+        await inspector.close();
+      });
+
+      it('should update dynamic data range in legend with new results', async () => {
+        const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+        const split = layerTOCDetails.trim().split('\n');
+
+        const min = split[0];
+        expect(min).to.equal('12');
+
+        const max = split[2];
+        expect(max).to.equal('12');
+      });
+    });
 
     describe('inspector', () => {
       afterEach(async () => {
