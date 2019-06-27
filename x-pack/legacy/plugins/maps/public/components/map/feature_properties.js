@@ -96,7 +96,7 @@ export class FeatureProperties extends React.Component {
             defaultMessage: 'Filter on property'
           })}
           onClick={() => {
-            this._onCloseTooltip();
+            this.props.onCloseTooltip();
             const filterAction = tooltipProperty.getFilterAction();
             filterAction();
           }}

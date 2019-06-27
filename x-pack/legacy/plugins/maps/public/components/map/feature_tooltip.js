@@ -123,6 +123,7 @@ export class FeatureTooltip extends React.Component {
         layerId={feature.layerId}
         loadFeatureProperties={this.props.loadFeatureProperties}
         showFilterButtons={this.props.showFilterButtons}
+        onCloseTooltip={this.props._onCloseTooltip}
       />
     );
   }
