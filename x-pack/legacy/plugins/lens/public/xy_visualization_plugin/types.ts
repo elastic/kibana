@@ -53,6 +53,7 @@ interface AxisConfig {
   title: string;
   showGridlines: boolean;
   position: Position;
+  hide?: boolean;
 }
 
 const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } = {
@@ -68,6 +69,11 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
     types: ['string'],
     options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
     help: 'The position of the axis',
+  },
+  hide: {
+    types: ['boolean'],
+    default: false,
+    help: 'Show / hide axis',
   },
 };
 

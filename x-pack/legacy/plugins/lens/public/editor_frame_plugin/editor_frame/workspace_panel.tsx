@@ -47,7 +47,8 @@ export function WorkspacePanel({
       datasourceSuggestions,
       visualizationMap,
       activeVisualizationId,
-      visualizationState
+      visualizationState,
+      datasourcePublicAPI
     );
 
     if (suggestions.length === 0) {
@@ -137,6 +138,7 @@ export function WorkspacePanel({
     } else {
       return (
         <ExpressionRendererComponent
+          className="lnsChartWrapper"
           expression={expression!}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);

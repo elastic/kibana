@@ -12,6 +12,7 @@ import { getSuggestions } from './xy_suggestions';
 import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState } from './types';
+import { toExpression } from './to_expression';
 
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
@@ -50,71 +51,5 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       domElement
     ),
 
-  toExpression: (state, datasource) => ({
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'lens_xy_chart',
-        arguments: {
-          seriesType: [state.seriesType],
-          legend: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_legendConfig',
-                  arguments: {
-                    isVisible: [state.legend.isVisible],
-                    position: [state.legend.position],
-                  },
-                },
-              ],
-            },
-          ],
-          x: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_xConfig',
-                  arguments: {
-                    title: [state.x.title],
-                    showGridlines: [state.x.showGridlines],
-                    position: [state.x.position],
-                    accessor: [state.x.accessor],
-                  },
-                },
-              ],
-            },
-          ],
-          y: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_yConfig',
-                  arguments: {
-                    title: [state.y.title],
-                    showGridlines: [state.y.showGridlines],
-                    position: [state.y.position],
-                    accessors: state.y.accessors,
-                    labels: state.y.accessors.map(accessor => {
-                      const operation = datasource.getOperationForColumnId(accessor);
-                      return operation ? operation.label : accessor;
-                    }),
-                  },
-                },
-              ],
-            },
-          ],
-          splitSeriesAccessors: state.splitSeriesAccessors,
-          stackAccessors: state.stackAccessors,
-        },
-      },
-    ],
-  }),
+  toExpression,
 };

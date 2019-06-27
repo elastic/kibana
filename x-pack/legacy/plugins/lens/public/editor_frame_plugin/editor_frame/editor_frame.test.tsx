@@ -553,6 +553,7 @@ Object {
           score: 1,
           datasourceSuggestionId: 0,
           state: initialState,
+          previewIcon: 'empty',
         },
       ]);
 
@@ -654,12 +655,14 @@ Object {
                   score: 0.5,
                   state: {},
                   title: 'Suggestion2',
+                  previewIcon: 'empty',
                 },
                 {
                   datasourceSuggestionId: 0,
                   score: 0.8,
                   state: {},
                   title: 'Suggestion1',
+                  previewIcon: 'empty',
                 },
               ],
             },
@@ -671,12 +674,14 @@ Object {
                   score: 0.4,
                   state: {},
                   title: 'Suggestion4',
+                  previewIcon: 'empty',
                 },
                 {
                   datasourceSuggestionId: 0,
                   score: 0.45,
                   state: {},
                   title: 'Suggestion3',
+                  previewIcon: 'empty',
                 },
               ],
             },
@@ -697,7 +702,7 @@ Object {
 
       // TODO why is this necessary?
       instance.update();
-      const suggestions = instance.find('[data-test-subj="suggestion"]');
+      const suggestions = instance.find('[data-test-subj="suggestion-title"]');
       expect(suggestions.map(el => el.text())).toEqual([
         'Suggestion1',
         'Suggestion2',
@@ -721,6 +726,7 @@ Object {
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion1',
+                  previewIcon: 'empty',
                 },
               ],
             },
@@ -744,7 +750,7 @@ Object {
       instance.update();
 
       act(() => {
-        instance.find('[data-test-subj="suggestion"]').simulate('click');
+        instance.find('[data-test-subj="suggestion-title"]').simulate('click');
       });
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(1);
@@ -776,12 +782,14 @@ Object {
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
+                  previewIcon: 'empty',
                 },
                 {
                   datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion2',
+                  previewIcon: 'empty',
                 },
               ],
             },
@@ -831,12 +839,14 @@ Object {
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
+                  previewIcon: 'empty',
                 },
                 {
                   datasourceSuggestionId: 0,
                   score: 0.6,
                   state: {},
                   title: 'Suggestion2',
+                  previewIcon: 'empty',
                 },
               ],
             },
@@ -848,6 +858,7 @@ Object {
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion3',
+                  previewIcon: 'empty',
                 },
               ],
             },
