@@ -23,6 +23,7 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 import { APMLink } from '../../shared/Links/APMLink';
+import { units, px } from '../../../style/variables';
 
 const homeTabs: IHistoryTab[] = [
   {
@@ -49,12 +50,11 @@ const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
 
 const MainNavigationBar = styled.div`
   display: block;
-  margin-top: -${theme.euiSizeL};
-  margin-left: -${theme.euiSizeL};
-  height: 64px;
+  height: 88px;
   padding: 0 ${theme.euiSizeL};
   background: ${theme.euiColorEmptyShade};
   border-bottom: 1px solid ${theme.euiColorLightShade};
+  padding: ${px(units.plus)};
 `;
 
 export function Home() {
@@ -75,7 +75,6 @@ export function Home() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MainNavigationBar>
-      <EuiSpacer />
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
