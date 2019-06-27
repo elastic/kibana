@@ -19,6 +19,8 @@
 import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 import { sortBy, isNumber } from 'lodash';
 
+export const ASCENDING_UNIT_ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
+
 const units = {
   ms: 0.001,
   s: 1,

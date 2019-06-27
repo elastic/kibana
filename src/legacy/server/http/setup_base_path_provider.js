@@ -18,11 +18,6 @@
  */
 
 export function setupBasePathProvider(kbnServer) {
-  kbnServer.server.decorate('request', 'setBasePath', function (basePath) {
-    const request = this;
-    kbnServer.newPlatform.setup.core.http.basePath.set(request, basePath);
-  });
-
   kbnServer.server.decorate('request', 'getBasePath', function () {
     const request = this;
     return kbnServer.newPlatform.setup.core.http.basePath.get(request);

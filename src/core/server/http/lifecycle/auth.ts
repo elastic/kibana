@@ -19,6 +19,7 @@
 import Boom from 'boom';
 import { noop } from 'lodash';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
+import { KibanaRequest } from '../router';
 
 enum ResultType {
   authenticated = 'authenticated',
@@ -26,9 +27,8 @@ enum ResultType {
   rejected = 'rejected',
 }
 
-interface Authenticated {
+interface Authenticated extends AuthResultData {
   type: ResultType.authenticated;
-  state: object;
 }
 
 interface Redirected {
@@ -45,8 +45,12 @@ interface Rejected {
 type AuthResult = Authenticated | Rejected | Redirected;
 
 const authResult = {
-  authenticated(state: object = {}): AuthResult {
-    return { type: ResultType.authenticated, state };
+  authenticated(data: Partial<AuthResultData> = {}): AuthResult {
+    return {
+      type: ResultType.authenticated,
+      state: data.state || {},
+      headers: data.headers || {},
+    };
   },
   redirected(url: string): AuthResult {
     return { type: ResultType.redirected, url };
@@ -74,12 +78,34 @@ const authResult = {
 };
 
 /**
+ * Auth Headers map
+ * @public
+ * */
+
+export type AuthHeaders = Record<string, string>;
+
+/**
+ * Result of an incoming request authentication.
+ * @public
+ * */
+export interface AuthResultData {
+  /**
+   * Data to associate with an incoming request. Any downstream plugin may get access to the data.
+   */
+  state: Record<string, unknown>;
+  /**
+   * Auth specific headers to authenticate a user against Elasticsearch.
+   */
+  headers: AuthHeaders;
+}
+
+/**
  * @public
  * A tool set defining an outcome of Auth interceptor for incoming request.
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (state?: object) => AuthResult;
+  authenticated: (data?: Partial<AuthResultData>) => AuthResult;
   /** Authentication requires to interrupt request handling and redirect to a configured url */
   redirected: (url: string) => AuthResult;
   /** Authentication is unsuccessful, fail the request with specified error. */
@@ -94,29 +120,29 @@ const toolkit: AuthToolkit = {
 
 /** @public */
 export type AuthenticationHandler = (
-  request: Readonly<Request>,
+  request: KibanaRequest,
   t: AuthToolkit
 ) => AuthResult | Promise<AuthResult>;
 
 /** @public */
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
-  onSuccess: (req: Request, state: unknown) => void = noop
+  onSuccess: (req: Request, data: AuthResultData) => void = noop
 ) {
   return async function interceptAuth(
     req: Request,
     h: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     try {
-      const result = await fn(req, toolkit);
+      const result = await fn(KibanaRequest.from(req, undefined, false), toolkit);
       if (!authResult.isValid(result)) {
         throw new Error(
           `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
         );
       }
       if (authResult.isAuthenticated(result)) {
-        onSuccess(req, result.state);
-        return h.authenticated({ credentials: result.state });
+        onSuccess(req, { state: result.state, headers: result.headers });
+        return h.authenticated({ credentials: result.state || {} });
       }
       if (authResult.isRedirected(result)) {
         return h.redirect(result.url).takeover();

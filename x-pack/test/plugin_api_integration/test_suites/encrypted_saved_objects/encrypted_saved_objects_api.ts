@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from 'src/legacy/server/saved_objects/service';
+import { SavedObject } from 'src/core/server';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export

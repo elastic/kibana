@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { EmbeddableMetadata, Query, TimeRange } from 'ui/embeddable';
+import { EmbeddableMetadata } from 'ui/embeddable';
 import { Filter } from '@kbn/es-query';
 import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { SavedDashboardPanelMap } from '../types';
 

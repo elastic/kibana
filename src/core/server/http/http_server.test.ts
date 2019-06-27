@@ -47,7 +47,7 @@ beforeEach(() => {
     ssl: {},
   } as HttpConfig;
 
-  server = new HttpServer(logger.get());
+  server = new HttpServer(logger, 'tests');
 });
 
 afterEach(async () => {
@@ -62,6 +62,13 @@ test('listening after started', async () => {
   await server.start();
 
   expect(server.isListening()).toBe(true);
+  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "http server running",
+  ],
+]
+`);
 });
 
 test('200 OK with body', async () => {
@@ -399,35 +406,6 @@ test('handles deleting', async () => {
     });
 });
 
-test('filtered headers', async () => {
-  expect.assertions(1);
-
-  const router = new Router('/foo');
-
-  let filteredHeaders: any;
-
-  router.get({ path: '/', validate: false }, (req, res) => {
-    filteredHeaders = req.getFilteredHeaders(['x-kibana-foo', 'host']);
-
-    return res.noContent();
-  });
-
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
-
-  await server.start();
-
-  await supertest(innerServer.listener)
-    .get('/foo/?bar=quux')
-    .set('x-kibana-foo', 'bar')
-    .set('x-kibana-bar', 'quux');
-
-  expect(filteredHeaders).toEqual({
-    host: `127.0.0.1:${config.port}`,
-    'x-kibana-foo': 'bar',
-  });
-});
-
 describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   let configWithBasePath: HttpConfig;
   let innerServerListener: Server;
@@ -580,11 +558,10 @@ test('returns server and connection options on start', async () => {
     ...config,
     port: 12345,
   };
-  const { options, server: innerServer } = await server.setup(configWithPort);
+  const { server: innerServer } = await server.setup(configWithPort);
 
   expect(innerServer).toBeDefined();
   expect(innerServer).toBe((server as any).server);
-  expect(options).toMatchSnapshot();
 });
 
 test('registers registerOnPostAuth interceptor several times', async () => {
@@ -639,7 +616,7 @@ describe('#registerAuth', () => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
       sessionStorage.set({ value: user, expires: Date.now() + 1000 });
-      return t.authenticated(user);
+      return t.authenticated({ state: user });
     }, cookieOptions);
     registerRouter(router);
     await server.start();
@@ -715,7 +692,7 @@ describe('#registerAuth', () => {
       });
   });
 
-  it(`allows manipulating cookies from route handler`, async () => {
+  it('allows manipulating cookies from route handler', async () => {
     const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
     const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
       const user = { id: '42' };
@@ -748,6 +725,55 @@ describe('#registerAuth', () => {
     expect(responseToResetCookie.header['set-cookie']).toEqual([
       'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
     ]);
+  });
+
+  it.skip('is the only place with access to the authorization header', async () => {
+    const token = 'Basic: user:password';
+    const {
+      registerAuth,
+      registerOnPreAuth,
+      registerOnPostAuth,
+      registerRouter,
+      server: innerServer,
+    } = await server.setup(config);
+
+    let fromRegisterOnPreAuth;
+    await registerOnPreAuth((req, t) => {
+      fromRegisterOnPreAuth = req.headers.authorization;
+      return t.next();
+    });
+
+    let fromRegisterAuth;
+    await registerAuth((req, t) => {
+      fromRegisterAuth = req.headers.authorization;
+      return t.authenticated();
+    }, cookieOptions);
+
+    let fromRegisterOnPostAuth;
+    await registerOnPostAuth((req, t) => {
+      fromRegisterOnPostAuth = req.headers.authorization;
+      return t.next();
+    });
+
+    let fromRouteHandler;
+    const router = new Router('');
+    router.get({ path: '/', validate: false }, (req, res) => {
+      fromRouteHandler = req.headers.authorization;
+      return res.ok({ content: 'ok' });
+    });
+    registerRouter(router);
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .set('Authorization', token)
+      .expect(200);
+
+    expect(fromRegisterOnPreAuth).toEqual({});
+    expect(fromRegisterAuth).toEqual({ authorization: token });
+    expect(fromRegisterOnPostAuth).toEqual({});
+    expect(fromRouteHandler).toEqual({});
   });
 });
 
@@ -909,7 +935,7 @@ describe('#auth.get()', () => {
     const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(config);
     const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
       sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
-      return t.authenticated(user);
+      return t.authenticated({ state: user });
     }, cookieOptions);
 
     const router = new Router('');

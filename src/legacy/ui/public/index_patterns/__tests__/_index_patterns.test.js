@@ -80,7 +80,7 @@ const config = {
 
 
 describe('IndexPatterns', () => {
-  const indexPatterns = new IndexPatterns('', config, savedObjectsClient);
+  const indexPatterns = new IndexPatterns(config, savedObjectsClient);
 
   it('does not cache gets without an id', function () {
     expect(indexPatterns.get()).not.toBe(indexPatterns.get());

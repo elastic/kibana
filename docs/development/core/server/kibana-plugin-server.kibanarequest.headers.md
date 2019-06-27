@@ -4,8 +4,15 @@
 
 ## KibanaRequest.headers property
 
+Readonly copy of incoming request headers.
+
 <b>Signature:</b>
 
 ```typescript
 readonly headers: Headers;
 ```
+
+## Remarks
+
+This property will contain a `filtered` copy of request headers.
+

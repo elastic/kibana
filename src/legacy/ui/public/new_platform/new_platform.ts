@@ -37,10 +37,12 @@ export function __reset__() {
   npStart.core = (null as unknown) as InternalCoreStart;
 }
 
-export function __setup__(coreSetup: InternalCoreSetup) {
+export function __setup__(coreSetup: InternalCoreSetup, plugins: Record<string, unknown>) {
   npSetup.core = coreSetup;
+  npSetup.plugins = plugins;
 }
 
-export function __start__(coreStart: InternalCoreStart) {
+export function __start__(coreStart: InternalCoreStart, plugins: Record<string, unknown>) {
   npStart.core = coreStart;
+  npStart.plugins = plugins;
 }
