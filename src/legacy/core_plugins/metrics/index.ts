@@ -32,7 +32,7 @@ export default function(kibana: any) {
 
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/metrics/'],
+      hacks: ['plugins/metrics/setup'],
     },
 
     config(Joi: any) {

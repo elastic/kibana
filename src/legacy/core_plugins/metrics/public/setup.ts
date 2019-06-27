@@ -19,24 +19,8 @@
 
 // @ts-ignore
 import { functionsRegistry } from 'plugins/interpreter/registries';
-// @ts-ignore
-import { tsvb } from './tsvb_fn';
-// @ts-ignore
-import { MetricsVis } from './kbn_vis_type';
 import { visualizations } from '../../visualizations/public';
-
-export class Plugin {
-  // @ts-ignore
-  public setup(core, plugins) {
-    plugins.data.expressions.functionsRegistry.register(tsvb);
-    // register the provider with the visTypes registry so that other know it exists
-    plugins.visualizations.types.VisTypesRegistryProvider.register(() => MetricsVis);
-  }
-
-  public start() {}
-
-  public stop() {}
-}
+import { plugin } from './plugin';
 
 const core = {};
 const plugins = {
@@ -48,4 +32,4 @@ const plugins = {
   visualizations,
 };
 
-new Plugin().setup(core, plugins);
+plugin().setup(core, plugins);
