@@ -11,6 +11,10 @@ export interface Props {
    */
   zoomScale: number;
   /**
+   * zoom level to scale workpad to fit into the viewport
+   */
+  fitZoomScale: number;
+  /**
    * sets the new zoom level
    */
   setZoomScale: (scale: number) => void;
@@ -28,5 +32,8 @@ export const zoomHandlerCreators = {
     const scaleIndex = ZOOM_LEVELS.indexOf(zoomScale);
     const scaleDown = scaleIndex - 1 >= 0 ? ZOOM_LEVELS[scaleIndex - 1] : MIN_ZOOM_LEVEL;
     setZoomScale(scaleDown);
+  },
+  resetZoom: ({ setZoomScale }: Props) => (): void => {
+    setZoomScale(1);
   },
 };
