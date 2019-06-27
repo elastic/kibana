@@ -30,9 +30,7 @@ export type Action =
     }
   | {
       type: 'SAVING';
-    }
-  | {
-      type: 'SAVED';
+      isSaving: boolean;
     }
   | {
       type: 'UPDATE_TITLE';
@@ -84,9 +82,7 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
 export const reducer = (state: EditorFrameState, action: Action): EditorFrameState => {
   switch (action.type) {
     case 'SAVING':
-      return { ...state, saving: true };
-    case 'SAVED':
-      return { ...state, saving: false };
+      return { ...state, saving: action.isSaving };
     case 'RESET':
       return action.state;
     case 'UPDATE_PERSISTED_ID':

@@ -204,6 +204,7 @@ describe('editor_frame state management', () => {
         },
         {
           type: 'SAVING',
+          isSaving: true,
         }
       );
 
@@ -226,7 +227,8 @@ describe('editor_frame state management', () => {
           },
         },
         {
-          type: 'SAVED',
+          type: 'SAVING',
+          isSaving: false,
         }
       );
 

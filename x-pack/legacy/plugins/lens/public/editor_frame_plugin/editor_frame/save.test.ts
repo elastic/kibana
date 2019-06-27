@@ -30,11 +30,11 @@ describe('save editor frame state', () => {
     let saved = false;
 
     const dispatch = jest.fn((action: Action) => {
-      if (action.type === 'SAVING' && saved) {
-        throw new Error('Saving was called after save');
-      }
-      if (action.type === 'SAVED' && !saved) {
-        throw new Error('Saved was called before save');
+      if (
+        (action.type === 'SAVING' && action.isSaving && saved) ||
+        (action.type === 'SAVING' && !action.isSaving && !saved)
+      ) {
+        throw new Error('Saving status was incorrectly set');
       }
     });
 
@@ -55,8 +55,8 @@ describe('save editor frame state', () => {
       },
     });
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVING' });
-    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVED' });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVING', isSaving: true });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVING', isSaving: false });
   });
 
   it('allows saves if an error occurs', async () => {
@@ -80,8 +80,8 @@ describe('save editor frame state', () => {
       })
     ).rejects.toThrow();
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVING' });
-    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVED' });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVING', isSaving: true });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'SAVING', isSaving: false });
   });
 
   it('transforms from internal state to persisted doc format', async () => {

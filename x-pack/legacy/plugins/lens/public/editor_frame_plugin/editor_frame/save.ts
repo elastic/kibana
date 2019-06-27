@@ -25,7 +25,7 @@ export async function save({
   visualization,
 }: Props) {
   try {
-    dispatch({ type: 'SAVING' });
+    dispatch({ type: 'SAVING', isSaving: true });
 
     const doc = await store.save({
       id: state.persistedId,
@@ -44,6 +44,6 @@ export async function save({
       redirectTo(`/edit/${doc.id}`);
     }
   } finally {
-    dispatch({ type: 'SAVED' });
+    dispatch({ type: 'SAVING', isSaving: false });
   }
 }
