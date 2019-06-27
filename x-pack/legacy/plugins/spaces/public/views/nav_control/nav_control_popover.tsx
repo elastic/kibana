@@ -174,7 +174,8 @@ export class NavControlPopover extends Component<Props, State> {
       onClose: () => this.props.spacesManager.changeSelectedSpace(space),
     });
 
-    setTimeout(() => this.props.spacesManager.changeSelectedSpace(space), 4000);
+    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2000));
+    this.props.spacesManager.changeSelectedSpace(space, timeoutPromise);
     return true;
   };
 }

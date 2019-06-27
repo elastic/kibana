@@ -51,14 +51,16 @@ export class SpacesManager extends EventEmitter {
     });
   }
 
-  public async changeSelectedSpace(space: Space) {
-    await kfetch({
+  public async changeSelectedSpace(space: Space, waitUntil = Promise.resolve()) {
+    const getSpaceLocation = await kfetch({
       pathname: `/api/spaces/v1/space/${encodeURIComponent(space.id)}/select`,
       method: 'POST',
-    })
-      .then(response => {
-        if (response.location) {
-          window.location = response.location;
+    });
+
+    Promise.all([getSpaceLocation, waitUntil])
+      .then(([{ location }]) => {
+        if (location) {
+          window.location = location;
         } else {
           this._displayError();
         }
