@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { HeaderExtension } from './header_extension';
-import { ChromeNavControl } from '../../../../../../../core/public';
+import { ChromeNavControl } from '../../nav_controls';
 
 interface Props {
   navControls: ReadonlyArray<ChromeNavControl>;

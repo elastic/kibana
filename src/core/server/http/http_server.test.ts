@@ -47,7 +47,7 @@ beforeEach(() => {
     ssl: {},
   } as HttpConfig;
 
-  server = new HttpServer(logger.get());
+  server = new HttpServer(logger, 'tests');
 });
 
 afterEach(async () => {
