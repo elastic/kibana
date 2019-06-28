@@ -41,11 +41,11 @@ const defaultProps = {
 };
 
 const mockTooltipProperties = [
-  new MockTooltipProperty('foo', 'bar', true),
-  new MockTooltipProperty('foo', 'bar', false)
+  new MockTooltipProperty('prop1', 'foobar1', true),
+  new MockTooltipProperty('prop2', 'foobar2', false)
 ];
 
-describe('FeatureTooltip (single)', async () => {
+describe('FeatureProperties', async () => {
 
   test('should not show filter button', async () => {
     const component = shallow(
@@ -89,7 +89,6 @@ describe('FeatureTooltip (single)', async () => {
       <FeatureProperties
         {...defaultProps}
         showFilterButtons={true}
-        showCloseButton={true}
         loadFeatureProperties={() => { throw new Error('Simulated load properties error'); }}
       />
     );
