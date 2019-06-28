@@ -21,6 +21,8 @@ import _ from 'lodash';
 import moment from 'moment';
 import { i18n }  from '@kbn/i18n';
 
+import { getEsShardTimeout } from '../helpers';
+
 const TIMEFILTER = '%timefilter%';
 const AUTOINTERVAL = '%autointerval%';
 const MUST_CLAUSE = '%dashboard_context-must_clause%';
@@ -36,12 +38,12 @@ const TIMEFIELD = '%timefield%';
  */
 export class EsQueryParser {
 
-  constructor(timeCache, searchCache, filters, onWarning, esShardTimeout) {
+  constructor(timeCache, searchCache, filters, onWarning) {
     this._timeCache = timeCache;
     this._searchCache = searchCache;
     this._filters = filters;
     this._onWarning = onWarning;
-    this._esShardTimeout = esShardTimeout;
+    this._esShardTimeout = getEsShardTimeout();
   }
 
   // noinspection JSMethodCanBeStatic

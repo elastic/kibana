@@ -17,28 +17,33 @@
  * under the License.
  */
 
-import { VegaParser } from './data_model/vega_parser';
-import { SearchCache } from './data_model/search_cache';
-import { TimeCache } from './data_model/time_cache';
+import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
-export function VegaRequestHandlerProvider(es, serviceSettings, config, esShardTimeout) {
+import { VegaParser } from './data_model/vega_parser';
+import { SearchCache } from './data_model/search_cache';
+import { TimeCache } from './data_model/time_cache';
+
+export async function createVegaRequestHandler() {
+
+  // todo: work in progress.
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const es = $injector.get('es');
+  const serviceSettings = $injector.get('serviceSettings');
+  // ^
+
+  const uiSettings = chrome.getUiSettingsClient();
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
+  return ({ timeRange, filters, query, visParams }) => {
+    timeCache.setTimeRange(timeRange);
 
-  return {
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
+    const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
+    const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
 
-    name: 'vega',
-
-    handler({ timeRange, filters, query, visParams }) {
-      timeCache.setTimeRange(timeRange);
-      const esQueryConfigs = getEsQueryConfig(config);
-      const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
-      const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings, esShardTimeout);
-      return vp.parseAsync();
-    }
-
+    return vp.parseAsync();
   };
 }

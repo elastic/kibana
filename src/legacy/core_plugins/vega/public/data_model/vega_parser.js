@@ -47,7 +47,7 @@ const DEFAULT_PARSER = 'elasticsearch';
 
 export class VegaParser {
 
-  constructor(spec, searchCache, timeCache, filters, serviceSettings, esShardTimeout) {
+  constructor(spec, searchCache, timeCache, filters, serviceSettings) {
     this.spec = spec;
     this.hideWarnings = false;
     this.error = undefined;
@@ -55,7 +55,7 @@ export class VegaParser {
 
     const onWarn = this._onWarning.bind(this);
     this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, searchCache, filters, onWarn, esShardTimeout),
+      elasticsearch: new EsQueryParser(timeCache, searchCache, filters, onWarn),
       emsfile: new EmsFileParser(serviceSettings),
       url: new UrlParser(onWarn),
     };

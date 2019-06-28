@@ -18,21 +18,26 @@
  */
 
 import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
 
-export default kibana => new kibana.Plugin({
-  id: 'vega',
-  require: ['elasticsearch'],
+const vegaPluginInitializer = (kibana: any) =>
+  new kibana.Plugin({
+    id: 'vega',
+    require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
+    publicDir: resolve(__dirname, 'public'),
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      hacks: [resolve(__dirname, 'public/setup')],
+      injectDefaultVars: () => ({}),
+    },
+    init: (server: Legacy.Server) => ({}),
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        enableExternalUrls: Joi.boolean().default(false),
+      }).default();
+    },
+  } as Legacy.PluginSpecOptions);
 
-  uiExports: {
-    visTypes: ['plugins/vega/vega_type'],
-    interpreter: ['plugins/vega/vega_fn'],
-    injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-  },
-
-  config: (Joi) => Joi.object({
-    enabled: Joi.boolean().default(true),
-    enableExternalUrls: Joi.boolean().default(false)
-  }).default(),
-
-});
+// eslint-disable-next-line import/no-default-export
+export default vegaPluginInitializer;

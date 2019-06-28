@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-import { VegaRequestHandlerProvider } from './vega_request_handler';
+import { createVegaRequestHandler } from './vega_request_handler';
 
-export const vega = () => ({
+export const kibanaVegaFn = () => ({
   name: 'vega',
   type: 'render',
   context: {
@@ -42,9 +40,7 @@ export const vega = () => ({
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
+    const vegaRequestHandler = await createVegaRequestHandler();
 
     const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),
@@ -67,5 +63,3 @@ export const vega = () => ({
     };
   }
 });
-
-functionsRegistry.register(vega);
