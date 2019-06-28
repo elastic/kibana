@@ -175,7 +175,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               nativeProps={{
                 columnId,
                 dragDropContext: props.dragDropContext,
-                filterOperations: op => op.isBucketed === true,
+                filterOperations: (op: Operation) => op.isBucketed === true,
                 suggestedPriority: 0,
               }}
             />

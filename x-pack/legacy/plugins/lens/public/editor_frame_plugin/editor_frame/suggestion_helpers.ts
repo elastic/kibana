@@ -27,7 +27,6 @@ export interface Suggestion {
  * action with `toSwitchAction` and dispatching it
  */
 export function getSuggestions(
-  datasource: DatasourcePublicAPI,
   datasourceTableSuggestions: DatasourceSuggestion[],
   visualizationMap: Record<string, Visualization>,
   activeVisualizationId: string | null,
