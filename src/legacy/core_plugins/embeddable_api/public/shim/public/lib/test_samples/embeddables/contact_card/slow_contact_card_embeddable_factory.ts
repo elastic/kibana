@@ -19,8 +19,7 @@
 
 import { Container, EmbeddableFactory } from '../../..';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
-
-export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
+import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 
 export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
   ContactCardEmbeddableInput
