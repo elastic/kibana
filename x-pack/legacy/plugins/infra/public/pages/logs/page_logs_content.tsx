@@ -118,16 +118,25 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>
-                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
-                        <LogMinimap
-                          height={height}
-                          width={width}
-                          highlightedInterval={visibleTimeInterval}
-                          intervalSize={intervalSize}
-                          jumpToTarget={jumpToTargetPosition}
-                          summaryBuckets={buckets}
-                          target={visibleMidpointTime}
-                        />
+                      {({
+                        isAutoReloading,
+                        jumpToTargetPosition,
+                        visibleMidpointTime,
+                        visibleTimeInterval,
+                      }) => (
+                        <WithStreamItems initializeOnMount={!isAutoReloading}>
+                          {({ isReloading }) => (
+                            <LogMinimap
+                              height={height}
+                              width={width}
+                              highlightedInterval={isReloading ? null : visibleTimeInterval}
+                              intervalSize={intervalSize}
+                              jumpToTarget={jumpToTargetPosition}
+                              summaryBuckets={buckets}
+                              target={visibleMidpointTime}
+                            />
+                          )}
+                        </WithStreamItems>
                       )}
                     </WithLogPosition>
                   )}

@@ -23,6 +23,7 @@ interface VerticalScrollPanelProps<Child> {
       bottomChild: Child;
       pagesAbove: number;
       pagesBelow: number;
+      fromScroll: boolean;
     }
   ) => void;
   target: Child | undefined;
@@ -54,11 +55,17 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   public scrollRef = React.createRef<HTMLDivElement>();
   public childRefs = new Map<Child, MeasurableChild>();
   public childDimensions = new Map<Child, Rect>();
+  private nextScrollEventFromCenterTarget = false;
 
   public handleScroll: React.UIEventHandler<HTMLDivElement> = throttle(
     SCROLL_THROTTLE_INTERVAL,
     () => {
-      this.reportVisibleChildren();
+      // If this event was fired by the centerTarget method modifying the scrollTop,
+      // then don't send `fromScroll: true` to reportVisibleChildren. The rest of the
+      // app needs to respond differently depending on whether the user is scrolling through
+      // the pane manually, versus whether the pane is updating itself in response to new data
+      this.reportVisibleChildren(!this.nextScrollEventFromCenterTarget);
+      this.nextScrollEventFromCenterTarget = false;
     }
   );
 
@@ -123,7 +130,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     };
   };
 
-  public reportVisibleChildren = () => {
+  public reportVisibleChildren = (fromScroll: boolean = false) => {
     const { onVisibleChildrenChange } = this.props;
     const visibleChildren = this.getVisibleChildren();
     const scrollPosition = this.getScrollPosition();
@@ -136,6 +143,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
       bottomChild: visibleChildren.bottomChild,
       middleChild: visibleChildren.middleChild,
       topChild: visibleChildren.topChild,
+      fromScroll,
       ...scrollPosition,
     });
   };
@@ -155,6 +163,9 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
 
     if (targetDimensions) {
       const targetOffset = typeof offset === 'undefined' ? targetDimensions.height / 2 : offset;
+      // Flag the scrollTop change that's about to happen as programmatic, as
+      // opposed to being in direct response to user input
+      this.nextScrollEventFromCenterTarget = true;
       scrollRef.current.scrollTop = targetDimensions.top + targetOffset - scrollViewHeight / 2;
     }
   };

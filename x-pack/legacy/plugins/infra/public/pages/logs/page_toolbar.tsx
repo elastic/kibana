@@ -100,6 +100,7 @@ export const LogsToolbar = injectI18n(({ intl }) => {
               jumpToTargetPositionTime,
               startLiveStreaming,
               stopLiveStreaming,
+              targetPosition,
             }) => (
               <LogTimeControls
                 currentTime={visibleMidpointTime}

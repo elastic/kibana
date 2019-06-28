@@ -45,6 +45,7 @@ interface ScrollableLogTextStreamViewProps {
       startKey: TimeKey | null;
       middleKey: TimeKey | null;
       endKey: TimeKey | null;
+      fromScroll: boolean;
     }
   ) => any;
   loadNewerItems: () => void;
@@ -251,12 +252,14 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       bottomChild,
       pagesAbove,
       pagesBelow,
+      fromScroll,
     }: {
       topChild: string;
       middleChild: string;
       bottomChild: string;
       pagesAbove: number;
       pagesBelow: number;
+      fromScroll: boolean;
     }) => {
       this.props.reportVisibleInterval({
         endKey: parseStreamItemId(bottomChild),
@@ -264,6 +267,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
         pagesAfterEnd: pagesBelow,
         pagesBeforeStart: pagesAbove,
         startKey: parseStreamItemId(topChild),
+        fromScroll,
       });
     }
   );

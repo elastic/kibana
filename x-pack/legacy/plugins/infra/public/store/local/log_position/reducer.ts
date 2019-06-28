@@ -36,6 +36,7 @@ export interface LogPositionState {
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
   };
+  controlsShouldDisplayTargetPosition: boolean;
 }
 
 export const initialLogPositionState: LogPositionState = {
@@ -48,14 +49,12 @@ export const initialLogPositionState: LogPositionState = {
     middleKey: null,
     startKey: null,
   },
+  controlsShouldDisplayTargetPosition: false,
 };
 
 const targetPositionReducer = reducerWithInitialState(initialLogPositionState.targetPosition).case(
   jumpToTargetPosition,
-  (state, target) => {
-    console.log(state, target);
-    return target;
-  }
+  (state, target) => target
 );
 
 const targetPositionUpdatePolicyReducer = reducerWithInitialState(
@@ -77,8 +76,23 @@ const visiblePositionReducer = reducerWithInitialState(
   startKey,
 }));
 
+// Determines whether to use the target position or the visible midpoint when
+// displaying a timestamp or time range in the toolbar and log minimap. When the
+// user jumps to a new target, the final visible midpoint is indeterminate until
+// all the new data has finished loading, so using this flag reduces the perception
+// that the UI is jumping around inaccurately
+const controlsShouldDisplayTargetPositionReducer = reducerWithInitialState(
+  initialLogPositionState.controlsShouldDisplayTargetPosition
+)
+  .case(jumpToTargetPosition, () => true)
+  .case(reportVisiblePositions, (state, { fromScroll }) => {
+    if (fromScroll) return false;
+    return state;
+  });
+
 export const logPositionReducer = combineReducers<LogPositionState>({
   targetPosition: targetPositionReducer,
   updatePolicy: targetPositionUpdatePolicyReducer,
   visiblePositions: visiblePositionReducer,
+  controlsShouldDisplayTargetPosition: controlsShouldDisplayTargetPositionReducer,
 });
