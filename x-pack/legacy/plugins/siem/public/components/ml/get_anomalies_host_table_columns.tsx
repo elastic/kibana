@@ -84,13 +84,17 @@ export const getAnomaliesHostTableColumns = (
               key={`${entityName}-${entityValue}-${createCompoundHostKey(anomaliesByHost)}`}
               grow={false}
             >
-              <EntityDraggable
-                idPrefix={`anomalies-host-table-influencers-${entityName}-${entityValue}-${createCompoundHostKey(
-                  anomaliesByHost
-                )}`}
-                entityName={entityName}
-                entityValue={entityValue}
-              />
+              <EuiFlexGroup gutterSize="none" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EntityDraggable
+                    idPrefix={`anomalies-host-table-influencers-${entityName}-${entityValue}-${createCompoundHostKey(
+                      anomaliesByHost
+                    )}`}
+                    entityName={entityName}
+                    entityValue={entityValue}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           );
         })}
