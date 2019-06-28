@@ -21,6 +21,7 @@ import { EmbeddableSetupDependencies } from '../types';
 
 export const createDeps = (): EmbeddableSetupDependencies => {
   const deps: EmbeddableSetupDependencies = {
+    api: {} as any,
     triggers: new Map<any, any>(),
     actions: new Map<any, any>(),
     embeddableFactories: new Map<any, any>(),

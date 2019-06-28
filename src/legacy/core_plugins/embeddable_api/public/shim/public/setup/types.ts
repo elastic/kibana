@@ -30,6 +30,7 @@ export interface EmbeddableSetupApi {
 }
 
 export interface EmbeddableSetupDependencies {
+  api: EmbeddableSetupApi,
   triggers: TriggerRegistry;
   actions: ActionRegistry;
   embeddableFactories: EmbeddableFactoryRegistry;

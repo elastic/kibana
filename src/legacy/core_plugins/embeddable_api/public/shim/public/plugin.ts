@@ -30,19 +30,21 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, void> 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
+    const api = {} as EmbeddableSetupApi;
     const deps = {
+      api,
       actions: this.actions,
       embeddableFactories: this.embeddableFactories,
       triggers: this.triggers,
     };
-    const api = {
+    Object.assign(api, {
       attachAction: attachAction(deps),
       detachAction: detachAction(deps),
       getTrigger: getTrigger(deps),
       registerAction: registerAction(deps),
       registerEmbeddableFactory: registerEmbeddableFactory(deps),
       registerTrigger: registerTrigger(deps),
-    };
+    });
 
     bootstrap(api);
 
