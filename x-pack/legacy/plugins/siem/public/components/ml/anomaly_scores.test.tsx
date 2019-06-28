@@ -26,15 +26,13 @@ describe('anomaly_scores', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <span>
-        <AnomalyScores
-          anomalies={anomalies}
-          startDate={0}
-          endDate={endDate}
-          isLoading={false}
-          narrowDateRange={narrowDateRange}
-        />
-      </span>
+      <AnomalyScores
+        anomalies={anomalies}
+        startDate={0}
+        endDate={endDate}
+        isLoading={false}
+        narrowDateRange={narrowDateRange}
+      />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
