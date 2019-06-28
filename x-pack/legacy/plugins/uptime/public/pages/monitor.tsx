@@ -28,6 +28,7 @@ import { BaseLocationOptions } from '../components/functional/ping_list';
 interface MonitorPageProps {
   history: { push: any };
   location: { pathname: string; search: string };
+  logMonitorPageLoad: () => void;
   match: { params: { id: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
@@ -36,7 +37,13 @@ interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
+export const MonitorPage = ({
+  history,
+  location,
+  logMonitorPageLoad,
+  query,
+  setBreadcrumbs,
+}: MonitorPageProps) => {
   const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
   const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
@@ -80,6 +87,10 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
     location: locationVar,
     monitorId,
   };
+
+  useEffect(() => {
+    logMonitorPageLoad();
+  }, []);
 
   return (
     <Fragment>
