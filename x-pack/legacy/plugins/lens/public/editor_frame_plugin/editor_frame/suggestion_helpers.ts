@@ -5,7 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, DatasourceSuggestion, DatasourcePublicAPI } from '../../types';
+import { Visualization, DatasourceSuggestion } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -30,8 +30,7 @@ export function getSuggestions(
   datasourceTableSuggestions: DatasourceSuggestion[],
   visualizationMap: Record<string, Visualization>,
   activeVisualizationId: string | null,
-  visualizationState: unknown,
-  datasourcePublicAPI: DatasourcePublicAPI
+  visualizationState: unknown
 ): Suggestion[] {
   const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
 
@@ -39,13 +38,10 @@ export function getSuggestions(
     Object.entries(visualizationMap)
       .map(([visualizationId, visualization]) => {
         return visualization
-          .getSuggestions(
-            {
-              tables: datasourceTables,
-              state: visualizationId === activeVisualizationId ? visualizationState : undefined,
-            },
-            datasourcePublicAPI
-          )
+          .getSuggestions({
+            tables: datasourceTables,
+            state: visualizationId === activeVisualizationId ? visualizationState : undefined,
+          })
           .map(({ datasourceSuggestionId, ...suggestion }) => ({
             ...suggestion,
             visualizationId,
