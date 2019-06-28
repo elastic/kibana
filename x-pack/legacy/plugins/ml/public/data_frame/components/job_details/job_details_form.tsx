@@ -254,6 +254,13 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                 defaultMessage: 'Date field',
               }
             )}
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.jobDetailsForm.continuousModeDateFieldHelpText',
+              {
+                defaultMessage:
+                  'Pick a date field for the time based continuous data frame transform that reflects ingestion time.',
+              }
+            )}
           >
             <EuiSelect
               options={dateFieldNames.map(text => ({ text }))}
@@ -273,6 +280,12 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                 }),
               ]
             }
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.jobDetailsForm.continuousModeDelayHelpText',
+              {
+                defaultMessage: 'Delay after which a new filtered transform iteration will be run.',
+              }
+            )}
           >
             <EuiFieldText
               placeholder="delay"
