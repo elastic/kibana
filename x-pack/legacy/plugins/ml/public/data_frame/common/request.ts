@@ -148,6 +148,17 @@ export function getDataFrameRequest(
     dest: {
       index: jobDetailsState.destinationIndex,
     },
+    // conditionally add continuous mode config
+    ...(jobDetailsState.isContinuousModeEnabled
+      ? {
+          sync: {
+            time: {
+              field: jobDetailsState.continuousModeDateField,
+              delay: jobDetailsState.continuousModeDelay,
+            },
+          },
+        }
+      : {}),
   };
 
   return request;
