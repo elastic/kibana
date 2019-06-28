@@ -12,7 +12,6 @@ import { LeftInnerJoin } from './joins/left_inner_join';
 import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
-  GEO_JSON_TYPE,
   FEATURE_VISIBLE_PROPERTY_NAME
 } from '../../../common/constants';
 import _ from 'lodash';
