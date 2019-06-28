@@ -11,6 +11,7 @@ import template from './watch_list_route.html';
 import './components/watch_list';
 import 'plugins/watcher/services/license';
 import { getWatchListBreadcrumbs } from '../../lib/breadcrumbs';
+import { watches } from 'plugins/watcher/services/watches';
 
 routes
   .when('/management/elasticsearch/watcher/', {
@@ -30,11 +31,10 @@ routes
     k7Breadcrumbs: getWatchListBreadcrumbs,
     resolve: {
       watches: ($injector) => {
-        const watchesService = $injector.get('xpackWatcherWatchesService');
         const licenseService = $injector.get('xpackWatcherLicenseService');
         const kbnUrl = $injector.get('kbnUrl');
 
-        return watchesService.getWatchList()
+        return watches.getWatchList()
           .catch(err => {
             return licenseService.checkValidity()
               .then(() => {
