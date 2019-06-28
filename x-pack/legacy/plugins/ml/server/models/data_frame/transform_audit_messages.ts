@@ -8,7 +8,7 @@ import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/inde
 import { callWithRequestType } from '../../../common/types/kibana';
 import { TransformMessage } from '../../../common/types/audit_message';
 
-const SIZE = 1000;
+const SIZE = 20;
 
 interface Message {
   _index: string;
@@ -70,7 +70,7 @@ export function transformAuditMessagesProvider(callWithRequest: callWithRequestT
         rest_total_hits_as_int: true,
         size: SIZE,
         body: {
-          sort: [{ timestamp: { order: 'asc' } }, { transform_id: { order: 'asc' } }],
+          sort: [{ timestamp: { order: 'desc' } }, { transform_id: { order: 'asc' } }],
           query,
         },
       });
