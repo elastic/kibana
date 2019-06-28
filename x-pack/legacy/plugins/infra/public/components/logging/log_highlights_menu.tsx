@@ -56,16 +56,6 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     [highlightTerm]
   );
 
-  // Input ref state
-  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
-  useEffect(
-    () => {
-      if (inputRef) {
-        inputRef.focus();
-      }
-    },
-    [inputRef]
-  );
   const button = (
     <EuiButtonEmpty color="text" size="xs" iconType="brush" onClick={togglePopover}>
       <FormattedMessage
@@ -98,9 +88,6 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               onChange={changeHighlightTerm}
               isLoading={isLoading}
               aria-label={termsFieldLabel}
-              inputRef={ref => {
-                setInputRef(ref);
-              }}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
