@@ -34,7 +34,7 @@ uiRoutes
           .then(clusters => {
             if (clusters && clusters.length) {
               kbnUrl.changePath('/home');
-              return Promise.reject();
+              return;
             }
             setAngularState($scope, $injector);
             return toggleSetupMode(true)
