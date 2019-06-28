@@ -20,9 +20,7 @@ describe('draggable_score', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <span>
-        <DraggableScore id="some-id" index={0} score={anomalies.anomalies[0]} />
-      </span>
+      <DraggableScore id="some-id" index={0} score={anomalies.anomalies[0]} />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

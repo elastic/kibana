@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { NarrowDateRange, Anomaly } from './types';
 import { DraggableScore } from './draggable_score';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import { createDescriptionsList } from './create_descriptions_list';
+import { createDescriptionList } from './create_description_list';
 
 interface Args {
   startDate: number;
@@ -50,7 +50,7 @@ export const AnomalyScore = React.memo<Args>(
           >
             <EuiDescriptionList
               data-test-subj="anomaly-description-list"
-              listItems={createDescriptionsList(
+              listItems={createDescriptionList(
                 score,
                 startDate,
                 endDate,

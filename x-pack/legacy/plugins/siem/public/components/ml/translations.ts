@@ -15,43 +15,43 @@ export const ANOMALIES = i18n.translate('xpack.siem.anomaliesTable.anomaliesDesc
 });
 
 export const NARROW_TO_THIS_DATE_RANGE = i18n.translate(
-  'xpack.siem.ml.createDescriptionsList.narrowToThisDateRangeLink',
+  'xpack.siem.ml.createDescriptionList.narrowToThisDateRangeLink',
   {
     defaultMessage: 'Narrow to this date range',
   }
 );
 
 export const VIEW_IN_MACHINE_LEARNING = i18n.translate(
-  'xpack.siem.ml.createDescriptionsList.viewInMachineLearningLink',
+  'xpack.siem.ml.createDescriptionList.viewInMachineLearningLink',
   {
     defaultMessage: 'View in Machine Learning',
   }
 );
 
-export const DETECTED = i18n.translate('xpack.siem.ml.createDescriptionsList.detectedTitle', {
+export const DETECTED = i18n.translate('xpack.siem.ml.createDescriptionList.detectedTitle', {
   defaultMessage: 'Detected',
 });
 
-export const ANOMALY_JOB = i18n.translate('xpack.siem.ml.createDescriptionsList.anomalyJobTitle', {
+export const ANOMALY_JOB = i18n.translate('xpack.siem.ml.createDescriptionList.anomalyJobTitle', {
   defaultMessage: 'Anomaly Job',
 });
 
 export const MAX_ANOMALY_SCORE = i18n.translate(
-  'xpack.siem.ml.createDescriptionsList.maxAnomalyScoreTitle',
+  'xpack.siem.ml.createDescriptionList.maxAnomalyScoreTitle',
   {
     defaultMessage: 'Max Anomaly Score',
   }
 );
 
 export const TOP_ANOMALY_SUSPECT = i18n.translate(
-  'xpack.siem.ml.createDescriptionsList.topAnomalySuspectTitle',
+  'xpack.siem.ml.createDescriptionList.topAnomalySuspectTitle',
   {
     defaultMessage: 'Top Anomaly Suspect',
   }
 );
 
 export const INFLUENCED_BY = i18n.translate(
-  'xpack.siem.ml.createDescriptionsList.influencedByTitle',
+  'xpack.siem.ml.createDescriptionList.influencedByTitle',
   {
     defaultMessage: 'Influenced By',
   }

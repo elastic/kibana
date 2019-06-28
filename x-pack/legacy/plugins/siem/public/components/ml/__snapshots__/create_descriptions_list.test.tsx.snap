@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`create_descriptions_list renders correctly against snapshot 1`] = `
+exports[`create_description_list renders correctly against snapshot 1`] = `
 <dl
   className="euiDescriptionList euiDescriptionList--row"
   data-test-subj="anomaly-description-list"
