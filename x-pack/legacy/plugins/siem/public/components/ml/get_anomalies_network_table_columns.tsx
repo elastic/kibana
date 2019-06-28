@@ -11,7 +11,7 @@ import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from './types';
 import { getRowItemDraggable } from '../tables/helpers';
 import { EntityDraggable } from './entity_draggable';
 import { createCompoundNetworkKey } from './create_compound_key';
-import { HostDetailsLink } from '../links';
+import { IPDetailsLink } from '../links';
 
 import * as i18n from './translations';
 import { AnomalyScore } from './anomaly_score';
@@ -39,7 +39,7 @@ export const getAnomaliesNetworkTableColumns = (
         idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(
           anomaliesByNetwork
         )}-networkIp`,
-        render: item => <HostDetailsLink hostName={item} />,
+        render: item => <IPDetailsLink ip={item} />,
       }),
   },
   {
