@@ -572,7 +572,20 @@ export class WebElementWrapper {
     const screenshot = await this.driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
     const { width, height, x, y } = await this.getPosition();
+    const windowWidth = await this.driver.executeScript('return window.document.body.clientWidth');
     const src = PNG.sync.read(buffer);
+    if (src.width > windowWidth) {
+      // on linux size of screenshot is double size of screen, scale it down
+      src.width = src.width / 2;
+      src.height = src.height / 2;
+      let h = false;
+      let v = false;
+      src.data = src.data.filter((d: any, i: number) => {
+        h = i % 4 ? h : !h;
+        v = i % (src.width * 2 * 4) ? v : !v;
+        return h && v;
+      });
+    }
     const dst = new PNG({ width, height });
     PNG.bitblt(src, dst, x, y, width, height, 0, 0);
     return PNG.sync.write(dst);
