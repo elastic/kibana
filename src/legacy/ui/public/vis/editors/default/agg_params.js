@@ -140,7 +140,7 @@ uiModules
               if (param.type === 'field') {
                 const availableFields = param.getAvailableFields($scope.agg.getIndexPattern().fields);
                 fields = $aggParamEditorsScope[`${param.name}Options`] =
-                  aggTypeFieldFilters.filter(availableFields, param.type, $scope.agg, $scope.vis);
+                  aggTypeFieldFilters.filter(availableFields, param.type, $scope.agg);
                 $scope.indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
               }
 

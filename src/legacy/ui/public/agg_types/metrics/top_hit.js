@@ -36,10 +36,9 @@ aggTypeFieldFilters.addFilter(
   (
     field,
     fieldParamType,
-    aggConfig,
-    vis
+    aggConfig
   ) => {
-    if (aggConfig.type.name !== 'top_hits' || vis.type.name === 'table' || vis.type.name === 'metric') {
+    if (aggConfig.type.name !== 'top_hits' || _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)) {
       return true;
     }
     return field.type === 'number';
