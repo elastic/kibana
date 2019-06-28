@@ -1,8 +1,6 @@
 {
   "snapshot": {
-    "up": 8,
-    "down": 2,
-    "total": 10,
+    "counts": { "down": 2, "mixed": 1, "up": 7, "total": 10 },
     "histogram": [
       { "upCount": 7, "downCount": 3, "x": 1548697764160, "x0": 1548697571840, "y": 1 },
       { "upCount": 7, "downCount": 3, "x": 1548697956480, "x0": 1548697764160, "y": 1 },
