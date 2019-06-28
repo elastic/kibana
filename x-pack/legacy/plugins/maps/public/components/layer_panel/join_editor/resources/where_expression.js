@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { data } from 'plugins/data/setup';
-const { QueryBar } = data.query.ui;
+const { SearchBar } = data.search.ui;
 import { Storage } from 'ui/storage';
 
 const settings = chrome.getUiSettingsClient();
@@ -41,6 +41,10 @@ export class WhereExpression extends Component {
   _onQueryChange = ({ query }) => {
     this.props.onChange(query);
     this._closePopover();
+  }
+
+  _onFiltersUpdated = () => {
+    return;
   }
 
   render() {
@@ -72,11 +76,16 @@ export class WhereExpression extends Component {
         }
       >
         <div className="mapFilterEditor" data-test-subj="mapJoinWhereFilterEditor">
-          <QueryBar
+          <SearchBar
             query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-            onSubmit={this._onQueryChange}
+            onQuerySubmit={this._onQueryChange}
             appName="maps"
+            screenTitle="maps"
             showDatePicker={false}
+            showFilterBar={false}
+            showQueryBar={true}
+            filters={[]}
+            onFiltersUpdated={this._onFiltersUpdated}
             indexPatterns={[indexPattern]}
             store={localStorage}
             customSubmitButton={
