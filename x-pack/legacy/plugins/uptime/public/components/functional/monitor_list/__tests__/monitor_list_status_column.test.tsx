@@ -17,9 +17,7 @@ describe('MonitorListStatusColumn', () => {
   });
 
   it('provides expected tooltip and display times', () => {
-    const component = shallowWithIntl(
-      <MonitorListStatusColumn status="up" timestamp={'2314123'} />
-    );
+    const component = shallowWithIntl(<MonitorListStatusColumn status="up" timestamp="2314123" />);
     expect(component).toMatchSnapshot();
   });
 
