@@ -10,13 +10,15 @@ describe('Data Frame: Job List Columns', () => {
   test('getColumns()', () => {
     const columns = getColumns(() => {}, [], () => {});
 
-    expect(columns).toHaveLength(7);
+    expect(columns).toHaveLength(8);
     expect(columns[0].isExpander).toBeTruthy();
     expect(columns[1].name).toBe('ID');
     expect(columns[2].name).toBe('Source index');
     expect(columns[3].name).toBe('Destination index');
     expect(columns[4].name).toBe('Status');
-    expect(columns[5].name).toBe('Progress');
-    expect(columns[6].name).toBe('Actions');
+    expect(columns[5].name).toBe('Mode');
+    // The progress column is nested React code with an info icon
+    expect(typeof columns[6].name).toBe('object');
+    expect(columns[7].name).toBe('Actions');
   });
 });

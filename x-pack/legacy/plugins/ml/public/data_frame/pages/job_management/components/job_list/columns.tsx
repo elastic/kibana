@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiProgress,
   EuiText,
   RIGHT_ALIGNMENT,
@@ -91,9 +92,31 @@ export const getColumns = (
         const color = item.state.task_state === 'started' ? 'primary' : 'hollow';
         return <EuiBadge color={color}>{item.state.task_state}</EuiBadge>;
       },
+      width: '100px',
     },
     {
-      name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
+      name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
+      sortable: true,
+      truncateText: true,
+      render(item: DataFrameJobListRow) {
+        const mode = typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch';
+        const color = 'hollow';
+        return <EuiBadge color={color}>{mode}</EuiBadge>;
+      },
+      width: '100px',
+    },
+    {
+      name: (
+        <Fragment>
+          {i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' })}{' '}
+          <EuiIconTip
+            content={i18n.translate('xpack.ml.dataframe.progressIconTipContent', {
+              defaultMessage:
+                'Percentage shown in continuous mode inidicates progress of the current checkpoint.',
+            })}
+          />
+        </Fragment>
+      ),
       sortable: true,
       truncateText: true,
       render(item: DataFrameJobListRow) {
@@ -105,21 +128,27 @@ export const getColumns = (
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiProgress value={progress} max={100} color="primary" size="m">
-                {progress}%
-              </EuiProgress>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">{`${progress}%`}</EuiText>
-            </EuiFlexItem>
+            {true && (
+              <Fragment>
+                <EuiFlexItem style={{ width: '40px' }} grow={false}>
+                  <EuiProgress value={progress} max={100} color="primary" size="m">
+                    {progress}%
+                  </EuiProgress>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ width: '35px' }} grow={false}>
+                  <EuiText size="xs">{`${progress}%`}</EuiText>
+                </EuiFlexItem>
+              </Fragment>
+            )}
           </EuiFlexGroup>
         );
       },
+      width: '100px',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.tableActionLabel', { defaultMessage: 'Actions' }),
       actions,
+      width: '200px',
     },
   ];
 };
