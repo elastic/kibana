@@ -33,10 +33,6 @@ describe('getSupportedUrlParams', () => {
       AUTOREFRESH_IS_PAUSED,
       DATE_RANGE_START,
       DATE_RANGE_END,
-      MONITOR_LIST_PAGE_INDEX,
-      MONITOR_LIST_PAGE_SIZE,
-      MONITOR_LIST_SORT_DIRECTION,
-      MONITOR_LIST_SORT_FIELD,
       SEARCH,
       SELECTED_PING_LIST_STATUS,
     } = CLIENT_DEFAULTS;
@@ -47,10 +43,6 @@ describe('getSupportedUrlParams', () => {
       autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
-      monitorListPageIndex: MONITOR_LIST_PAGE_INDEX,
-      monitorListPageSize: MONITOR_LIST_PAGE_SIZE,
-      monitorListSortDirection: MONITOR_LIST_SORT_DIRECTION,
-      monitorListSortField: MONITOR_LIST_SORT_FIELD,
       search: SEARCH,
       selectedPingStatus: SELECTED_PING_LIST_STATUS,
     });
