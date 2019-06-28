@@ -119,6 +119,7 @@ export const useLogHighlightsState = ({
     setFilterQuery,
     logEntryHighlights,
     logEntryHighlightsById,
+    loadLogEntryHighlightsRequest,
   };
 };
 

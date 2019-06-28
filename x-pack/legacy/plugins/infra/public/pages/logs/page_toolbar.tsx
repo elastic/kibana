@@ -40,7 +40,9 @@ export const LogsToolbar = injectI18n(({ intl }) => {
 
   const { setSurroundingLogsId } = useContext(LogFlyout.Context);
 
-  const { setHighlightTerms } = useContext(LogHighlightsState.Context);
+  const { setHighlightTerms, loadLogEntryHighlightsRequest, highlightTerms } = useContext(
+    LogHighlightsState.Context
+  );
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -97,7 +99,13 @@ export const LogsToolbar = injectI18n(({ intl }) => {
           </LogCustomizationMenu>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogHighlightsMenu onChange={setHighlightTerms} />
+          <LogHighlightsMenu
+            onChange={setHighlightTerms}
+            isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
+            activeHighlights={
+              highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <WithLogPosition resetOnUnmount>
