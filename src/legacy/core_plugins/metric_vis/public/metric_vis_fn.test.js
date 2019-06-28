@@ -27,47 +27,43 @@ describe('interpreter/functions#metric', () => {
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
-  const visConfig = {
-    addTooltip: true,
-    addLegend: false,
-    type: 'metric',
-    metric: {
-      percentageMode: false,
-      useRanges: false,
-      colorSchema: 'Green to Red',
-      metricColorMode: 'None',
-      colorsRange: [
-        {
-          from: 0,
-          to: 10000,
-        }
-      ],
-      labels: {
-        show: true,
-      },
-      invertColors: false,
-      style: {
-        bgFill: '#000',
-        bgColor: false,
-        labelColor: false,
-        subText: '',
-        fontSize: 60,
-      },
-      metrics: [
-        {
-          accessor: 0,
-          format: {
-            id: 'number'
-          },
-          params: {},
-          aggType: 'count',
-        }
-      ]
+  const args = {
+    percentageMode: false,
+    useRanges: false,
+    colorSchema: 'Green to Red',
+    metricColorMode: 'None',
+    colorsRange: [
+      {
+        from: 0,
+        to: 10000,
+      }
+    ],
+    labels: {
+      show: true,
     },
+    invertColors: false,
+    style: {
+      bgFill: '#000',
+      bgColor: false,
+      labelColor: false,
+      subText: '',
+      fontSize: 60,
+    },
+    font: { spec: { fontSize: 60 } },
+    metrics: [
+      {
+        accessor: 0,
+        format: {
+          id: 'number'
+        },
+        params: {},
+        aggType: 'count',
+      }
+    ]
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(context, args);
     expect(actual).toMatchSnapshot();
   });
 });
