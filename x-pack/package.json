@@ -72,6 +72,7 @@
     "@types/nock": "^10.0.0",
     "@types/node": "^10.12.27",
     "@types/node-fetch": "^2.1.4",
+    "@types/nodemailer": "^6.2.0",
     "@types/object-hash": "^1.2.0",
     "@types/papaparse": "^4.5.5",
     "@types/pngjs": "^3.3.1",
