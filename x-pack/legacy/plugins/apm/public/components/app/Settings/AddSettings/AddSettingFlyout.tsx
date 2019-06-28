@@ -17,7 +17,8 @@ import {
   EuiFlexItem,
   EuiFlyoutFooter,
   EuiButton,
-  EuiButtonEmpty
+  EuiButtonEmpty,
+  EuiCallOut
 } from '@elastic/eui';
 import React from 'react';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
@@ -43,34 +44,24 @@ export function AddSettingsFlyout({
     <EuiPortal>
       <EuiFlyout size="s" onClose={onClose} ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                {selectedConfig ? (
-                  <h2>Edit configuration</h2>
-                ) : (
-                  <h2>Create configuration</h2>
-                )}
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiBetaBadge
-                label="Beta"
-                tooltipContent="This feature is not GA. Please help us by reporting any bugs."
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle>
+            {selectedConfig ? (
+              <h2>Edit configuration</h2>
+            ) : (
+              <h2>Create configuration</h2>
+            )}
+          </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiText>
-            <p>
-              This is where you define the configuration you want to sync to
-              your service and agent. This initial version is supported by the
-              Elastic APM Java agent and for sample rate configuration only. We
-              will continue to add support for Agent configuration for other
-              agents and add more configuration options in future releases.
-            </p>
-          </EuiText>
+          <EuiCallOut
+            title="APM Agent Configuration (BETA)"
+            iconType="iInCircle"
+            color="warning"
+          >
+            Please note only sample rate configuration is supported in this
+            first version. We will extend support for central configuration in
+            future releases. Please be aware of bugs.
+          </EuiCallOut>
           <EuiHorizontalRule margin="m" />
           <AddSettingFlyoutBody
             selectedConfig={selectedConfig}
