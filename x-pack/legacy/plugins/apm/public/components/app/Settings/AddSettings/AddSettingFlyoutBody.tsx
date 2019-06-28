@@ -196,7 +196,7 @@ export function AddSettingFlyoutBody({
               <p>
                 If you wish to delete this configuration, please be aware that
                 the agents will continue to use the existing configuration until
-                it syncs with the APM Server.
+                they sync with the APM Server.
               </p>
             </EuiText>
 
