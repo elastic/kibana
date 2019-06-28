@@ -45,7 +45,6 @@ const SINGLE_FEATURE = [
 const defaultProps = {
   loadFeatureProperties: () => { return []; },
   findLayerById: (id) => {
-    console.log('fin by id', id);
     return new MockLayer(id);
   },
   closeTooltip: () => {},

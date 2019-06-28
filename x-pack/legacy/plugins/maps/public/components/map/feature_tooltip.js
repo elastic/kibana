@@ -129,17 +129,13 @@ export class FeatureTooltip extends React.Component {
 
   _renderLayerFilterBox() {
 
-    console.log('SHOW FILTER BOX');
     if (!this.props.showFeatureList) {
       return null;
     }
 
     if (!this.state.uniqueLayers || this.state.uniqueLayers.length < 2) {
-      console.log('SKIP');
       return null;
     }
-
-    console.log('SHOW FILTER LYOPTIONS');
     const layerOptions = this.state.uniqueLayers.map(({ id, displayName, count }) => {
       return {
         value: id,
