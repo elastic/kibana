@@ -24,7 +24,7 @@ export const createSetupApi = () => {
   const core = {} as any;
   const api = plugin.setup(core);
 
-  return [api, plugin, core];
+  return { api, plugin, core };
 };
 
 export const expectError = (fn: (...args: any) => any) => {
@@ -33,5 +33,13 @@ export const expectError = (fn: (...args: any) => any) => {
     throw new Error('Expected an error throw.');
   } catch (error) {
     return error;
+  }
+};
+
+export const of = async <T, P extends Promise<T>>(promise: P): Promise<[T | undefined, Error | any]> => {
+  try {
+    return [await promise, undefined];
+  } catch (error) {
+    return [, error];
   }
 };

@@ -21,27 +21,28 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { Action, ActionContext } from '../../../actions';
-import { ViewMode, EmbeddableFactoryRegistry } from '../../../types';
+import { ViewMode, GetEmbeddableFactory } from '../../../types';
 import { EmbeddableFactoryNotFoundError } from '../../../embeddables';
 
 export const EDIT_PANEL_ACTION_ID = 'editPanel';
 
 export class EditPanelAction extends Action {
   public readonly type = EDIT_PANEL_ACTION_ID;
-  constructor(private embeddableFactories: EmbeddableFactoryRegistry) {
+  constructor(private getEmbeddableFactory: GetEmbeddableFactory) {
     super(EDIT_PANEL_ACTION_ID);
     this.order = 15;
   }
 
   public getDisplayName({ embeddable }: ActionContext) {
-    const factory = this.embeddableFactories.get(embeddable.type);
+    const factory = this.getEmbeddableFactory(embeddable.type);
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(embeddable.type);
     }
     return i18n.translate('embeddableApi.panel.editPanel.displayName', {
       defaultMessage: 'Edit {value}',
       values: {
-        value: factory.getDisplayName(),
+        // TODO: Did embeddable factories ever have `.getDisplayName()`?
+        value: 'factory.getDisplayName()',
       },
     });
   }

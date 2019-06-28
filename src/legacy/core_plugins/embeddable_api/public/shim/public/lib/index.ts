@@ -16,45 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export {
-  IEmbeddable,
-  EmbeddableFactory,
-  EmbeddableInstanceConfiguration,
-  Embeddable,
-  OutputSpec,
-  ErrorEmbeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  isErrorEmbeddable,
-} from './embeddables';
 
-export {
-  ViewMode,
-  Trigger,
-  EmbeddablePlugin,
-  TriggerRegistry,
-  ActionRegistry,
-  EmbeddableFactoryRegistry,
-} from './types';
-
-export { Action, ActionContext, IncompatibleActionError } from './actions';
-
-export {
-  APPLY_FILTER_TRIGGER,
-  executeTriggerActions,
-  CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from './triggers';
-
-export {
-  Container,
-  ContainerInput,
-  ContainerOutput,
-  PanelState,
-  IContainer,
-  EmbeddableChildPanel,
-} from './containers';
-
-export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';
-
-export { embeddablePlugin } from './plugin';
+export * from './embeddables';
+export * from './types';
+export * from './actions';
+export * from './triggers';
+export * from './containers';
+export * from './panel';

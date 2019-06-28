@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { npStart } from 'ui/new_platform';
-import { EuiFlyoutBody } from '@elastic/eui';
+
 import { Action, ActionContext, IncompatibleActionError } from '../../actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 
@@ -37,17 +35,13 @@ export function hasFullNameOutput(
   );
 }
 
-function openSayHelloFlyout(hello: string) {
-  npStart.core.overlays.openFlyout(<EuiFlyoutBody>{hello}</EuiFlyoutBody>);
-}
-
 export class SayHelloAction extends Action {
   public readonly type = SAY_HELLO_ACTION;
   private sayHello: (name: string) => void;
 
   // Taking in a function, instead of always directly interacting with the dom,
   // can make testing the execute part of the action easier.
-  constructor(sayHello: (name: string) => void = openSayHelloFlyout) {
+  constructor(sayHello: (name: string) => void) {
     super(SAY_HELLO_ACTION);
     this.sayHello = sayHello;
   }

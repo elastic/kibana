@@ -32,7 +32,7 @@ const action2 = {
 } as any as Action;
 
 test('returns actions set on trigger', () => {
-  const [api] = createSetupApi();
+  const { api } = createSetupApi();
   api.registerAction(action1);
   api.registerAction(action2);
   api.registerTrigger({

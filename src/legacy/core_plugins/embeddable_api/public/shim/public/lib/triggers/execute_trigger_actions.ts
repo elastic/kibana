@@ -19,7 +19,6 @@
 import { TriggerRegistry, ActionRegistry } from '../../types';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu_actions';
 import { IEmbeddable } from '../embeddables';
-import { getActionsForTrigger } from './get_actions_for_trigger';
 
 export async function executeTriggerActions(
   triggerId: string,
@@ -31,6 +30,7 @@ export async function executeTriggerActions(
     triggerContext: any;
   }, triggerRegistry: TriggerRegistry, actionRegistry: ActionRegistry
 ) {
+  /*
   const actions = await getActionsForTrigger(actionRegistry, triggerRegistry, triggerId, {
     embeddable,
   });
@@ -58,4 +58,5 @@ export async function executeTriggerActions(
       actions[0].execute({ embeddable, triggerContext });
     }
   }
+  */
 }

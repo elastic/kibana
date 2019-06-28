@@ -22,6 +22,7 @@ import { attachAction } from './attach_action';
 import { detachAction } from './detach_action';
 import { getTrigger } from './get_trigger';
 import { getTriggerActions } from './get_trigger_actions';
+import { getTriggerCompatibleActions } from './get_trigger_compatible_actions';
 import { registerAction } from './register_action';
 import { registerEmbeddableFactory } from './register_embeddable_factory';
 import { registerTrigger } from './register_trigger';
@@ -32,6 +33,7 @@ export const pureSetupApi: EmbeddableSetupApiPure = {
   detachAction,
   getTrigger,
   getTriggerActions,
+  getTriggerCompatibleActions,
   registerAction,
   registerEmbeddableFactory,
   registerTrigger,

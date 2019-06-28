@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { Action, actionRegistry } from './actions';
-import { EmbeddableFactory, embeddableFactories } from './embeddables';
-import { EmbeddablePlugin } from './types';
-import { attachAction, triggerRegistry } from './triggers';
+import { EmbeddableSetupApiPure } from './types';
+import { Action } from '../lib';
 
-export const embeddablePlugin: EmbeddablePlugin = {
-  addAction: (action: Action) => actionRegistry.set(action.id, action),
-  addEmbeddableFactory: (factory: EmbeddableFactory) =>
-    embeddableFactories.set(factory.type, factory),
-  attachAction: data => attachAction(triggerRegistry, data),
+export const getTriggerCompatibleActions: EmbeddableSetupApiPure['getTriggerCompatibleActions'] = ({api}) => async (triggerId, context) => {
+  const actions = api().getTriggerActions(triggerId);
+  const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+  return actions.reduce<Action[]>((acc, action, i) => isCompatibles[i] ? [...acc, action] : acc, []);
 };

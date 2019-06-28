@@ -17,6 +17,11 @@
  * under the License.
  */
 
+import { Action } from './actions';
+import { IEmbeddable } from './embeddables';
+import { IContainer } from './containers';
+import { EmbeddableFactory } from 'ui/embeddable';
+
 export interface Trigger {
   id: string;
   title?: string;
@@ -32,9 +37,9 @@ export interface PropertySpec {
   value?: string;
 }
 
-export interface OutputSpec {
-  [id: string]: PropertySpec;
-}
+// export interface OutputSpec {
+  // [id: string]: PropertySpec;
+// }
 
 export enum ViewMode {
   EDIT = 'edit',
@@ -58,3 +63,11 @@ export interface SavedObjectMetaData<T> {
   getTooltipForSavedObject?(savedObject: any): any;
   showSavedObject?(savedObject: any): any;
 }
+
+export interface TriggerContext {
+  embeddable: IEmbeddable;
+  container?: IContainer;
+}
+
+export type GetActionsCompatibleWithTrigger = (triggerId: string, context: TriggerContext) => Promise<Action[]>;
+export type GetEmbeddableFactory = (id: string) => EmbeddableFactory;

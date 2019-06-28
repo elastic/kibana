@@ -24,7 +24,7 @@ import { buildContextMenuForActions } from '../context_menu_actions';
 
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { ViewMode, TriggerRegistry, ActionRegistry } from '../types';
+import { ViewMode, GetActionsCompatibleWithTrigger, GetEmbeddableFactory } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
@@ -32,8 +32,6 @@ import { CustomizePanelTitleAction } from './panel_header/panel_actions/customiz
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from './panel_header/panel_actions/edit_panel_action';
-import { getActionsForTrigger } from '../get_actions_for_trigger';
-import { embeddableFactories } from '../state/registries';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
@@ -54,8 +52,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private mounted: boolean = false;
   constructor(
     props: Props,
-    private triggerRegistry: TriggerRegistry,
-    private actionRegistry: ActionRegistry
+    private getActions: GetActionsCompatibleWithTrigger,
+    private getEmbeddableFactory: GetEmbeddableFactory,
   ) {
     super(props);
     const { embeddable } = this.props;
@@ -158,10 +156,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getActionContextMenuPanel = async () => {
-    const actions = await getActionsForTrigger(
-      this.actionRegistry,
-      this.triggerRegistry,
-      CONTEXT_MENU_TRIGGER,
+    const actions = await this.getActions(CONTEXT_MENU_TRIGGER,
       {
         embeddable: this.props.embeddable,
       }
@@ -174,7 +169,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new AddPanelAction(),
       new InspectPanelAction(),
       new RemovePanelAction(),
-      new EditPanelAction(embeddableFactories),
+      new EditPanelAction(this.getEmbeddableFactory),
     ];
 
     const sorted = actions.concat(extraActions).sort((a, b) => {

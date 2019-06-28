@@ -19,11 +19,15 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { toastNotifications } from 'ui/notify';
+import { CoreSetup } from 'kibana/public';
+
+// TODO: This needs to be adapted for NP.
+/*
 import {
   SavedObjectFinder,
   SavedObjectMetaData,
 } from 'ui/saved_objects/components/saved_object_finder';
+*/
 
 import {
   EuiFlexGroup,
@@ -45,6 +49,7 @@ import { IContainer } from '../../../../containers';
 interface Props {
   onClose: () => void;
   container: IContainer;
+  notifications: CoreSetup['notifications'];
 }
 
 export class AddPanelFlyout extends React.Component<Props> {
@@ -58,10 +63,10 @@ export class AddPanelFlyout extends React.Component<Props> {
     // To avoid the clutter of having toast messages cover flyout
     // close previous toast message before creating a new one
     if (this.lastToast) {
-      toastNotifications.remove(this.lastToast);
+      this.props.notifications.toasts.remove(this.lastToast);
     }
 
-    this.lastToast = toastNotifications.addSuccess({
+    this.lastToast = this.props.notifications.toasts.addSuccess({
       title: i18n.translate(
         'embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
         {
@@ -132,6 +137,29 @@ export class AddPanelFlyout extends React.Component<Props> {
   }
 
   public render() {
+    const savedObjectsFinder = (
+      <div>NEEDS ADAPTION FOR NP</div>
+      /*
+      <SavedObjectFinder
+        onChoose={this.onAddPanel}
+        savedObjectMetaData={
+          [...this.props.container.embeddableFactories.values()]
+            .filter(
+              embeddableFactory =>
+                Boolean(embeddableFactory.savedObjectMetaData) &&
+                !embeddableFactory.isContainerType
+            )
+            .map(({ savedObjectMetaData }) => savedObjectMetaData) as Array<
+            SavedObjectMetaData<SavedObjectAttributes>
+          >
+        }
+        showFilter={true}
+        noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
+          defaultMessage: 'No matching objects found.',
+        })}
+      />
+      */
+    );
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
         <EuiFlyoutHeader hasBorder>
@@ -142,24 +170,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <SavedObjectFinder
-            onChoose={this.onAddPanel}
-            savedObjectMetaData={
-              [...this.props.container.embeddableFactories.values()]
-                .filter(
-                  embeddableFactory =>
-                    Boolean(embeddableFactory.savedObjectMetaData) &&
-                    !embeddableFactory.isContainerType
-                )
-                .map(({ savedObjectMetaData }) => savedObjectMetaData) as Array<
-                SavedObjectMetaData<SavedObjectAttributes>
-              >
-            }
-            showFilter={true}
-            noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
-              defaultMessage: 'No matching objects found.',
-            })}
-          />
+          {savedObjectsFinder}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
