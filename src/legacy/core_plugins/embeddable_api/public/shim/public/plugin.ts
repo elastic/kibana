@@ -20,6 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
 import { EmbeddableSetupApi, registerTrigger, registerAction, registerEmbeddableFactory, attachAction, detachAction } from './setup';
+import { bootstrap } from './bootstrap';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, void> {
   private readonly triggers: TriggerRegistry = new Map();
@@ -34,13 +35,17 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, void> 
       actions: this.actions,
       embeddableFactories: this.embeddableFactories,
     };
-    return {
+    const api = {
       registerTrigger: registerTrigger(deps),
       registerAction: registerAction(deps),
       registerEmbeddableFactory: registerEmbeddableFactory(deps),
       attachAction: attachAction(deps),
       detachAction: detachAction(deps),
     };
+
+    bootstrap(api);
+
+    return api;
   }
 
   public start(core: CoreStart) {}

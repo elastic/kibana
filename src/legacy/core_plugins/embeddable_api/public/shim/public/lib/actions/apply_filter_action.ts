@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { Container, ContainerInput } from '../containers';
 import { IEmbeddable } from '../embeddables';
-import { Action, ActionContext } from '../actions';
-import { IncompatibleActionError } from '../actions/incompatible_action_error';
+import { Action, ActionContext } from './action';
+import { IncompatibleActionError } from './incompatible_action_error';
 import { IContainer } from '../containers/i_container';
 
 interface ApplyFilterContainerInput extends ContainerInput {

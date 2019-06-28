@@ -17,22 +17,18 @@
  * under the License.
  */
 
-import './ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
-
 import {
   HelloWorldAction,
   SayHelloAction,
   EmptyEmbeddable,
   RestrictedAction,
-} from './test_samples/index';
-import { TriggerRegistry, ActionRegistry } from './types';
-import { ActionContext } from './actions';
-import { SAY_HELLO_ACTION } from './test_samples/actions/say_hello_action';
-import { HELLO_WORLD_ACTION_ID } from './test_samples';
+} from '../test_samples/index';
+import { TriggerRegistry, ActionRegistry } from '../../types';
+import { ActionContext } from '../actions';
+import { SAY_HELLO_ACTION } from '../test_samples/actions/say_hello_action';
+import { HELLO_WORLD_ACTION_ID } from '../test_samples';
 import { getActionsForTrigger } from './get_actions_for_trigger';
-import { attachAction } from './triggers/attach_action';
-import { CONTEXT_MENU_TRIGGER } from './triggers';
+import { CONTEXT_MENU_TRIGGER } from '../triggers';
 
 const triggerRegistry: TriggerRegistry = new Map();
 const actionRegistry: ActionRegistry = new Map();

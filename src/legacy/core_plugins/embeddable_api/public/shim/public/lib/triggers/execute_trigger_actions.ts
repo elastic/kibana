@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TriggerRegistry, ActionRegistry } from '../types';
+import { TriggerRegistry, ActionRegistry } from '../../types';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu_actions';
 import { IEmbeddable } from '../embeddables';
-import { getActionsForTrigger } from '../get_actions_for_trigger';
+import { getActionsForTrigger } from './get_actions_for_trigger';
 
 export async function executeTriggerActions(
   triggerId: string,

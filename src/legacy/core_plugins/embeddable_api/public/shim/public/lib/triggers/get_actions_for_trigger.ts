@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Action } from './actions';
-import { IEmbeddable } from './embeddables';
-import { IContainer } from './containers';
-import { Trigger } from './types';
+import { Action } from '../actions';
+import { IEmbeddable } from '../embeddables';
+import { IContainer } from '../containers';
+import { Trigger } from '../types';
 
 export async function getActionsForTrigger(
   actionRegistry: Map<string, Action>,

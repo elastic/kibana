@@ -19,3 +19,4 @@
 
 export { Action, ActionContext } from './action';
 export { IncompatibleActionError } from './incompatible_action_error';
+export * from './apply_filter_action';

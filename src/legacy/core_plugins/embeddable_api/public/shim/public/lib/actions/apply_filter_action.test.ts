@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import '../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
 import {
   FilterableEmbeddable,
   FilterableEmbeddableFactory,
@@ -33,7 +31,7 @@ import { isErrorEmbeddable, EmbeddableOutput } from '../embeddables';
 import { FilterableContainerFactory } from '../test_samples/embeddables/filterable_container_factory';
 import { FilterableEmbeddableInput } from '../test_samples/embeddables/filterable_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { EmbeddableFactoryRegistry } from '../types';
+import { EmbeddableFactoryRegistry } from '../../types';
 
 const embeddableFactories: EmbeddableFactoryRegistry = new Map();
 
