@@ -6,16 +6,7 @@
 
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
-} from '@elastic/eui';
-
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
