@@ -79,9 +79,11 @@ export class FilterEditor extends Component {
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
   }
+
   _onFiltersUpdated = () => {
     return;
   }
+
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
 
