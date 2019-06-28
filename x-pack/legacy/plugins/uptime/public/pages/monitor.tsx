@@ -76,14 +76,27 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
   );
 
   const locationVar = selectedLocation[0].value === 'All' ? null : selectedLocation[0].value;
-  const sharedVariables = { dateRangeStart, dateRangeEnd, location: locationVar, monitorId };
+
+  const sharedVariables = {
+    dateRangeStart,
+    dateRangeEnd,
+    location: locationVar,
+    monitorId,
+  };
+
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
       <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} monitorId={monitorId} variables={sharedVariables} />
+      <MonitorCharts
+        {...colors}
+        monitorId={monitorId}
+        variables={sharedVariables}
+        dateRangeStart={dateRangeStart}
+        dateRangeEnd={dateRangeEnd}
+      />
       <EuiSpacer size="s" />
       <PingList
         onSelectedStatusUpdate={(selectedStatus: string | null) =>

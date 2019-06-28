@@ -65,6 +65,8 @@ describe('MonitorCharts component', () => {
         range="range"
         success="success"
         monitorId="something"
+        dateRangeStart="2008-09-15T15:53:00"
+        dateRangeEnd="2008-09-16T15:53:00"
       />
     );
     expect(component).toMatchSnapshot();

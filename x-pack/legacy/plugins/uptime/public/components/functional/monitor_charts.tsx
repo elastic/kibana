@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext } from 'react';
+import DateMath from '@elastic/datemath';
 import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
@@ -24,21 +25,24 @@ interface MonitorChartsProps {
   mean: string;
   range: string;
   success: string;
+  dateRangeStart: string;
+  dateRangeEnd: string;
 }
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
 export const MonitorChartsComponent = (props: Props) => {
-  const { danger, data, mean, range, success, monitorId } = props;
+  const { danger, data, mean, range, success, monitorId, dateRangeStart, dateRangeEnd } = props;
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
     } = data;
 
-    const { dateRangeStart, dateRangeEnd, absoluteStartDate, absoluteEndDate, colors } = useContext(
-      UptimeSettingsContext
-    );
-
+    const { colors } = useContext(UptimeSettingsContext);
+    const parseDateRange = (r: string): number => {
+      const parsed = DateMath.parse(r);
+      return parsed ? parsed.valueOf() : 0;
+    };
     return (
       <Fragment>
         <EuiFlexGroup>
@@ -51,8 +55,8 @@ export const MonitorChartsComponent = (props: Props) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <SnapshotHistogram
-              absoluteStartDate={absoluteStartDate}
-              absoluteEndDate={absoluteEndDate}
+              absoluteStartDate={parseDateRange(dateRangeStart)}
+              absoluteEndDate={parseDateRange(dateRangeEnd)}
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={{ dateRangeStart, dateRangeEnd, monitorId }}
