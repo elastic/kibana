@@ -18,6 +18,7 @@ import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
   WORKPAD_CANVAS_BUFFER,
+  CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR,
 } from '../../../../common/lib/constants';
 
 export interface Props {
@@ -67,7 +68,7 @@ export class WorkpadZoom extends PureComponent<Props> {
   _fitToWindow = () => {
     const { boundingBox, setZoomScale } = this.props;
     const canvasLayoutContent = document.querySelector(
-      '.canvasLayout__stageContent'
+      `#${CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}`
     ) as HTMLElement;
     const boundingWidth = Math.max(0, boundingBox.right) - Math.min(0, boundingBox.left);
     const boundingHeight = Math.max(0, boundingBox.bottom) - Math.min(0, boundingBox.top);

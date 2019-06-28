@@ -31,3 +31,4 @@ export const ZOOM_LEVELS = [0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 1.75, 2, 
 export const MIN_ZOOM_LEVEL = ZOOM_LEVELS[0];
 export const MAX_ZOOM_LEVEL = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 export const WORKPAD_CANVAS_BUFFER = 32; // 32px padding around the workpad
+export const CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR = `canvasLayout__stageContent`;
