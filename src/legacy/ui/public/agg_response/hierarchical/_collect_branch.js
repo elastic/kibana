@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function (leaf) {
   // walk up the branch for each parent
   function walk(item, memo) {

@@ -19,23 +19,19 @@
 
 import dateMath from '@elastic/datemath';
 import { Field, IndexPattern } from 'ui/index_patterns';
+import { TimeRange } from './time_history';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
 }
 
-interface TimeRange {
-  to: string;
-  from: string;
-}
-
 interface RangeFilter {
-  gte?: number;
-  lte?: number;
+  gte?: string | number;
+  lte?: string | number;
   format: string;
 }
 
-interface Filter {
+export interface Filter {
   range: { [s: string]: RangeFilter };
 }
 
@@ -56,7 +52,6 @@ export function getTime(
     return;
   }
 
-  let filter: Filter;
   const timefield: Field | undefined = indexPattern.fields.find(
     field => field.name === indexPattern.timeFieldName
   );
@@ -69,14 +64,17 @@ export function getTime(
   if (!bounds) {
     return;
   }
-  filter = { range: {} };
-  const min = bounds.min ? bounds.min.valueOf() : 0;
-  const max = bounds.max ? bounds.max.valueOf() : 0;
-  filter.range[timefield.name] = {
-    gte: min,
-    lte: max,
-    format: 'epoch_millis',
+  const filter: Filter = {
+    range: { [timefield.name]: { format: 'strict_date_optional_time' } },
   };
+
+  if (bounds.min) {
+    filter.range[timefield.name].gte = bounds.min.toISOString();
+  }
+
+  if (bounds.max) {
+    filter.range[timefield.name].lte = bounds.max.toISOString();
+  }
 
   return filter;
 }

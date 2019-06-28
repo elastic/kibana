@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { filterToKueryAST } from '../filter_to_kuery';
 
 describe('filter to kuery migration', function () {

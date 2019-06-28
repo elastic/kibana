@@ -19,17 +19,8 @@
 
 import * as Rx from 'rxjs';
 
-import { __newPlatformInit__, initChromeThemeApi } from './theme';
-
-const newPlatformChrome = {
-  setBrand: jest.fn(),
-  getBrand$: jest.fn(),
-  addApplicationClass: jest.fn(),
-  removeApplicationClass: jest.fn(),
-  getApplicationClasses$: jest.fn(),
-};
-
-__newPlatformInit__(newPlatformChrome as any);
+import { newPlatformChrome } from './theme.test.mocks';
+import { initChromeThemeApi } from './theme';
 
 function setup() {
   const brand$ = new Rx.BehaviorSubject({ logo: 'foo', smallLogo: 'foo' });

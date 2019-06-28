@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import getBucketSize from '../../helpers/get_bucket_size';
-import offsetTime from '../../offset_time';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { offsetTime } from '../../offset_time';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { set } from 'lodash';
-export default function dateHistogram(req, panel, series) {
+
+export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
-    const { timeField, interval } = getIntervalAndTimefield(panel, series);
-    const { bucketSize, intervalString } = getBucketSize(req, interval);
-    const { from, to }  = offsetTime(req, series.offset_time);
-    const { timezone } = req.payload.timerange;
+    const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
+    const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
+    const { from, to } = offsetTime(req, series.offset_time);
+    const timezone = capabilities.searchTimezone;
 
     set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
       field: timeField,
@@ -35,13 +36,14 @@ export default function dateHistogram(req, panel, series) {
       time_zone: timezone,
       extended_bounds: {
         min: from.valueOf(),
-        max: to.valueOf()
-      }
+        max: to.valueOf(),
+      },
     });
     set(doc, `aggs.${series.id}.meta`, {
       timeField,
       intervalString,
-      bucketSize
+      bucketSize,
+      seriesId: series.id,
     });
     return next(doc);
   };

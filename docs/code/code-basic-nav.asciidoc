@@ -1,0 +1,20 @@
+[[code-basic-nav]]
+== Basic navigation
+
+[float]
+==== View file structure and information
+The *File* tree on the left is the primary way to navigate through your folder structure.  When you are in a directory, *Code* also presents a finder-like view on the right. Additionally, a file path breadcrumb makes it easy to go back to any parent directory.
+
+[float]
+==== Git History and Blame
+The *Directory* view shows the most recent commits.  Clicking *View More* or *History* shows the complete commit history of the current folder or file.
+
+[role="screenshot"]
+image::images/code-history.png[]
+
+Clicking *Blame* shows the most recent commit per line.
+
+[role="screenshot"]
+image::images/code-blame.png[]
+
+include::code-semantic-nav.asciidoc[]

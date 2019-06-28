@@ -18,6 +18,5 @@
  */
 
 export { extractCodeMessages } from './code';
-export { extractHandlebarsMessages } from './handlebars';
 export { extractHtmlMessages } from './html';
 export { extractPugMessages } from './pug';

@@ -18,9 +18,10 @@
  */
 
 import angular from 'angular';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import { cloneDeep } from 'lodash';
 
 import { setupAndTeardownInjectorStub } from 'test_utils/stub_get_active_injector';
 
@@ -40,9 +41,7 @@ import { RequestAdapter } from '../../../inspector/adapters/request';
 
 describe('visualize loader', () => {
 
-  const DataLoader = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
-    ? PipelineDataLoader
-    : VisualizeDataLoader;
+  let DataLoader;
   let searchSource;
   let vis;
   let $rootScope;
@@ -75,12 +74,12 @@ describe('visualize loader', () => {
   }
 
   beforeEach(ngMock.module('kibana', 'kibana/directive'));
-  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, Private) => {
+  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, interpreterConfig, Private) => {
     $rootScope = _$rootScope_;
     searchSource = Private(FixturesStubbedSearchSourceProvider);
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-
+    DataLoader = interpreterConfig.enableInVisualize ? PipelineDataLoader : VisualizeDataLoader;
     // Create a new Vis object
     const Vis = Private(VisProvider);
     vis = new Vis(indexPattern, {
@@ -159,6 +158,15 @@ describe('visualize loader', () => {
         const container = newContainer();
         loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), { });
         expect(container.find('[data-test-subj="visualizationLoader"]').length).to.be(1);
+      });
+
+      it('should not mutate vis.params', () => {
+        const container = newContainer();
+        const savedObject = createSavedObject();
+        const paramsBefore = cloneDeep(vis.params);
+        loader.embedVisualizationWithSavedObject(container[0], savedObject, { });
+        const paramsAfter = cloneDeep(vis.params);
+        expect(paramsBefore).to.eql(paramsAfter);
       });
 
       it('should replace content of container by default', () => {

@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 
 import { delay } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import cheerio from 'cheerio';
 import { noop } from 'lodash';
@@ -60,6 +60,7 @@ describe('UiExports', function () {
       plugins: { paths: [resolve(__dirname, './fixtures/test_app')] },
     });
 
+    await root.setup();
     await root.start();
 
     kbnServer = getKbnServer(root);

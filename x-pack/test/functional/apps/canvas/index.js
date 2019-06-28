@@ -8,5 +8,7 @@ export default function canvasApp({ loadTestFile }) {
   describe('Canvas app', function canvasAppTestSuite() {
     this.tags('ciGroup2'); // CI requires tags ヽ(゜Q。)ノ？
     loadTestFile(require.resolve('./smoke_test'));
+    loadTestFile(require.resolve('./feature_controls/canvas_security'));
+    loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
   });
 }

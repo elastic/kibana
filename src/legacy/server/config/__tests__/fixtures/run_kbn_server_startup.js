@@ -26,6 +26,7 @@ import { createRoot } from '../../../../../test_utils/kbn_server';
   // log the deprecation messages. Once it has started up we close it
   // to allow the process to exit naturally
   try {
+    await root.setup();
     await root.start();
   } finally {
     await root.shutdown();

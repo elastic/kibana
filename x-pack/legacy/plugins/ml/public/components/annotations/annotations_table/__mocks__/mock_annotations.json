@@ -1,0 +1,39 @@
+[
+  {
+    "timestamp": 1455026177994,
+    "end_timestamp": 1455041968976,
+    "annotation": "Major spike.",
+    "job_id": "farequote",
+    "type": "annotation",
+    "create_time": 1546417097181,
+    "create_username": "<user unknown>",
+    "modified_time": 1546417097181,
+    "modified_username": "<user unknown>",
+    "_id": "KCCkDWgB_ZdQ1MFDSYPi"
+  },
+  {
+    "timestamp": 1455026177994,
+    "end_timestamp": 1455041968976,
+    "annotation": "",
+    "job_id": "farequote",
+    "type": "annotation",
+    "create_time": 1554377048000,
+    "create_username": "sysadmin",
+    "modified_time": 1554377048000,
+    "modified_username": "sysadmin",
+    "_id": "KCCkDWgB_ZdQ1MFDSYPj"
+  },
+  {
+    "timestamp": 1455026177994,
+    "end_timestamp": 1455041968976,
+    "annotation":
+    "A very long annotation with more than the maximum allowed characters. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    "job_id": "farequote",
+    "type": "annotation",
+    "create_time": 1554377253000,
+    "create_username": "sysadmin",
+    "modified_time": 1554377253000,
+    "modified_username": "sysadmin",
+    "_id": "KCCkDWgB_ZdQ1MFDSYPk"
+  }
+]

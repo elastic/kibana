@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import handleESError from '../handle_es_error';
 import { errors as esErrors } from 'elasticsearch';
 

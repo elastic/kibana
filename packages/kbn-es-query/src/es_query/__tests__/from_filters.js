@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { buildQueryFromFilters } from '../from_filters';
 
 describe('build query', function () {

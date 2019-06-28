@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import archiver from 'archiver';
 import fs from 'fs';
 import { createHash } from 'crypto';
-import { resolve, dirname, isAbsolute } from 'path';
+import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
 import { inspect } from 'util';
 
@@ -30,11 +31,9 @@ import del from 'del';
 import deleteEmpty from 'delete-empty';
 import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
-import { Extract } from 'tar';
+import tar from 'tar';
 
 const mkdirpAsync = promisify(mkdirpCb);
-const statAsync = promisify(fs.stat);
-const chmodAsync = promisify(fs.chmod);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
@@ -74,25 +73,6 @@ export async function getChildPaths(path) {
   assertAbsolute(path);
   const childNames = await readdirAsync(path);
   return childNames.map(name => resolve(path, name));
-}
-
-export async function copy(source, destination) {
-  assertAbsolute(source);
-  assertAbsolute(destination);
-
-  const stat = await statAsync(source);
-
-  // mkdirp after the stat(), stat will throw if source
-  // doesn't exist and ideally we won't create the parent directory
-  // unless the source exists
-  await mkdirp(dirname(destination));
-
-  await createPromiseFromStreams([
-    fs.createReadStream(source),
-    fs.createWriteStream(destination),
-  ]);
-
-  await chmodAsync(destination, stat.mode);
 }
 
 export async function deleteAll(patterns, log) {
@@ -194,12 +174,26 @@ export async function untar(source, destination, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
+  await mkdirpAsync(destination);
+
   await createPromiseFromStreams([
     fs.createReadStream(source),
     createGunzip(),
-    new Extract({
+    tar.extract({
       ...extractOptions,
-      path: destination
+      cwd: destination
     }),
   ]);
+}
+
+export async function compress(type, options = {}, source, destination) {
+  const output = fs.createWriteStream(destination);
+  const archive = archiver(type, options.archiverOptions);
+  const name = (options.createRootDirectory ? source.split(sep).slice(-1)[0] : false);
+
+  archive.pipe(output);
+
+  return archive
+    .directory(source, name)
+    .finalize();
 }

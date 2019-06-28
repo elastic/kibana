@@ -207,7 +207,7 @@ export default function (api) {
   api.addEndpointDescription('render_search_template', {
     data_autocomplete_rules: {
       __one_of: [
-        { inline: { __scope_link: 'search' } },
+        { source: { __scope_link: 'search' } },
         { __scope_link: 'GLOBAL.script' },
       ],
       params: {},

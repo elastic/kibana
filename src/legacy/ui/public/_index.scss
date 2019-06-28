@@ -9,12 +9,9 @@
 //   kbnChart__legend-isLoading
 
 @import './accessibility/index';
-@import './agg_table/index';
 @import './chrome/index';
 @import './collapsible_sidebar/index';
 @import './directives/index';
-@import './doc_table/index';
-@import './doc_viewer/index';
 @import './error_allow_explicit_index/index';
 @import './error_auto_create_index/index';
 @import './error_url_overflow/index';
@@ -22,13 +19,9 @@
 @import './field_editor/index';
 @import './inspector/index';
 @import './kbn_top_nav/index';
-// @import './timepicker/index';
 @import './markdown/index';
 @import './notify/index';
-@import './partials/index';
-@import './query_bar/index';
 @import './share/index';
-@import './filter_bar/index';
 @import './style_compile/index';
 
 // The following are prefixed with "vis"

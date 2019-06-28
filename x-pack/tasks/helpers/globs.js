@@ -26,7 +26,9 @@ function getPluginPaths(plugins, opts = {}) {
     const publicPaths = `plugins/${publicPath}/**/${testPath}/*.js`;
 
     paths = paths.concat([indexPaths, commonPaths, serverPaths]);
-
+    if(plugin === 'code') {
+      paths.push(`plugins/${serverPath}/**/${testPath}/*.ts`);
+    }
     if (opts.browser) {
       paths = paths.concat(publicPaths);
     }

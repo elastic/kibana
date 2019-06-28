@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
+    this.tags('smoke');
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
@@ -49,14 +50,14 @@ export default function ({ getService, getPageObjects }) {
       // initial metric of "Count" is selected by default
       return retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visualize.getGaugeValue();
-        expect(expectedCount).to.eql(metricValue[0].split('\n'));
+        expect(expectedCount).to.eql(metricValue);
       });
     });
 
     it('should show Split Gauges', async function () {
       await PageObjects.visualize.clickMetricEditor();
       log.debug('Bucket = Split Group');
-      await PageObjects.visualize.clickBucket('Split Group');
+      await PageObjects.visualize.clickBucket('Split group');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Field = machine.os.raw');
@@ -67,23 +68,22 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         expect(await PageObjects.visualize.getGaugeValue()).to.eql([
-          'win 8',
-          'win xp',
-          'win 7',
-          'ios'
+          '2,904', 'win 8',
+          '2,858', 'win xp',
+          '2,814', 'win 7',
+          '2,784', 'ios',
         ]);
       });
     });
 
     it('should show correct values for fields with fieldFormatters', async function () {
-      const expectedTexts = [ '2,904\nwin 8: Count', '0B\nwin 8: Min bytes' ];
+      const expectedTexts = [ '2,904', 'win 8: Count', '0B', 'win 8: Min bytes' ];
 
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Terms');
       await PageObjects.visualize.selectField('machine.os.raw');
       await PageObjects.visualize.setSize('1');
-      await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric', 'metric');
+      await PageObjects.visualize.clickBucket('Metric', 'metrics');
       await PageObjects.visualize.selectAggregation('Min', 'metrics');
       await PageObjects.visualize.selectField('bytes', 'metrics');
       await PageObjects.visualize.clickGo();

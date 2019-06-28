@@ -22,31 +22,59 @@ import vfs from 'vinyl-fs';
 
 import { createPromiseFromStreams } from '../../../legacy/utils';
 
+const transpileWithBabel = async (srcGlobs, build, presets) => {
+  const buildRoot = build.resolvePath();
+
+  await createPromiseFromStreams([
+    vfs.src(
+      srcGlobs.concat([
+        '!**/*.d.ts',
+        '!packages/**',
+        '!**/node_modules/**',
+        '!**/bower_components/**',
+        '!**/__tests__/**',
+      ]),
+      {
+        cwd: buildRoot,
+      }
+    ),
+
+    gulpBabel({
+      babelrc: false,
+      presets,
+    }),
+
+    vfs.dest(buildRoot),
+  ]);
+};
+
 export const TranspileBabelTask = {
   description: 'Transpiling sources with babel',
 
   async run(config, log, build) {
-    await createPromiseFromStreams([
-      vfs.src(
-        [
-          '**/*.js',
-          '!packages/**',
-          '!**/public/**',
-          '!**/node_modules/**',
-          '!**/bower_components/**',
-          '!**/__tests__/**',
-        ],
-        {
-          cwd: build.resolvePath(),
-        }
-      ),
+    // Transpile server code
+    await transpileWithBabel(
+      [
+        '**/*.{js,ts,tsx}',
+        '!**/public/**',
+      ],
+      build,
+      [
+        require.resolve('@kbn/babel-preset/node_preset')
+      ]
+    );
 
-      gulpBabel({
-        babelrc: false,
-        presets: [require.resolve('@kbn/babel-preset/node_preset')],
-      }),
-
-      vfs.dest(build.resolvePath()),
-    ]);
+    // Transpile client code
+    // NOTE: For the client, as we have the optimizer, we are only
+    // pre-transpiling the typescript based files
+    await transpileWithBabel(
+      [
+        '**/public/**/*.{ts,tsx}',
+      ],
+      build,
+      [
+        require.resolve('@kbn/babel-preset/webpack_preset')
+      ]
+    );
   },
 };

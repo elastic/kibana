@@ -5,12 +5,12 @@
 To understand how the query trees are displayed inside the {searchprofiler},
 let's look at a more complicated query.
 
-. Index the following data:
+. Index the following data via *Console*:
 +
 --
 [source,js]
 --------------------------------------------------
-POST test/test/_bulk
+POST test/_bulk
 {"index":{}}
 {"name":"aaron","age":23,"hair":"brown"}
 {"index":{}}
@@ -25,16 +25,11 @@ POST test/test/_bulk
 // CONSOLE
 --
 
-. Enter "test" in the Index filter above the query editor (the input box with a
-  grayed-out `_all`).  This restricts profiled queries to the `test` index.
-+
---
-image::dev-tools/searchprofiler/images/gs7.png["Using the index filter"]
---
+. From the {searchprofiler}, enter "test" in the Index field above the query editor to restrict profiled 
+queries to the `test` index.
 
-. Replace the default `match_all` query with a query that has two sub-query
-components and includes a simple aggregation. For example, copy and paste
-the following query into the query editor.
+. Replace the default `match_all` query in the query editor with a query that has two sub-query
+components and includes a simple aggregation, like the example below.
 +
 --
 [source,js]
@@ -71,52 +66,38 @@ the following query into the query editor.
 // NOTCONSOLE
 --
 
-. Click *Profile* to profile the query and visualize the results.
+. Click *Profile* to profile the query and visualize the results. 
+. Select the shard to view the query details.
 +
---
+[role="screenshot"]
 image::dev-tools/searchprofiler/images/gs8.png["Profiling the more complicated query"]
 
-As before, you'll see a list of shards appear in the center panel.  You'll notice
-that the query was slightly slower (15ms vs 0.13ms) because it actually had to do
-a bit of work this time, unlike the `match_all` query.
---
 
-. Click the first shard's Expand button to view the query details.
-+
---
-image::dev-tools/searchprofiler/images/gs9.png["Drilling into the first shard's details"]
-
---
-
-You'll notice several interesting things in the results.  The shard details
-contain a row for each query component:
+The detail view contains a row for each query component:
 
  - The top-level `BooleanQuery` component corresponds to the bool in the query.
  - The second `BooleanQuery` corresponds to the terms query, which is internally
  converted to a `Boolean` of should clauses. It has two child queries that correspond
  to "sue" and "sally" from the terms query.
- - The `TermQuery` that's labeled with _"name:fred"_ corresponds to match: fred in the query.
+ - The `TermQuery` that's labeled with "name:fred" corresponds to match: fred in the query.
 
-If you look at the timings, you can see that "Self Time" and "Total Time" are no longer
+If you look at the time columns, you can see that "Self time" and "Total time" are no longer
 identical on all the rows.  Self time represents how long the query component took to execute.
-Total time is the time a query component _and all its children_ took to execute.
-Therefore, queries like the Boolean queries often have larger Total than Self.
-
-In particular, you can see that the `BooleanQuery` for "name:sue name:sally" took 3.8ms total,
-but 2.8ms of that was "self" time.  That means 2.8ms was spent by the `BooleanQuery` itself, processing
-the should clauses
+Total time is the time a query component and all its children took to execute.
+Therefore, queries like the Boolean queries often have a larger total time than self time.
 
 
 ==== Aggregations
 
 This particular query also includes a aggregation (a `stats` agg on the `"age"` field).
-To view Aggregation profiling statistics, click the *Aggregation Profile* tab. This tab
-is only enabled if the query being profiled contains an aggregation.
+Click *Aggregation Profile* to view aggregation profiling statistics (this tab
+is only enabled if the query being profiled contains an aggregation).
 
+
+Select the name of the shard to view the aggregation details and timing breakdown.
+
+[role="screenshot"]
 image::dev-tools/searchprofiler/images/gs10.png["Drilling into the first shard's details"]
-
-Click a shard's Expand button to view the aggregation details. Hover over an
-aggregation row to view the timing breakdown.
 
 For more information about how the {searchprofiler} works, how timings are calculated, and
 how to interpret various results, see 

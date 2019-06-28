@@ -17,23 +17,27 @@
  * under the License.
  */
 
-import sinon from 'sinon';
+import moment from 'moment';
+import { of } from 'rxjs';
 import { expect } from 'chai';
-import getEsShardTimeout from '../../helpers/get_es_shard_timeout';
+import { getEsShardTimeout } from '../../helpers/get_es_shard_timeout';
 
 describe('getEsShardTimeout', () => {
-  it('should return the elasticsearch.shardTimeout', () => {
-    const getConfig = sinon.spy(() => '30000');
+  it('should return the elasticsearch.shardTimeout', async () => {
     const req = {
       server: {
-        config: () => ({
-          get: getConfig
-        })
-      }
+        newPlatform: {
+          setup: {
+            core: {
+              elasticsearch: { legacy: { config$: of({ shardTimeout: moment.duration(12345) }) } },
+            },
+          },
+        },
+      },
     };
-    const timeout = getEsShardTimeout(req);
 
-    expect(timeout).to.equal('30000');
-    expect(getConfig.called).to.equal(true);
+    const timeout = await getEsShardTimeout(req);
+
+    expect(timeout).to.equal(12345);
   });
 });

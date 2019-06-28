@@ -32,9 +32,9 @@ Authorization: Basic kibana changeme
            "actions":[
                "version:7.0.0-alpha1-SNAPSHOT",
                "action:login",
-               "action:saved_objects/dashboard/get",
-               "action:saved_objects/dashboard/bulk_get",
-               "action:saved_objects/dashboard/find",
+               "saved_object:dashboard/get",
+               "saved_object:dashboard/bulk_get",
+               "saved_object:dashboard/find",
                ...
            ],"metadata":{}}
    }
@@ -70,7 +70,7 @@ The application is created by concatenating the prefix of `kibana-` with the val
  }
 ----------------------------------
 
-Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management* / *Security* / *Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es} 
+Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management -> Security -> Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es} 
 {ref}/security-api.html#security-user-apis[user management APIs].
 
 [[development-rbac-authorization]]
@@ -90,7 +90,7 @@ Authorization: Basic foo_read_only_user password
            "application":"kibana-.kibana",
            "resources":["*"],
            "privileges":[
-             "action:saved_objects/dashboard/save",
+             "saved_object:dashboard/save",
            ]
        }
    ]
@@ -100,75 +100,3 @@ Authorization: Basic foo_read_only_user password
 {es} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {es} uses the <<development-rbac-privileges, {kib} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programatically.
 
 Once we have authorized the user to perform a specific action, we can execute the request using `callWithInternalUser`.
-
-[[development-rbac-legacy-fallback]]
-==== Legacy Fallback
-
-Users have existing roles that rely on index privileges to the `.kibana` index. The legacy fallback uses the `callWithRequest` method when the user doesn't have any application privileges. This relies on the user having index privileges on `.kibana`. The legacy fallback will be available until 7.0.
-
-Within the secured instance of the `SavedObjectsClient` the `_has_privileges` check determines if the user has any index privileges on the `.kibana` index:
-
-[source,js]
-----------------------------------
-POST /_security/user/_has_privileges
-Content-Type: application/json
-Authorization: Basic foo_legacy_user password
-
-{
-   "applications":[
-       {
-           "application":"kibana-.kibana",
-           "resources":["*"],
-           "privileges":[
-             "action:saved_objects/dashboard/save"
-           ]
-       }
-   ],
-   "index": [
-       {
-           "names": ".kibana",
-           "privileges": ["create", "delete", "read", "view_index_metadata"]
-       }
-   ]
-}
-----------------------------------
-
-Here is an example response if the user does not have application privileges, but does have privileges on the `.kibana` index:
-
-[source,js]
-----------------------------------
-{
-  "username": "foo_legacy_user",
-  "has_all_requested": false,
-  "cluster": {},
-  "index": {
-    ".kibana": {
-      "read": true,
-      "view_index_metadata": true,
-      "create": true,
-      "delete": true
-    }
-  },
-  "application": {
-    "kibana-.kibana": {
-      "*": {
-        "action:saved_objects/dashboard/save": false
-      }
-    }
-  }
-}
-----------------------------------
-
-{kib} automatically detects that the request could be executed against `.kibana` using `callWithRequest` and does so.
-
-When the user first logs into {kib}, if they have no application privileges and will have to rely on the legacy fallback, {kib} logs a deprecation warning similar to the following:
-
-[source,js]
-----------------------------------
-${username} relies on index privileges on the {kib} index. This is deprecated and will be removed in {kib} 7.0
-----------------------------------
-
-[[development-rbac-reserved-roles]]
-==== Reserved roles
-
-Ideally, the `kibana_user` and `kibana_dashboard_only_user` roles should only use application privileges, and no longer have index privileges on the `.kibana` index. However, making this switch forces the user to incur downtime if Elasticsearch is upgraded to >= 6.4, and {kib} is running < 6.4. To mitigate this downtime, for the 6.x releases the `kibana_user` and `kibana_dashbord_only_user` roles have both application privileges and index privileges. When {kib} is running >= 6.4 it uses the application privileges to authorize the user, but when {kib} is running < 6.4 {kib} relies on the direct index privileges. 

@@ -18,9 +18,9 @@
  */
 
 import $ from 'jquery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
@@ -46,7 +46,7 @@ describe('Table Vis Controller', function () {
     fixtures = require('fixtures/fake_hierarchical_data');
     AppState = Private(AppStateProvider);
     Vis = Private(VisProvider);
-    tableAggResponse =  Private(LegacyResponseHandlerProvider).handler;
+    tableAggResponse =  legacyResponseHandlerProvider().handler;
   }));
 
   function OneRangeVis(params) {
@@ -88,6 +88,7 @@ describe('Table Vis Controller', function () {
 
     tabifiedResponse = tabifyAggResponse(vis.aggs, fixtures.oneRangeBucket);
     $rootScope.vis = vis;
+    $rootScope.visParams = vis.params;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.renderComplete = () => {};
     $rootScope.newScope = function (scope) { $scope = scope; };

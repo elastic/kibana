@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { FieldFormat } from '../field_format';
 import { FieldFormatsService } from '../field_formats_service';
 import { createNumberFormat } from '../../../core_plugins/kibana/common/field_formats/types/number';

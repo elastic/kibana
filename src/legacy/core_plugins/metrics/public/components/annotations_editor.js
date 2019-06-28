@@ -20,13 +20,18 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import * as collectionActions from './lib/collection_actions';
-import AddDeleteButtons from './add_delete_buttons';
-import ColorPicker from './color_picker';
-import FieldSelect from './aggs/field_select';
+import { collectionActions } from './lib/collection_actions';
+import { ES_TYPES } from '../../common/es_types';
+import { AddDeleteButtons } from './add_delete_buttons';
+import { ColorPicker } from './color_picker';
+import { FieldSelect } from './aggs/field_select';
 import uuid from 'uuid';
-import IconSelect from './icon_select';
-import YesNo from './yes_no';
+import { IconSelect } from './icon_select';
+import { YesNo } from './yes_no';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data/setup';
+const { QueryBarInput } = data.query.ui;
+import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 import {
   htmlIdGenerator,
@@ -51,38 +56,54 @@ function newAnnotation() {
     time_field: '@timestamp',
     icon: 'fa-tag',
     ignore_global_filters: 1,
-    ignore_panel_filters: 1
+    ignore_panel_filters: 1,
   };
 }
 
-class AnnotationsEditor extends Component {
+const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
+const localStorage = new Storage(window.localStorage);
+export class AnnotationsEditor extends Component {
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
       handleChange(_.assign({}, item, part));
     };
   }
-
+  handleQueryChange = (model, filter) => {
+    const part = { query_string: filter };
+    collectionActions.handleChange(this.props, {
+      ...model,
+      ...part,
+    });
+  };
   renderRow(row) {
-    const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
+    const defaults = {
+      fields: '',
+      template: '',
+      index_pattern: '*',
+      query_string: { query: '', language: getDefaultQueryLanguage() },
+    };
     const model = { ...defaults, ...row };
-    const handleChange = (part) => {
+    const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
+    const togglePanelActivation = () => {
+      handleChange({
+        hidden: !model.hidden,
+      });
+    };
     const htmlId = htmlIdGenerator(model.id);
-    const handleAdd = collectionActions.handleAdd
-      .bind(null, this.props, newAnnotation);
-    const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, model);
+    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
+    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
         <EuiFlexGroup responsive={false}>
@@ -100,10 +121,12 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('indexPattern')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.indexPatternLabel"
-                    defaultMessage="Index pattern (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.indexPatternLabel"
+                      defaultMessage="Index pattern (required)"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -116,14 +139,16 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('timeField')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.timeFieldLabel"
-                    defaultMessage="Time field (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.timeFieldLabel"
+                      defaultMessage="Time field (required)"
+                    />
+                  }
                   fullWidth
                 >
                   <FieldSelect
-                    restrict="date"
+                    restrict={RESTRICT_FIELDS}
                     value={model.time_field}
                     onChange={this.handleChange(model, 'time_field')}
                     indexPattern={model.index_pattern}
@@ -140,16 +165,24 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('queryString')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.queryStringLabel"
-                    defaultMessage="Query string"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.queryStringLabel"
+                      defaultMessage="Query string"
+                    />
+                  }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={this.handleChange(model, 'query_string')}
-                    value={model.query_string}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.query_string.language || getDefaultQueryLanguage(),
+                      query: model.query_string.query || '',
+                    }}
+                    onChange={query => this.handleQueryChange(model, query)}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern]}
+                    store={localStorage}
+                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -189,24 +222,25 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('icon')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.iconLabel"
-                    defaultMessage="Icon (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.iconLabel"
+                      defaultMessage="Icon (required)"
+                    />
+                  }
                 >
-                  <IconSelect
-                    value={model.icon}
-                    onChange={this.handleChange(model, 'icon')}
-                  />
+                  <IconSelect value={model.icon} onChange={this.handleChange(model, 'icon')} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('fields')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.fieldsLabel"
-                    defaultMessage="Fields (required - comma separated paths)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.fieldsLabel"
+                      defaultMessage="Fields (required - comma separated paths)"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -219,16 +253,18 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('rowTemplate')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.rowTemplateLabel"
-                    defaultMessage="Row template (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.rowTemplateLabel"
+                      defaultMessage="Row template (required)"
+                    />
+                  }
                   helpText={
                     <span>
                       <FormattedMessage
                         id="tsvb.annotationsEditor.rowTemplateHelpText"
                         defaultMessage="eg.{rowTemplateExample}"
-                        values={{ rowTemplateExample: (<EuiCode>{'{{field}}'}</EuiCode>) }}
+                        values={{ rowTemplateExample: <EuiCode>{'{{field}}'}</EuiCode> }}
                       />
                     </span>
                   }
@@ -242,13 +278,14 @@ class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
-
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <AddDeleteButtons
               onAdd={handleAdd}
               onDelete={handleDelete}
+              togglePanelActivation={togglePanelActivation}
+              isPanelActive={!model.hidden}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -260,8 +297,7 @@ class AnnotationsEditor extends Component {
     const { model } = this.props;
     let content;
     if (!model.annotations || !model.annotations.length) {
-      const handleAdd = collectionActions.handleAdd
-        .bind(null, this.props, newAnnotation);
+      const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
       content = (
         <EuiText textAlign="center">
           <p>
@@ -292,28 +328,21 @@ class AnnotationsEditor extends Component {
           </EuiTitle>
           <EuiSpacer size="m" />
 
-          { annotations }
+          {annotations}
         </div>
       );
     }
-    return(
-      <div className="tvbAnnotationsEditor__container">
-        { content }
-      </div>
-    );
+    return <div className="tvbAnnotationsEditor__container">{content}</div>;
   }
-
 }
 
 AnnotationsEditor.defaultProps = {
-  name: 'annotations'
+  name: 'annotations',
 };
 
 AnnotationsEditor.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   name: PropTypes.string,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
-
-export default AnnotationsEditor;

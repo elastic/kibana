@@ -22,7 +22,10 @@ const _ = require('lodash');
 const es = require('./es');
 const settings = require('./settings');
 
-
+// NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
+// due to timing issues in our app.js tests.
+const POLL_INTERVAL = 60000;
+let pollTimeoutId;
 
 let perIndexTypes = {};
 let perAliasIndexes = [];
@@ -61,12 +64,13 @@ function expandAliases(indicesOrAliases) {
 function getTemplates() {
   return [ ...templates ];
 }
+
 function getFields(indices, types) {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
   let ret = [];
   indices = expandAliases(indices);
-  if (typeof indices === 'string') {
 
+  if (typeof indices === 'string') {
     const typeDict = perIndexTypes[indices];
     if (!typeDict) {
       return [];
@@ -75,8 +79,7 @@ function getFields(indices, types) {
     if (typeof types === 'string') {
       const f = typeDict[types];
       ret = f ? f : [];
-    }
-    else {
+    } else {
       // filter what we need
       $.each(typeDict, function (type, fields) {
         if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
@@ -86,8 +89,7 @@ function getFields(indices, types) {
 
       ret = [].concat.apply([], ret);
     }
-  }
-  else {
+  } else {
     // multi index mode.
     $.each(perIndexTypes, function (index) {
       if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
@@ -128,9 +130,7 @@ function getTypes(indices) {
   }
 
   return _.uniq(ret);
-
 }
-
 
 function getIndices(includeAliases) {
   const ret = [];
@@ -164,7 +164,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 
   if (fieldMapping.properties) {
     // derived object type
-    nestedFields = getFieldNamesFromTypeMapping(fieldMapping);
+    nestedFields = getFieldNamesFromProperties(fieldMapping.properties);
     return applyPathSettings(nestedFields);
   }
 
@@ -196,9 +196,9 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   return [ret];
 }
 
-function getFieldNamesFromTypeMapping(typeMapping) {
+function getFieldNamesFromProperties(properties = {}) {
   const fieldList =
-    $.map(typeMapping.properties || {}, function (fieldMapping, fieldName) {
+    $.map(properties, function (fieldMapping, fieldName) {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
 
@@ -208,22 +208,30 @@ function getFieldNamesFromTypeMapping(typeMapping) {
   });
 }
 
-function loadTemplates(templatesObject) {
+function loadTemplates(templatesObject = {}) {
   templates = Object.keys(templatesObject);
 }
 
 function loadMappings(mappings) {
   perIndexTypes = {};
+
   $.each(mappings, function (index, indexMapping) {
     const normalizedIndexMappings = {};
-    // 1.0.0 mapping format has changed, extract underlying mapping
+
+    // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
     if (indexMapping.mappings && _.keys(indexMapping).length === 1) {
       indexMapping = indexMapping.mappings;
     }
+
     $.each(indexMapping, function (typeName, typeMapping) {
-      const fieldList = getFieldNamesFromTypeMapping(typeMapping);
-      normalizedIndexMappings[typeName] = fieldList;
+      if (typeName === 'properties') {
+        const fieldList = getFieldNamesFromProperties(typeMapping);
+        normalizedIndexMappings[typeName] = fieldList;
+      } else {
+        normalizedIndexMappings[typeName] = [];
+      }
     });
+
     perIndexTypes[index] = normalizedIndexMappings;
   });
 }
@@ -256,78 +264,84 @@ function clear() {
   templates = [];
 }
 
-function retrieveAutocompleteInfoFromServer() {
-  const autocompleteSettings = settings.getAutocomplete();
-  let mappingPromise;
-  let aliasesPromise;
-  let templatesPromise;
-  if (autocompleteSettings.fields) {
-    mappingPromise = es.send('GET', '_mapping', null, null, true);
-  }
-  else {
-    mappingPromise = new $.Deferred();
-    mappingPromise.resolve();
-  }
-  if (autocompleteSettings.indices) {
-    aliasesPromise = es.send('GET', '_aliases', null, null, true);
-  }
-  else {
-    aliasesPromise = new $.Deferred();
-    aliasesPromise.resolve();
-  }
-  if (autocompleteSettings.templates) {
-    templatesPromise = es.send('GET', '_template', null, null, true);
+function retrieveSettings(settingsKey, settingsToRetrieve) {
+  const currentSettings = settings.getAutocomplete();
+  const settingKeyToPathMap = {
+    fields: '_mapping',
+    indices: '_aliases',
+    templates: '_template',
+  };
+
+  // Fetch autocomplete info if setting is set to true, and if user has made changes.
+  if (currentSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
+    return es.send('GET', settingKeyToPathMap[settingsKey], null, null, true);
   } else {
-    templatesPromise = new $.Deferred();
-    templatesPromise.resolve();
+    const settingsPromise = new $.Deferred();
+    // If a user has saved settings, but a field remains checked and unchanged, no need to make changes
+    if (currentSettings[settingsKey]) {
+      return settingsPromise.resolve();
+    }
+    // If the user doesn't want autocomplete suggestions, then clear any that exist
+    return settingsPromise.resolveWith(this, [ [JSON.stringify({})] ]);
   }
+}
+
+// Retrieve all selected settings by default.
+function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete()) {
+  if (pollTimeoutId) {
+    clearTimeout(pollTimeoutId);
+  }
+
+  const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
+  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
+  const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
 
   $.when(mappingPromise, aliasesPromise, templatesPromise)
-    .done(function (mappings, aliases, templates) {
-      if (!mappings) {
-        mappings = {};
+    .done((mappings, aliases, templates) => {
+      let mappingsResponse;
+      if (mappings) {
+        const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
+        if (maxMappingSize) {
+          console.warn(`Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`);
+          mappingsResponse = '[{}]';
+        } else {
+          mappingsResponse = mappings[0];
+        }
+        loadMappings(JSON.parse(mappingsResponse));
       }
-      else if (mappings[0].length < 10 * 1024 * 1024) {
-        mappings = JSON.parse(mappings[0]);
-      }
-      else {
-        console.warn('mapping size is larger than 10MB (' + mappings[0].length / 1024 / 1024 + ' MB). ignoring..');
-        mappings = {};
-      }
-      loadMappings(mappings);
+
       if (aliases) {
         loadAliases(JSON.parse(aliases[0]));
-      } else {
-        aliases = [{}];
-        loadAliases({});
       }
+
       if (templates) {
         loadTemplates(JSON.parse(templates[0]));
-      } else {
-        templates = [];
       }
-      // Trigger an update event with the mappings, aliases
-      $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
-    }
-    )
-  ;
+
+      if (mappings && aliases) {
+        // Trigger an update event with the mappings, aliases
+        $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
+      }
+
+      // Schedule next request.
+      pollTimeoutId = setTimeout(() => {
+        // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
+        // a scheduled request if the user turns off polling.
+        if (settings.getPolling()) {
+          retrieveAutoCompleteInfo();
+        }
+      }, POLL_INTERVAL);
+    });
 }
 
-function autocompleteRetriever() {
-  retrieveAutocompleteInfoFromServer();
-  setTimeout(function () {
-    autocompleteRetriever();
-  }, 60000);
-}
-
-export default _.assign(mappingObj, {
-  getFields: getFields,
-  getTemplates: getTemplates,
-  getIndices: getIndices,
-  getTypes: getTypes,
-  loadMappings: loadMappings,
-  loadAliases: loadAliases,
-  expandAliases: expandAliases,
-  clear: clear,
-  startRetrievingAutoCompleteInfo: autocompleteRetriever
-});
+export default {
+  getFields,
+  getTemplates,
+  getIndices,
+  getTypes,
+  loadMappings,
+  loadAliases,
+  expandAliases,
+  clear,
+  retrieveAutoCompleteInfo,
+};

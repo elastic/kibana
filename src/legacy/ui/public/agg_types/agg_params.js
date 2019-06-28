@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import '../filters/label';
 import { IndexedArray } from '../indexed_array';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
-import { RegexParamType } from './param_types/regex';
+import { SelectParamType } from './param_types/select';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
@@ -29,8 +28,9 @@ import { createLegacyClass } from '../utils/legacy_class';
 
 const paramTypeMap = {
   field: FieldParamType,
+  // todo: remove select type and update optioned type after EUIfication of all components;
   optioned: (OptionedParamType),
-  regex: (RegexParamType),
+  select: SelectParamType,
   string: (StringParamType),
   json: (JsonParamType),
   _default: (BaseParamType)

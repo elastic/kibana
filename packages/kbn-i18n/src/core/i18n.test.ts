@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 import * as i18nModule from './i18n';
 
 describe('I18n engine', () => {
@@ -885,7 +887,7 @@ describe('I18n engine', () => {
   });
 
   describe('load', () => {
-    let mockFetch: jest.Mock<unknown>;
+    let mockFetch: jest.Mock;
     beforeEach(() => {
       mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
     });
@@ -921,7 +923,7 @@ describe('I18n engine', () => {
       await expect(i18n.load('some-url')).resolves.toBeUndefined();
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(mockFetch).toHaveBeenCalledWith('some-url');
+      expect(mockFetch).toHaveBeenCalledWith('some-url', { credentials: 'same-origin' });
 
       expect(i18n.getTranslation()).toEqual(translations);
     });

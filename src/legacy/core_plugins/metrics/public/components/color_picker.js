@@ -22,17 +22,16 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { EuiIconTip, } from '@elastic/eui';
-import Picker from './custom_color_picker';
+import { EuiIconTip } from '@elastic/eui';
+import { CustomColorPicker } from './custom_color_picker';
 import { injectI18n } from '@kbn/i18n/react';
 
-class ColorPicker extends Component {
-
+class ColorPickerUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
       displayPicker: false,
-      color: {}
+      color: {},
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -68,7 +67,7 @@ class ColorPicker extends Component {
         <button
           aria-label={this.props.intl.formatMessage({
             id: 'tsvb.colorPicker.notAccessibleAriaLabel',
-            defaultMessage: 'Color picker, not accessible'
+            defaultMessage: 'Color picker, not accessible',
           })}
           className="tvbColorPicker__swatch-empty"
           onClick={this.handleClick}
@@ -77,11 +76,15 @@ class ColorPicker extends Component {
     }
     return (
       <button
-        aria-label={this.props.intl.formatMessage({
-          id: 'tsvb.colorPicker.notAccessibleWithValueAriaLabel',
-          defaultMessage: 'Color picker ({value}), not accessible' }, {
-          value: this.props.value
-        })}
+        aria-label={this.props.intl.formatMessage(
+          {
+            id: 'tsvb.colorPicker.notAccessibleWithValueAriaLabel',
+            defaultMessage: 'Color picker ({value}), not accessible',
+          },
+          {
+            value: this.props.value,
+          }
+        )}
         style={{ backgroundColor: this.props.value }}
         className="tvbColorPicker__swatch"
         onClick={this.handleClick}
@@ -102,42 +105,32 @@ class ColorPicker extends Component {
             color="danger"
             content={this.props.intl.formatMessage({
               id: 'tsvb.colorPicker.clearIconLabel',
-              defaultMessage: 'Clear'
+              defaultMessage: 'Clear',
             })}
           />
         </div>
       );
     }
     return (
-      <div className="tvbColorPicker">
-        { swatch }
-        { clear }
-        {
-          this.state.displayPicker
-            ? (
-              <div className="tvbColorPicker__popover">
-                <div
-                  className="tvbColorPicker__cover"
-                  onClick={this.handleClose}
-                />
-                <Picker
-                  color={value}
-                  onChangeComplete={this.handleChange}
-                />
-              </div>
-            ) : null
-        }
+      <div className="tvbColorPicker" data-test-subj="tvbColorPicker">
+        {swatch}
+        {clear}
+        {this.state.displayPicker ? (
+          <div className="tvbColorPicker__popover">
+            <div className="tvbColorPicker__cover" onClick={this.handleClose} />
+            <CustomColorPicker color={value} onChangeComplete={this.handleChange} />
+          </div>
+        ) : null}
       </div>
     );
   }
-
 }
 
-ColorPicker.propTypes = {
+ColorPickerUI.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   disableTrash: PropTypes.bool,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
-export default injectI18n(ColorPicker);
+export const ColorPicker = injectI18n(ColorPickerUI);

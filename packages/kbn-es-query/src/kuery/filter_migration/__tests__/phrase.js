@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { convertPhraseFilter } from '../phrase';
 
 describe('filter to kuery migration', function () {

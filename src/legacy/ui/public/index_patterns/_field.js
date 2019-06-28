@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { ObjDefine } from '../utils/obj_define';
+import { ObjDefine } from 'ui/utils/obj_define';
 import { FieldFormat } from '../../field_formats/field_format';
-import { fieldFormats } from '../registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 import { getKbnFieldType } from '../../../utils';
 import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 
 export function Field(indexPattern, spec) {
@@ -38,6 +37,8 @@ export function Field(indexPattern, spec) {
   if (spec.name === '_source') {
     spec.type = '_source';
   }
+
+  const shortDotsEnable = indexPattern.shortDotsEnable;
 
   // find the type for this field, fallback to unknown type
   let type = getKbnFieldType(spec.type);
@@ -58,7 +59,7 @@ export function Field(indexPattern, spec) {
 
   let format = spec.format;
   if (!format || !(format instanceof FieldFormat)) {
-    format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
+    format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
   }
 
   const indexed = !!spec.indexed;
@@ -72,6 +73,7 @@ export function Field(indexPattern, spec) {
 
   obj.fact('name');
   obj.fact('type');
+  obj.fact('esTypes');
   obj.writ('count', spec.count || 0);
 
   // scripted objs
@@ -92,11 +94,15 @@ export function Field(indexPattern, spec) {
 
   // computed values
   obj.comp('indexPattern', indexPattern);
-  obj.comp('displayName', chrome.getUiSettingsClient().get('shortDots:enable') ? shortenDottedString(spec.name) : spec.name);
+  obj.comp('displayName', shortDotsEnable ? shortenDottedString(spec.name) : spec.name);
   obj.comp('$$spec', spec);
 
   // conflict info
   obj.writ('conflictDescriptions');
+
+  // multi info
+  obj.fact('parent');
+  obj.fact('subType');
 
   return obj.create();
 }

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectMetaData } from '../saved_objects/components/saved_object_finder';
 import { Embeddable } from './embeddable';
 import { EmbeddableState } from './types';
 export interface EmbeddableInstanceConfiguration {
@@ -28,16 +30,24 @@ export type OnEmbeddableStateChanged = (embeddableStateChanges: EmbeddableState)
 /**
  * The EmbeddableFactory creates and initializes an embeddable instance
  */
-export abstract class EmbeddableFactory {
+export abstract class EmbeddableFactory<T extends SavedObjectAttributes = SavedObjectAttributes> {
   public readonly name: string;
+  public readonly savedObjectMetaData?: SavedObjectMetaData<T>;
 
   /**
    *
    * @param name - a unique identified for this factory, which will be used to map an embeddable spec to
    * a factory that can generate an instance of it.
    */
-  constructor({ name }: { name: string }) {
+  constructor({
+    name,
+    savedObjectMetaData,
+  }: {
+    name: string;
+    savedObjectMetaData?: SavedObjectMetaData<T>;
+  }) {
     this.name = name;
+    this.savedObjectMetaData = savedObjectMetaData;
   }
 
   /**

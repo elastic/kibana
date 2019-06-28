@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { Filters, Query, TimeRange } from 'ui/embeddable';
+import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { DashboardViewMode } from '../dashboard/dashboard_view_mode';
 import * as DashboardSelectors from '../dashboard/selectors';
 import { PanelId } from '../dashboard/selectors/types';
 import { CoreKibanaState } from './types';
+import { StagedFilter } from '../dashboard/types';
 
 export const getDashboard = (state: CoreKibanaState): DashboardSelectors.DashboardState =>
   state.dashboard;
@@ -46,7 +49,7 @@ export const getEmbeddableStagedFilter = (state: CoreKibanaState, panelId: Panel
 export const getEmbeddableMetadata = (state: CoreKibanaState, panelId: PanelId) =>
   DashboardSelectors.getEmbeddableMetadata(getDashboard(state), panelId);
 
-export const getStagedFilters = (state: CoreKibanaState): Filters =>
+export const getStagedFilters = (state: CoreKibanaState): StagedFilter[] =>
   DashboardSelectors.getStagedFilters(getDashboard(state));
 export const getViewMode = (state: CoreKibanaState): DashboardViewMode =>
   DashboardSelectors.getViewMode(getDashboard(state));
@@ -60,7 +63,7 @@ export const getHidePanelTitles = (state: CoreKibanaState): boolean =>
   DashboardSelectors.getHidePanelTitles(getDashboard(state));
 export const getTimeRange = (state: CoreKibanaState): TimeRange =>
   DashboardSelectors.getTimeRange(getDashboard(state));
-export const getFilters = (state: CoreKibanaState): Filters =>
+export const getFilters = (state: CoreKibanaState): Filter[] =>
   DashboardSelectors.getFilters(getDashboard(state));
 export const getQuery = (state: CoreKibanaState): Query =>
   DashboardSelectors.getQuery(getDashboard(state));

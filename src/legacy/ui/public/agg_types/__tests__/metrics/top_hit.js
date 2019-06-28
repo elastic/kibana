@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { topHitMetricAgg } from '../../metrics/top_hit';
 import { VisProvider } from '../../../vis';
@@ -39,10 +39,10 @@ describe('Top hit metric', function () {
         params.field = field;
       }
       params.sortOrder = {
-        val: sortOrder
+        value: sortOrder
       };
       params.aggregate = {
-        val: aggregate
+        value: aggregate
       };
       params.size = size;
       const vis = new Vis(indexPattern, {

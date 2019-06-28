@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
@@ -31,23 +30,25 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/LICENSE',
   '**/*.txt',
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/plugins/apm/**/*',
-  'x-pack/plugins/canvas/tasks/**/*',
-  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/legacy/plugins/apm/**/*',
+  'x-pack/legacy/plugins/canvas/tasks/**/*',
+  'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
-  'src/dev/tslint/rules/*',
   'src/legacy/ui/public/assets/fonts/**/*',
+
+  // Files in this directory must match a pre-determined name in some cases.
+  'x-pack/legacy/plugins/canvas/.storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 ];
-
 
 /**
  * These patterns are matched against directories and indicate
@@ -55,11 +56,7 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
-  'x-pack',
-];
-
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
 
 /**
  * These patterns are matched against directories and indicate
@@ -89,7 +86,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'x-pack/dev-tools',
 ];
 
-
 /**
  * DO NOT ADD FILES TO THIS LIST!!
  *
@@ -107,7 +103,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
 export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
   'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/console/public/webpackShims/ui-bootstrap-custom.js',
   'src/legacy/core_plugins/kibana/public/assets/play-circle.svg',
   'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js',
   'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
@@ -120,12 +115,9 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/timelion/server/series_functions/__tests__/fixtures/tlConfig.js',
   'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/fixtures/vislib/mock_data/terms/_seriesMultiple.js',
-  'src/legacy/ui/public/angular-bootstrap/accordion/accordion-group.html',
   'src/legacy/ui/public/angular-bootstrap/bindHtml/bindHtml.js',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-html-unsafe-popup.html',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-popup.html',
-  'src/legacy/ui/public/angular-bootstrap/typeahead/typeahead-match.html',
-  'src/legacy/ui/public/angular-bootstrap/typeahead/typeahead-popup.html',
   'src/legacy/ui/public/assets/favicons/android-chrome-192x192.png',
   'src/legacy/ui/public/assets/favicons/android-chrome-256x256.png',
   'src/legacy/ui/public/assets/favicons/android-chrome-512x512.png',
@@ -138,16 +130,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/ui/public/assets/favicons/mstile-310x150.png',
   'src/legacy/ui/public/assets/favicons/mstile-310x310.png',
   'src/legacy/ui/public/assets/favicons/safari-pinned-tab.svg',
-  'src/legacy/ui/public/directives/__tests__/confirm-click.js',
-  'src/legacy/ui/public/icons/beats-color.svg',
-  'src/legacy/ui/public/icons/beats-gray.svg',
-  'src/legacy/ui/public/icons/elasticsearch-color.svg',
-  'src/legacy/ui/public/icons/elasticsearch-gray.svg',
-  'src/legacy/ui/public/icons/kibana-color.svg',
-  'src/legacy/ui/public/icons/kibana-gray.svg',
-  'src/legacy/ui/public/icons/logstash-color.svg',
-  'src/legacy/ui/public/icons/logstash-gray.svg',
-  'src/legacy/ui/public/icons/security-gray.svg',
   'src/legacy/ui/public/styles/bootstrap/component-animations.less',
   'src/legacy/ui/public/styles/bootstrap/input-groups.less',
   'src/legacy/ui/public/styles/bootstrap/list-group.less',
@@ -177,23 +159,23 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'webpackShims/elasticsearch-browser.js',
   'webpackShims/moment-timezone.js',
   'webpackShims/ui-bootstrap.js',
-  'x-pack/plugins/graph/public/graphClientWorkspace.js',
-  'x-pack/plugins/graph/public/angular-venn-simple.js',
-  'x-pack/plugins/index_management/public/lib/editSettings.js',
-  'x-pack/plugins/license_management/public/store/reducers/licenseManagement.js',
-  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
-  'x-pack/plugins/ml/public/jobs/new_job/simple/components/watcher/email-influencers.html',
-  'x-pack/plugins/monitoring/public/icons/alert-blue.svg',
-  'x-pack/plugins/monitoring/public/icons/health-gray.svg',
-  'x-pack/plugins/monitoring/public/icons/health-green.svg',
-  'x-pack/plugins/monitoring/public/icons/health-red.svg',
-  'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/legacy/plugins/graph/public/graphClientWorkspace.js',
+  'x-pack/legacy/plugins/graph/public/angular-venn-simple.js',
+  'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
+  'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
+  'x-pack/legacy/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
+  'x-pack/legacy/plugins/ml/public/jobs/new_job/simple/components/watcher/email-influencers.html',
+  'x-pack/legacy/plugins/monitoring/public/icons/alert-blue.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-gray.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-green.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-red.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-yellow.svg',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

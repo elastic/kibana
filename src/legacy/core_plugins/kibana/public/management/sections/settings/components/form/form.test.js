@@ -84,6 +84,24 @@ describe('Form', () => {
         clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
+        enableSaving={true}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render read-only when saving is disabled', async () => {
+    const component = shallowWithIntl(
+      <Form.WrappedComponent
+        settings={settings}
+        categories={categories}
+        categoryCounts={categoryCounts}
+        save={save}
+        clear={clear}
+        clearQuery={clearQuery}
+        showNoResultsMessage={true}
+        enableSaving={false}
       />
     );
 
@@ -100,6 +118,7 @@ describe('Form', () => {
         clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
+        enableSaving={true}
       />
     );
 
@@ -116,6 +135,7 @@ describe('Form', () => {
         clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={false}
+        enableSaving={true}
       />
     );
 

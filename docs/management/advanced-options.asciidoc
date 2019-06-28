@@ -5,97 +5,251 @@ The *Advanced Settings* page enables you to directly edit settings that control 
 For example, you can change the format used to display dates, specify the default index pattern, and set the precision
 for displayed decimal values.
 
-To set advanced options:
+. Go to *Management > {kib} > Advanced Settings*.
+. Scroll or search for the setting you want to modify.
+. Enter a new value for the setting.
 
-. Go to *Settings > Advanced*.
-. Scroll or use the search bar to find the option you want to modify.
-. Enter a new value for the option.
-. Click the *Save* button.
+[float]
+[[settings-read-only-access]]
+=== [xpack]#Read only access#
+When you have insufficient privileges to edit advanced settings, the following 
+indicator in Kibana will be displayed. The buttons to edit settings won't be visible. 
+For more information on granting access to Kibana see <<xpack-security-authorization>>.
 
+[role="screenshot"]
+image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in Kibana's header]
+
+[float]
 [[kibana-settings-reference]]
+=== Kibana settings reference
 
-WARNING: Modifying the following settings can significantly affect Kibana's performance and cause problems that are
-difficult to diagnose. Setting a property's value to a blank field will revert to the default behavior, which may not be
-compatible with other configuration settings. Deleting a custom setting removes it from Kibana permanently.
+WARNING: Modifying a setting can affect {kib}
+performance and cause problems that are
+difficult to diagnose. Setting a property value to a blank field reverts 
+to the default behavior, which might not be
+compatible with other configuration settings. Deleting a custom setting 
+removes it from {kib} permanently.
 
-.Kibana settings reference
+
+[float]
+[[kibana-general-settings]]
+=== General settings
+
 [horizontal]
-`query:queryString:options`:: Options for the Lucene query string parser.
-`query:allowLeadingWildcards`:: When set, * is allowed as the first character in a query clause. Currently only applies when experimental query features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options.
-`search:queryLanguage`:: Default is `KQL`. Query language used by the query bar. Choose between the lucene query syntax and KQL, a new language built specifically for Kibana.
-`sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
-`dateFormat`:: The format to use for displaying pretty-formatted dates.
-`dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
-`dateFormat:scaled`:: These values define the format used to render ordered time-based data. Formatted timestamps must
+`csv:quoteValues`:: Set this property to `true` to quote exported values.
+`csv:separator`:: A string that serves as the separator for exported values.
+`dateFormat`:: The format to use for displaying https://momentjs.com/docs/#/displaying/format/[pretty formatted dates].
+`dateFormat:dow`:: The day that a week should start on.
+`dateFormat:scaled`:: The values that define the format to use to render ordered time-based data. Formatted timestamps must
 adapt to the interval between measurements. Keys are http://en.wikipedia.org/wiki/ISO_8601#Time_intervals[ISO8601 intervals].
-`dateFormat:dow`:: This property defines what day weeks should start on.
-`defaultIndex`:: Default is `null`. This property specifies the default index.
-`defaultColumns`:: Default is `_source`. Defines the columns that appear by default on the Discover page.
-`metaFields`:: An array of fields outside of `_source`. Kibana merges these fields into the document when displaying the
-document.
-`discover:sampleSize`:: The number of rows to show in the Discover table.
-`discover:aggs:terms:size`:: Determines how many terms will be visualized when clicking the "visualize" button, in the field drop downs, in the discover sidebar. The default value is `20`.
-`discover:sort:defaultOrder`:: Controls the default sort direction for time based index patterns in the Discover app.
-`doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when
-working on big documents. Set this property to `false` to disable highlighting.
-`doc_table:hideTimeColumn`:: Hide the 'Time' column in Discover and in all Saved Searches on Dashboards.
-`search:includeFrozen`:: Will include {ref}/frozen-indices.html[frozen indices] in results if enabled. Searching through frozen indices
-might increase the search time.
-`courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
-the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
-increase request processing time.
-`courier:ignoreFilterIfFieldNotInIndex`:: Set this property to `true` to skip filters that apply to fields that don't exist in a visualization's index. Useful when dashboards consist of visualizations from multiple index patterns.
-`courier:maxConcurrentShardRequests`:: Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests] setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.
-`fields:popularLimit`:: This setting governs how many of the top most popular fields are shown.
+`dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
+`defaultIndex`:: The index to access if no index is set. The default is `null`. 
+`fields:popularLimit`:: The top N most popular fields to show.
+`filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
+`filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state (be pinned) by default.
+`format:bytes:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "bytes" format.
+`format:currency:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "currency" format.
+`format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
+mentioned use "\_default_".
+`format:number:defaultLocale`:: The http://numeraljs.com/[numeral language] locale.
+`format:number:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "number" format.
+`format:percent:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "percent" format.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
-`visualize:enableLabs`:: Enables experimental visualizations. Default is `true`. If this is turned off, users will not be able to create visualizations that are considered experimental. They will also not be able to add or view these visualizations on a dashboard.
-`visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
-12 is the maximum. {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
-`visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the coordinate map.
-`visualization:colorMapping`:: Maps values to specified colors within visualizations.
-`visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
-`visualization:dimmingOpacity`:: When part of a visualization is highlighted, by hovering over it for example, ths is the opacity applied to the other elements. A higher number means other elements will be less opaque.
-`visualization:regionmap:showWarnings`:: Whether the region map show a warning when terms cannot be joined to a shape on the map.
-`csv:separator`:: A string that serves as the separator for exported values.
-`csv:quoteValues`:: Set this property to `true` to quote exported values.
-`history:limit`:: In fields that have history, such as query inputs, the value of this property limits how many recent
-values are shown.
-`shortDots:enable`:: Set this property to `true` to shorten long field names in visualizations. For example, instead of `foo.bar.baz`, show `f.b.baz`.
-`truncate:maxHeight`:: This property specifies the maximum height that a cell occupies in a table. A value of 0 disables
+`history:limit`:: In fields that have history, such as query inputs, show this many recent values.
+`indexPattern:fieldMapping:lookBack`:: For index patterns containing timestamps in their names, 
+look for this many recent matching patterns from which to query the field mapping.
+`indexPattern:placeholder`:: The default placeholder value to use in Management > Index Patterns > Create Index Pattern.
+`metaFields`:: Fields that exist outside of `_source`. Kibana merges these fields 
+into the document when displaying it.
+`metrics:max_buckets`:: The maximum numbers of buckets that a single
+data source can return. This might arise when the user selects a 
+short interval (for example, 1s) for a long time period (1 year).
+`query:allowLeadingWildcards`:: Allows a wildcard (*) as the first character 
+in a query clause. Only applies when experimental query features are 
+enabled in the query bar. To disallow leading wildcards in Lucene queries, 
+use `query:queryString:options`.
+`query:queryString:options`:: Options for the Lucene query string parser. Only
+used when "Query language" is set to Lucene.
+`savedObjects:listingLimit`:: The number of objects to fetch for lists of saved objects. 
+The default value is 1000. Do not set above 10000.
+`savedObjects:perPage`:: The number of objects to show on each page of the 
+list of saved objects. The default is 5.
+`search:queryLanguage`:: The query language to use in the query bar.
+Choices are <<kuery-query, KQL>>, a language built specifically for {kib}, and the <<lucene-query, Lucene 
+query syntax>>.
+`shortDots:enable`:: Set this property to `true` to shorten long 
+field names in visualizations. For example, show `f.b.baz` instead of `foo.bar.baz`.
+`sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
+`state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the 
+URL, which can lead to problems when there is a lot of state information, 
+and the URL gets very long. 
+Enabling this setting stores part of the URL in your browser session to keep the 
+URL short.
+`theme:darkMode`:: Set to `true` to enable a dark mode for the {kib} UI. You must
+refresh the page to apply the setting.
+`timepicker:quickRanges`:: The list of ranges to show in the Quick section of 
+the time filter. This should be an array of objects, with each object containing 
+`from`, `to` (see {ref}/common-options.html#date-math[accepted formats]), 
+and `display` (the title to be displayed).
+`timepicker:refreshIntervalDefaults`:: The default refresh interval for the time filter.
+`timepicker:timeDefaults`:: The default selection in the time filter.
+`truncate:maxHeight`:: The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
-`indexPattern:placeholder`:: The default placeholder value used when adding a new index pattern to Kibana.
-`format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
-mentioned use "_default_".
-`format:number:defaultPattern`:: Default numeral format for the "number" format.
-`format:bytes:defaultPattern`:: Default numeral format for the "bytes" format.
-`format:percent:defaultPattern`:: Default numeral format for the "percent" format.
-`format:currency:defaultPattern`:: Default numeral format for the "currency" format.
-`savedObjects:perPage`:: The number of objects shown on each page of the list of saved objects. The default value is 5.
-`savedObjects:listingLimit`:: The total number of objects to query for lists of saved objects. The default value is 1000. Do not set above 10000.
-`timepicker:timeDefaults`:: The default time filter selection.
-`timepicker:refreshIntervalDefaults`:: The time filter's default refresh interval.
-`timepicker:quickRanges`:: The list of ranges to show in the Quick section of the time picker. This should be an array of objects, with each object containing `from`, `to` (see {ref}/common-options.html#date-math[accepted formats]), `display` (the title to be displayed), and `section` (which column to put the option in).
-`filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state by default.
-`filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
-`notifications:banner`:: You can specify a custom banner to display temporary notices to all users. This field supports
-Markdown.
-`notifications:lifetime:banner`:: Specifies the duration in milliseconds for banner notification displays. The default value is 3000000. Set this field to `Infinity` to disable banner notifications.
-`notifications:lifetime:error`:: Specifies the duration in milliseconds for error notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
-`notifications:lifetime:warning`:: Specifies the duration in milliseconds for warning notification displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
-`notifications:lifetime:info`:: Specifies the duration in milliseconds for information notification displays. The default value is 5000. Set this field to `Infinity` to disable information notifications.
-`metrics:max_buckets`:: The maximum numbers of buckets that cannot be exceeded. For example, this can arise when the user selects a short interval like (e.g. 1s) for a long time period (e.g. 1 year)
-`timelion:showTutorial`:: Set this property to `true` to show the Timelion tutorial to users when they first open Timelion.
-`timelion:es.timefield`:: Default field containing a timestamp when using the `.es()` query.
-`timelion:es.default_index`:: Default index when using the `.es()` query.
-`timelion:target_buckets`:: Used for calculating automatic intervals in visualizations, this is the number of buckets to try to represent.
-`timelion:max_buckets`:: Used for calculating automatic intervals in visualizations, this is the maximum number of buckets to represent.
-`timelion:default_columns`:: The default number of columns to use on a timelion sheet.
-`timelion:default_rows`:: The default number of rows to use on a timelion sheet.
-`timelion:graphite.url`:: [experimental] Used with graphite queries, this it the URL of your host
-`timelion:quandl.key`:: [experimental] Used with quandl queries, this is your API key from www.quandl.com
-`state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of information there and the URL gets very long. Enabling this will store parts of the state in your browser session instead, to keep the URL shorter.
-`context:defaultSize`:: Specifies the initial number of surrounding entries to display in the context view. The default value is 5.
-`context:step`:: Specifies the number to increment or decrement the context size by when using the buttons in the context view. The default value is 5.
-`context:tieBreakerFields`:: A comma-separated list of fields to use for tiebreaking between documents that have the same timestamp value. From this list the first field that is present and sortable in the current index pattern is used.
+`xPack:defaultAdminEmail`:: Email address for X-Pack admin operations, such as 
+cluster alert notifications from Monitoring.
+
+
+[float]
+[[kibana-accessibility-settings]]
+=== Accessibility settings
+
+[horizontal]
+`accessibility:disableAnimations`:: Turns off all unnecessary animations in the 
+{kib} UI. Refresh the page to apply the changes.
+
+[float]
+[[kibana-dashboard-settings]]
+=== Dashboard settings
+
+[horizontal]
+`xpackDashboardMode:roles`:: The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
+
+[float]
+[[kibana-discover-settings]]
+=== Discover settings
+
+[horizontal]
+`context:defaultSize`:: The number of surrounding entries to display in the context view. The default value is 5.
+`context:step`:: The number by which to increment or decrement the context size. The default value is 5.
+`context:tieBreakerFields`:: A comma-separated list of fields to use 
+for breaking a tie between documents that have the same timestamp value. The first 
+field that is present and sortable in the current index pattern is used.
+`defaultColumns`:: The columns that appear by default on the Discover page.
+The default is `_source`. 
+`discover:aggs:terms:size`:: The number terms that are visualized when clicking 
+the Visualize button in the field drop down. The default is `20`.
+`discover:sampleSize`:: The number of rows to show in the Discover table.
+`discover:sort:defaultOrder`:: The default sort direction for time-based index patterns.
+`doc_table:hideTimeColumn`:: Hides the "Time" column in Discover and in all saved searches on dashboards.
+`doc_table:highlight`:: Highlights results in Discover and saved searches on dashboards. 
+Highlighting slows requests when
+working on big documents. 
+
+
+
+
+[float]
+[[kibana-notification-settings]]
+=== Notifications settings
+
+[horizontal]
+`notifications:banner`:: A custom banner intended for temporary notices to all users.
+Supports https://help.github.com/en/articles/basic-writing-and-formatting-syntax[Markdown].
+`notifications:lifetime:banner`:: The duration, in milliseconds, for banner 
+notification displays. The default value is 3000000. Set this field to `Infinity` 
+to disable banner notifications.
+`notifications:lifetime:error`:: The duration, in milliseconds, for error 
+notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
+`notifications:lifetime:info`:: The duration, in milliseconds, for information notification displays. 
+The default value is 5000. Set this field to `Infinity` to disable information notifications.
+`notifications:lifetime:warning`:: The duration, in milliseconds, for warning notification 
+displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
+
+
+
+[float]
+[[kibana-reporting-settings]]
+=== Reporting settings
+
+[horizontal]
+`xpackReporting:customPdfLogo`:: A custom image to use in the footer of the PDF.
+
+
+[float]
+[[kibana-rollups-settings]]
+=== Rollup settings
+
+[horizontal]
+`rollups:enableIndexPatterns`:: Enables the creation of index patterns that 
+capture rollup indices, which in turn enables visualizations based on rollup data. 
+Refresh the page to apply the changes.
+
+
+[float]
+[[kibana-search-settings]]
+=== Search settings
+
+[horizontal]
+`courier:customRequestPreference`:: {ref}/search-request-preference.html[Request preference] 
+to use when `courier:setRequestPreference` is set to "custom".
+`courier:ignoreFilterIfFieldNotInIndex`:: Skips filters that apply to fields that don't exist in the index for a visualization. 
+Useful when dashboards consist of visualizations from multiple index patterns.
+`courier:maxConcurrentShardRequests`:: Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests] 
+setting used for `_msearch` requests sent by {kib}. Set to 0 to disable this 
+config and use the {es} default.
+`courier:setRequestPreference`:: Enables you to set which shards handle your search requests.
+* *Session ID:* Restricts operations to execute all search requests on the same shards. 
+This has the benefit of reusing shard caches across requests.
+* *Custom:* Allows you to define your own preference. Use `courier:customRequestPreference` 
+to customize your preference value.
+* *None:* Do not set a preference. This might provide better performance 
+because requests can be spread across all shard copies. However, results might 
+be inconsistent because different shards might be in different refresh states.
+`search:includeFrozen`:: Includes {ref}/frozen-indices.html[frozen indices] in results. 
+Searching through frozen indices
+might increase the search time.
+
+[float]
+[[kibana-timelion-settings]]
+=== Timelion settings
+
+[horizontal]
+`timelion:default_columns`:: The default number of columns to use on a Timelion sheet.
+`timelion:default_rows`:: The default number of rows to use on a Timelion sheet.
+`timelion:es.default_index`:: The default index when using the `.es()` query.
+`timelion:es.timefield`:: The default field containing a timestamp when using the `.es()` query.
+`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host.
+`timelion:max_buckets`:: The maximum number of buckets a single data source can return.
+This value is used for calculating automatic intervals in visualizations.
+`timelion:min_interval`:: The smallest interval to calculate when using "auto".
+`timelion:quandl.key`:: [experimental] Used with quandl queries, this is your API key from https://www.quandl.com/[www.quandl.com].
+`timelion:showTutorial`:: Shows the Timelion tutorial 
+to users when they first open the Timelion app.
+`timelion:target_buckets`:: Used for calculating automatic intervals in visualizations, 
+this is the number of buckets to try to represent.
+
+
+
+[float]
+[[kibana-visualization-settings]]
+=== Visualization settings
+
+[horizontal]
+`visualization:colorMapping`:: Maps values to specified colors in visualizations.
+`visualization:dimmingOpacity`:: The opacity of the chart items that are dimmed 
+when highlighting another element of the chart. The lower this number, the more 
+the highlighted element stands out. This must be a number between 0 and 1.
+`visualization:loadingDelay`:: The time to wait before dimming visualizations 
+during a query.
+`visualization:regionmap:showWarnings`:: Shows 
+a warning in a region map when terms cannot be joined to a shape.
+`visualization:tileMap:WMSdefaults`:: The default properties for the WMS map server support in the coordinate map.
+`visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
+and 12 is the maximum. See this 
+{ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[explanation of cell dimensions].
+`visualize:enableLabs`:: Enables users to create, view, and edit experimental visualizations. 
+If disabled, only visualizations that are considered production-ready are available to the user.
+
+
+[float]
+[[kibana-telemetry-settings]]
+=== Usage data settings
+
+Helps improve the Elastic Stack by providing usage statistics for 
+basic features. This data will not be shared outside of Elastic.
+
+
+
+

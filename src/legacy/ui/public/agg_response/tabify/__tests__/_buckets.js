@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { TabifyBuckets } from '../_buckets';
 
 describe('Buckets wrapper', function () {

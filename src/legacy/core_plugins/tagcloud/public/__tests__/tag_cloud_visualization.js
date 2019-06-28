@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
@@ -85,7 +85,7 @@ describe('TagCloudVisualizationTest', function () {
     it('simple draw', async function () {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
 
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -101,7 +101,7 @@ describe('TagCloudVisualizationTest', function () {
     it('with resize', async function () {
 
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -111,7 +111,7 @@ describe('TagCloudVisualizationTest', function () {
 
       domNode.style.width = '256px';
       domNode.style.height = '368px';
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -127,7 +127,7 @@ describe('TagCloudVisualizationTest', function () {
     it('with param change', async function () {
 
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -139,7 +139,7 @@ describe('TagCloudVisualizationTest', function () {
       domNode.style.height = '368px';
       vis.params.orientation = 'right angled';
       vis.params.minFontSize = 70;
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: true,
         aggs: false,

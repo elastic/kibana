@@ -44,14 +44,15 @@ import {
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
   OptimizeBuildTask,
+  PatchNativeModulesTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
-  TranspileTypescriptTask,
   TranspileScssTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
+  PathLengthTask,
   WriteShaSumsTask,
 } from './tasks';
 
@@ -109,12 +110,10 @@ export async function buildDistributables(options) {
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
-  await run(TranspileTypescriptTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
   await run(RemoveWorkspacesTask);
-  await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
@@ -122,6 +121,7 @@ export async function buildDistributables(options) {
   await run(TranspileScssTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
+  await run(CleanTypescriptTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(CleanEmptyFoldersTask);
 
@@ -130,9 +130,12 @@ export async function buildDistributables(options) {
    * directories and perform platform-specific steps
    */
   await run(CreateArchivesSourcesTask);
+  await run(PatchNativeModulesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
+
+  await run(PathLengthTask);
 
   /**
    * package platform-specific builds into archives

@@ -33,5 +33,5 @@ export function inPluginNodeModules(checkPath) {
 }
 
 export function inDllPluginPublic(checkPath) {
-  return checkPath.includes(`${path.sep}dynamic_dll_plugin/public${path.sep}`);
+  return checkPath.includes(`${path.sep}dynamic_dll_plugin${path.sep}public${path.sep}`);
 }

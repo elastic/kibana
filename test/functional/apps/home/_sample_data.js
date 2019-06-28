@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
   describe('sample data', function describeIndexTests() {
+    this.tags('smoke');
 
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');

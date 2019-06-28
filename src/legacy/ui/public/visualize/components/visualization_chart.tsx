@@ -32,6 +32,7 @@ interface VisualizationChartProps {
   uiState: PersistedState;
   vis: Vis;
   visData: any;
+  visParams: any;
   listenOnChange: boolean;
 }
 
@@ -42,6 +43,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
   private containerDiv = React.createRef<HTMLDivElement>();
   private renderSubject: Rx.Subject<{
     vis: Vis;
+    visParams: any;
     visData: any;
     container: HTMLElement;
   }>;
@@ -63,7 +65,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
         ({ vis, visData, container }) => vis && container && (!vis.type.requiresSearch || visData)
       ),
       debounceTime(100),
-      switchMap(async ({ vis, visData, container }) => {
+      switchMap(async ({ vis, visData, visParams, container }) => {
         if (!this.visualization) {
           // This should never happen, since we only should trigger another rendering
           // after this component has mounted and thus the visualization implementation
@@ -73,7 +75,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
         vis.size = [container.clientWidth, container.clientHeight];
         const status = getUpdateStatus(vis.type.requiresUpdateStatus, this, this.props);
-        return this.visualization.render(visData, status);
+        return this.visualization.render(visData, visParams, status);
       })
     );
 
@@ -88,7 +90,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
   public render() {
     return (
-      <div className="visChart__container" tabIndex={0} ref={this.containerDiv}>
+      <div className="visChart__container kbn-resetFocusState" tabIndex={0} ref={this.containerDiv}>
         <p className="euiScreenReaderOnly">
           {this.props.vis.type.title} visualization, not yet accessible
         </p>
@@ -156,6 +158,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
       this.renderSubject.next({
         vis: this.props.vis,
         visData: this.props.visData,
+        visParams: this.props.visParams,
         container: this.containerDiv.current,
       });
     }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { errors as esErrors } from 'elasticsearch';
 import Chance from 'chance';
 import sinon from 'sinon';

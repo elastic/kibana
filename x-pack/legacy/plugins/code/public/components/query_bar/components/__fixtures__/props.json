@@ -1,0 +1,55 @@
+{
+  "file": {
+    "type": "file",
+    "total": 1,
+    "hasMore": false,
+    "suggestions": [
+      {
+        "description": "This is a file",
+        "end": 10,
+        "start": 1,
+        "text": "src/foo/bar.java",
+        "tokenType": "",
+        "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java"
+      }
+    ]
+  },
+  "repository": {
+    "type": "repository",
+    "total": 2,
+    "hasMore": true,
+    "suggestions": [
+      {
+        "description": "",
+        "end": 10,
+        "start": 1,
+        "text": "elastic/kibana",
+        "tokenType": "",
+        "selectUrl": "http://github.com/elastic/kibana"
+      },
+      {
+        "description": "",
+        "end": 10,
+        "start": 1,
+        "text": "elastic/elasticsearch",
+        "tokenType": "",
+        "selectUrl": "http://github.com/elastic/elasticsearch"
+      }
+    ]
+  },
+  "symbol": {
+    "type": "symbol",
+    "total": 1,
+    "hasMore": false,
+    "suggestions": [
+      {
+        "description": "elastic/elasticsearch > src/foo/bar.java",
+        "end": 10,
+        "start": 1,
+        "text": "java.lang.String",
+        "tokenType": "tokenClass",
+        "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java"
+      }
+    ]
+  }
+}

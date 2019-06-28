@@ -37,4 +37,4 @@ After exploring these traces,
 you can return to the full trace by clicking *View full trace* in the upper right hand corner of the page.
 
 [role="screenshot"]
-image::apm/images/apm-view-full-trace.png[Example of distributed trace colors in the APM UI in Kibana]
+image::apm/images/apm-transaction-sample.png[Example of distributed trace colors in the APM UI in Kibana]

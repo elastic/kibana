@@ -7,6 +7,7 @@ exports[`renders OptionsTab 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="updateFiltersOnChange"
+    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -26,6 +27,7 @@ exports[`renders OptionsTab 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="useTimeFilter"
+    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -45,12 +47,13 @@ exports[`renders OptionsTab 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="pinFilters"
+    labelType="label"
   >
     <EuiSwitch
       data-test-subj="inputControlEditorPinFiltersCheckbox"
       label={
         <FormattedMessage
-          defaultMessage="Pin filters to global state"
+          defaultMessage="Pin filters for all applications"
           id="inputControl.editor.optionsTab.pinFiltersLabel"
           values={Object {}}
         />

@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import 'ui/doc_table';
-
+import '../doc_table';
+import { capabilities } from 'ui/capabilities';
+import { i18n } from '@kbn/i18n';
 import { EmbeddableFactory } from 'ui/embeddable';
 import {
   EmbeddableInstanceConfiguration,
@@ -33,7 +34,16 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     private $rootScope: ng.IRootScopeService,
     private searchLoader: SavedSearchLoader
   ) {
-    super({ name: 'search' });
+    super({
+      name: 'search',
+      savedObjectMetaData: {
+        name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+          defaultMessage: 'Saved search',
+        }),
+        type: 'search',
+        getIconForSavedObject: () => 'search',
+      },
+    });
   }
 
   public getEditPath(panelId: string) {
@@ -53,6 +63,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const editUrl = this.getEditPath(id);
+    const editable = capabilities.get().discover.save as boolean;
 
     // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
     return this.searchLoader.get(id).then(savedObject => {
@@ -60,6 +71,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         onEmbeddableStateChanged,
         savedSearch: savedObject,
         editUrl,
+        editable,
         $rootScope: this.$rootScope,
         $compile: this.$compile,
       });

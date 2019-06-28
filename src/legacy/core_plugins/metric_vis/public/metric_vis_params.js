@@ -18,11 +18,13 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
+import 'ui/directives/inequality';
 import metricVisParamsTemplate from './metric_vis_params.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('metricVisParams', function (i18n) {
+module.directive('metricVisParams', function () {
   return {
     restrict: 'E',
     template: metricVisParamsTemplate,
@@ -54,7 +56,7 @@ module.directive('metricVisParams', function (i18n) {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return 0;
+        if (index === 0) return -Infinity;
         return $scope.editorState.params.metric.colorsRange[index - 1].to;
       };
 
@@ -80,7 +82,8 @@ module.directive('metricVisParams', function (i18n) {
         $scope.customColors = true;
       });
 
-      $scope.editorState.requiredDescription = i18n('metricVis.params.ranges.warning.requiredDescription', { defaultMessage: 'Required:' });
+      $scope.editorState.requiredDescription = i18n.translate(
+        'metricVis.params.ranges.warning.requiredDescription', { defaultMessage: 'Required:' });
     }
   };
 });

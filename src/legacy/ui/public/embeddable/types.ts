@@ -17,32 +17,11 @@
  * under the License.
  */
 
-export interface TimeRange {
-  to: string;
-  from: string;
-}
+import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
 
-export interface FilterMeta {
-  disabled: boolean;
-}
-
-// TODO: Filter object representation needs to be fleshed out.
-export interface Filter {
-  meta: FilterMeta;
-  query: object;
-}
-
-export type Filters = Filter[];
-
-export enum QueryLanguageType {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
-
-export interface Query {
-  language: QueryLanguageType;
-  query: string;
-}
 export interface EmbeddableCustomization {
   [key: string]: object | string;
 }
@@ -53,7 +32,9 @@ export interface ContainerState {
 
   timeRange: TimeRange;
 
-  filters: Filters;
+  filters: Filter[];
+
+  refreshConfig: RefreshInterval;
 
   query: Query;
 

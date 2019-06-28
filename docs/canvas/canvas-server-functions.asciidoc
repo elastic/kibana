@@ -1,7 +1,8 @@
+[role="xpack"]
 [[canvas-server-functions]]
 === Canvas server functions
 
-beta[]These functions can only execute on the server. This may be for performance
+These functions can only execute on the server. This may be for performance
 or security reasons, or because the function uses an API only available on the 
 {kib} server. If the expression is executing in the browser, it will transfer to 
 the server when it hits one of these functions.
@@ -17,9 +18,7 @@ A mock data set that includes project CI times with usernames, countries, and ru
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Alias: `type`)
 |string
@@ -39,9 +38,7 @@ especially if you are asking for a lot of rows.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |index
 |string
@@ -80,9 +77,7 @@ Queries {es} for a count of the number of hits matching a query.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |index
 |string
@@ -105,9 +100,7 @@ Specifies an {es} SQL.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*  (Alias: `query`, `q`)
 |string
@@ -134,9 +127,7 @@ then deduplicated by those keys using the specified TinyMath function.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |x
 |string
@@ -181,9 +172,7 @@ Uses Timelion to extract one or more time series from many sources.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Aliases: `query`, `q`)
 |string

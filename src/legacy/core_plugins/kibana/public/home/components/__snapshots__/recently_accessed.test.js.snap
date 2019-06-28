@@ -8,12 +8,10 @@ exports[`render 1`] = `
 >
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
-    <h3>
+    <h2>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Recently viewed"
@@ -21,37 +19,23 @@ exports[`render 1`] = `
           values={Object {}}
         />
       </EuiTextColor>
-    </h3>
+    </h2>
   </EuiTitle>
   <EuiSpacer
     size="s"
   />
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
       className="homRecentlyAccessed__flexItem"
-      component="div"
       grow={false}
     >
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <EuiFlexItem
           className="homRecentlyAccessed__item"
-          component="div"
           grow={false}
           style={
             Object {
@@ -77,23 +61,17 @@ exports[`render 1`] = `
         </EuiFlexItem>
         <EuiFlexItem
           className="homRecentlyAccessed__separator"
-          component="div"
           grow={false}
         >
-          <EuiText
-            grow={true}
-            size="m"
-          >
+          <EuiText>
             <EuiIcon
               color="subdued"
-              size="m"
               type="dot"
             />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem
           className="homRecentlyAccessed__item"
-          component="div"
           grow={false}
           style={
             Object {
@@ -120,7 +98,6 @@ exports[`render 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>

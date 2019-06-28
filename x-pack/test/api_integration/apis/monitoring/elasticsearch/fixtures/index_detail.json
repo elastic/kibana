@@ -9,6 +9,20 @@
     "totalShards": 10,
     "status": "green"
   },
+  "logs": {
+    "enabled": false,
+    "limit": 10,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
+      "nodeExists": null,
+      "indexExists": false,
+      "typeExists": false
+    },
+    "logs": []
+  },
   "metrics": {
     "index_search_request_rate": [
       {

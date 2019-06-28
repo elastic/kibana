@@ -18,12 +18,11 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './sections';
-import 'ui/filters/start_from';
-import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
@@ -33,7 +32,6 @@ import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
-import 'ui/kbn_top_nav';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
@@ -51,7 +49,7 @@ uiRoutes
     redirectTo: '/management'
   });
 
-require('ui/index_patterns/route_setup/load_default')({
+require('./route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index_pattern'
 });
 
@@ -129,7 +127,7 @@ export const destroyReact = id => {
 
 uiModules
   .get('apps/management')
-  .directive('kbnManagementApp', function (Private, $location) {
+  .directive('kbnManagementApp', function ($location) {
     return {
       restrict: 'E',
       template: appTemplate,
@@ -143,7 +141,7 @@ uiModules
       link: function ($scope) {
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
-        $scope.sections = management.items.inOrder;
+        $scope.sections = management.visibleItems;
         $scope.section = management.getSection($scope.sectionName) || management;
 
         if ($scope.section) {
@@ -154,7 +152,7 @@ uiModules
 
         updateSidebar($scope.sections, $scope.section.id);
         $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
-        management.addListener(() => updateSidebar(management.items.inOrder, $scope.section.id));
+        management.addListener(() => updateSidebar(management.visibleItems, $scope.section.id));
 
         updateLandingPage($scope.$root.chrome.getKibanaVersion());
         $scope.$on('$destroy', () => destroyReact(LANDING_ID));
@@ -168,19 +166,19 @@ uiModules
     return {
       restrict: 'E',
       link: function ($scope) {
-        $scope.sections = management.items.inOrder;
+        $scope.sections = management.visibleItems;
         $scope.kbnVersion = kbnVersion;
       }
     };
   });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'management',
-    title: i18n('kbn.management.managementLabel', {
+    title: i18n.translate('kbn.management.managementLabel', {
       defaultMessage: 'Management',
     }),
-    description: i18n('kbn.management.managementDescription', {
+    description: i18n.translate('kbn.management.managementDescription', {
       defaultMessage: 'Your center console for managing the Elastic Stack.',
     }),
     icon: 'managementApp',

@@ -18,15 +18,14 @@
  */
 
 import _ from 'lodash';
-import '../filters/uriescape';
-import '../filters/rison';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from '../modules';
 import { AppStateProvider } from '../state_management/app_state';
 
 uiModules.get('kibana/url')
   .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private, i18n) {
+export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
   /**
    *  the `kbnUrl` service was created to smooth over some of the
    *  inconsistent behavior that occurs when modifying the url via
@@ -115,18 +114,13 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
       // if evaluation can't be made, throw
       if (_.isUndefined(p)) {
         throw new Error(
-          i18n('common.ui.url.replacementFailedErrorMessage', {
+          i18n.translate('common.ui.url.replacementFailedErrorMessage', {
             defaultMessage: 'Replacement failed, unresolved expression: {expr}',
             values: { expr }
           }));
       }
 
-      // append uriescape filter if not included
-      if (expr.indexOf('uriescape') === -1) {
-        expr += '|uriescape';
-      }
-
-      return $parse(expr)(paramObj);
+      return encodeURIComponent($parse(expr)(paramObj));
     });
   };
 

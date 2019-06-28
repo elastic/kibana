@@ -19,14 +19,8 @@
 
 import * as Rx from 'rxjs';
 
-import { __newPlatformInit__, initChromeControlsApi } from './controls';
-
-const newPlatformChrome = {
-  setIsVisible: jest.fn(),
-  getIsVisible$: jest.fn(),
-};
-
-__newPlatformInit__(newPlatformChrome as any);
+import { newPlatformChrome } from './controls.test.mocks';
+import { initChromeControlsApi } from './controls';
 
 function setup() {
   const isVisible$ = new Rx.BehaviorSubject(true);

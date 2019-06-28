@@ -18,9 +18,11 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { capabilities } from 'ui/capabilities';
+
 uiModules.get('kibana')
   .provider('dashboardConfig', () => {
-    let hideWriteControls = false;
+    let hideWriteControls = !capabilities.get().dashboard.showWriteControls;
 
     return {
       /**

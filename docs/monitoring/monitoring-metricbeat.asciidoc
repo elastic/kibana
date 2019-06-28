@@ -1,6 +1,7 @@
 [role="xpack"]
 [[monitoring-metricbeat]]
 === Collecting {kib} monitoring data with {metricbeat}
+[subs="attributes"]
 ++++
 <titleabbrev>Collecting monitoring data with {metricbeat}</titleabbrev>
 ++++
@@ -14,9 +15,12 @@ image::monitoring/images/metricbeat.png[Example monitoring architecture]
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
+//NOTE: The tagged regions are re-used in the Stack Overview.
+
 . Disable the default collection of {kib} monitoring metrics. +
 +
 --
+// tag::disable-kibana-collection[]
 Add the following setting in the {kib} configuration file (`kibana.yml`): 
 
 [source,yaml]
@@ -25,7 +29,7 @@ xpack.monitoring.kibana.collection.enabled: false
 ----------------------------------
 
 Leave the `xpack.monitoring.enabled` set to its default value (`true`). 
-
+// end::disable-kibana-collection[]
 For more information, see 
 <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 --
@@ -78,29 +82,32 @@ For more information, see {ref}/monitoring-settings.html[Monitoring settings in 
 and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
-. {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the 
+. {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the
 same server as {kib}.
 
-. Enable the {kib} module in {metricbeat}. +
+. Enable the {kib} {xpack} module in {metricbeat}. +
 +
 --
+// tag::enable-kibana-module[]
 For example, to enable the default configuration in the `modules.d` directory, 
 run the following command:
 
 ["source","sh",subs="attributes,callouts"]
 ----------------------------------------------------------------------
-metricbeat modules enable kibana
+metricbeat modules enable kibana-xpack
 ----------------------------------------------------------------------
 
 For more information, see 
 {metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and 
 {metricbeat-ref}/metricbeat-module-kibana.html[{kib} module]. 
+// end::enable-kibana-module[]
 --
 
-. Configure the {kib} module in {metricbeat}. +
+. Configure the {kib} {xpack} module in {metricbeat}. +
 +
 --
-You must specify the following settings in the `modules.d/kibana.yml` file:
+// tag::configure-kibana-module[]
+The `modules.d/kibana-xpack.yml` file contains the following settings:
 
 [source,yaml]
 ----------------------------------
@@ -108,41 +115,49 @@ You must specify the following settings in the `modules.d/kibana.yml` file:
   metricsets:
     - stats
   period: 10s
-  hosts: ["http://localhost:5601"] <1>
-  xpack.enabled: true <2>
+  hosts: ["localhost:5601"]
+  #basepath: ""
+  #username: "user"
+  #password: "secret"
+  xpack.enabled: true
 ----------------------------------
-<1> This setting identifies the host and port number that are used to access {kib}. 
-<2> This setting ensures that {kib} can read the monitoring data successfully. 
-That is to say, it's stored in the same location and format as monitoring data 
-that is sent by {ref}/es-monitoring-exporters.html[exporters].  
---
 
-. If the Elastic {security-features} are enabled, you must also provide a user 
-ID and password so that {metricbeat} can collect metrics successfully. 
+By default, the module collects {kib} monitoring metrics from `localhost:5601`.
+If that host and port number are not correct, you must update the `hosts`
+setting. If you configured {kib} to use encrypted communications, you must
+access it via HTTPS. For example, use a `hosts` setting like
+`https://localhost:5601`.
+// end::configure-kibana-module[]
 
-... Create a user on the production cluster that has the 
+// tag::remote-monitoring-user[]
+If the Elastic {security-features} are enabled, you must also provide a user 
+ID and password so that {metricbeat} can collect metrics successfully: 
+
+.. Create a user on the production cluster that has the 
 `remote_monitoring_collector` {stack-ov}/built-in-roles.html[built-in role]. 
 Alternatively, use the `remote_monitoring_user` 
 {stack-ov}/built-in-users.html[built-in user].
 
 .. Add the `username` and `password` settings to the {kib} module configuration 
 file.
+// end::remote-monitoring-user[]
+--
+
+. Optional: Disable the system module in {metricbeat}.
 +
 --
-For example, add the following settings in the `modules.d/kibana.yml` file:
+// tag::disable-system-module[]
+By default, the {metricbeat-ref}/metricbeat-module-system.html[system module] is
+enabled. The information it collects, however, is not shown on the *Monitoring*
+page in {kib}. Unless you want to use that information for other purposes, run
+the following command:
 
-[source,yaml]
-----------------------------------
-- module: kibana
-  ...
-  username: remote_monitoring_user
-  password: YOUR_PASSWORD
-----------------------------------
+["source","sh",subs="attributes,callouts"]
+----------------------------------------------------------------------
+metricbeat modules disable system
+----------------------------------------------------------------------
+// end::disable-system-module[] 
 --
-
-. If you configured {kib} to use <<configuring-tls,encrypted communications>>, 
-you must access it via HTTPS. For example, use a `hosts` setting like 
-`https://localhost:5601` in the `modules.d/kibana.yml` file. 
 
 . Identify where to send the monitoring data. +
 +
@@ -159,42 +174,39 @@ configuration file (`metricbeat.yml`):
 [source,yaml]
 ----------------------------------
 output.elasticsearch:
+  # Array of hosts to connect to.
   hosts: ["http://es-mon-1:9200", "http://es-mon2:9200"] <1>
+  
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
 ----------------------------------
 <1> In this example, the data is stored on a monitoring cluster with nodes 
-`es-mon-1` and `es-mon-2`. 
+`es-mon-1` and `es-mon-2`.
 
-For more information about these configuration options, see 
-{metricbeat-ref}/elasticsearch-output.html[Configure the {es} output].
+If you configured the monitoring cluster to use encrypted communications, you
+must access it via HTTPS. For example, use a `hosts` setting like
+`https://es-mon-1:9200`.
 
---
+IMPORTANT: The {es} {monitor-features} use ingest pipelines, therefore the
+cluster that stores the monitoring data must have at least one ingest node.
 
-. If the {es} {security-features} are enabled on the monitoring cluster, you 
+If the {es} {security-features} are enabled on the monitoring cluster, you 
 must provide a valid user ID and password so that {metricbeat} can send metrics 
-successfully. 
+successfully: 
 
-... Create a user on the monitoring cluster that has the 
+.. Create a user on the monitoring cluster that has the 
 `remote_monitoring_agent` {stack-ov}/built-in-roles.html[built-in role]. 
 Alternatively, use the `remote_monitoring_user` 
 {stack-ov}/built-in-users.html[built-in user].
 
 .. Add the `username` and `password` settings to the {es} output information in 
-the {metricbeat} configuration file (`metricbeat.yml`):
-+
---
-[source,yaml]
-----------------------------------
-output.elasticsearch:
-  ...
-  username: remote_monitoring_user
-  password: YOUR_PASSWORD
-----------------------------------
---
+the {metricbeat} configuration file.
 
-. If you configured the monitoring cluster to use 
-{ref}/configuring-tls.html[encrypted communications], you must access it via 
-HTTPS. For example, use a `hosts` setting like `https://es-mon-1:9200` in the 
-`metricbeat.yml` file. 
+For more information about these configuration options, see 
+{metricbeat-ref}/elasticsearch-output.html[Configure the {es} output].
+--
 
 . {metricbeat-ref}/metricbeat-starting.html[Start {metricbeat}]. 
 

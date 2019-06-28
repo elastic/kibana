@@ -17,21 +17,25 @@
  * under the License.
  */
 
-module.exports = {
-  presets: [
-    [
-      require.resolve('babel-preset-env'),
-      {
-        targets: {
-          browsers: [
-            'last 2 versions',
-            '> 5%',
-            'Safari 7', // for PhantomJS support: https://github.com/elastic/kibana/issues/27136
-          ],
+module.exports = () => {
+  return {
+    presets: [
+      [
+        require.resolve('@babel/preset-env'),
+        {
+          targets: {
+            browsers: [
+              'last 2 versions',
+              '> 5%',
+              'Safari 7', // for PhantomJS support: https://github.com/elastic/kibana/issues/27136
+            ],
+          },
+          useBuiltIns: 'entry',
+          modules: 'cjs',
+          corejs: 2,
         },
-        useBuiltIns: true,
-      },
-    ],
-    require('./common_preset'),
-  ]
+      ],
+      require('./common_preset'),
+    ]
+  };
 };

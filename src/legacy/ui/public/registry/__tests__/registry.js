@@ -18,7 +18,7 @@
  */
 
 import { uiRegistry } from '../_registry';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 
 describe('Registry', function () {

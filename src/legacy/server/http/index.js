@@ -21,17 +21,17 @@ import { format } from 'url';
 import { resolve } from 'path';
 import _ from 'lodash';
 import Boom from 'boom';
-import Hapi from 'hapi';
+
 import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  kbnServer.server = new Hapi.Server(kbnServer.core.serverOptions);
+  kbnServer.server = kbnServer.newPlatform.setup.core.http.server;
   server = kbnServer.server;
 
-  setupBasePathProvider(server, config);
+  setupBasePathProvider(kbnServer);
 
   await registerHapiPlugins(server);
 

@@ -18,16 +18,13 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
-import { VislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
+import expect from '@kbn/expect';
+import { vislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
 
 describe('Basic Response Handler', function () {
-  let basicResponseHandler;
+  const basicResponseHandler = vislibSeriesResponseHandlerProvider().handler;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    basicResponseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
-  }));
 
   it('returns empty object if conversion failed', () => {
     basicResponseHandler({}).then(data => {

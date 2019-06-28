@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { flyoutItemQuery } from '../../../../plugins/infra/public/containers/logs/flyout_item.gql_query';
-import { FlyoutItemQuery } from '../../../../plugins/infra/public/graphql/types';
+import expect from '@kbn/expect';
+import { flyoutItemQuery } from '../../../../legacy/plugins/infra/public/containers/logs/flyout_item.gql_query';
+import { FlyoutItemQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const logItemTests: KbnTestProvider = ({ getService }) => {
@@ -171,5 +171,5 @@ const logItemTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default logItemTests;

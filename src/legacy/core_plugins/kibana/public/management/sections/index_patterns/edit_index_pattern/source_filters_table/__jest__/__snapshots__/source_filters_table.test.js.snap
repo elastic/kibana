@@ -20,7 +20,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
           ],
           "results": Array [
             Object {
-              "isThrow": false,
+              "type": "return",
               "value": undefined,
             },
           ],
@@ -114,7 +114,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
           ],
           "results": Array [
             Object {
-              "isThrow": false,
+              "type": "return",
               "value": undefined,
             },
           ],
@@ -267,6 +267,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
   />
   <eui-overlay-mask>
     <eui-confirm-modal
+      buttonColor="danger"
       cancelButtonText={
         <FormattedMessage
           defaultMessage="Cancel"
@@ -319,7 +320,7 @@ exports[`SourceFiltersTable should update a filter 1`] = `
           ],
           "results": Array [
             Object {
-              "isThrow": false,
+              "type": "return",
               "value": undefined,
             },
           ],

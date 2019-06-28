@@ -18,17 +18,15 @@
  */
 
 import { Adapters } from 'ui/inspector';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { ContainerState } from './types';
 
 export interface EmbeddableMetadata {
-  // TODO: change to an array, embeddables should be able to specify multiple index patterns they use. Also
-  // see https://github.com/elastic/kibana/issues/19408 - this needs to be generalized to support embeddables that
-  // use dynamic index patterns (vega, TSVB) instead of saved object index patterns (most other visualizations).
   /**
    * Should specify any index pattern the embeddable uses. This will be used by the container to list out
    * available fields to filter on.
    */
-  indexPattern?: object;
+  indexPatterns?: StaticIndexPattern[];
 
   /**
    * The title, or name, of the embeddable.
@@ -42,6 +40,13 @@ export interface EmbeddableMetadata {
    * offer for editing directly on the dashboard.
    */
   editUrl?: string;
+
+  editLabel?: string;
+
+  /**
+   * A flag indicating if this embeddable can be edited.
+   */
+  editable?: boolean;
 }
 
 export abstract class Embeddable {

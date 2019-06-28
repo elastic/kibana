@@ -20,9 +20,16 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ObjectsTable, INCLUDED_TYPES } from '../objects_table';
+import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
+import { findObjects } from '../../../lib';
+
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
+jest.mock('../../../lib/find_objects', () => ({
+  findObjects: jest.fn(),
+}));
 
 jest.mock('../components/header', () => ({
   Header: () => 'Header',
@@ -42,15 +49,16 @@ jest.mock('ui/errors', () => ({
 }));
 
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => ''
+  addBasePath: () => '',
+  getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
 }));
 
-jest.mock('../../../lib/retrieve_and_export_docs', () => ({
-  retrieveAndExportDocs: jest.fn(),
+jest.mock('../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: jest.fn(),
 }));
 
-jest.mock('../../../lib/scan_all_types', () => ({
-  scanAllTypes: jest.fn(),
+jest.mock('../../../lib/fetch_export_by_type', () => ({
+  fetchExportByType: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_saved_object_counts', () => ({
@@ -64,8 +72,8 @@ jest.mock('../../../lib/get_saved_object_counts', () => ({
   })
 }));
 
-jest.mock('../../../lib/save_to_file', () => ({
-  saveToFile: jest.fn(),
+jest.mock('@elastic/filesaver', () => ({
+  saveAs: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_relationships', () => ({
@@ -108,29 +116,11 @@ const allSavedObjects = [
 const $http = () => {};
 $http.post = jest.fn().mockImplementation(() => ([]));
 const defaultProps = {
+  goInspectObject: () => {},
+  confirmModalPromise: jest.fn(),
   savedObjectsClient: {
-    find: jest.fn().mockImplementation(({ type }) => {
-      // We pass in a single type when fetching counts
-      if (type && !Array.isArray(type)) {
-        return {
-          total: 1,
-          savedObjects: [
-            {
-              id: '1',
-              type,
-              attributes: {
-                title: `Title${type}`
-              }
-            },
-          ]
-        };
-      }
-
-      return {
-        total: allSavedObjects.length,
-        savedObjects: allSavedObjects,
-      };
-    }),
+    find: jest.fn(),
+    bulkGet: jest.fn(),
   },
   indexPatterns: {
     cache: {
@@ -142,11 +132,78 @@ const defaultProps = {
   newIndexPatternUrl: '',
   kbnIndex: '',
   services: [],
-  getEditUrl: () => {},
-  goInApp: () => {},
+  uiCapabilities: {
+    savedObjectsManagement: {
+      read: true,
+      edit: false,
+      delete: false,
+    }
+  },
+  canDelete: true,
 };
 
+beforeEach(() => {
+  findObjects.mockImplementation(() => ({
+    total: 4,
+    savedObjects: [
+      {
+        id: '1',
+        type: 'index-pattern',
+        meta: {
+          title: `MyIndexPattern*`,
+          icon: 'indexPatternApp',
+          editUrl: '#/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/management/kibana/index_patterns/1',
+            uiCapabilitiesPath: 'management.kibana.index_patterns',
+          },
+        },
+      },
+      {
+        id: '2',
+        type: 'search',
+        meta: {
+          title: `MySearch`,
+          icon: 'search',
+          editUrl: '#/management/kibana/objects/savedSearches/2',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
+        },
+      },
+      {
+        id: '3',
+        type: 'dashboard',
+        meta: {
+          title: `MyDashboard`,
+          icon: 'dashboardApp',
+          editUrl: '#/management/kibana/objects/savedDashboards/3',
+          inAppUrl: {
+            path: '/dashboard/3',
+            uiCapabilitiesPath: 'dashboard.show',
+          },
+        },
+      },
+      {
+        id: '4',
+        type: 'visualization',
+        meta: {
+          title: `MyViz`,
+          icon: 'visualizeApp',
+          editUrl: '#/management/kibana/objects/savedVisualizations/4',
+          inAppUrl: {
+            path: '/visualize/edit/4',
+            uiCapabilitiesPath: 'visualize.show',
+          },
+        },
+      },
+    ],
+  }));
+});
+
 let addDangerMock;
+let addSuccessMock;
 
 describe('ObjectsTable', () => {
   beforeEach(() => {
@@ -159,8 +216,10 @@ describe('ObjectsTable', () => {
       return debounced;
     };
     addDangerMock = jest.fn();
+    addSuccessMock = jest.fn();
     require('ui/notify').toastNotifications = {
       addDanger: addDangerMock,
+      addSuccess: addSuccessMock,
     };
   });
 
@@ -181,15 +240,12 @@ describe('ObjectsTable', () => {
   });
 
   it('should add danger toast when find fails', async () => {
-    const savedObjectsClientWithFindError = {
-      find: () => {
-        throw new Error('Simulated find error');
-      }
-    };
-    const customizedProps = { ...defaultProps, savedObjectsClient: savedObjectsClientWithFindError };
+    findObjects.mockImplementation(() => {
+      throw new Error('Simulated find error');
+    });
     const component = shallowWithIntl(
       <ObjectsTable.WrappedComponent
-        {...customizedProps}
+        {...defaultProps}
         perPageConfig={15}
       />
     );
@@ -222,7 +278,7 @@ describe('ObjectsTable', () => {
         }))
       };
 
-      const { retrieveAndExportDocs } = require('../../../lib/retrieve_and_export_docs');
+      const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
 
       const component = shallowWithIntl(
         <ObjectsTable.WrappedComponent
@@ -239,10 +295,10 @@ describe('ObjectsTable', () => {
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
 
-      await component.instance().onExport();
+      await component.instance().onExport(true);
 
-      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
-      expect(retrieveAndExportDocs).toHaveBeenCalledWith(mockSavedObjects, mockSavedObjectsClient);
+      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
+      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
     });
 
     it('should allow the user to choose when exporting all', async () => {
@@ -260,12 +316,12 @@ describe('ObjectsTable', () => {
       component.find('Header').prop('onExportAll')();
       component.update();
 
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
     });
 
     it('should export all', async () => {
-      const { scanAllTypes } = require('../../../lib/scan_all_types');
-      const { saveToFile } = require('../../../lib/save_to_file');
+      const { fetchExportByType } = require('../../../lib/fetch_export_by_type');
+      const { saveAs } = require('@elastic/filesaver');
       const component = shallowWithIntl(
         <ObjectsTable.WrappedComponent
           {...defaultProps}
@@ -278,12 +334,14 @@ describe('ObjectsTable', () => {
       component.update();
 
       // Set up mocks
-      scanAllTypes.mockImplementation(() => allSavedObjects);
+      const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
+      fetchExportByType.mockImplementation(() => blob);
 
       await component.instance().onExportAll();
 
-      expect(scanAllTypes).toHaveBeenCalledWith(defaultProps.$http, INCLUDED_TYPES);
-      expect(saveToFile).toHaveBeenCalledWith(JSON.stringify(allSavedObjects, null, 2));
+      expect(fetchExportByType).toHaveBeenCalledWith(POSSIBLE_TYPES, true);
+      expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
     });
   });
 
@@ -341,7 +399,8 @@ describe('ObjectsTable', () => {
       component.update();
 
       await component.instance().getRelationships('search', '1');
-      expect(getRelationships).toHaveBeenCalledWith('search', '1', defaultProps.$http, defaultProps.basePath);
+      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
+      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
     });
 
     it('should show the flyout', async () => {
@@ -356,13 +415,35 @@ describe('ObjectsTable', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      component.instance().onShowRelationships('1', 'search', 'MySearch');
+      component.instance().onShowRelationships({
+        id: '2',
+        type: 'search',
+        meta: {
+          title: `MySearch`,
+          icon: 'search',
+          editUrl: '#/management/kibana/objects/savedSearches/2',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
+        },
+      });
       component.update();
 
       expect(component.find(Relationships)).toMatchSnapshot();
-      expect(component.state('relationshipId')).toBe('1');
-      expect(component.state('relationshipType')).toBe('search');
-      expect(component.state('relationshipTitle')).toBe('MySearch');
+      expect(component.state('relationshipObject')).toEqual({
+        id: '2',
+        type: 'search',
+        meta: {
+          title: 'MySearch',
+          editUrl: '#/management/kibana/objects/savedSearches/2',
+          icon: 'search',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
+        },
+      });
     });
 
     it('should hide the flyout', async () => {

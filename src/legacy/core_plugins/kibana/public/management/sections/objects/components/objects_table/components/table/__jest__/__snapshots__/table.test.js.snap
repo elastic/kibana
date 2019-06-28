@@ -1,5 +1,220 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Table prevents saved objects from being deleted 1`] = `
+<Fragment>
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "savedObjectSearchBar",
+      }
+    }
+    filters={
+      Array [
+        Object {
+          "field": "type",
+          "multiSelect": "or",
+          "name": "Type",
+          "options": Array [
+            Object {
+              "value": 2,
+            },
+          ],
+          "type": "field_value_selection",
+        },
+      ]
+    }
+    onChange={[Function]}
+    toolsRight={
+      Array [
+        <EuiButton
+          color="danger"
+          data-test-subj="savedObjectsManagementDelete"
+          fill={false}
+          iconSide="left"
+          iconType="trash"
+          isDisabled={true}
+          onClick={[Function]}
+          size="m"
+          title="Unable to delete saved objects"
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Delete"
+            id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>,
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <EuiButton
+              color="primary"
+              fill={false}
+              iconSide="right"
+              iconType="arrowDown"
+              isDisabled={false}
+              onClick={[Function]}
+              size="m"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          }
+          closePopover={[Function]}
+          hasArrow={true}
+          isOpen={false}
+          ownFocus={false}
+          panelPaddingSize="m"
+        >
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Options"
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiSwitch
+              checked={true}
+              label={
+                <FormattedMessage
+                  defaultMessage="Include related objects"
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  values={Object {}}
+                />
+              }
+              name="includeReferencesDeep"
+              onChange={[Function]}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+            labelType="label"
+          >
+            <EuiButton
+              color="primary"
+              fill={true}
+              iconSide="left"
+              iconType="exportAction"
+              onClick={[Function]}
+              size="m"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          </EuiFormRow>
+        </EuiPopover>,
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <div
+    data-test-subj="savedObjectsTable"
+  >
+    <EuiBasicTable
+      columns={
+        Array [
+          Object {
+            "align": "center",
+            "description": "Type of the saved object",
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "sortable": false,
+            "width": "50px",
+          },
+          Object {
+            "dataType": "string",
+            "description": "Title of the saved object",
+            "field": "meta.title",
+            "name": "Title",
+            "render": [Function],
+            "sortable": false,
+          },
+          Object {
+            "actions": Array [
+              Object {
+                "available": [Function],
+                "description": "Inspect this saved object",
+                "icon": "inspect",
+                "name": "Inspect",
+                "onClick": [Function],
+                "type": "icon",
+              },
+              Object {
+                "description": "View the relationships this saved object has to other saved objects",
+                "icon": "kqlSelector",
+                "name": "Relationships",
+                "onClick": [Function],
+                "type": "icon",
+              },
+            ],
+            "name": "Actions",
+          },
+        ]
+      }
+      itemId="id"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/index_patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": Object {
+                "path": "/management/kibana/index_patterns/1",
+                "uiCapabilitiesPath": "management.kibana.index_patterns",
+              },
+              "title": "MyIndexPattern*",
+            },
+            "type": "index-pattern",
+          },
+        ]
+      }
+      loading={false}
+      noItemsMessage="No items found"
+      onChange={[Function]}
+      pagination={
+        Object {
+          "pageIndex": 1,
+          "pageSize": 2,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            20,
+            50,
+          ],
+          "totalItemCount": 3,
+        }
+      }
+      responsive={true}
+      selection={
+        Object {
+          "onSelectionChange": [Function],
+        }
+      }
+    />
+  </div>
+</Fragment>
+`;
+
 exports[`Table should render normally 1`] = `
 <Fragment>
   <EuiSearchBar
@@ -28,11 +243,13 @@ exports[`Table should render normally 1`] = `
       Array [
         <EuiButton
           color="danger"
+          data-test-subj="savedObjectsManagementDelete"
           fill={false}
           iconSide="left"
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -41,21 +258,81 @@ exports[`Table should render normally 1`] = `
             values={Object {}}
           />
         </EuiButton>,
-        <EuiButton
-          color="primary"
-          fill={false}
-          iconSide="left"
-          iconType="exportAction"
-          isDisabled={false}
-          onClick={[Function]}
-          type="button"
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <EuiButton
+              color="primary"
+              fill={false}
+              iconSide="right"
+              iconType="arrowDown"
+              isDisabled={false}
+              onClick={[Function]}
+              size="m"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          }
+          closePopover={[Function]}
+          hasArrow={true}
+          isOpen={false}
+          ownFocus={false}
+          panelPaddingSize="m"
         >
-          <FormattedMessage
-            defaultMessage="Export"
-            id="kbn.management.objects.objectsTable.table.exportButtonLabel"
-            values={Object {}}
-          />
-        </EuiButton>,
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Options"
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiSwitch
+              checked={true}
+              label={
+                <FormattedMessage
+                  defaultMessage="Include related objects"
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  values={Object {}}
+                />
+              }
+              name="includeReferencesDeep"
+              onChange={[Function]}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+            labelType="label"
+          >
+            <EuiButton
+              color="primary"
+              fill={true}
+              iconSide="left"
+              iconType="exportAction"
+              onClick={[Function]}
+              size="m"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          </EuiFormRow>
+        </EuiPopover>,
       ]
     }
   />
@@ -80,7 +357,7 @@ exports[`Table should render normally 1`] = `
           Object {
             "dataType": "string",
             "description": "Title of the saved object",
-            "field": "title",
+            "field": "meta.title",
             "name": "Title",
             "render": [Function],
             "sortable": false,
@@ -88,9 +365,10 @@ exports[`Table should render normally 1`] = `
           Object {
             "actions": Array [
               Object {
-                "description": "View this saved object within Kibana",
-                "icon": "eye",
-                "name": "In app",
+                "available": [Function],
+                "description": "Inspect this saved object",
+                "icon": "inspect",
+                "name": "Inspect",
                 "onClick": [Function],
                 "type": "icon",
               },
@@ -109,7 +387,19 @@ exports[`Table should render normally 1`] = `
       itemId="id"
       items={
         Array [
-          3,
+          Object {
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/index_patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": Object {
+                "path": "/management/kibana/index_patterns/1",
+                "uiCapabilitiesPath": "management.kibana.index_patterns",
+              },
+              "title": "MyIndexPattern*",
+            },
+            "type": "index-pattern",
+          },
         ]
       }
       loading={false}

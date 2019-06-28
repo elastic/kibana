@@ -5,6 +5,9 @@
 * Yes, technically you can load this and build the parser in real time, but this makes it annoying
 * to share the grammar between the front end and back, so, you know, just generate the parser.
 * You shouldn't be futzing around in the grammar very often anyway.
+*
+* Instructions for generating `grammar.json`: https://github.com/elastic/kibana/issues/28776#issue-399489673
+*
 */
 
 {
@@ -20,10 +23,10 @@ start
   = expression
 
 expression
-  = space? first:function rest:('|' space? fn:function { return fn; })* {
+  = space? first:function? rest:('|' space? fn:function { return fn; })* {
     return addMeta({
       type: 'expression',
-      chain: [first].concat(rest)
+      chain: first ? [first].concat(rest) : []
     }, text(), location());
   }
 

@@ -18,19 +18,22 @@
  */
 
 import angular from 'angular';
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { SearchSource } from 'ui/courier';
-import * as columnActions from 'ui/doc_table/actions/columns';
 import {
   ContainerState,
   Embeddable,
   EmbeddableState,
   OnEmbeddableStateChanged,
-  TimeRange,
 } from 'ui/embeddable';
-import { Filters, Query } from 'ui/embeddable/types';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
 import { getTime } from 'ui/timefilter/get_time';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 
@@ -57,6 +60,7 @@ interface SearchEmbeddableConfig {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
   savedSearch: SavedSearch;
   editUrl: string;
+  editable: boolean;
   $rootScope: ng.IRootScopeService;
   $compile: ng.ICompileService;
 }
@@ -72,13 +76,14 @@ export class SearchEmbeddable extends Embeddable {
   private panelTitle: string = '';
   private filtersSearchSource: SearchSource;
   private timeRange?: TimeRange;
-  private filters?: Filters;
+  private filters?: Filter[];
   private query?: Query;
   private searchInstance?: JQLite;
 
   constructor({
     onEmbeddableStateChanged,
     savedSearch,
+    editable,
     editUrl,
     $rootScope,
     $compile,
@@ -86,7 +91,11 @@ export class SearchEmbeddable extends Embeddable {
     super({
       title: savedSearch.title,
       editUrl,
-      indexPattern: savedSearch.searchSource.getField('index'),
+      editLabel: i18n.translate('kbn.embeddable.search.editLabel', {
+        defaultMessage: 'Edit saved search',
+      }),
+      editable,
+      indexPatterns: _.compact([savedSearch.searchSource.getField('index')]),
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedSearch = savedSearch;
@@ -100,6 +109,10 @@ export class SearchEmbeddable extends Embeddable {
 
   public getInspectorAdapters() {
     return this.inspectorAdaptors;
+  }
+
+  public getPanelTitle() {
+    return this.panelTitle;
   }
 
   public onContainerStateChanged(containerState: ContainerState) {

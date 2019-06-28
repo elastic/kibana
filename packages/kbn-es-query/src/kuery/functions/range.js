@@ -22,6 +22,7 @@ import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from '../../filters';
 import { getFields } from './utils/get_fields';
+import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
 
 export function buildNodeParams(fieldName, params) {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -35,7 +36,7 @@ export function buildNodeParams(fieldName, params) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   const [ fieldNameArg, ...args ] = node.arguments;
   const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);
@@ -60,7 +61,17 @@ export function toElasticsearchQuery(node, indexPattern) {
         script: getRangeScript(field, queryParams),
       };
     }
-
+    else if (field.type === 'date') {
+      const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
+      return {
+        range: {
+          [field.name]: {
+            ...queryParams,
+            ...timeZoneParam,
+          }
+        }
+      };
+    }
     return {
       range: {
         [field.name]: queryParams

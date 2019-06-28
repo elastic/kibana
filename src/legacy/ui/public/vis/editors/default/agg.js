@@ -21,6 +21,7 @@ import './agg_params';
 import './agg_add';
 import { Direction } from './keyboard_move';
 import _ from 'lodash';
+import '../../../fancy_forms';
 import { uiModules } from '../../../modules';
 import aggTemplate from './agg.html';
 import { move } from '../../../utils/collection';
@@ -53,7 +54,7 @@ uiModules
        * @return {[type]} [description]
        */
         $scope.describe = function () {
-          if (!$scope.agg.type.makeLabel) return '';
+          if (!$scope.agg.type || !$scope.agg.type.makeLabel) return '';
           const label = $scope.agg.type.makeLabel($scope.agg);
           return label ? label : '';
         };

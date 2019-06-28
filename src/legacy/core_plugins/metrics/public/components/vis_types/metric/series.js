@@ -19,21 +19,28 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import ColorPicker from '../../color_picker';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { ColorPicker } from '../../color_picker';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import Sortable from 'react-anything-sortable';
-import Split from '../../split';
-import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import createAggRowRender from '../../lib/create_agg_row_render';
-import createTextHandler from '../../lib/create_text_handler';
-import { createUpDownHandler } from '../../lib/sort_keyhandler';
+import { Split } from '../../split';
+import { SeriesDragHandler } from '../../series_drag_handler';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Aggs } from '../../aggs/aggs';
 
 function MetricSeriesUi(props) {
   const {
     panel,
     fields,
+    name,
     onAdd,
     onChange,
     onDelete,
@@ -41,14 +48,14 @@ function MetricSeriesUi(props) {
     disableAdd,
     selectedTab,
     visible,
-    intl
+    intl,
+    uiRestrictions,
   } = props;
 
   const defaults = { label: '' };
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
-  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -57,27 +64,24 @@ function MetricSeriesUi(props) {
   if (visible) {
     let seriesBody;
     if (selectedTab === 'metrics') {
-      const handleSort = (data) => {
-        const metrics = data.map(id => model.metrics.find(m => m.id === id));
-        props.onChange({ metrics });
-      };
       seriesBody = (
         <div>
-          <Sortable
-            style={{ cursor: 'default' }}
-            dynamic={true}
-            direction="vertical"
-            onSort={handleSort}
-            sortHandle="tvbAggRow__sortHandle"
-          >
-            { aggs }
-          </Sortable>
+          <Aggs
+            onChange={props.onChange}
+            fields={fields}
+            panel={panel}
+            model={model}
+            name={name}
+            uiRestrictions={uiRestrictions}
+            dragHandleProps={props.dragHandleProps}
+          />
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}
               fields={fields}
               panel={panel}
               model={model}
+              uiRestrictions={uiRestrictions}
             />
           </div>
         </div>
@@ -88,16 +92,14 @@ function MetricSeriesUi(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
     body = (
       <div className="tvbSeries__body">
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'metrics'}
-            onClick={() => props.switchTab('metrics')}
-          >
+          <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
             <FormattedMessage
               id="tsvb.metric.dataTab.metricsButtonLabel"
               defaultMessage="Metrics"
@@ -133,77 +135,69 @@ function MetricSeriesUi(props) {
     );
   }
 
-  let dragHandle;
-  if (!props.disableDelete) {
-    dragHandle = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={(<FormattedMessage
-            id="tsvb.metric.sort.dragToSortTooltip"
-            defaultMessage="Drag to sort"
-          />)}
-        >
-          <EuiButtonIcon
-            className="tvbSeries__sortHandle"
-            iconType="grab"
-            aria-label={intl.formatMessage({ id: 'tsvb.metric.sort.sortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
-            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
-
   return (
-    <div
-      className={`${props.className}`}
-      style={props.style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
-    >
+    <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({ id: 'tsvb.metric.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.metric.editor.toggleEditorAriaLabel',
+              defaultMessage: 'Toggle series editor',
+            })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
 
-        { colorPicker }
+        {colorPicker}
 
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({ id: 'tsvb.metric.editor.labelPlaceholder', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.metric.editor.labelPlaceholder',
+              defaultMessage: 'Label',
+            })}
             value={model.label}
           />
         </EuiFlexItem>
 
-        { dragHandle }
+        <SeriesDragHandler
+          dragHandleProps={props.dragHandleProps}
+          hideDragHandler={props.disableDelete}
+        />
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({ id: 'tsvb.metric.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
-            deleteTooltip={intl.formatMessage({ id: 'tsvb.metric.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
-            cloneTooltip={intl.formatMessage({ id: 'tsvb.metric.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
+            addTooltip={intl.formatMessage({
+              id: 'tsvb.metric.editor.addSeriesTooltip',
+              defaultMessage: 'Add Series',
+            })}
+            deleteTooltip={intl.formatMessage({
+              id: 'tsvb.metric.editor.deleteSeriesTooltip',
+              defaultMessage: 'Delete Series',
+            })}
+            cloneTooltip={intl.formatMessage({
+              id: 'tsvb.metric.editor.cloneSeriesTooltip',
+              defaultMessage: 'Clone Series',
+            })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
+            togglePanelActivation={props.togglePanelActivation}
+            isPanelActive={!model.hidden}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
             responsive={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      { body }
+      {body}
     </div>
   );
-
 }
 
 MetricSeriesUi.propTypes = {
@@ -217,19 +211,17 @@ MetricSeriesUi.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   selectedTab: PropTypes.string,
-  sortData: PropTypes.string,
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  togglePanelActivation: PropTypes.func,
+  uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
-const MetricSeries = injectI18n(MetricSeriesUi);
-export default MetricSeries;
+export const MetricSeries = injectI18n(MetricSeriesUi);

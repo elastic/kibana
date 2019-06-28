@@ -31,6 +31,7 @@ import {
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
+import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
@@ -46,6 +47,7 @@ export class AdvancedSettings extends Component {
   static propTypes = {
     config: PropTypes.object.isRequired,
     query: PropTypes.string,
+    enableSaving: PropTypes.bool.isRequired,
   }
 
   constructor(props) {
@@ -170,6 +172,12 @@ export class AdvancedSettings extends Component {
         <EuiSpacer size="m" />
         <CallOuts />
         <EuiSpacer size="m" />
+
+        <AdvancedSettingsVoiceAnnouncement
+          queryText={query.text}
+          settings={filteredSettings}
+        />
+
         <Form
           settings={filteredSettings}
           categories={this.categories}
@@ -178,8 +186,9 @@ export class AdvancedSettings extends Component {
           save={this.saveConfig}
           clear={this.clearConfig}
           showNoResultsMessage={!footerQueryMatched}
+          enableSaving={this.props.enableSaving}
         />
-        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
+        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} enableSaving={this.props.enableSaving} />
       </div>
     );
   }

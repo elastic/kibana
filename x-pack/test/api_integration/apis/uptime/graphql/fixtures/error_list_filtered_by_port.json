@@ -1,12 +1,14 @@
 {
   "errorList": [
     {
-      "latestMessage": "dial tcp 127.0.0.1:9200: connect: connection refused",
-      "monitorId": "auto-tcp-0X81440A68E839814C",
-      "type": "io",
       "count": 748,
+      "latestMessage": "dial tcp 127.0.0.1:9200: connect: connection refused",
+      "location": null,
+      "monitorId": "auto-tcp-0X81440A68E839814C",
+      "name": null,
       "statusCode": null,
-      "timestamp": "2019-01-28T17:59:34.075Z"
+      "timestamp": "2019-01-28T17:59:34.075Z",
+      "type": "io"
     }
   ]
 }

@@ -30,7 +30,8 @@ import { i18n } from '@kbn/i18n';
 const metricAggFilter = [
   '!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',
   '!sum_bucket', '!avg_bucket', '!min_bucket', '!max_bucket',
-  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum'
+  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
+  '!geo_bounds', '!geo_centroid',
 ];
 
 const metricAggSchema = (new Schemas([
@@ -38,7 +39,7 @@ const metricAggSchema = (new Schemas([
     group: 'none',
     name: 'metricAgg',
     title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-      defaultMessage: 'Metric Agg'
+      defaultMessage: 'Metric agg'
     }),
     aggFilter: metricAggFilter
   }
@@ -49,7 +50,7 @@ const bucketAggSchema = (new Schemas([
   {
     group: 'none',
     title: i18n.translate('common.ui.aggTypes.metrics.bucketAggTitle', {
-      defaultMessage: 'Bucket Agg'
+      defaultMessage: 'Bucket agg'
     }),
     name: 'bucketAgg',
     aggFilter: bucketAggFilter
@@ -58,7 +59,7 @@ const bucketAggSchema = (new Schemas([
 
 const siblingPipelineAggHelper = {
   subtype: i18n.translate('common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
-    defaultMessage: 'Sibling Pipeline Aggregations'
+    defaultMessage: 'Sibling pipeline aggregations'
   }),
   params: function () {
     return [

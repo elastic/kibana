@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table 1`] = `
+<Connect(NetworkTopNFlowTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "8.8.8.8",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes": 3826633497,
+            "direction": Array [
+              "inbound",
+            ],
+            "packets": 4185805,
+          },
+          "source": Object {
+            "count": 1,
+            "domain": Array [
+              "test.domain.com",
+            ],
+            "ip": "8.8.8.8",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "9.9.9.9",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes": 325909849,
+            "direction": Array [
+              "inbound",
+              "outbound",
+            ],
+            "packets": 221494,
+          },
+          "source": Object {
+            "domain": Array [
+              "test.domain.net",
+              "test.old.domain.net",
+            ],
+            "ip": "9.9.9.9",
+          },
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  indexPattern={
+    Object {
+      "fields": Array [
+        Object {
+          "aggregatable": true,
+          "name": "@timestamp",
+          "searchable": true,
+          "type": "date",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "@version",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.ephemeral_id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.hostname",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test1",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test2",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test3",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test4",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test5",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test6",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test7",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+      ],
+      "title": "filebeat-*,auditbeat-*,packetbeat-*",
+    }
+  }
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="10"
+  totalCount={524}
+  type="page"
+/>
+`;

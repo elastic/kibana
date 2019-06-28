@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { aggResponseIndex } from '../../../agg_response';
-import { VislibSeriesResponseHandlerProvider as vislibReponseHandler } from '../../response_handlers/vislib';
+import { vislibSeriesResponseHandlerProvider as vislibReponseHandler } from '../../response_handlers/vislib';
 
 describe('renderbot#buildChartData', function () {
   const buildChartData = vislibReponseHandler().handler;

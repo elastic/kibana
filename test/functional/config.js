@@ -17,50 +17,8 @@
  * under the License.
  */
 
-import {
-  CommonPageProvider,
-  ConsolePageProvider,
-  ShieldPageProvider,
-  ContextPageProvider,
-  DiscoverPageProvider,
-  HeaderPageProvider,
-  HomePageProvider,
-  DashboardPageProvider,
-  VisualizePageProvider,
-  SettingsPageProvider,
-  MonitoringPageProvider,
-  PointSeriesPageProvider,
-  VisualBuilderPageProvider,
-  TimelionPageProvider,
-  SharePageProvider,
-  TimePickerPageProvider,
-} from './page_objects';
-
-import {
-  RemoteProvider,
-  FilterBarProvider,
-  QueryBarProvider,
-  FindProvider,
-  TestSubjectsProvider,
-  DocTableProvider,
-  ScreenshotsProvider,
-  DashboardVisualizationProvider,
-  DashboardExpectProvider,
-  FailureDebuggingProvider,
-  VisualizeListingTableProvider,
-  DashboardAddPanelProvider,
-  DashboardPanelActionsProvider,
-  FlyoutProvider,
-  ComboBoxProvider,
-  EmbeddingProvider,
-  RenderableProvider,
-  TableProvider,
-  BrowserProvider,
-  InspectorProvider,
-  PieChartProvider,
-  AppsMenuProvider,
-  GlobalNavProvider,
-} from './services';
+import { pageObjects } from './page_objects';
+import { services } from './services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
@@ -79,53 +37,8 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/visualize'),
       require.resolve('./apps/xpack'),
     ],
-    pageObjects: {
-      common: CommonPageProvider,
-      console: ConsolePageProvider,
-      shield: ShieldPageProvider,
-      context: ContextPageProvider,
-      discover: DiscoverPageProvider,
-      header: HeaderPageProvider,
-      home: HomePageProvider,
-      dashboard: DashboardPageProvider,
-      visualize: VisualizePageProvider,
-      settings: SettingsPageProvider,
-      monitoring: MonitoringPageProvider,
-      pointSeries: PointSeriesPageProvider,
-      visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider,
-      share: SharePageProvider,
-      timePicker: TimePickerPageProvider,
-    },
-    services: {
-      es: commonConfig.get('services.es'),
-      esArchiver: commonConfig.get('services.esArchiver'),
-      kibanaServer: commonConfig.get('services.kibanaServer'),
-      retry: commonConfig.get('services.retry'),
-      __leadfoot__: RemoteProvider,
-      filterBar: FilterBarProvider,
-      queryBar: QueryBarProvider,
-      find: FindProvider,
-      testSubjects: TestSubjectsProvider,
-      docTable: DocTableProvider,
-      screenshots: ScreenshotsProvider,
-      dashboardVisualizations: DashboardVisualizationProvider,
-      dashboardExpect: DashboardExpectProvider,
-      failureDebugging: FailureDebuggingProvider,
-      visualizeListingTable: VisualizeListingTableProvider,
-      dashboardAddPanel: DashboardAddPanelProvider,
-      dashboardPanelActions: DashboardPanelActionsProvider,
-      flyout: FlyoutProvider,
-      comboBox: ComboBoxProvider,
-      embedding: EmbeddingProvider,
-      renderable: RenderableProvider,
-      table: TableProvider,
-      browser: BrowserProvider,
-      pieChart: PieChartProvider,
-      inspector: InspectorProvider,
-      appsMenu: AppsMenuProvider,
-      globalNav: GlobalNavProvider,
-    },
+    pageObjects,
+    services,
     servers: commonConfig.get('servers'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
@@ -147,6 +60,9 @@ export default async function ({ readConfigFile }) {
     },
 
     apps: {
+      kibana: {
+        pathname: '/app/kibana',
+      },
       status_page: {
         pathname: '/status',
       },
@@ -187,7 +103,10 @@ export default async function ({ readConfigFile }) {
       },
     },
     junit: {
-      reportName: 'UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests'
+    },
+    browser: {
+      type: 'chrome'
     }
   };
 }

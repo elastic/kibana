@@ -25,6 +25,8 @@ If you are running our https://cloud.elastic.co[hosted Elasticsearch Service]
 on Elastic Cloud, you can access Kibana with a single click.
 --
 
+include::getting-started/add-sample-data.asciidoc[]
+
 include::getting-started/tutorial-sample-data.asciidoc[]
 
 include::getting-started/tutorial-sample-filter.asciidoc[]

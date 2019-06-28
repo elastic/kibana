@@ -5,6 +5,9 @@
  */
 
 import request from 'request';
+import expect from '@kbn/expect';
+
+const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
@@ -57,52 +60,99 @@ export default function ({ getService }) {
         .expect(200);
     });
 
-    it('expired access token should be automatically refreshed', async function () {
-      this.timeout(40000);
+    describe('API access with expired access token.', function () {
+      const expectNewSessionCookie = (originalCookie, newCookie) => {
+        if (!newCookie) {
+          throw new Error('No session cookie set after token refresh');
+        }
+        if (!newCookie.httpOnly) {
+          throw new Error('Session cookie is not marked as HttpOnly');
+        }
+        if (newCookie.value === originalCookie.value) {
+          throw new Error('Session cookie has not changed after refresh');
+        }
+      };
 
-      const originalCookie = await createSessionCookie();
+      it('expired access token should be automatically refreshed', async function () {
+        this.timeout(40000);
 
-      // Access token expiration is set to 15s for API integration tests.
-      // Let's wait for 20s to make sure token expires.
-      await new Promise(resolve => setTimeout(() => resolve(), 20000));
+        const originalCookie = await createSessionCookie();
 
-      // This api call should succeed and automatically refresh token. Returned cookie will contain
-      // the new access and refresh token pair.
-      const response = await supertest
-        .get('/api/security/v1/me')
-        .set('kbn-xsrf', 'true')
-        .set('cookie', originalCookie.cookieString())
-        .expect(200);
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await delay(20000);
 
-      const newCookie = extractSessionCookie(response);
-      if (!newCookie) {
-        throw new Error('No session cookie set after token refresh');
-      }
-      if (!newCookie.httpOnly) {
-        throw new Error('Session cookie is not marked as HttpOnly');
-      }
-      if (newCookie.value === originalCookie.value) {
-        throw new Error('Session cookie has not changed after refresh');
-      }
+        // This api call should succeed and automatically refresh token. Returned cookie will contain
+        // the new access and refresh token pair.
+        const firstResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', originalCookie.cookieString())
+          .expect(200);
 
-      // Request with old cookie should fail with `400` since it contains expired access token and
-      // already used refresh tokens.
-      const apiResponseWithExpiredToken = await supertest
-        .get('/api/security/v1/me')
-        .set('kbn-xsrf', 'true')
-        .set('Cookie', originalCookie.cookieString())
-        .expect(400);
+        const firstNewCookie = extractSessionCookie(firstResponse);
+        expectNewSessionCookie(originalCookie, firstNewCookie);
 
-      if (apiResponseWithExpiredToken.headers['set-cookie'] !== undefined) {
-        throw new Error('Request rejecting expired access token still set session cookie');
-      }
+        // Request with old cookie should return another valid cookie we can use to authenticate requests
+        // if it happens within 60 seconds of the refresh token being used
+        const secondResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'true')
+          .set('Cookie', originalCookie.cookieString())
+          .expect(200);
 
-      // The new cookie with fresh pair of access and refresh tokens should work.
-      await supertest
-        .get('/api/security/v1/me')
-        .set('kbn-xsrf', 'true')
-        .set('Cookie', newCookie.cookieString())
-        .expect(200);
+        const secondNewCookie = extractSessionCookie(secondResponse);
+        expectNewSessionCookie(originalCookie, secondNewCookie);
+
+        if (secondNewCookie.value === firstNewCookie.value) {
+          throw new Error('Second new cookie is the same as the first new cookie');
+        }
+
+        // The first new cookie should authenticate a subsequent request
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'true')
+          .set('Cookie', firstNewCookie.cookieString())
+          .expect(200);
+
+        // The second new cookie should authenticate a subsequent request
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'true')
+          .set('Cookie', secondNewCookie.cookieString())
+          .expect(200);
+      });
+    });
+
+    describe('API access with missing access token document.', () => {
+      let sessionCookie;
+      beforeEach(async () => sessionCookie = await createSessionCookie());
+
+      it('should clear cookie and redirect to login', async function () {
+        // Let's delete tokens from `.security` index directly to simulate the case when
+        // Elasticsearch automatically removes access/refresh token document from the index
+        // after some period of time.
+        const esResponse = await getService('es').deleteByQuery({
+          index: '.security-tokens',
+          q: 'doc_type:token',
+          refresh: true,
+        });
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
+
+        const response = await supertest.get('/abc/xyz/')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect('location', '/login?next=%2Fabc%2Fxyz%2F')
+          .expect(302);
+
+        const cookies = response.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        const cookie = request.cookie(cookies[0]);
+        expect(cookie.key).to.be('sid');
+        expect(cookie.value).to.be.empty();
+        expect(cookie.path).to.be('/');
+        expect(cookie.httpOnly).to.be(true);
+      });
     });
   });
 }
