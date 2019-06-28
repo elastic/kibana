@@ -84,9 +84,11 @@ export class AbstractESSource extends AbstractVectorSource {
   getMetricFields() {
     return this._getValidMetrics().map(metric => {
       const metricKey = this._formatMetricKey(metric);
-      const metricLabel = this._formatMetricLabel(metric);
+      const metricLabel = metric.label ? metric.label : this._formatMetricLabel(metric);
+      const metricCopy = { ...metric };
+      delete metricCopy.label;
       return {
-        ...metric,
+        ...metricCopy,
         propertyKey: metricKey,
         propertyLabel: metricLabel
       };

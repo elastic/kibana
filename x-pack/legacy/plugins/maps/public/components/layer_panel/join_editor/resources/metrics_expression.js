@@ -66,7 +66,11 @@ export class MetricsExpression extends Component {
         }
         return false;
       })
-      .map(({ type, field }) => {
+      .map(({ type, field, label }) => {
+        if (label) {
+          return label;
+        }
+
         if (type === 'count') {
           return 'count';
         }
