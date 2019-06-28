@@ -24,16 +24,14 @@ test('Should render default props', () => {
     .toMatchSnapshot();
 });
 
-test('Should use custom labels and remove incomplete metrics in metric expression', () => {
+test('Should render metrics expression for metrics', () => {
   const component = shallow(
     <MetricsExpression
       {...defaultProps}
       metrics={[
-        { type: 'count' },
-        { type: 'count', label: 'my count' },
+        { type: 'count', label: 'my count' },  // should ignore label
         { type: 'max' }, // incomplete - no field, should not be included in expression
-        { type: 'max', field: 'prop1' },
-        { type: 'max', field: 'prop1', label: 'mostest' },
+        { type: 'max', field: 'prop1', label: 'mostest' }, // should ignore label
       ]}
     />
   );

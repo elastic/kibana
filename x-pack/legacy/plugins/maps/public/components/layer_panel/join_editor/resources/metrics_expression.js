@@ -66,11 +66,8 @@ export class MetricsExpression extends Component {
         }
         return false;
       })
-      .map(({ type, field, label }) => {
-        if (label) {
-          return label;
-        }
-
+      .map(({ type, field }) => {
+        // do not use metric label so field and aggregation are not obscured.
         if (type === 'count') {
           return 'count';
         }

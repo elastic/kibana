@@ -45,7 +45,7 @@ exports[`Should render default props 1`] = `
 </EuiPopover>
 `;
 
-exports[`Should use custom labels and remove incomplete metrics in metric expression 1`] = `
+exports[`Should render metrics expression for metrics 1`] = `
 <EuiPopover
   anchorPosition="leftCenter"
   button={
@@ -53,7 +53,7 @@ exports[`Should use custom labels and remove incomplete metrics in metric expres
       description="and use metrics"
       onClick={[Function]}
       uppercase={false}
-      value="count, my count, max prop1, mostest"
+      value="count, max prop1"
     />
   }
   closePopover={[Function]}
