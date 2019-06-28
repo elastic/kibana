@@ -17,15 +17,23 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+// @ts-ignore
+import { kibanaMarkdown } from './markdown_fn';
+// @ts-ignore
+import { MarkdownVis } from './markdown_vis';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'vis_type_markdown',
-    require: ['visualizations', 'data'],
-    uiExports: {
-      hacks: [resolve(__dirname, 'public/setup.ts')],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-  });
+class Plugin {
+  // @ts-ignore
+  public setup(core, plugins) {
+    plugins.data.expressions.functionsRegistry.register(kibanaMarkdown);
+    plugins.visualizations.types.VisTypesRegistryProvider.register(() => MarkdownVis);
+  }
+
+  public start() {}
+
+  public stop() {}
+}
+
+export function plugin() {
+  return new Plugin();
 }

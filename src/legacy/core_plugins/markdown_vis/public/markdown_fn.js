@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaMarkdown = () => ({
@@ -62,5 +61,3 @@ export const kibanaMarkdown = () => ({
     };
   }
 });
-
-functionsRegistry.register(kibanaMarkdown);
