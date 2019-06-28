@@ -11,8 +11,11 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('create slack action', () => {
+    after(() => esArchiver.unload('empty_kibana'));
+
     it('should return 200 when creating a slack action successfully', async () => {
       await supertest
         .post('/api/action')
