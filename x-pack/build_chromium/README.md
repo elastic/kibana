@@ -90,9 +90,9 @@ Find the Chromium revision (modify the following command to be wherever you have
 
 - `cat ~/dev/elastic/kibana/x-pack/node_modules/puppeteer-core/package.json | grep chromium_revision`
 - Take the revision number from that, and tack it to the end of this URL: https://crrev.com
-  - (For example: https://crrev.com/637110)
+  - (For example: https://crrev.com/672088)
 - Grab the SHA from there
-  - (For example, rev 637110 has sha 2fac04abf6133ab2da2846a8fbd0e97690722699)
+  - (For example, rev 672088 has sha 21a0edd1ded0244cd04af082b5c7945655759ae0)
 
 Note: In Linux, you should run the build command in tmux so that if your ssh session disconnects, the build can keep going. To do this, just type `tmux` into your terminal to hop into a tmux session. If you get disconnected, you can hop back in like so:
 
@@ -102,9 +102,9 @@ Note: In Linux, you should run the build command in tmux so that if your ssh ses
 
 To run the build, replace the sha in the following commands with the sha that you wish to build:
 
-- Mac: `python ~/chromium/build_chromium/build.py 2fac04abf6133ab2da2846a8fbd0e97690722699`
-- Linux: `python ~/chromium/build_chromium/build.py 2fac04abf6133ab2da2846a8fbd0e97690722699`
-- Windows: `python c:\chromium\build_chromium\build.py 2fac04abf6133ab2da2846a8fbd0e97690722699`
+- Mac: `python ~/chromium/build_chromium/build.py 21a0edd1ded0244cd04af082b5c7945655759ae0`
+- Linux: `python ~/chromium/build_chromium/build.py 21a0edd1ded0244cd04af082b5c7945655759ae0`
+- Windows: `python c:\chromium\build_chromium\build.py 21a0edd1ded0244cd04af082b5c7945655759ae0`
 
 ## Artifacts
 
