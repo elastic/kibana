@@ -24,6 +24,8 @@ import { TruncatableText } from '../truncatable_text';
 import { getDraggableId, getDroppableId } from './helpers';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
+export const DragEffects = styled.div``;
+
 const ProviderContainer = styled.div`
   &:hover {
     transition: background-color 0.7s ease;
