@@ -12,6 +12,7 @@ test('should return passed in params when validation not defined', () => {
     {
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     },
     {
@@ -28,6 +29,7 @@ test('should validate and apply defaults when params is valid', () => {
     {
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       validate: {
         params: Joi.object()
           .keys({
@@ -52,6 +54,7 @@ test('should validate and throw error when params is invalid', () => {
       {
         id: 'my-action-type',
         name: 'My action type',
+        unencryptedAttributes: [],
         validate: {
           params: Joi.object()
             .keys({

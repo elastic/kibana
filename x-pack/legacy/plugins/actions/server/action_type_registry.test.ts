@@ -40,6 +40,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -68,12 +69,14 @@ Array [
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(() =>
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        unencryptedAttributes: [],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -88,6 +91,7 @@ describe('get()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     });
     const actionType = actionTypeRegistry.get('my-action-type');
@@ -114,6 +118,7 @@ describe('list()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     });
     const actionTypes = actionTypeRegistry.list();
@@ -138,6 +143,7 @@ describe('has()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));

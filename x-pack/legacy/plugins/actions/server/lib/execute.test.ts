@@ -39,6 +39,7 @@ test('successfully executes', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -82,6 +83,7 @@ test('provides empty config when actionTypeConfig and / or actionTypeConfigSecre
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -106,6 +108,7 @@ test('throws an error when config is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     validate: {
       config: Joi.object()
         .keys({
@@ -136,6 +139,7 @@ test('throws an error when params is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     validate: {
       params: Joi.object()
         .keys({
