@@ -17,18 +17,18 @@ import 'ui/react_components';
 import 'ui/table_info';
 import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/components/forbidden_message';
-import 'plugins/watcher/services/watches';
+import { watches } from 'plugins/watcher/services/watches';
 import 'plugins/watcher/services/license';
 
 const app = uiModules.get('xpack/watcher');
 
 app.directive('watchList', function ($injector) {
   const pagerFactory = $injector.get('pagerFactory');
-  const watchesService = $injector.get('xpackWatcherWatchesService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
   const confirmModal = $injector.get('confirmModal');
   const $interval = $injector.get('$interval');
   const kbnUrl = $injector.get('kbnUrl');
+  const Promise = $injector.get('Promise');
 
   const $filter = $injector.get('$filter');
   const filter = $filter('filter');
@@ -83,8 +83,9 @@ app.directive('watchList', function ($injector) {
       }
 
       loadWatches = () => {
-        watchesService.getWatchList()
-          .then(watches => {
+        // wrapping promise for angular digest cycle
+        Promise.all([watches.getWatchList()])
+          .then(([watches]) => {
             this.watches = watches;
             this.forbidden = false;
           })
@@ -94,7 +95,7 @@ app.directive('watchList', function ($injector) {
                 if (err.status === 403) {
                   this.forbidden = true;
                 } else {
-                  toastNotifications.addDanger(err.data.message);
+                  toastNotifications.addDanger(err.message);
                 }
               });
           });
@@ -161,7 +162,7 @@ app.directive('watchList', function ($injector) {
         const numWatchesToDelete = this.watchesBeingDeleted.length;
 
         const watchIds = this.watchesBeingDeleted.map(watch => watch.id);
-        return watchesService.deleteWatches(watchIds)
+        return watches.deleteWatches(watchIds)
           .then(results => {
             const numSuccesses = results.numSuccesses;
             const numErrors = results.numErrors;
@@ -191,7 +192,7 @@ app.directive('watchList', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => toastNotifications.addDanger(err.data.message));
+              .then(() => toastNotifications.addDanger(err.message));
           });
       }
 
