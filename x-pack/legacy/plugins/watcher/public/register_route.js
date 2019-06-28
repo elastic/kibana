@@ -8,7 +8,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import routes from 'ui/routes';
 import { management } from 'ui/management';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import template from './app.html';
 import { App } from './app';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
@@ -31,8 +31,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
   controller: class WatcherController {
     constructor($injector, $scope, $http, Private) {
       const $route = $injector.get('$route');
-      const xpackInfoService = Private(XPackInfoProvider);
-      const licenseStatus = xpackInfoService.get(`features.${PLUGIN.ID}`);
+      const licenseStatus = xpackInfo.get(`features.${PLUGIN.ID}`);
 
       // clean up previously rendered React app if one exists
       // this happens because of React Router redirects
@@ -53,11 +52,9 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
 
 routes.defaults(/\/management/, {
   resolve: {
-    watcherManagementSection: $injector => {
-      const Private = $injector.get('Private');
-      const xpackInfoService = Private(XPackInfoProvider);
+    watcherManagementSection: () => {
       const watchesSection = management.getSection('elasticsearch/watcher');
-      const licenseStatus = xpackInfoService.get(`features.${PLUGIN.ID}`);
+      const licenseStatus = xpackInfo.get(`features.${PLUGIN.ID}`);
       const { status } = licenseStatus;
 
       if (status === LICENSE_STATUS_INVALID || status === LICENSE_STATUS_UNAVAILABLE) {
