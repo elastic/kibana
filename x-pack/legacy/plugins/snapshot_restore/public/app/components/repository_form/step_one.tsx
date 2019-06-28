@@ -143,6 +143,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <EuiCard
           title={displayName}
           icon={<RepositoryTypeLogo type={type} size="l" />}
+          description={<Fragment />} /* EuiCard requires `description` */
           footer={
             <EuiButtonEmpty
               href={documentationLinksService.getRepositoryTypeDocUrl(type)}
