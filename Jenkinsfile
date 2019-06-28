@@ -18,7 +18,16 @@ pipeline {
       }
       steps {
         dir("${env.BASE_DIR}"){
+          sh 'env > env.txt' 
+          script {
+            for (String x: readFile('env.txt').split("\r?\n")) {
+              println "# ENV VAR: ${x}"
+            }
+          }   
+          // Cleanup
+          sh 'rm env.txt' 
           sh 'echo "\n\t### STAGE_NAME: ${STAGE_NAME}"'
+          sh 'echo "\n\t### JOB_NAME: ${JOB_NAME}"'
 
           sh '${PIPELINE_DIR}extract_bootstrap_cache.sh'
           sh '${PIPELINE_DIR}setup.sh'
