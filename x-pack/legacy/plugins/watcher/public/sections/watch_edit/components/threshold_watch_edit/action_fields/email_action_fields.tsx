@@ -33,7 +33,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
         errorKey="to"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors && to !== undefined}
+        isShowingErrors={hasErrors && to !== null}
         label={i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.emailAction.recipientTextFieldLabel',
           {

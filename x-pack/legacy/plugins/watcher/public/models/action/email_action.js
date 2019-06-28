@@ -7,13 +7,15 @@
 import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 export class EmailAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    const toArray = get(props, 'to');
-
+    const uiSettings = chrome.getUiSettingsClient();
+    const defaultToEmail = uiSettings.get('xPack:defaultAdminEmail');
+    const toArray = get(props, 'to', defaultToEmail);
     this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
 
     const defaultSubject = i18n.translate('xpack.watcher.models.emailAction.defaultSubjectText', {
@@ -22,7 +24,6 @@ export class EmailAction extends BaseAction {
         context: '{{ctx.metadata.name}}',
       }
     });
-
     this.subject = get(props, 'subject', props.ignoreDefaults ? null : defaultSubject);
 
     this.body = get(props, 'body');
