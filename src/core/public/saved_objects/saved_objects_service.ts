@@ -30,7 +30,7 @@ export interface SavedObjectsStart {
 
 export const SavedObjectsService: CoreService<void, SavedObjectsStart> = {
   setup: async function setup() {},
-  start: async function start(http) {
+  start: async function start({ http }) {
     return { client: new SavedObjectsClient(http) };
   },
   stop: async function stop() {},

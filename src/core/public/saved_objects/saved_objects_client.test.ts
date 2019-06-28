@@ -17,12 +17,11 @@
  * under the License.
  */
 
-jest.mock('ui/kfetch', () => ({}));
-
 import * as sinon from 'sinon';
 import { SavedObjectsFindOptions } from 'src/core/server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
+import { httpServiceMock } from '../http/http_service.mock';
 
 describe('SavedObjectsClient', () => {
   const doc = {
@@ -32,272 +31,272 @@ describe('SavedObjectsClient', () => {
     version: 'foo',
   };
 
-  let kfetchStub: sinon.SinonStub;
+  const http = httpServiceMock.createStartContract();
   let savedObjectsClient: SavedObjectsClient;
+
   beforeEach(() => {
-    kfetchStub = sinon.stub();
-    require('ui/kfetch').kfetch = async (...args: any[]) => {
-      return kfetchStub(...args);
-    };
-    savedObjectsClient = new SavedObjectsClient();
+    savedObjectsClient = new SavedObjectsClient(http);
+    http.fetch.mockClear();
   });
 
   describe('#get', () => {
     beforeEach(() => {
-      kfetchStub
-        .withArgs({
-          method: 'POST',
-          pathname: `/api/saved_objects/_bulk_get`,
-          query: undefined,
-          body: sinon.match.any,
-        })
-        .returns(Promise.resolve({ saved_objects: [doc] }));
+      http.fetch.mockResolvedValue({ saved_objects: [doc] });
     });
 
-    test('returns a promise', () => {
-      expect(savedObjectsClient.get('index-pattern', 'logstash-*')).toBeInstanceOf(Promise);
+    test('rejects if `type` parameter is undefined', () => {
+      return expect(
+        savedObjectsClient.get(undefined as any, undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type and id]`);
     });
 
-    test('requires type', async () => {
-      try {
-        await savedObjectsClient.get(undefined as any, undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe('requires type and id');
-      }
+    test('rejects if `id` parameter is undefined', () => {
+      return expect(
+        savedObjectsClient.get('index-pattern', undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type and id]`);
     });
 
-    test('requires id', async () => {
-      try {
-        await savedObjectsClient.get('index-pattern', undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe('requires type and id');
-      }
-    });
+    test('resolves with SimpleSavedObject instance', async () => {
+      const response = savedObjectsClient.get(doc.type, doc.id);
+      await expect(response).resolves.toBeInstanceOf(SimpleSavedObject);
 
-    test('resolves with instantiated SavedObject', async () => {
-      const response = await savedObjectsClient.get(doc.type, doc.id);
-      expect(response).toBeInstanceOf(SimpleSavedObject);
-      expect(response.type).toBe('config');
-      expect(response.get('title')).toBe('Example title');
+      const result = await response;
+      expect(result.type).toBe('config');
+      expect(result.get('title')).toBe('Example title');
     });
 
     test('makes HTTP call', async () => {
       await savedObjectsClient.get(doc.type, doc.id);
-      sinon.assert.calledOnce(kfetchStub);
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "/api/saved_objects/_bulk_get",
+  Object {
+    "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"}]",
+    "method": "POST",
+    "query": undefined,
+  },
+]
+`);
     });
 
-    test('handles HTTP call when it fails', async () => {
-      kfetchStub
-        .withArgs({
-          method: 'POST',
-          pathname: `/api/saved_objects/_bulk_get`,
-          query: undefined,
-          body: sinon.match.any,
-        })
-        .rejects(new Error('Request failed'));
-      try {
-        await savedObjectsClient.get(doc.type, doc.id);
-        throw new Error('should have error');
-      } catch (e) {
-        expect(e.message).toBe('Request failed');
-      }
+    test('rejects when HTTP call fails', () => {
+      http.fetch.mockRejectedValue(new Error('Request failed'));
+      return expect(savedObjectsClient.get(doc.type, doc.id)).rejects.toMatchInlineSnapshot(
+        `[Error: Request failed]`
+      );
     });
   });
 
   describe('#delete', () => {
     beforeEach(() => {
-      kfetchStub
-        .withArgs({
-          method: 'DELETE',
-          pathname: `/api/saved_objects/index-pattern/logstash-*`,
-          query: undefined,
-          body: undefined,
-        })
-        .returns(Promise.resolve({}));
+      http.fetch.mockResolvedValue({});
     });
 
-    test('returns a promise', () => {
-      expect(savedObjectsClient.delete('index-pattern', 'logstash-*')).toBeInstanceOf(Promise);
+    test('rejects if `type` parameter is undefined', async () => {
+      expect(
+        savedObjectsClient.delete(undefined as any, undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type and id]`);
     });
 
-    test('requires type', async () => {
-      try {
-        await savedObjectsClient.delete(undefined as any, undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe('requires type and id');
-      }
+    test('throws if `id` parameter is undefined', async () => {
+      expect(
+        savedObjectsClient.delete('index-pattern', undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type and id]`);
     });
 
-    test('requires id', async () => {
-      try {
-        await savedObjectsClient.delete('index-pattern', undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe('requires type and id');
-      }
-    });
-
-    test('makes HTTP call', () => {
-      savedObjectsClient.delete('index-pattern', 'logstash-*');
-      sinon.assert.calledOnce(kfetchStub);
+    test('makes HTTP call', async () => {
+      await expect(savedObjectsClient.delete('index-pattern', 'logstash-*')).resolves.toEqual({});
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "/api/saved_objects/index-pattern/logstash-*",
+  Object {
+    "body": undefined,
+    "method": "DELETE",
+    "query": undefined,
+  },
+]
+`);
     });
   });
 
   describe('#update', () => {
-    const requireMessage = 'requires type, id and attributes';
+    const attributes = { foo: 'Foo', bar: 'Bar' };
+    const options = { version: '1' };
 
     beforeEach(() => {
-      kfetchStub
-        .withArgs({
-          method: 'PUT',
-          pathname: `/api/saved_objects/index-pattern/logstash-*`,
-          query: undefined,
-          body: sinon.match.any,
-        })
-        .returns(Promise.resolve({ data: 'api-response' }));
+      http.fetch.mockResolvedValue({ type: 'index-pattern', attributes });
     });
 
-    test('returns a promise', () => {
-      expect(savedObjectsClient.update('index-pattern', 'logstash-*', {})).toBeInstanceOf(Promise);
+    test('rejects if `type` is undefined', async () => {
+      expect(
+        savedObjectsClient.update(undefined as any, undefined as any, undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type, id and attributes]`);
     });
 
-    test('requires type', async () => {
-      try {
-        await savedObjectsClient.update(undefined as any, undefined as any, undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe(requireMessage);
-      }
+    test('rejects if `id` is undefined', async () => {
+      expect(
+        savedObjectsClient.update('index-pattern', undefined as any, undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type, id and attributes]`);
     });
 
-    test('requires id', async () => {
-      try {
-        await savedObjectsClient.update('index-pattern', undefined as any, undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe(requireMessage);
-      }
-    });
-
-    test('requires attributes', async () => {
-      try {
-        await savedObjectsClient.update('index-pattern', 'logstash-*', undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe(requireMessage);
-      }
+    test('rejects if `attributes` is undefined', async () => {
+      expect(
+        savedObjectsClient.update('index-pattern', 'logstash-*', undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type, id and attributes]`);
     });
 
     test('makes HTTP call', () => {
-      const attributes = { foo: 'Foo', bar: 'Bar' };
-      const body = { attributes, version: 'foo' };
-      const options = { version: 'foo' };
-
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
-      sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(
-        kfetchStub,
-        sinon.match({
-          body: JSON.stringify(body),
-        })
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/index-pattern/logstash-*",
+    Object {
+      "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"version\\":\\"1\\"}",
+      "method": "PUT",
+      "query": undefined,
+    },
+  ],
+]
+`);
+    });
+
+    test('rejects when HTTP call fails', async () => {
+      http.fetch.mockRejectedValueOnce(new Error('Request failed'));
+      await expect(
+        savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options)
+      ).rejects.toMatchInlineSnapshot(`[Error: Request failed]`);
+    });
+
+    test('resolves with SimpleSavedObject instance', async () => {
+      const response = savedObjectsClient.update(
+        'index-pattern',
+        'logstash-*',
+        attributes,
+        options
       );
+      await expect(response).resolves.toBeInstanceOf(SimpleSavedObject);
+
+      const result = await response;
+      expect(result.type).toBe('index-pattern');
+      expect(result.get('foo')).toBe('Foo');
     });
   });
 
   describe('#create', () => {
-    const requireMessage = 'requires type and attributes';
+    const attributes = { foo: 'Foo', bar: 'Bar' };
 
     beforeEach(() => {
-      kfetchStub
-        .withArgs({
-          method: 'POST',
-          pathname: `/api/saved_objects/index-pattern`,
-          query: undefined,
-          body: sinon.match.any,
-        })
-        .returns(Promise.resolve({}));
+      http.fetch.mockResolvedValue({ id: 'serverId', type: 'server-type', attributes });
     });
 
-    test('returns a promise', () => {
-      expect(savedObjectsClient.create('index-pattern', {})).toBeInstanceOf(Promise);
+    test('rejects if `type` is undefined', async () => {
+      await expect(
+        savedObjectsClient.create(undefined as any, undefined as any)
+      ).rejects.toMatchInlineSnapshot(`[Error: requires type and attributes]`);
     });
 
-    test('requires type', async () => {
-      try {
-        await savedObjectsClient.create(undefined as any, undefined as any);
-        fail('should have error');
-      } catch (e) {
-        expect(e.message).toBe(requireMessage);
-      }
+    test('resolves with SimpleSavedObject instance', async () => {
+      const response = savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
+      await expect(response).resolves.toBeInstanceOf(SimpleSavedObject);
+
+      const result = await response;
+
+      expect(result.type).toBe('server-type');
+      expect(result.id).toBe('serverId');
+      expect(result.attributes).toBe(attributes);
     });
 
-    test('allows for id to be provided', () => {
-      const attributes = { foo: 'Foo', bar: 'Bar' };
-      const path = `/api/saved_objects/index-pattern/myId`;
-      kfetchStub
-        .withArgs({
-          method: 'POST',
-          pathname: path,
-          query: undefined,
-          body: sinon.match.any,
-        })
-        .returns(Promise.resolve({}));
-
+    test('makes HTTP call with ID', () => {
       savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
-
-      sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(
-        kfetchStub,
-        sinon.match({
-          pathname: path,
-        })
-      );
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/index-pattern/myId",
+    Object {
+      "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
+      "method": "POST",
+      "query": Object {
+        "overwrite": undefined,
+      },
+    },
+  ],
+]
+`);
     });
 
-    test('makes HTTP call', () => {
-      const attributes = { foo: 'Foo', bar: 'Bar' };
+    test('makes HTTP call without ID', () => {
       savedObjectsClient.create('index-pattern', attributes);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/index-pattern",
+    Object {
+      "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
+      "method": "POST",
+      "query": Object {
+        "overwrite": undefined,
+      },
+    },
+  ],
+]
+`);
+    });
 
-      sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(
-        kfetchStub,
-        sinon.match({
-          pathname: sinon.match.string,
-          body: JSON.stringify({ attributes }),
-        })
-      );
+    test('rejects when HTTP call fails', async () => {
+      http.fetch.mockRejectedValueOnce(new Error('Request failed'));
+      await expect(
+        savedObjectsClient.create('index-pattern', attributes, { id: 'myId' })
+      ).rejects.toMatchInlineSnapshot(`[Error: Request failed]`);
     });
   });
 
   describe('#bulk_create', () => {
     beforeEach(() => {
-      kfetchStub
-        .withArgs({
-          method: 'POST',
-          pathname: `/api/saved_objects/_bulk_create`,
-          query: sinon.match.any,
-          body: sinon.match.any,
-        })
-        .returns(Promise.resolve({ saved_objects: [doc] }));
+      http.fetch.mockResolvedValue({ saved_objects: [doc] });
     });
 
-    test('returns a promise', () => {
-      expect(savedObjectsClient.bulkCreate([doc], {})).toBeInstanceOf(Promise);
-    });
+    test('resolves with array of SimpleSavedObject instances', async () => {
+      const response = savedObjectsClient.bulkCreate([doc]);
+      await expect(response).resolves.toHaveProperty('savedObjects');
 
-    test('resolves with instantiated SavedObjects', async () => {
-      const response = await savedObjectsClient.bulkCreate([doc], {});
-      expect(response).toHaveProperty('savedObjects');
-      expect(response.savedObjects.length).toBe(1);
-      expect(response.savedObjects[0]).toBeInstanceOf(SimpleSavedObject);
+      const result = await response;
+      expect(result.savedObjects).toHaveLength(1);
+      expect(result.savedObjects[0]).toBeInstanceOf(SimpleSavedObject);
     });
 
     test('makes HTTP call', async () => {
-      await savedObjectsClient.bulkCreate([doc], {});
-      sinon.assert.calledOnce(kfetchStub);
+      await savedObjectsClient.bulkCreate([doc]);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/_bulk_create",
+    Object {
+      "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
+      "method": "POST",
+      "query": Object {},
+    },
+  ],
+]
+`);
+    });
+
+    test('makes HTTP call with overwrite query paramater', async () => {
+      await savedObjectsClient.bulkCreate([doc], { overwrite: true });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/_bulk_create",
+    Object {
+      "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
+      "method": "POST",
+      "query": Object {
+        "overwrite": true,
+      },
+    },
+  ],
+]
+`);
     });
   });
 
@@ -305,53 +304,85 @@ describe('SavedObjectsClient', () => {
     const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
 
     beforeEach(() => {
-      kfetchStub.returns(Promise.resolve({ saved_objects: [object] }));
+      http.fetch.mockResolvedValue({ saved_objects: [object], page: 0, perPage: 1, total: 1 });
     });
 
-    test('returns a promise', () => {
-      expect(savedObjectsClient.find()).toBeInstanceOf(Promise);
+    test('resolves with instances of SimpleSavedObjects', async () => {
+      const body = { type: 'index-pattern' };
+      const resultP = savedObjectsClient.find(body);
+      await expect(resultP).resolves.toHaveProperty('savedObjects');
+
+      const result = await resultP;
+      expect(result.savedObjects).toHaveLength(1);
+      expect(result.savedObjects[0]).toBeInstanceOf(SimpleSavedObject);
+      expect(result.page).toBe(0);
+      expect(result.perPage).toBe(1);
+      expect(result.total).toBe(1);
     });
 
     test('accepts type', () => {
       const body = { type: 'index-pattern', invalid: true };
 
       savedObjectsClient.find(body);
-      sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(
-        kfetchStub,
-        sinon.match({
-          pathname: `/api/saved_objects/_find`,
-          query: { type: 'index-pattern', invalid: true },
-        })
-      );
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/_find",
+    Object {
+      "body": undefined,
+      "method": "GET",
+      "query": Object {
+        "invalid": true,
+        "type": "index-pattern",
+      },
+    },
+  ],
+]
+`);
     });
 
     test('accepts fields', () => {
       const body = { fields: ['title', 'description'] };
 
       savedObjectsClient.find(body);
-      sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(
-        kfetchStub,
-        sinon.match({
-          pathname: `/api/saved_objects/_find`,
-          query: { fields: ['title', 'description'] },
-        })
-      );
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/_find",
+    Object {
+      "body": undefined,
+      "method": "GET",
+      "query": Object {
+        "fields": Array [
+          "title",
+          "description",
+        ],
+      },
+    },
+  ],
+]
+`);
     });
 
     test('accepts pagination params', () => {
       const options: SavedObjectsFindOptions = { perPage: 10, page: 6 };
 
       savedObjectsClient.find(options);
-      sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.alwaysCalledWith(
-        kfetchStub,
-        sinon.match({
-          pathname: `/api/saved_objects/_find`,
-          query: { per_page: 10, page: 6 },
-        })
-      );
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/_find",
+    Object {
+      "body": undefined,
+      "method": "GET",
+      "query": Object {
+        "page": 6,
+        "per_page": 10,
+      },
+    },
+  ],
+]
+`);
     });
   });
 });

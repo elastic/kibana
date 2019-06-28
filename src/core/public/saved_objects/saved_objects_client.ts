@@ -207,6 +207,7 @@ export class SavedObjectsClient {
    * @returns The result of the create operation containing created saved objects.
    */
   public bulkCreate = (objects: BulkCreateOptions[] = [], options: HttpFetchQuery = {}) => {
+    // TODO better options type
     const path = this.getPath(['_bulk_create']);
     const query = pick(options, ['overwrite']) as Pick<HttpFetchQuery, 'overwrite'>;
 
