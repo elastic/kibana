@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiBadge, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiPanel,
+  EuiTitle,
+  EuiButtonIcon,
+  EuiBadge,
+  EuiIcon,
+  EuiLink,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -23,6 +31,7 @@ import { MonitorListDrawer } from './monitor_list_drawer';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
+import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -211,6 +220,18 @@ export const MonitorListComponent = (props: Props) => {
                 dangerColor={dangerColor}
                 histogramSeries={histogramSeries}
               />
+            ),
+          },
+          {
+            align: 'right',
+            field: 'state',
+            name: i18n.translate('xpack.uptime.monitorList.observabilityIntegrationsColumnLabel', {
+              defaultMessage: 'Integrations',
+              description:
+                'The heading column of some action buttons that will take users to other Obsevability apps',
+            }),
+            render: (state: any, summary: MonitorSummary) => (
+              <MonitorListActionsPopover summary={summary} />
             ),
           },
         ]}
