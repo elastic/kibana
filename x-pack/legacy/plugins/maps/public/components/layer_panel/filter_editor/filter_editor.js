@@ -24,6 +24,7 @@ import { Storage } from 'ui/storage';
 
 import { data } from 'plugins/data/setup';
 const { SearchBar } = data.search.ui;
+const { savedQueryService } = data.search.services;
 
 const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
@@ -33,11 +34,28 @@ export class FilterEditor extends Component {
   state = {
     isPopoverOpen: false,
     indexPatterns: [],
+    savedQuery: null,
   }
 
   componentDidMount() {
     this._isMounted = true;
     this._loadIndexPatterns();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const prevQuery = prevProps.layer.getQuery();
+    const currentQuery = this.props.layer.getQuery();
+    const prevSavedQuery = prevState.savedQuery;
+    const currentSavedQuery = this.state.savedQuery;
+    if (prevSavedQuery !== currentSavedQuery) {
+      console.log(`the savedQuery prop has changed from ${prevSavedQuery} to ${currentSavedQuery}`);
+    }
+    if (prevQuery !== currentQuery) {
+      console.log(`the query prop has changed from ${prevQuery} to ${currentQuery}`);
+    }
+    if (prevState.savedQuery !== this.state.savedQuery) {
+      console.log(`the incomming savedQuery ${prevState.savedQuery} is different to the one on state ${this.state.savedQuery}`);
+    }
   }
 
   componentWillUnmount() {
@@ -79,9 +97,43 @@ export class FilterEditor extends Component {
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
   }
+
   _onFiltersUpdated = () => {
     return;
   }
+
+  _onQuerySaved = (savedQuery) => {
+    console.log('savedQuery received from search bar after save:', savedQuery);
+    const oldSavedQuery = this.state.savedQuery;
+    if (!savedQuery) return;
+    // execute the code that triggers on the state.savedQuery watcher in map_controller
+    this._getSavedQueryFromService(savedQuery);
+    this.setState({ savedQuery: savedQuery.id });
+    if (savedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      this.props.setLayerQuery(this.props.layer.getId(), savedQuery.attributes.query);
+    }
+  }
+
+  _getSavedQueryFromService = async (savedQuery) => {
+    if (!savedQuery.id) return;
+    const newSavedQuery = await savedQueryService.getSavedQuery(savedQuery.id);
+    await this.setState({ savedQuery: newSavedQuery });
+    this.props.setLayerQuery(this.props.layer.getId(), newSavedQuery.attributes.query);
+
+  }
+
+  _onSavedQueryChange = (changedSavedQuery) => {
+    console.log('changedSavedQuery received from search bar after a change:', changedSavedQuery);
+    const oldSavedQuery = this.state.savedQuery;
+    if (!changedSavedQuery) return;
+    // execute the code that triggers on the state.savedQuery watcher in map_controller
+    this._getSavedQueryFromService(changedSavedQuery);
+    this.setState({ savedQuery: changedSavedQuery.id });
+    if (changedSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      this.props.setLayerQuery(this.props.layer.getId(), changedSavedQuery.attributes.query);
+    }
+  }
+
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
 
@@ -106,6 +158,9 @@ export class FilterEditor extends Component {
             showFilterBar={false}
             showQueryBar={true}
             store={localStorage}
+            savedQuery={this.state.savedQuery}
+            onSaved={this._onQuerySaved}
+            onSavedQueryUpdated={this._onSavedQueryChange}
             customSubmitButton={
               <EuiButton
                 fill
