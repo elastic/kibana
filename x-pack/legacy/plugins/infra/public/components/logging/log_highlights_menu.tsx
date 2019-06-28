@@ -3,10 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import { EuiButton, EuiButtonEmpty, EuiFieldText, EuiIcon, EuiPopover } from '@elastic/eui';
 import { debounce } from 'lodash';
-import { EuiIcon, EuiPopover, EuiButton, EuiButtonEmpty, EuiFieldText } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import euiStyled from '../../../../../common/eui_styled_components';
+import { useVisibilityState } from '../../utils/use_visibility_state';
 
 interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
@@ -18,20 +21,12 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   isLoading,
   activeHighlights,
 }) => {
-  // Popover state
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(
-    () => {
-      setIsPopoverOpen(!isPopoverOpen);
-    },
-    [isPopoverOpen, setIsPopoverOpen]
-  );
-  const closePopover = useCallback(
-    () => {
-      setIsPopoverOpen(false);
-    },
-    [setIsPopoverOpen]
-  );
+  const {
+    isVisible: isPopoverOpen,
+    hide: closePopover,
+    toggle: togglePopover,
+  } = useVisibilityState(false);
+
   // Input field state
   const [highlightTerm, setHighlightTerm] = useState('');
   const debouncedOnChange = useRef(
