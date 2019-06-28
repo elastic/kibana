@@ -31,6 +31,11 @@ export class FeatureTooltip extends React.Component {
     layerIdFilter: ALL_LAYERS
   };
 
+  constructor() {
+    super();
+    this._prevFeatures = null;
+  }
+
   componentDidMount() {
     this._isMounted = true;
   }
@@ -67,6 +72,11 @@ export class FeatureTooltip extends React.Component {
 
   _loadUniqueLayers = async () => {
 
+
+    if (this._prevFeatures === this.props.features) {
+      return;
+    }
+
     const uniqueLayerIds = [];
     for (let i = 0; i < this.props.features.length; i++) {
       let index = uniqueLayerIds.findIndex(({ layerId }) => {
@@ -100,6 +110,7 @@ export class FeatureTooltip extends React.Component {
     });
 
     if (this._isMounted) {
+      this._prevFeatures = this.props.features;
       if (!_.isEqual(this.state.uniqueLayers, options)) {
         this.setState({
           uniqueLayers: options,
