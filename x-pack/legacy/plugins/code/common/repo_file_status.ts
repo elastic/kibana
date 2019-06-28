@@ -5,23 +5,30 @@
  */
 
 export enum RepoFileStatus {
-  LANG_SERVER_IS_INITIALIZING = 'Language server is initializing',
+  LANG_SERVER_IS_INITIALIZING = 'Language server is initializing.',
   INDEXING = 'Indexing in progress',
-  FILE_NOT_SUPPORTED = 'Current file is not of a supported language',
-  REVISION_NOT_INDEXED = 'Current revision is not indexed',
-  LANG_SERVER_NOT_INSTALLED = 'Install additional language server to support current file',
-  FILE_IS_TOO_BIG = 'Current file is too big',
+  FILE_NOT_SUPPORTED = 'Current file is not of a supported language.',
+  REVISION_NOT_INDEXED = 'Current revision is not indexed.',
+  LANG_SERVER_NOT_INSTALLED = 'Install additional language server to support current file.',
+  FILE_IS_TOO_BIG = 'Current file is too big.',
 }
 
 export enum Severity {
+  NONE,
   NOTICE,
   WARNING,
   ERROR,
 }
 
 export enum LangServerType {
+  NONE = 'Current file is not supported by any language server',
   GENERIC = 'Current file is only covered by generic language server',
   DEDICATED = 'Current file is covered by dedicated language server',
+}
+
+export enum CTA {
+  SWITCH_TO_HEAD,
+  GOTO_LANG_MANAGE_PAGE,
 }
 
 export const REPO_FILE_STATUS_SEVERITY = {
@@ -39,9 +46,11 @@ export const REPO_FILE_STATUS_SEVERITY = {
   },
   [RepoFileStatus.REVISION_NOT_INDEXED]: {
     severity: Severity.WARNING,
+    fix: CTA.SWITCH_TO_HEAD,
   },
   [RepoFileStatus.LANG_SERVER_NOT_INSTALLED]: {
     severity: Severity.WARNING,
+    fix: CTA.GOTO_LANG_MANAGE_PAGE,
   },
   [RepoFileStatus.FILE_IS_TOO_BIG]: {
     severity: Severity.NOTICE,

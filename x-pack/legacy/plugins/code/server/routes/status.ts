@@ -66,9 +66,7 @@ export function statusRoute(
     repoUri: string,
     revision: string
   ) {
-    if (def === CTAGS) {
-      report.langServerType = LangServerType.GENERIC;
-    }
+    report.langServerType = def === CTAGS ? LangServerType.GENERIC : LangServerType.DEDICATED;
     if (lspService.languageServerStatus(def.languages[0]) === LanguageServerStatus.NOT_INSTALLED) {
       report.langServerStatus = RepoFileStatus.LANG_SERVER_NOT_INSTALLED;
     } else {
@@ -86,7 +84,7 @@ export function statusRoute(
     async handler(req: hapi.Request) {
       const { uri, path, ref } = req.params;
       const report: StatusReport = {
-        langServerType: LangServerType.DEDICATED,
+        langServerType: LangServerType.NONE,
       };
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
