@@ -157,19 +157,8 @@ export function WorkspacePanel({
   }
 
   return (
-    <EuiPageContent className="lnsPageContent">
-      <EuiPageContentHeader className="lnsPageContentHeader">
-        <EuiPageContentHeaderSection>
-          <EuiTitle size="xs">
-            <h2>New Visualization</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody className="lnsPageContentBody">
-        <DragDrop draggable={false} droppable={Boolean(dragDropContext.dragging)} onDrop={onDrop}>
-          {renderVisualization()}
-        </DragDrop>
-      </EuiPageContentBody>
-    </EuiPageContent>
+    <DragDrop draggable={false} droppable={Boolean(dragDropContext.dragging)} onDrop={onDrop}>
+      {renderVisualization()}
+    </DragDrop>
   );
 }

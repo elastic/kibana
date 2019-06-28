@@ -66,7 +66,7 @@ export type Action =
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     saving: false,
-    title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'Untitled chart' }),
+    title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
     datasource: {
       state: null,
       isLoading: Boolean(props.initialDatasourceId),

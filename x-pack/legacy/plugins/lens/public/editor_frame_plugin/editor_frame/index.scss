@@ -7,6 +7,16 @@
   right: 0;
   bottom: 0;
   overflow: hidden;
+  flex-direction: column;
+}
+
+.lnsHeader {
+  padding: $euiSize;
+  padding-bottom: 0;
+}
+
+.lnsPageMainContent {
+  display: flex;
 }
 
 .lnsSidebar {
@@ -71,6 +81,16 @@
   align-items: center;
   justify-content: center;
   overflow-x: hidden;
+}
+
+.lnsTitleInput {
+  width: 100%;
+  min-width: 100%;
+  border: 0;
+  font: inherit;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.2em;
 }
 
 @import './suggestion_panel.scss';

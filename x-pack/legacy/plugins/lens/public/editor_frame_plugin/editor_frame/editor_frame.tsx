@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useReducer, useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, Visualization } from '../../types';
@@ -134,8 +134,7 @@ export function EditorFrame(props: EditorFrameProps) {
       <FrameLayout
         navPanel={
           <nav>
-            <EuiButton
-              fill
+            <EuiLink
               onClick={() => {
                 if (datasource && visualization) {
                   save({
@@ -153,7 +152,7 @@ export function EditorFrame(props: EditorFrameProps) {
               {i18n.translate('xpack.lens.editorFrame.Save', {
                 defaultMessage: 'Save',
               })}
-            </EuiButton>
+            </EuiLink>
           </nav>
         }
         dataPanel={

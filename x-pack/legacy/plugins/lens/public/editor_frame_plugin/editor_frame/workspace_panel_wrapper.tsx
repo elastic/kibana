@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiFieldText } from '@elastic/eui';
+import { EuiPageContent, EuiPageContentHeader, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
 
@@ -17,9 +17,11 @@ interface Props {
 
 export function WorkspacePanelWrapper({ children, title, dispatch }: Props) {
   return (
-    <EuiPanel>
-      <header>
-        <EuiFieldText
+    <EuiPageContent className="lnsPageContent">
+      <EuiPageContentHeader className="lnsPageContentHeader">
+        <input
+          type="text"
+          className="euiFieldText lnsTitleInput"
           placeholder={i18n.translate('xpack.lens.chartTitlePlaceholder', {
             defaultMessage: 'Title',
           })}
@@ -30,8 +32,8 @@ export function WorkspacePanelWrapper({ children, title, dispatch }: Props) {
             defaultMessage: 'Title',
           })}
         />
-      </header>
-      {children}
-    </EuiPanel>
+      </EuiPageContentHeader>
+      <EuiPageContentBody className="lnsPageContentBody">{children}</EuiPageContentBody>
+    </EuiPageContent>
   );
 }
