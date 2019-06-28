@@ -6,6 +6,7 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
+import { transformAuditMessagesProvider } from '../models/data_frame/transform_audit_messages';
 
 export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
@@ -117,6 +118,21 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
         options.force = force;
       }
       return callWithRequest('ml.stopDataFrameTransformsJob', options)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
+    path: '/api/ml/_data_frame/transforms/{transformId}/messages',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { getTransformAuditMessages } = transformAuditMessagesProvider(callWithRequest);
+      const { transformId } = request.params;
+      return getTransformAuditMessages(transformId)
         .catch(resp => wrapError(resp));
     },
     config: {

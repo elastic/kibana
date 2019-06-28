@@ -18,14 +18,25 @@
  */
 
 import { migrations730 } from './migrations_730';
-import { DashboardDoc } from './types';
+import {
+  DashboardDoc700To720,
+  DashboardDoc730ToLatest,
+  RawSavedDashboardPanel730ToLatest,
+} from './types';
+
+const mockLogger = {
+  warning: () => {},
+  debug: () => {},
+  info: () => {},
+};
 
 test('dashboard migration 7.3.0 migrates filters to query on search source', () => {
-  const doc: DashboardDoc = {
+  const doc: DashboardDoc700To720 = {
     id: '1',
     type: 'dashboard',
     references: [],
     attributes: {
+      useMargins: true,
       description: '',
       uiStateJSON: '{}',
       version: 1,
@@ -38,7 +49,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
         '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
     },
   };
-  const newDoc = migrations730(doc);
+  const newDoc = migrations730(doc, mockLogger);
 
   expect(newDoc).toMatchInlineSnapshot(`
 Object {
@@ -49,7 +60,7 @@ Object {
     },
     "panelsJSON": "[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"foo\\":true},{\\"id\\":\\"2\\",\\"type\\":\\"visualization\\",\\"bar\\":true}]",
     "timeRestore": false,
-    "uiStateJSON": "{}",
+    "useMargins": true,
     "version": 1,
   },
   "id": "1",
@@ -57,4 +68,35 @@ Object {
   "type": "dashboard",
 }
 `);
+});
+
+test('dashboard migration 7.3.0 migrates panels', () => {
+  const doc: DashboardDoc700To720 = {
+    id: '1',
+    type: 'dashboard',
+    references: [],
+    attributes: {
+      useMargins: true,
+      description: '',
+      uiStateJSON: '{}',
+      version: 1,
+      timeRestore: false,
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"filter":[],"highlightAll":true,"version":true}',
+      },
+      panelsJSON:
+        '[{"size_x":6,"size_y":3,"panelIndex":1,"type":"visualization","id":"AWtIUP8QRNXhJVz2_Mar","col":1,"row":1}]',
+    },
+  };
+
+  const newDoc = migrations730(doc, mockLogger) as DashboardDoc730ToLatest;
+
+  const newPanels = JSON.parse(newDoc.attributes.panelsJSON) as RawSavedDashboardPanel730ToLatest[];
+
+  expect(newPanels.length).toBe(1);
+  expect(newPanels[0].gridData.w).toEqual(24);
+  expect(newPanels[0].gridData.h).toEqual(12);
+  expect(newPanels[0].gridData.x).toEqual(0);
+  expect(newPanels[0].gridData.y).toEqual(0);
+  expect(newPanels[0].panelIndex).toEqual('1');
 });
