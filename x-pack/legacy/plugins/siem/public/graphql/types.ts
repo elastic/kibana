@@ -134,11 +134,11 @@ export interface Source {
 
   KpiNetwork?: KpiNetworkData | null;
 
+  KpiIpDetails?: KpiIpDetailsData | null;
+
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
-
-  KpiIpDetails?: KpiIpDetailsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -1077,6 +1077,28 @@ export interface KpiNetworkHistogramData {
   y?: number | null;
 }
 
+export interface KpiIpDetailsData {
+  connections?: number | null;
+
+  hosts?: number | null;
+
+  sourcePackets?: number | null;
+
+  sourcePacketsHistogram?: KpiNetworkHistogramData[] | null;
+
+  sourceByte?: number | null;
+
+  sourceByteHistogram?: KpiNetworkHistogramData[] | null;
+
+  destinationPackets?: number | null;
+
+  destinationPacketsHistogram?: KpiNetworkHistogramData[] | null;
+
+  destinationByte?: number | null;
+
+  destinationByteHistogram?: KpiNetworkHistogramData[] | null;
+}
+
 export interface KpiHostsData {
   hosts?: number | null;
 
@@ -1121,34 +1143,6 @@ export interface KpiHostDetailsData {
   uniqueDestinationIps?: number | null;
 
   uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
-}
-
-export interface KpiIpDetailsData {
-  connections?: number | null;
-
-  hosts?: number | null;
-
-  sourcePackets?: number | null;
-
-  sourcePacketsHistogram?: KpiIpDetailsHistogramData[] | null;
-
-  sourceByte?: number | null;
-
-  sourceByteHistogram?: KpiIpDetailsHistogramData[] | null;
-
-  destinationPackets?: number | null;
-
-  destinationPacketsHistogram?: KpiIpDetailsHistogramData[] | null;
-
-  destinationByte?: number | null;
-
-  destinationByteHistogram?: KpiIpDetailsHistogramData[] | null;
-}
-
-export interface KpiIpDetailsHistogramData {
-  x?: number | null;
-
-  y?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -1916,6 +1910,15 @@ export interface KpiNetworkSourceArgs {
 
   defaultIndex: string[];
 }
+export interface KpiIpDetailsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
 export interface KpiHostsSourceArgs {
   id?: string | null;
 
@@ -1933,17 +1936,6 @@ export interface KpiHostDetailsSourceArgs {
   filterQuery?: string | null;
 
   defaultIndex: string[];
-}
-export interface KpiIpDetailsSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-
-  ip: string;
 }
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
@@ -3092,7 +3084,6 @@ export namespace GetKpiIpDetailsQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
-    ip: string;
   };
 
   export type Query = {
@@ -5234,7 +5225,7 @@ export namespace KpiHostChartFields {
 
 export namespace KpiIpDetailsChartFields {
   export type Fragment = {
-    __typename?: 'KpiIpDetailsHistogramData';
+    __typename?: 'KpiNetworkHistogramData';
 
     x?: number | null;
 

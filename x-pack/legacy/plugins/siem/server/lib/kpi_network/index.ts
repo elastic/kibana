@@ -7,7 +7,7 @@
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 
 import { KpiNetworkAdapter } from './types';
-import { KpiNetworkData } from '../../graphql/types';
+import { KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
 
 export class KpiNetwork {
   constructor(private readonly adapter: KpiNetworkAdapter) {}
@@ -17,5 +17,12 @@ export class KpiNetwork {
     options: RequestBasicOptions
   ): Promise<KpiNetworkData> {
     return await this.adapter.getKpiNetwork(req, options);
+  }
+
+  public async getKpiIpDetails(
+    req: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<KpiIpDetailsData> {
+    return await this.adapter.getKpiIpDetails(req, options);
   }
 }

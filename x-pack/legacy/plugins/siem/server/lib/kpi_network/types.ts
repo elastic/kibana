@@ -5,16 +5,31 @@
  */
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { MSearchHeader, SearchHit } from '../types';
-import { KpiNetworkHistogramData, KpiNetworkData } from '../../graphql/types';
+import { KpiNetworkHistogramData, KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
 
 export interface KpiNetworkAdapter {
   getKpiNetwork(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiNetworkData>;
+  getKpiIpDetails(
+    request: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<KpiIpDetailsData>;
 }
 
 export interface KpiNetworkHit {
   hits: {
     total: {
       value: number;
+    };
+  };
+}
+
+export interface KpiIpDetailsHit extends SearchHit {
+  aggregations: {
+    unique_flow_id: {
+      value: number;
+    };
+    active_agents: {
+      value: number | null;
     };
   };
 }
@@ -48,8 +63,3 @@ export interface KpiNetworkBody {
 export type KpiNetworkESMSearchBody = KpiNetworkBody | MSearchHeader;
 
 export type UniquePrivateAttributeQuery = 'source' | 'destination';
-
-// export interface KpiNetworkHistogram {
-//   x: string | null | undefined;
-//   y: number | null | undefined;
-// }

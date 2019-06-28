@@ -15,6 +15,11 @@ export type QueryKipNetworkResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type QueryKipIpDetailsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.KpiIpDetailsResolver>,
+  QuerySourceResolver
+>;
+
 export interface KpiNetworkResolversDeps {
   kpiNetwork: KpiNetwork;
 }
@@ -24,12 +29,17 @@ export const createKpiNetworkResolvers = (
 ): {
   Source: {
     KpiNetwork: QueryKipNetworkResolver;
+    KpiIpDetails: QueryKipIpDetailsResolver;
   };
 } => ({
   Source: {
     async KpiNetwork(source, args, { req }, info) {
       const options = { ...createOptions(source, args, info) };
       return libs.kpiNetwork.getKpiNetwork(req, options);
+    },
+    async KpiIpDetails(source, args, { req }, info) {
+      const options = { ...createOptions(source, args, info) };
+      return libs.kpiNetwork.getKpiIpDetails(req, options);
     },
   },
 });

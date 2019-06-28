@@ -7,7 +7,7 @@
 import gql from 'graphql-tag';
 
 export const kpiIpDetailsQuery = gql`
-  fragment KpiIpDetailsChartFields on KpiIpDetailsHistogramData {
+  fragment KpiIpDetailsChartFields on KpiNetworkHistogramData {
     x
     y
   }
@@ -17,16 +17,10 @@ export const kpiIpDetailsQuery = gql`
     $timerange: TimerangeInput!
     $filterQuery: String
     $defaultIndex: [String!]!
-    $ip: String!
   ) {
     source(id: $sourceId) {
       id
-      KpiIpDetails(
-        timerange: $timerange
-        filterQuery: $filterQuery
-        defaultIndex: $defaultIndex
-        ip: $ip
-      ) {
+      KpiIpDetails(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
         connections
         hosts
         sourcePackets

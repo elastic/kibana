@@ -26,11 +26,10 @@ export interface KpiIpDetailsArgs {
 
 export interface KpiIpDetailsProps extends QueryTemplateProps {
   children: (args: KpiIpDetailsArgs) => React.ReactNode;
-  ip: string;
 }
 
 export const KpiIpDetailsQuery = React.memo<KpiIpDetailsProps>(
-  ({ id = 'kpiIpDetailsQuery', children, filterQuery, sourceId, startDate, endDate, ip }) => (
+  ({ id = 'kpiIpDetailsQuery', children, filterQuery, sourceId, startDate, endDate }) => (
     <Query<GetKpiIpDetailsQuery.Query, GetKpiIpDetailsQuery.Variables>
       query={kpiIpDetailsQuery}
       fetchPolicy="cache-and-network"
@@ -44,7 +43,6 @@ export const KpiIpDetailsQuery = React.memo<KpiIpDetailsProps>(
         },
         filterQuery: createFilter(filterQuery),
         defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-        ip,
       }}
     >
       {({ data, loading, refetch }) => {

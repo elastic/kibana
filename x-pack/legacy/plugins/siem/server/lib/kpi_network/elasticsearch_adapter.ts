@@ -18,9 +18,10 @@ import {
   KpiNetworkESMSearchBody,
   KpiNetworkGeneralHit,
   KpiNetworkUniquePrivateIpsHit,
+  KpiIpDetailsHit,
 } from './types';
 import { TermAggregation } from '../types';
-import { KpiNetworkHistogramData, KpiNetworkData } from '../../graphql/types';
+import { KpiNetworkHistogramData, KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
 
 const formatHistogramData = (
   data: Array<{ key: number; count: { value: number } }>
@@ -95,6 +96,58 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
       ),
       dnsQueries: getOr(null, 'responses.3.hits.total.value', response),
       tlsHandshakes: getOr(null, 'responses.4.hits.total.value', response),
+    };
+  }
+
+  public async getKpiIpDetails(
+    request: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<KpiIpDetailsData> {
+    const generalQuery: KpiNetworkESMSearchBody[] = buildGeneralQuery(options);
+    const response = await this.framework.callWithRequest<KpiIpDetailsHit, TermAggregation>(
+      request,
+      'msearch',
+      {
+        body: [...generalQuery],
+      }
+    );
+
+    const sourcePacketsHistogram = getOr(
+      null,
+      'responses.0.aggregations.source.packetsHistogram.buckets',
+      response
+    );
+    const destinationPacketsHistogram = getOr(
+      null,
+      'responses.0.aggregations.destination.packetsHistogram.buckets',
+      response
+    );
+    const sourceByteHistogram = getOr(
+      null,
+      'responses.0.aggregations.source.bytesHistogram.buckets',
+      response
+    );
+    const destinationByteHistogram = getOr(
+      null,
+      'responses.0.aggregations.destination.bytesHistogram.buckets',
+      response
+    );
+
+    return {
+      connections: getOr(null, 'responses.0.aggregations.connections.value', response),
+      hosts: getOr(null, 'responses.0.aggregations.destination.hosts.value', response),
+      sourcePackets: getOr(null, 'responses.0.aggregations.source.packets.value', response),
+      sourcePacketsHistogram: formatHistogramData(sourcePacketsHistogram),
+      destinationPackets: getOr(
+        null,
+        'responses.0.aggregations.destination.packets.value',
+        response
+      ),
+      destinationPacketsHistogram: formatHistogramData(destinationPacketsHistogram),
+      sourceByte: getOr(null, 'responses.0.aggregations.source.bytes.value', response),
+      sourceByteHistogram: formatHistogramData(sourceByteHistogram),
+      destinationByte: getOr(null, 'responses.0.aggregations.destination.bytes.value', response),
+      destinationByteHistogram: formatHistogramData(destinationByteHistogram),
     };
   }
 }

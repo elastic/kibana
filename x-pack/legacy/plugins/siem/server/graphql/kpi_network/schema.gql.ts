@@ -23,6 +23,19 @@ export const kpiNetworkSchema = gql`
     tlsHandshakes: Float
   }
 
+  type KpiIpDetailsData {
+    connections: Float
+    hosts: Float
+    sourcePackets: Float
+    sourcePacketsHistogram: [KpiNetworkHistogramData!]
+    sourceByte: Float
+    sourceByteHistogram: [KpiNetworkHistogramData!]
+    destinationPackets: Float
+    destinationPacketsHistogram: [KpiNetworkHistogramData!]
+    destinationByte: Float
+    destinationByteHistogram: [KpiNetworkHistogramData!]
+  }
+
   extend type Source {
     KpiNetwork(
       id: String
@@ -30,5 +43,12 @@ export const kpiNetworkSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
     ): KpiNetworkData
+
+    KpiIpDetails(
+      id: String
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): KpiIpDetailsData
   }
 `;

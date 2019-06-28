@@ -28,7 +28,6 @@ import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
 import { Logger } from './utils/logger';
-import { createKpiIpDetailsResolvers } from './graphql/kpi_ip_details';
 
 export interface Config {
   mocking: boolean;
@@ -60,7 +59,6 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createUncommonProcessesResolvers(libs) as IResolvers,
       createWhoAmIResolvers() as IResolvers,
       createKpiHostsResolvers(libs) as IResolvers,
-      createKpiIpDetailsResolvers(libs) as IResolvers,
     ],
     typeDefs: schemas,
   });
