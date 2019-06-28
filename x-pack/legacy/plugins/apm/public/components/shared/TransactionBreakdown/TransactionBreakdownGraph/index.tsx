@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING = 'xPack:defaultAdminEmail';
+import React from 'react';
+
+const TransactionBreakdownGraph: React.FC<{}> = () => {
+  return <div />;
+};
+
+export { TransactionBreakdownGraph };
