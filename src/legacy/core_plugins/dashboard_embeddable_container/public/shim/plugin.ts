@@ -39,7 +39,7 @@ export class Plugin {
         capabilities: core.application.capabilities.dashboard as {
           showWriteControls: boolean;
           createNew: boolean;
-        },
+        }
       })
     );
   }

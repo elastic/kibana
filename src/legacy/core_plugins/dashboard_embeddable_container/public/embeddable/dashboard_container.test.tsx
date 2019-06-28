@@ -27,6 +27,8 @@ import {
   CONTEXT_MENU_TRIGGER,
   attachAction,
   EmbeddableFactory,
+  TriggerRegistry,
+  ActionRegistry
 } from '../../../embeddable_api/public';
 import { DashboardContainer } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
@@ -144,6 +146,8 @@ test('Container view mode change propagates to new children', async () => {
 });
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
+  const triggerRegistry: TriggerRegistry = new Map();
+  const actionRegistry: ActionRegistry = new Map();
   const editModeAction = new EditModeAction();
   actionRegistry.set(editModeAction.id, editModeAction);
   attachAction(triggerRegistry, {

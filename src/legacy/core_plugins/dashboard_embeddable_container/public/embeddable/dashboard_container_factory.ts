@@ -22,10 +22,10 @@ import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_fi
 import { SavedObjectAttributes } from 'target/types/server';
 import {
   ContainerOutput,
-  embeddableFactories,
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
+  EmbeddableFactoryRegistry,
 } from '../../../embeddable_api/public';
 import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 
@@ -48,7 +48,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
       showWriteControls: boolean;
       createNew: boolean;
     };
-  }) {
+  }, private embeddableFactories: EmbeddableFactoryRegistry) {
     super({ savedObjectMetaData });
     this.allowEditing = capabilities.createNew && capabilities.showWriteControls;
   }
@@ -75,6 +75,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, embeddableFactories, parent);
+    return new DashboardContainer(initialInput, this.embeddableFactories, parent);
   }
 }
