@@ -107,8 +107,7 @@ function DefaultEditorAggParams({
   const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, valid: true });
 
   const isFormValid =
-    aggType.valid &&
-    Object.keys(paramsState).every((paramsName: string) => paramsState[paramsName].valid);
+    aggType.valid && Object.entries(paramsState).every(([, paramState]) => paramState.valid);
   const isAllInvalidParamsTouched = isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   // reset validity before component destroyed
@@ -116,8 +115,7 @@ function DefaultEditorAggParams({
 
   useEffect(
     () => {
-      Object.keys(editorConfig).forEach(param => {
-        const paramConfig = editorConfig[param];
+      Object.entries(editorConfig).forEach(([param, paramConfig]) => {
         const paramOptions = agg.type.params.find(
           (paramOption: AggParam) => paramOption.name === param
         );
