@@ -27,7 +27,7 @@ import 'ui/private';
 import '../../components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { SimpleSavedObject } from 'ui/saved_objects';
+import { SimpleSavedObject } from '../../../../../../../core/public';
 
 // Load the kibana app dependencies.
 
