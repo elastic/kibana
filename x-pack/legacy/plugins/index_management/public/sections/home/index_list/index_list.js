@@ -6,10 +6,8 @@
 
 import React from 'react';
 
-import {
-  DetailPanel,
-  IndexTable,
-} from '../../components';
+import { DetailPanel } from './detail_panel';
+import { IndexTable } from './index_table';
 
 export class IndexList extends React.PureComponent {
   render() {

@@ -30,9 +30,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
-  EuiTitle,
   EuiText,
-  EuiPageContent,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
@@ -46,7 +44,7 @@ import {
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch } from '../../../no_match';
 import { PageErrorForbidden } from '../../../page_error';
-import { IndexActionsContextMenu } from '../../components';
+import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -410,50 +408,27 @@ export class IndexTable extends Component {
     }
 
     return (
-      <EuiPageContent>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h1 data-test-subj="sectionHeading">
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexTable.sectionHeading"
-                  defaultMessage="Index Management"
-                />
-              </h1>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexTable.sectionDescription"
-                  defaultMessage="Update your Elasticsearch indices individually or in bulk."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
-              <EuiFlexGroup>
-                {getToggleExtensions().map((toggle) => {
-                  return this.renderToggleControl(toggle);
-                })}
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    id="checkboxShowSystemIndices"
-                    checked={showSystemIndices}
-                    onChange={event => showSystemIndicesChanged(event.target.checked)}
-                    label={
-                      <FormattedMessage
-                        id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                        defaultMessage="Include system indices"
-                      />
-                    }
+      <Fragment>
+        {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
+          <EuiFlexGroup>
+            {getToggleExtensions().map((toggle) => {
+              return this.renderToggleControl(toggle);
+            })}
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                id="checkboxShowSystemIndices"
+                checked={showSystemIndices}
+                onChange={event => showSystemIndicesChanged(event.target.checked)}
+                label={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                    defaultMessage="Include system indices"
                   />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         <EuiSpacer />
         {this.renderBanners()}
         {indicesError && this.renderError()}
@@ -537,7 +512,7 @@ export class IndexTable extends Component {
         )}
         <EuiSpacer size="m" />
         {indices.length > 0 ? this.renderPager() : null}
-      </EuiPageContent>
+      </Fragment>
     );
   }
 }

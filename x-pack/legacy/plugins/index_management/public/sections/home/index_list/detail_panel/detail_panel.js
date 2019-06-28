@@ -29,7 +29,7 @@ import {
   TAB_STATS,
   TAB_EDIT_SETTINGS,
 } from '../../../../constants';
-import { IndexActionsContextMenu } from '../../components';
+import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
