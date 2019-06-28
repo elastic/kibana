@@ -34,14 +34,14 @@ To enable the token authentication provider in Kibana, set the following value i
 
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authProviders: [token]
+xpack.security.authc.providers: [token]
 --------------------------------------------------------------------------------
 
-The token authentication provider can be used in conjuction with the basic authentication provider. The login form will continue to use the token authentication provider, while enabling applications like `curl` to use the `Authorization` request header with the `Basic` scheme. Set the following in your `kibana.yml`, maintaining the order of the auth providers:
+The token authentication provider can be used in conjunction with the basic authentication provider. The login form will continue to use the token authentication provider, while enabling applications like `curl` to use the `Authorization` request header with the `Basic` scheme. Set the following in your `kibana.yml`, maintaining the order of the auth providers:
 
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authProviders: [token, basic]
+xpack.security.authc.providers: [token, basic]
 --------------------------------------------------------------------------------
 
 [[saml]]
@@ -55,7 +55,14 @@ Set the configuration values in `kibana.yml` as follows:
 +
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authProviders: [saml]
+xpack.security.authc.providers: [saml]
+--------------------------------------------------------------------------------
+
+. {kib} needs to specify which SAML realm in {es} should be used:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.saml.realm: realm-name
 --------------------------------------------------------------------------------
 
 . The Identify Provider sends authentication requests to the `Assertion Consumer Service` endpoint that {kib} exposes through a "non-safe" `POST` HTTP method. This does not include CSRF protection HTTP headers specific to {kib}. You must disable the CSRF check for this endpoint.
@@ -64,19 +71,6 @@ xpack.security.authProviders: [saml]
 --------------------------------------------------------------------------------
 server.xsrf.whitelist: [/api/security/v1/saml]
 --------------------------------------------------------------------------------
-
-. Sometimes {kib} is behind a reverse proxy so that the user-facing {kib} protocol, hostname, and port are different than what is known to {kib}. If this is your case, update the following settings:
-+
-[source,yaml]
---------------------------------------------------------------------------------
-xpack.security.public:
-  protocol: https
-  hostname: kibana.proxy.com
-  port: 8080
---------------------------------------------------------------------------------
---
-
-IMPORTANT: The {kib} user-facing origin should be the same in {kib}, {es}, and the Identity Provider SAML configuration.
 
 Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.
 
@@ -87,13 +81,12 @@ SAML support in {kib} is designed to be the primary (or sole) authentication met
 
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authProviders: [saml, basic]
+xpack.security.authc.providers: [saml, basic]
 --------------------------------------------------------------------------------
---
 
 The order of `saml` and `basic` is important. Users who open {kib} will go through the SAML Single Sign-On process unless the direct Basic authentication `/login` link is used. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database. Or, when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy).
 
-Basic authentication is supported _only_ if `basic` authentication provider is explicitly declared in `xpack.security.authProviders` setting in addition to `saml`.
+Basic authentication is supported _only_ if `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting in addition to `saml`.
 
 [[oidc]]
 ==== OpenID Connect Single Sign-On
@@ -103,11 +96,11 @@ should also be configured in {es}, see {xpack-ref}/saml-guide.html[Configuring O
 
 Set the configuration values in `kibana.yml` as follows:
 
-. Enable the SAML authentication:
+. Enable the OpenID Connect authentication:
 +
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authProviders: [oidc]
+xpack.security.authc.providers: [oidc]
 --------------------------------------------------------------------------------
 
 . {kib} needs to specify which OpenID Connect realm in {es} should be used, in case there are more than one configured there.
@@ -134,7 +127,7 @@ of that {kib} instance. However, you can configure both OpenID Connect and Basic
 
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authProviders: [oidc, basic]
+xpack.security.authc.providers: [oidc, basic]
 --------------------------------------------------------------------------------
 
 Users will be able to access the login page and use Basic authentication by navigating to the `/login` URL.

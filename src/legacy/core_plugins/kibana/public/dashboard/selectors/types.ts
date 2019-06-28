@@ -17,42 +17,30 @@
  * under the License.
  */
 
-import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { EmbeddableMetadata } from 'ui/embeddable';
+import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { DashboardViewMode } from '../dashboard_view_mode';
+import { SavedDashboardPanelMap } from '../types';
 
+export type DashboardViewMode = DashboardViewMode;
 export interface ViewState {
   readonly viewMode: DashboardViewMode;
   readonly isFullScreenMode: boolean;
   readonly maximizedPanelId?: string;
   readonly visibleContextMenuPanelId?: string;
   readonly timeRange: TimeRange;
-  readonly refreshConfig: RefreshConfig;
+  readonly refreshConfig: RefreshInterval;
   readonly hidePanelTitles: boolean;
   readonly useMargins: boolean;
   readonly query: Query;
-  readonly filters: Filters;
-}
-
-export interface GridData {
-  readonly w: number;
-  readonly h: number;
-  readonly x: number;
-  readonly y: number;
-  readonly i: string;
+  readonly filters: Filter[];
 }
 
 export type PanelId = string;
 export type SavedObjectId = string;
-
-export interface PanelState {
-  readonly id: SavedObjectId;
-  readonly version: string;
-  readonly type: string;
-  panelIndex: PanelId;
-  readonly embeddableConfig: any;
-  readonly gridData: GridData;
-  readonly title?: string;
-}
 
 export interface EmbeddableReduxState {
   readonly metadata?: EmbeddableMetadata;
@@ -63,10 +51,6 @@ export interface EmbeddableReduxState {
    * Timestamp of the last time this embeddable was requested to reload.
    */
   readonly lastReloadRequestTime: number;
-}
-
-export interface PanelsMap {
-  readonly [panelId: string]: PanelState;
 }
 
 export interface EmbeddablesMap {
@@ -80,7 +64,7 @@ export interface DashboardMetadata {
 
 export interface DashboardState {
   readonly view: ViewState;
-  readonly panels: PanelsMap;
+  readonly panels: SavedDashboardPanelMap;
   readonly embeddables: EmbeddablesMap;
   readonly metadata: DashboardMetadata;
 }

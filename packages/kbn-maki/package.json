@@ -1,0 +1,10 @@
+{
+  "name": "@kbn/maki",
+  "version": "6.1.0",
+  "description": "browser friendly version of @mapbox/maki",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "dependencies": {},
+  "peerDependencies": {}
+}

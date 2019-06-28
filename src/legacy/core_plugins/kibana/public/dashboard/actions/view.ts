@@ -20,7 +20,10 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import { createAction } from 'redux-actions';
-import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { KibanaAction } from '../../selectors/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId } from '../selectors';
@@ -68,10 +71,10 @@ export interface UpdateTimeRangeAction
   extends KibanaAction<ViewActionTypeKeys.UPDATE_TIME_RANGE, TimeRange> {}
 
 export interface UpdateRefreshConfigAction
-  extends KibanaAction<ViewActionTypeKeys.UPDATE_REFRESH_CONFIG, RefreshConfig> {}
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_REFRESH_CONFIG, RefreshInterval> {}
 
 export interface UpdateFiltersAction
-  extends KibanaAction<ViewActionTypeKeys.UPDATE_FILTERS, Filters> {}
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_FILTERS, Filter[]> {}
 
 export interface UpdateQueryAction extends KibanaAction<ViewActionTypeKeys.UPDATE_QUERY, Query> {}
 
@@ -104,8 +107,8 @@ export const updateHidePanelTitles = createAction<boolean>(
   ViewActionTypeKeys.UPDATE_HIDE_PANEL_TITLES
 );
 export const updateTimeRange = createAction<TimeRange>(ViewActionTypeKeys.UPDATE_TIME_RANGE);
-export const updateRefreshConfig = createAction<RefreshConfig>(
+export const updateRefreshConfig = createAction<RefreshInterval>(
   ViewActionTypeKeys.UPDATE_REFRESH_CONFIG
 );
-export const updateFilters = createAction<Filters>(ViewActionTypeKeys.UPDATE_FILTERS);
-export const updateQuery = createAction<Query>(ViewActionTypeKeys.UPDATE_QUERY);
+export const updateFilters = createAction<Filter[]>(ViewActionTypeKeys.UPDATE_FILTERS);
+export const updateQuery = createAction<Query | string>(ViewActionTypeKeys.UPDATE_QUERY);

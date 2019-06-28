@@ -37,7 +37,7 @@ describe('#setup()', () => {
     const toasts = new ToastsService();
 
     expect(
-      toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() })
+      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
     ).toBeInstanceOf(ToastsApi);
   });
 });
@@ -49,7 +49,7 @@ describe('#start()', () => {
     const toasts = new ToastsService();
 
     expect(mockReactDomRender).not.toHaveBeenCalled();
-    toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
@@ -59,7 +59,7 @@ describe('#start()', () => {
     const toasts = new ToastsService();
 
     expect(
-      toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() })
+      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
     ).toBeInstanceOf(ToastsApi);
     expect(
       toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays })
@@ -73,7 +73,7 @@ describe('#stop()', () => {
     targetDomElement.setAttribute('test', 'target-dom-element');
     const toasts = new ToastsService();
 
-    toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('#stop()', () => {
     const targetDomElement = document.createElement('div');
     const toasts = new ToastsService();
 
-    toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
     toasts.stop();
     expect(targetDomElement.childNodes).toHaveLength(0);

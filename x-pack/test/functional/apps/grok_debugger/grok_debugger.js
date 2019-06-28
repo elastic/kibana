@@ -11,7 +11,8 @@ export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['grokDebugger']);
 
-  describe('grok debugger app', () => {
+  describe('grok debugger app', function () {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
       // Increase window height to ensure "Simulate" button is shown above the

@@ -36,6 +36,7 @@ import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
 import fetchMock from 'fetch-mock/es5/client';
+import Symbol_observable from 'symbol-observable';
 
 import { CoreSystem } from '__kibanaCore__';
 

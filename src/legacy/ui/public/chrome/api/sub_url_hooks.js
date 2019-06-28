@@ -21,7 +21,6 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from '../../state_management/state_hashing';
-import { onStart } from '../../new_platform';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private) => {
@@ -42,7 +41,7 @@ export function registerSubUrlHooks(angularModule, internals) {
 
     $rootScope.$on('$routeChangeSuccess', onRouteChange);
     $rootScope.$on('$routeUpdate', onRouteChange);
-    onStart(updateSubUrls); // initialize sub urls
+    updateSubUrls();
   });
 }
 

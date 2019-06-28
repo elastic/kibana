@@ -35,7 +35,8 @@ export function StandardAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [ES_TYPES.NUMBER];
 
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   return (
@@ -50,10 +51,7 @@ export function StandardAgg(props) {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.stdAgg.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.stdAgg.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -66,33 +64,26 @@ export function StandardAgg(props) {
           />
         </EuiFlexItem>
 
-        {
-          model.type !== 'count'
-            ? (
-              <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('field')}
-                  label={(<FormattedMessage
-                    id="tsvb.stdAgg.fieldLabel"
-                    defaultMessage="Field"
-                  />)}
-                  fullWidth
-                >
-                  <FieldSelect
-                    fields={fields}
-                    type={model.type}
-                    restrict={restrictFields}
-                    indexPattern={indexPattern}
-                    value={model.field}
-                    onChange={handleSelectChange('field')}
-                    uiRestrictions={uiRestrictions}
-                    fullWidth
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            ) : null
-        }
-
+        {model.type !== 'count' ? (
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('field')}
+              label={<FormattedMessage id="tsvb.stdAgg.fieldLabel" defaultMessage="Field" />}
+              fullWidth
+            >
+              <FieldSelect
+                fields={fields}
+                type={model.type}
+                restrict={restrictFields}
+                indexPattern={indexPattern}
+                value={model.field}
+                onChange={handleSelectChange('field')}
+                uiRestrictions={uiRestrictions}
+                fullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </AggRow>
   );

@@ -17,24 +17,25 @@
  * under the License.
  */
 
-export function createFieldsFetcher(apiClient, config) {
-  class FieldsFetcher {
-    fetch(indexPattern) {
-      return this.fetchForWildcard(indexPattern.getIndex(), {
-        type: indexPattern.type,
-        params: indexPattern.typeMeta && indexPattern.typeMeta.params,
-      });
-    }
-
-    fetchForWildcard(indexPatternId, options = {}) {
-      return apiClient.getFieldsForWildcard({
-        pattern: indexPatternId,
-        metaFields: config.get('metaFields'),
-        type: options.type,
-        params: options.params || {},
-      });
-    }
+export class FieldsFetcher {
+  constructor(apiClient, metaFields) {
+    this.apiClient = apiClient;
+    this.metaFields = metaFields;
+  }
+  fetch(indexPattern, options) {
+    return this.fetchForWildcard(indexPattern.title, {
+      ...options,
+      type: indexPattern.type,
+      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+    });
   }
 
-  return new FieldsFetcher();
+  fetchForWildcard(indexPatternId, options = {}) {
+    return this.apiClient.getFieldsForWildcard({
+      pattern: indexPatternId,
+      metaFields: this.metaFields,
+      type: options.type,
+      params: options.params || {},
+    });
+  }
 }

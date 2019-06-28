@@ -40,13 +40,18 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeNavControl,
+  ChromeNavControls,
   ChromeNavLink,
-  ChromeSetup,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
   ChromeStart,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
 import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor } from './http';
-import { I18nSetup, I18nStart } from './i18n';
+import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
   ErrorToastOptions,
@@ -58,11 +63,13 @@ import {
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
-import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsStart, UiSettingsState } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import { DocLinksStart } from './doc_links';
 
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -74,14 +81,10 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
-  /** {@link ChromeSetup} */
-  chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
-  /** {@link I18nSetup} */
-  i18n: I18nSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
   /** {@link UiSettingsSetup} */
@@ -102,6 +105,8 @@ export interface CoreStart {
   application: Pick<ApplicationStart, 'capabilities'>;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
+  /** {@link DocLinksStart} */
+  docLinks: DocLinksStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /** {@link I18nStart} */
@@ -110,6 +115,8 @@ export interface CoreStart {
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
+  /** {@link UiSettingsStart} */
+  uiSettings: UiSettingsStart;
 }
 
 /** @internal */
@@ -127,6 +134,7 @@ export interface InternalCoreStart extends CoreStart {
 export {
   ApplicationSetup,
   ApplicationStart,
+  DocLinksStart,
   HttpServiceBase,
   HttpSetup,
   HttpStart,
@@ -135,14 +143,18 @@ export {
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,
-  ChromeSetup,
   ChromeStart,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
+  ChromeNavControl,
+  ChromeNavControls,
   ChromeNavLink,
-  I18nSetup,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
   I18nStart,
   LegacyNavLink,
   Plugin,
@@ -158,4 +170,5 @@ export {
   UiSettingsClient,
   UiSettingsState,
   UiSettingsSetup,
+  UiSettingsStart,
 };

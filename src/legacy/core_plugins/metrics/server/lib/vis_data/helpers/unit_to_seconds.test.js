@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { getUnitValue, parseInterval, convertIntervalToUnit, getSuitableUnit } from './unit_to_seconds';
+import {
+  getUnitValue,
+  parseInterval,
+  convertIntervalToUnit,
+  getSuitableUnit,
+} from './unit_to_seconds';
 
 describe('unit_to_seconds', () => {
   describe('parseInterval()', () => {
@@ -89,7 +94,6 @@ describe('unit_to_seconds', () => {
         unit: 'ms',
       }));
 
-
     test('should not convert "30m" interval to "0" unit (positive)', () =>
       expect(convertIntervalToUnit('30m', 'o')).toEqual({
         value: undefined,
@@ -134,7 +138,6 @@ describe('unit_to_seconds', () => {
       expect(getSuitableUnit(twoYearsInSeconds)).toBe('y');
     });
 
-
     test('should return "undefined" unit for negativeNumber (negative)', () => {
       const negativeNumber = -12;
 
@@ -155,6 +158,5 @@ describe('unit_to_seconds', () => {
 
     test('should return "undefined" in case of no input value(negative)', () =>
       expect(getSuitableUnit()).toBeUndefined());
-
   });
 });

@@ -33,9 +33,12 @@ export default function ({ getService, getPageObjects }) {
   const dashboardName = 'Dashboard Panel Controls Test';
 
   describe('dashboard panel controls', function viewEditModeTests() {
+    this.tags('smoke');
+
     before(async function () {
       await PageObjects.dashboard.initTests();
       await browser.refresh();
+      await PageObjects.header.awaitKibanaChrome();
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like

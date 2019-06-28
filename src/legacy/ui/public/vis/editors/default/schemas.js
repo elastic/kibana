@@ -18,9 +18,10 @@
  */
 
 import _ from 'lodash';
-import '../directives/buttons';
 import { IndexedArray } from '../../../indexed_array';
 import { AggParams } from '../../../agg_types/agg_params';
+import { RowsOrColumnsControl } from './controls/rows_or_columns';
+import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 
 class Schemas {
   constructor(schemas) {
@@ -36,9 +37,9 @@ class Schemas {
               default: true
             }
           ];
-          schema.editor = require('plugins/kbn_vislib_vis_types/controls/rows_or_columns.html');
+          schema.editorComponent = RowsOrColumnsControl;
         } else if (schema.name === 'radius') {
-          schema.editor = require('plugins/kbn_vislib_vis_types/controls/radius_ratio_option.html');
+          schema.editorComponent = RadiusRatioOptionControl;
         }
 
         _.defaults(schema, {

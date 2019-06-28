@@ -18,9 +18,16 @@
  */
 
 import chalk from 'chalk';
+import Listr from 'listr';
 import { resolve } from 'path';
 
-import { mergeConfigs, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
+import {
+  ErrorReporter,
+  mergeConfigs,
+  serializeToJson,
+  serializeToJson5,
+  writeFileAsync,
+} from './i18n';
 import { extractDefaultMessages } from './i18n/tasks';
 import { createFailError, run } from './run';
 
@@ -32,6 +39,7 @@ run(
       'output-format': outputFormat,
       'include-config': includeConfig,
     },
+    log,
   }) => {
     if (!outputDir || typeof outputDir !== 'string') {
       throw createFailError(
@@ -46,18 +54,42 @@ run(
     }
 
     const config = await mergeConfigs(includeConfig);
-    const defaultMessages = await extractDefaultMessages({ path, config });
 
-    // Messages shouldn't be written to a file if output is not supplied.
-    if (!outputDir || !defaultMessages.size) {
-      return;
+    const list = new Listr([
+      {
+        title: 'Extracting Default Messages',
+        task: () => new Listr(extractDefaultMessages({ path, config }), { exitOnError: true }),
+      },
+      {
+        title: 'Writing to file',
+        enabled: ctx => outputDir && ctx.messages.size,
+        task: async ctx => {
+          const sortedMessages = [...ctx.messages].sort(([key1], [key2]) =>
+            key1.localeCompare(key2)
+          );
+          await writeFileAsync(
+            resolve(outputDir, 'en.json'),
+            outputFormat === 'json5'
+              ? serializeToJson5(sortedMessages)
+              : serializeToJson(sortedMessages)
+          );
+        },
+      },
+    ]);
+
+    try {
+      const reporter = new ErrorReporter();
+      const messages: Map<string, { message: string }> = new Map();
+      await list.run({ messages, reporter });
+    } catch (error) {
+      process.exitCode = 1;
+      if (error instanceof ErrorReporter) {
+        error.errors.forEach((e: string | Error) => log.error(e));
+      } else {
+        log.error('Unhandled exception!');
+        log.error(error);
+      }
     }
-
-    const sortedMessages = [...defaultMessages].sort(([key1], [key2]) => key1.localeCompare(key2));
-    await writeFileAsync(
-      resolve(outputDir, 'en.json'),
-      outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
-    );
   },
   {
     flags: {

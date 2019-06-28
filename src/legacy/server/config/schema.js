@@ -250,7 +250,7 @@ export default () => Joi.object({
       })).default([])
     }).default(),
     manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.0'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.2'),
     emsTileLayerId: Joi.object({
       bright: Joi.string().default('road_map'),
       desaturated: Joi.string().default('road_map_desaturated'),

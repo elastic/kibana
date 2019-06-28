@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { filterBarQueryString } from '../../../../../plugins/uptime/public/queries';
+import { filterBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import filterList from './fixtures/filter_list';
 
 export default function ({ getService }) {

@@ -355,10 +355,10 @@ To execute both server and browser tests, but skip linting, use `yarn test:quick
 yarn test:quick
 ```
 
-Use `yarn test:server` when you want to run only the server tests.
+Use `yarn test:mocha` when you want to run the mocha tests.
 
 ```bash
-yarn test:server
+yarn test:mocha
 ```
 
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
@@ -397,7 +397,7 @@ This should work super if you're using the [Kibana plugin generator](https://git
 To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-yarn test:server
+yarn test:mocha
 yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
 
@@ -456,20 +456,20 @@ node scripts/docs.js --open
 
 ### Release Notes Process
 
-Part of this process only applies to maintainers, since it requires access to Github labels.
+Part of this process only applies to maintainers, since it requires access to GitHub labels.
 
 Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html). To include your change in the Release Notes:
 
 1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
-1. Label the PR with the targeted version (ex: 6.5).
-1. Label the PR with the appropriate github labels:
+2. Label the PR with the targeted version (ex: `v7.3.0`).
+3. Label the PR with the appropriate GitHub labels:
     * For a new feature or functionality, use `release_note:enhancement`.
-    * For an external-facing fix, use `release_note:fix`.  Exception: docs, build, and test fixes do not go in the Release Notes.
+    * For an external-facing fix, use `release_note:fix`. Exception: docs, build, and test fixes do not go in the Release Notes. Neither fixes for issues that were only on `master` and never have been released.
     * For a deprecated feature, use `release_note:deprecation`.
     * For a breaking change, use `release_note:breaking`.
+    * To **NOT** include your changes in the Release Notes, please use `release_note:skip`.
 
 We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
-
 
 ```
 # Dev Docs

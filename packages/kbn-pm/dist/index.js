@@ -17621,7 +17621,7 @@ function getProjectPaths(rootPath, options = {}) {
 
   if (!ossOnly) {
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack'));
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/plugins/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/legacy/plugins/*'));
   }
 
   if (!skipKibanaPlugins) {
@@ -41487,6 +41487,10 @@ function mixinDeep(target, objects) {
  */
 
 function copy(val, key) {
+  if (key === '__proto__') {
+    return;
+  }
+
   var obj = this[key];
   if (isObject(val) && isObject(obj)) {
     mixinDeep(obj, val);

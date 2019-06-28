@@ -7,20 +7,13 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.2.
 
-See also <<release-highlights>> and <<release-notes>>.
-
-coming[7.2.0]
-
-
-* <<breaking_72_index_pattern_changes>>
-
+See also <<release-highlights-7.2.0, release highlights>> and <<release-notes-7.2.0, release notes>>.
 
 [float]
 [[breaking_72_index_pattern_changes]]
-=== Index pattern changes 
 
 [float]
-==== Time-based internal index patterns queried as wildcard index patterns
+=== Time-based internal index patterns queried as wildcard index patterns
 *Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x, 
 you could no longer create time-based interval index patterns, but they continued 
 to function as expected. In 7.2, functionality has changed such that {kib} will 

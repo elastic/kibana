@@ -39,7 +39,7 @@ aggTypeFieldFilters.addFilter(
     aggConfig,
     vis
   ) => {
-    if (aggConfig.type.name !== 'top_hit' || vis.type.name === 'table' || vis.type.name === 'metric') {
+    if (aggConfig.type.name !== 'top_hits' || vis.type.name === 'table' || vis.type.name === 'metric') {
       return true;
     }
     return field.type === 'number';

@@ -70,6 +70,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
       key: readFileSync(ssl.key!),
       passphrase: ssl.keyPassphrase,
       secureOptions: ssl.getSecureOptions(),
+      requestCert: ssl.requestCert,
     };
 
     options.tls = tlsOptions;

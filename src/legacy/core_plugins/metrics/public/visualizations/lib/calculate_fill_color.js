@@ -27,8 +27,6 @@ export const calculateFillColor = (color, fill = 1) => {
 
   return {
     fill: opacity > 0,
-    fillColor: new Color([
-      r, g, b, Number(opacity.toFixed(2)),
-    ]).string(),
+    fillColor: new Color([r, g, b, Number(opacity.toFixed(2))]).string(),
   };
 };

@@ -55,6 +55,8 @@ exports.run = async (defaults = {}) => {
       esArgs: 'E',
     },
 
+    string: ['version'],
+
     boolean: ['download-only'],
 
     default: defaults,
@@ -69,6 +71,8 @@ exports.run = async (defaults = {}) => {
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
     }
+
+    options.bundledJDK = true;
 
     await cluster.run(installPath, options);
   }

@@ -4,13 +4,245 @@
 <titleabbrev>7.2.0</titleabbrev>
 ++++
 
-coming[7.2.0]
+Each release of {kib} brings new features and product improvements. 
+Here are the highlights of the feature and user experience changes in 7.2.0.
 
-See also <<breaking-changes>> and <<release-notes>>.
+Refer to the {kib} <<breaking-changes-7.2, breaking changes>> and <<release-notes-7.2.0, 
+release notes>> for a list of bug fixes and other changes.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
-
 // end::notable-highlights[]
+
+
+[float]
+=== Feature controls
+
+Want to hide Dev Tools from the left navigation? Show Stack Monitoring only to 
+admins? Or, give certain users access to only Dashboard and Canvas? 
+<<kibana-role-management, Feature controls>> allow you to hide and 
+restrict applications and features in the {kib} UI.
+
+[role="screenshot"]
+image::release-notes/images/7.2-feature-controls.png[Feature controls]
+
+You can configure {kib} applications and features based on your users’ needs, 
+and when used with security, based on their privileges. This means different 
+roles can have access to different features in the same space. Power users 
+might have privileges to create and edit visualizations and dashboards, 
+while analysts or executives might have Dashboard and Canvas with 
+read-only privileges.
+
+[role="screenshot"]
+image::release-notes/images/7.2-space-privileges.png[Space privileges]
+
+[float]
+=== Saved Object Import and Export API
+
+{kib} has new APIs for <<saved-objects-api-import, importing>> and 
+<<saved-objects-api-export, exporting>> saved objects, including dashboards, 
+visualizations, index patterns, maps, Canvas workpads, and advanced settings. 
+A benefit of this new API is that it automatically exports the dependencies 
+of the saved object. Just export the dashboard you need and its visualizations 
+and index patterns are exported as well. You can use the new APIs in the Management UI, 
+or call them directly.  
+
+[role="screenshot"]
+image::release-notes/images/7.2-saved-objects.png[Saved objects]
+
+[float]
+=== Rolled up data in Time Series Visual Builder 
+
+Time Series Visual Builder now has features for visualizing rolled up data. Similar 
+to Visualize, you can create index patterns that use rollup indices or mix rollup 
+and raw indices to visualize all data together. You can also create multiple 
+y-axes with different index patterns or rollup indices in the same chart. 
+
+When you specify the index in Visual Builder, you must explicitly state the 
+rollup name. Visual Builder will not include a rollup index if you use a wildcard. 
+See https://github.com/elastic/kibana/pull/28762[PR #28762] 
+for details.
+
+[float]
+=== Canvas enhancements 
+
+Canvas provides enhancements to custom elements, workpad filtering, and autoplay.
+
+[float]
+==== Custom elements
+
+Elements, such as charts, metrics, shapes, and images, are the building blocks 
+of a Canvas workpad. You can combine these elements to create new and interesting 
+presentations of your data. Your custom element might be as simple as a metric 
+on top of a geometric shape. Or, you might create a more complex grouping backed 
+by queries and conditional statements. 
+
+With 7.2, you can save custom elements for reuse across your workpads. This 
+reduces the need for copy and paste. It also enables you to share your custom 
+elements with your teammates.
+
+[role="screenshot"]
+image::release-notes/images/7.2-canvas-custom-elements.png[Canvas custom elements]
+
+[float]
+==== Filter groups
+
+If you’ve used the time or dropdown filter elements in Canvas, you know that 
+they apply to the entire workpad (and not just the page they are in). This 
+behavior is still the default, but you can now choose which elements are 
+affected by specific filters.  This gives you more options for exploring data 
+visualizations.
+
+[role="screenshot"]
+image::release-notes/images/7.2-canvas-filters.png[Canvas custom elements]
+
+[float]
+==== Autoplay
+
+As part of the ongoing work to provide kiosk mode in Canvas, version 7.2 
+introduces the ability to autoplay your workpad pages. Once enabled, full screen 
+mode automatically cycles through your workpad pages based on the time interval 
+you define.
+
+[float]
+=== Snapshot repositories
+
+This release introduces phase one of the {kib} Snapshot UI for managing backups 
+of your {es} indices and clusters. Snapshots are important because they provide 
+a copy of your data in case something goes wrong. If you need to roll back to an 
+older version of your data, you can restore a snapshot from the repository.  
+
+Use the Snapshot UI to register new repositories, edit existing ones, and drill down into 
+details about your repositories and snapshots. See <<snapshot-repositories, Snapshot repositories>>
+for step-by-step instructions.  Additional snapshot and recovery features are 
+planned for upcoming versions.
+
+[role="screenshot"]
+image::release-notes/images/7.2-snapshot-repositories.png[Snapshot repositories]
+
+[float]
+=== Maps in dashboards and other improvements 
+
+beta[]The Maps app now adds the ability to include your saved map on a 
+dashboard. You can view and interact with your geospatial data alongside 
+bar charts, pie charts, and other visualizations. Click the map to 
+quickly hone in on the data you desire, and that data is shown across the dashboard, 
+similar to how you interact with other visualization types. See 
+<<maps-embedding, Adding a map to a dashboard>> for step-by-step instructions.
+
+[role="screenshot"]
+image::release-notes/images/7.2-maps.png[Embedded map in dark mode]
+
+Additional improvements to the new Maps app include:
+
+* *Dark mode.* Building on the support for dark mode in {kib} 7.0, the 
+Elastic Maps Service now publishes dark themed tiles. This means that the 
+Maps app now fully respects dark mode.
+
+* *Collapsible map legends.* Use this feature to get an unobstructed 
+view of a map in a dashboard.  
+
+* *Class styling.*  With this style, you can symbolize map features by class. 
+Use layer filtering to define the class for each layer, and static styling to 
+symbolize each class. See <<maps-vector-style-class>> for an example.
+
+
+[float]
+=== {kib} in Japanese
+
+{kib} now supports Japanese, in addition to Simplified Chinese and English. 
+If you’d like to use {kib} with Japanese, set `i18n.locale` to `ja-JP` in your 
+`kibana.yml` file.  The Japanese localization is a work in progress. 
+We welcome your feedback in the form of a https://github.com/elastic/kibana/issues[Github issue]. 
+You can also https://github.com/elastic/kibana/pulls[issue a pull request in GitHub].
+
+[role="screenshot"]
+image::release-notes/images/7.2-localization.jpg[Kibana in Japanese]
+
+
+[float]
+=== Data frames
+
+beta[] Machine Learning now enables you to transform your data with {stack-ov}/ml-dataframes.html[data frames]. A 
+new wizard guides you through the process of creating a data frame: selecting 
+the source data, the fields you want to group by, and the aggregations for 
+pivoting the data. There is also a preview of the transform for reviewing the configuration. 
+
+[role="screenshot"]
+image::release-notes/images/7.2-data-frames.png[Data frames]
+
+Data frames jobs are managed on a new list page, displaying the details and 
+status of each job, and controls for starting, stopping, or deleting jobs.
+
+[role="screenshot"]
+image::release-notes/images/7.2-data-frames-list-view.png[Data frames]
+
+[float]
+=== Search for influencers in Anomaly Explorer
+
+A query bar is now available in the Machine Learning Anomaly Explorer, which 
+enables you to filter anomaly results for one or more selected influencers. 
+The query bar suggests influencer field names and values for the selected jobs 
+as you type.
+
+[float]
+=== Simplified creation of {ml} jobs for sample data sets and {metricbeat} data
+
+If you use the {kib} sample data sets, there are now {ml} jobs for the
+sample eCommerce orders and the sample web logs. These jobs demonstrate a
+variety of ways that you can detect anomalous behavior in the sample data. You
+can add the jobs when you <<add-sample-data,load the sample data>> or use the
+supplied configuration when you are creating jobs in the Machine Learning app.
+
+Likewise, if you use the
+{metricbeat-ref}/metricbeat-module-system.html[{metricbeat} system module] to
+monitor your servers, there is a {ml} wizard that recognizes this type of data.
+For example, with the supplied configuration you can detect unusual increases in
+disk utilization:
+
+[role="screenshot"]
+image::release-notes/images/7.2-metricbeat-ml-modules.png[Embedded map in dark mode]
+
+These wizards expedite the creation of pre-configured jobs, dashboards, searches,
+and visualizations. For more information, see <<ml-jobs>>.
+
+[float]
+=== View recent log entries alongside your monitoring data
+
+You can now see your cluster's recent log entries within the *Stack Monitoring*
+application:
+
+[role="screenshot"]
+image::release-notes/images/7.2-monitoring-logs.png["Monitoring recent {es} logs"]
+
+See <<elasticsearch-metrics>>. If you want to see earlier log entries, you can
+follow a link to the <<xpack-logs,Logs UI>> and continue your investigation
+there.
+
+TIP: You must use {filebeat} to collect the logs.
+
+//See {ref}/configuring-filebeat.html[Collecting {es} log data with {filebeat}].
+
+[float]
+=== Observability
+
+Observability has two new notable features.
+
+* Metrics Explorer is a new view in the Infrastructure app. Metrics Explorer 
+enhances how you interact with infrastructure metrics in an ad hoc way.
+
+* APM agents now collect language-specific metrics, in addition to the common 
+key performance indicators. These new metrics are automatically displayed in the APM UI.
+
+For more information, visit the https://www.elastic.co/blog/elastic-observability-update-7-2-0[Observability blog].
+
+[float]
+=== Give us your feedback
+
+Enjoy all the new features and functionality in {kib} 7.2. Play around with them 
+locally or on the https://www.elastic.co/cloud/elasticsearch-service[Elasticsearch Service]
+and reach out on the https://discuss.elastic.co/c/kibana[Kibana Discuss forum] 
+if you have any questions or feedback. 
+

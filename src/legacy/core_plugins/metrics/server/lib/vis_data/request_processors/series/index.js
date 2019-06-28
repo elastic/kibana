@@ -38,5 +38,5 @@ export const processors = [
   metricBuckets,
   siblingBuckets,
   filterRatios,
-  normalizeQuery
+  normalizeQuery,
 ];

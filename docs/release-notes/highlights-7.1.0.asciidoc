@@ -4,11 +4,19 @@
 <titleabbrev>7.1.0</titleabbrev>
 ++++
 
-See also <<breaking-changes>> and <<release-notes>>.
+Each release of {kib} brings new features and product improvements. Here are the 
+highlights of the feature and user experience changes in 7.1.0.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+* Some Elastic Stack security features, such as encrypted communications, 
+file and native authentication, and role-based access control, are now available 
+in more subscription levels. For details, see https://www.elastic.co/subscriptions.
+
+Refer to the <<release-notes-7.1.0, {kib} 7.1.0 release notes>> for a list of
+enhancements and bug fixes.
 
 // end::notable-highlights[]

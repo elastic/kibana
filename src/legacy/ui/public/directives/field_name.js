@@ -46,7 +46,7 @@ const compiledSourceFieldNameIcon = template(sourceFieldNameIcon);
 const compiledStringFieldNameIcon = template(stringFieldNameIcon);
 const compiledUnknownFieldNameIcon = template(unknownFieldNameIcon);
 
-module.directive('fieldName', function ($compile, $rootScope, config) {
+module.directive('fieldName', function ($rootScope, config) {
   return {
     restrict: 'AE',
     scope: {
