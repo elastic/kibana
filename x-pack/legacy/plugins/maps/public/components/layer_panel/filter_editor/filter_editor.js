@@ -77,10 +77,6 @@ export class FilterEditor extends Component {
     this.setState({ isPopoverOpen: false });
   }
 
-  _open = () => {
-    this.setState({ isPopoverOpen: true });
-  }
-
   _onQueryChange = ({ query }) => {
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();

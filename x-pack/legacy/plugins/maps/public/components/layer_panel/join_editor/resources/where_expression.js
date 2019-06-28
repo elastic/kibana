@@ -19,11 +19,12 @@ import { Storage } from 'ui/storage';
 
 const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
-
+const { savedQueryService } = data.search.services;
 export class WhereExpression extends Component {
 
   state = {
     isPopoverOpen: false,
+    savedQuery: null,
   };
 
   _togglePopover = () => {
@@ -45,6 +46,32 @@ export class WhereExpression extends Component {
 
   _onFiltersUpdated = () => {
     return;
+  }
+
+  _onQuerySaved = (savedQuery) => {
+    this._addOrUpdateSavedQuery(savedQuery, this.state.savedQuery);
+  }
+
+  _getSavedQueryFromService = async (savedQuery) => {
+    if (!savedQuery.id) return;
+    const newSavedQuery = await savedQueryService.getSavedQuery(savedQuery.id);
+    await this.setState({ savedQuery: newSavedQuery });
+    this.props.onChange(newSavedQuery.attributes.query);
+    this._closePopover();
+  }
+
+  _onSavedQueryChange = (changedSavedQuery) => {
+    this._addOrUpdateSavedQuery(changedSavedQuery, this.state.savedQuery);
+  }
+
+  _addOrUpdateSavedQuery = async (currentSavedQuery, oldSavedQuery) => {
+    if (!currentSavedQuery) return;
+    await this._getSavedQueryFromService(currentSavedQuery);
+    await this.setState({ savedQuery: currentSavedQuery });
+    if (currentSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      this.props.onChange(currentSavedQuery.attributes.query);
+      this._closePopover();
+    }
   }
 
   render() {
@@ -88,6 +115,9 @@ export class WhereExpression extends Component {
             onFiltersUpdated={this._onFiltersUpdated}
             indexPatterns={[indexPattern]}
             store={localStorage}
+            savedQuery={this.state.savedQuery}
+            onSaved={this._onQuerySaved}
+            onSavedQueryUpdated={this._onSavedQueryChange}
             customSubmitButton={
               <EuiButton
                 fill
