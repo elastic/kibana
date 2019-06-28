@@ -161,7 +161,8 @@ exports[`PingList component renders sorted list without errors 1`] = `
           Object {
             "dataType": "number",
             "field": "observer.geo.name",
-            "name": [Function],
+            "name": "Location",
+            "render": [Function],
           },
           Object {
             "dataType": "number",

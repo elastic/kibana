@@ -115,7 +115,10 @@ export const PingListComponent = ({
     {
       field: 'observer.geo.name',
       dataType: 'number',
-      name: (location: string) => <LocationName location={location} />,
+      name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
+        defaultMessage: 'Location',
+      }),
+      render: (location: string) => <LocationName location={location} />,
     },
     {
       field: 'monitor.ip',
