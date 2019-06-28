@@ -290,7 +290,7 @@
     "@types/enzyme": "^3.9.0",
     "@types/eslint": "^4.16.6",
     "@types/execa": "^0.9.0",
-    "@types/fetch-mock": "7.3.0",
+    "@types/fetch-mock": "7.3.1",
     "@types/getopts": "^2.0.1",
     "@types/glob": "^7.1.1",
     "@types/globby": "^8.0.0",
