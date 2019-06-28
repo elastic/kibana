@@ -283,7 +283,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
             helpText={i18n.translate(
               'xpack.ml.dataframe.jobDetailsForm.continuousModeDelayHelpText',
               {
-                defaultMessage: 'Delay after which a new filtered transform iteration will be run.',
+                defaultMessage: 'Time delay between current time and latest input data time.',
               }
             )}
           >
