@@ -624,7 +624,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   canShowTooltip() {
-    return this.isVisible() && this._source.canFormatFeatureProperties();
+    return this.isVisible() && (this._source.canFormatFeatureProperties() || this._joins.length);
   }
 
   getFeatureById(id) {
