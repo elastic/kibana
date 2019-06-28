@@ -17,7 +17,5 @@
  * under the License.
  */
 
-export { executeTriggerActions } from './execute_trigger_actions';
-
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
