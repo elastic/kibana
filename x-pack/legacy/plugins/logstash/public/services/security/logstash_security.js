@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class LogstashSecurityService {
-  constructor(xpackInfoService) {
-    this.xpackInfoService = xpackInfoService;
-  }
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
-  get isSecurityEnabled() {
-    return Boolean(this.xpackInfoService.get(`features.security`));
+export const logstashSecurity = {
+  isSecurityEnabled() {
+    return Boolean(xpackInfo.get(`features.security`));
   }
-}
+};
