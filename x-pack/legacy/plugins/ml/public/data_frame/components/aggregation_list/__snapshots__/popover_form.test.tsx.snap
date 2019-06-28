@@ -13,6 +13,7 @@ exports[`Data Frame: Aggregation <PopoverForm /> Minimal initialization 1`] = `
     error={false}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    helpText=""
     isInvalid={false}
     label="Aggregation name"
     labelType="label"
