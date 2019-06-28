@@ -57,13 +57,7 @@ Array [
 `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
     const call = getCreateTaskRunnerFunction.mock.calls[0][0];
-    expect(call.actionType).toMatchInlineSnapshot(`
-Object {
-  "executor": [MockFunction],
-  "id": "my-action-type",
-  "name": "My action type",
-}
-`);
+    expect(call.actionTypeRegistry).toBeTruthy();
     expect(call.encryptedSavedObjectsPlugin).toBeTruthy();
     expect(call.getServices).toBeTruthy();
   });
