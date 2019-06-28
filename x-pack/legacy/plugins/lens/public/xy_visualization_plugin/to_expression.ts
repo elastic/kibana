@@ -31,7 +31,6 @@ export const buildExpression = (
       function: 'lens_xy_chart',
       arguments: {
         seriesType: [state.seriesType],
-        title: [state.title],
         legend: [
           {
             type: 'expression',

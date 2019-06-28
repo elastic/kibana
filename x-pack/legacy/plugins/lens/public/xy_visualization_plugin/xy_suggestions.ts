@@ -78,7 +78,6 @@ function getSuggestion(
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
-    title,
     legend: { isVisible: true, position: Position.Right },
     seriesType: isDate ? 'line' : 'bar',
     splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],

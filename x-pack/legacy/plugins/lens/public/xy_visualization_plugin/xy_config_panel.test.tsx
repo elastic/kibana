@@ -37,7 +37,6 @@ describe('XYConfigPanel', () => {
       seriesType: 'bar',
       splitSeriesAccessors: [],
       stackAccessors: [],
-      title: 'Test Chart',
       x: {
         accessor: 'foo',
         position: Position.Bottom,
@@ -125,32 +124,6 @@ describe('XYConfigPanel', () => {
     });
     expect(toggleIsVisible(true)).toMatchObject({
       legend: { isVisible: false },
-    });
-  });
-
-  test('allows editing the chart title', () => {
-    const testSetTitle = (title: string) => {
-      const setState = jest.fn();
-      const component = mount(
-        <XYConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={testState()}
-        />
-      );
-
-      (testSubj(component, 'lnsXY_title').onChange as Function)({ target: { value: title } });
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(testSetTitle('Hoi')).toMatchObject({
-      title: 'Hoi',
-    });
-    expect(testSetTitle('There!')).toMatchObject({
-      title: 'There!',
     });
   });
 

@@ -21,7 +21,6 @@ function exampleState(): State {
     seriesType: 'area',
     splitSeriesAccessors: [],
     stackAccessors: [],
-    title: 'Foo',
     x: {
       accessor: 'a',
       position: Position.Bottom,
