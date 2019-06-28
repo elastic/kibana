@@ -101,7 +101,10 @@ describe('Data Frame: Common', () => {
       valid: true,
     };
     const jobDetailsState: JobDetailsExposedState = {
+      continuousModeDateField: 'the-continuous-mode-date-field',
+      continuousModeDelay: 'the-continuous-mode-delay',
       createIndexPattern: false,
+      isContinuousModeEnabled: false,
       jobId: 'the-job-id',
       destinationIndex: 'the-destination-index',
       touched: true,

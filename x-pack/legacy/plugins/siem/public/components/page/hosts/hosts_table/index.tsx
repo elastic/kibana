@@ -116,6 +116,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     return (
       <LoadMoreTable
         columns={this.memoizedColumns(type, indexPattern)}
+        dataTestSubj="all-hosts"
         hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
