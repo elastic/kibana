@@ -9,11 +9,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { Anomaly, NarrowDateRange } from './types';
 import { getScoreString } from './get_score_string';
-import { createLink } from './create_link';
 import { PreferenceFormattedDate } from '../formatted_date';
 import { createInfluencers } from './create_influencers';
 import { DescriptionList } from '../../../common/utility_types';
 import * as i18n from './translations';
+import { createExplorerLink } from './create_explorer_link';
 
 const LargeScore = styled(EuiText)`
   font-size: 45px;
@@ -48,7 +48,7 @@ export const createDescriptionsList = (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>{score.jobId}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink href={createLink(score, startDate, endDate)} target="_blank">
+            <EuiLink href={createExplorerLink(score, startDate, endDate)} target="_blank">
               {i18n.VIEW_IN_MACHINE_LEARNING}
             </EuiLink>
           </EuiFlexItem>

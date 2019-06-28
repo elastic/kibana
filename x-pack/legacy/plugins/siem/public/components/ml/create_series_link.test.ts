@@ -6,9 +6,9 @@
 
 import { mockAnomalies } from './mock';
 import { cloneDeep } from 'lodash/fp';
-import { createLink } from './create_link';
+import { createSeriesLink } from './create_series_link';
 
-describe('create_link', () => {
+describe('create_series_link', () => {
   let anomalies = cloneDeep(mockAnomalies);
 
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('create_link', () => {
   });
 
   test('it returns expected createKeyAndValue record with special left and right quotes', () => {
-    const entities = createLink(
+    const entities = createSeriesLink(
       anomalies.anomalies[0],
       new Date('1970').valueOf(),
       new Date('3000').valueOf()
