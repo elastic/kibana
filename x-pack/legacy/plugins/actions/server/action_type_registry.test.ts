@@ -100,6 +100,7 @@ Object {
   "executor": [Function],
   "id": "my-action-type",
   "name": "My action type",
+  "unencryptedAttributes": Array [],
 }
 `);
   });
