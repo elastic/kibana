@@ -70,10 +70,18 @@ export class WorkpadZoom extends PureComponent<Props> {
     const canvasLayoutContent = document.querySelector(
       `#${CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}`
     ) as HTMLElement;
-    const boundingWidth = Math.max(0, boundingBox.right) - Math.min(0, boundingBox.left);
-    const boundingHeight = Math.max(0, boundingBox.bottom) - Math.min(0, boundingBox.top);
-    const xScale = (canvasLayoutContent.clientWidth - WORKPAD_CANVAS_BUFFER * 2) / boundingWidth;
-    const yScale = (canvasLayoutContent.clientHeight - WORKPAD_CANVAS_BUFFER * 2) / boundingHeight;
+    const layoutWidth = canvasLayoutContent.clientWidth;
+    const layoutHeight = canvasLayoutContent.clientHeight;
+    const boundingWidth =
+      Math.max(layoutWidth, boundingBox.right) -
+      Math.min(0, boundingBox.left) +
+      WORKPAD_CANVAS_BUFFER * 2;
+    const boundingHeight =
+      Math.max(layoutHeight, boundingBox.bottom) -
+      Math.min(0, boundingBox.top) +
+      WORKPAD_CANVAS_BUFFER * 2;
+    const xScale = layoutWidth / boundingWidth;
+    const yScale = layoutHeight / boundingHeight;
 
     setZoomScale(Math.min(xScale, yScale));
   };
