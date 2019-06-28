@@ -70,14 +70,14 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <withApollo(Component)
-        absoluteEndDate={1221598380000}
-        absoluteStartDate={1221511980000}
+        absoluteEndDate={1322903730000}
+        absoluteStartDate={1322903730000}
         dangerColor="#bd271e"
         successColor="#017d73"
         variables={
           Object {
-            "dateRangeEnd": "2008-09-16T15:53:00",
-            "dateRangeStart": "2008-09-15T15:53:00",
+            "dateRangeEnd": "2011-12-03T10:15:30+01:00",
+            "dateRangeStart": "2011-12-03T10:15:30+01:00",
             "monitorId": "something",
           }
         }
