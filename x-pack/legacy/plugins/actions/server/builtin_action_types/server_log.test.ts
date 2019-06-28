@@ -13,7 +13,7 @@ import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks'
 
 import { registerBuiltInActionTypes } from './index';
 
-const ACTION_TYPE_ID = 'kibana.server-log';
+const ACTION_TYPE_ID = '.server-log';
 const NO_OP_FN = () => {};
 
 const services: Services = {

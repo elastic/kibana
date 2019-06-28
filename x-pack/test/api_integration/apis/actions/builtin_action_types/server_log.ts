@@ -23,7 +23,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         .send({
           attributes: {
             description: 'A server.log action',
-            actionTypeId: 'kibana.server-log',
+            actionTypeId: '.server-log',
             actionTypeConfig: {},
           },
         })
@@ -34,7 +34,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
             id: resp.body.id,
             attributes: {
               description: 'A server.log action',
-              actionTypeId: 'kibana.server-log',
+              actionTypeId: '.server-log',
               actionTypeConfig: {},
             },
             references: [],
