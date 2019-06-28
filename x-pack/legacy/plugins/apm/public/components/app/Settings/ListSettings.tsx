@@ -154,9 +154,8 @@ export function ListSettings() {
 
         <EuiCallOut title="APM Agent Configuration (BETA)" iconType="iInCircle">
           <p>
-            We're excited to bring you a first look at how you can fine-tune
-            your agent configuration directly from Kibana without having to
-            redeploy.&nbsp;
+            We're excited to bring you a first look at APM Agent
+            configuration.&nbsp;
             <EuiLink href="https://www.elastic.co/guide/en/kibana/current/agent-configuration.html">
               Learn more in our docs
             </EuiLink>
@@ -175,9 +174,9 @@ export function ListSettings() {
             body={
               <>
                 <p>
-                  Let's change that! You can fine-tune variables in your agents
-                  based on your environment directly from Kibana. Get started by
-                  creating your first configuration.
+                  Let's change that! You can fine-tune agent configuration
+                  directly from Kibana without having to redeploy. Get started
+                  by creating your first configuration.
                 </p>
               </>
             }
