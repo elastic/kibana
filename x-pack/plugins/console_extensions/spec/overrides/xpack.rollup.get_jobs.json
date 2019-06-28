@@ -1,7 +1,0 @@
-{
-  "xpack.rollup.get_jobs": {
-    "patterns": [
-      "_xpack/rollup/job/{id}"
-    ]
-  }
-}

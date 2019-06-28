@@ -8,7 +8,7 @@ import { map as mapAsync } from 'bluebird';
 
 export function AceEditorProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-  const remote = getService('remote');
+  const find = getService('find');
   const retry = getService('retry');
 
   // see https://w3c.github.io/webdriver/webdriver-spec.html#keyboard-actions
@@ -21,7 +21,7 @@ export function AceEditorProvider({ getService }) {
       await retry.try(async () => {
         const container = await testSubjects.find(testSubjectSelector);
         await container.click();
-        const input = await remote.getActiveElement();
+        const input = await find.activeElement();
 
         const modifier = process.platform === 'darwin' ? CMD_KEY : CTRL_KEY;
         await input.type([modifier, 'a']); // select all

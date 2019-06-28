@@ -24,20 +24,30 @@ const htmlSourceBuffer = Buffer.from(`
   <div>
     <p
       i18n-id="kbn.dashboard.id-1"
-      i18n-default-message="Message text 1"
-      i18n-context="Message context 1"
+      i18n-default-message="Message text 1 {value}"
+      i18n-description="Message description 1"
+      i18n-values="{
+        value: 'Multiline
+                string',
+      }"
     ></p>
   </div>
   <div>
     {{ 'kbn.dashboard.id-2' | i18n: { defaultMessage: 'Message text 2' } }}
   </div>
   <div>
-    {{ 'kbn.dashboard.id-3' | i18n: { defaultMessage: 'Message text 3', context: 'Message context 3' } }}
+    {{ 'kbn.dashboard.id-3' | i18n: { defaultMessage: 'Message text 3', description: 'Message description 3' } }}
   </div>
 </div>
 `);
 
+const report = jest.fn();
+
 describe('dev/i18n/extractors/html', () => {
+  beforeEach(() => {
+    report.mockClear();
+  });
+
   test('extracts default messages from HTML', () => {
     const actual = Array.from(extractHtmlMessages(htmlSourceBuffer));
     expect(actual.sort()).toMatchSnapshot();
@@ -59,11 +69,12 @@ describe('dev/i18n/extractors/html', () => {
 <p
   i18n-id=""
   i18n-default-message="Message text"
-  i18n-context="Message context"
+  i18n-description="Message description"
 ></p>
 `);
 
-    expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHtmlMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing i18n-default-message attribute', () => {
@@ -73,16 +84,31 @@ describe('dev/i18n/extractors/html', () => {
 ></p>
 `);
 
-    expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHtmlMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
-  test('throws on i18n filter usage in angular directive argument', () => {
+  test('throws on i18n filter usage in complex angular expression', () => {
     const source = Buffer.from(`\
 <div
   ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"
 ></div>
 `);
 
-    expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHtmlMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
+  });
+
+  test('extracts message from i18n filter in interpolating directive', () => {
+    const source = Buffer.from(`
+<icon-tip
+  content="::'namespace.messageId' | i18n: {
+    defaultMessage: 'Message'
+  }"
+  position="'right'"
+></icon-tip>
+`);
+
+    expect(Array.from(extractHtmlMessages(source))).toMatchSnapshot();
   });
 });

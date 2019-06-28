@@ -10,16 +10,13 @@ $buttonSmallPadding: 2px 8px 3px;
 $buttonSmallHeight: 22px;
 
 // Most buttons
-$buttonDefaultTextColor: #FFF;
+$buttonDefaultTextColor: $euiColorGhost;
 
 // Basic
 $buttonBasicTextColor: $kuiTextColor;
 $buttonBasicBackgroundColor: $kuiColorLightestGray;
 $buttonBasicHoverBackgroundColor: darken($kuiColorLightestGray, 10%);
 $buttonBasicDisabledTextColor: $kuiTextColor;
-$buttonBasicTextColor--darkTheme: #FFF;
-$buttonBasicBackgroundColor--darkTheme: #9c9c9c;
-$buttonBasicHoverBackgroundColor--darkTheme: darken($buttonBasicBackgroundColor--darkTheme, 20%);
 
 // Primary
 $buttonPrimaryBackgroundColor: $kuiLinkColor;
@@ -37,12 +34,12 @@ $buttonDangerHoverBackgroundColor: darken($kuiColorRed, 10%);
 $buttonDangerDisabledBackgroundColor: lighten($buttonDangerBackgroundColor, 50%);
 
 // Warning
-$buttonWarningBackgroundColor: #f98100;
+$buttonWarningBackgroundColor: $euiColorWarning;
 $buttonWarningHoverBackgroundColor: darken($buttonWarningBackgroundColor, 10%);
 $buttonWarningDisabledBackgroundColor: lighten($buttonWarningBackgroundColor, 10%);
 
 // Hollow
-$buttonHollowDisabledTextColor: #dddddd;
+$buttonHollowDisabledTextColor: $euiColorMediumShade;
 
 @import "button";
 @import "button_group/button_group";

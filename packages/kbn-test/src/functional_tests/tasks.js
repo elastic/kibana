@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { relative, resolve } from 'path';
+import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
 
-import { runElasticsearch, runKibanaServer, runFtr, KIBANA_FTR_SCRIPT } from './lib';
+import {
+  runElasticsearch,
+  runKibanaServer,
+  runFtr,
+  assertNoneExcluded,
+  hasTests,
+  KIBANA_FTR_SCRIPT,
+} from './lib';
 
 import { readConfigFile } from '../../../../src/functional_test_runner/lib';
 
@@ -38,37 +45,63 @@ in another terminal session by running this command from this directory:
 /**
  * Run servers and tests for each config
  * @param {object} options                   Optional
- * @property {string[]} configPaths          Array of paths to configs
- * @property {function} options.createLogger Optional logger creation function
+ * @property {string[]} options.configs      Array of paths to configs
+ * @property {function} options.log          An instance of the ToolingLog
  * @property {string} options.installDir     Optional installation dir from which to run Kibana
  * @property {boolean} options.bail          Whether to exit test run at the first failure
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
   for (const configPath of options.configs) {
-    await runSingleConfig(resolve(process.cwd(), configPath), options);
+    const log = options.createLogger();
+    const opts = {
+      ...options,
+      log,
+    };
+
+    log.info('Running', configPath);
+    log.indent(2);
+
+    if (options.assertNoneExcluded) {
+      await assertNoneExcluded({ configPath, options: opts });
+      continue;
+    }
+
+    if (!(await hasTests({ configPath, options: opts }))) {
+      log.info('Skipping', configPath, 'since all tests are excluded');
+      continue;
+    }
+
+    await withProcRunner(log, async procs => {
+      const config = await readConfigFile(log, configPath);
+
+      const es = await runElasticsearch({ config, options: opts });
+      await runKibanaServer({ procs, config, options: opts });
+      await runFtr({ configPath, options: opts });
+
+      await procs.stop('kibana');
+      await es.cleanup();
+    });
   }
 }
 
 /**
  * Start only servers using single config
  * @param {object} options                   Optional
- * @property {string} options.configPath     Path to a config file
- * @property {function} options.createLogger Optional logger creation function
+ * @property {string} options.config         Path to a config file
+ * @property {function} options.log          An instance of the ToolingLog
  * @property {string} options.installDir     Optional installation dir from which to run Kibana
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
-  const { config: configOption, createLogger } = options;
-  const configPath = resolve(process.cwd(), configOption);
-  const log = createLogger();
+  const log = options.createLogger();
   const opts = {
     ...options,
     log,
   };
 
   await withProcRunner(log, async procs => {
-    const config = await readConfigFile(log, configPath);
+    const config = await readConfigFile(log, options.config);
 
     const es = await runElasticsearch({ config, options: opts });
     await runKibanaServer({
@@ -76,7 +109,10 @@ export async function startServers(options) {
       config,
       options: {
         ...opts,
-        extraKbnOpts: [...options.extraKbnOpts, ...(options.installDir ? [] : ['--dev'])],
+        extraKbnOpts: [
+          ...options.extraKbnOpts,
+          ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
+        ],
       },
     });
 
@@ -99,26 +135,4 @@ async function silence(milliseconds, { log }) {
       take(1)
     )
     .toPromise();
-}
-
-/*
- * Start servers and run tests for single config
- */
-async function runSingleConfig(configPath, options) {
-  const log = options.createLogger();
-  const opts = {
-    ...options,
-    log,
-  };
-
-  await withProcRunner(log, async procs => {
-    const config = await readConfigFile(log, configPath);
-
-    const es = await runElasticsearch({ config, options: opts });
-    await runKibanaServer({ procs, config, options: opts });
-    await runFtr({ configPath, options: opts });
-
-    await procs.stop('kibana');
-    await es.cleanup();
-  });
 }

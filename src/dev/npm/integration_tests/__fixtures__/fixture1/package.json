@@ -1,0 +1,12 @@
+{
+  "name": "fixture1",
+  "version": "0.0.1",
+  "license": "MIT",
+  "dependencies": {
+    "dep1": "0.0.2",
+    "privatedep": "0.0.2"
+  },
+  "devDependencies": {
+    "dep2": "0.0.2"
+  }
+}

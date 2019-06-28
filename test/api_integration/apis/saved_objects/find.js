@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -42,13 +42,23 @@ export default function ({ getService }) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 1,
+                  version: 'WzIsMV0=',
                   attributes: {
                     'title': 'Count of requests'
-                  }
+                  },
+                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  references: [
+                    {
+                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                      type: 'index-pattern',
+                    },
+                  ],
+                  updated_at: '2017-09-21T18:51:23.794Z',
                 }
               ]
             });
+            expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           })
       ));
 
@@ -87,7 +97,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -178,7 +188,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({

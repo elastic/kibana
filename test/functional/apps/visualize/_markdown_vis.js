@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const find = getService('find');
+  const inspector = getService('inspector');
   const markdown = `
 # Heading 1
 
@@ -39,8 +40,7 @@ export default function ({ getPageObjects, getService }) {
     describe('markdown vis', async () => {
 
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it('should render markdown as html', async function () {

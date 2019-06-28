@@ -30,12 +30,14 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
     configs: options.configs || [],
     cliArgs: {
       dev: true,
+      open: false,
       quiet: false,
       silent: false,
       watch: false,
       repl: false,
       basePath: false,
       optimize: false,
+      oss: false,
       ...(options.cliArgs || {}),
     },
     isDevClusterMaster:

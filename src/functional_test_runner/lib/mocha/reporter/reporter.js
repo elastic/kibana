@@ -21,6 +21,7 @@ import { format } from 'util';
 
 import Mocha from 'mocha';
 import { ToolingLogTextWriter } from '@kbn/dev-utils';
+import moment from 'moment';
 
 import { setupJUnitReportGeneration } from '../../../../dev';
 import * as colors from './colors';
@@ -33,6 +34,7 @@ export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   let originalLogWriters;
+  let reporterCaptureStartTime;
 
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
@@ -52,7 +54,6 @@ export function MochaReporterProvider({ getService }) {
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
-          rootDirectory: config.get('junit.rootDirectory')
         });
       }
     }
@@ -60,7 +61,10 @@ export function MochaReporterProvider({ getService }) {
     onStart = () => {
       if (config.get('mochaReporter.captureLogOutput')) {
         log.warning('debug logs are being captured, only error logs will be written to the console');
+
+        reporterCaptureStartTime = moment();
         originalLogWriters = log.getWriters();
+
         log.setWriters([
           new ToolingLogTextWriter({
             level: 'error',
@@ -69,7 +73,7 @@ export function MochaReporterProvider({ getService }) {
           new ToolingLogTextWriter({
             level: 'debug',
             writeTo: {
-              write: (chunk) => {
+              write: (line) => {
                 // if the current runnable is a beforeEach hook then
                 // `runner.suite` is set to the suite that defined the
                 // hook, rather than the suite executing, so instead we
@@ -80,7 +84,14 @@ export function MochaReporterProvider({ getService }) {
                   ? this.runner.test.parent
                   : this.runner.suite;
 
-                recordLog(currentSuite, chunk);
+                // We are computing the difference between the time when this
+                // reporter has started and the time when each line are being
+                // logged in order to be able to label the test results log lines
+                // with this relative time information
+                const diffTimeSinceStart = moment().diff(reporterCaptureStartTime);
+                const readableDiffTimeSinceStart = `[${moment(diffTimeSinceStart).format('HH:mm:ss')}] `;
+
+                recordLog(currentSuite, `${readableDiffTimeSinceStart} ${line}`);
               }
             }
           })
@@ -129,13 +140,9 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onPass = test => {
-      let time = '';
-      if (test.speed !== 'fast') {
-        time = colors.speed(test.speed, ` (${ms(test.duration)})`);
-      }
-
+      const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`- ${pass} ${time}`);
+      log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
     }
 
     onFail = runnable => {

@@ -19,12 +19,32 @@
 
 const execa = require('execa');
 const chalk = require('chalk');
-const { installSnapshot, installSource, installArchive } = require('./install');
+const path = require('path');
+const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
+const {
+  log: defaultLog,
+  parseEsLog,
+  extractConfigFiles,
+  decompress,
+  NativeRealm,
+} = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
+
+// listen to data on stream until map returns anything but undefined
+const first = (stream, map) =>
+  new Promise(resolve => {
+    const onData = data => {
+      const result = map(data);
+      if (result !== undefined) {
+        resolve(result);
+        stream.removeListener('data', onData);
+      }
+    };
+    stream.on('data', onData);
+  });
 
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
@@ -44,6 +64,28 @@ exports.Cluster = class Cluster {
     this._log.indent(4);
 
     const { installPath } = await installSource({ log: this._log, ...options });
+
+    this._log.indent(-4);
+
+    return { installPath };
+  }
+
+  /**
+   * Download ES from a snapshot
+   *
+   * @param {Object} options
+   * @property {Array} options.installPath
+   * @property {Array} options.sourcePath
+   * @returns {Promise<{installPath}>}
+   */
+  async downloadSnapshot(options = {}) {
+    this._log.info(chalk.bold('Downloading snapshot'));
+    this._log.indent(4);
+
+    const { installPath } = await downloadSnapshot({
+      log: this._log,
+      ...options,
+    });
 
     this._log.indent(-4);
 
@@ -95,25 +137,49 @@ exports.Cluster = class Cluster {
   }
 
   /**
+   * Unpakcs a tar or zip file containing the data directory for an
+   * ES cluster.
+   *
+   * @param {String} installPath
+   * @param {String} archivePath
+   */
+  async extractDataDirectory(installPath, archivePath) {
+    this._log.info(chalk.bold(`Extracting data directory`));
+    this._log.indent(4);
+
+    // decompress excludes the root directory as that is how our archives are
+    // structured. This works in our favor as we can explicitly extract into the data dir
+    const extractPath = path.resolve(installPath, 'data');
+    this._log.info(`Data archive: ${archivePath}`);
+    this._log.info(`Extract path: ${extractPath}`);
+
+    await decompress(archivePath, extractPath);
+
+    this._log.indent(-4);
+  }
+
+  /**
    * Starts ES and returns resolved promise once started
    *
    * @param {String} installPath
    * @param {Object} options
    * @property {Array} options.esArgs
+   * @property {String} options.password - super user password used to bootstrap
    * @returns {Promise}
    */
   async start(installPath, options = {}) {
     this._exec(installPath, options);
 
     await Promise.race([
-      // await the "started" log message
-      new Promise(resolve => {
-        this._process.stdout.on('data', data => {
+      // wait for native realm to be setup and es to be started
+      Promise.all([
+        first(this._process.stdout, data => {
           if (/started/.test(data)) {
-            resolve();
+            return true;
           }
-        });
-      }),
+        }),
+        this._nativeRealmSetup,
+      ]),
 
       // await the outcome of the process in case it exits before starting
       this._outcome.then(() => {
@@ -132,6 +198,12 @@ exports.Cluster = class Cluster {
    */
   async run(installPath, options = {}) {
     this._exec(installPath, options);
+
+    // log native realm setup errors so they aren't uncaught
+    this._nativeRealmSetup.catch(error => {
+      this._log.error(error);
+      this.stop();
+    });
 
     // await the final outcome of the process
     await this._outcome;
@@ -170,7 +242,7 @@ exports.Cluster = class Cluster {
    * @property {Array} options.esArgs
    * @return {undefined}
    */
-  _exec(installPath, { esArgs = [] }) {
+  _exec(installPath, options = {}) {
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
@@ -178,7 +250,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const args = extractConfigFiles(esArgs, installPath, {
+    const args = extractConfigFiles(options.esArgs || [], installPath, {
       log: this._log,
     }).reduce((acc, cur) => acc.concat(['-E', cur]), []);
 
@@ -186,29 +258,51 @@ exports.Cluster = class Cluster {
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
+      env: {
+        ...process.env,
+        ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
+        ...(options.esEnvVars || {}),
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    this._process.stdout.on('data', data => {
-      const lines = parseEsLog(data.toString());
-      lines.forEach(line => this._log.info(line.formattedMessage));
+    // parse log output to find http port
+    const httpPort = first(this._process.stdout, data => {
+      const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
+
+      if (match) {
+        return match[1];
+      }
     });
 
+    // once the http port is available setup the native realm
+    this._nativeRealmSetup = httpPort.then(async port => {
+      const nativeRealm = new NativeRealm(options.password, port, this._log);
+      await nativeRealm.setPasswords(options);
+    });
+
+    // parse and forward es stdout to the log
+    this._process.stdout.on('data', data => {
+      const lines = parseEsLog(data.toString());
+      lines.forEach(line => {
+        this._log.info(line.formattedMessage);
+      });
+    });
+
+    // forward es stderr to the log
     this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
 
-    this._outcome = new Promise((resolve, reject) => {
-      this._process.once('exit', code => {
-        if (this._stopCalled) {
-          resolve();
-          return;
-        }
-        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
-        if (code > 0 && !(code === 143 || code === 130)) {
-          reject(createCliError(`ES exited with code ${code}`));
-        } else {
-          resolve();
-        }
-      });
+    // observe the exit code of the process and reflect in _outcome promies
+    const exitCode = new Promise(resolve => this._process.once('exit', resolve));
+    this._outcome = exitCode.then(code => {
+      if (this._stopCalled) {
+        return;
+      }
+
+      // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
+      if (code > 0 && !(code === 143 || code === 130)) {
+        throw createCliError(`ES exited with code ${code}`);
+      }
     });
   }
 };

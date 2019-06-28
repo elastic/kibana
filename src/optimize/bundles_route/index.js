@@ -18,3 +18,4 @@
  */
 
 export { createBundlesRoute } from './bundles_route';
+export { createProxyBundlesRoute } from './proxy_bundles_route';

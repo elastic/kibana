@@ -30,5 +30,4 @@ export {
 } from 'react-intl';
 
 export { I18nProvider } from './provider';
-export { injectI18nProvider } from './inject_i18n_provider';
 export { injectI18n } from './inject';

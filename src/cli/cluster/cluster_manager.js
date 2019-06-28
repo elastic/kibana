@@ -18,14 +18,17 @@
  */
 
 import { resolve } from 'path';
+import { format as formatUrl } from 'url';
+import opn from 'opn';
+
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
-import { fromEvent, race } from 'rxjs';
-import { first } from 'rxjs/operators';
+import * as Rx from 'rxjs';
+import { first, mapTo, filter, map, take } from 'rxjs/operators';
 
 import Log from '../log';
 import Worker from './worker';
-import { Config } from '../../server/config/config';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
+import { Config } from '../../legacy/server/config/config';
+import { transformDeprecations } from '../../legacy/server/config/transform_deprecations';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -88,6 +91,15 @@ export default class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
+    if (opts.open) {
+      this.setupOpen(formatUrl({
+        protocol: config.get('server.ssl.enabled') ? 'https' : 'http',
+        hostname: config.get('server.host'),
+        port: config.get('server.port'),
+        pathname: (this.basePathProxy ? this.basePathProxy.basePath : ''),
+      }));
+    }
+
     if (opts.watch) {
       const pluginPaths = config.get('plugins.paths');
       const scanDirs = config.get('plugins.scanDirs');
@@ -104,7 +116,8 @@ export default class ClusterManager {
               resolve(path, 'target'),
               resolve(path, 'scripts'),
               resolve(path, 'docs'),
-              resolve(path, 'x-pack/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
+              resolve(path, 'legacy/plugins/siem/cypress'),
+              resolve(path, 'x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
             ),
           []
         );
@@ -124,19 +137,41 @@ export default class ClusterManager {
     }
   }
 
+  setupOpen(openUrl) {
+    const serverListening$ = Rx.merge(
+      Rx.fromEvent(this.server, 'listening')
+        .pipe(mapTo(true)),
+      Rx.fromEvent(this.server, 'fork:exit')
+        .pipe(mapTo(false)),
+      Rx.fromEvent(this.server, 'crashed')
+        .pipe(mapTo(false))
+    );
+
+    const optimizeSuccess$ = Rx.fromEvent(this.optimizer, 'optimizeStatus')
+      .pipe(map(msg => !!msg.success));
+
+    Rx.combineLatest(serverListening$, optimizeSuccess$)
+      .pipe(
+        filter(([serverListening, optimizeSuccess]) => serverListening && optimizeSuccess),
+        take(1),
+      )
+      .toPromise()
+      .then(() => opn(openUrl));
+  }
+
   setupWatching(extraPaths, extraIgnores) {
     const chokidar = require('chokidar');
-    const { fromRoot } = require('../../utils');
+    const { fromRoot } = require('../../legacy/utils');
 
     const watchPaths = [
-      fromRoot('src/core_plugins'),
-      fromRoot('src/server'),
-      fromRoot('src/ui'),
-      fromRoot('src/utils'),
-      fromRoot('x-pack/common'),
-      fromRoot('x-pack/plugins'),
-      fromRoot('x-pack/server'),
-      fromRoot('x-pack/webpackShims'),
+      fromRoot('src/core'),
+      fromRoot('src/legacy/core_plugins'),
+      fromRoot('src/legacy/server'),
+      fromRoot('src/legacy/ui'),
+      fromRoot('src/legacy/utils'),
+      fromRoot('x-pack/legacy/common'),
+      fromRoot('x-pack/legacy/plugins'),
+      fromRoot('x-pack/legacy/server'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));
@@ -147,6 +182,7 @@ export default class ClusterManager {
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
         /\.test\.js$/,
         ...extraIgnores,
+        'plugins/java_languageserver'
       ],
     });
 
@@ -217,9 +253,13 @@ export default class ClusterManager {
   }
 
   shouldRedirectFromOldBasePath(path) {
+    // strip `s/{id}` prefix when checking for need to redirect
+    if (path.startsWith('s/')) {
+      path = path.split('/').slice(2).join('/');
+    }
+
     const isApp = path.startsWith('app/');
     const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
-
     return isApp || isKnownShortPath;
   }
 
@@ -229,7 +269,10 @@ export default class ClusterManager {
       return Promise.resolve();
     }
 
-    return race(fromEvent(this.server, 'listening'), fromEvent(this.server, 'crashed'))
+    return Rx.race(
+      Rx.fromEvent(this.server, 'listening'),
+      Rx.fromEvent(this.server, 'crashed')
+    )
       .pipe(first())
       .toPromise();
   }

@@ -21,7 +21,7 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/maste
     Start kibana and have it include this plugin. You can pass any arguments that you would normally send to `bin/kibana`
 
       ```
-      yarn start --elasticsearch.url http://localhost:9220
+      yarn start --elasticsearch.hosts http://localhost:9220
       ```
 
   - `yarn build`
@@ -32,7 +32,7 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/maste
 
     Run the browser tests in a real web browser.
 
-  - `yarn test:server`
+  - `yarn test:mocha`
 
     Run the server tests using mocha.
 

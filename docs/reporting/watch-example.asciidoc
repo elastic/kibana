@@ -3,7 +3,7 @@ For example, the following watch generates a report that contains the
 
 [source,js]
 ---------------------------------------------------------
-PUT _xpack/watcher/watch/error_report
+PUT _watcher/watch/error_report
 {
   "trigger" : {
     "schedule": {

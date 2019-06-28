@@ -1,0 +1,14 @@
+{
+  "ml.revert_model_snapshot": {
+    "url_params": {
+      "delete_intervening_results": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_revert"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-revert-snapshot.html"
+  }
+}

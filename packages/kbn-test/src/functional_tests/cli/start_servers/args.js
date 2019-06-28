@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 import dedent from 'dedent';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
@@ -29,7 +31,7 @@ const options = {
   esFrom: {
     arg: '<snapshot|source|path>',
     desc: 'Build Elasticsearch from source, snapshot or path to existing install dir.',
-    default: 'snapshot',
+    defaultHelp: 'Default: $TEST_ES_FROM or snapshot',
   },
   'kibana-install-dir': {
     arg: '<dir>',
@@ -49,7 +51,7 @@ export function displayHelp() {
       return {
         ...option,
         usage: `${name} ${option.arg || ''}`,
-        default: option.default ? `Default: ${option.default}` : '',
+        default: option.defaultHelp || '',
       };
     })
     .map(option => {
@@ -80,7 +82,7 @@ export function processOptions(userOptions, defaultConfigPath) {
   }
 
   if (!userOptions.esFrom) {
-    userOptions.esFrom = 'snapshot';
+    userOptions.esFrom = process.env.TEST_ES_FROM || 'snapshot';
   }
 
   if (userOptions['kibana-install-dir']) {
@@ -97,7 +99,7 @@ export function processOptions(userOptions, defaultConfigPath) {
 
   return {
     ...userOptions,
-    config,
+    config: resolve(config),
     createLogger,
     extraKbnOpts: userOptions._,
   };

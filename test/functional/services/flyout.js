@@ -20,23 +20,40 @@
 export function FlyoutProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const log = getService('log');
+  const retry = getService('retry');
 
   class Flyout {
+    async close(testSubj) {
+      log.debug('Closing flyout', testSubj);
+      const flyoutElement = await testSubjects.find(testSubj);
+      const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
+      await closeBtn.click();
+      await retry.waitFor('flyout closed', async () => !await testSubjects.exists(testSubj));
+    }
 
-    async getFlyout(testSubj) {
-      if (testSubj) {
-        return await testSubjects.find(testSubj);
-      } else {
-        return await find.byCssSelector('.euiFlyout');
+    async ensureClosed(testSubj) {
+      if (await testSubjects.exists(testSubj)) {
+        await this.close(testSubj);
       }
     }
 
-    async close(panelTestSubj) {
-      const panelElement = await this.getFlyout(panelTestSubj);
-      const closeBtn = await panelElement.findByCssSelector('[aria-label*="Close"]');
-      await closeBtn.click();
-    }
+    async ensureAllClosed() {
+      const flyoutElements = await find.allByCssSelector('.euiFlyout');
 
+      if (!flyoutElements.length) {
+        return;
+      }
+
+      await Promise.all(flyoutElements.map(async (flyoutElement) => {
+        const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
+        await closeBtn.click();
+      }));
+
+      await retry.waitFor('all flyouts to be closed', async () => (
+        (await find.allByCssSelector('.euiFlyout')).length === 0
+      ));
+    }
   }
 
   return new Flyout();

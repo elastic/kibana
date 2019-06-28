@@ -1,6 +1,8 @@
 .kuiPanel {
-  border: $kuiBorderThin;
-  border-radius: $kuiBorderRadius;
+  @include euiBottomShadowSmall;
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
 }
 
 .kuiPanel--prompt {

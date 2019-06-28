@@ -166,7 +166,7 @@ describe('I18n loader', () => {
       });
     });
 
-    test('should return translation messages from JSON5 file', async () => {
+    test('should return translation messages from JSON file', async () => {
       i18nLoader.registerTranslationFile(
         join(__dirname, './__fixtures__/test_plugin_2/translations/fr.json')
       );

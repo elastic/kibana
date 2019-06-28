@@ -10,6 +10,8 @@ documents directly to the `.kibana` index. *Do not do this!* Writing directly
 to the `.kibana` index is not safe and it _will_ result in corrupted data that
 permanently breaks Kibana in a future version.
 
+NOTE: You cannot access these endpoints via the Console in Kibana.
+
 * <<dashboard-import-api-import>>
 * <<dashboard-import-api-export>>
 

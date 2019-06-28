@@ -23,8 +23,8 @@ import { readFileSync } from 'fs';
 
 import del from 'del';
 import sinon from 'sinon';
-import expect from 'expect.js';
-import Wreck from 'wreck';
+import expect from '@kbn/expect';
+import Wreck from '@hapi/wreck';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';
@@ -45,12 +45,12 @@ describe('src/dev/build/tasks/nodejs/download', () => {
   const log = new ToolingLog({
     level: 'verbose',
     writeTo: {
-      write: onLogLine
-    }
+      write: onLogLine,
+    },
   });
 
   const FOO_SHA256 = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
-  const createSendHandler = (send) => (req, res) => {
+  const createSendHandler = send => (req, res) => {
     res.statusCode = 200;
     res.end(send);
   };
@@ -62,7 +62,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
   let server;
   let serverUrl;
   let nextHandler;
-  afterEach(() => nextHandler = null);
+  afterEach(() => (nextHandler = null));
 
   before(async () => {
     server = createServer((req, res) => {
@@ -79,9 +79,9 @@ describe('src/dev/build/tasks/nodejs/download', () => {
       new Promise((resolve, reject) => {
         server.once('error', reject);
       }),
-      new Promise((resolve) => {
+      new Promise(resolve => {
         server.listen(resolve);
-      })
+      }),
     ]);
 
     serverUrl = `http://localhost:${server.address().port}/`;
@@ -98,7 +98,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
       log,
       url: serverUrl,
       destination: TMP_DESTINATION,
-      sha256: FOO_SHA256
+      sha256: FOO_SHA256,
     });
     expect(readFileSync(TMP_DESTINATION, 'utf8')).to.be('foo');
   });
@@ -111,11 +111,13 @@ describe('src/dev/build/tasks/nodejs/download', () => {
         log,
         url: serverUrl,
         destination: TMP_DESTINATION,
-        sha256: 'bar'
+        sha256: 'bar',
       });
       throw new Error('Expected download() to reject');
     } catch (error) {
-      expect(error).to.have.property('message').contain('does not match the expected sha256 checksum');
+      expect(error)
+        .to.have.property('message')
+        .contain('does not match the expected sha256 checksum');
     }
 
     try {
@@ -192,7 +194,9 @@ describe('src/dev/build/tasks/nodejs/download', () => {
         });
         throw new Error('Expected download() to reject');
       } catch (error) {
-        expect(error).to.have.property('message').contain('Unexpected status code 500');
+        expect(error)
+          .to.have.property('message')
+          .contain('Unexpected status code 500');
         expect(reqCount).to.be(6);
       }
     });
@@ -211,12 +215,14 @@ describe('src/dev/build/tasks/nodejs/download', () => {
         await download({
           log,
           url: 'http://google.com',
-          destination: TMP_DESTINATION
+          destination: TMP_DESTINATION,
         });
 
         throw new Error('expected download() to reject');
       } catch (error) {
-        expect(error).to.have.property('message').contain('refusing to download');
+        expect(error)
+          .to.have.property('message')
+          .contain('refusing to download');
       }
     });
   });

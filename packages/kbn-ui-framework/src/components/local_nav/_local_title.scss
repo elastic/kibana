@@ -2,7 +2,16 @@
   display: flex;
   align-items: center;
   height: 100%;
-  padding-left: $localNavSideSpacing;
+  padding: ($localNavSideSpacing * 1.5) $localNavSideSpacing;
   font-size: $kuiFontSize;
   font-weight: bold;
+  border-bottom: $euiBorderThin;
+  flex-grow: 1;
+  flex-basis: 100%;
+  background-color: $euiColorEmptyShade;
+
+  &:empty {
+    padding: 0;
+    display: none;
+  }
 }

@@ -1,9 +1,11 @@
 [[spaces-api-get]]
 === Get Space
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
 
 Retrieves all {kib} spaces, or a specific space.
+
+Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Get all {kib} spaces
 
@@ -20,7 +22,7 @@ GET /api/spaces/space
 
 ===== Response
 
-A successful call returns a response code of `200` and a response body containing a JSON 
+A successful call returns a response code of `200` and a response body containing a JSON
 representation of the spaces.
 
 [source,js]
@@ -30,6 +32,7 @@ representation of the spaces.
     "id": "default",
     "name": "Default",
     "description" : "This is the Default Space",
+    "disabledFeatures": [],
     "_reserved": true
   },
   {
@@ -37,12 +40,14 @@ representation of the spaces.
     "name": "Marketing",
     "description" : "This is the Marketing Space",
     "color": "#aabbcc",
+    "disabledFeatures": ["apm"],
     "initials": "MK"
   },
   {
     "id": "sales",
     "name": "Sales",
-    "initials": "MK"
+    "initials": "MK",
+    "disabledFeatures": ["discover", "timelion"],
   },
 ]
 --------------------------------------------------
@@ -62,7 +67,7 @@ GET /api/spaces/space/marketing
 
 ===== Response
 
-A successful call returns a response code of `200` and a response body containing a JSON 
+A successful call returns a response code of `200` and a response body containing a JSON
 representation of the space.
 
 [source,js]
@@ -72,6 +77,7 @@ representation of the space.
   "name": "Marketing",
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
-  "initials": "MK"
+  "initials": "MK",
+  "disabledFeatures": []
 }
 --------------------------------------------------

@@ -1,104 +1,107 @@
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "space:default",
+    "index": ".kibana",
     "source": {
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z",
       "space": {
-        "name": "Default Space",
+        "_reserved": true,
         "description": "This is the default space",
-        "_reserved": true
-      }
-    }
+        "disabledFeatures": [],
+        "name": "Default Space"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "space:space_1",
+    "index": ".kibana",
     "source": {
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z",
       "space": {
-        "name": "Space 1",
-        "description": "This is the first test space"
-      }
-    }
+        "description": "This is the first test space",
+        "disabledFeatures": [],
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "space:space_2",
+    "index": ".kibana",
     "source": {
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z",
       "space": {
-        "name": "Space 2",
-        "description": "This is the second test space"
-      }
-    }
+        "description": "This is the second test space",
+        "disabledFeatures": [],
+        "name": "Space 2"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "space_2:dashboard:my_dashboard",
+    "index": ".kibana",
     "source": {
-      "type": "dashboard",
-      "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespace": "space_2",
       "dashboard": {
         "description": "Space 2",
         "title": "This is the second test space"
-      }
-    }
+      },
+      "namespace": "space_2",
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "space_1:dashboard:my_dashboard",
+    "index": ".kibana",
     "source": {
-      "type": "dashboard",
-      "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespace": "space_1",
       "dashboard": {
         "description": "Space 1",
         "title": "This is the second test space"
-      }
-    }
+      },
+      "namespace": "space_1",
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "dashboard:my_dashboard",
+    "index": ".kibana",
     "source": {
-      "type": "dashboard",
-      "updated_at": "2017-09-21T18:49:16.270Z",
       "dashboard": {
         "description": "Default Space",
         "title": "This is the default test space"
-      }
-    }
+      },
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }

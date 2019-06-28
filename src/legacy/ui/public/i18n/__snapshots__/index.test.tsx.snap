@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ui/i18n renders children and forwards properties 1`] = `
+<div>
+  Context: 
+  <span>
+    Child: some prop:100500
+  </span>
+</div>
+`;

@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
-  const remote = getService('remote');
+  const inspector = getService('inspector');
+  const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
 
   describe('area charts', function indexPatternCreation() {
     const vizName1 = 'Visualization AreaChart Name Test';
@@ -38,19 +39,18 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickAreaChart();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      log.debug('Click X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('Click X-axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Click Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Check field value');
-      const fieldValue = await PageObjects.visualize.getField();
-      log.debug('fieldValue = ' + fieldValue);
-      expect(fieldValue).to.be('@timestamp');
+      const fieldValues = await PageObjects.visualize.getField();
+      log.debug('fieldValue = ' + fieldValues);
+      expect(fieldValues[0]).to.be('@timestamp');
       const intervalValue = await PageObjects.visualize.getInterval();
       log.debug('intervalValue = ' + intervalValue);
-      expect(intervalValue).to.be('Auto');
+      expect(intervalValue[0]).to.be('Auto');
       return PageObjects.visualize.clickGo();
     };
 
@@ -58,35 +58,24 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizNamewithSpecialChars);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizNamewithSpecialChars);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
     });
 
     it('should save and load with non-ascii characters', async function () {
       const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizNamewithSpecialChars);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Saved viz page title with umlaut is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizNamewithSpecialChars);
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Saved viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
-      return PageObjects.common.sleep(2000);
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct chart', async function () {
@@ -140,15 +129,13 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-22 21:00', '29']
       ];
 
-      await PageObjects.visualize.openInspector();
-      await PageObjects.visualize.setInspectorTablePageSize(50);
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug('getDataTableData = ' + data);
-      expect(data).to.eql(expectedTableData);
+      await inspector.open();
+      await inspector.setTablePageSize(50);
+      await inspector.expectTableData(expectedTableData);
     });
 
     it('should hide side editor if embed is set to true in url', async () => {
-      const url = await remote.getCurrentUrl();
+      const url = await browser.getCurrentUrl();
       const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
       await PageObjects.common.navigateToUrl('visualize', embedUrl);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -227,6 +214,57 @@ export default function ({ getService, getPageObjects }) {
           '200', '400', '600', '800', '1,000', '1,200', '1,400',
         ];
         expect(labels).to.eql(expectedLabels);
+      });
+    });
+    describe('date histogram with long time range', () => {
+      // that dataset spans from Oct 26, 2013 @ 06:10:17.855	to Apr 18, 2019 @ 11:38:12.790
+      const fromTime = '2013-01-01 00:00:00.000';
+      const toTime = '2020-01-01 00:00:00.000';
+      it('should render a yearly area with 12 svg paths', async () => {
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickAreaChart');
+        await PageObjects.visualize.clickAreaChart();
+        log.debug('clickNewSearch');
+        await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('Click X-axis');
+        await PageObjects.visualize.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visualize.selectAggregation('Date Histogram');
+        await PageObjects.visualize.selectField('@timestamp');
+        await PageObjects.visualize.setInterval('Yearly');
+        await PageObjects.visualize.clickGo();
+        // This svg area is composed by 7 years (2013 - 2019).
+        // 7 points are used to draw the upper line (usually called y1)
+        // 7 points compose the lower line (usually called y0)
+        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
+        log.debug('actual chart data =     ' + paths);
+        const numberOfSegments = 7 * 2;
+        expect(paths.length).to.eql(numberOfSegments);
+      });
+      it('should render monthly areas with 168 svg paths', async () => {
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickAreaChart');
+        await PageObjects.visualize.clickAreaChart();
+        log.debug('clickNewSearch');
+        await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('Click X-axis');
+        await PageObjects.visualize.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visualize.selectAggregation('Date Histogram');
+        await PageObjects.visualize.selectField('@timestamp');
+        await PageObjects.visualize.setInterval('Monthly');
+        await PageObjects.visualize.clickGo();
+        // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
+        // 67 points are used to draw the upper line (usually called y1)
+        // 67 points compose the lower line (usually called y0)
+        const numberOfSegments = 67 * 2;
+        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
+        log.debug('actual chart data =     ' + paths);
+        expect(paths.length).to.eql(numberOfSegments);
       });
     });
   });

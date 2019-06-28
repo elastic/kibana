@@ -18,8 +18,10 @@
  */
 
 import { resolve } from 'path';
+import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
-const PKG_VERSION = require('../../package.json').version;
+const { version } = require('../../package.json');
+const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
@@ -27,7 +29,7 @@ module.exports = function (grunt) {
     return {
       options: {
         wait: false,
-        ready: /Server running/,
+        ready: /http server running/,
         quiet: false,
         failOnError: false
       },
@@ -37,7 +39,6 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
         '--logging.json=false',
 
         ...flags,
@@ -55,68 +56,107 @@ module.exports = function (grunt) {
   }
 
   const browserTestServerFlags = [
+    '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
   ];
 
-  const esFrom = process.env.TEST_ES_FROM || 'source';
+  const NODE = 'node';
+  const scriptWithGithubChecks = ({ title, options, cmd, args }) => (
+    process.env.CHECKS_REPORTER_ACTIVE === 'true' ? {
+      options,
+      cmd: 'yarn',
+      args: ['run', 'github-checks-reporter', title, cmd, ...args],
+    } : { options, cmd, args });
+  const gruntTaskWithGithubChecks = (title, task) =>
+    scriptWithGithubChecks({
+      title,
+      cmd: 'yarn',
+      args: ['run', 'grunt', task]
+    });
+
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors
-    eslint: {
-      cmd: process.execPath,
+    eslint: scriptWithGithubChecks({
+      title: 'eslint',
+      cmd: NODE,
       args: [
-        require.resolve('../../scripts/eslint'),
+        'scripts/eslint',
         '--no-cache'
       ]
-    },
+    }),
+
+    sasslint: scriptWithGithubChecks({
+      title: 'sasslint',
+      cmd: NODE,
+      args: [
+        'scripts/sasslint'
+      ]
+    }),
 
     // used by the test tasks
     //    runs the check_file_casing script to ensure filenames use correct casing
-    checkFileCasing: {
-      cmd: process.execPath,
+    checkFileCasing: scriptWithGithubChecks({
+      title: 'Check file casing',
+      cmd: NODE,
       args: [
-        require.resolve('../../scripts/check_file_casing'),
+        'scripts/check_file_casing',
         '--quiet' // only log errors, not warnings
       ]
-    },
+    }),
+
+    // used by the test tasks
+    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
+    checkCoreApiChanges: scriptWithGithubChecks({
+      title: 'Check core API changes',
+      cmd: NODE,
+      args: [
+        'scripts/check_core_api_changes'
+      ]
+    }),
 
     // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
-    tslint: {
-      cmd: process.execPath,
+    //    runs the typecheck script to check for Typescript type errors
+    typeCheck: scriptWithGithubChecks({
+      title: 'Type check',
+      cmd: NODE,
       args: [
-        require.resolve('../../scripts/tslint')
+        'scripts/type_check'
       ]
-    },
+    }),
 
     // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
-    typeCheck: {
-      cmd: process.execPath,
+    //    ensures that all typescript files belong to a typescript project
+    checkTsProjects: scriptWithGithubChecks({
+      title: 'TypeScript - all files belong to a TypeScript project',
+      cmd: NODE,
       args: [
-        require.resolve('../../scripts/type_check')
+        'scripts/check_ts_projects'
       ]
-    },
+    }),
 
     // used by the test and jenkins:unit tasks
     //    runs the i18n_check script to check i18n engine usage
-    i18nCheck: {
-      cmd: process.execPath,
+    i18nCheck: scriptWithGithubChecks({
+      title: 'Internationalization check',
+      cmd: NODE,
       args: [
-        require.resolve('../../scripts/i18n_check'),
+        'scripts/i18n_check',
+        '--ignore-missing',
       ]
-    },
+    }),
 
-    // used by the test:server task
+    // used by the test:mocha task
     //    runs all node.js/server mocha tests
-    mocha: {
-      cmd: process.execPath,
+    mocha: scriptWithGithubChecks({
+      title: 'Mocha tests',
+      cmd: NODE,
       args: [
-        require.resolve('../../scripts/mocha')
+        'scripts/mocha'
       ]
-    },
+    }),
 
     // used by the test:browser task
     //    runs the kibana server to serve the browser test bundle
@@ -149,6 +189,7 @@ module.exports = function (grunt) {
       flags: [
         ...browserTestServerFlags,
         '--dev',
+        '--no-dev-config',
         '--no-watch',
         '--no-base-path',
         '--optimize.watchPort=5611',
@@ -157,80 +198,97 @@ module.exports = function (grunt) {
       ]
     }),
 
-    verifyNotice: {
+    verifyNotice: scriptWithGithubChecks({
+      title: 'Verify NOTICE.txt',
       options: {
         wait: true,
       },
-      cmd: process.execPath,
+      cmd: NODE,
       args: [
         'scripts/notice',
         '--validate'
       ]
-    },
+    }),
 
-    apiIntegrationTests: {
-      cmd: process.execPath,
+    apiIntegrationTests: scriptWithGithubChecks({
+      title: 'API integration tests',
+      cmd: NODE,
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
       ],
-    },
+    }),
 
-    serverIntegrationTests: {
-      cmd: process.execPath,
+    serverIntegrationTests: scriptWithGithubChecks({
+      title: 'Server integration tests',
+      cmd: NODE,
       args: [
         'scripts/functional_tests',
         '--config', 'test/server_integration/http/ssl/config.js',
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
-    },
+    }),
 
-    pluginFunctionalTestsRelease: {
-      cmd: process.execPath,
+    interpreterFunctionalTestsRelease: scriptWithGithubChecks({
+      title: 'Interpreter functional tests',
+      cmd: NODE,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/interpreter_functional/config.js',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+      ],
+    }),
+
+    pluginFunctionalTestsRelease: scriptWithGithubChecks({
+      title: 'Plugin functional tests',
+      cmd: NODE,
       args: [
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
-    },
+    }),
 
-    functionalTests: {
-      cmd: process.execPath,
+    functionalTests: scriptWithGithubChecks({
+      title: 'Functional tests',
+      cmd: NODE,
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
-    },
+    }),
 
-    functionalTestsRelease: {
-      cmd: process.execPath,
+    licenses: scriptWithGithubChecks({
+      title: 'Check licenses',
+      cmd: NODE,
       args: [
-        'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
-        '--esFrom', esFrom,
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
+        'scripts/check_licenses',
+        '--dev',
       ],
-    },
+    }),
+
+    verifyDependencyVersions:
+      gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
+    test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
+    test_jest_integration:
+      gruntTaskWithGithubChecks('Jest integration tests', 'test:jest_integration'),
+    test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
+    test_browser_ci:
+      gruntTaskWithGithubChecks('Browser tests', 'test:browser-ci'),
+
+    ...getFunctionalTestGroupRunConfigs({
+      kibanaInstallDir: KIBANA_INSTALL_DIR
+    })
   };
 };

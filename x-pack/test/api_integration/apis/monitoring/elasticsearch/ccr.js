@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ccrFixture from './fixtures/ccr';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe.skip('ccr', () => {
+  describe('ccr', () => {
     const archive = 'monitoring/ccr';
     const timeRange = {
       min: '2018-09-19T00:00:00.000Z',

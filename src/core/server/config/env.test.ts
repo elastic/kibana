@@ -17,20 +17,7 @@
  * under the License.
  */
 
-jest.mock('process', () => ({
-  cwd() {
-    return '/test/cwd';
-  },
-}));
-
-jest.mock('path', () => ({
-  resolve(...pathSegments: string[]) {
-    return pathSegments.join('/');
-  },
-}));
-
-const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../utils/package_json', () => ({ pkg: mockPackage }));
+import { mockPackage } from './env.test.mocks';
 
 import { Env } from '.';
 import { getEnvOptions } from './__mocks__/env';
@@ -142,4 +129,26 @@ test('correctly creates environment with constructor.', () => {
   );
 
   expect(env).toMatchSnapshot('env properties');
+});
+
+test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', () => {
+  const env = new Env(
+    '/some/home/dir',
+    getEnvOptions({
+      cliArgs: { oss: false },
+    })
+  );
+
+  expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/plugins');
+});
+
+test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is true', () => {
+  const env = new Env(
+    '/some/home/dir',
+    getEnvOptions({
+      cliArgs: { oss: true },
+    })
+  );
+
+  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/plugins');
 });

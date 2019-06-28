@@ -18,7 +18,7 @@
  */
 
 import { parse } from '@babel/parser';
-import { isExpressionStatement, isObjectExpression } from '@babel/types';
+import { isExpressionStatement, isObjectExpression, isObjectProperty } from '@babel/types';
 
 import {
   isI18nTranslateFunction,
@@ -27,6 +27,8 @@ import {
   formatJSString,
   checkValuesProperty,
   createParserErrorMessage,
+  normalizePath,
+  extractMessageValueFromNode,
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
@@ -36,7 +38,7 @@ ${callee}('plugin_1.id_1', {
     key: 'value',
   },
   defaultMessage: 'Message text',
-  context: 'Message context'
+  description: 'Message description'
 });
 `
 );
@@ -106,6 +108,10 @@ describe('i18n utils', () => {
     }
   });
 
+  test('should normalizePath', () => {
+    expect(normalizePath(__dirname)).toMatchSnapshot();
+  });
+
   test('should validate conformity of "values" and "defaultMessage"', () => {
     const valuesKeys = ['url', 'username', 'password'];
     const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
@@ -152,5 +158,37 @@ describe('i18n utils', () => {
     expect(() =>
       checkValuesProperty(valuesKeys, defaultMessage, messageId)
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('should parse nested ICU message', () => {
+    const valuesKeys = ['first', 'second', 'third'];
+    const defaultMessage = 'Test message {first, plural, one {{second}} other {{third}}}';
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).not.toThrow();
+  });
+
+  test(`should throw on wrong nested ICU message`, () => {
+    const valuesKeys = ['first', 'second', 'third'];
+    const defaultMessage = 'Test message {first, plural, one {{second}} other {other}}';
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test(`should parse string concatenation`, () => {
+    const source = `
+i18n('namespace.id', {
+  defaultMessage: 'Very ' + 'long ' + 'concatenated ' + 'string',
+});`;
+    const objectProperty = [...traverseNodes(parse(source).program.body)].find(node =>
+      isObjectProperty(node)
+    );
+
+    expect(extractMessageValueFromNode(objectProperty.value)).toMatchSnapshot();
   });
 });

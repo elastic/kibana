@@ -18,7 +18,6 @@
  */
 
 import { resolve, dirname } from 'path';
-import { platform as getOsPlatform } from 'os';
 import { times } from 'lodash';
 
 const TOTAL_CI_SHARDS = 4;
@@ -29,13 +28,10 @@ module.exports = function (grunt) {
     if (grunt.option('browser')) {
       return grunt.option('browser');
     }
-
-    switch (getOsPlatform()) {
-      case 'win32':
-        return 'Chrome';
-      default:
-        return 'Chrome';
+    if (process.env.TEST_BROWSER_HEADLESS) {
+      return 'Chrome_Headless';
     }
+    return 'Chrome';
   }
 
   const config = {
@@ -46,11 +42,30 @@ module.exports = function (grunt) {
       captureTimeout: 30000,
       browserNoActivityTimeout: 120000,
       frameworks: ['mocha'],
+      plugins: [
+        'karma-chrome-launcher',
+        'karma-coverage',
+        'karma-firefox-launcher',
+        'karma-ie-launcher',
+        'karma-junit-reporter',
+        'karma-mocha',
+        'karma-safari-launcher',
+      ],
       port: 9876,
       colors: true,
       logLevel: grunt.option('debug') || grunt.option('verbose') ? 'DEBUG' : 'INFO',
       autoWatch: false,
       browsers: [pickBrowser()],
+      customLaunchers: {
+        Chrome_Headless: {
+          base: 'Chrome',
+          flags: [
+            '--headless',
+            '--disable-gpu',
+            '--remote-debugging-port=9222',
+          ],
+        },
+      },
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
       reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
@@ -70,16 +85,20 @@ module.exports = function (grunt) {
 
       // list of files / patterns to load in the browser
       files: [
-        'http://localhost:5610/bundles/vendors.bundle.js',
+        'http://localhost:5610/test_bundle/built_css.css',
+
+        'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
         'http://localhost:5610/bundles/tests.bundle.js',
 
-        'http://localhost:5610/bundles/vendors.style.css',
-        'http://localhost:5610/bundles/tests.style.css'
+        'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+        'http://localhost:5610/bundles/tests.style.css',
       ],
 
       proxies: {
         '/tests/': 'http://localhost:5610/tests/',
-        '/bundles/': 'http://localhost:5610/bundles/'
+        '/bundles/': 'http://localhost:5610/bundles/',
+        '/built_assets/dlls/': 'http://localhost:5610/built_assets/dlls/',
+        '/test_bundle/': 'http://localhost:5610/test_bundle/'
       },
 
       client: {
@@ -152,7 +171,7 @@ module.exports = function (grunt) {
    *  a test is running in by searching for the "ready to load tests for shard X"
    *  log message.
    *
-   *  [1]: src/ui/public/test_harness/test_sharding/setup_test_sharding.js
+   *  [1]: src/legacy/ui/public/test_harness/test_sharding/setup_test_sharding.js
    */
   times(TOTAL_CI_SHARDS, i => {
     const n = i + 1;
@@ -160,13 +179,13 @@ module.exports = function (grunt) {
       singleRun: true,
       options: {
         files: [
-          'http://localhost:5610/bundles/vendors.bundle.js',
-          'http://localhost:5610/bundles/commons.bundle.js',
+          'http://localhost:5610/test_bundle/built_css.css',
+
+          'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
           `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
 
-          'http://localhost:5610/bundles/vendors.style.css',
-          'http://localhost:5610/bundles/commons.style.css',
-          'http://localhost:5610/bundles/tests.style.css'
+          'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+          'http://localhost:5610/bundles/tests.style.css',
         ]
       }
     };

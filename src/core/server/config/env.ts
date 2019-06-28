@@ -17,30 +17,33 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import process from 'process';
+import { resolve, dirname } from 'path';
 
-import { pkg } from '../../../utils/package_json';
+// `require` is necessary for this to work inside x-pack code as well
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pkg = require('../../../../package.json');
 
-interface PackageInfo {
+export interface PackageInfo {
   version: string;
   branch: string;
   buildNum: number;
   buildSha: string;
 }
 
-interface EnvironmentMode {
+export interface EnvironmentMode {
   name: 'development' | 'production';
   dev: boolean;
   prod: boolean;
 }
 
+/** @internal */
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
   isDevClusterMaster: boolean;
 }
 
+/** @internal */
 export interface CliArgs {
   dev: boolean;
   envName?: string;
@@ -50,6 +53,8 @@ export interface CliArgs {
   repl: boolean;
   basePath: boolean;
   optimize: boolean;
+  open: boolean;
+  oss: boolean;
 }
 
 export class Env {
@@ -57,14 +62,20 @@ export class Env {
    * @internal
    */
   public static createDefault(options: EnvOptions): Env {
-    return new Env(process.cwd(), options);
+    const repoRoot = dirname(require.resolve('../../../../package.json'));
+    return new Env(repoRoot, options);
   }
 
+  /** @internal */
   public readonly configDir: string;
-  public readonly corePluginsDir: string;
+  /** @internal */
   public readonly binDir: string;
+  /** @internal */
   public readonly logDir: string;
+  /** @internal */
   public readonly staticFilesDir: string;
+  /** @internal */
+  public readonly pluginSearchPaths: ReadonlyArray<string>;
 
   /**
    * Information about Kibana package (version, build number etc.).
@@ -78,16 +89,19 @@ export class Env {
 
   /**
    * Arguments provided through command line.
+   * @internal
    */
   public readonly cliArgs: Readonly<CliArgs>;
 
   /**
    * Paths to the configuration files.
+   * @internal
    */
   public readonly configs: ReadonlyArray<string>;
 
   /**
    * Indicates that this Kibana instance is run as development Node Cluster master.
+   * @internal
    */
   public readonly isDevClusterMaster: boolean;
 
@@ -96,10 +110,16 @@ export class Env {
    */
   constructor(readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
-    this.corePluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
+
+    this.pluginSearchPaths = [
+      resolve(this.homeDir, 'src', 'plugins'),
+      options.cliArgs.oss ? '' : resolve(this.homeDir, 'x-pack', 'plugins'),
+      resolve(this.homeDir, 'plugins'),
+      resolve(this.homeDir, '..', 'kibana-extra'),
+    ].filter(Boolean);
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 
 export default function ({ getService, getPageObjects }) {
@@ -26,8 +26,10 @@ export default function ({ getService, getPageObjects }) {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
+    const inspector = getService('inspector');
     const log = getService('log');
-    const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+    const find = getService('find');
+    const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
 
     before(async function () {
 
@@ -36,10 +38,9 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickRegionMap');
       await PageObjects.visualize.clickRegionMap();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = shape field');
-      await PageObjects.visualize.clickBucket('shape field');
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('Bucket = Shape field');
+      await PageObjects.visualize.clickBucket('Shape field');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Field = geo.src');
@@ -50,15 +51,13 @@ export default function ({ getService, getPageObjects }) {
     describe('vector map', function indexPatternCreation() {
 
       it('should have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(true);
+        await inspector.expectIsEnabled();
       });
 
       it('should show results after clicking play (join on states)', async function () {
         const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
-        await PageObjects.visualize.openInspector();
-        const data = await PageObjects.visualize.getInspectorTableData();
-        expect(data).to.eql(expectedData);
+        await inspector.open();
+        await inspector.expectTableData(expectedData);
       });
 
       it('should change results after changing layer to world', async function () {
@@ -69,21 +68,23 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.sleep(1000);//give angular time to go update UI state
 
         //ensure all fields are there
-        await  PageObjects.visualize.selectFieldById('Two letter abbreviation', 'joinField');
-        await  PageObjects.visualize.selectFieldById('Three letter abbreviation', 'joinField');
-        await  PageObjects.visualize.selectFieldById('Country name', 'joinField');
-        await  PageObjects.visualize.selectFieldById('Two letter abbreviation', 'joinField');
-
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-3 code', 'joinField');
+        await  PageObjects.visualize.selectFieldById('name', 'joinField');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
         await PageObjects.common.sleep(2000);//need some time for the data to load
 
-        await PageObjects.visualize.openInspector();
-        const actualData = await PageObjects.visualize.getInspectorTableData();
+        await inspector.open();
+        const actualData = await inspector.getTableData();
         const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
         expect(actualData).to.eql(expectedData);
-
-
       });
 
+      it('should contain a dropdown with the default road_map base layer as an option',
+        async () => {
+          const roadMapExists = await find.existsByCssSelector('[label="road_map"]');
+          expect(roadMapExists).to.be(true);
+        });
     });
   });
 

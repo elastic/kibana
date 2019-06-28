@@ -19,6 +19,15 @@
 
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
+import { shallow } from 'enzyme';
+import React from 'react';
+
+import { applicationServiceMock } from '../application/application_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
+import { ChromeService } from './chrome_service';
+import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 
 const store = new Map();
 (window as any).localStorage = {
@@ -27,17 +36,65 @@ const store = new Map();
   removeItem: (key: string) => store.delete(String(key)),
 };
 
-import { ChromeService } from './chrome_service';
+function defaultStartDeps() {
+  return {
+    application: applicationServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
+    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+    notifications: notificationServiceMock.createStartContract(),
+  };
+}
 
 beforeEach(() => {
   store.clear();
 });
 
 describe('start', () => {
+  it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
+    const service = new ChromeService({ browserSupportsCsp: false });
+    const startDeps = defaultStartDeps();
+    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+    await service.start(startDeps);
+    expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Your browser does not meet the security requirements for Kibana.",
+  ],
+]
+`);
+  });
+
+  it('does not add legacy browser warning if browser supports CSP', async () => {
+    const service = new ChromeService({ browserSupportsCsp: true });
+    const startDeps = defaultStartDeps();
+    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+    await service.start(startDeps);
+    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
+  it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
+    const service = new ChromeService({ browserSupportsCsp: false });
+    const startDeps = defaultStartDeps();
+    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: false });
+    await service.start(startDeps);
+    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
+  describe('getComponent', () => {
+    it('returns a renderable React component', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
+      // Have to do some fanagling to get the type system and enzyme to accept this.
+      // Don't capture the snapshot because it's 600+ lines long.
+      expect(shallow(React.createElement(() => start.getComponent()))).toBeDefined();
+    });
+  });
+
   describe('brand', () => {
     it('updates/emits the brand as it changes', async () => {
-      const service = new ChromeService();
-      const start = service.start();
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
       const promise = start
         .getBrand$()
         .pipe(toArray())
@@ -70,8 +127,8 @@ Array [
 
   describe('visibility', () => {
     it('updates/emits the visibility', async () => {
-      const service = new ChromeService();
-      const start = service.start();
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
       const promise = start
         .getIsVisible$()
         .pipe(toArray())
@@ -92,11 +149,11 @@ Array [
 `);
     });
 
-    it('always emits false if embed query string is in hash when started', async () => {
+    it('always emits false if embed query string is in hash when set up', async () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
-      const service = new ChromeService();
-      const start = service.start();
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
       const promise = start
         .getIsVisible$()
         .pipe(toArray())
@@ -120,8 +177,8 @@ Array [
 
   describe('is collapsed', () => {
     it('updates/emits isCollapsed', async () => {
-      const service = new ChromeService();
-      const start = service.start();
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
       const promise = start
         .getIsCollapsed$()
         .pipe(toArray())
@@ -143,8 +200,8 @@ Array [
     });
 
     it('only stores true in localStorage', async () => {
-      const service = new ChromeService();
-      const start = service.start();
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
 
       start.setIsCollapsed(true);
       expect(store.size).toBe(1);
@@ -156,8 +213,8 @@ Array [
 
   describe('application classes', () => {
     it('updates/emits the application classes', async () => {
-      const service = new ChromeService();
-      const start = service.start();
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
       const promise = start
         .getApplicationClasses$()
         .pipe(toArray())
@@ -205,17 +262,115 @@ Array [
 `);
     });
   });
+
+  describe('badge', () => {
+    it('updates/emits the current badge', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
+      const promise = start
+        .getBadge$()
+        .pipe(toArray())
+        .toPromise();
+
+      start.setBadge({ text: 'foo', tooltip: `foo's tooltip` });
+      start.setBadge({ text: 'bar', tooltip: `bar's tooltip` });
+      start.setBadge(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  undefined,
+  Object {
+    "text": "foo",
+    "tooltip": "foo's tooltip",
+  },
+  Object {
+    "text": "bar",
+    "tooltip": "bar's tooltip",
+  },
+  undefined,
+]
+`);
+    });
+  });
+
+  describe('breadcrumbs', () => {
+    it('updates/emits the current set of breadcrumbs', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
+      const promise = start
+        .getBreadcrumbs$()
+        .pipe(toArray())
+        .toPromise();
+
+      start.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
+      start.setBreadcrumbs([{ text: 'foo' }]);
+      start.setBreadcrumbs([{ text: 'bar' }]);
+      start.setBreadcrumbs([]);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  Array [],
+  Array [
+    Object {
+      "text": "foo",
+    },
+    Object {
+      "text": "bar",
+    },
+  ],
+  Array [
+    Object {
+      "text": "foo",
+    },
+  ],
+  Array [
+    Object {
+      "text": "bar",
+    },
+  ],
+  Array [],
+]
+`);
+    });
+  });
+
+  describe('help extension', () => {
+    it('updates/emits the current help extension', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
+      const promise = start
+        .getHelpExtension$()
+        .pipe(toArray())
+        .toPromise();
+
+      start.setHelpExtension(() => () => undefined);
+      start.setHelpExtension(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  undefined,
+  [Function],
+  undefined,
+]
+`);
+    });
+  });
 });
 
 describe('stop', () => {
-  it('completes applicationClass$, isCollapsed$, isVisible$, and brand$ observables', async () => {
-    const service = new ChromeService();
-    const start = service.start();
+  it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
+    const service = new ChromeService({ browserSupportsCsp: true });
+    const start = await service.start(defaultStartDeps());
     const promise = Rx.combineLatest(
       start.getBrand$(),
       start.getApplicationClasses$(),
       start.getIsCollapsed$(),
-      start.getIsVisible$()
+      start.getBreadcrumbs$(),
+      start.getIsVisible$(),
+      start.getHelpExtension$()
     ).toPromise();
 
     service.stop();
@@ -223,8 +378,8 @@ describe('stop', () => {
   });
 
   it('completes immediately if service already stopped', async () => {
-    const service = new ChromeService();
-    const start = service.start();
+    const service = new ChromeService({ browserSupportsCsp: true });
+    const start = await service.start(defaultStartDeps());
     service.stop();
 
     await expect(
@@ -232,7 +387,9 @@ describe('stop', () => {
         start.getBrand$(),
         start.getApplicationClasses$(),
         start.getIsCollapsed$(),
-        start.getIsVisible$()
+        start.getBreadcrumbs$(),
+        start.getIsVisible$(),
+        start.getHelpExtension$()
       ).toPromise()
     ).resolves.toBe(undefined);
   });

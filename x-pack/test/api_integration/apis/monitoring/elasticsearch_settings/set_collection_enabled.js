@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -14,7 +14,7 @@ export default function ({ getService }) {
     after(async () => {
       // turn off collection
       const disableCollection = {
-        "persistent":
+        'persistent':
         {
           xpack: {
             monitoring: {

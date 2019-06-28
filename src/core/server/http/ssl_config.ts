@@ -30,7 +30,7 @@ const protocolMap = new Map<string, number>([
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
 ]);
 
-const sslSchema = schema.object(
+export const sslSchema = schema.object(
   {
     certificate: schema.maybe(schema.string()),
     certificateAuthorities: schema.maybe(
@@ -45,15 +45,11 @@ const sslSchema = schema.object(
     key: schema.maybe(schema.string()),
     keyPassphrase: schema.maybe(schema.string()),
     redirectHttpFromPort: schema.maybe(schema.number()),
-    supportedProtocols: schema.maybe(
-      schema.arrayOf(
-        schema.oneOf([
-          schema.literal('TLSv1'),
-          schema.literal('TLSv1.1'),
-          schema.literal('TLSv1.2'),
-        ])
-      )
+    supportedProtocols: schema.arrayOf(
+      schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
+      { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
     ),
+    requestCert: schema.maybe(schema.boolean({ defaultValue: false })),
   },
   {
     validate: ssl => {
@@ -67,20 +63,16 @@ const sslSchema = schema.object(
 type SslConfigType = TypeOf<typeof sslSchema>;
 
 export class SslConfig {
-  /**
-   * @internal
-   */
-  public static schema = sslSchema;
-
   public enabled: boolean;
   public redirectHttpFromPort: number | undefined;
   public key: string | undefined;
   public certificate: string | undefined;
   public certificateAuthorities: string[] | undefined;
   public keyPassphrase: string | undefined;
+  public requestCert: boolean | undefined;
 
   public cipherSuites: string[];
-  public supportedProtocols: string[] | undefined;
+  public supportedProtocols: string[];
 
   /**
    * @internal
@@ -94,24 +86,26 @@ export class SslConfig {
     this.keyPassphrase = config.keyPassphrase;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
+    this.requestCert = config.requestCert;
   }
 
   /**
    * Options that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options.
    */
   public getSecureOptions() {
-    if (this.supportedProtocols === undefined || this.supportedProtocols.length === 0) {
-      return 0;
+    // our validation should ensure that this.supportedProtocols is at least an empty array,
+    // which the following logic depends upon.
+    if (this.supportedProtocols == null || this.supportedProtocols.length === 0) {
+      throw new Error(`supportedProtocols should be specified`);
     }
 
     const supportedProtocols = this.supportedProtocols;
     return Array.from(protocolMap).reduce((secureOptions, [protocolAlias, secureOption]) => {
       // `secureOption` is the option that turns *off* support for a particular protocol,
       // so if protocol is supported, we should not enable this option.
-      // tslint:disable no-bitwise
       return supportedProtocols.includes(protocolAlias)
         ? secureOptions
-        : secureOptions | secureOption;
+        : secureOptions | secureOption; // eslint-disable-line no-bitwise
     }, 0);
   }
 

@@ -5,23 +5,21 @@
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
-import Keys from 'leadfoot/keys';
-import moment from 'moment';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
 export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
 
   return {
-    async goToTime(time: number) {
+    async goToTime(time: string) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-
-      await datePickerInput.type(Array(30).fill(Keys.BACKSPACE));
-      await datePickerInput.type([moment(time).format('L LTS'), Keys.RETURN]);
+      await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
+      await datePickerInput.type([time, browser.keys.RETURN]);
     },
 
     async getWaffleMap() {
@@ -34,6 +32,11 @@ export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaul
 
     async getNoMetricsDataPrompt() {
       return await testSubjects.find('noMetricsDataPrompt');
+    },
+
+    async openSourceConfigurationFlyout() {
+      await testSubjects.click('configureSourceButton');
+      await testSubjects.exists('sourceConfigurationFlyout');
     },
   };
 }

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImpactBar component should render with default values 1`] = `
+<EuiProgress
+  color="primary"
+  max={100}
+  size="l"
+  value={25}
+/>
+`;
+
+exports[`ImpactBar component should render with overridden values 1`] = `
+<EuiProgress
+  color="danger"
+  max={5}
+  size="s"
+  value={2}
+/>
+`;

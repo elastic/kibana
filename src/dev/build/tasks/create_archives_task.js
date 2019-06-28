@@ -17,35 +17,59 @@
  * under the License.
  */
 
-import { dirname, extname } from 'path';
-import compressing from 'compressing';
-
-import { mkdirp } from '../lib';
+import path from 'path';
+import { mkdirp, compress } from '../lib';
 
 export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
 
   async run(config, log, build) {
-    await Promise.all(config.getTargetPlatforms().map(async platform => {
+    // archive one at a time, parallel causes OOM sometimes
+    for (const platform of config.getTargetPlatforms()) {
       const source = build.resolvePathForPlatform(platform, '.');
       const destination = build.getPlatformArchivePath(platform);
 
       log.info('archiving', source, 'to', destination);
 
-      await mkdirp(dirname(destination));
+      await mkdirp(path.dirname(destination));
 
-      switch (extname(destination)) {
+      switch (path.extname(destination)) {
         case '.zip':
-          await compressing.zip.compressDir(source, destination);
+          await compress(
+            'zip',
+            {
+              archiverOptions: {
+                zlib: {
+                  level: 9
+                }
+              },
+              createRootDirectory: true
+            },
+            source,
+            destination
+          );
           break;
 
         case '.gz':
-          await compressing.tgz.compressDir(source, destination);
+          await compress(
+            'tar',
+            {
+              archiverOptions: {
+                gzip: true,
+                gzipOptions: {
+                  level: 9
+                }
+              },
+              createRootDirectory: true
+            },
+            source,
+            destination
+          );
           break;
 
         default:
           throw new Error(`Unexpected extension for archive destination: ${destination}`);
       }
-    }));
+    }
   }
 };

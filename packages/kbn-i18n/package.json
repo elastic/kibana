@@ -7,34 +7,32 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "yarn build:web && yarn build:node && yarn build:types",
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:web": "cross-env BABEL_ENV=web babel src --config-file ./babel.config.js --out-dir target/web --extensions \".ts,.js,.tsx\"",
-    "build:node": "cross-env BABEL_ENV=node babel src --config-file ./babel.config.js --out-dir target/node --extensions \".ts,.js,.tsx\"",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:watch": "node scripts/build --watch --source-maps"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.0",
-    "@babel/core": "^7.1.0",
-    "@babel/plugin-proposal-class-properties": "^7.1.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-    "@babel/preset-env": "^7.1.0",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/preset-typescript": "^7.1.0",
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-react": "7.0.0",
+    "@babel/preset-typescript": "7.3.3",
+    "@kbn/dev-utils": "1.0.0",
     "@types/intl-relativeformat": "^2.1.0",
-    "@types/json5": "^0.0.30",
-    "@types/react-intl": "^2.3.11",
-    "cross-env": "^5.2.0",
-    "typescript": "^3.0.3"
+    "@types/react-intl": "^2.3.15",
+    "del": "^4.0.0",
+    "getopts": "^2.2.4",
+    "supports-color": "^6.1.0",
+    "typescript": "^3.3.3333"
   },
   "dependencies": {
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
-    "json5": "^2.0.1",
     "prop-types": "^15.6.2",
-    "react": "^16.3.0",
-    "react-intl": "^2.7.0"
+    "react": "^16.6.0",
+    "react-intl": "^2.8.0"
   }
 }

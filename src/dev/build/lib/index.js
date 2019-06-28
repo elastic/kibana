@@ -25,10 +25,12 @@ export {
   read,
   write,
   mkdirp,
-  copy,
   copyAll,
   getFileHash,
   untar,
   deleteAll,
+  deleteEmptyFolders,
+  compress,
 } from './fs';
 export { scanDelete } from './scan_delete';
+export { scanCopy } from './scan_copy';

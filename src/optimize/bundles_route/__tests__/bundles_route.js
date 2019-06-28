@@ -22,7 +22,7 @@ import { readFileSync } from 'fs';
 import crypto from 'crypto';
 
 import Chance from 'chance';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Hapi from 'hapi';
 import Inert from 'inert';
 import sinon from 'sinon';
@@ -33,6 +33,18 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../../public_path_placeholder';
 const chance = new Chance();
 const outputFixture = resolve(__dirname, './fixtures/output');
 
+const randomWordsCache = new Set();
+const uniqueRandomWord = () => {
+  const word = chance.word();
+
+  if (randomWordsCache.has(word)) {
+    return uniqueRandomWord();
+  }
+
+  randomWordsCache.add(word);
+  return word;
+};
+
 function replaceAll(source, replace, replaceWith) {
   return source.split(replace).join(replaceWith);
 }
@@ -42,16 +54,20 @@ describe('optimizer/bundle route', () => {
 
   function createServer(options = {}) {
     const {
-      bundlesPath = outputFixture,
-      basePublicPath = ''
+      regularBundlesPath = outputFixture,
+      dllBundlesPath = outputFixture,
+      basePublicPath = '',
+      builtCssPath = outputFixture
     } = options;
 
     const server = new Hapi.Server();
     server.register([Inert]);
 
     server.route(createBundlesRoute({
-      bundlesPath,
+      regularBundlesPath,
+      dllBundlesPath,
       basePublicPath,
+      builtCssPath
     }));
 
     return server;
@@ -60,28 +76,32 @@ describe('optimizer/bundle route', () => {
   afterEach(() => sandbox.restore());
 
   describe('validation', () => {
-    it('validates that bundlesPath is an absolute path', () => {
+    it('validates that regularBundlesPath is an absolute path', () => {
       expect(() => {
         createBundlesRoute({
-          bundlesPath: null,
+          regularBundlesPath: null,
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: './relative',
+          regularBundlesPath: './relative',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: 1234,
+          regularBundlesPath: 1234,
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/absolute/path',
+          regularBundlesPath: '/absolute/path',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.not.throwError();
@@ -89,37 +109,43 @@ describe('optimizer/bundle route', () => {
     it('validates that basePublicPath is valid', () => {
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: 123
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: {}
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: '/a/'
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: 'a/'
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: '/a'
         });
       }).to.not.throwError();
       expect(() => {
         createBundlesRoute({
-          bundlesPath: '/bundles',
+          regularBundlesPath: '/bundles',
+          dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
       }).to.not.throwError();
@@ -158,7 +184,7 @@ describe('optimizer/bundle route', () => {
 
   describe('js file with placeholder', () => {
     it('responds with no content-length and modified file data', async () => {
-      const basePublicPath = `/${chance.word()}`;
+      const basePublicPath = `/${uniqueRandomWord()}`;
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
@@ -195,7 +221,7 @@ describe('optimizer/bundle route', () => {
 
   describe('css file with placeholder', () => {
     it('responds with no content-length and modified file data', async () => {
-      const basePublicPath = `/${chance.word()}`;
+      const basePublicPath = `/${uniqueRandomWord()}`;
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
@@ -215,7 +241,7 @@ describe('optimizer/bundle route', () => {
     });
   });
 
-  describe('js file outside bundlesPath', () => {
+  describe('js file outside regularBundlesPath', () => {
     it('responds with a 404', async () => {
       const server = createServer();
 
@@ -249,10 +275,10 @@ describe('optimizer/bundle route', () => {
     });
   });
 
-  describe('missing bundlesPath', () => {
+  describe('missing regularBundlesPath', () => {
     it('responds with 404', async () => {
       const server = createServer({
-        bundlesPath: resolve(__dirname, 'fixtures/not_really_output')
+        regularBundlesPath: resolve(__dirname, 'fixtures/not_really_output')
       });
 
       const response = await server.inject({
@@ -292,8 +318,8 @@ describe('optimizer/bundle route', () => {
     });
 
     it('is unique per basePublicPath although content is the same', async () => {
-      const basePublicPath1 = `/${chance.word()}`;
-      const basePublicPath2 = `/${chance.word()}`;
+      const basePublicPath1 = `/${uniqueRandomWord()}`;
+      const basePublicPath2 = `/${uniqueRandomWord()}`;
 
       const [resp1, resp2] = await Promise.all([
         createServer({ basePublicPath: basePublicPath1 }).inject({

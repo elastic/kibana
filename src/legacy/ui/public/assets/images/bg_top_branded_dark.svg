@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="370" viewBox="0 0 400 370">
+  <g fill="none" fill-rule="evenodd" opacity=".2">
+    <polygon fill="#D8D8D8" fill-opacity=".5" points="400 370 0 0 400 0" opacity=".08" style="mix-blend-mode:overlay"/>
+    <polygon fill="#F5F5F5" points="400 169 220 0 400 0" opacity=".07"/>
+  </g>
+</svg>

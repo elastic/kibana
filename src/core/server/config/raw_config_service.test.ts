@@ -17,11 +17,7 @@
  * under the License.
  */
 
-const mockGetConfigFromFiles = jest.fn();
-
-jest.mock('./read_config', () => ({
-  getConfigFromFiles: mockGetConfigFromFiles,
-}));
+import { mockGetConfigFromFiles } from './raw_config_service.test.mocks';
 
 import { first } from 'rxjs/operators';
 import { RawConfigService } from '.';
@@ -96,7 +92,7 @@ test('returns config at path as observable', async () => {
   expect(exampleConfig.getFlattenedPaths()).toEqual(['key']);
 });
 
-test("does not push new configs when reloading if config at path hasn't changed", async () => {
+test("pushes new configs when reloading even if config at path hasn't changed", async () => {
   mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
 
   const configService = new RawConfigService([configFile]);
@@ -113,9 +109,20 @@ test("does not push new configs when reloading if config at path hasn't changed"
 
   configService.reloadConfig();
 
-  expect(valuesReceived).toHaveLength(1);
-  expect(valuesReceived[0].get('key')).toEqual('value');
-  expect(valuesReceived[0].getFlattenedPaths()).toEqual(['key']);
+  expect(valuesReceived).toMatchInlineSnapshot(`
+Array [
+  ObjectToConfigAdapter {
+    "rawConfig": Object {
+      "key": "value",
+    },
+  },
+  ObjectToConfigAdapter {
+    "rawConfig": Object {
+      "key": "value",
+    },
+  },
+]
+`);
 });
 
 test('pushes new config when reloading and config at path has changed', async () => {

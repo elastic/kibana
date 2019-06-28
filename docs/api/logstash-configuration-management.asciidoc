@@ -9,6 +9,8 @@ Traditionally users would perform this integration by accessing the the `.logsta
 directly. *Do not do this!* The structure of this index is subject to change, which could
 cause your integration to break. Instead, use the following API.
 
+NOTE: You cannot access these endpoints via the Console in Kibana.
+
 * <<logstash-configuration-management-api-create>>
 * <<logstash-configuration-management-api-retrieve>>
 * <<logstash-configuration-management-api-delete>>

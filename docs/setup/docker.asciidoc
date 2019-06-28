@@ -39,6 +39,13 @@ Alternatively, you can download other Docker images that contain only features
 available under the Apache 2.0 license. To download the images, go to 
 https://www.docker.elastic.co[www.docker.elastic.co].
 
+[float]
+=== Running Kibana on Docker for development
+Kibana can be quickly started and connected to a local Elasticsearch container for development
+or testing use with the following command:
+--------------------------------------------
+docker run --link YOUR_ELASTICSEARCH_CONTAINER_NAME_OR_ID:elasticsearch -p 5601:5601 {docker-repo}:{version}
+--------------------------------------------
 endif::[]
 
 [float]
@@ -89,7 +96,7 @@ Some example translations are shown here:
 `KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
 `XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
 
-In general, any setting listed in <<settings>> or <<settings-xpack-kb>> can be 
+In general, any setting listed in <<settings>> can be 
 configured with this technique.
 
 These variables can be set with +docker-compose+ like this:
@@ -102,7 +109,7 @@ services:
     image: {docker-image}
     environment:
       SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_URL: http://elasticsearch.example.org
+      ELASTICSEARCH_HOSTS: http://elasticsearch.example.org
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take
@@ -117,7 +124,7 @@ images:
 [horizontal]
 `server.name`:: `kibana`
 `server.host`:: `"0"`
-`elasticsearch.url`:: `http://elasticsearch:9200`
+`elasticsearch.hosts`:: `http://elasticsearch:9200`
 `xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
 
 NOTE: The setting `xpack.monitoring.ui.container.elasticsearch.enabled` is not

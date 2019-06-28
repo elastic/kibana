@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
+import expect from '@kbn/expect';
+import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -28,11 +28,10 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([{ status: 200, result: 'updated' }]);
+      expect(apiResponse.results).to.eql([{ success: true, result: { message: 'updated' } }]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -49,9 +48,9 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([
-        { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' },
+      expect(apiResponse.results).to.eql([
+        { success: true, result: { message: 'updated' } },
+        { success: true, result: { message: 'updated' } },
       ]);
 
       let esResponse;
@@ -60,7 +59,6 @@ export default function ({ getService }) {
       // Beat foo
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -70,7 +68,6 @@ export default function ({ getService }) {
       // Beat bar
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -87,14 +84,13 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([
-        { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' },
+      expect(apiResponse.results).to.eql([
+        { success: true, result: { message: 'updated' } },
+        { success: true, result: { message: 'updated' } },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -111,9 +107,9 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([
-        { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' },
+      expect(apiResponse.results).to.eql([
+        { success: true, result: { message: 'updated' } },
+        { success: true, result: { message: 'updated' } },
       ]);
 
       let esResponse;
@@ -122,7 +118,6 @@ export default function ({ getService }) {
       // Beat foo
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -132,7 +127,6 @@ export default function ({ getService }) {
       // Beat bar
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -151,8 +145,8 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} not found` },
+      expect(apiResponse.results).to.eql([
+        { success: false, error: { code: 404, message: `Beat ${nonExistentBeatId} not found` } },
       ]);
     });
 
@@ -167,13 +161,12 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([
-        { status: 404, result: `Tag ${nonExistentTag} not found` },
+      expect(apiResponse.results).to.eql([
+        { success: false, error: { code: 404, message: `Tag ${nonExistentTag} not found` } },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -193,13 +186,18 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found` },
+      expect(apiResponse.results).to.eql([
+        {
+          success: false,
+          error: {
+            code: 404,
+            message: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found`,
+          },
+        },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 

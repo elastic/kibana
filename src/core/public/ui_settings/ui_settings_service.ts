@@ -17,45 +17,40 @@
  * under the License.
  */
 
-import { BasePathStartContract } from '../base_path';
-import { InjectedMetadataStartContract } from '../injected_metadata';
-import { LoadingCountStartContract } from '../loading_count';
-import { NotificationsStartContract } from '../notifications';
+import { HttpSetup } from '../http';
+import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 
-interface Deps {
-  notifications: NotificationsStartContract;
-  loadingCount: LoadingCountStartContract;
-  injectedMetadata: InjectedMetadataStartContract;
-  basePath: BasePathStartContract;
+interface UiSettingsServiceDeps {
+  http: HttpSetup;
+  injectedMetadata: InjectedMetadataSetup;
 }
 
+/** @internal */
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public start({ notifications, loadingCount, injectedMetadata, basePath }: Deps) {
-    this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
-    loadingCount.add(this.uiSettingsApi.getLoadingCount$());
+  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): UiSettingsSetup {
+    this.uiSettingsApi = new UiSettingsApi(http);
+    http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
     const legacyMetadata = injectedMetadata.getLegacyMetadata();
 
     this.uiSettingsClient = new UiSettingsClient({
       api: this.uiSettingsApi,
-      onUpdateError: error => {
-        notifications.toasts.addDanger({
-          title: 'Unable to update UI setting',
-          text: error.message,
-        });
-      },
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
     });
 
     return this.uiSettingsClient;
+  }
+
+  public start(): UiSettingsStart {
+    return this.uiSettingsClient!;
   }
 
   public stop() {
@@ -69,4 +64,8 @@ export class UiSettingsService {
   }
 }
 
-export type UiSettingsStartContract = UiSettingsClient;
+/** @public */
+export type UiSettingsSetup = UiSettingsClient;
+
+/** @public */
+export type UiSettingsStart = UiSettingsClient;

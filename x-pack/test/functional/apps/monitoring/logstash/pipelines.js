@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/logstash-pipelines', {
-        from: '2018-01-22 9:10:00.000',
-        to: '2018-01-22 9:41:00.000',
+        from: '2018-01-22 09:10:00.000',
+        to: '2018-01-22 09:41:00.000',
       });
 
       // go to pipelines listing
@@ -32,10 +32,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('should have Logstash Cluster Summary Status showing correct info', async () => {
       expect(await lsClusterSummaryStatus.getContent()).to.eql({
-        nodeCount: 'Nodes:\n2',
-        memoryUsed: 'Memory:\n528.4 MB / 1.9 GB',
-        eventsInTotal: 'Events Received:\n117.9k',
-        eventsOutTotal: 'Events Emitted:\n111.9k'
+        nodeCount: 'Nodes\n2',
+        memoryUsed: 'Memory\n528.4 MB / 1.9 GB',
+        eventsInTotal: 'Events Received\n117.9k',
+        eventsOutTotal: 'Events Emitted\n111.9k'
       });
     });
 

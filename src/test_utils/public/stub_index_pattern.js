@@ -17,20 +17,16 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
-import Promise from 'bluebird';
-import { IndexPatternProvider, getRoutes } from 'ui/index_patterns/_index_pattern';
-import { formatHit } from 'ui/index_patterns/_format_hit';
+import { IndexPattern } from 'ui/index_patterns/_index_pattern';
+import { getRoutes } from 'ui/index_patterns/get_routes';
+import { formatHitProvider } from 'ui/index_patterns/_format_hit';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
+import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
 import { FieldList } from 'ui/index_patterns/_field_list';
 
-export default function (Private) {
-
-  const flattenHit = Private(IndexPatternsFlattenHitProvider);
-  const IndexPattern = Private(IndexPatternProvider);
+export default function () {
 
   function StubIndexPattern(pattern, timeField, fields) {
     this.id = pattern;
@@ -45,15 +41,10 @@ export default function (Private) {
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
-    this.toIndexList = _.constant(Promise.resolve(pattern.split(',')));
-    this.toDetailedIndexList = _.constant(Promise.resolve(pattern.split(',').map(index => ({
-      index,
-      min: 0,
-      max: 1
-    }))));
     this.getComputedFields = getComputedFields.bind(this);
-    this.flattenHit = flattenHit(this);
-    this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
+    this.flattenHit = flattenHitWrapper(this, this.metaFields);
+    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
+    this.fieldsFetcher = { apiClient: { baseUrl: '' } };
     this.formatField = this.formatHit.formatField;
 
     this._reindexFields = function () {

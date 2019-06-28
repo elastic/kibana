@@ -8,7 +8,7 @@ import { map as mapAsync } from 'bluebird';
 
 export function WatcherPageProvider({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
-  const remote = getService('remote');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   class WatcherPage {
@@ -24,8 +24,8 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
 
     async createWatch(watchName, name) {
       await testSubjects.click('createAdvancedWatchButton');
-      await remote.findById('id').type(watchName);
-      await remote.findById('name').type(name);
+      await find.setValue('#id', watchName);
+      await find.setValue('#name', name);
       await testSubjects.click('btnSaveWatch');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -33,7 +33,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     async getWatch(watchID) {
       const watchRow = await testSubjects.find(`watchRow-${watchID}`);
       const text =  await watchRow.getVisibleText();
-      const columns = text.split("\n");
+      const columns = text.split('\n');
       return {
         id: columns[0],
         name: columns[1]
@@ -47,7 +47,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
 
     //get all the watches in the list
     async getWatches() {
-      const watches = await remote.findAllByCssSelector('.kuiTableRow');
+      const watches = await find.allByCssSelector('.kuiTableRow');
       return mapAsync(watches, async watch => {
         const checkBox = await watch.findByCssSelector('td:nth-child(1)');
         const id = await watch.findByCssSelector('td:nth-child(2)');

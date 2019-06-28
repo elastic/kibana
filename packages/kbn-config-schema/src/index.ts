@@ -39,13 +39,18 @@ import {
   NumberOptions,
   NumberType,
   ObjectType,
+  ObjectTypeOptions,
   Props,
+  RecordOfOptions,
+  RecordOfType,
   StringOptions,
   StringType,
   Type,
   TypeOf,
   TypeOptions,
   UnionType,
+  URIOptions,
+  URIType,
 } from './types';
 
 export { ObjectType, TypeOf, Type };
@@ -61,6 +66,10 @@ function boolean(options?: TypeOptions<boolean>): Type<boolean> {
 
 function string(options?: StringOptions): Type<string> {
   return new StringType(options);
+}
+
+function uri(options?: URIOptions): Type<string> {
+  return new URIType(options);
 }
 
 function literal<T extends string | number | boolean>(value: T): Type<T> {
@@ -86,10 +95,7 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
 }
 
-function object<P extends Props>(
-  props: P,
-  options?: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }>
-): ObjectType<P> {
+function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
   return new ObjectType(props, options);
 }
 
@@ -103,6 +109,14 @@ function mapOf<K, V>(
   options?: MapOfOptions<K, V>
 ): Type<Map<K, V>> {
   return new MapOfType(keyType, valueType, options);
+}
+
+function recordOf<K extends string, V>(
+  keyType: Type<K>,
+  valueType: Type<V>,
+  options?: RecordOfOptions<K, V>
+): Type<Record<K, V>> {
+  return new RecordOfType(keyType, valueType, options);
 }
 
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
@@ -175,8 +189,10 @@ export const schema = {
   number,
   object,
   oneOf,
+  recordOf,
   siblingRef,
   string,
+  uri,
 };
 
 export type Schema = typeof schema;

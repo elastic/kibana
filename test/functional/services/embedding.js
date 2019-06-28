@@ -18,16 +18,16 @@
  */
 
 export function EmbeddingProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const PageObjects = getPageObjects(['header']);
 
   class Embedding {
 
     async openInEmbeddedMode() {
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       log.debug(`Opening in embedded mode: ${currentUrl}`);
-      await remote.get(`${currentUrl}&embed=true`);
+      await browser.get(`${currentUrl}&embed=true`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

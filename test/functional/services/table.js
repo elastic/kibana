@@ -34,7 +34,7 @@ export function TableProvider({ getService }) {
       const rows = await table.findAllByTagName('tr');
       return await Promise.all(rows.map(async row => {
         const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+        return await Promise.all(cells.map(async cell => await cell.getVisibleText()));
       }));
     }
   }

@@ -18,7 +18,7 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
@@ -27,7 +27,7 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/visualize');
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
-      await remote.setWindowSize(1300, 900);
+      await browser.setWindowSize(1300, 900);
     });
 
     loadTestFile(require.resolve('./self_changing_vis'));

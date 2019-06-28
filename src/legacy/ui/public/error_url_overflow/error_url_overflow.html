@@ -1,0 +1,55 @@
+<div class="app-container kbnError--url-overflow-app euiText">
+  <h3>
+    <icon aria-hidden="true" type="'alert'" color="'danger'"></icon>
+    <span
+      i18n-id="common.ui.errorUrlOverflow.errorTitle"
+      i18n-default-message="Woah there!">
+    </span>
+  </h3>
+
+  <p
+    i18n-id="common.ui.errorUrlOverflow.errorDescription"
+    i18n-default-message="That's a big URL you have there. I have some unfortunate news: Your browser doesn't play nice
+    with Kibana's bacon-double-cheese-burger-with-extra-fries sized URL. To keep you from running
+    into problems Kibana limits URLs in your browser to {urlCharacterLimit} characters for your
+    safety."
+    i18n-values="{ urlCharacterLimit: controller.limit }"
+  ></p>
+
+  <h3
+    i18n-id="common.ui.errorUrlOverflow.howTofixErrorTitle"
+    i18n-default-message="Ok, how do I fix this?"
+  ></h3>
+  <p
+    i18n-id="common.ui.errorUrlOverflow.howTofixErrorDescription"
+    i18n-default-message="This usually only happens with big, complex dashboards, so you have some options:"
+  ></p>
+
+  <ol>
+    <li
+      i18n-id="common.ui.errorUrlOverflow.howTofixError.enableOptionText"
+      i18n-default-message="Enable the {storeInSessionStorageConfig} option in the {kibanaSettingsLink}. This will prevent the URLs from
+      getting long, but makes them a bit less portable."
+      i18n-values="{
+        html_storeInSessionStorageConfig: '<code>state:storeInSessionStorage</code>',
+        html_kibanaSettingsLink: '<a href=#/management/kibana/settings>' + controller.advancedSettingsLabel + '</a>'
+      }"
+    ></li>
+    <li
+      i18n-id="common.ui.errorUrlOverflow.howTofixError.removeStuffFromDashboardText"
+      i18n-default-message="Remove some stuff from your dashboard. This will reduce the length of the URL and keep IE in a good place."
+    ></li>
+    <li
+      i18n-id="common.ui.errorUrlOverflow.howTofixError.doNotUseIEText"
+      i18n-default-message="Don't use IE. Every other supported browser we know of doesn't have this limit."
+    ></li>
+  </ol>
+  <br />
+  <br />
+  <p>
+    <small
+      i18n-id="common.ui.errorUrlOverflow.footnoteText"
+      i18n-default-message="Footnote: Party size candy bars are tiny. Party size sub sandwiches are massive. Really makes you think."
+    ></small>
+  </p>
+</div>

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import wreck from 'wreck';
+import wreck from '@hapi/wreck';
 
 export async function getNodeShasums(nodeVersion) {
   const url = `https://nodejs.org/dist/v${nodeVersion}/SHASUMS256.txt`;

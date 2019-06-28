@@ -5,10 +5,11 @@
 .DS_Store
 .node_binaries
 node_modules
-!/src/dev/npm/__tests__/fixtures/fixture1/node_modules
+!/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
 trash
 /optimize
+/built_assets
 target
 /build
 .jruby
@@ -30,7 +31,7 @@ webpackstats.json
 !/config/kibana.yml
 coverage
 selenium
-.babelcache.json
+.babel_register_cache.json
 .webpack.babelcache
 *.swp
 *.swo
@@ -40,6 +41,6 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
+*.sublime-*
 npm-debug.log*
 .tern-project
-**/public/index.css

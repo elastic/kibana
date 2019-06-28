@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Writable } from 'stream';
+
 import { startServersCli } from './cli';
 import { checkMockConsoleLogSnapshot } from '../../test_helpers';
 
@@ -28,7 +30,7 @@ jest.mock('../../tasks', () => ({
 
 describe('start servers CLI', () => {
   describe('options', () => {
-    const originalObjects = {};
+    const originalObjects = { process, console };
     const exitMock = jest.fn();
     const logMock = jest.fn(); // mock logging so we don't send output to the test results
     const argvMock = ['foo', 'foo'];
@@ -36,13 +38,15 @@ describe('start servers CLI', () => {
     const processMock = {
       exit: exitMock,
       argv: argvMock,
-      stdout: { on: jest.fn(), once: jest.fn(), emit: jest.fn() },
+      stdout: new Writable(),
       cwd: jest.fn(),
+      env: {
+        ...originalObjects.process.env,
+        TEST_ES_FROM: 'snapshot',
+      },
     };
 
     beforeAll(() => {
-      originalObjects.process = process;
-      originalObjects.console = console;
       global.process = processMock;
       global.console = { log: logMock };
     });
@@ -54,6 +58,10 @@ describe('start servers CLI', () => {
 
     beforeEach(() => {
       global.process.argv = [...argvMock];
+      global.process.env = {
+        ...originalObjects.process.env,
+        TEST_ES_FROM: 'snapshot',
+      };
       jest.resetAllMocks();
     });
 

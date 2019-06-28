@@ -10,7 +10,7 @@ import { promisify } from 'bluebird';
 import mkdirp from 'mkdirp';
 import { PDFImage } from 'pdf-image';
 import PDFJS from 'pdfjs-dist';
-import { comparePngs } from './common';
+import { comparePngs } from '../../../../../test/functional/services/lib/compare_pngs';
 
 const mkdirAsync = promisify(mkdirp);
 
@@ -44,8 +44,8 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
   const convertOptions = {
-    '-density': '300',
   };
+
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
 
@@ -70,7 +70,7 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
     log.debug(`Converting actual pdf page ${pageNum} to png`);
     const actualPagePng = await actualPdfImage.convertPage(pageNum);
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
-    diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, log);
+    diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, sessionDirectoryPath, log);
     pageNum++;
   }
 

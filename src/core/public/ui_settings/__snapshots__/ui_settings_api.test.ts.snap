@@ -1,126 +1,84 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`#batchSet Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
-Object {
-  "matched": Array [
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
       },
-    ],
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"bar\\":\\"box\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
-      },
-    ],
+      "method": "POST",
+    },
   ],
-  "unmatched": Array [],
-}
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+]
 `;
 
 exports[`#batchSet Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
-Object {
-  "matched": Array [
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"foo\\":\\"a\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
       },
-    ],
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"foo\\":\\"d\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
-      },
-    ],
+      "method": "POST",
+    },
   ],
-  "unmatched": Array [],
-}
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+]
 `;
 
 exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
-Object {
-  "matched": Array [
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
       },
-    ],
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"box\\":\\"bar\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
-      },
-    ],
+      "method": "POST",
+    },
   ],
-  "unmatched": Array [],
-}
-`;
-
-exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: initial, only one request 1`] = `
-Object {
-  "matched": Array [
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
       },
-    ],
+      "method": "POST",
+    },
   ],
-  "unmatched": Array [],
-}
+]
 `;
 
 exports[`#batchSet rejects all promises for batched requests that fail: promise rejections 1`] = `
@@ -146,23 +104,18 @@ exports[`#batchSet rejects on 404 response 1`] = `"Request failed with status co
 
 exports[`#batchSet rejects on 500 1`] = `"Request failed with status code: 500"`;
 
-exports[`#batchSet sends a single change immediately: synchronous fetch 1`] = `
-Object {
-  "matched": Array [
-    Array [
-      "/foo/bar/api/kibana/settings",
-      Object {
-        "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
-        "credentials": "same-origin",
-        "headers": Object {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "kbn-version": "v9.9.9",
-        },
-        "method": "POST",
+exports[`#batchSet sends a single change immediately: single change 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
       },
-    ],
+      "method": "POST",
+    },
   ],
-  "unmatched": Array [],
-}
+]
 `;

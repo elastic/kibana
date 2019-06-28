@@ -50,7 +50,7 @@ class MockClusterFork extends EventEmitter {
     });
 
     jest.spyOn(this, 'on');
-    jest.spyOn(this, 'removeListener');
+    jest.spyOn(this, 'off');
     jest.spyOn(this, 'emit');
 
     (async () => {

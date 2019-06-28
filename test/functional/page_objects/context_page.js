@@ -26,7 +26,7 @@ const DEFAULT_INITIAL_STATE = {
 };
 
 export function ContextPageProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const config = getService('config');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -44,7 +44,10 @@ export function ContextPageProvider({ getService, getPageObjects }) {
         hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorType}/${anchorId}?_a=${initialState}`,
       });
 
-      await remote.get(appUrl);
+      log.debug(`browser.get(${appUrl})`);
+
+      await browser.get(appUrl);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await this.waitUntilContextLoadingHasFinished();
       // For lack of a better way, using a sleep to ensure page is loaded before proceeding
       await PageObjects.common.sleep(1000);
@@ -72,6 +75,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
         const predecessorButton = await this.getPredecessorLoadMoreButton();
         await predecessorButton.click();
       });
+      await this.waitUntilContextLoadingHasFinished();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -81,6 +85,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
         const sucessorButton = await this.getSuccessorLoadMoreButton();
         await sucessorButton.click();
       });
+      await this.waitUntilContextLoadingHasFinished();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -88,8 +93,8 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         const successorLoadMoreButton = await this.getSuccessorLoadMoreButton();
         const predecessorLoadMoreButton = await this.getPredecessorLoadMoreButton();
-        if (!(successorLoadMoreButton.isEnabled() && successorLoadMoreButton.isDisplayed() &&
-              predecessorLoadMoreButton.isEnabled() && predecessorLoadMoreButton.isDisplayed())) {
+        if (!(await successorLoadMoreButton.isEnabled() && await successorLoadMoreButton.isDisplayed() &&
+              await predecessorLoadMoreButton.isEnabled() && await predecessorLoadMoreButton.isDisplayed())) {
           throw new Error('loading context rows');
         }
       });
