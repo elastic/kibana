@@ -13,6 +13,8 @@ import {
   EuiIcon,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -24,6 +26,7 @@ interface LogHighlightsMenuProps {
   isLoading: boolean;
   activeHighlights: boolean;
 }
+
 export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   onChange,
   isLoading,
@@ -65,7 +68,10 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   );
   const button = (
     <EuiButtonEmpty color="text" size="xs" iconType="brush" onClick={togglePopover}>
-      Highlights
+      <FormattedMessage
+        id="xpack.infra.logs.highlights.highlightsPopoverButtonLabel"
+        defaultMessage="Highlights"
+      />
       {activeHighlights ? (
         <IconWrapper>
           <EuiIcon type="checkInCircleFilled" size="s" color="secondary" />
@@ -86,12 +92,12 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiFieldText
-              placeholder="Terms to highlight"
+              placeholder={termsFieldLabel}
               fullWidth={true}
               value={highlightTerm}
               onChange={changeHighlightTerm}
               isLoading={isLoading}
-              aria-label="Terms to highlight"
+              aria-label={termsFieldLabel}
               inputRef={ref => {
                 setInputRef(ref);
               }}
@@ -99,10 +105,11 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label="Clear terms to highlight"
+              aria-label={clearTermsButtonLabel}
               color="danger"
               iconType="trash"
               onClick={clearHighlightTerm}
+              title={clearTermsButtonLabel}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -110,6 +117,17 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     </EuiPopover>
   );
 };
+
+const termsFieldLabel = i18n.translate('xpack.infra.logs.highlights.highlightTermsFieldLabel', {
+  defaultMessage: 'Terms to highlight',
+});
+
+const clearTermsButtonLabel = i18n.translate(
+  'xpack.infra.logs.highlights.clearHighlightTermsButtonLabel',
+  {
+    defaultMessage: 'Clear terms to highlight',
+  }
+);
 
 const IconWrapper = euiStyled.span`
   padding-left: ${props => props.theme.eui.paddingSizes.xs};
