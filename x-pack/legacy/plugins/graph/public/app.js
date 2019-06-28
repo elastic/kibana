@@ -30,7 +30,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
@@ -63,9 +63,9 @@ import './directives/graph_settings';
 
 const app = uiModules.get('app/graph');
 
-function checkLicense(Private, Promise, kbnBaseUrl) {
-  const xpackInfo = Private(XPackInfoProvider);
-  const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
+function checkLicense(Promise, kbnBaseUrl) {
+  const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
+    xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');
     const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
@@ -165,8 +165,7 @@ app.controller('graphuiPlugin', function (
   Private,
   Promise,
   confirmModal,
-  kbnBaseUrl,
-  config
+  kbnBaseUrl
 ) {
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)
