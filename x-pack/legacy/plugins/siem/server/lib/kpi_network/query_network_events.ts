@@ -7,35 +7,9 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody } from './types';
+import { getIpFilter } from './helpers';
 
-const getDnsQueryFilter = () => [
-  {
-    bool: {
-      should: [
-        {
-          exists: {
-            field: 'dns.question.name',
-          },
-        },
-        {
-          term: {
-            'suricata.eve.dns.type': {
-              value: 'query',
-            },
-          },
-        },
-        {
-          exists: {
-            field: 'zeek.dns.query',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  },
-];
-
-export const buildDnsQuery = ({
+export const buildNetworkEventsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
@@ -45,7 +19,7 @@ export const buildDnsQuery = ({
 }: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...getDnsQueryFilter(),
+    ...getIpFilter(),
     {
       range: {
         [timestamp]: {
