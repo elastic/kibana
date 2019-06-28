@@ -31,9 +31,23 @@ export const monitorStatesSchema = gql`
 
   type Check {
     agent: Agent
+    container: StateContainer
+    kubernetes: StateKubernetes
     monitor: CheckMonitor!
     observer: CheckObserver
     timestamp: String!
+  }
+
+  type StateContainer {
+    id: String
+  }
+
+  type StateKubernetes {
+    pod: StatePod
+  }
+
+  type StatePod {
+    uid: String
   }
 
   type CheckMonitor {

@@ -542,11 +542,27 @@ export interface Agent {
 export interface Check {
   agent?: Agent | null;
 
+  container?: StateContainer | null;
+
+  kubernetes?: StateKubernetes | null;
+
   monitor: CheckMonitor;
 
   observer?: CheckObserver | null;
 
   timestamp: string;
+}
+
+export interface StateContainer {
+  id?: string | null;
+}
+
+export interface StateKubernetes {
+  pod?: StatePod | null;
+}
+
+export interface StatePod {
+  uid?: string | null;
 }
 
 export interface CheckMonitor {

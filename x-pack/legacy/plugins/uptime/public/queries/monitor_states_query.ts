@@ -34,6 +34,14 @@ export const monitorStatesQuery = gql`
             agent {
               id
             }
+            container {
+              id
+            }
+            kubernetes {
+              pod {
+                uid
+              }
+            }
             monitor {
               ip
               status
@@ -84,6 +92,7 @@ export const monitorStatesQuery = gql`
           }
           url {
             full
+            domain
           }
           timestamp
         }

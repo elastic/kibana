@@ -102,7 +102,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                     if (state.globals.url == null) {
                       Map url = new HashMap();
                       Collection fields = ["full", "original", "scheme", "username", "password", "domain", "port", "path", "query", "fragment"];
-                      url.full = doc["url.full"];
                       for (field in fields) {
                         String docPath = "url." + field;
                         def val = doc[docPath];
@@ -134,6 +133,15 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                     if (!doc["observer.geo.location"].isEmpty()) {
                       curCheck.observer.geo.location = doc["observer.geo.location"][0];
                     }
+                    if (!doc["kubernetes.pod.uid"].isEmpty() && curCheck.kubernetes == null) {
+                      curCheck.kubernetes = new HashMap();
+                      curCheck.kubernetes.pod = new HashMap();
+                      curCheck.kubernetes.pod.uid = doc["kubernetes.pod.uid"][0];
+                    }
+                    if (!doc["container.id"].isEmpty() && curCheck.container == null) {
+                      curCheck.container = new HashMap();
+                      curCheck.container.id = doc["container.id"][0];
+                    }
                     
                     state.checksByAgentIdIP[agentIdIP] = curCheck;
                 `,
@@ -146,6 +154,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   Instant maxTs = Instant.ofEpochMilli(0);
                   Collection ips = new HashSet();
                   Collection geoNames = new HashSet();
+                  Collection podUids = new HashSet();
+                  Collection containerIds = new HashSet();
                   for (state in states) {
                     result.putAll(state.globals);
                     for (entry in state.checksByAgentIdIP.entrySet()) {
@@ -160,11 +170,16 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                         check["@timestamp"] = check["@timestamp"];
                         checks[agentIdIP] = check
                       }
-                  
-                  
+
                       ips.add(check.monitor.ip);
                       if (check.observer != null && check.observer.geo != null && check.observer.geo.name != null) {
                         geoNames.add(check.observer.geo.name);
+                      }
+                      if (check.kubernetes != null && check.kubernetes.pod != null) {
+                        podUids.add(check.kubernetes.pod.uid);
+                      }
+                      if (check.container != null) {
+                        containerIds.add(check.container.id);
                       }
                     }
                   }
@@ -190,6 +205,17 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   geo.name = geoNames;
                   result.observer = observer;
                   
+                  if (!podUids.isEmpty()) {
+                    result.kubernetes = new HashMap();
+                    result.kubernetes.pod = new HashMap();
+                    result.kubernetes.pod.uid = podUids;
+                  }
+
+                  if (!containerIds.isEmpty()) {
+                    result.container = new HashMap();
+                    result.container.id = containerIds;
+                  }
+
                   return result;
                 `,
                 },
