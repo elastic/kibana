@@ -6,6 +6,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiIcon, EuiPopover, EuiButtonEmpty, EuiFieldText } from '@elastic/eui';
+import euiStyled from '../../../../../common/eui_styled_components';
 
 interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
@@ -36,7 +37,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   const debouncedOnChange = useRef(
     debounce((value: string) => {
       onChange([value]);
-    }, 1000)
+    }, 275)
   );
   const changeHighlightTerm = useCallback(
     e => {
@@ -64,7 +65,11 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   const button = (
     <EuiButtonEmpty color="text" size="xs" iconType="brush" onClick={togglePopover}>
       Highlights
-      {activeHighlights ? <EuiIcon type="checkInCircleFilled" size="s" color="secondary" /> : null}
+      {activeHighlights ? (
+        <IconWrapper>
+          <EuiIcon type="checkInCircleFilled" size="s" color="secondary" />
+        </IconWrapper>
+      ) : null}
     </EuiButtonEmpty>
   );
 
@@ -91,3 +96,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     </EuiPopover>
   );
 };
+
+const IconWrapper = euiStyled.span`
+  padding-left: ${props => props.theme.eui.paddingSizes.xs};
+`;
