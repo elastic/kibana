@@ -13,10 +13,6 @@ describe('stringifyUrlParams', () => {
       autorefreshIsPaused: false,
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
-      monitorListPageIndex: 1,
-      monitorListPageSize: 15,
-      monitorListSortDirection: 'desc',
-      monitorListSortField: 'monitor_id',
       search: 'monitor.id: foo',
       selectedPingStatus: 'down',
     });

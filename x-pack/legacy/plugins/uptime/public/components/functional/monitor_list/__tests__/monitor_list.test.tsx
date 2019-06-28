@@ -8,14 +8,11 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { MonitorSummaryResult } from '../../../../../common/graphql/types';
 import { MonitorListComponent } from '../monitor_list';
-import { Criteria } from '../types';
 
 describe('MonitorList component', () => {
   let result: MonitorSummaryResult;
-  let onChange: (criteria: Criteria) => void;
 
   beforeEach(() => {
-    onChange = jest.fn();
     result = {
       summaries: [
         {
@@ -87,15 +84,12 @@ describe('MonitorList component', () => {
   it('renders the monitor list', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
+        absoluteStartDate={123}
+        absoluteEndDate={125}
         dangerColor="danger"
         data={{ monitorStates: result }}
         loading={false}
         successColor="primary"
-        onChange={onChange}
-        pageIndex={0}
-        pageSize={10}
-        sortField="monitor_id"
-        sortDirection="asc"
       />
     );
 
@@ -105,15 +99,12 @@ describe('MonitorList component', () => {
   it('renders a no items message when no data is provided', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
+        absoluteStartDate={123}
+        absoluteEndDate={125}
         dangerColor="danger"
         data={{}}
         loading={false}
         successColor="primary"
-        onChange={onChange}
-        pageIndex={0}
-        pageSize={10}
-        sortField="monitor_id"
-        sortDirection="asc"
       />
     );
     expect(component).toMatchSnapshot();
