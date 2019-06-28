@@ -8,36 +8,36 @@ import React from 'react';
 import { toastNotifications } from 'ui/notify';
 import { MarkdownSimple } from 'ui/markdown';
 import chrome from 'ui/chrome';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { PLUGIN, ROUTES } from '../../../common/constants';
 
 export class LicenseService {
-  constructor(xpackInfoService, kbnUrlService, $timeout, $http) {
+  constructor(kbnUrlService, $timeout, $http) {
     this.$http = $http;
-    this.xpackInfoService = xpackInfoService;
     this.kbnUrlService = kbnUrlService;
     this.$timeout = $timeout;
     this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
   }
 
   get showLinks() {
-    return Boolean(this.xpackInfoService.get(`features.${PLUGIN.ID}.showLinks`));
+    return Boolean(xpackInfo.get(`features.${PLUGIN.ID}.showLinks`));
   }
 
   get enableLinks() {
-    return Boolean(this.xpackInfoService.get(`features.${PLUGIN.ID}.enableLinks`));
+    return Boolean(xpackInfo.get(`features.${PLUGIN.ID}.enableLinks`));
   }
 
   get isAvailable() {
-    return Boolean(this.xpackInfoService.get(`features.${PLUGIN.ID}.isAvailable`));
+    return Boolean(xpackInfo.get(`features.${PLUGIN.ID}.isAvailable`));
   }
 
   get message() {
-    return this.xpackInfoService.get(`features.${PLUGIN.ID}.message`);
+    return xpackInfo.get(`features.${PLUGIN.ID}.message`);
   }
 
   notifyAndRedirect() {
     toastNotifications.addDanger({
-      title: <MarkdownSimple>{this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>,
+      title: <MarkdownSimple>{xpackInfo.get(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>,
     });
     this.kbnUrlService.redirect('/management');
   }
