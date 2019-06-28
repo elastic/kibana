@@ -1,0 +1,8 @@
+import("//build/args/headless.gn")
+is_debug = false
+symbol_level = 0
+is_component_build = false
+remove_webcore_debug_symbols = true
+enable_nacl = false
+# Please, consult @elastic/kibana-security before changing/removing this option.
+use_kerberos = false

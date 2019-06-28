@@ -1,0 +1,31 @@
+{
+  "graph-workspace": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {
+          "searchSourceJSON": {
+            "type": "text"
+          }
+        }
+      },
+      "numLinks": {
+        "type": "integer"
+      },
+      "numVertices": {
+        "type": "integer"
+      },
+      "title": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      },
+      "wsState": {
+        "type": "text"
+      }
+    }
+  }
+}

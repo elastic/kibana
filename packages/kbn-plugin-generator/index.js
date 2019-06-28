@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { resolve } = require('path');
 
 const dedent = require('dedent');
@@ -23,7 +42,7 @@ exports.run = function run(argv) {
       dedent(chalk`
         {dim usage:} node scripts/generate-plugin {bold [name]}
 
-        generate a fresh Kibana plugin in the ../kibana-extra/ directory
+        generate a fresh Kibana plugin in the plugins/ directory
       `) + '\n'
     );
     process.exit(1);
@@ -31,8 +50,8 @@ exports.run = function run(argv) {
 
   const name = options._[0];
   const template = resolve(__dirname, './sao_template');
-  const kibanaExtra = resolve(__dirname, '../../../kibana-extra');
-  const targetPath = resolve(kibanaExtra, snakeCase(name));
+  const kibanaPlugins = resolve(__dirname, '../../plugins');
+  const targetPath = resolve(kibanaPlugins, snakeCase(name));
 
   sao({
     template: template,

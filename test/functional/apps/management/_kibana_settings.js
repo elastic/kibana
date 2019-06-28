@@ -1,23 +1,41 @@
-import expect from 'expect.js';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const remote = getService('remote');
-  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'header']);
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker']);
 
   describe('kibana settings', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();
       await PageObjects.settings.navigateTo();
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 
@@ -28,25 +46,18 @@ export default function ({ getService, getPageObjects }) {
       expect(advancedSetting).to.be('America/Phoenix');
     });
 
-    it('should coerce an empty setting of type JSON into an empty object', async function () {
-      await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettingsInput('query:queryString:options', '', 'unsavedValueJsonTextArea');
-      const advancedSetting = await PageObjects.settings.getAdvancedSettings('query:queryString:options');
-      expect(advancedSetting).to.be.eql('{}');
-    });
-
     describe('state:storeInSessionStorage', () => {
       it ('defaults to false', async () => {
         await PageObjects.settings.clickKibanaSettings();
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettings('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be('false');
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
+        expect(storeInSessionStorage).to.be(false);
       });
 
       it('when false, dashboard state is unhashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
-        const currentUrl = await remote.getCurrentUrl();
+        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+        const currentUrl = await browser.getCurrentUrl();
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];
         const appState = urlPieces[3];
@@ -61,15 +72,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettings('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be('true');
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
+        expect(storeInSessionStorage).to.be(true);
       });
 
       it('when true, dashboard state is hashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
-        const currentUrl = await remote.getCurrentUrl();
+        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+        const currentUrl = await browser.getCurrentUrl();
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];
         const appState = urlPieces[3];
@@ -84,21 +95,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-      });
-    });
-
-    describe('notifications:banner', () => {
-      it('Should convert notification banner markdown into HTML', async function () {
-        await PageObjects.settings.clickKibanaSettings();
-        await PageObjects.settings.setAdvancedSettingsInput('notifications:banner', '# Welcome to Kibana', 'unsavedValueMarkdownTextArea');
-        const bannerValue = await PageObjects.settings.getAdvancedSettings('notifications:banner');
-        expect(bannerValue).to.equal('Welcome to Kibana');
-      });
-
-      after('navigate to settings page and clear notifications:banner', async () => {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSettings();
-        await PageObjects.settings.clearAdvancedSettings('notifications:banner');
       });
     });
 

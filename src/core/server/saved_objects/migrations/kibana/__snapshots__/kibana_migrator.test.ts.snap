@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core properties 1`] = `
+Object {
+  "_meta": Object {
+    "migrationMappingPropertyHashes": Object {
+      "amap": "625b32086eb1d1203564cf85062dd22e",
+      "bmap": "625b32086eb1d1203564cf85062dd22e",
+      "config": "87aca8fdb053154f11383fce3dbf3edf",
+      "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
+      "namespace": "2f4316de49999235636386fe51dc06c1",
+      "references": "7997cf5a56cc02bdc9c93361bde732b0",
+      "type": "2f4316de49999235636386fe51dc06c1",
+      "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+    },
+  },
+  "dynamic": "strict",
+  "properties": Object {
+    "amap": Object {
+      "type": "text",
+    },
+    "bmap": Object {
+      "type": "text",
+    },
+    "config": Object {
+      "dynamic": "true",
+      "properties": Object {
+        "buildNum": Object {
+          "type": "keyword",
+        },
+      },
+    },
+    "migrationVersion": Object {
+      "dynamic": "true",
+      "type": "object",
+    },
+    "namespace": Object {
+      "type": "keyword",
+    },
+    "references": Object {
+      "properties": Object {
+        "id": Object {
+          "type": "keyword",
+        },
+        "name": Object {
+          "type": "keyword",
+        },
+        "type": Object {
+          "type": "keyword",
+        },
+      },
+      "type": "nested",
+    },
+    "type": Object {
+      "type": "keyword",
+    },
+    "updated_at": Object {
+      "type": "date",
+    },
+  },
+}
+`;

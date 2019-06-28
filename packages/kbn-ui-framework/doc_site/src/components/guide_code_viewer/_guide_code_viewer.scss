@@ -5,11 +5,11 @@
   bottom: 0;
   width: $guideCodeViewerWidth;
   padding: 6px 0 40px;
-  background-color: white;
+  background-color: $euiColorEmptyShade;
   transform: translateX($guideCodeViewerWidth);
   transition: transform $guideCodeViewerTransition;
   overflow: auto;
-  border-left: 1px solid #d6d6d6;
+  border-left: $euiBorderThin;
 
   @include scrollbar;
 
@@ -25,7 +25,7 @@
   .guideCodeViewer__header {
     padding: 0 20px 6px;
     line-height: $guideLineHeight;
-    border-bottom: 1px solid #d6d6d6;
+    border-bottom: $euiBorderThin;
     font-size: 14px;
     font-weight: 700;
     margin-bottom: 10px;
@@ -47,7 +47,7 @@
 
   .guideCodeViewer__title {
     padding: 0 20px 6px;
-    border-bottom: 1px solid #d6d6d6;
+    border-bottom: $euiBorderThin;
     line-height: $guideLineHeight;
     font-size: 14px;
   }
@@ -61,7 +61,7 @@
 .hljs {
   display: block;
   padding: 15px 20px;
-  color: #637c84;
+  color: $euiColorDarkShade;
   font-size: 14px;
   line-height: 1.3;
   font-family: 'Ubuntu Mono', monospace;

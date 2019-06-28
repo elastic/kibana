@@ -4,4 +4,4 @@ extends: "@elastic/kibana"
 settings:
   import/resolver:
     '@elastic/eslint-import-resolver-kibana':
-      rootPackageName: '<%= kebabCase(name) %>'
+      rootPackageName: '<%= snakeCase(name) %>'

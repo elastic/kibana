@@ -1,0 +1,24 @@
+{
+  "msearch_template": {
+    "url_params": {
+      "search_type": [
+        "query_then_fetch",
+        "query_and_fetch",
+        "dfs_query_then_fetch",
+        "dfs_query_and_fetch"
+      ],
+      "typed_keys": "__flag__",
+      "max_concurrent_searches": ""
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_msearch/template",
+      "{indices}/_msearch/template",
+      "{indices}/{type}/_msearch/template"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+  }
+}

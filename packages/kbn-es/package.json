@@ -5,15 +5,20 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "chalk": "^2.3.1",
+    "@elastic/elasticsearch": "^7.0.0-rc.2",
+    "@kbn/dev-utils": "1.0.0",
+    "abort-controller": "^2.0.3",
+    "chalk": "^2.4.1",
     "dedent": "^0.7.0",
-    "elasticsearch": "^14.1.0",
-    "execa": "^0.10.0",
+    "del": "^4.0.0",
+    "execa": "^1.0.0",
+    "getopts": "^2.2.4",
+    "glob": "^7.1.2",
     "mkdirp": "^0.5.1",
     "node-fetch": "^2.0.0",
     "simple-git": "^1.91.0",
-    "tar-fs": "^1.16.0",
-    "zlib": "^1.0.5"
+    "tar-fs": "^1.16.3",
+    "tree-kill": "^1.1.0",
+    "yauzl": "^2.10.0"
   }
 }

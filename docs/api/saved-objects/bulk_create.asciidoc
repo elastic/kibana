@@ -1,0 +1,107 @@
+[[saved-objects-api-bulk-create]]
+=== Bulk Create Objects
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The bulk-create saved object API enables you to persist multiple Kibana saved
+objects.
+
+Note: You cannot access this endpoint via the Console in Kibana.
+
+==== Request
+
+`POST /api/saved_objects/_bulk_create`
+
+
+==== Query Parameters
+
+`overwrite` (optional)::
+  (boolean) If true, will overwrite the document with the same ID.
+
+
+==== Request Body
+
+The request body must be a JSON array containing objects, each of which
+contains the following properties:
+
+`type` (required)::
+  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+
+`id` (optional)::
+  (string) Enables specifying an ID to use, as opposed to one being randomly generated
+
+`attributes` (required)::
+  (object) The data to persist
+
+`references` (optional)::
+  (array) An array of objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. The `name` can be used in the attributes to refer to the other saved object, but never the `id`, which may be updated automatically in the future during migrations or import/export.
+
+`version` (optional)::
+  (number) Enables specifying a version
+
+
+==== Response body
+
+The response body will have a top level `saved_objects` property that contains
+an array of objects, which represent the response for each of the requested
+objects. The order of the objects in the response is identical to the order of
+the objects in the request.
+
+For any saved object that could not be persisted, an error object will exist in its
+place.
+
+
+==== Examples
+
+The following example attempts to persist an index pattern with id
+`my-pattern` and a dashboard with id `my-dashboard`, but only the index pattern
+could be persisted because there was an id collision with `my-dashboard` as a saved object with that id alread exists.
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/_bulk_create
+[
+  {
+    "type": "index-pattern",
+    "id": "my-pattern",
+    "attributes": {
+      "title": "my-pattern-*"
+    }
+  },
+  {
+    "type": "dashboard",
+    "id": "my-dashboard",
+    "attributes": {
+      "title": "Look at my dashboard"
+    }
+  }
+]
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "saved_objects": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern",
+      "version": 1,
+      "attributes": {
+        "title": "my-pattern-*"
+      }
+    },
+    {
+      "id": "my-dashboard",
+      "type": "dashboard",
+      "error": {
+        "statusCode": 409,
+        "message": "version conflict, document already exists"
+      }
+    }
+  ]
+}
+--------------------------------------------------

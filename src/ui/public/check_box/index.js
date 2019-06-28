@@ -1,1 +1,0 @@
-import './check_box';

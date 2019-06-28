@@ -1,10 +1,29 @@
-import expect from 'expect.js';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
   describe('Index patterns on aliases', function () {
     before(async function () {
@@ -28,7 +47,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to create index pattern without time field', async function () {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias1', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
@@ -45,7 +63,6 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should be able to create index pattern with timefield', async function () {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias2', 'date');
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
@@ -60,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('alias2');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);

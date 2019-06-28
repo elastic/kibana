@@ -1,3 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -10,11 +31,11 @@ import {
 } from '../../components';
 
 import CollapseButton from './collapse_button';
-const collapseButtonSource = require('!!raw-loader!./collapse_button');
+import collapseButtonSource from '!!raw-loader!./collapse_button';
 const collapseButtonHtml = renderToHtml(CollapseButton);
 
 import CollapseButtonAria from './collapse_button_aria';
-const collapseButtonAriaSource = require('!!raw-loader!./collapse_button_aria');
+import collapseButtonAriaSource from '!!raw-loader!./collapse_button_aria';
 const collapseButtonAriaHtml = renderToHtml(CollapseButtonAria);
 
 export default props => (

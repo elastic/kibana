@@ -1,0 +1,17 @@
+{
+  "indices.create": {
+    "url_params": {
+      "include_type_name": "",
+      "wait_for_active_shards": "",
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "{indices}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-create-index.html"
+  }
+}

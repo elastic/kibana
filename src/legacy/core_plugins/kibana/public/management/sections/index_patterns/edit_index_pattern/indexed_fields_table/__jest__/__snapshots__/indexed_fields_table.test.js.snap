@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
+<div>
+  <Table
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "Elastic",
+          "excluded": false,
+          "format": undefined,
+          "indexPattern": undefined,
+          "info": undefined,
+          "name": "Elastic",
+          "routes": undefined,
+          "searchable": true,
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
+<div>
+  <Table
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "timestamp",
+          "excluded": false,
+          "format": undefined,
+          "indexPattern": undefined,
+          "info": undefined,
+          "name": "timestamp",
+          "routes": undefined,
+          "type": "date",
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should render normally 1`] = `
+<div>
+  <Table
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "Elastic",
+          "excluded": false,
+          "format": undefined,
+          "indexPattern": undefined,
+          "info": undefined,
+          "name": "Elastic",
+          "routes": undefined,
+          "searchable": true,
+        },
+        Object {
+          "displayName": "timestamp",
+          "excluded": false,
+          "format": undefined,
+          "indexPattern": undefined,
+          "info": undefined,
+          "name": "timestamp",
+          "routes": undefined,
+          "type": "date",
+        },
+        Object {
+          "displayName": "conflictingField",
+          "excluded": false,
+          "format": undefined,
+          "indexPattern": undefined,
+          "info": undefined,
+          "name": "conflictingField",
+          "routes": undefined,
+          "type": "conflict",
+        },
+      ]
+    }
+  />
+</div>
+`;

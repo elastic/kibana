@@ -1,0 +1,107 @@
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "_reserved": true,
+        "description": "This is the default space",
+        "disabledFeatures": [],
+        "name": "Default Space"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_1",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the first test space",
+        "disabledFeatures": [],
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_2",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the second test space",
+        "disabledFeatures": [],
+        "name": "Space 2"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_2:dashboard:my_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Space 2",
+        "title": "This is the second test space"
+      },
+      "namespace": "space_2",
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_1:dashboard:my_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Space 1",
+        "title": "This is the second test space"
+      },
+      "namespace": "space_1",
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "dashboard:my_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Default Space",
+        "title": "This is the default test space"
+      },
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}

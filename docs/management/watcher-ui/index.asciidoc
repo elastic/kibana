@@ -1,0 +1,8 @@
+[role="xpack"]
+[[watcher-ui]]
+== Watcher UI
+
+_Watcher UI_ enables you to monitor, manage, create and simulate 
+{stack-ov}/xpack-alerting.html[watches] for your Elasticsearch indices.
+
+include::getting-started.asciidoc[]

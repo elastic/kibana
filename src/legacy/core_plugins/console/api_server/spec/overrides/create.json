@@ -1,0 +1,16 @@
+{
+  "create": {
+    "url_params": {
+      "timeout": "1m",
+      "ttl": "5m",
+      "version": "1"
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/{type}/{id}/_create"
+    ]
+  }
+}

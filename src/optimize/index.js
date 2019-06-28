@@ -1,5 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
+import { DllCompiler } from './dynamic_dll_plugin';
+import { fromRoot } from '../legacy/utils';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -9,27 +30,23 @@ export default async (kbnServer, server, config) => {
   // bundles in a "middleware" style.
   //
   // the server listening on 5601 may be restarted a number of times, depending
-  // on the watch setup managed by the cli. It proxies all bundles/* requests to
-  // the other server. The server on 5602 is long running, in order to prevent
-  // complete rebuilds of the optimize content.
+  // on the watch setup managed by the cli. It proxies all bundles/* and built_assets/dlls/*
+  // requests to the other server. The server on 5602 is long running, in order
+  // to prevent complete rebuilds of the optimize content.
   const watch = config.get('optimize.watch');
   if (watch) {
     return await kbnServer.mixin(require('./watch/watch'));
   }
 
-  const { uiBundles } = kbnServer;
+  const { newPlatform, uiBundles } = kbnServer;
   server.route(createBundlesRoute({
-    bundlesPath: uiBundles.getWorkingDir(),
-    basePublicPath: config.get('server.basePath')
+    regularBundlesPath: uiBundles.getWorkingDir(),
+    dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
+    basePublicPath: config.get('server.basePath'),
+    builtCssPath: fromRoot('built_assets/css'),
   }));
 
-  await uiBundles.writeEntryFiles();
-
-  // Not all entry files produce a css asset. Ensuring they exist prevents
-  // an error from occuring when the file is missing.
-  await uiBundles.ensureStyleFiles();
-
-  // in prod, only bundle when someing is missing or invalid
+  // in prod, only bundle when something is missing or invalid
   const reuseCache = config.get('optimize.useBundleCache')
     ? await uiBundles.areAllBundleCachesValid()
     : false;
@@ -43,12 +60,16 @@ export default async (kbnServer, server, config) => {
     return;
   }
 
+  await uiBundles.resetBundleDir();
+
   // only require the FsOptimizer when we need to
   const optimizer = new FsOptimizer({
+    logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
+    discoveredPlugins: newPlatform.setup.core.plugins.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
-    unsafeCache: config.get('optimize.unsafeCache'),
+    workers: config.get('optimize.workers'),
   });
 
   server.log(

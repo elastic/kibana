@@ -1,0 +1,105 @@
+<div class="kbnToaster__container">
+  <ul class="kbnToaster">
+    <li ng-repeat="notif in list" kbn-toast notif="notif">
+      <div ng-class="notif.getAlertClass()">
+        <span ng-show="notif.count > 1" class="euiBadge euiBadge--default">
+          <span class="euiBadge__content">
+            <span class="euiBadge__text">{{ notif.count }}</span>
+          </span>
+        </span>
+
+        <i ng-class="notif.getIconClass()" tooltip="{{notif.title}}"></i>
+
+        <kbn-truncated
+          ng-if="notif.content"
+          source="{{notif.content | markdown}}"
+          is-html="true"
+          length="250"
+          ng-class="notif.getToastMessageClass()"
+        ></kbn-truncated>
+
+        <render-directive
+          ng-if="notif.directive"
+          definition="notif.directive"
+          notif="notif"
+          ng-class="notif.getToastMessageClass()"
+        ></render-directive>
+
+        <div class="kuiButtonGroup" ng-class="notif.getButtonGroupClass()">
+          <button
+            type="button"
+            ng-if="notif.stack && !notif.showStack"
+            class="kuiButton kuiButton--small"
+            ng-class="notif.getButtonClass()"
+            ng-click="notif.cancelTimer(); notif.showStack = true"
+            i18n-id="common.ui.notify.toaster.moreInfoButtonLabel"
+            i18n-default-message="More Info"
+          >
+          </button>
+          <button
+            type="button"
+            ng-if="notif.stack && notif.showStack"
+            class="kuiButton kuiButton--small"
+            ng-class="notif.getButtonClass()"
+            ng-click="notif.showStack = false"
+            i18n-id="common.ui.notify.toaster.lessInfoButtonLabel"
+            i18n-default-message="Less Info"
+          >
+          </button>
+          <button
+            data-test-subj="notifierDismissButton"
+            type="button"
+            ng-if="notif.accept"
+            class="kuiButton kuiButton--small"
+            ng-class="notif.getButtonClass()"
+            ng-click="notif.accept()"
+            i18n-id="common.ui.notify.toaster.okButtonLabel"
+            i18n-default-message="OK"
+          >
+          </button>
+          <button
+            type="button"
+            ng-if="notif.address"
+            class="kuiButton kuiButton--small"
+            ng-class="notif.getButtonClass()"
+            ng-click="notif.address()"
+            i18n-id="common.ui.notify.toaster.fixItButtonLabel"
+            i18n-default-message="Fix it"
+          >
+          </button>
+          <button
+            type="button"
+            class="kuiButton kuiButton--small"
+            ng-repeat="action in notif.customActions"
+            ng-class="action.getButtonClass()"
+            ng-click="action.callback()"
+            ng-bind="action.key"
+            data-test-subj="{{action.dataTestSubj}}"
+          ></button>
+        </div>
+
+        <!-- Countdown badge -->
+        <button
+          class="euiBadge euiBadge--default"
+          type="button"
+          ng-if="notif.isTimed()"
+          class="kbnToaster__countdown"
+          ng-click="notif.cancelTimer()"
+          title="{{ ::'common.ui.notify.toaster.stopCountdownButtonTooltip' | i18n: { defaultMessage: 'Stop' } }}"
+        >
+          <span class="euiBadge__content">
+            <span
+              i18n-id="common.ui.notify.toaster.timeRemainingInSecondsLabel"
+              i18n-default-message="{timeRemaining}s"
+              i18n-values="{ timeRemaining: notif.timeRemaining }"
+            ></span>
+          </span>
+        </button>
+      </div>
+
+      <div ng-if="notif.stack && notif.showStack" ng-class="notif.getAlertClassStack()">
+        <pre ng-repeat="stack in notif.stacks" ng-bind="stack"></pre>
+      </div>
+    </li>
+  </ul>
+</div>

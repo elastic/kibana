@@ -1,6 +1,24 @@
-import Wreck from 'wreck';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import Wreck from '@hapi/wreck';
 import Progress from '../progress';
-import { fromNode as fn } from 'bluebird';
 import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
 import HttpsProxyAgent from 'https-proxy-agent';
@@ -22,32 +40,31 @@ function getProxyAgent(sourceUrl, logger) {
   }
 }
 
-function sendRequest({ sourceUrl, timeout }, logger) {
+async function sendRequest({ sourceUrl, timeout }, logger) {
   const maxRedirects = 11; //Because this one goes to 11.
-  return fn(cb => {
-    const reqOptions = { timeout, redirects: maxRedirects };
-    const proxyAgent = getProxyAgent(sourceUrl, logger);
+  const reqOptions = { timeout, redirects: maxRedirects };
+  const proxyAgent = getProxyAgent(sourceUrl, logger);
 
-    if (proxyAgent) {
-      reqOptions.agent = proxyAgent;
+  if (proxyAgent) {
+    reqOptions.agent = proxyAgent;
+  }
+
+  try {
+    const promise = Wreck.request('GET', sourceUrl, reqOptions);
+    const req = promise.req;
+    const resp = await promise;
+    if (resp.statusCode >= 400) {
+      throw new Error('ENOTFOUND');
     }
 
-    const req = Wreck.request('GET', sourceUrl, reqOptions, (err, resp) => {
-      if (err) {
-        if (err.code === 'ECONNREFUSED') {
-          err = new Error('ENOTFOUND');
-        }
+    return { req, resp };
+  } catch (err) {
+    if (err.code === 'ECONNREFUSED') {
+      err = new Error('ENOTFOUND');
+    }
 
-        return cb(err);
-      }
-
-      if (resp.statusCode >= 400) {
-        return cb(new Error('ENOTFOUND'));
-      }
-
-      cb(null, { req, resp });
-    });
-  });
+    throw err;
+  }
 }
 
 function downloadResponse({ resp, targetPath, progress }) {

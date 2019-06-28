@@ -1,0 +1,32 @@
+{
+  "termvectors": {
+    "url_params": {
+      "term_statistics": "__flag__",
+      "field_statistics": "__flag__",
+      "fields": [],
+      "offsets": "__flag__",
+      "positions": "__flag__",
+      "payloads": "__flag__",
+      "preference": "random",
+      "routing": "",
+      "parent": "",
+      "realtime": "__flag__",
+      "version": "",
+      "version_type": [
+        "internal",
+        "external",
+        "external_gte",
+        "force"
+      ]
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/{type}/_termvectors",
+      "{indices}/{type}/{id}/_termvectors"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-termvectors.html"
+  }
+}

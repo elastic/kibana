@@ -1,32 +1,24 @@
-import {
-  CommonPageProvider,
-  ConsolePageProvider,
-  ShieldPageProvider,
-  ContextPageProvider,
-  DiscoverPageProvider,
-  HeaderPageProvider,
-  HomePageProvider,
-  DashboardPageProvider,
-  VisualizePageProvider,
-  SettingsPageProvider,
-  MonitoringPageProvider,
-  PointSeriesPageProvider,
-  VisualBuilderPageProvider,
-  TimelionPageProvider,
-} from './page_objects';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-import {
-  RemoteProvider,
-  FilterBarProvider,
-  QueryBarProvider,
-  FindProvider,
-  TestSubjectsProvider,
-  DocTableProvider,
-  ScreenshotsProvider,
-  DashboardVisualizationProvider,
-  DashboardExpectProvider,
-  FailureDebuggingProvider,
-} from './services';
+import { pageObjects } from './page_objects';
+import { services } from './services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
@@ -45,40 +37,32 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/visualize'),
       require.resolve('./apps/xpack'),
     ],
-    pageObjects: {
-      common: CommonPageProvider,
-      console: ConsolePageProvider,
-      shield: ShieldPageProvider,
-      context: ContextPageProvider,
-      discover: DiscoverPageProvider,
-      header: HeaderPageProvider,
-      home: HomePageProvider,
-      dashboard: DashboardPageProvider,
-      visualize: VisualizePageProvider,
-      settings: SettingsPageProvider,
-      monitoring: MonitoringPageProvider,
-      pointSeries: PointSeriesPageProvider,
-      visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider
-    },
-    services: {
-      es: commonConfig.get('services.es'),
-      esArchiver: commonConfig.get('services.esArchiver'),
-      kibanaServer: commonConfig.get('services.kibanaServer'),
-      retry: commonConfig.get('services.retry'),
-      remote: RemoteProvider,
-      filterBar: FilterBarProvider,
-      queryBar: QueryBarProvider,
-      find: FindProvider,
-      testSubjects: TestSubjectsProvider,
-      docTable: DocTableProvider,
-      screenshots: ScreenshotsProvider,
-      dashboardVisualizations: DashboardVisualizationProvider,
-      dashboardExpect: DashboardExpectProvider,
-      failureDebugging: FailureDebuggingProvider,
-    },
+    pageObjects,
+    services,
     servers: commonConfig.get('servers'),
+
+    esTestCluster: commonConfig.get('esTestCluster'),
+
+    kbnTestServer: {
+      ...commonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...commonConfig.get('kbnTestServer.serverArgs'),
+        '--oss',
+      ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false
+      },
+    },
+
     apps: {
+      kibana: {
+        pathname: '/app/kibana',
+      },
       status_page: {
         pathname: '/status',
       },
@@ -109,13 +93,20 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
       },
+      account: {
+        pathname: '/app/kibana',
+        hash: '/account',
+      },
       home: {
         pathname: '/app/kibana',
         hash: '/home',
       },
     },
     junit: {
-      reportName: 'UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests'
+    },
+    browser: {
+      type: 'chrome'
     }
   };
 }

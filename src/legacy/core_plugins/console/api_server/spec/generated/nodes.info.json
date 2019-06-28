@@ -1,0 +1,32 @@
+{
+  "nodes.info": {
+    "url_params": {
+      "flat_settings": "__flag__",
+      "timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_nodes",
+      "_nodes/{nodes}",
+      "_nodes/{metrics}",
+      "_nodes/{nodes}/{metrics}"
+    ],
+    "url_components": {
+      "nodes": null,
+      "metrics": [
+        "http",
+        "ingest",
+        "jvm",
+        "os",
+        "plugins",
+        "process",
+        "settings",
+        "thread_pool",
+        "transport"
+      ]
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-info.html"
+  }
+}

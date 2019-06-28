@@ -1,49 +1,78 @@
-import path from 'path';
-import { inspect } from 'util';
-import chalk from 'chalk';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
+import chalk from 'chalk';
+import fs from 'fs';
+import { relative, resolve as resolvePath } from 'path';
+import { inspect } from 'util';
+
+import { CliError } from './errors';
+import { log } from './log';
+import {
+  IPackageDependencies,
+  IPackageJson,
+  IPackageScripts,
+  isLinkDependency,
+  readPackageJson,
+} from './package_json';
 import {
   installInDir,
   runScriptInPackage,
   runScriptInPackageStreaming,
+  yarnWorkspacesInfo,
 } from './scripts';
-import {
-  PackageJson,
-  PackageDependencies,
-  PackageScripts,
-  isLinkDependency,
-  readPackageJson,
-} from './package_json';
-import { CliError } from './errors';
 
 interface BuildConfig {
   skip?: boolean;
   intermediateBuildDirectory?: string;
+  oss?: boolean;
+}
+
+interface CleanConfig {
+  extraPatterns?: string[];
 }
 
 export class Project {
-  static async fromPath(path: string) {
+  public static async fromPath(path: string) {
     const pkgJson = await readPackageJson(path);
     return new Project(pkgJson, path);
   }
 
-  public readonly json: PackageJson;
+  public readonly json: IPackageJson;
   public readonly packageJsonLocation: string;
   public readonly nodeModulesLocation: string;
   public readonly targetLocation: string;
   public readonly path: string;
-  public readonly allDependencies: PackageDependencies;
-  public readonly productionDependencies: PackageDependencies;
-  public readonly devDependencies: PackageDependencies;
-  public readonly scripts: PackageScripts;
+  public readonly allDependencies: IPackageDependencies;
+  public readonly productionDependencies: IPackageDependencies;
+  public readonly devDependencies: IPackageDependencies;
+  public readonly scripts: IPackageScripts;
+  public isWorkspaceRoot = false;
+  public isWorkspaceProject = false;
 
-  constructor(packageJson: PackageJson, projectPath: string) {
+  constructor(packageJson: IPackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
 
-    this.packageJsonLocation = path.resolve(this.path, 'package.json');
-    this.nodeModulesLocation = path.resolve(this.path, 'node_modules');
-    this.targetLocation = path.resolve(this.path, 'target');
+    this.packageJsonLocation = resolvePath(this.path, 'package.json');
+    this.nodeModulesLocation = resolvePath(this.path, 'node_modules');
+    this.targetLocation = resolvePath(this.path, 'target');
 
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
@@ -51,6 +80,7 @@ export class Project {
       ...this.devDependencies,
       ...this.productionDependencies,
     };
+    this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
 
     this.scripts = this.json.scripts || {};
   }
@@ -59,43 +89,44 @@ export class Project {
     return this.json.name;
   }
 
-  ensureValidProjectDependency(project: Project) {
-    const relativePathToProject = normalizePath(
-      path.relative(this.path, project.path)
-    );
-
+  public ensureValidProjectDependency(project: Project, dependentProjectIsInWorkspace: boolean) {
     const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
 
+    let expectedVersionInPackageJson;
+    if (dependentProjectIsInWorkspace) {
+      expectedVersionInPackageJson = project.json.version;
+    } else {
+      const relativePathToProject = normalizePath(relative(this.path, project.path));
+      expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    }
+
+    // No issues!
     if (versionInPackageJson === expectedVersionInPackageJson) {
       return;
     }
 
-    const updateMsg = 'Update its package.json to the expected value below.';
-    const meta = {
-      package: `${this.name} (${this.packageJsonLocation})`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-      actual: `"${project.name}": "${versionInPackageJson}"`,
-    };
-
-    if (isLinkDependency(versionInPackageJson)) {
-      throw new CliError(
-        `[${this.name}] depends on [${
-          project.name
-        }] using 'link:', but the path is wrong. ${updateMsg}`,
-        meta
-      );
+    let problemMsg;
+    if (isLinkDependency(versionInPackageJson) && dependentProjectIsInWorkspace) {
+      problemMsg = `but should be using a workspace`;
+    } else if (isLinkDependency(versionInPackageJson)) {
+      problemMsg = `using 'link:', but the path is wrong`;
+    } else {
+      problemMsg = `but it's not using the local package`;
     }
 
     throw new CliError(
       `[${this.name}] depends on [${
         project.name
-      }], but it's not using the local package. ${updateMsg}`,
-      meta
+      }] ${problemMsg}. Update its package.json to the expected value below.`,
+      {
+        actual: `"${project.name}": "${versionInPackageJson}"`,
+        expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+        package: `${this.name} (${this.packageJsonLocation})`,
+      }
     );
   }
 
-  getBuildConfig(): BuildConfig {
+  public getBuildConfig(): BuildConfig {
     return (this.json.kibana && this.json.kibana.build) || {};
   }
 
@@ -104,18 +135,19 @@ export class Project {
    * This config can be specified to only include the project's build artifacts
    * instead of everything located in the project directory.
    */
-  getIntermediateBuildDirectory() {
-    return path.resolve(
-      this.path,
-      this.getBuildConfig().intermediateBuildDirectory || '.'
-    );
+  public getIntermediateBuildDirectory() {
+    return resolvePath(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
 
-  hasScript(name: string) {
+  public getCleanConfig(): CleanConfig {
+    return (this.json.kibana && this.json.kibana.clean) || {};
+  }
+
+  public hasScript(name: string) {
     return name in this.scripts;
   }
 
-  getExecutables(): { [key: string]: string } {
+  public getExecutables(): { [key: string]: string } {
     const raw = this.json.bin;
 
     if (!raw) {
@@ -124,14 +156,14 @@ export class Project {
 
     if (typeof raw === 'string') {
       return {
-        [this.name]: path.resolve(this.path, raw),
+        [this.name]: resolvePath(this.path, raw),
       };
     }
 
     if (typeof raw === 'object') {
       const binsConfig: { [k: string]: string } = {};
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = path.resolve(this.path, raw[binName]);
+        binsConfig[binName] = resolvePath(this.path, raw[binName]);
       }
       return binsConfig;
     }
@@ -140,38 +172,66 @@ export class Project {
       `[${this.name}] has an invalid "bin" field in its package.json, ` +
         `expected an object or a string`,
       {
-        package: `${this.name} (${this.packageJsonLocation})`,
         binConfig: inspect(raw),
+        package: `${this.name} (${this.packageJsonLocation})`,
       }
     );
   }
 
-  async runScript(scriptName: string, args: string[] = []) {
-    console.log(
+  public async runScript(scriptName: string, args: string[] = []) {
+    log.write(
       chalk.bold(
-        `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(
-          this.name
-        )}]:\n`
+        `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(this.name)}]:\n`
       )
     );
     return runScriptInPackage(scriptName, args, this);
   }
 
-  runScriptStreaming(scriptName: string, args: string[] = []) {
+  public runScriptStreaming(scriptName: string, args: string[] = []) {
     return runScriptInPackageStreaming(scriptName, args, this);
   }
 
-  hasDependencies() {
+  public hasDependencies() {
     return Object.keys(this.allDependencies).length > 0;
   }
 
-  async installDependencies({ extraArgs }: { extraArgs: string[] }) {
-    console.log(
-      chalk.bold(
-        `\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`
-      )
-    );
-    return installInDir(this.path, extraArgs);
+  public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
+    log.write(chalk.bold(`\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`));
+    await installInDir(this.path, extraArgs);
+    await this.removeExtraneousNodeModules();
+  }
+
+  /**
+   * Yarn workspaces symlinks workspace projects to the root node_modules, even
+   * when there is no depenency on the project. This results in unnecicary, and
+   * often duplicated code in the build archives.
+   */
+  public async removeExtraneousNodeModules() {
+    // this is only relevant for the root workspace
+    if (!this.isWorkspaceRoot) {
+      return;
+    }
+
+    const workspacesInfo = await yarnWorkspacesInfo(this.path);
+    const unusedWorkspaces = new Set(Object.keys(workspacesInfo));
+
+    // check for any cross-project dependency
+    for (const name of Object.keys(workspacesInfo)) {
+      const workspace = workspacesInfo[name];
+      workspace.workspaceDependencies.forEach(w => unusedWorkspaces.delete(w));
+    }
+
+    unusedWorkspaces.forEach(name => {
+      const { dependencies, devDependencies } = this.json;
+      const nodeModulesPath = resolvePath(this.nodeModulesLocation, name);
+      const isDependency = dependencies && dependencies.hasOwnProperty(name);
+      const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
+
+      if (!isDependency && !isDevDependency && fs.existsSync(nodeModulesPath)) {
+        log.write(`No dependency on ${name}, removing link in node_modules`);
+        fs.unlinkSync(nodeModulesPath);
+      }
+    });
   }
 }
 

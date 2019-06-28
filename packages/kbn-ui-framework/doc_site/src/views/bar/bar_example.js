@@ -1,3 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -10,15 +31,15 @@ import {
 } from '../../components';
 
 import Bar from './bar';
-const barSource = require('!!raw-loader!./bar');
+import barSource from '!!raw-loader!./bar';
 const barHtml = renderToHtml(Bar);
 
 import BarOneSection from './bar_one_section';
-const barOneSectionSource = require('!!raw-loader!./bar_one_section');
+import barOneSectionSource from '!!raw-loader!./bar_one_section';
 const barOneSectionHtml = renderToHtml(BarOneSection);
 
 import BarThreeSections from './bar_three_sections';
-const barThreeSectionsSource = require('!!raw-loader!./bar_three_sections');
+import barThreeSectionsSource from '!!raw-loader!./bar_three_sections';
 const barThreeSectionsHtml = renderToHtml(BarThreeSections);
 
 export default props => (

@@ -1,12 +1,11 @@
 $modalPadding: 10px;
-$modalBorderColor: $kuiColorLightGray;
-$modalBackgroundColor: #FFF;
-$modalOverlayBackground: rgba(#000000, 0.5);
+$modalBorderColor: $euiBorderColor;
+$modalBackgroundColor: $euiColorEmptyShade;
 $kuiModalDepth: 1000;
-
-// Dark theme colors
-$modalBorderColor--darkTheme: #000;
-$modalBackgroundColor--darkTheme: #525252;
+$modalOverlayBackground: $euiColorEmptyShade;
+@if (lightness($euiTextColor) > 50) {
+  $modalOverlayBackground: $euiColorLightShade;
+}
 
 @import "modal_overlay";
 @import "modal";

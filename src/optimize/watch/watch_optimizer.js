@@ -1,10 +1,30 @@
-import { Observable, ReplaySubject } from 'rxjs';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 import BaseOptimizer from '../base_optimizer';
-
 import { createBundlesRoute } from '../bundles_route';
+import { DllCompiler } from '../dynamic_dll_plugin';
+import { fromRoot } from '../../legacy/utils';
+import * as Rx from 'rxjs';
+import { mergeMap, take } from 'rxjs/operators';
 
-const STATUS = {
+export const STATUS = {
   RUNNING: 'optimizer running',
   SUCCESS: 'optimizer completed successfully',
   FAILURE: 'optimizer failed with stats',
@@ -14,25 +34,23 @@ const STATUS = {
 export default class WatchOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
-    this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
-    this.status$ = new ReplaySubject(1);
+    this.watchCache = opts.watchCache;
+    this.status$ = new Rx.ReplaySubject(1);
   }
 
   async init() {
     this.initializing = true;
     this.initialBuildComplete = false;
 
+    // try reset the watch optimizer cache
+    await this.watchCache.tryReset();
+
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
+    await this.uiBundles.resetBundleDir();
+    await super.init();
 
-    await this.uiBundles.writeEntryFiles();
-    await this.uiBundles.ensureStyleFiles();
-
-    await this.initCompiler();
-
-    this.compiler.plugin('watch-run', this.compilerRunStartHandler);
-    this.compiler.plugin('done', this.compilerDoneHandler);
     this.compiler.watch({ aggregateTimeout: 200 }, this.compilerWatchErrorHandler);
 
     if (this.prebuild) {
@@ -42,26 +60,74 @@ export default class WatchOptimizer extends BaseOptimizer {
     this.initializing = false;
   }
 
+  /**
+   *
+   * Extends the base_optimizer registerCompilerHooks function
+   * calling extended function also adding a new register function
+   *
+   * It gets called by super.init()
+  */
+  registerCompilerHooks() {
+    super.registerCompilerHooks();
+    this.registerCompilerWatchRunHook();
+  }
+
+  registerCompilerWatchRunHook() {
+    this.compiler.hooks.watchRun.tap('watch_optimizer-watchRun', () => {
+      this.status$.next({
+        type: STATUS.RUNNING
+      });
+    });
+  }
+
+  registerCompilerDoneHook() {
+    super.registerCompilerDoneHook();
+
+    this.compiler.hooks.done.tap('watch_optimizer-done', stats => {
+      if (stats.compilation.needAdditionalPass) {
+        return;
+      }
+
+      this.initialBuildComplete = true;
+      const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
+
+      if (this.isFailure(stats)) {
+        this.status$.next({
+          type: STATUS.FAILURE,
+          seconds,
+          error: this.failedStatsToError(stats)
+        });
+      } else {
+        this.status$.next({
+          type: STATUS.SUCCESS,
+          seconds,
+        });
+      }
+    });
+  }
+
   bindToServer(server, basePath) {
     // pause all requests received while the compiler is running
     // and continue once an outcome is reached (aborting the request
     // with an error if it was a failure).
-    server.ext('onRequest', (request, reply) => {
-      this.onceBuildOutcome()
-        .then(() => reply.continue())
-        .catch(reply);
+    server.ext('onRequest', async (request, h) => {
+      await this.onceBuildOutcome();
+      return h.continue;
     });
 
     server.route(createBundlesRoute({
-      bundlesPath: this.compiler.outputPath,
-      basePublicPath: basePath
+      regularBundlesPath: this.compiler.outputPath,
+      dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
+      basePublicPath: basePath,
+      builtCssPath: fromRoot('built_assets/css'),
     }));
   }
 
   async onceBuildOutcome() {
-    return await this.status$
-      .mergeMap(this.mapStatusToOutcomes)
-      .take(1)
+    return await this.status$.pipe(
+      mergeMap(this.mapStatusToOutcomes),
+      take(1)
+    )
       .toPromise();
   }
 
@@ -75,16 +141,8 @@ export default class WatchOptimizer extends BaseOptimizer {
 
       case STATUS.FAILURE:
       case STATUS.FATAL:
-        return Observable.throw(error);
+        return Rx.throwError(error);
     }
-  }
-
-  compilerRunStartHandler = (watchingCompiler, cb) => {
-    this.status$.next({
-      type: STATUS.RUNNING
-    });
-
-    cb();
   }
 
   compilerWatchErrorHandler = (error) => {
@@ -94,40 +152,20 @@ export default class WatchOptimizer extends BaseOptimizer {
         error
       });
     }
-  }
-
-  compilerDoneHandler = (stats) => {
-    this.initialBuildComplete = true;
-    const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
-
-    if (stats.hasErrors() || stats.hasWarnings()) {
-      this.status$.next({
-        type: STATUS.FAILURE,
-        seconds,
-        error: this.failedStatsToError(stats)
-      });
-    } else {
-      this.status$.next({
-        type: STATUS.SUCCESS,
-        seconds,
-      });
-    }
-  }
+  };
 
   onStatusChangeHandler = ({ type, seconds, error }) => {
     switch (type) {
       case STATUS.RUNNING:
         if (!this.initialBuildComplete) {
-          this.log(['info', 'optimize'], {
-            tmpl: 'Optimization started',
+          this.logWithMetadata(['info', 'optimize'], `Optimization started`, {
             bundles: this.uiBundles.getIds()
           });
         }
         break;
 
       case STATUS.SUCCESS:
-        this.log(['info', 'optimize'], {
-          tmpl: 'Optimization <%= status %> in <%= seconds %> seconds',
+        this.logWithMetadata(['info', 'optimize'], `Optimization success in ${seconds} seconds`, {
           bundles: this.uiBundles.getIds(),
           status: 'success',
           seconds
@@ -138,8 +176,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         // errors during initialization to the server, unlike the rest of the
         // errors produced here. Lets not muddy the console with extra errors
         if (!this.initializing) {
-          this.log(['fatal', 'optimize'], {
-            tmpl: 'Optimization <%= status %> in <%= seconds %> seconds<%= err %>',
+          this.logWithMetadata(['fatal', 'optimize'], `Optimization failed in ${seconds} seconds${error}`, {
             bundles: this.uiBundles.getIds(),
             status: 'failed',
             seconds,
@@ -149,7 +186,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         break;
 
       case STATUS.FATAL:
-        this.log('fatal', error);
+        this.logWithMetadata('fatal', error);
         process.exit(1);
         break;
     }

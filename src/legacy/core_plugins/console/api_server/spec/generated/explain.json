@@ -1,0 +1,30 @@
+{
+  "explain": {
+    "url_params": {
+      "analyze_wildcard": "__flag__",
+      "analyzer": "",
+      "default_operator": [
+        "AND",
+        "OR"
+      ],
+      "df": "_all",
+      "stored_fields": [],
+      "lenient": "__flag__",
+      "parent": "",
+      "preference": "random",
+      "q": "",
+      "routing": "",
+      "_source": [],
+      "_source_exclude": [],
+      "_source_include": []
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/{type}/{id}/_explain"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-explain.html"
+  }
+}

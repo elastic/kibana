@@ -1,15 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { CLIEngine } from 'eslint';
 
-import { matchesAnyGlob } from '../globs';
-import { DEFAULT_ESLINT_PATHS } from './default_eslint_paths';
-
 /**
- * Filters a list of files that should be linted. This is done by comparing the
- * file name against the default eslint patterns (used when executing the eslint
- * script without arguments) and then filtering those files by the eslint ignored
- * paths in .eslintignore.
- *
- * When any JS file is ignored by either mechanism a warning message is logged.
+ * Filters a list of files to only include lintable files.
  *
  * @param  {ToolingLog} log
  * @param  {Array<File>} files
@@ -17,28 +28,20 @@ import { DEFAULT_ESLINT_PATHS } from './default_eslint_paths';
  */
 export function pickFilesToLint(log, files) {
   const cli = new CLIEngine();
-  const sourcePathGlobs = cli.resolveFileGlobPatterns(DEFAULT_ESLINT_PATHS);
 
   return files.filter(file => {
+    if (!file.isJs() && !file.isTypescript()) {
+      return;
+    }
+
     const path = file.getRelativePath();
-    const isNormallyLinted = matchesAnyGlob(path, sourcePathGlobs);
-    const isExplicitlyIgnored = isNormallyLinted && cli.isPathIgnored(path);
 
-    if (isNormallyLinted && !isExplicitlyIgnored) {
-      log.debug('linting %j', file);
-      return true;
+    if (cli.isPathIgnored(path)) {
+      log.warning(`[eslint] %j ignored by .eslintignore`, file);
+      return false;
     }
 
-    // warn about modified JS files that are not being linted
-    if (!isNormallyLinted && file.isJs()) {
-      log.warning('%j not selected by src/dev/eslint/default_eslint_paths', file);
-    }
-
-    // warn about modified JS files that are explicitly excluded from linting
-    if (isExplicitlyIgnored && file.isJs()) {
-      log.warning(`%j ignored by .eslintignore`, file);
-    }
-
-    return false;
+    log.debug('[eslint] linting %j', file);
+    return true;
   });
 }

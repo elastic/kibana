@@ -1,4 +1,23 @@
-import expect from 'expect.js';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -20,6 +39,7 @@ export default function ({ getService }) {
               type: 'visualization',
               updated_at: '2017-09-21T18:51:23.794Z',
               version: resp.body.version,
+              migrationVersion: resp.body.migrationVersion,
               attributes: {
                 title: 'Count of requests',
                 description: '',
@@ -28,8 +48,14 @@ export default function ({ getService }) {
                 visState: resp.body.attributes.visState,
                 uiStateJSON: resp.body.attributes.uiStateJSON,
                 kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta
-              }
+              },
+              references: [{
+                type: 'index-pattern',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+              }],
             });
+            expect(resp.body.migrationVersion).to.be.ok();
           })
       ));
 
@@ -41,7 +67,7 @@ export default function ({ getService }) {
             .then(resp => {
               expect(resp.body).to.eql({
                 error: 'Not Found',
-                message: 'Not Found',
+                message: 'Saved object [visualization/foobar] not found',
                 statusCode: 404,
               });
             })
@@ -65,7 +91,7 @@ export default function ({ getService }) {
           .then(resp => {
             expect(resp.body).to.eql({
               error: 'Not Found',
-              message: 'Not Found',
+              message: 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',
               statusCode: 404,
             });
           })

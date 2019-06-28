@@ -1,0 +1,49 @@
+[[creating-df-kib]]
+== Creating {dataframe-transforms}
+
+beta[]
+
+You can create {stack-ov}/ml-dataframes.html[{dataframe-transforms}] in the 
+{kib} Machine Learning application.
+
+[role="screenshot"]
+image::ml/images/ml-definepivot.jpg["Defining a {dataframe} pivot"]
+
+Select the index pattern or saved search you want to transform. To pivot your 
+data, you must group the data by at least one field and apply at least one 
+aggregation. The {dataframe} pivot preview on the right side provides a visual 
+verification.
+
+Once you have created the pivot, add a job ID and define the index for the 
+transformed data (_target index_). If the target index does not exist, it will be 
+created automatically. You can optionally select to create a {kib} index pattern 
+for the target index. At the end of the process, a {dataframe} job is created as 
+a result. 
+
+[role="screenshot"]
+image::ml/images/ml-jobid.jpg["Job ID and target index"]
+
+After you create {dataframe} jobs, you can start, stop, and delete them 
+and explore their progress and statistics from the jobs list.
+
+For a more detailed example of using {dataframes} with the {kib} sample data,
+see {stack-ov}/ecommerce-dataframes.html[Transforming your data].
+
+[NOTE]
+===============================
+If {stack} {security-features} are enabled, you must have appropriate authority
+to work with {dataframes}. For example, there are built-in
+`data_frame_transforms_admin` and `data_frame_transforms_user` roles that have
+`manage_data_frame_transforms` and `monitor_data_frame_transforms` cluster
+privileges respectively. See
+{stack-ov}/built-in-roles.html[Built-in roles] and
+{stack-ov}/security-privileges.html[Security privileges].
+
+Depending on what tasks you perform, you might require additional privileges.
+For example, to create a {dataframe-transform} and generate a new target index,
+you need `manage_data_frame_transforms` cluster privileges, `read` and
+`view_index_metadata` privileges on the source index, and `read`, `create_index`,
+and `index` privileges on the target index. For more information, see the
+authorization details for each {ref}/data-frame-apis.html[{dataframe} API].
+
+===============================

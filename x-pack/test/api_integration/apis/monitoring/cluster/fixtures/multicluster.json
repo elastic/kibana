@@ -1,0 +1,341 @@
+[{
+  "cluster_uuid": "6d-9tDFTRe-qT5GoBytdlQ",
+  "cluster_name": "clustertwo",
+  "version": "7.0.0-alpha1",
+  "license": {
+    "status": "active",
+    "type": "basic",
+    "expiry_date_in_millis": 1914278399999
+  },
+  "elasticsearch": {
+    "cluster_stats": {
+      "indices": {
+        "count": 1,
+        "docs": {
+          "count": 8,
+          "deleted": 0
+        },
+        "shards": {
+          "total": 1,
+          "primaries": 1,
+          "replication": 0,
+          "index": {
+            "shards": {
+              "min": 1,
+              "max": 1,
+              "avg": 1
+            },
+            "primaries": {
+              "min": 1,
+              "max": 1,
+              "avg": 1
+            },
+            "replication": {
+              "min": 0,
+              "max": 0,
+              "avg": 0
+            }
+          }
+        },
+        "store": {
+          "size_in_bytes": 34095
+        }
+      },
+      "nodes": {
+        "fs": {
+          "total_in_bytes": 499065712640,
+          "free_in_bytes": 200665341952,
+          "available_in_bytes": 200403197952
+        },
+        "count": {
+          "total": 1
+        },
+        "jvm": {
+          "max_uptime_in_millis": 701043,
+          "mem": {
+            "heap_used_in_bytes": 204299464,
+            "heap_max_in_bytes": 628555776
+          }
+        }
+      },
+      "status": "green"
+    }
+  },
+  "logstash": {
+    "node_count": 0,
+    "events_in_total": 0,
+    "events_out_total": 0,
+    "avg_memory": 0,
+    "avg_memory_used": 0,
+    "max_uptime": 0,
+    "pipeline_count": 0,
+    "queue_types": {
+      "memory": 0,
+      "persisted": 0
+    },
+    "versions": []
+  },
+  "kibana": {
+    "status": null,
+    "requests_total": 0,
+    "concurrent_connections": 0,
+    "response_time_max": 0,
+    "memory_size": 0,
+    "memory_limit": 0,
+    "count": 0
+  },
+  "beats": {
+    "totalEvents": null,
+    "bytesSent": null,
+    "beats": {
+      "total": null,
+      "types": []
+    }
+  },
+  "apm": {
+    "totalEvents": null,
+    "memRss": null,
+    "memTotal": null,
+    "apms": {
+      "total": null
+    }
+  },
+  "alerts": {
+    "alertsMeta": {
+      "enabled": true
+    },
+    "clusterMeta": {
+      "enabled": false,
+      "message": "Cluster [clustertwo] license type [basic] does not support Cluster Alerts"
+    }
+  },
+  "isPrimary": false,
+  "status": "green",
+  "isCcrEnabled": true
+}, {
+  "isSupported": true,
+  "cluster_uuid": "lOF8kofiS_2DX58o9mXJ1Q",
+  "cluster_name": "monitoring-one",
+  "version": "7.0.0-alpha1",
+  "license": {
+    "status": "active",
+    "type": "trial",
+    "expiry_date_in_millis": 1505426308997
+  },
+  "elasticsearch": {
+    "cluster_stats": {
+      "indices": {
+        "count": 8,
+        "docs": {
+          "count": 3997,
+          "deleted": 69
+        },
+        "shards": {
+          "total": 8,
+          "primaries": 8,
+          "replication": 0,
+          "index": {
+            "shards": {
+              "min": 1,
+              "max": 1,
+              "avg": 1
+            },
+            "primaries": {
+              "min": 1,
+              "max": 1,
+              "avg": 1
+            },
+            "replication": {
+              "min": 0,
+              "max": 0,
+              "avg": 0
+            }
+          }
+        },
+        "store": {
+          "size_in_bytes": 2647163
+        }
+      },
+      "nodes": {
+        "fs": {
+          "total_in_bytes": 499065712640,
+          "free_in_bytes": 200665792512,
+          "available_in_bytes": 200403648512
+        },
+        "count": {
+          "total": 1
+        },
+        "jvm": {
+          "max_uptime_in_millis": 761002,
+          "mem": {
+            "heap_used_in_bytes": 133041176,
+            "heap_max_in_bytes": 628555776
+          }
+        }
+      },
+      "status": "yellow"
+    }
+  },
+  "logstash": {
+    "node_count": 0,
+    "events_in_total": 0,
+    "events_out_total": 0,
+    "avg_memory": 0,
+    "avg_memory_used": 0,
+    "max_uptime": 0,
+    "pipeline_count": 0,
+    "queue_types": {
+      "memory": 0,
+      "persisted": 0
+    },
+    "versions": []
+  },
+  "kibana": {
+    "status": null,
+    "requests_total": 0,
+    "concurrent_connections": 0,
+    "response_time_max": 0,
+    "memory_size": 0,
+    "memory_limit": 0,
+    "count": 0
+  },
+  "beats": {
+    "totalEvents": null,
+    "bytesSent": null,
+    "beats": {
+      "total": null,
+      "types": []
+    }
+  },
+  "apm": {
+    "totalEvents": null,
+    "memRss": null,
+    "memTotal": null,
+    "apms": {
+      "total": null
+    }
+  },
+  "alerts": {
+    "alertsMeta": {
+      "enabled": true
+    },
+    "count": 1,
+    "low": 0,
+    "medium": 1,
+    "high": 0
+  },
+  "isPrimary": false,
+  "status": "yellow",
+  "isCcrEnabled": true
+}, {
+  "isSupported": true,
+  "cluster_uuid": "TkHOX_-1TzWwbROwQJU5IA",
+  "cluster_name": "clusterone",
+  "version": "7.0.0-alpha1",
+  "license": {
+    "status": "active",
+    "type": "trial",
+    "expiry_date_in_millis": 1505426327135
+  },
+  "elasticsearch": {
+    "cluster_stats": {
+      "indices": {
+        "count": 5,
+        "docs": {
+          "count": 150,
+          "deleted": 0
+        },
+        "shards": {
+          "total": 26,
+          "primaries": 13,
+          "replication": 1,
+          "index": {
+            "shards": {
+              "min": 2,
+              "max": 10,
+              "avg": 5.2
+            },
+            "primaries": {
+              "min": 1,
+              "max": 5,
+              "avg": 2.6
+            },
+            "replication": {
+              "min": 1,
+              "max": 1,
+              "avg": 1
+            }
+          }
+        },
+        "store": {
+          "size_in_bytes": 4838464
+        }
+      },
+      "nodes": {
+        "fs": {
+          "total_in_bytes": 499065712640,
+          "free_in_bytes": 200666353664,
+          "available_in_bytes": 200404209664
+        },
+        "count": {
+          "total": 2
+        },
+        "jvm": {
+          "max_uptime_in_millis": 741786,
+          "mem": {
+            "heap_used_in_bytes": 465621856,
+            "heap_max_in_bytes": 1257111552
+          }
+        }
+      },
+      "status": "green"
+    }
+  },
+  "logstash": {
+    "node_count": 1,
+    "events_in_total": 142,
+    "events_out_total": 142,
+    "avg_memory": 1038876672,
+    "avg_memory_used": 487782224,
+    "max_uptime": 570039,
+    "pipeline_count": 1,
+    "queue_types": {
+      "memory": 1,
+      "persisted": 0
+    },
+    "versions": ["7.0.0-alpha1"]
+  },
+  "kibana": {
+    "status": "green",
+    "requests_total": 571,
+    "concurrent_connections": 307,
+    "response_time_max": 1930,
+    "memory_size": 231141376,
+    "memory_limit": 1501560832,
+    "count": 1
+  },
+  "beats": {
+    "totalEvents": null,
+    "bytesSent": null,
+    "beats": {
+      "total": null,
+      "types": []
+    }
+  },
+  "apm": {
+    "totalEvents": null,
+    "memRss": null,
+    "memTotal": null,
+    "apms": {
+      "total": null
+    }
+  },
+  "alerts": {
+    "alertsMeta": {
+      "enabled": true
+    }
+  },
+  "isPrimary": false,
+  "status": "green",
+  "isCcrEnabled": true
+}]

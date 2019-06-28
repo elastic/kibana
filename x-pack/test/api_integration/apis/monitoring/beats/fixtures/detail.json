@@ -1,0 +1,728 @@
+{
+  "summary": {
+    "uuid": "60599a4f-8139-4251-b0b9-15866df34221",
+    "transportAddress": "spicy.local",
+    "version": "7.0.0-alpha1",
+    "name": "spicy.local",
+    "type": "Metricbeat",
+    "output": "Elasticsearch",
+    "configReloads": 0,
+    "uptime": 440261,
+    "eventsTotal": 11466,
+    "eventsEmitted": 11466,
+    "eventsDropped": 0,
+    "bytesWritten": 9564746,
+    "handlesHardLimit": null,
+    "handlesSoftLimit": null
+  },
+  "metrics": {
+    "beat_event_rates": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.pipeline.events.total",
+        "metricAgg": "max",
+        "label": "New",
+        "title": "Events Rate",
+        "description": "New events sent to the publishing pipeline",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 27.3],
+        [1518212610000, 27.3],
+        [1518212640000, 27.3],
+        [1518212670000, 27.3],
+        [1518212700000, 27.3],
+        [1518212730000, 27.3],
+        [1518212760000, 27.3],
+        [1518212790000, 27.3],
+        [1518212820000, 27.3],
+        [1518212850000, 27.3],
+        [1518212880000, 27.3],
+        [1518212910000, 27.3],
+        [1518212940000, 27.3],
+        [1518212970000, 9.1]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.output.events.total",
+        "metricAgg": "max",
+        "label": "Emitted",
+        "title": "Events Rate",
+        "description": "Events processed by the output (including retries)",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.output.events.acked",
+        "metricAgg": "max",
+        "label": "Acknowledged",
+        "title": "Events Rate",
+        "description": "Events acknowledged by the output (includes events dropped by the output)",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.pipeline.events.published",
+        "metricAgg": "max",
+        "label": "Queued",
+        "title": "Events Rate",
+        "description": "Events added to the event pipeline queue",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 27.3],
+        [1518212610000, 27.3],
+        [1518212640000, 27.3],
+        [1518212670000, 27.3],
+        [1518212700000, 27.3],
+        [1518212730000, 27.3],
+        [1518212760000, 27.3],
+        [1518212790000, 27.3],
+        [1518212820000, 27.3],
+        [1518212850000, 27.3],
+        [1518212880000, 27.3],
+        [1518212910000, 27.3],
+        [1518212940000, 27.3],
+        [1518212970000, 9.1]
+      ]
+    }],
+    "beat_fail_rates": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.pipeline.events.failed",
+        "metricAgg": "max",
+        "label": "Failed in Pipeline",
+        "title": "Fail Rates",
+        "description": "Failures that happened before event was added to the publishing pipeline (output was disabled or publisher client closed)",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.pipeline.events.dropped",
+        "metricAgg": "max",
+        "label": "Dropped in Pipeline",
+        "title": "Fail Rates",
+        "description": "Events that have been dropped after N retries (N = max_retries setting)",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.output.events.dropped",
+        "metricAgg": "max",
+        "label": "Dropped in Output",
+        "title": "Fail Rates",
+        "description": "(Fatal drop) Events dropped by the output as being \"invalid.\" The output still acknowledges the event for the Beat to remove it from the queue.",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.pipeline.events.retry",
+        "metricAgg": "max",
+        "label": "Retry in Pipeline",
+        "title": "Fail Rates",
+        "description": "Events in the pipeline that are trying again to be sent to the output",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }],
+    "beat_throughput_rates": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.output.write.bytes",
+        "metricAgg": "max",
+        "label": "Bytes Sent",
+        "title": "Throughput",
+        "description": "Bytes written to the output (consists of size of network headers and compressed payload)",
+        "units": "/s",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 22857.166666666668],
+        [1518212610000, 21809.833333333332],
+        [1518212640000, 23896.066666666666],
+        [1518212670000, 23110.5],
+        [1518212700000, 17254.266666666666],
+        [1518212730000, 27146.233333333334],
+        [1518212760000, 20635.933333333334],
+        [1518212790000, 26116.2],
+        [1518212820000, 23117.933333333334],
+        [1518212850000, 17254.4],
+        [1518212880000, 28442.8],
+        [1518212910000, 19319.966666666667],
+        [1518212940000, 26377.166666666668],
+        [1518212970000, 5203.266666666666]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.output.read.bytes",
+        "metricAgg": "max",
+        "label": "Bytes Received",
+        "title": "Throughput",
+        "description": "Bytes read in response from the output",
+        "units": "/s",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 6281.033333333334],
+        [1518212610000, 5900.266666666666],
+        [1518212640000, 6661.766666666666],
+        [1518212670000, 6661.9],
+        [1518212700000, 4377.033333333334],
+        [1518212730000, 7453.4],
+        [1518212760000, 5925.9],
+        [1518212790000, 7073.166666666667],
+        [1518212820000, 6690.866666666667],
+        [1518212850000, 4396.033333333334],
+        [1518212880000, 8323.233333333334],
+        [1518212910000, 4676.066666666667],
+        [1518212940000, 7838.133333333333],
+        [1518212970000, 1337.9]
+      ]
+    }],
+    "beat_output_errors": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.output.write.errors",
+        "metricAgg": "max",
+        "label": "Sending",
+        "title": "Output Errors",
+        "description": "Errors in writing the response from the output",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.libbeat.output.read.errors",
+        "metricAgg": "max",
+        "label": "Receiving",
+        "title": "Output Errors",
+        "description": "Errors in reading the response from the output",
+        "units": "/s",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }],
+    "beat_memory": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.beat.memstats.memory_alloc",
+        "metricAgg": "max",
+        "label": "Active",
+        "title": "Memory",
+        "description": "Private memory in active use by the Beat",
+        "units": "B",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1518212550000, 7218840],
+        [1518212580000, 5731608],
+        [1518212610000, 7190216],
+        [1518212640000, 7372128],
+        [1518212670000, 6364000],
+        [1518212700000, 6922392],
+        [1518212730000, 8683016],
+        [1518212760000, 6838576],
+        [1518212790000, 8076536],
+        [1518212820000, 6499144],
+        [1518212850000, 7986856],
+        [1518212880000, 6491704],
+        [1518212910000, 7986632],
+        [1518212940000, 7605664],
+        [1518212970000, 7598304]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.beat.memstats.rss",
+        "metricAgg": "max",
+        "label": "Process Total",
+        "title": "Memory",
+        "description": "Resident set size of memory reserved by the Beat from the OS",
+        "units": "B",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1518212550000, 40939520],
+        [1518212580000, 36126720],
+        [1518212610000, 36188160],
+        [1518212640000, 37097472],
+        [1518212670000, 37257216],
+        [1518212700000, 37171200],
+        [1518212730000, 32886784],
+        [1518212760000, 33087488],
+        [1518212790000, 33058816],
+        [1518212820000, 32894976],
+        [1518212850000, 33087488],
+        [1518212880000, 33218560],
+        [1518212910000, 33243136],
+        [1518212940000, 35459072],
+        [1518212970000, 35471360]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.beat.memstats.gc_next",
+        "metricAgg": "max",
+        "label": "GC Next",
+        "title": "Memory",
+        "description": "Limit of allocated memory at which garbage collection will occur",
+        "units": "B",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1518212550000, 9444400],
+        [1518212580000, 9334256],
+        [1518212610000, 9752752],
+        [1518212640000, 10073040],
+        [1518212670000, 9931344],
+        [1518212700000, 10466192],
+        [1518212730000, 9876624],
+        [1518212760000, 11007568],
+        [1518212790000, 9953440],
+        [1518212820000, 9833024],
+        [1518212850000, 11066352],
+        [1518212880000, 10439376],
+        [1518212910000, 11023968],
+        [1518212940000, 9470112],
+        [1518212970000, 9983712]
+      ]
+    }],
+    "beat_cpu_utilization": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.beat.cpu.total.value",
+        "metricAgg": "max",
+        "label": "Total",
+        "title": "CPU Utilization",
+        "description": "Percentage of CPU time spent executing (user+kernel mode) for the Beat process",
+        "units": "%",
+        "format": "0.[00]",
+        "hasCalculation": true,
+        "isDerivative": true
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, 0],
+        [1518212610000, 0],
+        [1518212640000, 0],
+        [1518212670000, 0],
+        [1518212700000, 0],
+        [1518212730000, 0],
+        [1518212760000, 0],
+        [1518212790000, 0],
+        [1518212820000, 0],
+        [1518212850000, 0],
+        [1518212880000, 0],
+        [1518212910000, 0],
+        [1518212940000, 0],
+        [1518212970000, 0]
+      ]
+    }],
+    "beat_os_load": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.system.load.1",
+        "metricAgg": "max",
+        "label": "1m",
+        "title": "System Load",
+        "description": "Load average over the last 1 minute",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1518212550000, 3.8462],
+        [1518212580000, 3.7266],
+        [1518212610000, 3.5405],
+        [1518212640000, 3.2588],
+        [1518212670000, 3.3047],
+        [1518212700000, 2.9639],
+        [1518212730000, 2.8369],
+        [1518212760000, 2.7363],
+        [1518212790000, 2.5972],
+        [1518212820000, 2.6816],
+        [1518212850000, 2.918],
+        [1518212880000, 2.8921],
+        [1518212910000, 2.6353],
+        [1518212940000, 3.0137],
+        [1518212970000, 2.6235]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.system.load.5",
+        "metricAgg": "max",
+        "label": "5m",
+        "title": "System Load",
+        "description": "Load average over the last 5 minutes",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1518212550000, 2.8774],
+        [1518212580000, 2.9438],
+        [1518212610000, 2.9321],
+        [1518212640000, 2.9175],
+        [1518212670000, 2.9595],
+        [1518212700000, 2.9009],
+        [1518212730000, 2.874],
+        [1518212760000, 2.8389],
+        [1518212790000, 2.7803],
+        [1518212820000, 2.7627],
+        [1518212850000, 2.8022],
+        [1518212880000, 2.7988],
+        [1518212910000, 2.7314],
+        [1518212940000, 2.8057],
+        [1518212970000, 2.729]
+      ]
+    }, {
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.system.load.15",
+        "metricAgg": "max",
+        "label": "15m",
+        "title": "System Load",
+        "description": "Load average over the last 15 minutes",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1518212550000, 2.7319],
+        [1518212580000, 2.7612],
+        [1518212610000, 2.7612],
+        [1518212640000, 2.7573],
+        [1518212670000, 2.7773],
+        [1518212700000, 2.7598],
+        [1518212730000, 2.752],
+        [1518212760000, 2.7427],
+        [1518212790000, 2.7251],
+        [1518212820000, 2.7192],
+        [1518212850000, 2.7339],
+        [1518212880000, 2.7339],
+        [1518212910000, 2.7104],
+        [1518212940000, 2.7368],
+        [1518212970000, 2.7104]
+      ]
+    }],
+    "beat_handles": [{
+      "bucket_size": "30 seconds",
+      "timeRange": {
+        "min": 1518209340000,
+        "max": 1518213000000
+      },
+      "metric": {
+        "app": "beats",
+        "field": "beats_stats.metrics.beat.handles.open",
+        "metricAgg": "max",
+        "label": "Open Handles",
+        "title": "Open Handles",
+        "description": "Count of open file handlers",
+        "units": "",
+        "format": "0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1518212550000, null],
+        [1518212580000, null],
+        [1518212610000, null],
+        [1518212640000, null],
+        [1518212670000, null],
+        [1518212700000, null],
+        [1518212730000, null],
+        [1518212760000, null],
+        [1518212790000, null],
+        [1518212820000, null],
+        [1518212850000, null],
+        [1518212880000, null],
+        [1518212910000, null],
+        [1518212940000, null],
+        [1518212970000, null]
+      ]
+    }]
+  }
+}

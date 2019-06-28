@@ -1,1 +1,0 @@
-export { VislibComponentsColorColorProvider } from './color';

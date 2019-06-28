@@ -1,0 +1,12 @@
+[IMPORTANT]
+===================
+The interval between report requests must be longer than the time it
+takes to generate the reports--otherwise, the report queue can back up. To 
+avoid this, increase the time between report requests. 
+
+By default, report generation times out if the report cannot be generated
+within two minutes. If you are generating reports that contain many complex
+visualizations or your machine is slow or under constant heavy load, it
+might take longer than two minutes to generate a report. You can increase
+the timeout by setting `xpack.reporting.queue.timeout` in `kibana.yml`.
+===================

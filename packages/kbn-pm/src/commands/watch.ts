@@ -1,8 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import chalk from 'chalk';
-import { topologicallyBatchProjects, ProjectMap } from '../utils/projects';
+import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
+import { ProjectMap, topologicallyBatchProjects } from '../utils/projects';
 import { waitUntilWatchIsReady } from '../utils/watch';
-import { Command } from './';
+import { ICommand } from './';
 
 /**
  * Name of the script in the package/project package.json file to run during `kbn watch`.
@@ -24,37 +44,42 @@ const kibanaProjectName = 'kibana';
  * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
  */
-export const WatchCommand: Command = {
-  name: 'watch',
+export const WatchCommand: ICommand = {
   description: 'Runs `kbn:watch` script for every project.',
+  name: 'watch',
 
   async run(projects, projectGraph) {
-    const projectsWithWatchScript: ProjectMap = new Map();
+    const projectsToWatch: ProjectMap = new Map();
     for (const project of projects.values()) {
+      // We can't watch project that doesn't have `kbn:watch` script.
       if (project.hasScript(watchScriptName)) {
-        projectsWithWatchScript.set(project.name, project);
+        projectsToWatch.set(project.name, project);
       }
     }
 
-    const projectNames = Array.from(projectsWithWatchScript.keys());
-    console.log(
-      chalk.bold(
-        chalk.green(
-          `Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`
+    if (projectsToWatch.size === 0) {
+      log.write(
+        chalk.red(
+          `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
         )
+      );
+      return;
+    }
+
+    const projectNames = Array.from(projectsToWatch.keys());
+    log.write(
+      chalk.bold(
+        chalk.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)
       )
     );
 
     // Kibana should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
-    projectsWithWatchScript.delete(kibanaProjectName);
+    const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
 
-    const batchedProjects = topologicallyBatchProjects(
-      projectsWithWatchScript,
-      projectGraph
-    );
+    const batchedProjects = topologicallyBatchProjects(projectsToWatch, projectGraph);
 
-    if (projects.has(kibanaProjectName)) {
+    if (shouldWatchKibanaProject) {
       batchedProjects.push([projects.get(kibanaProjectName)!]);
     }
 
@@ -63,12 +88,8 @@ export const WatchCommand: Command = {
         pkg.runScriptStreaming(watchScriptName).stdout
       );
 
-      console.log(
-        chalk.bold(
-          `[${chalk.green(
-            pkg.name
-          )}] Initial build completed (${completionHint}).`
-        )
+      log.write(
+        chalk.bold(`[${chalk.green(pkg.name)}] Initial build completed (${completionHint}).`)
       );
     });
   },

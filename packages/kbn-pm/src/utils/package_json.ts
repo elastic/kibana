@@ -1,45 +1,41 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import readPkg from 'read-pkg';
 import writePkg from 'write-pkg';
-import path from 'path';
 
-export type PackageJson = { [key: string]: any };
-export type PackageDependencies = { [key: string]: string };
-export type PackageScripts = { [key: string]: string };
+export interface IPackageJson {
+  [key: string]: any;
+}
+export interface IPackageDependencies {
+  [key: string]: string;
+}
+export interface IPackageScripts {
+  [key: string]: string;
+}
 
 export function readPackageJson(dir: string) {
   return readPkg(dir, { normalize: false });
 }
 
-export function writePackageJson(path: string, json: PackageJson) {
+export function writePackageJson(path: string, json: IPackageJson) {
   return writePkg(path, json);
 }
 
-export const createProductionPackageJson = (pkgJson: PackageJson) => ({
-  ...pkgJson,
-  dependencies: transformDependencies(pkgJson.dependencies),
-});
-
-export const isLinkDependency = (depVersion: string) =>
-  depVersion.startsWith('link:');
-
-/**
- * Replaces `link:` dependencies with `file:` dependencies. When installing
- * dependencies, these `file:` dependencies will be copied into `node_modules`
- * instead of being symlinked.
- *
- * This will allow us to copy packages into the build and run `yarn`, which
- * will then _copy_ the `file:` dependencies into `node_modules` instead of
- * symlinking like we do in development.
- */
-export function transformDependencies(dependencies: PackageDependencies = {}) {
-  const newDeps: PackageDependencies = {};
-  for (const name of Object.keys(dependencies)) {
-    const depVersion = dependencies[name];
-    if (isLinkDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:', 'file:');
-    } else {
-      newDeps[name] = depVersion;
-    }
-  }
-  return newDeps;
-}
+export const isLinkDependency = (depVersion: string) => depVersion.startsWith('link:');

@@ -1,0 +1,111 @@
+{
+  "id": "nginx_ecs",
+  "title": "Nginx access logs",
+  "description": "Find unusual activity in HTTP access logs from filebeat (ECS)",
+  "type": "Web Access Logs",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "filebeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        { "term":  { "event.dataset": "nginx.access" } },
+        { "exists": { "field": "source.address" } },
+        { "exists": { "field": "url.original" } },
+        { "exists": { "field": "http.response.status_code" } }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "visitor_rate_ecs",
+      "file": "visitor_rate_ecs.json"
+    },
+    {
+      "id": "status_code_rate_ecs",
+      "file": "status_code_rate_ecs.json"
+    },
+    {
+      "id": "source_ip_url_count_ecs",
+      "file": "source_ip_url_count_ecs.json"
+    },
+    {
+      "id": "source_ip_request_rate_ecs",
+      "file": "source_ip_request_rate_ecs.json"
+    },
+    {
+      "id": "low_request_rate_ecs",
+      "file": "low_request_rate_ecs.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-visitor_rate_ecs",
+      "file": "datafeed_visitor_rate_ecs.json",
+      "job_id": "visitor_rate_ecs"
+    },
+    {
+      "id": "datafeed-status_code_rate_ecs",
+      "file": "datafeed_status_code_rate_ecs.json",
+      "job_id": "status_code_rate_ecs"
+    },
+    {
+      "id": "datafeed-source_ip_url_count_ecs",
+      "file": "datafeed_source_ip_url_count_ecs.json",
+      "job_id": "source_ip_url_count_ecs"
+    },
+    {
+      "id": "datafeed-source_ip_request_rate_ecs",
+      "file": "datafeed_source_ip_request_rate_ecs.json",
+      "job_id": "source_ip_request_rate_ecs"
+    },
+    {
+      "id": "datafeed-low_request_rate_ecs",
+      "file": "datafeed_low_request_rate_ecs.json",
+      "job_id": "low_request_rate_ecs"
+    }
+  ],
+  "kibana": {
+    "dashboard": [
+      {
+        "id": "ml_http_access_explorer_ecs",
+        "file": "ml_http_access_explorer_ecs.json"
+      }
+    ],
+    "search": [
+      {
+        "id": "ml_http_access_filebeat_ecs",
+        "file": "ml_http_access_filebeat_ecs.json"
+      }
+    ],
+    "visualization": [
+      {
+        "id": "ml_http_access_map_ecs",
+        "file": "ml_http_access_map_ecs.json"
+      },
+      {
+        "id": "ml_http_access_source_ip_timechart_ecs",
+        "file": "ml_http_access_source_ip_timechart_ecs.json"
+      },
+      {
+        "id": "ml_http_access_status_code_timechart_ecs",
+        "file": "ml_http_access_status_code_timechart_ecs.json"
+      },
+      {
+        "id": "ml_http_access_top_source_ips_table_ecs",
+        "file": "ml_http_access_top_source_ips_table_ecs.json"
+      },
+      {
+        "id": "ml_http_access_top_urls_table_ecs",
+        "file": "ml_http_access_top_urls_table_ecs.json"
+      },
+      {
+        "id": "ml_http_access_unique_count_url_timechart_ecs",
+        "file": "ml_http_access_unique_count_url_timechart_ecs.json"
+      },
+      {
+        "id": "ml_http_access_events_timechart_ecs",
+        "file": "ml_http_access_events_timechart_ecs.json"
+      }
+    ]
+  }
+}

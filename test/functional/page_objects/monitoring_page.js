@@ -1,33 +1,44 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export function MonitoringPageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-
-  const getRemote = (timeout) =>
-    getService('remote')
-      .setFindTimeout(
-        timeout || getService('config').get('timeouts.find')
-      );
+  const find = getService('find');
 
   class MonitoringPage {
-    getWelcome() {
-      return getRemote()
-        .findDisplayedByCssSelector('render-directive')
-        .getVisibleText();
+    async getWelcome() {
+      const el = await find.displayedByCssSelector('render-directive');
+      return await el.getVisibleText();
     }
 
     dismissWelcome() {
       return testSubjects.click('notifierDismissButton');
     }
 
-    getToasterContents() {
-      return getRemote()
-        .findByCssSelector('div.toaster-container.ng-isolate-scope')
-        .getVisibleText();
+    async getToasterContents() {
+      const el = await find.byCssSelector('div.kbnToaster__container');
+      return await el.getVisibleText();
     }
 
-    clickOptOut() {
-      return getRemote().findByLinkText('Opt out here').click();
+    async clickOptOut() {
+      return find.clickByLinkText('Opt out here');
     }
-
   }
 
   return new MonitoringPage();

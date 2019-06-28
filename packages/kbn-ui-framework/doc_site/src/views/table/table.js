@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, {
   Component,
 } from 'react';
@@ -5,11 +24,6 @@ import React, {
 import classNames from 'classnames';
 
 import {
-  KuiButton,
-  KuiButtonIcon,
-  KuiPopover,
-  KuiContextMenuPanel,
-  KuiContextMenuItem,
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
@@ -154,57 +168,6 @@ export class Table extends Component {
           <KuiTableRowCell>
             {item.dateCreated}
           </KuiTableRowCell>
-
-          <KuiTableRowCell textOnly={false}>
-            <KuiPopover
-              button={(
-                <KuiButton
-                  buttonType="basic"
-                  onClick={() => this.togglePopover(item)}
-                  icon={<KuiButtonIcon className="fa-angle-down" />}
-                  iconPosition="right"
-                >
-                  Actions
-                </KuiButton>
-              )}
-              isOpen={this.isPopoverOpen(item)}
-              closePopover={() => this.closePopover(item)}
-              panelPaddingSize="none"
-              withTitle
-              anchorPosition="right"
-            >
-              <KuiContextMenuPanel
-                style={{ width: '100px' }}
-                items={[
-                  (
-                    <KuiContextMenuItem
-                      key="A"
-                      icon={<span className="kuiIcon fa-pencil" />}
-                      onClick={() => { this.closePopover(item); window.alert('Edit'); }}
-                    >
-                    Edit
-                    </KuiContextMenuItem>
-                  ), (
-                    <KuiContextMenuItem
-                      key="B"
-                      icon={<span className="kuiIcon fa-share" />}
-                      onClick={() => { this.closePopover(item); window.alert('Share'); }}
-                    >
-                    Share
-                    </KuiContextMenuItem>
-                  ), (
-                    <KuiContextMenuItem
-                      key="C"
-                      icon={<span className="kuiIcon fa-trash-o" />}
-                      onClick={() => { this.closePopover(item); window.alert('Delete'); }}
-                    >
-                    Delete
-                    </KuiContextMenuItem>
-                  )
-                ]}
-              />
-            </KuiPopover>
-          </KuiTableRowCell>
         </KuiTableRow>
       );
 
@@ -254,10 +217,6 @@ export class Table extends Component {
 
           <KuiTableHeaderCell>
             Date created
-          </KuiTableHeaderCell>
-
-          <KuiTableHeaderCell width="110px">
-            Actions
           </KuiTableHeaderCell>
         </KuiTableHeader>
 

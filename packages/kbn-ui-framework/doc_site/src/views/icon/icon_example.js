@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 
 import {
@@ -9,15 +28,15 @@ import {
   GuideText,
 } from '../../components';
 
-const iconHtml = require('./icon.html');
-const infoHtml = require('./icon_info.html');
-const basicHtml = require('./icon_basic.html');
-const successHtml = require('./icon_success.html');
-const warningHtml = require('./icon_warning.html');
-const errorHtml = require('./icon_error.html');
-const inactiveHtml = require('./icon_inactive.html');
-const spinnerHtml = require('./icon_spinner.html');
-const spinnerJs = require('raw-loader!./icon_spinner.js');
+import iconHtml from './icon.html';
+import infoHtml from './icon_info.html';
+import basicHtml from './icon_basic.html';
+import successHtml from './icon_success.html';
+import warningHtml from './icon_warning.html';
+import errorHtml from './icon_error.html';
+import inactiveHtml from './icon_inactive.html';
+import spinnerHtml from './icon_spinner.html';
+import spinnerJs from 'raw-loader!./icon_spinner.js';
 
 export default props => (
   <GuidePage title={props.route.name}>

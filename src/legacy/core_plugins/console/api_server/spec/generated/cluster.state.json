@@ -1,0 +1,39 @@
+{
+  "cluster.state": {
+    "url_params": {
+      "local": "__flag__",
+      "master_timeout": "",
+      "flat_settings": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cluster/state",
+      "_cluster/state/{metrics}",
+      "_cluster/state/{metrics}/{indices}"
+    ],
+    "url_components": {
+      "indices": null,
+      "metrics": [
+        "_all",
+        "blocks",
+        "master_node",
+        "metadata",
+        "nodes",
+        "routing_nodes",
+        "routing_table",
+        "version"
+      ]
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
+  }
+}

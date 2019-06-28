@@ -1,0 +1,67 @@
+[[dashboards]]
+== Monitoring's Dashboards
+
+=== Overview Dashboard
+
+The _Overview_ dashboard is Monitoring's main page. The dashboard displays the
+essentials metrics you need to know that your cluster is healthy. It also
+provides an overview of your nodes and indices, displayed in two clean tables
+with the relevant key metrics. If some value needs your attention, they will
+be highlighted in yellow or red. The nodes and indices tables also serve as an
+entry point to the more detailed _Node Statistics_ and _Index Statistics_
+dashboards.
+
+overview_thumb.png["Overview Dashboard",link="images/overview.png"]
+
+=== Node & Index Statistics
+
+The _Node Statistics_ dashboard displays metric charts from the perspective of
+one or more nodes. Metrics include hardware level metrics (like load and CPU
+usage), process and JVM metrics (memory usage, GC), and node level
+Elasticsearch metrics such as field data usage, search requests rate and
+thread pool rejection.
+
+node_stats_thumb.png["Node Statistics Dashboard",link="images/node_stats.png"]
+
+The _Index Statistics_ dashboard is very similar to the _Node Statistics_
+dashboard, but it shows you all the metrics from the perspective of one or
+more indices. The metrics are per index, with data aggregated from all of the
+nodes in the cluster. For example, the ''store size'' chart shows the total
+size of the index data across the whole cluster.
+
+index_stats_thumb.png["Index Statistics Dashboard",link="images/index_stats.png"]
+
+=== Shard Allocation
+
+The _Shard Allocation_ dashboard displays how the shards are allocated across nodes.
+The dashboard also shows the status of the shards. It has two perspectives, _By Indices_ and _By Nodes_.
+The _By Indices_ view lists each index and shows you how it's shards are
+distributed across nodes. The _By Nodes_ view lists each node and shows you which shards the node current host.
+
+The viewer also has a playback feature which allows you to view the history of the shard allocation. You can rewind to each
+allocation event and then play back the history from any point in time. Hover on relocating shards to highlight both
+their previous and new location. The time line color changes based on the state of the cluster for
+each time period.
+
+shard_allocation_thumb.png["Shard Allocation Dashboard",link="images/shard_allocation.png"]
+
+=== Cluster Pulse
+
+The Cluster Pulse Dashboard allows you to see any event of interest in the cluster. Typical
+events include nodes joining or leaving, master election, index creation, shard (re)allocation
+and more.
+
+cluster_pulse_thumb.png["Index Statistics Dashboard",link="images/cluster_pulse.png"]
+
+[[sense]]
+=== Sense
+
+_Sense_ is a lightweight developer console. The console is handy when you want
+to make an extra API call to check something or perhaps tweak a setting. The
+developer console understands both JSON and the Elasticsearch API, offering
+suggestions and autocompletion. It is very useful for prototyping queries,
+researching your data or any other administrative work with the API.
+
+image::images/sense_thumb.png["Developer Console",link="sense.png"]
+
+

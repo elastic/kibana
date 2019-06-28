@@ -1,53 +1,71 @@
-import path from 'path';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import chalk from 'chalk';
+import path from 'path';
 
 import { Project } from './project';
 
 const projectKey = Symbol('__project');
 
-export function renderProjectsTree(
-  rootPath: string,
-  projects: Map<string, Project>
-) {
+export function renderProjectsTree(rootPath: string, projects: Map<string, Project>) {
   const projectsTree = buildProjectsTree(rootPath, projects);
   return treeToString(createTreeStructure(projectsTree));
 }
 
-type Tree = {
+interface ITree {
   name?: string;
-  children?: TreeChildren;
-};
-interface TreeChildren extends Array<Tree> {}
+  children?: ITreeChildren;
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ITreeChildren extends Array<ITree> {}
 
 type DirOrProjectName = string | typeof projectKey;
-type ProjectsTree = Map<DirOrProjectName, ProjectsTreeValue | string>;
-interface ProjectsTreeValue extends ProjectsTree {}
 
-function treeToString(tree: Tree) {
-  return [tree.name].concat(childrenToString(tree.children, '')).join('\n');
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IProjectsTree extends Map<DirOrProjectName, string | IProjectsTree> {}
+
+function treeToString(tree: ITree) {
+  return [tree.name].concat(childrenToStrings(tree.children, '')).join('\n');
 }
 
-function childrenToString(tree: TreeChildren | undefined, treePrefix: string) {
+function childrenToStrings(tree: ITreeChildren | undefined, treePrefix: string) {
   if (tree === undefined) {
     return [];
   }
 
-  let string: string[] = [];
+  let strings: string[] = [];
   tree.forEach((node, index) => {
     const isLastNode = tree.length - 1 === index;
     const nodePrefix = isLastNode ? '└── ' : '├── ';
     const childPrefix = isLastNode ? '    ' : '│   ';
     const childrenPrefix = treePrefix + childPrefix;
 
-    string.push(`${treePrefix}${nodePrefix}${node.name}`);
-    string = string.concat(childrenToString(node.children, childrenPrefix));
+    strings.push(`${treePrefix}${nodePrefix}${node.name}`);
+    strings = strings.concat(childrenToStrings(node.children, childrenPrefix));
   });
-  return string;
+  return strings;
 }
 
-function createTreeStructure(tree: ProjectsTree): Tree {
+function createTreeStructure(tree: IProjectsTree): ITree {
   let name: string | undefined;
-  const children: TreeChildren = [];
+  const children: ITreeChildren = [];
 
   for (const [dir, project] of tree.entries()) {
     // This is a leaf node (aka a project)
@@ -63,8 +81,8 @@ function createTreeStructure(tree: ProjectsTree): Tree {
     if (project.size === 1 && project.has(projectKey)) {
       const projectName = project.get(projectKey)! as string;
       children.push({
-        name: dirOrProjectName(dir, projectName),
         children: [],
+        name: dirOrProjectName(dir, projectName),
       });
       continue;
     }
@@ -77,8 +95,8 @@ function createTreeStructure(tree: ProjectsTree): Tree {
       const projectName = subtree.name;
 
       children.push({
-        name: dirOrProjectName(dir, projectName),
         children: subtree.children,
+        name: dirOrProjectName(dir, projectName),
       });
       continue;
     }
@@ -91,15 +109,15 @@ function createTreeStructure(tree: ProjectsTree): Tree {
       const newName = chalk.dim(path.join(dir.toString(), child.name!));
 
       children.push({
-        name: newName,
         children: child.children,
+        name: newName,
       });
       continue;
     }
 
     children.push({
-      name: chalk.dim(dir.toString()),
       children: subtree.children,
+      name: chalk.dim(dir.toString()),
     });
   }
 
@@ -113,7 +131,7 @@ function dirOrProjectName(dir: DirOrProjectName, projectName: string) {
 }
 
 function buildProjectsTree(rootPath: string, projects: Map<string, Project>) {
-  const tree: ProjectsTree = new Map();
+  const tree: IProjectsTree = new Map();
 
   for (const project of projects.values()) {
     if (rootPath === project.path) {
@@ -127,11 +145,7 @@ function buildProjectsTree(rootPath: string, projects: Map<string, Project>) {
   return tree;
 }
 
-function addProjectToTree(
-  tree: ProjectsTree,
-  pathParts: string[],
-  project: Project
-) {
+function addProjectToTree(tree: IProjectsTree, pathParts: string[], project: Project) {
   if (pathParts.length === 0) {
     tree.set(projectKey, project.name);
   } else {
@@ -141,7 +155,7 @@ function addProjectToTree(
       tree.set(currentDir, new Map());
     }
 
-    const subtree = tree.get(currentDir) as ProjectsTree;
+    const subtree = tree.get(currentDir) as IProjectsTree;
     addProjectToTree(subtree, rest, project);
   }
 }

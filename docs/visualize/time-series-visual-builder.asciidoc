@@ -1,8 +1,6 @@
 [[time-series-visual-builder]]
 == Time Series Visual Builder
 
-*Experimental Feature*
-
 Time Series Visual Builder is a time series data visualizer with an emphasis
 on allowing you to use the full power of Elasticsearch aggregation framework.
 Time Series Visual Builder allows you to combine an infinite number of
@@ -10,9 +8,10 @@ aggregations and pipeline aggregations to display complex data in a meaningful w
 
 image:images/tsvb-screenshot.png["Time Series Visual Builder Interface"]
 
+[[time-series-visualizations]]
 === Featured Visualizations
 
-Time Series Visual Build comes with 5 different visualization types. You can
+Time Series Visual Build comes with 6 different visualization types. You can
 switch between each visualization type using the tabbed picker at the top of the
 interface.
 
@@ -23,7 +22,7 @@ A histogram visualization that supports area, line, bar, and steps along with
 multiple y-axis. You can fully customize the colors, points, line thickness
 and fill opacity. This visualization also supports time shifting to compare two
 time periods. This visualization also supports annotations which can be loaded from
-a seperate index based on a query.
+a separate index based on a query.
 
 image:images/tsvb-timeseries.png["Time Series Visualization"]
 
@@ -61,12 +60,19 @@ image:images/tsvb-gauge.png["Gauge Visualization"]
 
 This visualization allows you to enter Markdown text and embed Mustache
 template syntax to customize the Markdown with data based on a set of series.
-This visualization also supports HTML markup along with the ability to define
-a custom stylesheet.
 
 image:images/tsvb-markdown.png["Markdown Visualization"]
 
 
+==== Table
+
+A table visualization allows you to display data from multiple time series.
+You define which field group to show in the rows and what columns of data to display.
+
+image:images/tsvb-table.png["Table Visualization"]
+
+
+[[time-series-interface]]
 === Interface Overview
 
 The user interface for each visualization is compose of a "Data" tab and "Panel
@@ -211,4 +217,3 @@ syntax uses the Handlebar.js processor which is an extended version of the Musta
 template language.
 
 image:images/tsvb-markdown-tab.png["Markdown Tab"]
-

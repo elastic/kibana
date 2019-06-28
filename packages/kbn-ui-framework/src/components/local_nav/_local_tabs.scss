@@ -23,21 +23,12 @@
     &:hover:not(.kuiLocalTab-isDisabled),
     &:active:not(.kuiLocalTab-isDisabled) {
       color: $localTabTextColor-isHover;
-
-      @include darkTheme {
-        color: $localTabTextColor-isHover--darkTheme;
-      }
     }
 
     &.kuiLocalTab-isSelected {
       color: $localTabTextColor-isSelected;
       border-bottom-color: $localTabTextColor-isSelected;
       cursor: default;
-
-      @include darkTheme {
-        color: $localTabTextColor-isSelected--darkTheme;
-        border-bottom-color: $localTabTextColor-isSelected--darkTheme;
-      }
     }
 
     /**
@@ -51,9 +42,5 @@
 
     & + & {
       margin-left: 15px;
-    }
-
-    @include darkTheme {
-      color: $localTabTextColor--darkTheme;
     }
   }

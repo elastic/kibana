@@ -1,13 +1,23 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import Slugify from '../string/slugify';
-
-import AccessibilityExample
-  from '../../views/accessibility/accessibility_example';
-
-import ActionItemExample
-  from '../../views/action_item/action_item_example';
-
-import BadgeExample
-  from '../../views/badge/badge_example';
 
 import BarExample
   from '../../views/bar/bar_example';
@@ -15,56 +25,19 @@ import BarExample
 import ButtonExample
   from '../../views/button/button_example';
 
-import CardExample
-  from '../../views/card/card_example';
-
-import CodeEditor
-  from '../../views/code_editor/code_editor_example';
-
 import CollapseButtonExample
   from '../../views/collapse_button/collapse_button_example';
 
-import ColorPickerExample
-  from '../../views/color_picker/color_picker_example';
-
-import ColumnExample
-  from '../../views/column/column_example';
-
-import ContextMenuExample
-  from '../../views/context_menu/context_menu_example';
-
-import EventExample
-  from '../../views/event/event_example';
-
-import EventsSandbox
-  from '../../views/event/events_sandbox';
-
 import ExpressionExample
   from '../../views/expression/expression_example';
-
-import FlexExample
-  from '../../views/flex/flex_example';
-
 import FormExample
   from '../../views/form/form_example';
 
 import FormLayoutExample
   from '../../views/form_layout/form_layout_example';
 
-import GalleryExample
-  from '../../views/gallery/gallery_example';
-
-import HeaderBarExample
-  from '../../views/header_bar/header_bar_example';
-
-import HeaderBarSandbox
-  from '../../views/header_bar/header_bar_sandbox';
-
 import IconExample
   from '../../views/icon/icon_example';
-
-import InfoButtonExample
-  from '../../views/info_button/info_button_example';
 
 import InfoPanelExample
   from '../../views/info_panel/info_panel_example';
@@ -81,14 +54,8 @@ import MenuExample
 import MenuButtonExample
   from '../../views/menu_button/menu_button_example';
 
-import MicroButtonExample
-  from '../../views/micro_button/micro_button_example';
-
 import ModalExample
   from '../../views/modal/modal_example';
-
-import NoticeSandbox
-  from '../../views/notice/notice_sandbox';
 
 import PagerExample
   from '../../views/pager/pager_example';
@@ -131,17 +98,6 @@ import ViewSandbox
 
 // Component route names should match the component name exactly.
 const components = [{
-  name: 'Accessibility',
-  component: AccessibilityExample,
-  hasReact: true,
-}, {
-  name: 'ActionItem',
-  component: ActionItemExample,
-  hasReact: true,
-}, {
-  name: 'Badge',
-  component: BadgeExample,
-}, {
   name: 'Bar',
   component: BarExample,
   hasReact: true,
@@ -150,47 +106,21 @@ const components = [{
   component: ButtonExample,
   hasReact: true,
 }, {
-  name: 'Card',
-  component: CardExample,
-  hasReact: true,
-}, {
-  name: 'CodeEditor',
-  component: CodeEditor,
-  hasReact: true,
-}, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
   hasReact: true,
 }, {
-  name: 'ColorPicker',
-  component: ColorPickerExample,
-  hasReact: true,
-}, {
-  name: 'Column',
-  component: ColumnExample,
-}, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
-  hasReact: true,
-}, {
-  name: 'ContextMenu',
-  component: ContextMenuExample,
   hasReact: true,
 }, {
   name: 'EmptyTablePrompt',
   component: EmptyTablePromptExample,
   hasReact: true,
 }, {
-  name: 'Event',
-  component: EventExample,
-  hasReact: true,
-}, {
   name: 'Expression',
   component: ExpressionExample,
   hasReact: true,
-}, {
-  name: 'Flex',
-  component: FlexExample,
 }, {
   name: 'Form',
   component: FormExample,
@@ -199,20 +129,8 @@ const components = [{
   component: FormLayoutExample,
   hasReact: true,
 }, {
-  name: 'Gallery',
-  component: GalleryExample,
-  hasReact: true,
-}, {
-  name: 'HeaderBar',
-  component: HeaderBarExample,
-  hasReact: true,
-}, {
   name: 'Icon',
   component: IconExample,
-}, {
-  name: 'InfoButton',
-  component: InfoButtonExample,
-  hasReact: true,
 }, {
   name: 'InfoPanel',
   component: InfoPanelExample,
@@ -230,9 +148,6 @@ const components = [{
 }, {
   name: 'MenuButton',
   component: MenuButtonExample,
-}, {
-  name: 'MicroButton',
-  component: MicroButtonExample,
 }, {
   name: 'Modal',
   component: ModalExample,
@@ -279,15 +194,6 @@ const components = [{
 }];
 
 const sandboxes = [{
-  name: 'Events',
-  component: EventsSandbox,
-}, {
-  name: 'HeaderBar with Table',
-  component: HeaderBarSandbox,
-}, {
-  name: 'Notice',
-  component: NoticeSandbox,
-}, {
   name: 'View',
   component: ViewSandbox,
 }];

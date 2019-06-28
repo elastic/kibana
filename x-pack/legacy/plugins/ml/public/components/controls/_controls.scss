@@ -1,0 +1,16 @@
+.ml-table-controls {
+  label {
+    font-size: $euiFontSizeXS;
+    padding: 0px 0px $euiSizeXS $euiSizeXS;
+  }
+
+  .ml-table-controls-element {
+    display: inline-block;
+    padding-left: $euiSize;
+  }
+
+  select {
+    font-size: $euiFontSizeXS;
+    font-style: normal;
+  }
+}

@@ -1,68 +1,105 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from '@kbn/expect';
+
 export function DiscoverPageProvider({ getService, getPageObjects }) {
-  const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
-
-  const getRemote = () => (
-    getService('remote')
-      .setFindTimeout(config.get('timeouts.find'))
-  );
+  const browser = getService('browser');
+  const globalNav = getService('globalNav');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
-    getQueryField() {
-      return getRemote()
-        .findByCssSelector('input[ng-model=\'state.query\']');
+    async getQueryField() {
+      return await find.byCssSelector('input[ng-model=\'state.query\']');
     }
 
-    getQuerySearchButton() {
-      return getRemote()
-        .findByCssSelector('button[aria-label=\'Search\']');
+    async getQuerySearchButton() {
+      return await find.byCssSelector('button[aria-label=\'Search\']');
     }
 
-    async getTimespanText() {
-      return await testSubjects.getVisibleText('globalTimepickerRange');
+    async getChartTimespan() {
+      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
+      return await el.getVisibleText();
     }
 
-    getChartTimespan() {
-      return getRemote()
-        .findByCssSelector('center.small > span:nth-child(1)')
-        .getVisibleText();
+    async saveSearch(searchName) {
+      log.debug('saveSearch');
+      await this.clickSaveSearchButton();
+      await testSubjects.setValue('savedObjectTitle', searchName);
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // LeeDr - this additional checking for the saved search name was an attempt
+      // to cause this method to wait for the reloading of the page to complete so
+      // that the next action wouldn't have to retry.  But it doesn't really solve
+      // that issue.  But it does typically take about 3 retries to
+      // complete with the expected searchName.
+      await retry.try(async () => {
+        const name = await this.getCurrentQueryName();
+        expect(name).to.be(searchName);
+      });
     }
 
-    saveSearch(searchName) {
-      return this.clickSaveSearchButton()
-        .then(() => {
-          log.debug('--saveSearch button clicked');
-          return getRemote().findDisplayedById('SaveSearch')
-            .pressKeys(searchName);
-        })
-        .then(() => {
-          log.debug('--find save button');
-          return testSubjects.click('discoverSaveSearchButton');
-        })
-        .then(async () => {
-          return await testSubjects.exists('saveSearchSuccess', 2000);
-        });
+    async waitUntilSearchingHasFinished() {
+      const spinner = await testSubjects.find('loadingSpinner');
+      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(el => el.getVisibleText()));
+      return await Promise.all(headerElements.map(async (el) => await el.getVisibleText()));
+    }
+
+    async openLoadSavedSearchPanel() {
+      const isOpen = await testSubjects.exists('loadSearchForm');
+      if (isOpen) {
+        return;
+      }
+
+      // We need this try loop here because previous actions in Discover like
+      // saving a search cause reloading of the page and the "Open" menu item goes stale.
+      await retry.try(async () => {
+        await this.clickLoadSavedSearchButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const isOpen = await testSubjects.exists('loadSearchForm');
+        expect(isOpen).to.be(true);
+      });
+    }
+
+    async closeLoadSaveSearchPanel() {
+      await flyout.ensureClosed('loadSearchForm');
     }
 
     async hasSavedSearch(searchName) {
-      await this.clickLoadSavedSearchButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
-      await this.clickLoadSavedSearchButton();
-      const searchLink = await find.byPartialLinkText(searchName);
+      await this.openLoadSavedSearchPanel();
+      const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -79,62 +116,48 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
-    async getCurrentQueryName() {
-      return await testSubjects.getVisibleText('discoverCurrentQuery');
+    async clickHistogramBar(i) {
+      const bars = await find.allByCssSelector(`.series.histogram rect`);
+      await bars[i].click();
     }
 
-    getBarChartData() {
-      let yAxisLabel = 0;
-      let yAxisHeight;
+    async brushHistogram(from, to) {
+      const bars = await find.allByCssSelector('.series.histogram rect');
+      await browser.dragAndDrop(
+        { location: bars[from], offset: { x: 0, y: -5 } },
+        { location: bars[to], offset: { x: 0, y: -5 } }
+      );
+    }
 
-      return PageObjects.header.waitUntilLoadingHasFinished()
-        .then(() => {
-          return getRemote()
-            .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
-        })
-        .then(function setYAxisLabel(y) {
-          return y
-            .getVisibleText()
-            .then(function (yLabel) {
-              yAxisLabel = yLabel.replace(',', '');
-              log.debug('yAxisLabel = ' + yAxisLabel);
-              return yLabel;
-            });
-        })
-      // 2). find and save the y-axis pixel size (the chart height)
-        .then(function getRect() {
-          return getRemote()
-            .findByCssSelector('rect.background')
-            .then(function getRectHeight(chartAreaObj) {
-              return chartAreaObj
-                .getAttribute('height')
-                .then(function (theHeight) {
-                  yAxisHeight = theHeight; // - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
-                  log.debug('theHeight = ' + theHeight);
-                  return theHeight;
-                });
-            });
-        })
-      // 3). get the chart-wrapper elements
-        .then(function () {
-          return getRemote()
-          // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-            .findAllByCssSelector('svg > g > g.series > rect') // rect
-            .then(function (chartTypes) {
-              function getChartType(chart) {
-                return chart
-                  .getAttribute('height')
-                  .then(function (barHeight) {
-                    return Math.round(barHeight / yAxisHeight * yAxisLabel);
-                  });
-              }
-              const getChartTypesPromises = chartTypes.map(getChartType);
-              return Promise.all(getChartTypesPromises);
-            })
-            .then(function (bars) {
-              return bars;
-            });
-        });
+    async getCurrentQueryName() {
+      return await globalNav.getLastBreadcrumb();
+    }
+
+    async getBarChartXTicks() {
+      const xAxis = await find.byCssSelector('.x.axis.CategoryAxis-1');
+      const $ = await xAxis.parseDomContent();
+      return $('.tick > text').toArray().map(tick => $(tick).text().trim());
+    }
+
+    async getBarChartData() {
+      let yAxisLabel = 0;
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const y = await find.byCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
+      const yLabel = await y.getVisibleText();
+      yAxisLabel = yLabel.replace(',', '');
+      log.debug('yAxisLabel = ' + yAxisLabel);
+      // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
+      const svg = await find.byCssSelector('div.chart > svg');
+      const $ = await svg.parseDomContent();
+      const yAxisHeight = $('rect.background').attr('height');
+      log.debug('theHeight = ' + yAxisHeight);
+      const bars = $('g > g.series > rect').toArray().map(chart => {
+        const barHeight = $(chart).attr('height');
+        return Math.round(barHeight / yAxisHeight * yAxisLabel);
+      });
+
+      return bars;
     }
 
     async getChartInterval() {
@@ -154,105 +177,55 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverQueryHits');
     }
 
-    query(queryString) {
-      return getRemote()
-        .findByCssSelector('input[aria-label="Search input"]')
-        .clearValue()
-        .type(queryString)
-        .then(() => {
-          return getRemote()
-            .findByCssSelector('button[aria-label="Search"]')
-            .click();
-        })
-        .then(() => {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
+    async query(queryString) {
+      await find.setValue('input[aria-label="Search input"]', queryString);
+      await find.clickByCssSelector('button[aria-label="Search"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    getDocHeader() {
-      return getRemote()
-        .findByCssSelector('thead.ng-isolate-scope > tr:nth-child(1)')
-        .getVisibleText();
+    async getDocHeader() {
+      const header = await find.byCssSelector('thead > tr:nth-child(1)');
+      return await header.getVisibleText();
     }
 
-    getDocTableIndex(index) {
-      return getRemote()
-        .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
-        .getVisibleText();
+    async getDocTableIndex(index) {
+      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + (index) + ')');
+      return await row.getVisibleText();
     }
 
-    clickDocSortDown() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-down')
-        .click();
+    async clickDocSortDown() {
+      await find.clickByCssSelector('.fa-sort-down');
     }
 
-    clickDocSortUp() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-up')
-        .click();
+    async clickDocSortUp() {
+      await find.clickByCssSelector('.fa-sort-up');
     }
 
-    getMarks() {
-      return getRemote()
-        .findAllByCssSelector('mark')
-        .getVisibleText();
-    }
-
-    clickShare() {
-      return testSubjects.click('discoverShareButton');
-    }
-
-    clickShortenUrl() {
-      return testSubjects.click('sharedSnapshotShortUrlButton');
-    }
-
-    async clickCopyToClipboard() {
-      await testSubjects.click('sharedSnapshotCopyButton');
-
-      // Confirm that the content was copied to the clipboard.
-      return await testSubjects.exists('shareCopyToClipboardSuccess');
-    }
-
-    async getShareCaption() {
-      return await testSubjects.getVisibleText('shareUiTitle');
-    }
-
-    async getSharedUrl() {
-      return await testSubjects.getProperty('sharedSnapshotUrl', 'value');
+    async getMarks() {
+      const marks = await find.allByCssSelector('mark');
+      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
     }
 
     async toggleSidebarCollapse() {
       return await testSubjects.click('collapseSideBarButton');
     }
 
-    getAllFieldNames() {
-      return getRemote()
-        .findAllByClassName('sidebar-item')
-        .then((items) => {
-          return Promise.all(items.map((item) => item.getVisibleText()));
-        });
+    async getAllFieldNames() {
+      const items = await find.allByCssSelector('.sidebar-item');
+      return await Promise.all(items.map((item) => item.getVisibleText()));
     }
 
-    getSidebarWidth() {
-      return getRemote()
-        .findByClassName('sidebar-list')
-        .getProperty('clientWidth');
+    async getSidebarWidth() {
+      const sidebar = await find.byCssSelector('.sidebar-list');
+      return await sidebar.getProperty('clientWidth');
     }
 
     async hasNoResults() {
       return await testSubjects.exists('discoverNoResults');
     }
 
-    async getNoResultsTimepicker() {
-      return await testSubjects.find('discoverNoResultsTimefilter');
-    }
-
-    hasNoResultsTimepicker() {
-      return this
-        .getNoResultsTimepicker()
-        .then(() => true)
-        .catch(() => false);
+    async hasNoResultsTimepicker() {
+      return await testSubjects.exists('discoverNoResultsTimefilter');
     }
 
     async clickFieldListItem(field) {
@@ -270,38 +243,55 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    clickFieldListPlusFilter(field, value) {
-      // this method requires the field details to be open from clickFieldListItem()
-      // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
-        .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
-        .click();
+    async expectFieldListItemVisualize(field) {
+      await testSubjects.existOrFail(`fieldVisualize-${field}`);
     }
 
-    clickFieldListMinusFilter(field, value) {
+    async expectMissingFieldListItemVisualize(field) {
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
+    }
+
+    async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
-        .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
-        .click();
+      await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickFieldListMinusFilter(field, value) {
+      // this method requires the field details to be open from clickFieldListItem()
+      // testSubjects.find doesn't handle spaces in the data-test-subj value
+      await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectIndexPattern(indexPattern) {
-      await getRemote().findByClassName('index-pattern-selection').click();
-      await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
-    }
-
-    async removeAllFilters() {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('removeAllFilters');
+      await find.clickByCssSelector('.index-pattern-selection');
+      await find.setValue('.ui-select-search', indexPattern + '\n');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.waitUntilUrlIncludes('filters:!()');
     }
 
     async removeHeaderColumn(name) {
       await testSubjects.moveMouseTo(`docTableHeader-${name}`);
       await testSubjects.click(`docTableRemoveHeader-${name}`);
     }
+
+    async openSidebarFieldFilter() {
+      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
+      if (!fieldFilterFormExists) {
+        await testSubjects.click('toggleFieldFilterButton');
+        await testSubjects.existOrFail('discoverFieldFilter');
+      }
+    }
+
+    async closeSidebarFieldFilter() {
+      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
+      if (fieldFilterFormExists) {
+        await testSubjects.click('toggleFieldFilterButton');
+        await testSubjects.missingOrFail('discoverFieldFilter');
+      }
+    }
+
   }
 
   return new DiscoverPage();

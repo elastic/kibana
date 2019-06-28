@@ -1,0 +1,102 @@
+{
+  "type": "index",
+  "value": {
+    "index": "secrepo",
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "strings": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "match": "*",
+            "match_mapping_type": "string"
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "@version": {
+          "type": "keyword"
+        },
+        "build": {
+          "type": "keyword"
+        },
+        "bytes": {
+          "type": "integer"
+        },
+        "device": {
+          "type": "keyword"
+        },
+        "http_method": {
+          "type": "keyword"
+        },
+        "http_version": {
+          "type": "keyword"
+        },
+        "major": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "text"
+        },
+        "minor": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "keyword"
+        },
+        "os": {
+          "type": "keyword"
+        },
+        "os_major": {
+          "type": "keyword"
+        },
+        "os_minor": {
+          "type": "keyword"
+        },
+        "os_name": {
+          "type": "keyword"
+        },
+        "params": {
+          "fielddata": true,
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "patch": {
+          "type": "keyword"
+        },
+        "referer": {
+          "type": "keyword"
+        },
+        "response_code": {
+          "type": "integer"
+        },
+        "src": {
+          "type": "ip"
+        },
+        "url": {
+          "fields": {
+            "parts": {
+              "fielddata": true,
+              "type": "text"
+            }
+          },
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

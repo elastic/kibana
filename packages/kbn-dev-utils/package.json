@@ -1,23 +1,27 @@
 {
   "name": "@kbn/dev-utils",
   "main": "./target/index.js",
+  "types": "./index.d.ts",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
     "build": "babel src --out-dir target",
-    "kbn:bootstrap": "yarn build"
+    "kbn:bootstrap": "yarn build --quiet",
+    "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "chalk": "^2.3.0",
-    "execa": "^0.10.0",
+    "chalk": "^2.4.1",
+    "execa": "^1.0.0",
     "moment": "^2.20.1",
-    "tree-kill": "^1.2.0"
+    "rxjs": "^6.2.1",
+    "tree-kill": "^1.2.0",
+    "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
-    "babel-cli": "^6.26.0",
-    "chance": "1.0.6",
-    "expect.js": "0.3.1"
+    "@babel/cli": "7.4.4",
+    "@kbn/babel-preset": "1.0.0",
+    "@kbn/expect": "1.0.0",
+    "chance": "1.0.18"
   }
 }

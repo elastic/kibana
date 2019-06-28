@@ -1,0 +1,1272 @@
+{
+  "indexSummary": {
+    "documents": 628,
+    "dataSize": {
+      "primaries": 4601000,
+      "total": 9202023
+    },
+    "unassignedShards": 0,
+    "totalShards": 10,
+    "status": "green"
+  },
+  "metrics": {
+    "index_1": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Lucene Total",
+        "title": "Index Memory - Lucene 1",
+        "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 2378656],
+        [1507235530000, 2378656],
+        [1507235540000, 2378656],
+        [1507235550000, 2378656],
+        [1507235560000, 2378656],
+        [1507235570000, 2378656],
+        [1507235580000, 2378656],
+        [1507235590000, 2378656],
+        [1507235600000, 2378656],
+        [1507235610000, 2378656],
+        [1507235620000, 2378656],
+        [1507235630000, 2378656],
+        [1507235640000, 2378656],
+        [1507235650000, 2378656],
+        [1507235660000, 2378656],
+        [1507235670000, 2378656],
+        [1507235680000, 2378656],
+        [1507235690000, 2378656],
+        [1507235700000, 2378656]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.stored_fields_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Stored Fields",
+        "title": "Index Memory",
+        "description": "Heap memory used by Stored Fields (e.g., _source). This is a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 19024],
+        [1507235530000, 19024],
+        [1507235540000, 19024],
+        [1507235550000, 19024],
+        [1507235560000, 19024],
+        [1507235570000, 19024],
+        [1507235580000, 19024],
+        [1507235590000, 19024],
+        [1507235600000, 19024],
+        [1507235610000, 19024],
+        [1507235620000, 19024],
+        [1507235630000, 19024],
+        [1507235640000, 19024],
+        [1507235650000, 19024],
+        [1507235660000, 19024],
+        [1507235670000, 19024],
+        [1507235680000, 19024],
+        [1507235690000, 19024],
+        [1507235700000, 19024]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.doc_values_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Doc Values",
+        "title": "Index Memory",
+        "description": "Heap memory used by Doc Values. This is a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 232336],
+        [1507235530000, 232336],
+        [1507235540000, 232336],
+        [1507235550000, 232336],
+        [1507235560000, 232336],
+        [1507235570000, 232336],
+        [1507235580000, 232336],
+        [1507235590000, 232336],
+        [1507235600000, 232336],
+        [1507235610000, 232336],
+        [1507235620000, 232336],
+        [1507235630000, 232336],
+        [1507235640000, 232336],
+        [1507235650000, 232336],
+        [1507235660000, 232336],
+        [1507235670000, 232336],
+        [1507235680000, 232336],
+        [1507235690000, 232336],
+        [1507235700000, 232336]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.norms_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Norms",
+        "title": "Index Memory",
+        "description": "Heap memory used by Norms (normalization factors for query-time, text scoring). This is a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 233472],
+        [1507235530000, 233472],
+        [1507235540000, 233472],
+        [1507235550000, 233472],
+        [1507235560000, 233472],
+        [1507235570000, 233472],
+        [1507235580000, 233472],
+        [1507235590000, 233472],
+        [1507235600000, 233472],
+        [1507235610000, 233472],
+        [1507235620000, 233472],
+        [1507235630000, 233472],
+        [1507235640000, 233472],
+        [1507235650000, 233472],
+        [1507235660000, 233472],
+        [1507235670000, 233472],
+        [1507235680000, 233472],
+        [1507235690000, 233472],
+        [1507235700000, 233472]
+      ]
+    }],
+    "index_2": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Lucene Total",
+        "title": "Index Memory - Lucene 2",
+        "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 2378656],
+        [1507235530000, 2378656],
+        [1507235540000, 2378656],
+        [1507235550000, 2378656],
+        [1507235560000, 2378656],
+        [1507235570000, 2378656],
+        [1507235580000, 2378656],
+        [1507235590000, 2378656],
+        [1507235600000, 2378656],
+        [1507235610000, 2378656],
+        [1507235620000, 2378656],
+        [1507235630000, 2378656],
+        [1507235640000, 2378656],
+        [1507235650000, 2378656],
+        [1507235660000, 2378656],
+        [1507235670000, 2378656],
+        [1507235680000, 2378656],
+        [1507235690000, 2378656],
+        [1507235700000, 2378656]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.terms_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Terms",
+        "title": "Index Memory",
+        "description": "Heap memory used by Terms (e.g., text). This is a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 1889180],
+        [1507235530000, 1889180],
+        [1507235540000, 1889180],
+        [1507235550000, 1889180],
+        [1507235560000, 1889180],
+        [1507235570000, 1889180],
+        [1507235580000, 1889180],
+        [1507235590000, 1889180],
+        [1507235600000, 1889180],
+        [1507235610000, 1889180],
+        [1507235620000, 1889180],
+        [1507235630000, 1889180],
+        [1507235640000, 1889180],
+        [1507235650000, 1889180],
+        [1507235660000, 1889180],
+        [1507235670000, 1889180],
+        [1507235680000, 1889180],
+        [1507235690000, 1889180],
+        [1507235700000, 1889180]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.points_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Points",
+        "title": "Index Memory",
+        "description": "Heap memory used by Points (e.g., numbers, IPs, and geo data). This is a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 4644],
+        [1507235530000, 4644],
+        [1507235540000, 4644],
+        [1507235550000, 4644],
+        [1507235560000, 4644],
+        [1507235570000, 4644],
+        [1507235580000, 4644],
+        [1507235590000, 4644],
+        [1507235600000, 4644],
+        [1507235610000, 4644],
+        [1507235620000, 4644],
+        [1507235630000, 4644],
+        [1507235640000, 4644],
+        [1507235650000, 4644],
+        [1507235660000, 4644],
+        [1507235670000, 4644],
+        [1507235680000, 4644],
+        [1507235690000, 4644],
+        [1507235700000, 4644]
+      ]
+    }],
+    "index_3": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Lucene Total",
+        "title": "Index Memory - Lucene 3",
+        "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 2378656],
+        [1507235530000, 2378656],
+        [1507235540000, 2378656],
+        [1507235550000, 2378656],
+        [1507235560000, 2378656],
+        [1507235570000, 2378656],
+        [1507235580000, 2378656],
+        [1507235590000, 2378656],
+        [1507235600000, 2378656],
+        [1507235610000, 2378656],
+        [1507235620000, 2378656],
+        [1507235630000, 2378656],
+        [1507235640000, 2378656],
+        [1507235650000, 2378656],
+        [1507235660000, 2378656],
+        [1507235670000, 2378656],
+        [1507235680000, 2378656],
+        [1507235690000, 2378656],
+        [1507235700000, 2378656]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.fixed_bit_set_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Fixed Bitsets",
+        "title": "Index Memory",
+        "description": "Heap memory used by Fixed Bit Sets (e.g., deeply nested documents). This is a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 0],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.term_vectors_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Term Vectors",
+        "title": "Index Memory",
+        "description": "Heap memory used by Term Vectors. This is a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 0],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.version_map_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Version Map",
+        "title": "Index Memory",
+        "description": "Heap memory used by Versioning (e.g., updates and deletes). This is NOT a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 0],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }],
+    "index_4": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.query_cache.memory_size_in_bytes",
+        "metricAgg": "max",
+        "label": "Query Cache",
+        "title": "Index Memory - Elasticsearch",
+        "description": "Heap memory used by Query Cache (e.g., cached filters). This is for the same shards, but not a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 0],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.request_cache.memory_size_in_bytes",
+        "metricAgg": "max",
+        "label": "Request Cache",
+        "title": "Index Memory",
+        "description": "Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 0],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.fielddata.memory_size_in_bytes",
+        "metricAgg": "max",
+        "label": "Fielddata",
+        "title": "Index Memory",
+        "description": "Heap memory used by Fielddata (e.g., global ordinals or explicitly enabled fielddata on text fields). This is for the same shards, but not a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 0],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.index_writer_memory_in_bytes",
+        "metricAgg": "max",
+        "label": "Index Writer",
+        "title": "Index Memory",
+        "description": "Heap memory used by the Index Writer. This is NOT a part of Lucene Total.",
+        "units": "B",
+        "format": "0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 0],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }],
+    "index_total": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.search.query_total",
+        "metricAgg": "max",
+        "label": "Search Total",
+        "title": "Request Rate",
+        "description": "Amount of search operations (per shard).",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.indexing.index_total",
+        "metricAgg": "max",
+        "label": "Index Total",
+        "title": "Request Rate",
+        "description": "Amount of indexing operations.",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }],
+    "index_time": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.search.query_time_in_millis",
+        "metricAgg": "max",
+        "label": "Search",
+        "title": "Request Time",
+        "description": "Amount of time spent performing search operations (per shard).",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.indexing.index_time_in_millis",
+        "metricAgg": "max",
+        "label": "Indexing",
+        "title": "Request Time",
+        "description": "Amount of time spent performing index operations on primary and replica shards.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.indexing.index_time_in_millis",
+        "metricAgg": "max",
+        "label": "Indexing (Primaries)",
+        "title": "Request Time",
+        "description": "Amount of time spent performing index operations on primary shards only.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }],
+    "index_throttling": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.indexing.throttle_time_in_millis",
+        "metricAgg": "max",
+        "label": "Indexing",
+        "title": "Throttle Time",
+        "description": "Amount of time spent throttling index operations on primary and replica shards.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.indexing.throttle_time_in_millis",
+        "metricAgg": "max",
+        "label": "Indexing (Primaries)",
+        "title": "Throttle Time",
+        "description": "Amount of time spent throttling index operations on primary shards.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }],
+    "index_refresh": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.refresh.total_time_in_millis",
+        "metricAgg": "max",
+        "label": "Total",
+        "title": "Refresh Time",
+        "description": "Amount of time spent to perform refresh operations on primary and replica shards.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.refresh.total_time_in_millis",
+        "metricAgg": "max",
+        "label": "Primaries",
+        "title": "Refresh Time",
+        "description": "Amount of time spent to perform refresh operations on primary shards.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }],
+    "index_disk": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.store.size_in_bytes",
+        "metricAgg": "max",
+        "label": "Store",
+        "title": "Disk",
+        "description": "Size of primary and replica shards on disk.",
+        "units": "B",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 9202023],
+        [1507235530000, 9202023],
+        [1507235540000, 9202023],
+        [1507235550000, 9202023],
+        [1507235560000, 9202023],
+        [1507235570000, 9202023],
+        [1507235580000, 9202023],
+        [1507235590000, 9202023],
+        [1507235600000, 9202023],
+        [1507235610000, 9202023],
+        [1507235620000, 9202023],
+        [1507235630000, 9202023],
+        [1507235640000, 9202023],
+        [1507235650000, 9202023],
+        [1507235660000, 9202023],
+        [1507235670000, 9202023],
+        [1507235680000, 9202023],
+        [1507235690000, 9202023],
+        [1507235700000, 9202023]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.store.size_in_bytes",
+        "metricAgg": "max",
+        "label": "Store (Primaries)",
+        "title": "Disk",
+        "description": "Size of primary shards on disk.",
+        "units": "B",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 4601000],
+        [1507235530000, 4601000],
+        [1507235540000, 4601000],
+        [1507235550000, 4601000],
+        [1507235560000, 4601000],
+        [1507235570000, 4601000],
+        [1507235580000, 4601000],
+        [1507235590000, 4601000],
+        [1507235600000, 4601000],
+        [1507235610000, 4601000],
+        [1507235620000, 4601000],
+        [1507235630000, 4601000],
+        [1507235640000, 4601000],
+        [1507235650000, 4601000],
+        [1507235660000, 4601000],
+        [1507235670000, 4601000],
+        [1507235680000, 4601000],
+        [1507235690000, 4601000],
+        [1507235700000, 4601000]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.merges.total_size_in_bytes",
+        "metricAgg": "max",
+        "label": "Merges",
+        "title": "Disk",
+        "description": "Size of merges on primary and replica shards.",
+        "units": "B",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.merges.total_size_in_bytes",
+        "metricAgg": "max",
+        "label": "Merges (Primaries)",
+        "title": "Disk",
+        "description": "Size of merges on primary shards.",
+        "units": "B",
+        "format": "0,0.0 b",
+        "hasCalculation": false,
+        "isDerivative": true
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }],
+    "index_segment_count": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.segments.count",
+        "metricAgg": "max",
+        "label": "Total",
+        "title": "Segment Count",
+        "description": "Number of segments for primary and replica shards.",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 60],
+        [1507235530000, 60],
+        [1507235540000, 60],
+        [1507235550000, 60],
+        [1507235560000, 60],
+        [1507235570000, 60],
+        [1507235580000, 60],
+        [1507235590000, 60],
+        [1507235600000, 60],
+        [1507235610000, 60],
+        [1507235620000, 60],
+        [1507235630000, 60],
+        [1507235640000, 60],
+        [1507235650000, 60],
+        [1507235660000, 60],
+        [1507235670000, 60],
+        [1507235680000, 60],
+        [1507235690000, 60],
+        [1507235700000, 60]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.segments.count",
+        "metricAgg": "max",
+        "label": "Primaries",
+        "title": "Segment Count",
+        "description": "Number of segments for primary shards.",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, 30],
+        [1507235530000, 30],
+        [1507235540000, 30],
+        [1507235550000, 30],
+        [1507235560000, 30],
+        [1507235570000, 30],
+        [1507235580000, 30],
+        [1507235590000, 30],
+        [1507235600000, 30],
+        [1507235610000, 30],
+        [1507235620000, 30],
+        [1507235630000, 30],
+        [1507235640000, 30],
+        [1507235650000, 30],
+        [1507235660000, 30],
+        [1507235670000, 30],
+        [1507235680000, 30],
+        [1507235690000, 30],
+        [1507235700000, 30]
+      ]
+    }],
+    "index_latency": [{
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.primaries.indexing.index_total",
+        "metricAgg": "sum",
+        "label": "Indexing Latency",
+        "title": "Latency",
+        "description": "Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This only considers primary shards.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": true,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }, {
+      "bucket_size": "10 seconds",
+      "timeRange": {
+        "min": 1507235508000,
+        "max": 1507235712000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "index_stats.total.search.query_total",
+        "metricAgg": "sum",
+        "label": "Search Latency",
+        "description": "Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.",
+        "units": "ms",
+        "format": "0,0.[00]",
+        "hasCalculation": true,
+        "isDerivative": false
+      },
+      "data": [
+        [1507235520000, null],
+        [1507235530000, 0],
+        [1507235540000, 0],
+        [1507235550000, 0],
+        [1507235560000, 0],
+        [1507235570000, 0],
+        [1507235580000, 0],
+        [1507235590000, 0],
+        [1507235600000, 0],
+        [1507235610000, 0],
+        [1507235620000, 0],
+        [1507235630000, 0],
+        [1507235640000, 0],
+        [1507235650000, 0],
+        [1507235660000, 0],
+        [1507235670000, 0],
+        [1507235680000, 0],
+        [1507235690000, 0],
+        [1507235700000, 0]
+      ]
+    }]
+  }
+}

@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sparkline component does not show tooltip initially 1`] = `
+<div>
+  <div
+    className="monSparkline"
+  />
+</div>
+`;
+
+exports[`Sparkline component shows tooltip on hover 1`] = `
+<div>
+  <div
+    className="monSparkline"
+  />
+  <div
+    className="monSparklineTooltip__container"
+    style={
+      Object {
+        "left": 210,
+        "top": 27,
+      }
+    }
+  >
+    <i
+      className="fa fa-caret-left monSparklineTooltip__caret"
+      style={
+        Object {
+          "display": "block",
+          "width": 6,
+        }
+      }
+    />
+    <div
+      className="monSparklineTooltip"
+      style={
+        Object {
+          "height": 36,
+          "width": 220,
+        }
+      }
+    >
+      <div
+        className="monSparklineTooltip__yValue"
+      >
+        1513814914
+      </div>
+      <div
+        className="monSparklineTooltip__xValue"
+      >
+        25
+      </div>
+    </div>
+    <i
+      className="fa fa-caret-right monSparklineTooltip__caret"
+      style={
+        Object {
+          "width": 6,
+        }
+      }
+    />
+  </div>
+</div>
+`;

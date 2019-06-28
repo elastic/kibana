@@ -2,12 +2,19 @@
 === Install Kibana with RPM
 
 The RPM for Kibana can be <<install-rpm,downloaded from our website>>
-or from our  <<rpm-repo,RPM repository>>. It can be used to install
+or from our <<rpm-repo,RPM repository>>. It can be used to install
 Kibana on any RPM-based system such as OpenSuSE, SLES, Centos, Red Hat,
 and Oracle Enterprise.
 
 NOTE: RPM install is not supported on distributions with old versions of RPM,
 such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
+
+This package is free to use under the Elastic license. It contains open source 
+and free commercial features and access to paid commercial features. 
+{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
+paid commercial features. See the 
+https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+Elastic license levels.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page. Other versions can
@@ -84,6 +91,36 @@ sudo zypper install kibana <3>
 
 endif::[]
 
+ifeval::["{release-state}"!="unreleased"]
+
+[NOTE]
+==================================================
+
+An alternative package, `kibana-oss`, which contains only features that are available under the
+Apache 2.0 license is also available. To install it, use the following `baseurl` in your `kibana.repo` file:
+
+ifeval::["{release-state}"=="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+baseurl=https://artifacts.elastic.co/packages/oss-{major-version}-prerelease/yum
+--------------------------------------------------
+
+endif::[]
+
+ifeval::["{release-state}"!="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+baseurl=https://artifacts.elastic.co/packages/oss-{major-version}/yum
+--------------------------------------------------
+
+endif::[]
+
+==================================================
+
+endif::[]
+
 [[install-rpm]]
 ==== Download and install the RPM manually
 
@@ -106,32 +143,18 @@ sudo rpm --install kibana-{version}-x86_64.rpm
 <1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha512[published SHA].
 
+Alternatively, you can download the following package, which contains only 
+features that are available under the Apache 2.0 license:
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm  
+
 endif::[]
+
+==== SysV `init` vs `systemd`
 
 include::init-systemd.asciidoc[]
 
 [[rpm-running-init]]
-==== Running Kibana with SysV `init`
-
-Use the `chkconfig` command to configure Kibana to start automatically
-when the system boots up:
-
-[source,sh]
---------------------------------------------------
-sudo chkconfig --add kibana
---------------------------------------------------
-
-Kibana can be started and stopped using the `service` command:
-
-[source,sh]
---------------------------------------------
-sudo -i service kibana start
-sudo -i service kibana stop
---------------------------------------------
-
-If Kibana fails to start for any reason, it will print the reason for
-failure to STDOUT. Log files can be found in `/var/log/kibana/`.
-
+include::rpm-init.asciidoc[]
 
 [[rpm-running-systemd]]
 include::systemd.asciidoc[]

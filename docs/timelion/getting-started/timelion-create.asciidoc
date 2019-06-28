@@ -15,7 +15,7 @@ To start, you will need to define an `index`, `timefield` and `metric` in the fi
 image::images/timelion-create01.png[]
 {nbsp}
 
-Now you need to add another series with data from the previous hour for comparison. To do so, you'll have to add an `offset` arguement to the `.es()` function. `offset` will offset the series retrieval by a date expression. For this example, you'll want to offset the data back one hour and will be using the date expression `-1h`. Using a comma to separate the two series, enter the following expression into the Timelion query bar:
+Now you need to add another series with data from the previous hour for comparison. To do so, you'll have to add an `offset` argument to the `.es()` function. `offset` will offset the series retrieval by a date expression. For this example, you'll want to offset the data back one hour and will be using the date expression `-1h`. Using a comma to separate the two series, enter the following expression into the Timelion query bar:
 
 [source,text]
 ----------------------------------
@@ -33,5 +33,3 @@ It’s a bit hard to differentiate the two series. Customize the labels in order
 
 image::images/timelion-create03.png[]
 {nbsp}
-
-Save the entire Timelion sheet as _Metricbeat Example_. As a best practice, you should be saving any significant changes made to this sheet as you progress through this tutorial.

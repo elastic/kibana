@@ -1,13 +1,31 @@
-import expect from 'expect.js';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from '@kbn/expect';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
-const TEST_ANCHOR_TYPE = 'doc';
+const TEST_ANCHOR_TYPE = '_doc';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_DEFAULT_CONTEXT_SIZE = 7;
 const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
@@ -42,7 +60,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
       const table = await docTable.getTable();
-      await (await PageObjects.context.getPredecessorLoadMoreButton()).click();
+      await PageObjects.context.clickPredecessorLoadMoreButton();
+
       await retry.try(async function () {
         expect(await docTable.getBodyRows(table)).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
@@ -54,9 +73,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
       const table = await docTable.getTable();
-      const successorLoadMoreButton = await PageObjects.context.getSuccessorLoadMoreButton();
-      await remote.moveMouseTo(successorLoadMoreButton);  // possibly scroll until the button is visible
-      await successorLoadMoreButton.click();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+
       await retry.try(async function () {
         expect(await docTable.getBodyRows(table)).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _, { keys } from 'lodash';
 
 import { run } from '../utilities/visual_regression';
@@ -12,16 +31,9 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:server', [
-    'checkPlugins',
-    'simplemocha:all',
-  ]);
+  grunt.registerTask('test:mocha', ['checkPlugins', 'run:mocha']);
 
-  grunt.registerTask('test:browser', [
-    'checkPlugins',
-    'run:testServer',
-    'karma:unit',
-  ]);
+  grunt.registerTask('test:browser', ['checkPlugins', 'run:browserSCSS', 'run:browserTestServer', 'karma:unit']);
 
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
@@ -29,81 +41,41 @@ module.exports = function (grunt) {
       .map(key => `karma:${key}`);
 
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
-
-    grunt.task.run([
-      'run:testServer',
-      ...ciShardTasks
-    ]);
+    grunt.task.run(['run:browserSCSS']);
+    grunt.task.run(['run:browserTestServer', ...ciShardTasks]);
   });
 
-  grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
+  grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
 
   grunt.registerTask('test:quick', [
-    'test:server',
-    'test:ui',
+    'checkPlugins',
+    'test:mocha',
+    'run:functionalTests',
     'test:jest',
     'test:jest_integration',
     'test:projects',
     'test:browser',
-    'test:api'
+    'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('test:dev', [
-    'checkPlugins',
-    'run:devTestServer',
-    'karma:dev'
-  ]);
-
-  grunt.registerTask('test:ui', [
-    'checkPlugins',
-    'run:testEsServer',
-    'run:testUIServer',
-    'functional_test_runner:functional',
-    'stop:testEsServer',
-    'stop:testUIServer'
-  ]);
-
-  grunt.registerTask('test:uiRelease', [
-    'checkPlugins',
-    'run:testEsServer',
-    'run:testUIReleaseServer',
-    'functional_test_runner:functional',
-    'stop:testEsServer',
-    'stop:testUIReleaseServer'
-  ]);
-
-  grunt.registerTask('test:ui:server', [
-    'checkPlugins',
-    'run:testEsServer',
-    'run:testUIDevServer:keepalive'
-  ]);
-
-  grunt.registerTask('test:api', [
-    'run:testEsServer',
-    'run:apiTestServer',
-    'functional_test_runner:apiIntegration',
-    'stop:testEsServer',
-    'stop:apiTestServer'
-  ]);
-
-  grunt.registerTask('test:api:server', [
-    'run:testEsServer',
-    'run:devApiTestServer:keepalive'
-  ]);
-
-  grunt.registerTask('test:api:runner', () => {
-    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/functional_test_runner --config test/api_integration/config.js`');
-  });
+  grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
-    grunt.task.run(_.compact([
-      !grunt.option('quick') && 'run:eslint',
-      'licenses',
-      'test:quick',
-      'verifyTranslations',
-    ]));
+    grunt.task.run(
+      _.compact([
+        !grunt.option('quick') && 'run:eslint',
+        !grunt.option('quick') && 'run:sasslint',
+        !grunt.option('quick') && 'run:checkTsProjects',
+        !grunt.option('quick') && 'run:checkCoreApiChanges',
+        !grunt.option('quick') && 'run:typeCheck',
+        !grunt.option('quick') && 'run:i18nCheck',
+        'run:checkFileCasing',
+        'licenses',
+        'test:quick',
+      ])
+    );
   });
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
@@ -116,8 +88,8 @@ module.exports = function (grunt) {
   function runProjectsTests() {
     const serverCmd = {
       cmd: 'yarn',
-      args: ['kbn', 'run', 'test', '--skip-kibana', '--skip-kibana-extra'],
-      opts: { stdio: 'inherit' }
+      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-plugins'],
+      opts: { stdio: 'inherit' },
     };
 
     return new Promise((resolve, reject) => {

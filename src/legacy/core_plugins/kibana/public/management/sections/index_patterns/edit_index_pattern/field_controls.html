@@ -1,0 +1,19 @@
+<div class="actions">
+  <a
+    data-test-subj="indexPatternFieldEditButton"
+    ng-href="{{ kbnUrl.getRouteHref(field, 'edit') }}"
+    aria-label="{{::'kbn.management.editIndexPattern.editFieldButton' | i18n: { defaultMessage: 'Edit' } }}"
+    class="kuiButton kuiButton--basic kuiButton--small"
+  >
+    <span aria-hidden="true" class="kuiIcon fa-pencil"></span>
+  </a>
+
+  <button
+    ng-if="field.scripted"
+    ng-click="remove(field)"
+    class="kuiButton kuiButton--danger kuiButton--small"
+    aria-label="{{::'kbn.management.editIndexPattern.deleteFieldButton' | i18n: { defaultMessage: 'Delete' } }}"
+  >
+    <span aria-hidden="true" class="kuiIcon fa-trash"></span>
+  </button>
+</div>

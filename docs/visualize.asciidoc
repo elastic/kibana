@@ -47,9 +47,10 @@ data sets.
 <<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
 * *Other*
 [horizontal]
-<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
+<<controls,Controls>>:: Controls provide the ability to add interactive inputs to Kibana Dashboards.
 <<markdown-widget,Markdown widget>>:: Display free-form information or
 instructions.
+<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance.
 <<vega-graph,Vega graph>>:: Support for user-defined graphs, external data sources, images, and user-defined interactivity.
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
@@ -122,7 +123,7 @@ _buckets_ for the x-axis. Buckets are analogous to SQL `GROUP BY`
 statements. Pie charts, use the metric for the slice size and the bucket
 for the number of slices.
 
-You can futher break down the data by specifying sub aggregations. The first
+You can further break down the data by specifying sub aggregations. The first
 aggregation determines the data set for any subsequent aggregations. Sub
 aggregations are applied in order--you can drag the aggregations to change the
 order in which they're applied.
@@ -137,7 +138,11 @@ For more information about working with sub aggregations, see
 https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
 Aggregation Execution Order, and You].
 
+include::visualize/saving.asciidoc[]
+
 include::visualize/xychart.asciidoc[]
+
+include::visualize/controls.asciidoc[]
 
 include::visualize/datatable.asciidoc[]
 
@@ -159,6 +164,6 @@ include::visualize/tagcloud.asciidoc[]
 
 include::visualize/heatmap.asciidoc[]
 
-include::visualize/visualization-raw-data.asciidoc[]
-
 include::visualize/vega.asciidoc[]
+
+include::visualize/inspector.asciidoc[]

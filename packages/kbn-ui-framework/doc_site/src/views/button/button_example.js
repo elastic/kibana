@@ -1,3 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 
 import { renderToHtml } from '../../services';
@@ -11,50 +32,50 @@ import {
 } from '../../components';
 
 import Basic from './button_basic';
-const basicSource = require('!!raw-loader!./button_basic');
+import basicSource from '!!raw-loader!./button_basic';
 const basicHtml = renderToHtml(Basic);
 
 import Hollow from './button_hollow';
-const hollowSource = require('!!raw-loader!./button_hollow');
+import hollowSource from '!!raw-loader!./button_hollow';
 const hollowHtml = renderToHtml(Hollow);
 
 import Primary from './button_primary';
-const primarySource = require('!!raw-loader!./button_primary');
+import primarySource from '!!raw-loader!./button_primary';
 const primaryHtml = renderToHtml(Primary);
 
 import Secondary from './button_secondary';
-const secondarySource = require('!!raw-loader!./button_secondary');
+import secondarySource from '!!raw-loader!./button_secondary';
 const secondaryHtml = renderToHtml(Secondary);
 
 import Danger from './button_danger';
-const dangerSource = require('!!raw-loader!./button_danger');
+import dangerSource from '!!raw-loader!./button_danger';
 const dangerHtml = renderToHtml(Danger);
 
 import Warning from './button_warning';
-const warningSource = require('!!raw-loader!./button_danger');
+import warningSource from '!!raw-loader!./button_danger';
 const warningHtml = renderToHtml(Warning);
 
 import Loading from './button_loading';
-const loadingSource = require('!!raw-loader!./button_loading');
+import loadingSource from '!!raw-loader!./button_loading';
 const loadingHtml = renderToHtml(Loading, { isLoading: true });
 
 import WithIcon from './button_with_icon';
-const withIconSource = require('!!raw-loader!./button_with_icon');
+import withIconSource from '!!raw-loader!./button_with_icon';
 const withIconHtml = renderToHtml(WithIcon);
 
 import ButtonGroup from './button_group';
-const buttonGroupSource = require('!!raw-loader!./button_group');
+import buttonGroupSource from '!!raw-loader!./button_group';
 const buttonGroupHtml = renderToHtml(ButtonGroup);
 
 import ButtonGroupUnited from './button_group_united';
-const buttonGroupUnitedSource = require('!!raw-loader!./button_group_united');
+import buttonGroupUnitedSource from '!!raw-loader!./button_group_united';
 const buttonGroupUnitedHtml = renderToHtml(ButtonGroupUnited);
 
 import Elements from './button_elements';
-const elementsSource = require('!!raw-loader!./button_elements');
+import elementsSource from '!!raw-loader!./button_elements';
 const elementsHtml = renderToHtml(Elements);
 
-const sizesHtml = require('./button_sizes.html');
+import sizesHtml from './button_sizes.html';
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -73,10 +94,6 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Basic />
-      </GuideDemo>
-
-      <GuideDemo isDarkTheme={true}>
         <Basic />
       </GuideDemo>
     </GuideSection>

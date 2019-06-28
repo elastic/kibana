@@ -1,1 +1,0 @@
-import './filter_pill';

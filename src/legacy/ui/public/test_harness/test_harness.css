@@ -1,0 +1,22 @@
+/**
+ * This file is only for tests so it is it's own CSS
+ * to be imported directly by and only by this module.
+ */
+
+body#test-harness-body {
+  /**
+    now that tests include the kibana styles, we have
+    to override the body { display: flex; } rule as it
+    prevents the visualizations from properly testing
+    their sizing
+  */
+  display: block;
+}
+
+body#test-harness-body #mocha-stats .progress {
+  /* bootstrap thinks it is the only one who will use ".progress" */
+  height: auto;
+  background-color: transparent;
+  overflow: auto;
+  border-radius: 0;
+}

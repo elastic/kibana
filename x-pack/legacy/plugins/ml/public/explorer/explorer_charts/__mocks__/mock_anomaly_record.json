@@ -1,0 +1,33 @@
+{
+  "job_id": "mock-job-id",
+  "result_type": "record",
+  "probability": 0.000374234162864467,
+  "record_score": 1.3677172011743646,
+  "initial_record_score": 1.3677172011743646,
+  "bucket_span": 900,
+  "detector_index": 0,
+  "is_interim": false,
+  "timestamp": 1486743300000,
+  "partition_field_name": "airline",
+  "partition_field_value": "JAL",
+  "function": "mean",
+  "function_description": "mean",
+  "typical": [
+    499.9850000350266
+  ],
+  "actual": [
+    511.4997161865235
+  ],
+  "field_name": "responsetime",
+  "influencers": [
+    {
+      "influencer_field_name": "airline",
+      "influencer_field_values": [
+        "JAL"
+      ]
+    }
+  ],
+  "airline": [
+    "JAL"
+  ]
+}

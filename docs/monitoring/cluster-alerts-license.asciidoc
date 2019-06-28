@@ -1,0 +1,2 @@
+NOTE: Watcher must be enabled to view cluster alerts. If you have a Basic
+license, Top Cluster Alerts are not displayed.

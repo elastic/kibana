@@ -1,0 +1,11 @@
+{
+  "ping": {
+    "methods": [
+      "HEAD"
+    ],
+    "patterns": [
+      ""
+    ],
+    "documentation": "http://www.elastic.co/guide/"
+  }
+}

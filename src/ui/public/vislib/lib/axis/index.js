@@ -1,1 +1,0 @@
-export { VislibLibAxisProvider } from './axis';

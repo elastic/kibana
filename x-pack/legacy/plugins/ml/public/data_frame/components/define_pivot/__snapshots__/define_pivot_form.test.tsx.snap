@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <DefinePivotForm /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "combinedQuery": Object {},
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "id": "the-index-pattern-id",
+          "title": "the-index-pattern-title",
+        },
+        "currentSavedSearch": Object {},
+        "indexPatterns": Object {},
+        "kbnBaseUrl": "url",
+        "kibanaConfig": Object {},
+      }
+    }
+  >
+    <Component
+      onChange={[Function]}
+    />
+  </ContextProvider>
+</div>
+`;

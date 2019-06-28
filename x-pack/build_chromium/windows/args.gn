@@ -1,0 +1,27 @@
+# Based on //build/headless.gn
+
+# Embed resource.pak into binary to simplify deployment.
+headless_use_embedded_resources = true
+
+# Use embedded data instead external files for headless in order
+# to simplify deployment.
+v8_use_external_startup_data = false
+
+enable_nacl = false
+enable_print_preview = false
+enable_basic_printing = false
+enable_remoting = false
+use_alsa = false
+use_cups = false
+use_dbus = false
+use_gio = false
+use_libpci = false
+use_pulseaudio = false
+use_udev = false
+# Please, consult @elastic/kibana-security before changing/removing this option.
+use_kerberos = false
+
+is_debug = false
+symbol_level = 0
+is_component_build = false
+remove_webcore_debug_symbols = true

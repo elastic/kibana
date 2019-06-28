@@ -1,0 +1,121 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#batchSet Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet rejects all promises for batched requests that fail: promise rejections 1`] = `
+Array [
+  Object {
+    "error": [Error: Request failed with status code: 400],
+    "isRejected": true,
+  },
+  Object {
+    "error": [Error: Request failed with status code: 400],
+    "isRejected": true,
+  },
+  Object {
+    "error": [Error: Request failed with status code: 400],
+    "isRejected": true,
+  },
+]
+`;
+
+exports[`#batchSet rejects on 301 1`] = `"Request failed with status code: 301"`;
+
+exports[`#batchSet rejects on 404 response 1`] = `"Request failed with status code: 404"`;
+
+exports[`#batchSet rejects on 500 1`] = `"Request failed with status code: 500"`;
+
+exports[`#batchSet sends a single change immediately: single change 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;

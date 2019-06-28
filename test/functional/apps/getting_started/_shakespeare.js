@@ -1,4 +1,23 @@
-import expect from 'expect.js';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -18,14 +37,13 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
       + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
     });
 
     it('should create shakespeare index pattern', async function () {
       log.debug('Create shakespeare index pattern');
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
@@ -40,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should create initial vertical bar chart', async function () {
       log.debug('create shakespeare vertical bar chart');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch('shakes*');
       await PageObjects.visualize.waitForVisualization();
@@ -50,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visualize.getBarChartData('Count');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        expect(data[0] - expectedChartValues[0]).to.be.lessThan(5);
       });
     });
 
@@ -68,7 +86,6 @@ export default function ({ getService, getPageObjects }) {
       // then increment the aggIndex for the next one we create
       aggIndex = aggIndex + 1;
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
       const expectedChartValues = [935];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
@@ -87,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
     5. Click Apply changes images/apply-changes-button.png to view the results.
     */
     it('should configure Terms aggregation on play_name', async function () {
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       aggIndex = aggIndex + 1;
@@ -118,8 +135,7 @@ export default function ({ getService, getPageObjects }) {
     2. Choose the Max aggregation and select the speech_number field.
     */
     it('should configure Max aggregation metric on speech_number', async function () {
-      await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Y-Axis');
+      await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();

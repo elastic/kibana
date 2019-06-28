@@ -1,1 +1,0 @@
-export { RemoteProvider } from './remote';

@@ -1,6 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { resolve, relative, dirname } = require('path');
 
-const kebabCase = require('lodash.kebabcase');
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
 const snakeCase = require('lodash.snakecase');
@@ -9,7 +27,7 @@ const chalk = require('chalk');
 
 const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
-const kibanaPkg = require(kibanaPkgPath);
+const kibanaPkg = require(kibanaPkgPath); // eslint-disable-line import/no-dynamic-require
 
 const KBN_DIR = dirname(kibanaPkgPath);
 
@@ -44,24 +62,34 @@ module.exports = function({ name }) {
         message: 'Should a server API be generated?',
         default: true,
       },
+      generateScss: {
+        type: 'confirm',
+        message: 'Should SCSS be used?',
+        when: answers => answers.generateApp,
+        default: true,
+      },
     },
     filters: {
       'public/**/*': 'generateApp',
       'translations/**/*': 'generateTranslations',
+      '.i18nrc.json': 'generateTranslations',
       'public/hack.js': 'generateHack',
       'server/**/*': 'generateApi',
+      'public/app.scss': 'generateScss',
+      '.kibana-plugin-helpers.json': 'generateScss',
     },
     move: {
       gitignore: '.gitignore',
       eslintrc: '.eslintrc',
+      'package_template.json': 'package.json',
     },
     data: answers =>
       Object.assign(
         {
           templateVersion: pkg.version,
-          kebabCase,
           startCase,
           camelCase,
+          snakeCase,
           name,
         },
         answers
@@ -74,10 +102,7 @@ module.exports = function({ name }) {
         cwd: KBN_DIR,
         stdio: 'inherit',
       }).then(() => {
-        const dir = relative(
-          process.cwd(),
-          resolve(KBN_DIR, `../kibana-extra`, snakeCase(name))
-        );
+        const dir = relative(process.cwd(), resolve(KBN_DIR, 'plugins', snakeCase(name)));
 
         log.success(chalk`🎉
 
