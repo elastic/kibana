@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem
 } from '@elastic/eui';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FeatureProperties } from './feature_properties';
 
@@ -77,6 +76,8 @@ export class FeatureTooltip extends React.Component {
       return;
     }
 
+    this._prevFeatures = this.props.features;
+
     const uniqueLayerIds = [];
     for (let i = 0; i < this.props.features.length; i++) {
       let index = uniqueLayerIds.findIndex(({ layerId }) => {
@@ -110,14 +111,11 @@ export class FeatureTooltip extends React.Component {
     });
 
     if (this._isMounted) {
-      this._prevFeatures = this.props.features;
-      if (!_.isEqual(this.state.uniqueLayers, options)) {
-        this.setState({
-          uniqueLayers: options,
-          layerIdFilter: ALL_LAYERS,
-          pageNumber: DEFAULT_PAGE_NUMBER
-        });
-      }
+      this.setState({
+        uniqueLayers: options,
+        layerIdFilter: ALL_LAYERS,
+        pageNumber: DEFAULT_PAGE_NUMBER
+      });
     }
   };
 
