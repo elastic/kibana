@@ -42,21 +42,21 @@ export class FilterEditor extends Component {
     this._loadIndexPatterns();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevQuery = prevProps.layer.getQuery();
-    const currentQuery = this.props.layer.getQuery();
-    const prevSavedQuery = prevState.savedQuery;
-    const currentSavedQuery = this.state.savedQuery;
-    if (prevSavedQuery !== currentSavedQuery) {
-      console.log(`the savedQuery prop has changed from ${prevSavedQuery} to ${currentSavedQuery}`);
-    }
-    if (prevQuery !== currentQuery) {
-      console.log(`the query prop has changed from ${prevQuery} to ${currentQuery}`);
-    }
-    if (prevState.savedQuery !== this.state.savedQuery) {
-      console.log(`the incomming savedQuery ${prevState.savedQuery} is different to the one on state ${this.state.savedQuery}`);
-    }
-  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   const prevQuery = prevProps.layer.getQuery();
+  //   const currentQuery = this.props.layer.getQuery();
+  //   const prevSavedQuery = prevState.savedQuery;
+  //   const currentSavedQuery = this.state.savedQuery;
+  //   if (prevSavedQuery !== currentSavedQuery) {
+  //     console.log(`the savedQuery prop has changed from ${prevSavedQuery} to ${currentSavedQuery}`);
+  //   }
+  //   if (prevQuery !== currentQuery) {
+  //     console.log(`the query prop has changed from ${prevQuery} to ${currentQuery}`);
+  //   }
+  //   if (prevState.savedQuery !== this.state.savedQuery) {
+  //     console.log(`the incomming savedQuery ${prevState.savedQuery} is different to the one on state ${this.state.savedQuery}`);
+  //   }
+  // }
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -93,6 +93,10 @@ export class FilterEditor extends Component {
     this.setState({ isPopoverOpen: false });
   }
 
+  _open = () => {
+    this.setState({ isPopoverOpen: true });
+  }
+
   _onQueryChange = ({ query }) => {
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
@@ -103,15 +107,7 @@ export class FilterEditor extends Component {
   }
 
   _onQuerySaved = (savedQuery) => {
-    console.log('savedQuery received from search bar after save:', savedQuery);
-    const oldSavedQuery = this.state.savedQuery;
-    if (!savedQuery) return;
-    // execute the code that triggers on the state.savedQuery watcher in map_controller
-    this._getSavedQueryFromService(savedQuery);
-    this.setState({ savedQuery: savedQuery.id });
-    if (savedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      this.props.setLayerQuery(this.props.layer.getId(), savedQuery.attributes.query);
-    }
+    this._addOrUpdateSavedQuery(savedQuery, this.state.savedQuery);
   }
 
   _getSavedQueryFromService = async (savedQuery) => {
@@ -119,19 +115,21 @@ export class FilterEditor extends Component {
     const newSavedQuery = await savedQueryService.getSavedQuery(savedQuery.id);
     await this.setState({ savedQuery: newSavedQuery });
     this.props.setLayerQuery(this.props.layer.getId(), newSavedQuery.attributes.query);
-
   }
 
   _onSavedQueryChange = (changedSavedQuery) => {
-    console.log('changedSavedQuery received from search bar after a change:', changedSavedQuery);
-    const oldSavedQuery = this.state.savedQuery;
-    if (!changedSavedQuery) return;
-    // execute the code that triggers on the state.savedQuery watcher in map_controller
-    this._getSavedQueryFromService(changedSavedQuery);
-    this.setState({ savedQuery: changedSavedQuery.id });
-    if (changedSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      this.props.setLayerQuery(this.props.layer.getId(), changedSavedQuery.attributes.query);
+    this._addOrUpdateSavedQuery(changedSavedQuery, this.state.savedQuery);
+  }
+
+  _addOrUpdateSavedQuery = (currentSavedQuery, oldSavedQuery) => {
+    if (!currentSavedQuery) return;
+    this._getSavedQueryFromService(currentSavedQuery);
+    // this.setState({ currentSavedQuery: currentSavedQuery.id });
+    this.setState({ savedQuery: currentSavedQuery });
+    if (currentSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      this.props.setLayerQuery(this.props.layer.getId(), currentSavedQuery.attributes.query);
     }
+    this._renderOpenButton();
   }
 
   _renderQueryPopover() {
