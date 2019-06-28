@@ -11,7 +11,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiProgress,
   EuiText,
   RIGHT_ALIGNMENT,
@@ -106,17 +105,9 @@ export const getColumns = (
       width: '100px',
     },
     {
-      name: (
-        <Fragment>
-          {i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' })}{' '}
-          <EuiIconTip
-            content={i18n.translate('xpack.ml.dataframe.progressIconTipContent', {
-              defaultMessage:
-                'Percentage shown in continuous mode inidicates progress of the current checkpoint.',
-            })}
-          />
-        </Fragment>
-      ),
+      name: i18n.translate('xpack.ml.dataframe.progressIconTipContent', {
+        defaultMessage: 'Progress',
+      }),
       sortable: true,
       truncateText: true,
       render(item: DataFrameJobListRow) {
@@ -126,9 +117,11 @@ export const getColumns = (
           progress = Math.round(item.state.progress.percent_complete);
         }
 
+        const isBatchTransform = typeof item.config.sync === 'undefined';
+
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            {true && (
+            {isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   <EuiProgress value={progress} max={100} color="primary" size="m">
@@ -137,6 +130,19 @@ export const getColumns = (
                 </EuiFlexItem>
                 <EuiFlexItem style={{ width: '35px' }} grow={false}>
                   <EuiText size="xs">{`${progress}%`}</EuiText>
+                </EuiFlexItem>
+              </Fragment>
+            )}
+            {!isBatchTransform && (
+              <Fragment>
+                <EuiFlexItem style={{ width: '40px' }} grow={false}>
+                  {item.state.task_state === 'started' && <EuiProgress color="primary" size="m" />}
+                  {item.state.task_state !== 'started' && (
+                    <EuiProgress value={0} max={100} color="primary" size="m" />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem style={{ width: '35px' }} grow={false}>
+                  &nbsp;
                 </EuiFlexItem>
               </Fragment>
             )}

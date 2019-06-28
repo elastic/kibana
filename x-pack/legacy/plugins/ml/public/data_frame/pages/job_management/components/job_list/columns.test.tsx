@@ -17,8 +17,7 @@ describe('Data Frame: Job List Columns', () => {
     expect(columns[3].name).toBe('Destination index');
     expect(columns[4].name).toBe('Status');
     expect(columns[5].name).toBe('Mode');
-    // The progress column is nested React code with an info icon
-    expect(typeof columns[6].name).toBe('object');
+    expect(columns[6].name).toBe('Progress');
     expect(columns[7].name).toBe('Actions');
   });
 });
