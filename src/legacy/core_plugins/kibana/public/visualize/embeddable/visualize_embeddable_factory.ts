@@ -54,20 +54,27 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
         type: 'visualization',
         getIconForSavedObject: savedObject => {
-          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type];
-          return (visType && visType.icon) || 'visualizeApp';
+          return (
+            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
+          );
         },
         getTooltipForSavedObject: savedObject => {
-          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type];
-          return `${savedObject.attributes.title} ${visType ? `(${visType.title})` : ''}`;
+          return `${savedObject.attributes.title} (${
+            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title
+          })`;
         },
         showSavedObject: savedObject => {
+          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+          const visType = visTypes.byName[typeName];
+          if (!visType) {
+            return false;
+          }
+
           if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
             return true;
           }
-          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.byName[typeName];
-          return visType && visType.stage !== 'experimental';
+
+          return visType.stage !== 'experimental';
         },
       },
     });
