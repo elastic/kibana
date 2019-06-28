@@ -36,7 +36,7 @@ export class LeftInnerJoin {
   }
 
   getJoinFields() {
-    return this._rightSource.getRightMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
+    return this.getRightMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
     });
   }
