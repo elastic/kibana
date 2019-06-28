@@ -4,30 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { callWithRequestType } from '../../../common/types/kibana';
+import { TransformMessage } from '../../../common/types/audit_message';
 
-const SIZE = 1000;
+const SIZE = 20;
 
-export function transformAuditMessagesProvider(callWithRequest) {
+interface Message {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: null | number;
+  _source: TransformMessage;
+  sort?: any;
+}
 
+interface BoolQuery {
+  bool: { [key: string]: any };
+}
+
+export function transformAuditMessagesProvider(callWithRequest: callWithRequestType) {
   // search for audit messages,
   // transformId is optional. without it, all jobs will be listed.
-  async function getTransformAuditMessages(transformId) {
-    const query = {
+  async function getTransformAuditMessages(transformId: string) {
+    const query: BoolQuery = {
       bool: {
         filter: [
           {
             bool: {
               must_not: {
                 term: {
-                  level: 'activity'
-                }
-              }
-            }
+                  level: 'activity',
+                },
+              },
+            },
           },
-        ]
-      }
+        ],
+      },
     };
 
     // if no transformId specified, load all of the messages
@@ -37,16 +50,16 @@ export function transformAuditMessagesProvider(callWithRequest) {
           should: [
             {
               term: {
-                transform_id: '' // catch system messages
-              }
+                transform_id: '', // catch system messages
+              },
             },
             {
               term: {
-                transform_id: transformId // messages for specified transformId
-              }
-            }
-          ]
-        }
+                transform_id: transformId, // messages for specified transformId
+              },
+            },
+          ],
+        },
       });
     }
 
@@ -56,19 +69,15 @@ export function transformAuditMessagesProvider(callWithRequest) {
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
         size: SIZE,
-        body:
-        {
-          sort: [
-            { timestamp: { order: 'asc' } },
-            { transform_id: { order: 'asc' } }
-          ],
-          query
-        }
+        body: {
+          sort: [{ timestamp: { order: 'desc' } }, { transform_id: { order: 'asc' } }],
+          query,
+        },
       });
 
       let messages = [];
       if (resp.hits.total !== 0) {
-        messages = resp.hits.hits.map(hit => hit._source);
+        messages = resp.hits.hits.map((hit: Message) => hit._source);
       }
       return messages;
     } catch (e) {
@@ -77,6 +86,6 @@ export function transformAuditMessagesProvider(callWithRequest) {
   }
 
   return {
-    getTransformAuditMessages
+    getTransformAuditMessages,
   };
 }
