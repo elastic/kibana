@@ -19,5 +19,5 @@ export interface CoreSetup
 |  [fatalErrors](./kibana-plugin-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> | [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |
 |  [http](./kibana-plugin-public.coresetup.http.md) | <code>HttpSetup</code> | [HttpSetup](./kibana-plugin-public.httpsetup.md) |
 |  [notifications](./kibana-plugin-public.coresetup.notifications.md) | <code>NotificationsSetup</code> | [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |
-|  [uiSettings](./kibana-plugin-public.coresetup.uisettings.md) | <code>UiSettingsSetup</code> | [UiSettingsSetup](./kibana-plugin-public.uisettingssetup.md) |
+|  [uiSettings](./kibana-plugin-public.coresetup.uisettings.md) | <code>UiSettingsClientContract</code> | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 

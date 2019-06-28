@@ -30,12 +30,12 @@ import { CoreSetup, CoreStart } from '..';
  *
  * @public
  */
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
-    create: <Schema>() => Observable<Schema>;
-    createIfExists: <Schema>() => Observable<Schema | undefined>;
+    create: <T = ConfigSchema>() => Observable<T>;
+    createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };
 }
 

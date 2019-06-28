@@ -16,9 +16,60 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { of } from 'rxjs';
+import { PluginInitializerContext, CoreSetup, CoreStart } from '.';
+import { loggingServiceMock } from './logging/logging_service.mock';
+import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+import { httpServiceMock } from './http/http_service.mock';
 
 export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
 export { SavedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
+
+export function pluginInitializerContextConfigMock<T>(config: T) {
+  const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
+    create: jest.fn().mockReturnValue(of(config)),
+    createIfExists: jest.fn().mockReturnValue(of(config)),
+  };
+
+  return mock;
+}
+
+function pluginInitializerContextMock<T>(config: T) {
+  const mock: jest.Mocked<PluginInitializerContext<T>> = {
+    logger: loggingServiceMock.create(),
+    env: {
+      mode: {
+        dev: true,
+        name: 'development',
+        prod: false,
+      },
+    },
+    config: pluginInitializerContextConfigMock<T>(config),
+  };
+
+  return mock;
+}
+
+function createCoreSetupMock() {
+  const mock: MockedKeys<CoreSetup> = {
+    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
+  };
+
+  return mock;
+}
+
+function createCoreStartMock() {
+  const mock: MockedKeys<CoreStart> = {};
+
+  return mock;
+}
+
+export const coreMock = {
+  createSetup: createCoreSetupMock,
+  createStart: createCoreStartMock,
+  createPluginInitializerContext: pluginInitializerContextMock,
+};

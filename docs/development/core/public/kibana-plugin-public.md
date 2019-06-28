@@ -63,6 +63,5 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
-|  [UiSettingsSetup](./kibana-plugin-public.uisettingssetup.md) |  |
-|  [UiSettingsStart](./kibana-plugin-public.uisettingsstart.md) |  |
+|  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 
