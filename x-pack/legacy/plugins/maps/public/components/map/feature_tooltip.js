@@ -177,11 +177,12 @@ export class FeatureTooltip extends React.Component {
 
   _renderHeader() {
 
-    if (!this.props.showCloseButton &&  !this.props.showFeatureList) {
+    if (!this.props.showCloseButton && !this.props.showFeatureList) {
       return null;
     }
 
-    const divider =  (this.state.uniqueLayers && this.state.uniqueLayers.length > 1) ? <EuiHorizontalRule margin="xs" /> : null;
+    const divider = (this.state.uniqueLayers && this.state.uniqueLayers.length > 1) ?
+      <EuiHorizontalRule margin="xs"/> : null;
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -205,7 +206,7 @@ export class FeatureTooltip extends React.Component {
 
     return (
       <Fragment>
-        <EuiHorizontalRule margin="xs" />
+        <EuiHorizontalRule margin="xs"/>
         {this._renderPagination(filteredFeatures)}
       </Fragment>
     );
@@ -248,7 +249,7 @@ export class FeatureTooltip extends React.Component {
 
   _renderPagination(filteredFeatures) {
 
-    const pageNumberReadout =   (
+    const pageNumberReadout = (
       <EuiText size="s"><b>{(this.state.pageNumber + 1)}</b> of <b>{filteredFeatures.length}</b></EuiText>
     );
 
