@@ -123,9 +123,7 @@ const defaultProps = {
     bulkGet: jest.fn(),
   },
   indexPatterns: {
-    cache: {
-      clearAll: jest.fn(),
-    }
+    clearCache: jest.fn(),
   },
   $http,
   basePath: '',
