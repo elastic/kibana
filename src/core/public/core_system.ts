@@ -19,13 +19,9 @@
 
 import './core.css';
 
-import { Subject } from 'rxjs';
-
-import { CoreSetup } from '.';
-import { BasePathService } from './base_path';
-import { CapabilitiesService } from './capabilities';
+import { InternalCoreSetup, InternalCoreStart } from '.';
 import { ChromeService } from './chrome';
-import { FatalErrorsService } from './fatal_errors';
+import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
@@ -34,6 +30,10 @@ import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
+import { ApplicationService } from './application';
+import { mapToObject } from '../utils/';
+import { DocLinksService } from './doc_links';
+import { RenderingService } from './rendering';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -62,17 +62,16 @@ export class CoreSystem {
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly uiSettings: UiSettingsService;
-  private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
-  private readonly capabilities: CapabilitiesService;
   private readonly overlay: OverlayService;
   private readonly plugins: PluginsService;
+  private readonly application: ApplicationService;
+  private readonly docLinks: DocLinksService;
+  private readonly rendering: RenderingService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly notificationsTargetDomElement$: Subject<HTMLDivElement>;
-  private readonly legacyPlatformTargetDomElement: HTMLDivElement;
-  private readonly overlayTargetDomElement: HTMLDivElement;
+  private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
     const {
@@ -87,37 +86,28 @@ export class CoreSystem {
 
     this.i18n = new I18nService();
 
-    this.capabilities = new CapabilitiesService();
-
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
 
-    this.fatalErrors = new FatalErrorsService({
-      rootDomElement,
-      injectedMetadata: this.injectedMetadata,
-      stopCoreSystem: () => {
-        this.stop();
-      },
+    this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
+      // Stop Core before rendering any fatal errors into the DOM
+      this.stop();
     });
 
-    this.notificationsTargetDomElement$ = new Subject();
-    this.notifications = new NotificationsService({
-      targetDomElement$: this.notificationsTargetDomElement$.asObservable(),
-    });
+    this.notifications = new NotificationsService();
     this.http = new HttpService();
-    this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
-    this.overlayTargetDomElement = document.createElement('div');
-    this.overlay = new OverlayService(this.overlayTargetDomElement);
+    this.overlay = new OverlayService();
+    this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
+    this.docLinks = new DocLinksService();
+    this.rendering = new RenderingService();
 
     const core: CoreContext = {};
     this.plugins = new PluginsService(core);
 
-    this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
-      targetDomElement: this.legacyPlatformTargetDomElement,
       requireLegacyFiles,
       useLegacyTestHarness,
     });
@@ -125,58 +115,108 @@ export class CoreSystem {
 
   public async setup() {
     try {
-      const i18n = this.i18n.setup();
-      const notifications = this.notifications.setup({ i18n });
+      // Setup FatalErrorsService and it's dependencies first so that we're
+      // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
-      const fatalErrors = this.fatalErrors.setup({ i18n });
-      const http = this.http.setup({ fatalErrors });
-      const overlays = this.overlay.setup({ i18n });
-      const basePath = this.basePath.setup({ injectedMetadata });
-      const capabilities = this.capabilities.setup({ injectedMetadata });
-      const uiSettings = this.uiSettings.setup({
-        notifications,
-        http,
+      this.fatalErrorsSetup = this.fatalErrors.setup({
         injectedMetadata,
-        basePath,
+        i18n: this.i18n.getContext(),
       });
-      const chrome = this.chrome.setup({
-        injectedMetadata,
-        notifications,
-      });
+      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
+      const notifications = this.notifications.setup({ uiSettings });
+      const application = this.application.setup();
 
-      const core: CoreSetup = {
-        basePath,
-        chrome,
-        fatalErrors,
+      const core: InternalCoreSetup = {
+        application,
+        fatalErrors: this.fatalErrorsSetup,
         http,
-        i18n,
-        capabilities,
         injectedMetadata,
         notifications,
         uiSettings,
-        overlays,
       };
 
-      await this.plugins.setup(core);
+      // Services that do not expose contracts at setup
+      const plugins = await this.plugins.setup(core);
+      await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
+
+      return { fatalErrors: this.fatalErrorsSetup };
+    } catch (error) {
+      if (this.fatalErrorsSetup) {
+        this.fatalErrorsSetup.add(error);
+      } else {
+        // If the FatalErrorsService has not yet been setup, log error to console
+        // eslint-disable-next-line no-console
+        console.log(error);
+      }
+    }
+  }
+
+  public async start() {
+    try {
+      const injectedMetadata = await this.injectedMetadata.start();
+      const docLinks = await this.docLinks.start({ injectedMetadata });
+      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const i18n = await this.i18n.start();
+      const application = await this.application.start({ injectedMetadata });
+
+      const coreUiTargetDomElement = document.createElement('div');
+      coreUiTargetDomElement.id = 'kibana-body';
+      const notificationsTargetDomElement = document.createElement('div');
+      const overlayTargetDomElement = document.createElement('div');
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
-
-      const notificationsTargetDomElement = document.createElement('div');
+      this.rootDomElement.appendChild(coreUiTargetDomElement);
       this.rootDomElement.appendChild(notificationsTargetDomElement);
-      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
-      this.rootDomElement.appendChild(this.overlayTargetDomElement);
+      this.rootDomElement.appendChild(overlayTargetDomElement);
 
-      // Only provide the DOM element to notifications once it's attached to the page.
-      // This prevents notifications from timing out before being displayed.
-      this.notificationsTargetDomElement$.next(notificationsTargetDomElement);
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
+      const notifications = await this.notifications.start({
+        i18n,
+        overlays,
+        targetDomElement: notificationsTargetDomElement,
+      });
+      const chrome = await this.chrome.start({
+        application,
+        docLinks,
+        http,
+        injectedMetadata,
+        notifications,
+      });
+      const uiSettings = await this.uiSettings.start();
 
-      this.legacyPlatform.setup(core);
+      const core: InternalCoreStart = {
+        application,
+        chrome,
+        docLinks,
+        http,
+        i18n,
+        injectedMetadata,
+        notifications,
+        overlays,
+        uiSettings,
+      };
 
-      return { fatalErrors };
+      const plugins = await this.plugins.start(core);
+      const rendering = this.rendering.start({
+        chrome,
+        targetDomElement: coreUiTargetDomElement,
+      });
+      await this.legacyPlatform.start({
+        core,
+        plugins: mapToObject(plugins.contracts),
+        targetDomElement: rendering.legacyTargetDomElement,
+      });
     } catch (error) {
-      this.fatalErrors.add(error);
+      if (this.fatalErrorsSetup) {
+        this.fatalErrorsSetup.add(error);
+      } else {
+        // If the FatalErrorsService has not yet been setup, log error to console
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
     }
   }
 

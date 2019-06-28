@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { Capabilities as UICapabilities, CapabilitiesSetup } from '../../../../core/public';
+import { npStart } from 'ui/new_platform';
+import { Capabilities as UICapabilities } from '../../../../core/public';
 
-export { Capabilities as UICapabilities } from '../../../../core/public';
-export let uiCapabilities: UICapabilities = null!;
+export { UICapabilities };
 
-export function __newPlatformInit__(capabililitiesService: CapabilitiesSetup) {
-  if (uiCapabilities) {
-    throw new Error('ui/capabilities already initialized with new platform apis');
-  }
-
-  uiCapabilities = capabililitiesService.getCapabilities();
-}
+export const capabilities = {
+  get() {
+    return npStart.core.application.capabilities;
+  },
+};

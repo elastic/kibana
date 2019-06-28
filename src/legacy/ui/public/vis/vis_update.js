@@ -27,12 +27,14 @@ const updateVisualizationConfig = (stateConfig, config) => {
 
   // update value axis options
   const isUserDefinedYAxis = config.setYExtents;
+  const defaultYExtents = config.defaultYExtents;
   const mode = ['stacked', 'overlap'].includes(config.mode) ? 'normal' : config.mode || 'normal';
   config.valueAxes[0].scale = {
     ...config.valueAxes[0].scale,
     type: config.scale || 'linear',
     setYExtents: config.setYExtents || false,
     defaultYExtents: config.defaultYExtents || false,
+    boundsMargin: defaultYExtents ? config.boundsMargin : 0,
     min: isUserDefinedYAxis ? config.yAxis.min : undefined,
     max: isUserDefinedYAxis ? config.yAxis.max : undefined,
     mode: mode

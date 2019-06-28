@@ -58,7 +58,7 @@ export interface GenericFtrProviderContext<
    */
   hasService(serviceName: 'config' | 'log' | 'lifecycle'): true;
   hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
-  hasService(serviceName: string): serviceName is keyof ServiceMap;
+  hasService(serviceName: string): serviceName is Extract<keyof ServiceMap, string>;
 
   /**
    * Get the instance of a service, if the service is loaded async and the service needs to be used
@@ -82,4 +82,9 @@ export interface GenericFtrProviderContext<
    * @param path
    */
   loadTestFile(path: string): void;
+}
+
+export interface FtrConfigProviderContext {
+  log: ToolingLog;
+  readConfigFile(path: string): Promise<Config>;
 }

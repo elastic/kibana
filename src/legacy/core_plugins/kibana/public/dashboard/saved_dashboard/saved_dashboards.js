@@ -35,7 +35,7 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function (Private, SavedDashboard, kbnIndex, kbnUrl, $http, chrome) {
+module.service('savedDashboards', function (Private, SavedDashboard, kbnUrl, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   return new SavedObjectLoader(SavedDashboard, kbnUrl, chrome, savedObjectClient);
 });

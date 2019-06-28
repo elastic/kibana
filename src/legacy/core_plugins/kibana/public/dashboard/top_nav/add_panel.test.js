@@ -27,11 +27,13 @@ import {
 
 jest.mock('ui/capabilities',
   () => ({
-    uiCapabilities: {
-      visualize: {
-        show: true,
-        save: true
-      }
+    capabilities: {
+      get: () => ({
+        visualize: {
+          show: true,
+          save: true
+        }
+      })
     }
   }), { virtual: true });
 

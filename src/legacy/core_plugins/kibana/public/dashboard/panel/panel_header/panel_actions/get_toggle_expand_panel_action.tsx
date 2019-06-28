@@ -38,17 +38,19 @@ export function getToggleExpandPanelAction({
 }) {
   return new ContextMenuAction(
     {
-      displayName: isExpanded
-        ? i18n.translate('kbn.dashboard.panel.toggleExpandPanel.expandedDisplayName', {
-            defaultMessage: 'Minimize',
-          })
-        : i18n.translate('kbn.dashboard.panel.toggleExpandPanel.notExpandedDisplayName', {
-            defaultMessage: 'Full screen',
-          }),
       id: 'togglePanel',
       parentPanelId: 'mainMenu',
     },
     {
+      getDisplayName: () => {
+        return isExpanded
+          ? i18n.translate('kbn.dashboard.panel.toggleExpandPanel.expandedDisplayName', {
+              defaultMessage: 'Minimize',
+            })
+          : i18n.translate('kbn.dashboard.panel.toggleExpandPanel.notExpandedDisplayName', {
+              defaultMessage: 'Full screen',
+            });
+      },
       // TODO: Update to minimize icon when https://github.com/elastic/eui/issues/837 is complete.
       icon: <EuiIcon type={isExpanded ? 'expand' : 'expand'} />,
       onClick: toggleExpandedPanel,

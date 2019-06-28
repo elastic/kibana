@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 export const createTrycloudOption1 = () => ({
   title: i18n.translate('kbn.common.tutorials.premCloudInstructions.option1.title', {
-    defaultMessage: 'Option 1: Try module in Elastic Cloud',
+    defaultMessage: 'Option 1: Try in Elastic Cloud',
   }),
   textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option1.textPre', {
     defaultMessage: 'Go to [Elastic Cloud]({link}). Register if you \

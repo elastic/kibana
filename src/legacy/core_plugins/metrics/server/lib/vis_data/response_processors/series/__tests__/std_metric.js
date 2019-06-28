@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import stdMetric from '../std_metric';
+import { stdMetric } from '../std_metric';
 
 describe('stdMetric(resp, panel, series)', () => {
   let panel;
@@ -27,7 +27,7 @@ describe('stdMetric(resp, panel, series)', () => {
   let resp;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       chart_type: 'line',
@@ -38,7 +38,7 @@ describe('stdMetric(resp, panel, series)', () => {
       color: 'rgb(255, 0, 0)',
       id: 'test',
       split_mode: 'everything',
-      metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }]
+      metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }],
     };
     resp = {
       aggregations: {
@@ -47,16 +47,16 @@ describe('stdMetric(resp, panel, series)', () => {
             buckets: [
               {
                 key: 1,
-                avgmetric: { value: 1 }
+                avgmetric: { value: 1 },
               },
               {
                 key: 2,
-                avgmetric: { value: 2 }
-              }
-            ]
-          }
-        }
-      }
+                avgmetric: { value: 2 },
+              },
+            ],
+          },
+        },
+      },
     };
   });
 
@@ -94,7 +94,6 @@ describe('stdMetric(resp, panel, series)', () => {
     expect(results[0]).to.have.property('stack');
     expect(results[0]).to.have.property('bars');
     expect(results[0]).to.have.property('points');
-    expect(results[0].data).to.eql([ [1, 1], [2, 2] ]);
+    expect(results[0].data).to.eql([[1, 1], [2, 2]]);
   });
-
 });

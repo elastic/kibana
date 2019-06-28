@@ -39,7 +39,5 @@ export interface UpdateDescriptionAction
 
 export type MetadataActions = UpdateDescriptionAction | UpdateTitleAction;
 
-export const updateDescription = createAction<UpdateDescriptionAction>(
-  MetadataActionTypeKeys.UPDATE_DESCRIPTION
-);
-export const updateTitle = createAction<UpdateTitleAction>(MetadataActionTypeKeys.UPDATE_TITLE);
+export const updateDescription = createAction<string>(MetadataActionTypeKeys.UPDATE_DESCRIPTION);
+export const updateTitle = createAction<string>(MetadataActionTypeKeys.UPDATE_TITLE);

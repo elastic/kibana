@@ -39,6 +39,7 @@ type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
   const mocked: jest.Mocked<ElasticsearchServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createSetupContractMock());

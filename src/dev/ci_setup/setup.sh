@@ -52,7 +52,7 @@ if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-nodeVersion="$(cat $dir/.node-version)"
+nodeVersion="$(cat "$dir/.node-version")"
 nodeDir="$cacheDir/node/$nodeVersion"
 
 if [[ "$OS" == "win" ]]; then
@@ -66,7 +66,7 @@ fi
 echo " -- node: version=v${nodeVersion} dir=$nodeDir"
 
 echo " -- setting up node.js"
-if [ -x "$nodeBin/node" ] && [ "$($nodeBin/node --version)" == "v$nodeVersion" ]; then
+if [ -x "$nodeBin/node" ] && [ "$("$nodeBin/node" --version)" == "v$nodeVersion" ]; then
   echo " -- reusing node.js install"
 else
   if [ -d "$nodeDir" ]; then
@@ -78,8 +78,8 @@ else
   mkdir -p "$nodeDir"
   if [[ "$OS" == "win" ]]; then
     nodePkg="$nodeDir/${nodeUrl##*/}"
-    curl --silent -o $nodePkg $nodeUrl
-    unzip -qo $nodePkg -d $nodeDir
+    curl --silent -o "$nodePkg" "$nodeUrl"
+    unzip -qo "$nodePkg" -d "$nodeDir"
     mv "${nodePkg%.*}" "$nodeBin"
   else
     curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
@@ -95,7 +95,7 @@ export PATH="$nodeBin:$PATH"
 ### downloading yarn
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-npm install -g yarn@^${yarnVersion}
+npm install -g "yarn@^${yarnVersion}"
 
 ###
 ### setup yarn offline cache
@@ -180,3 +180,44 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
+
+###
+### rebuild kbn-pm distributable to ensure it's not out of date
+###
+echo " -- building renovate config"
+node scripts/build_renovate_config
+
+###
+### verify no git modifications
+###
+GIT_CHANGES="$(git ls-files --modified)"
+if [ "$GIT_CHANGES" ]; then
+  echo -e "\n${RED}ERROR: 'node scripts/build_renovate_config' caused changes to the following files:${C_RESET}\n"
+  echo -e "$GIT_CHANGES\n"
+  exit 1
+fi
+
+###
+### github-checks-reporter kill switch. Remove to disable
+###
+export CHECKS_REPORTER_ACTIVE=true
+
+### only run on pr jobs
+if [[ "$JOB_NAME" != "elastic+kibana+pull-request"* ]] ; then
+  export CHECKS_REPORTER_ACTIVE=false
+fi
+
+###
+### Implements github-checks-reporter kill switch when scripts are called from the command line
+### $@ - all arguments
+###
+function checks-reporter-with-killswitch() {
+  if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
+    yarn run github-checks-reporter "$@"
+  else
+    arguments=("$@");
+    "${arguments[@]:1}";
+  fi
+}
+
+export -f checks-reporter-with-killswitch

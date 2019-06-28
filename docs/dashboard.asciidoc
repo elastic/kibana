@@ -3,7 +3,7 @@
 
 [partintro]
 --
-A Kibana _dashboard_ displays a collection of visualizations and searches.
+A Kibana _dashboard_ displays a collection of visualizations, searches, and {kibana-ref}/maps.html[maps].
 You can arrange, resize, and edit the dashboard content and then save the dashboard
 so you can share it.
 
@@ -15,27 +15,40 @@ image:images/Dashboard_example.png[Example dashboard]
 [[dashboard-getting-started]]
 == Building a Dashboard
 
-If you haven't yet indexed data into {es} or created an index pattern, 
-you'll be prompted to do so as you follow the steps for creating a dashboard.  
-Or, you can use one of the prebuilt sample data sets, available from the 
+If you haven't yet indexed data into {es} or created an index pattern,
+you'll be prompted to do so as you follow the steps for creating a dashboard.
+Or, you can use one of the prebuilt sample data sets, available from the
 Kibana home page.
 
-. In the side navigation, click *Dashboard*.
-. Click *Create new dashboard.*  
-. Click *Add*.
+[float]
+[[dashboard-read-only-access]]
+=== [xpack]#Read only access#
+When you have insufficient privileges to create or save dashboards, the following 
+indicator in Kibana will be displayed. The buttons to create new dashboards or edit
+existing dashboard won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
 
-[[adding-visualizations-to-a-dashboard]]
-. Use *Add Panels* to add visualizations and saved searches to the dashboard. 
-If you have a large number of visualizations, you can filter the lists. 
+[role="screenshot"]
+image::images/dashboard-read-only-badge.png[Example of Dashboard's read only access indicator in Kibana's header]
+
+[float]
+[[dashboard-create-new-dashboard]]
+=== Creating a new Dashboard
+
+. In the side navigation, click *Dashboard*.
+. Click *Create new dashboard.*
+. Click *Add*.
+. [[adding-visualizations-to-a-dashboard]]Use *Add Panels* to add visualizations
+and saved searches to the dashboard. If you have a large number of
+visualizations, you can filter the lists.
 +
 [role="screenshot"]
 image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
-[[saving-dashboards]]
-. When you're finished adding and arranging the panels,
+. [[saving-dashboards]]When you're finished adding and arranging the panels,
 go to the menu bar and click *Save*.
 
-. In *Save Dashboard*, enter a dashboard title and optionally a description. 
+. In *Save Dashboard*, enter a dashboard title and optionally a description.
 
 . To store the time period specified in the time filter, enable *Store time
 with dashboard*.
@@ -59,7 +72,7 @@ resize, edit, and delete.  To start editing, click *Edit* in the menu bar.
 to the new dimensions.
 
 [[removing-containers]]
-Additional commands for managing the panel and its contents 
+Additional commands for managing the panel and its contents
 are in the gear menu in the upper right.
 
 [role="screenshot"]
@@ -71,14 +84,14 @@ dashboard does *not* delete the saved visualization or search.
 [[viewing-detailed-information]]
 == Inspecting a Visualization from the Dashboard
 
-Many visualizations allow you to inspect the data and requests behind the 
-visualization. 
+Many visualizations allow you to inspect the data and requests behind the
+visualization.
 
-In the dashboard, expand the visualization's panel menu (or gear menu if in 
+In the dashboard, expand the visualization's panel menu (or gear menu if in
 *Edit* mode) and select *Inspect*.
 
-The initial view shows the underlying data for the visualization. To view the 
-requests that were made for the visualization, choose *Requests* from the *View* 
+The initial view shows the underlying data for the visualization. To view the
+requests that were made for the visualization, choose *Requests* from the *View*
 menu.
 
 The views you'll see depend on the element that you inspect.

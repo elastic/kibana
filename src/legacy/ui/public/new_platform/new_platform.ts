@@ -16,26 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from '../../../../core/public';
+import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
 
-const runtimeContext = {
-  setup: {
-    core: (null as unknown) as CoreSetup,
-    plugins: {},
-  },
+export const npSetup = {
+  core: (null as unknown) as InternalCoreSetup,
+  plugins: {} as Record<string, unknown>,
 };
 
-export function __newPlatformInit__(core: CoreSetup) {
-  if (runtimeContext.setup.core) {
-    throw new Error('New platform core api was already initialized');
-  }
+export const npStart = {
+  core: (null as unknown) as InternalCoreStart,
+  plugins: {} as Record<string, unknown>,
+};
 
-  runtimeContext.setup.core = core;
+/**
+ * Only used by unit tests
+ * @internal
+ */
+export function __reset__() {
+  npSetup.core = (null as unknown) as InternalCoreSetup;
+  npStart.core = (null as unknown) as InternalCoreStart;
 }
 
-export function getNewPlatform() {
-  if (runtimeContext.setup.core === null) {
-    throw new Error('runtimeContext is not initialized yet');
-  }
-  return runtimeContext;
+export function __setup__(coreSetup: InternalCoreSetup, plugins: Record<string, unknown>) {
+  npSetup.core = coreSetup;
+  npSetup.plugins = plugins;
+}
+
+export function __start__(coreStart: InternalCoreStart, plugins: Record<string, unknown>) {
+  npStart.core = coreStart;
+  npStart.plugins = plugins;
 }

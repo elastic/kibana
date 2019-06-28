@@ -17,10 +17,19 @@
  * under the License.
  */
 
-export { HttpConfig } from './http_config';
-export { HttpService, HttpServiceSetup } from './http_service';
-export { Router, KibanaRequest } from './router';
-export { HttpServerInfo } from './http_server';
+export { config, HttpConfig, HttpConfigType } from './http_config';
+export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
+export { GetAuthHeaders } from './auth_headers_storage';
+export {
+  isRealRequest,
+  KibanaRequest,
+  KibanaRequestRoute,
+  Router,
+  RouteMethod,
+  RouteConfigOptions,
+} from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
-export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
-export { OnRequestHandler, OnRequestToolkit } from './lifecycle/on_request';
+export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+export { AuthenticationHandler, AuthHeaders, AuthResultData, AuthToolkit } from './lifecycle/auth';
+export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export { SessionStorageFactory, SessionStorage } from './session_storage';

@@ -10,7 +10,7 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
-import introspectionQueryResultData from '../../../plugins/infra/public/graphql/introspection.json';
+import introspectionQueryResultData from '../../../legacy/plugins/infra/public/graphql/introspection.json';
 
 export function InfraOpsGraphQLClientProvider({ getService }) {
   return new InfraOpsGraphQLClientFactoryProvider({ getService })();
@@ -39,6 +39,17 @@ export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
           introspectionQueryResultData,
         }),
       }),
+      defaultOptions: {
+        query: {
+          fetchPolicy: 'no-cache'
+        },
+        watchQuery: {
+          fetchPolicy: 'no-cache'
+        },
+        mutate: {
+          fetchPolicy: 'no-cache'
+        },
+      },
       link: httpLink,
     });
   };

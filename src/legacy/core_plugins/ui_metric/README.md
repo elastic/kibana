@@ -16,14 +16,29 @@ the name of a dashboard they've viewed, or the timestamp of the interaction.
 
 ## How to use it
 
-To track a user interaction, simply send a `POST` request to `/api/ui_metric/{APP_NAME}/{METRIC_TYPE}`,
-where `APP_NAME` and `METRIC_TYPE` are underscore-delimited strings. For example, to track the app
-`my_app` and the metric `my_metric`, send a request to `/api/ui_metric/my_app/my_metric`.
+To track a user interaction, import the `trackUiMetric` helper function from UI Metric app:
+
+```js
+import { trackUiMetric } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
+```
+
+Call this function whenever you would like to track a user interaction within your app. The function
+accepts two arguments, `appName` and `metricType`. These should be underscore-delimited strings.
+For example, to track the `my_metric` metric in the app `my_app` call `trackUiMetric('my_app', 'my_metric)`.
 
 That's all you need to do!
 
-To track multiple metrics within a single request, provide multiple metric types separated by
-commas, e.g. `/api/ui_metric/my_app/my_metric1,my_metric2,my_metric3`.
+To track multiple metrics within a single request, provide an array of metric types, e.g. `trackUiMetric('my_app', ['my_metric1', 'my_metric2', 'my_metric3'])`.
+
+**NOTE:** When called, this function sends a `POST` request to `/api/ui_metric/{appName}/{metricType}`.
+It's important that this request is sent via the `trackUiMetric` function, because it contains special
+logic for blocking the request if the user hasn't opted in to telemetry.
+
+### Disallowed characters
+
+The colon and comma characters (`,`, `:`) should not be used in app name or metric types. Colons play
+a sepcial role in how metrics are stored as saved objects, and the API endpoint uses commas to delimit
+multiple metric types in a single API request.
 
 ### Tracking timed interactions
 
@@ -32,8 +47,7 @@ logic yourself. You'll also need to predefine some buckets into which the UI met
 For example, if you're timing how long it takes to create a visualization, you may decide to
 measure interactions that take less than 1 minute, 1-5 minutes, 5-20 minutes, and longer than 20 minutes.
 To track these interactions, you'd use the timed length of the interaction to determine whether to
-hit `/api/ui_metric/visualize/create_vis_1m`, `/api/ui_metric/visualize/create_vis_5m`,
-`/api/ui_metric/visualize/create_vis_20m`, etc.
+use a `metricType` of  `create_vis_1m`, `create_vis_5m`, `create_vis_20m`, or `create_vis_infinity`.
 
 ## How it works
 

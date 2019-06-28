@@ -55,7 +55,7 @@ function runServerFunctions(server) {
                 id: Joi.number().required(),
                 functionName: Joi.string().required(),
                 args: Joi.object().default({}),
-                context: Joi.object().allow(null).default({}),
+                context: Joi.any().default(null),
               }),
           ).required(),
         }).required(),

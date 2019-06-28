@@ -25,7 +25,6 @@ export {
   read,
   write,
   mkdirp,
-  copy,
   copyAll,
   getFileHash,
   untar,

@@ -22,8 +22,8 @@ import { pick } from 'lodash';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
-import { createPluginSetupContext } from './plugin_context';
-import { PluginsServiceSetupDeps } from './plugins_service';
+import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
+import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 
 /** @internal */
 export class PluginsSystem {
@@ -56,8 +56,8 @@ export class PluginsSystem {
       }
 
       this.log.debug(`Setting up plugin "${pluginName}"...`);
-
-      const pluginDepContracts = [...plugin.requiredPlugins, ...plugin.optionalPlugins].reduce(
+      const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
+      const pluginDepContracts = Array.from(pluginDeps).reduce(
         (depContracts, dependencyName) => {
           // Only set if present. Could be absent if plugin does not have server-side code or is a
           // missing optional dependency.
@@ -79,6 +79,43 @@ export class PluginsSystem {
       );
 
       this.satupPlugins.push(pluginName);
+    }
+
+    return contracts;
+  }
+
+  public async startPlugins(deps: PluginsServiceStartDeps) {
+    const contracts = new Map<PluginName, unknown>();
+    if (this.satupPlugins.length === 0) {
+      return contracts;
+    }
+
+    this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
+
+    for (const pluginName of this.satupPlugins) {
+      this.log.debug(`Starting plugin "${pluginName}"...`);
+      const plugin = this.plugins.get(pluginName)!;
+      const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
+      const pluginDepContracts = Array.from(pluginDeps).reduce(
+        (depContracts, dependencyName) => {
+          // Only set if present. Could be absent if plugin does not have server-side code or is a
+          // missing optional dependency.
+          if (contracts.has(dependencyName)) {
+            depContracts[dependencyName] = contracts.get(dependencyName);
+          }
+
+          return depContracts;
+        },
+        {} as Record<PluginName, unknown>
+      );
+
+      contracts.set(
+        pluginName,
+        await plugin.start(
+          createPluginStartContext(this.coreContext, deps, plugin),
+          pluginDepContracts
+        )
+      );
     }
 
     return contracts;

@@ -31,6 +31,7 @@ export class PipelineDataLoader {
       {},
       {
         getInitialContext: () => ({
+          type: 'kibana_context',
           query: params.query,
           timeRange: params.timeRange,
           filters: params.filters

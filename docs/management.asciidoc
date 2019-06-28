@@ -41,5 +41,6 @@ include::management/managing-beats.asciidoc[]
 
 include::management/managing-remote-clusters.asciidoc[]
 
+include::management/snapshot-restore/index.asciidoc[]
 
 

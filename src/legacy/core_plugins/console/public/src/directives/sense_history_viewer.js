@@ -19,11 +19,13 @@
 
 const SenseEditor = require('../sense_editor/editor');
 
+import { i18n } from '@kbn/i18n';
+
 import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 
 require('ui/modules')
   .get('app/sense')
-  .directive('senseHistoryViewer', function (i18n) {
+  .directive('senseHistoryViewer', function () {
     return {
       restrict: 'E',
       scope: {
@@ -43,7 +45,7 @@ require('ui/modules')
             viewer.clearSelection();
           } else {
             viewer.getSession().setValue(
-              i18n('console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
+              i18n.translate('console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
             );
           }
         });

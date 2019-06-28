@@ -18,23 +18,19 @@
  */
 
 import { expect } from 'chai';
-import getBucketsPath from '../../helpers/get_buckets_path';
+import { getBucketsPath } from '../../helpers/get_buckets_path';
 
 describe('getBucketsPath', () => {
-
   const metrics = [
     { id: 1, type: 'derivative' },
     { id: 2, type: 'percentile', percentiles: [{ value: '50' }] },
-    { id: 3, type: 'percentile', percentiles: [
-      { value: '20.0' },
-      { value: '10.0' }
-    ] },
+    { id: 3, type: 'percentile', percentiles: [{ value: '20.0' }, { value: '10.0' }] },
     { id: 4, type: 'std_deviation', mode: 'raw' },
     { id: 5, type: 'std_deviation', mode: 'upper' },
     { id: 6, type: 'std_deviation', mode: 'lower' },
     { id: 7, type: 'sum_of_squares' },
     { id: 8, type: 'variance' },
-    { id: 9, type: 'max' }
+    { id: 9, type: 'max' },
   ];
 
   it('return path for derivative', () => {
@@ -76,7 +72,4 @@ describe('getBucketsPath', () => {
   it('return path for basic metric', () => {
     expect(getBucketsPath(9, metrics)).to.equal('9');
   });
-
-
 });
-

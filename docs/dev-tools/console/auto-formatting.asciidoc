@@ -1,19 +1,20 @@
 [[auto-formatting]]
-=== Auto Formatting
+=== Auto formatting
 
-Console allows you to auto format messy requests. To do so, position the cursor on the request you would like to format
-and select Auto Indent from the action menu:
+Console can help you format requests. Select one or more requests that you
+want to format, click the action icon (image:dev-tools/console/images/wrench.png[]),
+and select *Auto indent*.
 
-.Auto Indent a request
-image::images/auto_format_before.png["Auto format before",width=500,align="center"]
+For example, you might have a request that is formatted like this:
 
-Console will adjust the JSON body of the request and it will now look like this:
+[role="screenshot"]
+image::dev-tools/console/images/copy-curl.png["Console close-up"]
 
-.A formatted request
-image::images/auto_format_after.png["Auto format after",width=500,align="center"]
+Console adjusts the JSON body of the request to apply the indents. 
 
-If you select Auto Indent on a request that is already perfectly formatted, Console will collapse the
-request body to a single line per document. This is very handy when working with Elasticsearch's bulk APIs:
+[role="screenshot"]
+image::dev-tools/console/images/request.png["Console close-up"]
 
-.One doc per line
-image::images/auto_format_bulk.png["Auto format bulk",width=550,align="center"]
+If you select *Auto indent* on a request that is already well formatted, 
+Console collapses the request body to a single line per document. 
+This is helpful when working with {es}'s {ref}/docs-bulk.html[bulk APIs].

@@ -22,7 +22,7 @@ import { Transform } from 'stream';
 const SCROLL_SIZE = 1000;
 const SCROLL_TIMEOUT = '1m';
 
-export function createGenerateDocRecordsStream(client, stats) {
+export function createGenerateDocRecordsStream(client, stats, progress) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
@@ -41,6 +41,7 @@ export function createGenerateDocRecordsStream(client, stats) {
               rest_total_hits_as_int: true
             });
             remainingHits = resp.hits.total;
+            progress.addToTotal(remainingHits);
           } else {
             resp = await client.scroll({
               scrollId: resp._scroll_id,
@@ -63,6 +64,8 @@ export function createGenerateDocRecordsStream(client, stats) {
               }
             });
           }
+
+          progress.addToComplete(resp.hits.hits.length);
         }
 
         callback(null);

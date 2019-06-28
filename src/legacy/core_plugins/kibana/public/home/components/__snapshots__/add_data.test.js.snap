@@ -8,20 +8,16 @@ exports[`apmUiEnabled 1`] = `
 >
   <EuiFlexGroup>
     <EuiFlexItem>
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
-        <h3>
+      <EuiTitle>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
-        grow={true}
         size="s"
       >
         <p>
@@ -219,7 +215,6 @@ exports[`apmUiEnabled 1`] = `
       className="homAddData__footerItem"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -258,7 +253,6 @@ exports[`apmUiEnabled 1`] = `
       className="homAddData__footerItem"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -305,20 +299,16 @@ exports[`isNewKibanaInstance 1`] = `
 >
   <EuiFlexGroup>
     <EuiFlexItem>
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
-        <h3>
+      <EuiTitle>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
-        grow={true}
         size="s"
       >
         <p>
@@ -474,7 +464,6 @@ exports[`isNewKibanaInstance 1`] = `
       className="homAddData__footerItem homAddData__footerItem--highlight"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -513,7 +502,6 @@ exports[`isNewKibanaInstance 1`] = `
       className="homAddData__footerItem homAddData__footerItem--highlight"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -560,20 +548,16 @@ exports[`mlEnabled 1`] = `
 >
   <EuiFlexGroup>
     <EuiFlexItem>
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
-        <h3>
+      <EuiTitle>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
-        grow={true}
         size="s"
       >
         <p>
@@ -771,7 +755,6 @@ exports[`mlEnabled 1`] = `
       className="homAddData__footerItem"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -810,7 +793,6 @@ exports[`mlEnabled 1`] = `
       className="homAddData__footerItem"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -849,7 +831,6 @@ exports[`mlEnabled 1`] = `
       className="homAddData__footerItem"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -896,20 +877,16 @@ exports[`render 1`] = `
 >
   <EuiFlexGroup>
     <EuiFlexItem>
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
-        <h3>
+      <EuiTitle>
+        <h2>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
             id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText
-        grow={true}
         size="s"
       >
         <p>
@@ -1065,7 +1042,6 @@ exports[`render 1`] = `
       className="homAddData__footerItem"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong
@@ -1104,7 +1080,6 @@ exports[`render 1`] = `
       className="homAddData__footerItem"
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <strong

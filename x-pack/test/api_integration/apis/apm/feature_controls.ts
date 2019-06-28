@@ -42,7 +42,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/errors/bar/distribution?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
         expect(result.response).to.have.property('statusCode', 400);
@@ -64,7 +64,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       },
     },
     {
-      url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
         expect(result.response).to.have.property('statusCode', 400);
@@ -101,12 +101,12 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       },
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/bar?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/transaction_groups?start=${start}&end=${end}&transactionType=bar`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/bar/charts?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
@@ -116,12 +116,12 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/bar/baz/charts?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/bar/baz/distribution?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/transaction_groups/distribution?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
         expect(result.response).to.have.property('statusCode', 400);

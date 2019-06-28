@@ -96,6 +96,15 @@ export default function (kibana) {
       ];
     },
 
+    uiCapabilities() {
+      return {
+        dev_tools: {
+          show: true,
+          save: true,
+        },
+      };
+    },
+
     async init(server, options) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
       if (options.ssl && options.ssl.verify) {
@@ -111,11 +120,6 @@ export default function (kibana) {
         elasticsearchUrl: url.format(
           Object.assign(url.parse(head(legacyEsConfig.hosts)), { auth: false })
         ),
-        uiCapabilities: {
-          dev_tools: {
-            show: true
-          },
-        }
       };
 
       server.route(createProxyRoute({

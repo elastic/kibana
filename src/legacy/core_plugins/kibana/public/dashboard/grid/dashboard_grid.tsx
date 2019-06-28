@@ -37,8 +37,12 @@ import {
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
 import { PanelUtils } from '../panel/panel_utils';
-import { PanelState, PanelStateMap, Pre61PanelState } from '../selectors/types';
-import { GridData } from '../types';
+import {
+  GridData,
+  SavedDashboardPanel,
+  Pre61SavedDashboardPanel,
+  SavedDashboardPanelMap,
+} from '../types';
 
 let lastValidGridSize = 0;
 
@@ -117,10 +121,10 @@ const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 interface Props extends ReactIntl.InjectedIntlProps {
-  panels: PanelStateMap;
+  panels: SavedDashboardPanelMap;
   getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
-  onPanelsUpdated: (updatedPanels: PanelStateMap) => void;
+  onPanelsUpdated: (updatedPanels: SavedDashboardPanelMap) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
 }
@@ -182,18 +186,18 @@ class DashboardGridUi extends React.Component<Props, State> {
           : PanelUtils.parseVersion('6.0.0');
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 1)) {
-        panel = PanelUtils.convertPanelDataPre_6_1(panel as Pre61PanelState);
+        panel = PanelUtils.convertPanelDataPre_6_1((panel as unknown) as Pre61SavedDashboardPanel);
       }
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 3)) {
-        PanelUtils.convertPanelDataPre_6_3(panel as PanelState, this.props.useMargins);
+        PanelUtils.convertPanelDataPre_6_3(panel as SavedDashboardPanel, this.props.useMargins);
       }
 
-      return (panel as PanelState).gridData;
+      return (panel as SavedDashboardPanel).gridData;
     });
   }
 
-  public createEmbeddableFactoriesMap(panels: PanelStateMap) {
+  public createEmbeddableFactoriesMap(panels: SavedDashboardPanelMap) {
     Object.values(panels).map(panel => {
       if (!this.embeddableFactoryMap[panel.type]) {
         this.embeddableFactoryMap[panel.type] = this.props.getEmbeddableFactory(panel.type);
@@ -211,17 +215,14 @@ class DashboardGridUi extends React.Component<Props, State> {
 
   public onLayoutChange = (layout: PanelLayout[]) => {
     const { onPanelsUpdated, panels } = this.props;
-    const updatedPanels = layout.reduce(
-      (updatedPanelsAcc, panelLayout) => {
-        updatedPanelsAcc[panelLayout.i] = {
-          ...panels[panelLayout.i],
-          panelIndex: panelLayout.i,
-          gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-        };
-        return updatedPanelsAcc;
-      },
-      {} as PanelStateMap
-    );
+    const updatedPanels = layout.reduce((updatedPanelsAcc: SavedDashboardPanelMap, panelLayout) => {
+      updatedPanelsAcc[panelLayout.i] = {
+        ...panels[panelLayout.i],
+        panelIndex: panelLayout.i,
+        gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+      };
+      return updatedPanelsAcc;
+    }, {});
     onPanelsUpdated(updatedPanels);
   };
 
@@ -240,7 +241,9 @@ class DashboardGridUi extends React.Component<Props, State> {
     const { focusedPanelIndex } = this.state;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map((key: string) => panels[key] as PanelState);
+    const panelsInOrder = Object.keys(panels).map(
+      (key: string) => panels[key] as SavedDashboardPanel
+    );
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;

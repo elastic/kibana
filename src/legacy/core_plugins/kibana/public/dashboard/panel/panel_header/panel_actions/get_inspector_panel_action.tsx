@@ -40,12 +40,14 @@ export function getInspectorPanelAction({
   return new ContextMenuAction(
     {
       id: 'openInspector',
-      displayName: i18n.translate('kbn.dashboard.panel.inspectorPanel.displayName', {
-        defaultMessage: 'Inspect',
-      }),
       parentPanelId: 'mainMenu',
     },
     {
+      getDisplayName: () => {
+        return i18n.translate('kbn.dashboard.panel.inspectorPanel.displayName', {
+          defaultMessage: 'Inspect',
+        });
+      },
       icon: <EuiIcon type="inspect" />,
       isVisible: ({ embeddable }) => {
         if (!embeddable) {

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TooltipSelector should create eui row component 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  label="Fields to display in tooltip"
+  labelType="label"
+>
+  <MultiFieldSelect
+    fields={Array []}
+    filterField={[Function]}
+    onChange={[Function]}
+    placeholder="Select fields"
+    value={Array []}
+  />
+</EuiFormRow>
+`;

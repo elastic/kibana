@@ -20,13 +20,25 @@
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from '../utils/deep_freeze';
+import { deepFreeze } from '../../utils/';
+import { Capabilities } from '..';
+
+/** @public */
+export interface LegacyNavLink {
+  id: string;
+  title: string;
+  order: number;
+  url: string;
+  icon?: string;
+  euiIconType?: string;
+}
 
 /** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    branch: string;
     basePath: string;
     csp: {
       warnLegacyBrowsers: boolean;
@@ -38,11 +50,12 @@ export interface InjectedMetadataParams {
       id: PluginName;
       plugin: DiscoveredPlugin;
     }>;
+    capabilities: Capabilities;
     legacyMetadata: {
       app: unknown;
       translations: unknown;
       bundleId: string;
-      nav: unknown;
+      nav: LegacyNavLink[];
       version: string;
       branch: string;
       buildNum: number;
@@ -73,6 +86,10 @@ export class InjectedMetadataService {
 
   constructor(private readonly params: InjectedMetadataParams) {}
 
+  public start(): InjectedMetadataStart {
+    return this.setup();
+  }
+
   public setup(): InjectedMetadataSetup {
     return {
       getBasePath: () => {
@@ -80,7 +97,11 @@ export class InjectedMetadataService {
       },
 
       getKibanaVersion: () => {
-        return this.getKibanaVersion();
+        return this.state.version;
+      },
+
+      getCapabilities: () => {
+        return this.state.capabilities;
       },
 
       getCspConfig: () => {
@@ -102,26 +123,29 @@ export class InjectedMetadataService {
       getInjectedVars: () => {
         return this.state.vars;
       },
+
+      getKibanaBuildNumber: () => {
+        return this.state.buildNumber;
+      },
+
+      getKibanaBranch: () => {
+        return this.state.branch;
+      },
     };
-  }
-
-  public getKibanaVersion() {
-    return this.state.version;
-  }
-
-  public getKibanaBuildNumber() {
-    return this.state.buildNumber;
   }
 }
 
 /**
  * Provides access to the metadata injected by the server into the page
  *
- * @public
+ * @internal
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getKibanaBuildNumber: () => number;
+  getKibanaBranch: () => string;
   getKibanaVersion: () => string;
+  getCapabilities: () => Capabilities;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };
@@ -136,7 +160,7 @@ export interface InjectedMetadataSetup {
     app: unknown;
     translations: unknown;
     bundleId: string;
-    nav: unknown;
+    nav: LegacyNavLink[];
     version: string;
     branch: string;
     buildNum: number;
@@ -154,3 +178,6 @@ export interface InjectedMetadataSetup {
     [key: string]: unknown;
   };
 }
+
+/** @internal */
+export type InjectedMetadataStart = InjectedMetadataSetup;

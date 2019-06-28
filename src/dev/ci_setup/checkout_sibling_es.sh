@@ -22,7 +22,7 @@ function checkout_sibling {
 
     function clone_target_is_valid {
       echo " -> checking for '${cloneBranch}' branch at ${cloneAuthor}/${project}"
-      if [[ -n "$(git ls-remote --heads git@github.com:${cloneAuthor}/${project}.git ${cloneBranch} 2>/dev/null)" ]]; then
+      if [[ -n "$(git ls-remote --heads "git@github.com:${cloneAuthor}/${project}.git" ${cloneBranch} 2>/dev/null)" ]]; then
         return 0
       else
         return 1
@@ -96,7 +96,7 @@ ES_DIR="$PARENT_DIR/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
 
-if [ ! -f $ES_JAVA_PROP_PATH ]; then
+if [ ! -f "$ES_JAVA_PROP_PATH" ]; then
   echo "Unable to set JAVA_HOME, $ES_JAVA_PROP_PATH does not exist"
   exit 1
 fi
@@ -104,7 +104,8 @@ fi
 # While sourcing the property file would currently work, we want
 # to support the case where whitespace surrounds the equals.
 # This has the added benefit of explicitly exporting property values
-export ES_BUILD_JAVA="$(cat "$ES_JAVA_PROP_PATH" | grep "^ES_BUILD_JAVA" | cut -d'=' -f2 | tr -d '[:space:]')"
+ES_BUILD_JAVA="$(grep "^ES_BUILD_JAVA" "$ES_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
+export ES_BUILD_JAVA
 
 if [ -z "$ES_BUILD_JAVA" ]; then
   echo "Unable to set JAVA_HOME, ES_BUILD_JAVA not present in $ES_JAVA_PROP_PATH"

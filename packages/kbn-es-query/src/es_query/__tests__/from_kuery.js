@@ -52,15 +52,6 @@ describe('build query', function () {
       expect(result.filter).to.eql(expectedESQueries);
     });
 
-    it('should throw a useful error if it looks like query is using an old, unsupported syntax', function () {
-      const oldQuery = { query: 'is(foo, bar)', language: 'kuery' };
-
-      expect(buildQueryFromKuery).withArgs(indexPattern, [oldQuery], true).to.throwError(
-        /OutdatedKuerySyntaxError/
-      );
-    });
-
-
     it('should accept a specific date format for a kuery query into an ES query in the bool\'s filter clause', function () {
       const queries = [{ query: '@timestamp:"2018-04-03T19:04:17"', language: 'kuery' }];
 

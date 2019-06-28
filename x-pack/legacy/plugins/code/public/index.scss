@@ -1,0 +1,19 @@
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+@import "./components/editor/references_panel.scss";
+@import "./monaco/override_monaco_styles.scss";
+@import "./components/diff_page/diff.scss";
+@import "./components/main/main.scss";
+
+// TODO: Cleanup everything above this line
+
+@import "./style/utilities";
+@import "./style/buttons";
+@import "./style/layout";
+@import "./style/sidebar";
+@import "./style/markdown";
+@import "./style/shortcuts";
+@import "./style/monaco";
+@import "./style/filetree";
+@import "./style/query_bar";
+@import "./style/filters";

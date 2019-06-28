@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export { IndexPatternsService, IndexPatternsSetup } from './index_patterns_service';
+export {
+  IndexPatternsService,
+  IndexPatterns,
+  // types
+  IndexPatternsSetup,
+  IndexPattern,
+  StaticIndexPattern,
+  StaticIndexPatternField,
+  Field,
+} from './index_patterns_service';

@@ -32,11 +32,11 @@ describe('DefaultSearchStrategy', () => {
         plugins: {
           elasticsearch: {
             getCluster: jest.fn().mockReturnValue({
-              callWithRequest
-            })
-          }
-        }
-      }
+              callWithRequest,
+            }),
+          },
+        },
+      },
     };
     defaultSearchStrategy = new DefaultSearchStrategy(server);
   });
@@ -62,7 +62,6 @@ describe('DefaultSearchStrategy', () => {
     expect(value.isViable).toBe(true);
     expect(value.capabilities).toEqual({
       request: req,
-      batchRequestsSupport: true,
       fieldsCapabilities: {},
     });
   });

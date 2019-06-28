@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rendering renders correctly 1`] = `
+<Component>
+  <p>
+    Additional filters here.
+  </p>
+</Component>
+`;

@@ -18,11 +18,12 @@
  */
 
 import _ from 'lodash';
-export default (handleChange) => {
-  return (name) => (selectedOptions) => {
+
+export const createSelectHandler = handleChange => {
+  return name => selectedOptions => {
     if (_.isFunction(handleChange)) {
       return handleChange({
-        [name]: _.get(selectedOptions, '[0].value', null)
+        [name]: _.get(selectedOptions, '[0].value', null),
       });
     }
   };

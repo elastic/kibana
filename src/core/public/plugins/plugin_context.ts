@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from '../../server';
-import { BasePathSetup } from '../base_path';
-import { ChromeSetup } from '../chrome';
+import { omit } from 'lodash';
+
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreContext } from '../core_system';
-import { FatalErrorsSetup } from '../fatal_errors';
-import { I18nSetup } from '../i18n';
-import { NotificationsSetup } from '../notifications';
-import { UiSettingsSetup } from '../ui_settings';
 import { PluginWrapper } from './plugin';
-import { PluginsServiceSetupDeps } from './plugins_service';
+import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { CoreSetup, CoreStart } from '../';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -35,20 +32,6 @@ import { PluginsServiceSetupDeps } from './plugins_service';
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
-
-/**
- * The available core services passed to a plugin's `Plugin#setup` method.
- *
- * @public
- */
-export interface PluginSetupContext {
-  basePath: BasePathSetup;
-  chrome: ChromeSetup;
-  fatalErrors: FatalErrorsSetup;
-  i18n: I18nSetup;
-  notifications: NotificationsSetup;
-  uiSettings: UiSettingsSetup;
-}
 
 /**
  * Provides a plugin-specific context passed to the plugin's construtor. This is currently
@@ -75,17 +58,54 @@ export function createPluginInitializerContext(
  * @param plugin
  * @internal
  */
-export function createPluginSetupContext<TPlugin, TPluginDependencies>(
+export function createPluginSetupContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
+>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
-  plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): PluginSetupContext {
+  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
+): CoreSetup {
   return {
-    basePath: deps.basePath,
-    chrome: deps.chrome,
+    http: deps.http,
     fatalErrors: deps.fatalErrors,
+    notifications: deps.notifications,
+    uiSettings: deps.uiSettings,
+  };
+}
+
+/**
+ * Provides a plugin-specific context passed to the plugin's `start` lifecycle event. Currently
+ * this returns a shallow copy the service start contracts, but in the future could provide
+ * plugin-scoped versions of the service.
+ *
+ * @param coreContext
+ * @param deps
+ * @param plugin
+ * @internal
+ */
+export function createPluginStartContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
+>(
+  coreContext: CoreContext,
+  deps: PluginsServiceStartDeps,
+  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
+): CoreStart {
+  return {
+    application: {
+      capabilities: deps.application.capabilities,
+    },
+    docLinks: deps.docLinks,
+    http: deps.http,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
+    overlays: deps.overlays,
     uiSettings: deps.uiSettings,
   };
 }

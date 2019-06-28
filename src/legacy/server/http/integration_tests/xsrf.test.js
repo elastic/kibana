@@ -39,6 +39,7 @@ describe('xsrf request filter', () => {
     });
 
     await root.setup();
+    await root.start();
 
     const kbnServer = kbnTestServer.getKbnServer(root);
     kbnServer.server.route({

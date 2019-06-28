@@ -17,26 +17,27 @@
  * under the License.
  */
 
-import * as FunctionalTestRunner from '../../../../../src/functional_test_runner';
+import { FunctionalTestRunner, readConfigFile } from '../../../../../src/functional_test_runner';
 import { CliError } from './run_cli';
 
-function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
-  return FunctionalTestRunner.createFunctionalTestRunner({
-    log,
-    configFile: configPath,
-    configOverrides: {
-      mochaOpts: {
-        bail: !!bail,
-        grep,
-      },
-      updateBaselines,
-      suiteTags,
+async function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
+  const config = await readConfigFile(log, configPath);
+
+  return new FunctionalTestRunner(log, configPath, {
+    mochaOpts: {
+      bail: !!bail,
+      grep,
+    },
+    updateBaselines,
+    suiteTags: {
+      include: [...suiteTags.include, ...config.get('suiteTags.include')],
+      exclude: [...suiteTags.exclude, ...config.get('suiteTags.exclude')],
     },
   });
 }
 
 export async function assertNoneExcluded({ configPath, options }) {
-  const ftr = createFtr({ configPath, options });
+  const ftr = await createFtr({ configPath, options });
 
   const stats = await ftr.getTestStats();
   if (stats.excludedTests.length > 0) {
@@ -53,7 +54,7 @@ export async function assertNoneExcluded({ configPath, options }) {
 }
 
 export async function runFtr({ configPath, options }) {
-  const ftr = createFtr({ configPath, options });
+  const ftr = await createFtr({ configPath, options });
 
   const failureCount = await ftr.run();
   if (failureCount > 0) {
@@ -64,7 +65,7 @@ export async function runFtr({ configPath, options }) {
 }
 
 export async function hasTests({ configPath, options }) {
-  const ftr = createFtr({ configPath, options });
+  const ftr = await createFtr({ configPath, options });
   const stats = await ftr.getTestStats();
   return stats.testCount > 0;
 }

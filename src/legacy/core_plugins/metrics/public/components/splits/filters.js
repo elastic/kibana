@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import createSelectHandler from '../lib/create_select_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
-import FilterItems from './filter_items';
+import { FilterItems } from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SplitByFilters = (props) => {
-  const { onChange, model, uiRestrictions } = props;
+export const SplitByFilters = props => {
+  const { onChange, model, uiRestrictions, indexPattern } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
   return (
@@ -35,10 +35,9 @@ export const SplitByFilters = (props) => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('group')}
-            label={(<FormattedMessage
-              id="tsvb.splits.filters.groupByLabel"
-              defaultMessage="Group by"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.splits.filters.groupByLabel" defaultMessage="Group by" />
+            }
           >
             <GroupBySelect
               value={model.split_mode}
@@ -53,6 +52,7 @@ export const SplitByFilters = (props) => {
         name="split_filters"
         model={model}
         onChange={onChange}
+        indexPatterns={indexPattern}
       />
     </div>
   );
@@ -62,4 +62,5 @@ SplitByFilters.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  indexPatterns: PropTypes.array,
 };

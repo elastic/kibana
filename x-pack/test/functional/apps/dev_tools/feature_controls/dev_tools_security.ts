@@ -15,6 +15,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
+  const globalNav = getService('globalNav');
 
   describe('security', () => {
     before(async () => {
@@ -70,19 +71,46 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         ]);
       });
 
-      it(`can navigate to console`, async () => {
-        await PageObjects.common.navigateToApp('console');
-        await testSubjects.existOrFail('console');
+      describe('console', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('console');
+        });
+
+        it(`can navigate to console`, async () => {
+          await testSubjects.existOrFail('console');
+        });
+
+        it(`doesn't show read-only badge`, async () => {
+          await globalNav.badgeMissingOrFail();
+        });
       });
 
-      it(`can navigate to search profiler`, async () => {
-        await PageObjects.common.navigateToApp('searchProfiler');
-        await testSubjects.existOrFail('searchProfiler');
+      describe('search profiler', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('searchProfiler');
+        });
+
+        it(`can navigate to search profiler`, async () => {
+          await testSubjects.existOrFail('searchProfiler');
+        });
+
+        it(`doesn't show read-only badge`, async () => {
+          await globalNav.badgeMissingOrFail();
+        });
       });
 
-      it(`can navigate to grok debugger`, async () => {
-        await PageObjects.common.navigateToApp('grokDebugger');
-        await grokDebugger.assertExists();
+      describe('grok debugger', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('grokDebugger');
+        });
+
+        it(`can navigate to grok debugger`, async () => {
+          await grokDebugger.assertExists();
+        });
+
+        it(`doesn't show read-only badge`, async () => {
+          await globalNav.badgeMissingOrFail();
+        });
       });
     });
 
@@ -126,19 +154,46 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).to.eql(['Dev Tools', 'Management']);
       });
 
-      it(`can navigate to console`, async () => {
-        await PageObjects.common.navigateToApp('console');
-        await testSubjects.existOrFail('console');
+      describe('console', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('console');
+        });
+
+        it(`can navigate to console`, async () => {
+          await testSubjects.existOrFail('console');
+        });
+
+        it(`shows read-only badge`, async () => {
+          await globalNav.badgeExistsOrFail('Read only');
+        });
       });
 
-      it(`can navigate to search profiler`, async () => {
-        await PageObjects.common.navigateToApp('searchProfiler');
-        await testSubjects.existOrFail('searchProfiler');
+      describe('search profiler', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('searchProfiler');
+        });
+
+        it(`can navigate to search profiler`, async () => {
+          await testSubjects.existOrFail('searchProfiler');
+        });
+
+        it(`shows read-only badge`, async () => {
+          await globalNav.badgeExistsOrFail('Read only');
+        });
       });
 
-      it(`can navigate to grok debugger`, async () => {
-        await PageObjects.common.navigateToApp('grokDebugger');
-        await grokDebugger.assertExists();
+      describe('grok debugger', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('grokDebugger');
+        });
+
+        it(`can navigate to grok debugger`, async () => {
+          await grokDebugger.assertExists();
+        });
+
+        it(`shows read-only badge`, async () => {
+          await globalNav.badgeExistsOrFail('Read only');
+        });
       });
     });
 

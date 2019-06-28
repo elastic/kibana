@@ -160,7 +160,7 @@ export const createInstallRoute = () => ({
         );
       }
       const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
-        return savedObjectCreateResult.hasOwnProperty('error');
+        return Boolean(savedObjectCreateResult.error);
       });
       if (errors.length > 0) {
         server.log(

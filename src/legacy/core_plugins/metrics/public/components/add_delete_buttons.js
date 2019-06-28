@@ -23,7 +23,7 @@ import { EuiToolTip, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { isBoolean } from 'lodash';
 
-function AddDeleteButtons(props) {
+export function AddDeleteButtons(props) {
   const { testSubj } = props;
   const createDelete = () => {
     if (props.disableDelete) {
@@ -86,12 +86,14 @@ function AddDeleteButtons(props) {
     let activatePanelBtn = null;
 
     if (isBoolean(props.isPanelActive)) {
-      const tooltip = props.isPanelActive ? props.deactivatePanelTooltip : props.activatePanelTooltip;
+      const tooltip = props.isPanelActive
+        ? props.deactivatePanelTooltip
+        : props.activatePanelTooltip;
       const iconType = props.isPanelActive ? 'eye' : 'eyeClosed';
 
       activatePanelBtn = (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={tooltip} >
+          <EuiToolTip content={tooltip}>
             <EuiButtonIcon
               data-test-subj={`${testSubj}ActivatePanelBtn`}
               aria-label={tooltip}
@@ -123,12 +125,24 @@ function AddDeleteButtons(props) {
 
 AddDeleteButtons.defaultProps = {
   testSubj: 'Add',
-  activeTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', { defaultMessage: 'Add' }),
-  addTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', { defaultMessage: 'Add' }),
-  deleteTooltip: i18n.translate('tsvb.addDeleteButtons.deleteButtonDefaultTooltip', { defaultMessage: 'Delete' }),
-  cloneTooltip: i18n.translate('tsvb.addDeleteButtons.cloneButtonDefaultTooltip', { defaultMessage: 'Clone' }),
-  activatePanelTooltip: i18n.translate('tsvb.addDeleteButtons.reEnableTooltip', { defaultMessage: 'Re-enable' }),
-  deactivatePanelTooltip: i18n.translate('tsvb.addDeleteButtons.temporarilyDisableTooltip', { defaultMessage: 'Temporarily Disable' }),
+  activeTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', {
+    defaultMessage: 'Add',
+  }),
+  addTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', {
+    defaultMessage: 'Add',
+  }),
+  deleteTooltip: i18n.translate('tsvb.addDeleteButtons.deleteButtonDefaultTooltip', {
+    defaultMessage: 'Delete',
+  }),
+  cloneTooltip: i18n.translate('tsvb.addDeleteButtons.cloneButtonDefaultTooltip', {
+    defaultMessage: 'Clone',
+  }),
+  activatePanelTooltip: i18n.translate('tsvb.addDeleteButtons.reEnableTooltip', {
+    defaultMessage: 'Re-enable',
+  }),
+  deactivatePanelTooltip: i18n.translate('tsvb.addDeleteButtons.temporarilyDisableTooltip', {
+    defaultMessage: 'Temporarily Disable',
+  }),
 };
 
 AddDeleteButtons.propTypes = {
@@ -146,5 +160,3 @@ AddDeleteButtons.propTypes = {
   onDelete: PropTypes.func,
   responsive: PropTypes.bool,
 };
-
-export default AddDeleteButtons;

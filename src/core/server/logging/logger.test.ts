@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LoggingConfig } from '.';
+import { LoggingConfig } from './logging_config';
 import { Appender } from './appenders/appenders';
 import { LogLevel } from './log_level';
 import { BaseLogger } from './logger';

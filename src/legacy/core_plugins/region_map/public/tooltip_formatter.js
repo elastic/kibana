@@ -18,10 +18,11 @@
  */
 
 import $ from 'jquery';
-export const TileMapTooltipFormatter = ($compile, $rootScope) => {
+import template from './tooltip.html';
 
+export const TileMapTooltipFormatter = ($compile, $rootScope) => {
   const $tooltipScope = $rootScope.$new();
-  const $el = $('<div>').html(require('./tooltip.html'));
+  const $el = $('<div>').html(template);
   $compile($el)($tooltipScope);
 
   return function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {

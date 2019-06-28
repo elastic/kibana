@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import calculateLabel from '../calculate_label';
+import { calculateLabel } from '../calculate_label';
 
 describe('calculateLabel(metric, metrics)', () => {
   it('returns "Unknown" for empty metric', () => {
@@ -49,20 +49,14 @@ describe('calculateLabel(metric, metrics)', () => {
 
   it('returns formated label for pipeline aggs', () => {
     const metric = { id: 2, type: 'derivative', field: 1 };
-    const metrics = [
-      { id: 1, type: 'max', field: 'network.out.bytes' },
-      metric
-    ];
+    const metrics = [{ id: 1, type: 'max', field: 'network.out.bytes' }, metric];
     const label = calculateLabel(metric, metrics);
     expect(label).to.equal('Derivative of Max of network.out.bytes');
   });
 
   it('returns formated label for derivative of percentile', () => {
     const metric = { id: 2, type: 'derivative', field: '1[50.0]' };
-    const metrics = [
-      { id: 1, type: 'percentile', field: 'network.out.bytes' },
-      metric
-    ];
+    const metrics = [{ id: 1, type: 'percentile', field: 'network.out.bytes' }, metric];
     const label = calculateLabel(metric, metrics);
     expect(label).to.equal('Derivative of Percentile of network.out.bytes (50.0)');
   });
@@ -72,7 +66,7 @@ describe('calculateLabel(metric, metrics)', () => {
     const metrics = [
       { id: 1, type: 'max', field: 'network.out.bytes' },
       { id: 2, type: 'moving_average', field: 1 },
-      metric
+      metric,
     ];
     const label = calculateLabel(metric, metrics);
     expect(label).to.equal('Derivative of Moving Average of Max of network.out.bytes');
@@ -82,10 +76,9 @@ describe('calculateLabel(metric, metrics)', () => {
     const metric = { id: 2, type: 'derivative', field: 1 };
     const metrics = [
       { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
-      metric
+      metric,
     ];
     const label = calculateLabel(metric, metrics);
     expect(label).to.equal('Derivative of Outbound Traffic');
   });
-
 });

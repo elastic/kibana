@@ -32,7 +32,7 @@ import { I18nContext } from 'ui/i18n';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorVisOptions', function (Private, $compile) {
+  .directive('visEditorVisOptions', function ($compile) {
     return {
       restrict: 'E',
       template: visOptionsTemplate,

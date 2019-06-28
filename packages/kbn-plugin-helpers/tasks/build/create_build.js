@@ -27,9 +27,14 @@ const vfs = require('vinyl-fs');
 const rename = require('gulp-rename');
 const through = require('through2');
 const minimatch = require('minimatch');
+const gulpBabel = require('gulp-babel');
+const { promisify } = require('util');
+const { pipeline } = require('stream');
 
 const rewritePackageJson = require('./rewrite_package_json');
 const winCmd = require('../../lib/win_cmd');
+
+const asyncPipeline = promisify(pipeline);
 
 // `link:` dependencies create symlinks, but we don't want to include symlinks
 // in the built zip file. Therefore we remove all symlinked dependencies, so we
@@ -63,6 +68,31 @@ function parseTsconfig(pluginSourcePath, configPath) {
   }
 
   return config;
+}
+
+// transpile with babel
+async function transpileWithBabel(srcGlobs, buildRoot, presets) {
+  await asyncPipeline(
+    vfs.src(
+      srcGlobs.concat([
+        '!**/*.d.ts',
+        '!**/*.{test,test.mocks,mock,mocks}.{ts,tsx}',
+        '!**/node_modules/**',
+        '!**/bower_components/**',
+        '!**/__tests__/**',
+      ]),
+      {
+        cwd: buildRoot,
+      }
+    ),
+
+    gulpBabel({
+      babelrc: false,
+      presets,
+    }),
+
+    vfs.dest(buildRoot)
+  );
 }
 
 module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaVersion, files) {
@@ -122,17 +152,11 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
 
       del.sync([path.join(buildRoot, '**', '*.s{a,c}ss')]);
     })
-    .then(function() {
+    .then(async function() {
       const buildConfigPath = path.join(buildRoot, 'tsconfig.json');
 
       if (!existsSync(buildConfigPath)) {
         return;
-      }
-
-      if (!plugin.pkg.devDependencies.typescript) {
-        throw new Error(
-          'Found tsconfig.json file in plugin but typescript is not a devDependency.'
-        );
       }
 
       // attempt to patch the extends path in the tsconfig file
@@ -144,11 +168,19 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
         writeFileSync(buildConfigPath, JSON.stringify(buildConfig));
       }
 
-      execa.sync(
-        path.join(buildSource, 'node_modules', '.bin', winCmd('tsc')),
-        ['--pretty', 'true'],
-        { cwd: buildRoot }
-      );
+      // Transpile ts server code
+      //
+      // Include everything except content from public folders
+      await transpileWithBabel(['**/*.{ts,tsx}', '!**/public/**'], buildRoot, [
+        require.resolve('@kbn/babel-preset/node_preset'),
+      ]);
+
+      // Transpile ts client code
+      //
+      // Include everything inside a public directory
+      await transpileWithBabel(['**/public/**/*.{ts,tsx}'], buildRoot, [
+        require.resolve('@kbn/babel-preset/webpack_preset'),
+      ]);
 
       del.sync([
         path.join(buildRoot, '**', '*.{ts,tsx,d.ts}'),

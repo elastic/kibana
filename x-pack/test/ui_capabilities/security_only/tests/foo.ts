@@ -20,8 +20,10 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
-          username: scenario.username,
-          password: scenario.password,
+          credentials: {
+            username: scenario.username,
+            password: scenario.password,
+          },
         });
         switch (scenario.username) {
           // these users have a read/write view of Foo

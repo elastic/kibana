@@ -23,7 +23,7 @@ import { readFileSync } from 'fs';
 import { generateBuildNoticeText } from './generate_build_notice_text';
 
 const NODE_MODULES = resolve(__dirname, '__fixtures__/node_modules');
-const NODE_DIR = resolve(process.execPath, '../..');
+const NODE_DIR = resolve(__dirname, '__fixtures__/fake_nodejs_install');
 const NODE_VERSION = '8.11.3';
 const PACKAGES = [
   {

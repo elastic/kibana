@@ -25,16 +25,14 @@ expect.addSnapshotSerializer({
 });
 
 import { mockRender } from './fatal_errors_service.test.mocks';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
 import { FatalErrorsService } from './fatal_errors_service';
 
 function setupService() {
   const rootDomElement = document.createElement('div');
 
-  const injectedMetadata = {
-    getKibanaBuildNumber: jest.fn().mockReturnValue('kibanaBuildNumber'),
-    getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-  };
+  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
 
   const stopCoreSystem = jest.fn();
 
@@ -44,16 +42,13 @@ function setupService() {
     },
   };
 
+  const fatalErrorsService = new FatalErrorsService(rootDomElement, stopCoreSystem);
+
   return {
     rootDomElement,
     injectedMetadata,
-    i18n,
     stopCoreSystem,
-    fatalErrors: new FatalErrorsService({
-      injectedMetadata: injectedMetadata as any,
-      rootDomElement,
-      stopCoreSystem,
-    }),
+    fatalErrors: fatalErrorsService.setup({ injectedMetadata, i18n }),
   };
 }
 
@@ -91,46 +86,12 @@ describe('#add()', () => {
   });
 });
 
-describe('setup.add()', () => {
-  it('exposes a function that passes its two arguments to fatalErrors.add()', () => {
-    const { fatalErrors, i18n } = setupService();
-
-    jest.spyOn(fatalErrors, 'add').mockImplementation(() => undefined as never);
-
-    expect(fatalErrors.add).not.toHaveBeenCalled();
-    const { add } = fatalErrors.setup({ i18n });
-    add('foo', 'bar');
-    expect(fatalErrors.add).toHaveBeenCalledTimes(1);
-    expect(fatalErrors.add).toHaveBeenCalledWith('foo', 'bar');
-  });
-
-  it('deletes all children of rootDomElement and renders <FatalErrorScreen /> into it', () => {
-    const { fatalErrors, i18n, rootDomElement } = setupService();
-
-    rootDomElement.innerHTML = `
-      <h1>Loading...</h1>
-      <div class="someSpinner"></div>
-    `;
-
-    expect(mockRender).not.toHaveBeenCalled();
-    expect(rootDomElement.children).toHaveLength(2);
-
-    const { add } = fatalErrors.setup({ i18n });
-
-    expect(() => add(new Error('foo'))).toThrowError();
-    expect(rootDomElement).toMatchSnapshot('fatal error screen container');
-    expect(mockRender.mock.calls).toMatchSnapshot('fatal error screen component');
-  });
-});
-
 describe('setup.get$()', () => {
   it('provides info about the errors passed to fatalErrors.add()', () => {
-    const { fatalErrors, i18n } = setupService();
-
-    const setup = fatalErrors.setup({ i18n });
+    const { fatalErrors } = setupService();
 
     const onError = jest.fn();
-    setup.get$().subscribe(onError);
+    fatalErrors.get$().subscribe(onError);
 
     expect(onError).not.toHaveBeenCalled();
     expect(() => {

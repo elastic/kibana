@@ -21,13 +21,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { assign, get } from 'lodash';
 
-import timeseries from './vis_types/timeseries/series';
-import metric from './vis_types/metric/series';
-import topN from './vis_types/top_n/series';
-import table from './vis_types/table/series';
-import gauge from './vis_types/gauge/series';
-import markdown from './vis_types/markdown/series';
-import { sortable } from 'react-anything-sortable';
+import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
+import { MetricSeries as metric } from './vis_types/metric/series';
+import { TopNSeries as topN } from './vis_types/top_n/series';
+import { TableSeries as table } from './vis_types/table/series';
+import { GaugeSeries as gauge } from './vis_types/gauge/series';
+import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const lookup = {
@@ -39,7 +38,7 @@ const lookup = {
   markdown,
 };
 
-class Series extends Component {
+export class Series extends Component {
   constructor(props) {
     super(props);
 
@@ -52,11 +51,11 @@ class Series extends Component {
     this.visDataSubscription = null;
   }
 
-  switchTab = (selectedTab) => {
+  switchTab = selectedTab => {
     this.setState({ selectedTab });
   };
 
-  handleChange = (part) => {
+  handleChange = part => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = assign({}, model, part);
@@ -72,20 +71,21 @@ class Series extends Component {
     });
   };
 
-  toggleVisible = (e) => {
+  toggleVisible = e => {
     e.preventDefault();
 
     this.setState({
-      visible: !this.state.visible
+      visible: !this.state.visible,
     });
   };
 
   componentDidMount() {
     if (this.props.visData$) {
-      this.visDataSubscription = this.props.visData$
-        .subscribe(visData =>  this.setState({
-          uiRestrictions: get(visData, 'uiRestrictions')
-        }));
+      this.visDataSubscription = this.props.visData$.subscribe(visData =>
+        this.setState({
+          uiRestrictions: get(visData, 'uiRestrictions'),
+        })
+      );
     }
   }
 
@@ -93,43 +93,36 @@ class Series extends Component {
     const { panel } = this.props;
     const Component = lookup[panel.type];
 
-    if (Component) {
-      const params = {
-        className: this.props.className,
-        disableAdd: this.props.disableAdd,
-        disableDelete: this.props.disableDelete,
-        fields: this.props.fields,
-        name: this.props.name,
-        onAdd: this.props.onAdd,
-        onChange: this.handleChange,
-        onClone: this.props.onClone,
-        onDelete: this.props.onDelete,
-        onMouseDown: this.props.onMouseDown,
-        onTouchStart: this.props.onTouchStart,
-        onShouldSortItem: this.props.onShouldSortItem,
-        onSortableItemMount: this.props.onSortableItemMount,
-        onSortableItemReadyToMove: this.props.onSortableItemReadyToMove,
-        model: this.props.model,
-        panel: this.props.panel,
-        selectedTab: this.state.selectedTab,
-        sortData: this.props.sortData,
-        style: this.props.style,
-        uiRestrictions: this.state.uiRestrictions,
-        switchTab: this.switchTab,
-        toggleVisible: this.toggleVisible,
-        togglePanelActivation: this.togglePanelActivation,
-        visible: this.state.visible,
-      };
-      return (<Component {...params}/>);
-    }
-    return (
-      <div>
-        <FormattedMessage
-          id="tsvb.seriesConfig.missingSeriesComponentDescription"
-          defaultMessage="Missing Series component for panel type: {panelType}"
-          values={{ panelType: panel.type }}
-        />
-      </div>
+    const params = {
+      className: this.props.className,
+      disableAdd: this.props.disableAdd,
+      disableDelete: this.props.disableDelete,
+      fields: this.props.fields,
+      name: this.props.name,
+      onAdd: this.props.onAdd,
+      onChange: this.handleChange,
+      onClone: this.props.onClone,
+      onDelete: this.props.onDelete,
+      model: this.props.model,
+      panel: this.props.panel,
+      selectedTab: this.state.selectedTab,
+      style: this.props.style,
+      uiRestrictions: this.state.uiRestrictions,
+      switchTab: this.switchTab,
+      toggleVisible: this.toggleVisible,
+      togglePanelActivation: this.togglePanelActivation,
+      visible: this.state.visible,
+      dragHandleProps: this.props.dragHandleProps,
+      indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
+    };
+    return Boolean(Component) ? (
+      <Component {...params} />
+    ) : (
+      <FormattedMessage
+        id="tsvb.seriesConfig.missingSeriesComponentDescription"
+        defaultMessage="Missing Series component for panel type: {panelType}"
+        values={{ panelType: panel.type }}
+      />
     );
   }
 
@@ -154,15 +147,8 @@ Series.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onShouldSortItem: PropTypes.func.isRequired,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   visData$: PropTypes.object,
-  sortData: PropTypes.string,
+  dragHandleProps: PropTypes.object,
 };
-
-export default sortable(Series);

@@ -1,0 +1,21 @@
+[[code-install-lang-server]]
+== Install language server
+
+*Code* comes with built-in language support for TypeScript. You can install additional languages as a {kib} plugin.
+
+[role="screenshot"]
+image::images/code-lang-server-tab.png[]
+
+The following languages are supported for the current version:
+
+* Built-in language support: `TypeScript`
+
+* Additional language support: `Java`
+
+You can check the status of the language servers and get installation instructions on the *Language Servers* tab.  Make sure the status of the language server is `INSTALLED` or `RUNNING` after you restart the {kib} instance.
+[role="screenshot"]
+image::images/code-lang-server-status.png[]
+
+
+
+include::code-basic-nav.asciidoc[]

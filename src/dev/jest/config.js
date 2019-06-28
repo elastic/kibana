@@ -22,6 +22,7 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
 export default {
   rootDir: '../../..',
   roots: [
+    '<rootDir>/src/plugins',
     '<rootDir>/src/legacy/ui',
     '<rootDir>/src/core',
     '<rootDir>/src/legacy/core_plugins',
@@ -44,9 +45,15 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
+    'src/legacy/core_plugins/**/*.js',
+    'src/legacy/core_plugins/**/*.jsx',
+    'src/legacy/core_plugins/**/*.ts',
+    'src/legacy/core_plugins/**/*.tsx',
+    '!src/legacy/core_plugins/**/__test__/**/*',
+    '!src/legacy/core_plugins/**/__snapshots__/**/*',
   ],
   moduleNameMapper: {
-    '^plugins/([^\/.]*)/(.*)': '<rootDir>/src/legacy/core_plugins/$1/public/$2',
+    '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
@@ -58,9 +65,13 @@ export default {
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
   ],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/dev/jest/setup/mocks.js',
+  ],
   coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: [
     'html',
+    'text',
   ],
   moduleFileExtensions: [
     'js',
@@ -86,7 +97,8 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    '[/\\\\]node_modules[/\\\\].+\\.js$',
+    // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
+    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [

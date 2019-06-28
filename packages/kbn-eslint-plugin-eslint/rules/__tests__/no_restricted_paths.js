@@ -35,7 +35,7 @@ const ruleTester = new RuleTester({
   parser: 'babel-eslint',
   parserOptions: {
     sourceType: 'module',
-    ecmaVersion: 2015,
+    ecmaVersion: 2018,
   },
 });
 

@@ -60,7 +60,7 @@ export function registerSubUrlHooks(angularModule, internals) {
 
     $rootScope.$on('$routeChangeSuccess', onRouteChange);
     $rootScope.$on('$routeUpdate', onRouteChange);
-    updateSubUrls(); // initialize sub urls
+    updateSubUrls();
   });
 }
 

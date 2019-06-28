@@ -22,6 +22,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { Collector } from '../collector';
 import { CollectorSet } from '../collector_set';
+import { UsageCollector } from '../usage_collector';
 
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
@@ -138,6 +139,26 @@ describe('CollectorSet', () => {
           { day_index: 3, day_name: 'wednesday' },
         ],
       });
+    });
+  });
+
+  describe('isUsageCollector', () => {
+    const server = { };
+    const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {} };
+
+    it('returns true only for UsageCollector instances', () => {
+      const collectors = new CollectorSet(server);
+
+      const usageCollector = new UsageCollector(server, collectorOptions);
+      const collector = new Collector(server, collectorOptions);
+      const randomClass = new (class Random {});
+      expect(collectors.isUsageCollector(usageCollector)).to.be(true);
+      expect(collectors.isUsageCollector(collector)).to.be(false);
+      expect(collectors.isUsageCollector(randomClass)).to.be(false);
+      expect(collectors.isUsageCollector({})).to.be(false);
+      expect(collectors.isUsageCollector(null)).to.be(false);
+      expect(collectors.isUsageCollector('')).to.be(false);
+      expect(collectors.isUsageCollector()).to.be(false);
     });
   });
 });

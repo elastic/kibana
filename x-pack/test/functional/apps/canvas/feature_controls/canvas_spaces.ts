@@ -12,10 +12,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
-  const find = getService('find');
   const appsMenu = getService('appsMenu');
 
-  describe('spaces feature controls', () => {
+  describe('spaces feature controls', function() {
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -80,9 +80,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     });
 
     describe('space with Canvas disabled', () => {
-      const getMessageText = async () =>
-        await (await find.byCssSelector('body>pre')).getVisibleText();
-
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -116,7 +113,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -136,7 +133,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

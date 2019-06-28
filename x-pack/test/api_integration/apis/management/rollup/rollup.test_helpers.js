@@ -11,7 +11,7 @@ const jobsCreated = [];
 const jobsStarted = [];
 
 export const registerHelpers = ({ supertest, es }) => {
-  const { createIndex, deleteAllIndices } = initElasticsearchIndicesHelpers(es);
+  const { createIndex, deleteIndex, deleteAllIndicesCreated } = initElasticsearchIndicesHelpers(es);
 
   const createIndexWithMappings = (indexName = undefined, mappings = INDEX_TO_ROLLUP_MAPPINGS) => {
     return createIndex(indexName, { mappings });
@@ -101,23 +101,29 @@ export const registerHelpers = ({ supertest, es }) => {
 
   const deleteIndicesGeneratedByJobs = () => (
     supertest.get(`${API_BASE_PATH}/indices`)
-      .then(({ body }) => {
+      .then(({ status, body }) => {
+
+        if (status !== 200) {
+          throw new Error(`Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
+        }
+
         const index = Object.keys(body);
+
         if (!index.length) {
           return;
         }
-        return es.indices.delete({ index });
+
+        return deleteIndex(index);
       })
   );
 
   const cleanUp = () => (
     Promise.all([
-      deleteAllIndices(),
       stopAllJobs().then(deleteJob),
-      deleteIndicesGeneratedByJobs(),
+      deleteIndicesGeneratedByJobs().then(deleteAllIndicesCreated),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
-      throw(err);
+      throw err;
     })
   );
 

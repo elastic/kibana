@@ -20,14 +20,13 @@
 import _ from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
-import '../directives/validate_date_interval';
-import '../directives/input_number';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
-import intervalTemplate from '../controls/number_interval.html';
+import { NumberIntervalParamEditor } from '../controls/number_interval';
 import { MinDocCountParamEditor } from '../controls/min_doc_count';
-import extendedBoundsTemplate from '../controls/extended_bounds.html';
+import { HasExtendedBoundsParamEditor } from '../controls/has_extended_bounds';
+import { ExtendedBoundsParamEditor } from '../controls/extended_bounds';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -76,7 +75,7 @@ export const histogramBucketAgg = new BucketAggType({
     },
     {
       name: 'interval',
-      editor: intervalTemplate,
+      editorComponent: NumberIntervalParamEditor,
       modifyAggConfigOnSearchRequestStart(aggConfig, searchSource) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
@@ -160,30 +159,29 @@ export const histogramBucketAgg = new BucketAggType({
     },
 
     {
-      name: 'extended_bounds',
-      default: {},
-      editor: extendedBoundsTemplate,
-      write: function (aggConfig, output) {
-        const val = aggConfig.params.extended_bounds;
+      name: 'has_extended_bounds',
+      default: false,
+      editorComponent: HasExtendedBoundsParamEditor,
+      write: () => {},
+    },
 
-        if (aggConfig.params.min_doc_count && (val.min != null || val.max != null)) {
-          output.params.extended_bounds = {
-            min: val.min,
-            max: val.max
-          };
+    {
+      name: 'extended_bounds',
+      default: {
+        min: '',
+        max: '',
+      },
+      editorComponent: ExtendedBoundsParamEditor,
+      write: function (aggConfig, output) {
+        const { min, max } = aggConfig.params.extended_bounds;
+
+        if (aggConfig.params.has_extended_bounds &&
+          (min || min === 0) &&
+          (max || max === 0)) {
+          output.params.extended_bounds = { min, max };
         }
       },
-
-      // called from the editor
-      shouldShow: function (aggConfig) {
-        const field = aggConfig.params.field;
-        if (
-          field
-          && (field.type === 'number' || field.type === 'date')
-        ) {
-          return aggConfig.params.min_doc_count;
-        }
-      }
+      shouldShow: aggConfig => aggConfig.params.has_extended_bounds
     }
   ]
 });

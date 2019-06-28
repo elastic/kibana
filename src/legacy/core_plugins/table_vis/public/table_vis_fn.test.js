@@ -24,7 +24,7 @@ const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
   tables: [{ columns: [], rows: [] }],
 }));
 jest.mock('ui/vis/response_handlers/legacy', () => ({
-  LegacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+  legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 }));
 
 describe('interpreter/functions#table', () => {

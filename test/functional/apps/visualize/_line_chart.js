@@ -38,14 +38,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = Split Chart');
-      await PageObjects.visualize.clickBucket('Split Chart');
+      log.debug('Bucket = Split chart');
+      await PageObjects.visualize.clickBucket('Split chart');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Field = extension');
       await PageObjects.visualize.selectField('extension.raw');
       log.debug('switch from Rows to Columns');
-      await PageObjects.visualize.clickColumns();
+      await PageObjects.visualize.clickSplitDirection('Columns');
       await PageObjects.visualize.clickGo();
     };
 
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
       const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
       log.debug('Order By = Term');
-      await PageObjects.visualize.selectOrderBy('_key');
+      await PageObjects.visualize.selectOrderByMetric(2, '_key');
       await PageObjects.visualize.clickGo();
       await retry.try(async function () {
         const data = await PageObjects.visualize.getLineChartData();

@@ -17,47 +17,25 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { ConfigWithSchema, EnvironmentMode } from '../config';
+import { EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
-import { ClusterClient } from '../elasticsearch';
-import { HttpServiceSetup } from '../http';
 import { LoggerFactory } from '../logging';
 import { PluginWrapper, PluginManifest } from './plugin';
-import { PluginsServiceSetupDeps } from './plugins_service';
+import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * Context that's available to plugins during initialization stage.
  *
  * @public
  */
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
-    create: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config>;
-    createIfExists: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config | undefined>;
-  };
-}
-
-/**
- * Context passed to the plugins `setup` method.
- *
- * @public
- */
-export interface PluginSetupContext {
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-  };
-  http: {
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnRequest: HttpServiceSetup['registerOnRequest'];
+    create: <T = ConfigSchema>() => Observable<T>;
+    createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };
 }
 
@@ -104,22 +82,16 @@ export function createPluginInitializerContext(
        * @param ConfigClass A class (not an instance of a class) that contains a
        * static `schema` that we validate the config at the given `path` against.
        */
-      create(ConfigClass) {
-        return coreContext.configService.atPath(pluginManifest.configPath, ConfigClass);
+      create() {
+        return coreContext.configService.atPath(pluginManifest.configPath);
       },
-      createIfExists(ConfigClass) {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath, ConfigClass);
+      createIfExists() {
+        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
       },
     },
   };
 }
 
-// Added to improve http typings as make { http: Required<HttpSetup> }
-// Http service is disabled, when Kibana runs in optimizer mode or as dev cluster managed by cluster master.
-// In theory no plugins shouldn try to access http dependency in this case.
-function preventAccess() {
-  throw new Error('Cannot use http contract when http server not started');
-}
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
  * This facade should be safe to use only within `setup` itself.
@@ -138,20 +110,38 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): PluginSetupContext {
+): CoreSetup {
   return {
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
     },
-    http: deps.http
-      ? {
-          registerAuth: deps.http.registerAuth,
-          registerOnRequest: deps.http.registerOnRequest,
-        }
-      : {
-          registerAuth: preventAccess,
-          registerOnRequest: preventAccess,
-        },
+    http: {
+      registerOnPreAuth: deps.http.registerOnPreAuth,
+      registerAuth: deps.http.registerAuth,
+      registerOnPostAuth: deps.http.registerOnPostAuth,
+      basePath: deps.http.basePath,
+      createNewServer: deps.http.createNewServer,
+    },
   };
+}
+
+/**
+ * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
+ * This facade should be safe to use only within `start` itself.
+ *
+ * This is called for each plugin when it starts, so each plugin gets its own
+ * version of these values.
+ *
+ * @param coreContext Kibana core context
+ * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during start.
+ * @internal
+ */
+export function createPluginStartContext<TPlugin, TPluginDependencies>(
+  coreContext: CoreContext,
+  deps: PluginsServiceStartDeps,
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): CoreStart {
+  return {};
 }

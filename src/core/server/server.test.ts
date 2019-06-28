@@ -18,113 +18,100 @@
  */
 
 import {
-  elasticsearchService,
-  httpService,
+  mockElasticsearchService,
+  mockHttpService,
   mockLegacyService,
   mockPluginsService,
+  mockConfigService,
 } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { Env } from './config';
+import { Env, Config, ObjectToConfigAdapter } from './config';
 import { Server } from './server';
 
 import { getEnvOptions } from './config/__mocks__/env';
-import { configServiceMock } from './config/config_service.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
 
-const configService = configServiceMock.create();
 const env = new Env('.', getEnvOptions());
 const logger = loggingServiceMock.create();
 
 beforeEach(() => {
-  configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+  mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
 });
 
 afterEach(() => {
   jest.clearAllMocks();
-
-  configService.atPath.mockReset();
-  httpService.setup.mockReset();
-  httpService.stop.mockReset();
-  elasticsearchService.setup.mockReset();
-  elasticsearchService.stop.mockReset();
-  mockPluginsService.setup.mockReset();
-  mockPluginsService.stop.mockReset();
-  mockLegacyService.setup.mockReset();
-  mockLegacyService.stop.mockReset();
 });
 
+const config$ = new BehaviorSubject<Config>(new ObjectToConfigAdapter({}));
 test('sets up services on "setup"', async () => {
-  const mockPluginsServiceSetup = new Map([['some-plugin', 'some-value']]);
-  mockPluginsService.setup.mockReturnValue(Promise.resolve(mockPluginsServiceSetup));
+  const server = new Server(config$, env, logger);
 
-  const server = new Server(configService as any, logger, env);
-
-  expect(httpService.setup).not.toHaveBeenCalled();
-  expect(elasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockHttpService.setup).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
-  expect(httpService.setup).toHaveBeenCalledTimes(1);
-  expect(elasticsearchService.setup).toHaveBeenCalledTimes(1);
+  expect(mockHttpService.setup).toHaveBeenCalledTimes(1);
+  expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
 });
 
+test('runs services on "start"', async () => {
+  const server = new Server(config$, env, logger);
+
+  expect(mockHttpService.setup).not.toHaveBeenCalled();
+  expect(mockLegacyService.start).not.toHaveBeenCalled();
+
+  await server.setup();
+
+  expect(mockHttpService.start).not.toHaveBeenCalled();
+  expect(mockLegacyService.start).not.toHaveBeenCalled();
+  await server.start();
+
+  expect(mockHttpService.start).toHaveBeenCalledTimes(1);
+  expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
+});
+
 test('does not fail on "setup" if there are unused paths detected', async () => {
-  configService.getUnusedPaths.mockResolvedValue(['some.path', 'another.path']);
+  mockConfigService.getUnusedPaths.mockResolvedValue(['some.path', 'another.path']);
 
-  const server = new Server(configService as any, logger, env);
-  await expect(server.setup()).resolves.toBeUndefined();
-  expect(loggingServiceMock.collect(logger)).toMatchSnapshot('unused paths logs');
-});
+  const server = new Server(config$, env, logger);
 
-test('does not setup http service is `autoListen:false`', async () => {
-  configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: false }));
-
-  const server = new Server(configService as any, logger, env);
-
-  expect(mockLegacyService.setup).not.toHaveBeenCalled();
-
-  await server.setup();
-
-  expect(httpService.setup).not.toHaveBeenCalled();
-  expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.setup).toHaveBeenCalledWith({});
-});
-
-test('does not setup http service if process is dev cluster master', async () => {
-  const server = new Server(
-    configService as any,
-    logger,
-    new Env('.', getEnvOptions({ isDevClusterMaster: true }))
-  );
-
-  expect(mockLegacyService.setup).not.toHaveBeenCalled();
-
-  await server.setup();
-
-  expect(httpService.setup).not.toHaveBeenCalled();
-  expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.setup).toHaveBeenCalledWith({});
+  await expect(server.setup()).resolves.toBeDefined();
 });
 
 test('stops services on "stop"', async () => {
-  const server = new Server(configService as any, logger, env);
+  const server = new Server(config$, env, logger);
 
   await server.setup();
 
-  expect(httpService.stop).not.toHaveBeenCalled();
-  expect(elasticsearchService.stop).not.toHaveBeenCalled();
+  expect(mockHttpService.stop).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
-  expect(httpService.stop).toHaveBeenCalledTimes(1);
-  expect(elasticsearchService.stop).toHaveBeenCalledTimes(1);
+  expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
+  expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
+});
+
+test(`doesn't setup core services if config validation fails`, async () => {
+  mockConfigService.setSchema.mockImplementation(() => {
+    throw new Error('invalid config');
+  });
+  const server = new Server(config$, env, logger);
+  await expect(server.setupConfigSchemas()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"invalid config"`
+  );
+  expect(mockHttpService.setup).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockPluginsService.setup).not.toHaveBeenCalled();
+  expect(mockLegacyService.setup).not.toHaveBeenCalled();
 });

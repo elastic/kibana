@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Markdown markdown links it renders the expected content containing a link 1`] = `
+<Component
+  raw="A link to an external site [External Site](https://google.com)"
+/>
+`;
+
+exports[`Markdown markdown tables it renders the expected table content 1`] = `
+<Component
+  raw="| we | support | markdown | tables |
+|---------|---------|------------|--------|
+| because | tables  | are        | pretty |
+| useful  | for     | formatting | data   |"
+/>
+`;

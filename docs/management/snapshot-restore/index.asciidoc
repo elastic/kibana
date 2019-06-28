@@ -1,0 +1,135 @@
+[role="xpack"]
+[[snapshot-repositories]]
+== Snapshot repositories
+
+Use *Snapshot Repositories* to store backups of your 
+{es} indices and clusters. Snapshots are important because they provide 
+a copy of your data in case something goes wrong. If you need to roll 
+back to an older version of your data, you can restore a snapshot from the repository.
+
+Before using this feature, you should be familiar with how snapshots work.  
+{ref}/modules-snapshots.html[Snapshot and Restore] is a good source for 
+more detailed information.
+
+To get started, go to *Management > Elasticsearch > Snapshot Repositories*.  You 
+begin with an overview of your repositories. You can then use the UI to 
+drill down into your repositories and snapshots.
+
+[role="screenshot"]
+image:management/snapshot-restore/images/repository_list.png["Repository list"]
+
+[float]
+=== Registering a repository
+
+You must have a registry before you can save your snapshots. If you don’t see a 
+repository in the list, navigate to *Register repository* to create one. 
+
+[role="screenshot"]
+image:management/snapshot-restore/images/register_repo.png["Register repository"]
+
+{kib} supports three types of repositories on startup:
+
+* *Shared file system.*  Uses a shared file system to store the snapshots.
+* *Read-only url.*  Provides a read-only alternative to access snapshot data 
+in another repository. 
+* *Source-only.*  Enables storage of minimal, source-only snapshots.  
+A source-only repository can take up to 50% less disk space.
+
+For more information on these repositories and the settings that you can 
+configure, see {ref}/modules-snapshots.html#_repositories[Repositories]. 
+To add support for additional types, see 
+{ref}/modules-snapshots.html#_repository_plugins[Repository plugins].
+
+A best practice is to register a repository for each major version of 
+{es}. If you register the same snapshot repository with multiple clusters, 
+give only one cluster write access to the repository. All other clusters 
+connected to that repository should have read-only access.
+
+[float]
+=== Creating a snapshot
+
+Use the Kibana <<console-kibana, Console>> to create your snapshots. The 
+{ref}//modules-snapshots.html#_snapshot[snapshot API]
+takes the current state and data in your index or cluster and saves it to a 
+shared repository. 
+
+The snapshot process is "smart." Your first snapshot is a complete copy of data.
+All subsequent snapshots save the changes between the existing snapshots and 
+the new data.
+
+For an overview of the snapshots in your cluster, go to the *Snapshots* tab in *Snapshot Repositories*.
+You can then drill down into the details for each snapshot.
+
+[role="screenshot"]
+image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
+
+[float]
+=== Example: Register a shared file system repository
+
+This example shows how to register a shared file system repository 
+and store snapshots.
+
+[float]
+==== Register the repository location
+
+You must register the location of the repository in the `path.repo` setting on 
+your master and data nodes.  You can do this in one of two ways:
+
+* Edit  your `elasticsearch.yml` to include the `path.repo` setting.
+
+* Pass the `path.repo` setting when you start Elasticsearch.
++
+`bin/elasticsearch -E path.repo=/tmp/es-backups`
+
+[float]
+==== Register the repository
+
+Use *Snapshot Repositories* to register a repository. 
+
+
+. Go to *Management > Elasticsearch > Snapshot Repositories*.
+. Click *Register a repository*.
+. Enter a name for your repository. For example, `my_backup`.
+. Set *Repository type* to Shared file system.
++ 
+[role="screenshot"]
+image:management/snapshot-restore/images/register_repo.png["Register repository"]
+
+. Click *Next*.
+. In *Location*, enter the path to the snapshot repository, `/tmp/es-backups`.
+. In *Chunk size*, enter 100mb so that snapshot files are not bigger than that size.
+. Use the defaults for all other fields.
+. Click *Register*.
++
+Your new repository is listed on the *Repositories* tab.
++
+. Inspect the details for the repository. 
++
+The repository currently doesn’t have any snapshots.
++
+. Click *Verify repository* to view the repository connection status. 
++
+[role="screenshot"]
+image:management/snapshot-restore/images/verify_repository.png["Verify repository"]
+
+[float]
+==== Add a snapshot to the repository
+Use the {ref}//modules-snapshots.html#_snapshot[snapshot API] to create a snapshot.
+
+. Go to *Dev Tools > Console*.
+. Create the snapshot. 
++
+In this example, the snapshot name is `2019-04-25_snapshot`. You can also 
+use {ref}//date-math-index-names.html[date math expression] for the snapshot name.
++
+[role="screenshot"]
+image:management/snapshot-restore/images/create_snapshot.png["Create snapshot"]
++
+. Open *Snapshot Repositories*. 
++
+Your new snapshot is available in the *Snapshots* tab.
+
+
+
+
+

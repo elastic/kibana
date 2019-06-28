@@ -18,11 +18,13 @@
  */
 
 jest.mock('ui/capabilities', () => ({
-  uiCapabilities: {
-    uiCapability1: true,
-    uiCapability2: {
-      nestedProp: 'nestedValue',
-    },
+  capabilities: {
+    get: () => ({
+      uiCapability1: true,
+      uiCapability2: {
+        nestedProp: 'nestedValue',
+      },
+    }),
   },
 }));
 
