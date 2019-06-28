@@ -33,6 +33,19 @@ import { toInt } from '../field_formatters';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
+const getValidationErrorWithMessage = (
+  validation: Partial<ValidationConfig>,
+  validationResult: ValidationError
+) => {
+  const message =
+    typeof validation.message !== 'undefined' ? validation.message : validationResult.message;
+
+  return {
+    ...validationResult,
+    message: typeof message === 'function' ? message(validationResult) : message,
+  };
+};
+
 export const useField = (form: Form, path: string, config: FieldConfig = {}) => {
   const {
     defaultValue = '',
@@ -40,15 +53,17 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     helpText = '',
     type = 'text',
     validations = [],
+    validationsArrayItems = [],
     formatters = [],
     fieldsToValidateOnChange = [path],
     isValidationAsync = false,
   } = config;
 
-  const [value, setValue] = useState(
+  const [value, setStateValue] = useState(
     typeof defaultValue === 'function' ? defaultValue() : defaultValue
   );
   const [errors, setErrors] = useState<ValidationError[]>([]);
+  const [arrayItemErrors, setArrayItemErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -60,8 +75,17 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     formatters.push(toInt);
   }
 
-  const validate: Field['validate'] = async (formData: any) => {
+  const doValidate = async (
+    validationsToRun: ValidationConfig[],
+    setErrorsDispatcher: React.Dispatch<React.SetStateAction<ValidationError[]>>,
+    formData?: any,
+    valueToValidate?: unknown
+  ) => {
+    formData = formData || form.getFormData({ unflatten: false });
+    valueToValidate = valueToValidate || value;
+
     setValidating(true);
+    setErrorsDispatcher([]);
 
     // By the time our validate function has reached completion, it’s possible
     // that validate() will have been called again. If this is the case, we need
@@ -72,19 +96,6 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     const validationErrors: ValidationError[] = [];
     let skip = false;
 
-    const getValidationErrorWithMessage = (
-      validation: Partial<ValidationConfig>,
-      validationResult: ValidationError
-    ) => {
-      const message =
-        typeof validation.message !== 'undefined' ? validation.message : validationResult.message;
-
-      return {
-        ...validationResult,
-        message: typeof message === 'function' ? message(validationResult) : message,
-      };
-    };
-
     const validateFieldAsync = async ({ validator, exitOnFail }: ValidationConfig) => {
       if (skip) {
         return;
@@ -93,7 +104,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
       try {
         validationResult = await validator({
-          value: (formData[name] as unknown) as string,
+          value: (valueToValidate as unknown) as string,
           errors: validationErrors,
           formData,
           path,
@@ -119,7 +130,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
       try {
         validationResult = validator({
-          value: (value as unknown) as string,
+          value: (valueToValidate as unknown) as string,
           errors: validationErrors,
           formData,
           path,
@@ -139,7 +150,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     // Sequencially execute all the validations for the field
     if (isValidationAsync) {
-      await validations.reduce(
+      await validationsToRun.reduce(
         (promise, validation) =>
           promise.then(async () => {
             const validationResult = await validateFieldAsync(validation);
@@ -152,7 +163,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
         Promise.resolve()
       );
     } else {
-      validations.forEach(validation => {
+      validationsToRun.forEach(validation => {
         const validationResult = validateFieldSync(validation);
 
         if (validationResult) {
@@ -165,13 +176,24 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     if (validateIteration === validateCounter.current) {
       // This is the most recent invocation
       setValidating(false);
-      setErrors(validationErrors);
+      setErrorsDispatcher(validationErrors);
     }
 
-    const isFieldValid = validationErrors.length === 0;
-
-    return isFieldValid;
+    return {
+      isValid: validationErrors.length === 0,
+      errors: validationErrors,
+    };
   };
+
+  // Validate the field value using the "validations" configuration.
+  const validate: Field['validate'] = async (formData, valueToValidate) =>
+    doValidate(validations, setErrors, formData, valueToValidate);
+
+  // When the field value is an Array, we can declare a set of validations to validate
+  // an item _before_ it is added to the Array.
+  // For that we will use the "validationsArrayItems" configuration.
+  const validateArrayItem: Field['validateArrayItem'] = async (formData, valueToValidate) =>
+    doValidate(validationsArrayItems, setArrayItemErrors, formData, valueToValidate);
 
   const runFormatters = (input: unknown): unknown => {
     if (typeof input === 'string' && input.trim() === '') {
@@ -180,7 +202,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     return formatters.reduce((output, formatter) => formatter(output), input);
   };
 
-  const onChange: Field['onChange'] = e => {
+  const onValueChange = () => {
     if (isPristine) {
       setPristine(false);
     }
@@ -193,12 +215,40 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     debounceTimeout.current = setTimeout(() => {
       setIsUpdating(false);
     }, form.options.errorDisplayDelay);
+  };
 
-    if ({}.hasOwnProperty.call(e.target, 'checked')) {
-      setValue(e.target.checked);
-    } else {
-      setValue(runFormatters(e.target.value));
-    }
+  /**
+   * Handler for the form input events change
+   *
+   * @param event Form input change event
+   */
+  const onChange: Field['onChange'] = event => {
+    onValueChange();
+
+    const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
+      ? event.target.checked
+      : event.target.value;
+
+    setStateValue(runFormatters(newValue));
+  };
+
+  const setValue: Field['setValue'] = newValue => {
+    onValueChange();
+    setStateValue(runFormatters(newValue));
+  };
+
+  const getErrorsMessages: Field['getErrorsMessages'] = (
+    onlyAlwaysVisible = false,
+    fromArrayItemErrors = false
+  ) => {
+    const errorsArray = fromArrayItemErrors ? arrayItemErrors : errors;
+
+    return errorsArray.reduce((messages, error) => {
+      if (onlyAlwaysVisible && !error.alwaysVisible) {
+        return messages;
+      }
+      return messages ? `${messages}, ${error.message}` : (error.message as string);
+    }, '');
   };
 
   useEffect(
@@ -218,15 +268,18 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     helpText,
     value,
     errors,
+    arrayItemErrors,
     type,
     form,
     isPristine,
     isValidating,
     isUpdating,
     validate,
+    validateArrayItem,
     setErrors,
     setValue,
     onChange,
+    getErrorsMessages,
   };
 
   form.addField(field);

@@ -19,4 +19,6 @@
 
 export * from './string';
 
+export * from './array';
+
 export { isUrl } from './is_url';

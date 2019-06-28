@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ChangeEvent, FormEvent } from 'react';
+import { ChangeEvent, FormEvent, MouseEvent } from 'react';
 export interface Form<T = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
   readonly isValid: boolean;
   readonly options: FormOptions;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement> | MouseEvent) => void;
   addField: (field: Field) => void;
   removeField: (fieldNames: string | string[]) => void;
   removeFieldsStartingWith: (pattern: string) => void;
@@ -66,12 +66,21 @@ export interface Field {
   readonly type: string;
   readonly value: unknown;
   readonly errors: ValidationError[];
+  readonly arrayItemErrors: ValidationError[];
   readonly isPristine: boolean;
   readonly isValidating: boolean;
   readonly isUpdating: boolean;
   readonly form: Form;
-  onChange: (e: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
-  validate: (formData: any) => Promise<boolean>;
+  getErrorsMessages: (onlyAlwaysVisible?: boolean, fromArrayItemErrors?: boolean) => string;
+  onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
+  validate: (
+    formData?: any,
+    valueToValidate?: unknown
+  ) => Promise<{ isValid: boolean; errors: ValidationError[] }>;
+  validateArrayItem: (
+    formData?: any,
+    valueToValidate?: unknown
+  ) => Promise<{ isValid: boolean; errors: ValidationError[] }>;
   setErrors: (errors: ValidationError[]) => void;
   setValue: (value: FieldValue) => void;
 }
@@ -83,6 +92,7 @@ export interface FieldConfig<T = FormData> {
   readonly type?: HTMLInputElement['type'];
   readonly defaultValue?: unknown;
   readonly validations?: Array<ValidationConfig<T>>;
+  readonly validationsArrayItems?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
   readonly fieldsToValidateOnChange?: string[];
   readonly isValidationAsync?: boolean;

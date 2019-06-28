@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle, EuiForm, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiButton } from '@elastic/eui';
 import { useForm, FormConfig } from 'ui/forms/use_form';
 import { FormRow, UseField } from 'ui/forms/components';
 

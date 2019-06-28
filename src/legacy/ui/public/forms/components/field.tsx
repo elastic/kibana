@@ -36,7 +36,26 @@ export const Field = ({ field }: Props) => {
 
   const onAddValueToCombo = (value: string) => {
     const newValue = [...(field.value as string[]), value];
-    field.setValue(newValue);
+
+    /**
+     * There is a strange behaviour in the EUI Combobox component
+     * If the value to be added is immediately set (no timeout) with the keyboard ENTER
+     * key, then the event bubbles and the pill that is added receive the ENTER event
+     * "on" the close icon (the cross) that triggers the "remove item" callback.
+     * The behaviour does not occur with the "onBlur" as no key is pressed.
+     *
+     * I played around and added 1000ms to better see the issue. We can see clearly the
+     * difference between the keydown "ENTER" and the "onBlur" triggers.
+     * This needs to be investigated.
+     */
+    setTimeout(() => {
+      field.setValue(newValue);
+    }, 1000);
+
+    // The following line should be the correct way to update the value
+    // but it does not currently work when hitting the "ENTER" key
+
+    // field.setValue(newValue);
   };
 
   const onComboUpdate = (options: EuiComboBoxOptionProps[]) => {

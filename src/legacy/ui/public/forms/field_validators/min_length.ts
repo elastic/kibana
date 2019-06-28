@@ -18,7 +18,7 @@
  */
 
 import { ValidationFunc } from '../use_form';
-import { hasMinLength } from '../../validators';
+import { minLengthString, minLengthArray } from '../../validators';
 import { minLengthError } from '../errors';
 
 export const minLengthField = (length = 0) => (
@@ -26,5 +26,8 @@ export const minLengthField = (length = 0) => (
 ): ReturnType<ValidationFunc> => {
   const [{ value }] = args;
 
-  return hasMinLength(length)(value.trim()) ? undefined : minLengthError(length);
+  if (Array.isArray(value)) {
+    return minLengthArray(length)(value) ? undefined : minLengthError(length);
+  }
+  return minLengthString(length)(value.trim()) ? undefined : minLengthError(length);
 };

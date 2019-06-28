@@ -51,19 +51,37 @@ export const Form3 = () => {
 
   const { form } = useForm<MyForm>({ onSubmit, schema: formSchema });
 
-  const onAddValueToCombo = (field: FieldType) => (value: string) => {
+  const onAddValueToCombo = (field: FieldType) => async (value: string) => {
+    const { isValid } = await field.validateArrayItem(undefined, value);
+
+    if (!isValid) {
+      // There is an issue with the ComboBox, and we need to wrap the update inside a setTimeout
+      // see comment in "Field" component.
+      setTimeout(() => {
+        field.setValue(field.value as string[]);
+      });
+      return;
+    }
+
     const newValue = [...(field.value as string[]), value];
-    console.log('New value', newValue);
-    field.setValue(newValue);
+
+    setTimeout(() => {
+      field.setValue(newValue);
+    });
   };
 
   const onComboUpdate = (field: FieldType) => (options: EuiComboBoxOptionProps[]) => {
-    console.log('Update', options);
     field.setValue(options.map(option => option.label));
   };
 
+  const onSearchComboUpdate = (field: FieldType) => (value: string) => {
+    if (value) {
+      field.setErrors([]);
+    }
+  };
+
   return (
-    <form onSubmit={form.onSubmit} noValidate>
+    <form noValidate>
       <EuiTitle size="m">
         <h2>3. Advanced usage</h2>
       </EuiTitle>
@@ -133,13 +151,63 @@ export const Form3 = () => {
           <UseField path="field.not.on.schema" config={inlineConfig} render={Field} form={form} />
         </EuiFlexItem>
       </FormRow>
+      <FormRow
+        title="Combobox with validation"
+        description="Here we have validation _before_ adding a value to the comboBox array"
+      >
+        <UseField path="comboBoxFieldWithValidation" form={form}>
+          {field => {
+            const isInvalid = field.errors.length
+              ? form.isSubmitted || field.errors[0].alwaysVisible
+              : false;
+
+            // Errors for the field
+            const errorsField = form.isSubmitted
+              ? field.getErrorsMessages()
+              : field.getErrorsMessages(true);
+
+            // Errors of an invalid item that was introduced
+            const errorsArrayItem = form.isSubmitted
+              ? field.getErrorsMessages(false, true)
+              : field.getErrorsMessages(true, true);
+
+            // Concatenate messages.
+            const error =
+              errorsField && errorsArrayItem
+                ? `${errorsField}, ${errorsArrayItem}`
+                : errorsField
+                ? errorsField
+                : errorsArrayItem;
+
+            return (
+              <EuiFormRow
+                label={field.label}
+                helpText={field.helpText}
+                error={error}
+                isInvalid={isInvalid}
+                fullWidth
+              >
+                <EuiComboBox
+                  noSuggestions
+                  placeholder="Type and then hit ENTER"
+                  selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
+                  onCreateOption={onAddValueToCombo(field)}
+                  onChange={onComboUpdate(field)}
+                  onSearchChange={onSearchComboUpdate(field)}
+                  fullWidth
+                />
+              </EuiFormRow>
+            );
+          }}
+        </UseField>
+      </FormRow>
 
       <EuiSpacer size="m" />
       <EuiButton
         color="secondary"
         iconType="check"
-        type="submit"
         fill
+        onClick={form.onSubmit}
         disabled={form.isSubmitting || (form.isSubmitted && !form.isValid)}
       >
         Submit form

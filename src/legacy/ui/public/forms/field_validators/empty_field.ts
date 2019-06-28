@@ -18,10 +18,14 @@
  */
 
 import { ValidationFunc } from '../use_form';
-import { isEmpty } from '../../validators';
+import { isEmptyString, isEmptyArray } from '../../validators';
 import { fieldMissingError } from '../errors';
 
 export const emptyField = (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
   const [{ value, path }] = args;
-  return isEmpty(value) ? fieldMissingError(path) : undefined;
+
+  if (Array.isArray(value)) {
+    return isEmptyArray(value) ? fieldMissingError(path) : undefined;
+  }
+  return isEmptyString(value) ? fieldMissingError(path) : undefined;
 };

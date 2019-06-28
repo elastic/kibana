@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export const minLengthString = (length: number) => (str: string) => str.length >= length;
+export const isEmptyArray = (value: any[]): boolean => value.length === 0;
 
-export const maxLengthString = (length: number) => (str: string) => str.length <= length;
+export const minLengthArray = (length = 1) => (value: any[]): boolean => value.length >= length;
 
-export const isEmptyString = (value: string) => value.trim() === '';
+export const maxLengthArray = (length = 5) => (value: any[]): boolean => value.length <= length;

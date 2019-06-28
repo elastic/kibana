@@ -27,7 +27,7 @@ export const fieldMissingError = (fieldName: string, message = 'Field missing') 
 
 export const minLengthError = (
   length: number,
-  message = (error: any) => `Must have a minimun of ${error.length} characters.`
+  message = (error: any) => `Must have a minimun length of ${error.length}.`
 ) => ({
   code: ERR_MIN_LENGTH,
   length,
