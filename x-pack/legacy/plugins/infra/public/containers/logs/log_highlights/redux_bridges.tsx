@@ -29,13 +29,14 @@ export const LogHighlightsPositionBridge = withStreamItems(
 );
 
 export const LogHighlightsFilterQueryBridge = withLogFilter(
-  ({ filterQuery }: { filterQuery: any }) => {
+  ({ serializedFilterQuery }: { serializedFilterQuery: string | null }) => {
     const { setFilterQuery } = useContext(LogHighlightsState.Context);
+
     useEffect(
       () => {
-        setFilterQuery(filterQuery);
+        setFilterQuery(serializedFilterQuery);
       },
-      [filterQuery]
+      [serializedFilterQuery]
     );
 
     return null;

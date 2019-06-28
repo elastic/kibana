@@ -6,17 +6,15 @@
 
 import createContainer from 'constate-latest';
 import { useEffect, useState, useMemo } from 'react';
+
 import { TimeKey } from '../../../../common/time';
 import { LogEntryHighlightsQuery } from '../../../graphql/types';
 import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
+import { LogEntryHighlightsMap } from '../../../utils/log_entry';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { logEntryHighlightsQuery } from './log_highlights.gql_query';
 
 type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
-
-interface LogEntryHighlightsMap {
-  [entryId: string]: LogEntryHighlights[0]['entries'];
-}
 
 export const useLogHighlightsState = ({
   sourceId,
@@ -32,7 +30,7 @@ export const useLogHighlightsState = ({
   );
   const [startKey, setStartKey] = useState<TimeKey | null>(null);
   const [endKey, setEndKey] = useState<TimeKey | null>(null);
-  const [filterQuery, setFilterQuery] = useState(null);
+  const [filterQuery, setFilterQuery] = useState<string | null>(null);
 
   const [loadLogEntryHighlightsRequest, loadLogEntryHighlights] = useTrackedPromise(
     {
@@ -54,12 +52,15 @@ export const useLogHighlightsState = ({
           variables: {
             sourceId,
             startKey,
-            endKey,
+            endKey: {
+              time: endKey.time,
+              tiebreaker: endKey.tiebreaker + 1, // we want to perform an inclusive search
+            },
             filterQuery,
             highlights: [
               {
                 query: JSON.stringify({
-                  multi_match: { query: highlightTerms[0], type: 'phrase' },
+                  multi_match: { query: highlightTerms[0], type: 'phrase_prefix', lenient: true },
                 }),
               },
             ],
@@ -75,7 +76,11 @@ export const useLogHighlightsState = ({
 
   useEffect(
     () => {
-      if (highlightTerms.length && startKey && endKey) {
+      if (
+        highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
+        startKey &&
+        endKey
+      ) {
         loadLogEntryHighlights();
       } else {
         setLogEntryHighlights(undefined);
