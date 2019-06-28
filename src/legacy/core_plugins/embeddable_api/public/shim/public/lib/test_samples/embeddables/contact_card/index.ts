@@ -17,15 +17,7 @@
  * under the License.
  */
 
-export {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from './contact_card_embeddable';
-
-export {
-  ContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-} from './contact_card_embeddable_factory';
-export { SlowContactCardEmbeddableFactory } from './slow_contact_card_embeddable_factory';
-export { ContactCardInitializerProps } from './contact_card_initializer';
+export * from './contact_card_embeddable';
+export * from './contact_card_embeddable_factory';
+export * from './slow_contact_card_embeddable_factory';
+export * from './contact_card_initializer';

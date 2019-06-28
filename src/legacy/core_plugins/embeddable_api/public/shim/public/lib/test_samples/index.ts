@@ -17,33 +17,5 @@
  * under the License.
  */
 
-export {
-  EmptyEmbeddable,
-  HelloWorldEmbeddable,
-  HelloWorldEmbeddableFactory,
-  ContactCardEmbeddableFactory,
-  SlowContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  HelloWorldContainer,
-  FilterableContainer,
-  FilterableEmbeddable,
-  FilterableEmbeddableFactory,
-  FILTERABLE_EMBEDDABLE,
-  FILTERABLE_CONTAINER,
-  FilterableContainerInput,
-  FilterableEmbeddableInput,
-  ContactCardInitializerProps,
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-} from './embeddables';
-
-export {
-  SayHelloAction,
-  EditModeAction,
-  HelloWorldAction,
-  RestrictedAction,
-  HELLO_WORLD_ACTION_ID,
-  SEND_MESSAGE_ACTION,
-} from './actions';
+export * from './embeddables';
+export * from './actions';

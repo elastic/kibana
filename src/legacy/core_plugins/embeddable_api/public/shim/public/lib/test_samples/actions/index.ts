@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export { HelloWorldAction, HELLO_WORLD_ACTION_ID } from './hello_world_action';
-export { SayHelloAction } from './say_hello_action';
-export { EditModeAction } from './edit_mode_action';
-export { RestrictedAction } from './restricted_action';
-export { SendMessageAction, SEND_MESSAGE_ACTION } from './send_message_action';
+export * from './hello_world_action';
+export * from './say_hello_action';
+export * from './edit_mode_action';
+export * from './restricted_action';
+export * from './send_message_action';

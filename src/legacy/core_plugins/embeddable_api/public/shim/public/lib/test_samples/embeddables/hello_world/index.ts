@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { HelloWorldEmbeddableFactory } from './hello_world_embeddable_factory';
-export { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE_TYPE } from './hello_world_embeddable';
+export * from './hello_world_embeddable_factory';
+export * from './hello_world_embeddable';

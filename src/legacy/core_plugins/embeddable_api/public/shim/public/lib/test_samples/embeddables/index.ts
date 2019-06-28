@@ -17,30 +17,10 @@
  * under the License.
  */
 
-export {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  ContactCardInitializerProps,
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  SlowContactCardEmbeddableFactory,
-} from './contact_card';
-export {
-  HelloWorldEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-  HelloWorldEmbeddable,
-} from './hello_world';
-export { HelloWorldContainer } from './hello_world_container';
-export { EmptyEmbeddable } from './empty_embeddable';
-export {
-  FilterableEmbeddable,
-  FilterableEmbeddableInput,
-  FILTERABLE_EMBEDDABLE,
-} from './filterable_embeddable';
-export {
-  FilterableContainer,
-  FILTERABLE_CONTAINER,
-  FilterableContainerInput,
-} from './filterable_container';
-export { FilterableEmbeddableFactory } from './filterable_embeddable_factory';
+export * from './contact_card';
+export * from './hello_world';
+export * from './hello_world_container';
+export * from './empty_embeddable';
+export * from './filterable_embeddable';
+export * from './filterable_container';
+export * from './filterable_embeddable_factory';
