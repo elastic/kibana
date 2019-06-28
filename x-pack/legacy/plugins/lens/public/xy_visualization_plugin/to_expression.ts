@@ -8,7 +8,22 @@ import { Ast } from '@kbn/interpreter/common';
 import { State } from './types';
 import { DatasourcePublicAPI } from '../types';
 
-export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => ({
+export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
+  const labels: Partial<Record<string, string>> = {};
+  state.y.accessors.forEach(columnId => {
+    const operation = datasource.getOperationForColumnId(columnId);
+    if (operation && operation.label) {
+      labels[columnId] = operation.label;
+    }
+  });
+
+  return buildExpression(state, labels);
+};
+
+export const buildExpression = (
+  state: State,
+  columnLabels: Partial<Record<string, string>>
+): Ast => ({
   type: 'expression',
   chain: [
     {
@@ -63,8 +78,7 @@ export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast
                   accessors: state.y.accessors,
                   hide: [Boolean(state.y.hide)],
                   labels: state.y.accessors.map(accessor => {
-                    const operation = datasource.getOperationForColumnId(accessor);
-                    return operation ? operation.label : accessor;
+                    return columnLabels[accessor] || accessor;
                   }),
                 },
               },

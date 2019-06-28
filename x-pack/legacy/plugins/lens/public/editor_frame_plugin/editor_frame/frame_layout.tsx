@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar, EuiPageBody, EuiPageHeader } from '@elastic/eui';
 import { RootDragDropProvider } from '../../drag_drop';
 
 export interface FrameLayoutProps {
@@ -19,16 +19,17 @@ export interface FrameLayoutProps {
 export function FrameLayout(props: FrameLayoutProps) {
   return (
     <RootDragDropProvider>
-      {props.navPanel}
-      <EuiFlexGroup>
-        {/* TODO style this and add workspace prop and loading flags */}
-        <EuiFlexItem grow={null}>{props.dataPanel}</EuiFlexItem>
-        <EuiFlexItem grow={5}>{props.workspacePanel}</EuiFlexItem>
-        <EuiFlexItem grow={null}>
+      <EuiPage className="lnsPage">
+        <EuiPageHeader className="lnsHeader">{props.navPanel}</EuiPageHeader>
+        <EuiPageSideBar className="lnsSidebar">{props.dataPanel}</EuiPageSideBar>
+        <EuiPageBody className="lnsPageBody" restrictWidth={false}>
+          {props.workspacePanel}
+        </EuiPageBody>
+        <EuiPageSideBar className="lnsSidebar lnsSidebar--right">
           {props.configPanel}
           {props.suggestionsPanel}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiPageSideBar>
+      </EuiPage>
     </RootDragDropProvider>
   );
 }

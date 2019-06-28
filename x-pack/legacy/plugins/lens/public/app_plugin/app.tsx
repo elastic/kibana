@@ -14,6 +14,7 @@ export function App({ editorFrame }: { editorFrame: EditorFrameInstance }) {
   return (
     <I18nProvider>
       <NativeRenderer
+        className="lnsPage"
         render={editorFrame.mount}
         nativeProps={{
           onError: (e: { message: string }) =>

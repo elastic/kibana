@@ -192,7 +192,6 @@ export function EditorFrame(props: EditorFrameProps) {
           <SuggestionPanel
             activeDatasource={datasource}
             activeVisualizationId={state.visualization.activeId}
-            datasourcePublicAPI={datasourcePublicAPI!}
             datasourceState={state.datasource.state}
             visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}

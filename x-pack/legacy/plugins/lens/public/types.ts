@@ -172,8 +172,5 @@ export interface Visualization<T = unknown, P = unknown> {
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data
-  getSuggestions: (
-    options: SuggestionRequest<T>,
-    datasource: DatasourcePublicAPI
-  ) => Array<VisualizationSuggestion<T>>;
+  getSuggestions: (options: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
 }

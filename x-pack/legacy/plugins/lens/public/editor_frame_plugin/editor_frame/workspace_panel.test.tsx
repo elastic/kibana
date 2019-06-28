@@ -17,6 +17,7 @@ import {
 import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
+import { DragDrop } from '../../drag_drop';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -318,7 +319,7 @@ Object {
         },
       ]);
 
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,
@@ -329,8 +330,7 @@ Object {
       expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
           tables: [expectedTable],
-        }),
-        expect.anything()
+        })
       );
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',
@@ -378,7 +378,7 @@ Object {
         },
       ]);
 
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,
@@ -396,7 +396,7 @@ Object {
     });
 
     it("should do nothing when the visualization can't use the suggestions", () => {
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,
