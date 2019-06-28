@@ -13,7 +13,14 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { JobDetailsExposedState } from './job_details_form';
 
 export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
-  ({ createIndexPattern, jobId, destinationIndex, touched }) => {
+  ({
+    continuousModeDateField,
+    createIndexPattern,
+    isContinuousModeEnabled,
+    jobId,
+    destinationIndex,
+    touched,
+  }) => {
     if (touched === false) {
       return null;
     }
@@ -41,6 +48,18 @@ export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
         >
           <EuiFieldText defaultValue={destinationIndex} disabled={true} />
         </EuiFormRow>
+        {isContinuousModeEnabled && (
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.ml.dataframe.jobDetailsSummary.continuousModeDateFieldLabel',
+              {
+                defaultMessage: 'Continuous mode date field',
+              }
+            )}
+          >
+            <EuiFieldText defaultValue={continuousModeDateField} disabled={true} />
+          </EuiFormRow>
+        )}
       </Fragment>
     );
   }
