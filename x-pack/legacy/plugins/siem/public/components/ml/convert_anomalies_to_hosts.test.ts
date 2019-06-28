@@ -9,13 +9,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Write tests for this against convert_anomalies_to_hosts
 import { mockAnomalies } from './mock';
-import {
-  createEntitiesFromScore,
-  createEntity,
-  createEntityFromRecord,
-} from './create_entities_from_score';
 import { cloneDeep } from 'lodash/fp';
 import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
 import { AnomaliesByHost } from './types';
@@ -115,6 +109,12 @@ describe('convert_anomalies_to_hosts', () => {
         hostName: 'zeek-iowa',
       },
     ];
+    expect(entities).toEqual(expected);
+  });
+
+  test('it returns empty anomalies if sent in a null', () => {
+    const entities = convertAnomaliesToHosts(null);
+    const expected: AnomaliesByHost[] = [];
     expect(entities).toEqual(expected);
   });
 });
