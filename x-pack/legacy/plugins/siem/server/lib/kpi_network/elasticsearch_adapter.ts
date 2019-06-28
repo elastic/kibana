@@ -23,6 +23,10 @@ import { TermAggregation } from '../types';
 import { KpiNetworkHistogramData, KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
 import { buildNetworkEventsQuery } from './query_network_events';
 import { buildUniqueFlowIdsQuery } from './query_unique_flow';
+import { buildTopIpsQuery } from './query_top_ips';
+import { buildTransportBytesQuery } from './query_transport_bytes';
+import { buildTopPortsQuery } from './query_top_ports';
+import { buildTopTransportQuery } from './query_top_transport';
 
 const formatHistogramData = (
   data: Array<{ key: number; count: { value: number } }>
@@ -98,14 +102,19 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
     request: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<KpiIpDetailsData> {
-    const generalQuery: KpiNetworkESMSearchBody[] = buildGeneralQuery(options);
+    const transportBytesQuery: KpiNetworkESMSearchBody[] = buildTransportBytesQuery(options);
+    const topIpsQuery: KpiNetworkESMSearchBody[] = buildTopIpsQuery(options);
+    const topPortsQuery: KpiNetworkESMSearchBody[] = buildTopPortsQuery(options);
+    const topTransportQuery: KpiNetworkESMSearchBody[] = buildTopTransportQuery(options);
     const response = await this.framework.callWithRequest<KpiIpDetailsHit, TermAggregation>(
       request,
       'msearch',
       {
-        body: [...generalQuery],
+        body: [...transportBytesQuery, ...topIpsQuery],
+        // ...topPortsQuery, ...topTransportQuery
       }
     );
+    console.log('----', JSON.stringify(response));
 
     const sourcePacketsHistogram = getOr(
       null,

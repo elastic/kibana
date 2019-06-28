@@ -7,6 +7,7 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody } from './types';
+import { getBytesAggs } from './helpers';
 
 const getAggs = (attrAuery: 'source' | 'destination') => ({
   [`top${attrAuery}Ip`]: {
@@ -17,22 +18,11 @@ const getAggs = (attrAuery: 'source' | 'destination') => ({
       },
       size: 5,
     },
-    aggs: {
-      sourceBytes: {
-        sum: {
-          field: 'source.bytes',
-        },
-      },
-      destinationBytes: {
-        sum: {
-          field: 'destination.bytes',
-        },
-      },
-    },
+    ...getBytesAggs(),
   },
 });
 
-export const buildDnsQuery = ({
+export const buildTopIpsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,

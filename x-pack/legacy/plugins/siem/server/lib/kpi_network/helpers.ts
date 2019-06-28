@@ -23,3 +23,19 @@ export const getIpFilter = () => [
     },
   },
 ];
+
+export const getBytesAggs = () => ({
+  aggs: {
+    sourceBytes: {
+      sum: {
+        field: 'source.bytes',
+      },
+    },
+
+    destinationBytes: {
+      sum: {
+        field: 'destination.bytes',
+      },
+    },
+  },
+});
