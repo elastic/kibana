@@ -8,15 +8,23 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EmptyStateComponent } from '../empty_state';
 import { GraphQLError } from 'graphql';
+import { StatesIndexStatus } from '../../../../../common/graphql/types';
 
 describe('EmptyState component', () => {
+  let statesIndexStatus: StatesIndexStatus;
+
+  beforeEach(() => {
+    statesIndexStatus = {
+      indexExists: true,
+      docCount: {
+        count: 1,
+      },
+    };
+  });
+
   it('renders child components when count is truthy', () => {
     const component = shallowWithIntl(
-      <EmptyStateComponent
-        basePath=""
-        data={{ getStatesIndexStatus: { docCount: { count: 1 }, indexExists: true } }}
-        loading={false}
-      >
+      <EmptyStateComponent basePath="" data={{ statesIndexStatus }} loading={false}>
         <div>Foo</div>
         <div>Bar</div>
         <div>Baz</div>
@@ -66,12 +74,14 @@ describe('EmptyState component', () => {
   });
 
   it('renders empty state with appropriate base path', () => {
+    statesIndexStatus = {
+      docCount: {
+        count: 0,
+      },
+      indexExists: true,
+    };
     const component = mountWithIntl(
-      <EmptyStateComponent
-        basePath="foo"
-        data={{ getStatesIndexStatus: { docCount: { count: 0 }, indexExists: true } }}
-        loading={false}
-      >
+      <EmptyStateComponent basePath="foo" data={{ statesIndexStatus }} loading={false}>
         <div>If this is in the snapshot the test should fail</div>
       </EmptyStateComponent>
     );
@@ -79,12 +89,9 @@ describe('EmptyState component', () => {
   });
 
   it('notifies when index does not exist', () => {
+    statesIndexStatus.indexExists = false;
     const component = mountWithIntl(
-      <EmptyStateComponent
-        basePath="foo"
-        data={{ getStatesIndexStatus: { indexExists: false } }}
-        loading={false}
-      >
+      <EmptyStateComponent basePath="foo" data={{ statesIndexStatus }} loading={false}>
         <div>This text should not render</div>
       </EmptyStateComponent>
     );

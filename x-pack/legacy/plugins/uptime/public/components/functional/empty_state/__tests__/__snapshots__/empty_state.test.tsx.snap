@@ -175,7 +175,10 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
   basePath="foo"
   data={
     Object {
-      "getStatesIndexStatus": Object {
+      "statesIndexStatus": Object {
+        "docCount": Object {
+          "count": 1,
+        },
         "indexExists": false,
       },
     }
@@ -317,30 +320,28 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
               >
                 <EuiEmptyPrompt
                   body={
-                    <React.Fragment>
-                      <p>
-                        <FormattedMessage
-                          defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                          id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                          values={
-                            Object {
-                              "configureHeartbeatLink": <EuiLink
-                                color="primary"
-                                href="foo/app/kibana#/home/tutorial/uptimeMonitors"
-                                target="_blank"
-                                type="button"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Configure Heartbeat"
-                                  id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                  values={Object {}}
-                                />
-                              </EuiLink>,
-                            }
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                        id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                        values={
+                          Object {
+                            "configureHeartbeatLink": <EuiLink
+                              color="primary"
+                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                              target="_blank"
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Configure Heartbeat"
+                                id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                values={Object {}}
+                              />
+                            </EuiLink>,
                           }
-                        />
-                      </p>
-                    </React.Fragment>
+                        }
+                      />
+                    </p>
                   }
                   iconColor="subdued"
                   iconType="uptimeApp"
@@ -494,7 +495,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
   basePath="foo"
   data={
     Object {
-      "getStatesIndexStatus": Object {
+      "statesIndexStatus": Object {
         "docCount": Object {
           "count": 0,
         },
@@ -639,30 +640,28 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
               >
                 <EuiEmptyPrompt
                   body={
-                    <React.Fragment>
-                      <p>
-                        <FormattedMessage
-                          defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                          id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                          values={
-                            Object {
-                              "configureHeartbeatLink": <EuiLink
-                                color="primary"
-                                href="foo/app/kibana#/home/tutorial/uptimeMonitors"
-                                target="_blank"
-                                type="button"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Configure Heartbeat"
-                                  id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                  values={Object {}}
-                                />
-                              </EuiLink>,
-                            }
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                        id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                        values={
+                          Object {
+                            "configureHeartbeatLink": <EuiLink
+                              color="primary"
+                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                              target="_blank"
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Configure Heartbeat"
+                                id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                values={Object {}}
+                              />
+                            </EuiLink>,
                           }
-                        />
-                      </p>
-                    </React.Fragment>
+                        }
+                      />
+                    </p>
                   }
                   iconColor="subdued"
                   iconType="uptimeApp"
