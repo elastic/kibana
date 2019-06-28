@@ -2007,8 +2007,6 @@ export interface PersistNoteMutationArgs {
 }
 export interface DeleteNoteMutationArgs {
   id: string[];
-
-  version?: string | null;
 }
 export interface DeleteNoteByTimelineIdMutationArgs {
   timelineId: string;
@@ -7116,8 +7114,6 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, Context, DeleteNoteArgs>;
   export interface DeleteNoteArgs {
     id: string[];
-
-    version?: string | null;
   }
 
   export type DeleteNoteByTimelineIdResolver<
