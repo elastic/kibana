@@ -38,6 +38,7 @@ const originalPanelData = {
 
 beforeEach(() => {
   // init store
+  // @ts-ignore all this is going away soon, just ignore type errors.
   store.dispatch(updatePanels({ '1': originalPanelData }));
 });
 
@@ -53,6 +54,7 @@ describe('UpdatePanel', () => {
         y: 5,
       },
     };
+    // @ts-ignore all this is going away soon, just ignore type errors.
     store.dispatch(updatePanel(newPanelData));
 
     const panel = getPanel(store.getState(), '1');
@@ -70,6 +72,7 @@ describe('UpdatePanel', () => {
         columns: ['field1', 'field2', 'field3'],
       },
     };
+    // @ts-ignore all this is going away soon, just ignore type errors.
     store.dispatch(updatePanels({ '1': panelData }));
     const newPanelData = {
       ...originalPanelData,
@@ -77,12 +80,13 @@ describe('UpdatePanel', () => {
         columns: ['field2', 'field3'],
       },
     };
+    // @ts-ignore all this is going away soon, just ignore type errors.
     store.dispatch(updatePanel(newPanelData));
 
     const panel = getPanel(store.getState(), '1');
-    expect(panel.embeddableConfig.columns.length).toBe(2);
-    expect(panel.embeddableConfig.columns[0]).toBe('field2');
-    expect(panel.embeddableConfig.columns[1]).toBe('field3');
+    expect((panel.embeddableConfig as any).columns.length).toBe(2);
+    expect((panel.embeddableConfig as any).columns[0]).toBe('field2');
+    expect((panel.embeddableConfig as any).columns[1]).toBe('field3');
   });
 });
 
