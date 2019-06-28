@@ -7,9 +7,11 @@ import { InfraBackendLibs } from '../lib/infra_types';
 import { InfraWrappableRequest } from '../lib/adapters/framework';
 import { internalInfraFrameworkRequest } from '../lib/adapters/framework';
 
-const INDEX_PATTERN_ID = 'metricbeat-*';
+// Creates an index pattern if one doesn't already exist
+// This will prevent redirects to the index pattern page when clicking on
+// links to TSVB
+const INDEX_PATTERN_ID = '_internal_metrics_explorer_tsvb';
 
-// Creates a `metricbeat-*` index pattern if one doesn't already exist
 async function getIndexPattern(req: InfraWrappableRequest<{}>) {
   const infraIndexPatternTitle = 'infra_oss.indexPattern';
   const savedObjectsClient = req[internalInfraFrameworkRequest].getSavedObjectsClient();
