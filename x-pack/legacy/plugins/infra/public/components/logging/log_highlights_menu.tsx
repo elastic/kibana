@@ -29,11 +29,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
 
   // Input field state
   const [highlightTerm, setHighlightTerm] = useState('');
-  const debouncedOnChange = useRef(
-    debounce((value: string) => {
-      onChange([value]);
-    }, 275)
-  );
+  const debouncedOnChange = useMemo(() => debounce(onChange, 275), [onChange]);
   const changeHighlightTerm = useCallback(
     e => {
       const value = e.target.value;
@@ -43,10 +39,11 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   );
   useEffect(
     () => {
-      debouncedOnChange.current(highlightTerm);
+      debouncedOnChange([highlightTerm]);
     },
     [highlightTerm]
   );
+
   // Input ref state
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
   useEffect(
