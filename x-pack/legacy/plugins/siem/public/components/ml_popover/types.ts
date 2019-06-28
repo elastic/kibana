@@ -15,6 +15,7 @@ export interface MlSetupArgs {
   indexPatternName: string;
   groups: string[];
   prefix?: string;
+  headers: Record<string, string | undefined>;
 }
 
 export interface ConfigTemplate {
@@ -43,4 +44,39 @@ export interface DisplayJob {
   title: string;
   description: string;
   isChecked: boolean;
+}
+
+export interface SetupMlResponseJob {
+  id: string;
+  success: boolean;
+}
+
+export interface SetupMlResponseDatafeed {
+  id: string;
+  success: boolean;
+  started: boolean;
+}
+
+export interface SetupMlResponse {
+  jobs: SetupMlResponseJob[];
+  datafeeds: SetupMlResponseDatafeed[];
+  kibana: {};
+}
+
+export interface StartDatafeedResponse {
+  [key: string]: {
+    started: boolean;
+  };
+}
+
+export interface StopDatafeedResponse {
+  [key: string]: {
+    stopped: boolean;
+  };
+}
+
+export interface CloseJobsResponse {
+  [key: string]: {
+    closed: boolean;
+  };
 }
