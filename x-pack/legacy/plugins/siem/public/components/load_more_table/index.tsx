@@ -25,6 +25,8 @@ import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
 
+const DEFAULT_DATA_TEST_SUBJ = 'load-more-table';
+
 export interface ItemsPerRow {
   text: string;
   numberOfRow: number;
@@ -73,6 +75,7 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
         Columns<AB>
       ];
   hasNextPage: boolean;
+  dataTestSubj?: string;
   headerCount: number;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
@@ -135,6 +138,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   public render() {
     const {
       columns,
+      dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
       hasNextPage,
       headerCount,
       headerSupplement,
@@ -192,7 +196,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         </EuiContextMenuItem>
       ));
     return (
-      <EuiPanel>
+      <EuiPanel data-test-subj={dataTestSubj}>
         <BasicTableContainer>
           {loading && (
             <>

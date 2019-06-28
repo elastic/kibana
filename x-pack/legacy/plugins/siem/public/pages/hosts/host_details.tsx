@@ -19,7 +19,7 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
+import { EventsTable, UncommonProcessTable, KpiHostsComponent } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
@@ -42,6 +42,7 @@ import { hostToInfluencers } from '../../components/ml/host_to_influencers';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score_interval_to_datetime';
+import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 
 const type = hostsModel.HostsType.details;
 
@@ -49,6 +50,7 @@ const HostOverviewManage = manageQuery(HostOverview);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const EventsTableManage = manageQuery(EventsTable);
+const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
@@ -126,6 +128,26 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           </AnomalyTableProvider>
                         )}
                       </HostOverviewByNameQuery>
+
+                      <EuiHorizontalRule />
+
+                      <KpiHostDetailsQuery
+                        sourceId="default"
+                        filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
+                        skip={isInitializing}
+                        startDate={from}
+                        endDate={to}
+                      >
+                        {({ kpiHostDetails, loading, id, refetch }) => (
+                          <KpiHostDetailsManage
+                            id={id}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            data={kpiHostDetails}
+                            loading={loading}
+                          />
+                        )}
+                      </KpiHostDetailsQuery>
 
                       <EuiHorizontalRule />
 
