@@ -15,3 +15,5 @@ export interface AppDependencies {
 export interface AppState {
   permissions: AppPermissions;
 }
+
+export type AppAction = { type: string } & { permissions: AppState['permissions'] };

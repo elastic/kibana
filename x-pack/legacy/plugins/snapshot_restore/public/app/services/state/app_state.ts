@@ -5,15 +5,17 @@
  */
 
 import { createContext, useContext, Dispatch, ReducerAction } from 'react';
-import { AppState } from '../../types';
+import { AppState, AppAction } from '../../types';
 
-type StateReducer = (state: AppState, action: { type: string; [key: string]: any }) => void;
-type ReducedStateContext = [Partial<AppState>, Dispatch<ReducerAction<StateReducer>>];
+type StateReducer = (state: AppState, action: AppAction) => AppState;
+type ReducedStateContext = [AppState, Dispatch<ReducerAction<StateReducer>>];
 
-const StateContext = createContext<ReducedStateContext>([{}, () => {}]);
-
-export const initialState = {
-  permissions: {},
+export const initialState: AppState = {
+  permissions: {
+    hasPermission: true,
+    missingClusterPrivileges: [],
+    missingIndexPrivileges: [],
+  },
 };
 
 export const reducer: StateReducer = (state, action) => {
@@ -28,6 +30,8 @@ export const reducer: StateReducer = (state, action) => {
       return state;
   }
 };
+
+const StateContext = createContext<ReducedStateContext>([initialState, () => {}]);
 
 export const AppStateProvider = StateContext.Provider;
 
