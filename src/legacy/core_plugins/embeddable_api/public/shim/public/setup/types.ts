@@ -21,19 +21,20 @@ import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from '../t
 import { Trigger, Action, EmbeddableFactory } from '../lib';
 
 export interface EmbeddableSetupApi {
-  registerTrigger: (trigger: Trigger) => void;
-  getTrigger: (id: string) => Trigger;
-  registerAction: (action: Action) => void;
-  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
   attachAction: (triggerId: string, actionId: string) => void;
   detachAction: (triggerId: string, actionId: string) => void;
+  getTrigger: (id: string) => Trigger;
+  getTriggerActions: (id: string) => Action[];
+  registerAction: (action: Action) => void;
+  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
+  registerTrigger: (trigger: Trigger) => void;
 }
 
 export interface EmbeddableSetupDependencies {
-  api: EmbeddableSetupApi,
-  triggers: TriggerRegistry;
   actions: ActionRegistry;
+  api: () => EmbeddableSetupApi,
   embeddableFactories: EmbeddableFactoryRegistry;
+  triggers: TriggerRegistry;
 }
 
 export type EmbeddableSetupApiPure = {

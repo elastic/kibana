@@ -17,10 +17,22 @@
  * under the License.
  */
 
+import { EmbeddableSetupApiPure } from './types';
+import { attachAction } from './attach_action';
+import { detachAction } from './detach_action';
+import { getTrigger } from './get_trigger';
+import { getTriggerActions } from './get_trigger_actions';
+import { registerAction } from './register_action';
+import { registerEmbeddableFactory } from './register_embeddable_factory';
+import { registerTrigger } from './register_trigger';
+
 export * from './types';
-export * from './register_trigger';
-export * from './register_action';
-export * from './register_embeddable_factory';
-export * from './attach_action';
-export * from './detach_action';
-export * from './get_trigger';
+export const pureSetupApi: EmbeddableSetupApiPure = {
+  attachAction,
+  detachAction,
+  getTrigger,
+  getTriggerActions,
+  registerAction,
+  registerEmbeddableFactory,
+  registerTrigger,
+};

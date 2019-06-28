@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
-import { EmbeddableSetupApi, registerTrigger, registerAction, registerEmbeddableFactory, attachAction, detachAction, getTrigger } from './setup';
+import { EmbeddableSetupApi, pureSetupApi } from './setup';
 import { bootstrap } from './bootstrap';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, void> {
@@ -32,19 +32,16 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, void> 
   public setup(core: CoreSetup) {
     const api = {} as EmbeddableSetupApi;
     const deps = {
-      api,
+      api: () => api,
       actions: this.actions,
       embeddableFactories: this.embeddableFactories,
       triggers: this.triggers,
     };
-    Object.assign(api, {
-      attachAction: attachAction(deps),
-      detachAction: detachAction(deps),
-      getTrigger: getTrigger(deps),
-      registerAction: registerAction(deps),
-      registerEmbeddableFactory: registerEmbeddableFactory(deps),
-      registerTrigger: registerTrigger(deps),
-    });
+
+    for (const [key, fn] of Object.entries(pureSetupApi)) {
+      (api as any)[key] = fn(deps);
+    }
+    Object.freeze(api);
 
     bootstrap(api);
 
