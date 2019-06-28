@@ -153,15 +153,22 @@ export function ElasticsearchPanel(props) {
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
-      return [
-        <EuiDescriptionListTitle key="mlJobsListTitle">
-          <FormattedMessage
-            id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
-            defaultMessage="Jobs"
-          />
-        </EuiDescriptionListTitle>,
-        <EuiDescriptionListDescription key="mlJobsCount" data-test-subj="esMlJobs">{ props.ml.jobs }</EuiDescriptionListDescription>
-      ];
+      const gotoURL = '#/elasticsearch/ml_jobs';
+      return (
+        <>
+          <EuiDescriptionListTitle>
+            <EuiLink href={gotoURL}>
+              <FormattedMessage
+                id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
+                defaultMessage="Jobs"
+              />
+            </EuiLink>
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="esMlJobs">
+            <EuiLink href={gotoURL}>{props.ml.jobs}</EuiLink>
+          </EuiDescriptionListDescription>
+        </>
+      );
     }
     return null;
   };

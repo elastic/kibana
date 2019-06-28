@@ -92,3 +92,8 @@ image::logs/images/log-details-filter.png[Filtering from the log event details f
 
 [role="screenshot"]
 image::logs/images/logs-stream-filtered-by-value.png[Log console after filtering by a value in the details flyover]
+
+You can use the Actions menu to view any monitor or APM trace that the log event may be associated with.
+
+[role="screenshot"]
+image::logs/images/log-details-actions.png[Log event document details with actions menu open]
