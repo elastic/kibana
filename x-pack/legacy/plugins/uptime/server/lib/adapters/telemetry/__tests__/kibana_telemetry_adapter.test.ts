@@ -8,7 +8,7 @@ import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
 
 describe('KibanaTelemetryAdapter', () => {
   let server: any;
-  let collector: { type: string; fetch: () => Promise<any> };
+  let collector: { type: string; fetch: () => Promise<any>; isReady: () => boolean };
   beforeEach(() => {
     server = {
       usage: {
@@ -22,11 +22,34 @@ describe('KibanaTelemetryAdapter', () => {
   });
 
   it('collects monitor and overview data', async () => {
+    expect.assertions(1);
     KibanaTelemetryAdapter.initUsageCollector(server);
     KibanaTelemetryAdapter.countMonitor();
     KibanaTelemetryAdapter.countOverview();
     KibanaTelemetryAdapter.countOverview();
     const result = await collector.fetch();
     expect(result).toMatchSnapshot();
+  });
+
+  it('drops old buckets and reduces current window', async () => {
+    expect.assertions(1);
+    // give a time of > 24 hours ago
+    Date.now = jest.fn(() => 1559053560000);
+    KibanaTelemetryAdapter.initUsageCollector(server);
+    KibanaTelemetryAdapter.countMonitor();
+    KibanaTelemetryAdapter.countOverview();
+    // give a time of now
+    Date.now = jest.fn(() => new Date().valueOf());
+    KibanaTelemetryAdapter.countMonitor();
+    KibanaTelemetryAdapter.countMonitor();
+    KibanaTelemetryAdapter.countOverview();
+    KibanaTelemetryAdapter.countOverview();
+    const result = await collector.fetch();
+    expect(result).toMatchSnapshot();
+  });
+
+  it('defaults ready to `true`', async () => {
+    KibanaTelemetryAdapter.initUsageCollector(server);
+    expect(collector.isReady()).toBe(true);
   });
 });

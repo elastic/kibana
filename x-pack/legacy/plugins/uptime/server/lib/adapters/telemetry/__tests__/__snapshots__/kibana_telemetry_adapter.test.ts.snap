@@ -10,3 +10,14 @@ Object {
   },
 }
 `;
+
+exports[`KibanaTelemetryAdapter drops old buckets and reduces current window 1`] = `
+Object {
+  "last_24_hours": Object {
+    "hits": Object {
+      "monitor_page": 3,
+      "overview_page": 4,
+    },
+  },
+}
+`;

@@ -25,7 +25,6 @@ export class KibanaTelemetryAdapter {
       type: 'uptime',
       fetch: async () => {
         const report = this.getReport();
-        this.collector = {};
         return { last_24_hours: { hits: { ...report } } };
       },
       isReady: () => true,
@@ -46,17 +45,20 @@ export class KibanaTelemetryAdapter {
 
   private static getReport() {
     const minBucket = this.getCollectorWindow();
-    return Object.keys(this.collector)
+    Object.keys(this.collector)
       .map(key => parseInt(key, 10))
-      .filter(key => key >= minBucket)
-      .map(key => this.collector[key])
-      .reduce(
-        (acc, cum) => ({
-          overview_page: acc.overview_page + cum.overview_page,
-          monitor_page: acc.monitor_page + cum.monitor_page,
-        }),
-        { overview_page: 0, monitor_page: 0 }
-      );
+      .filter(key => key < minBucket)
+      .forEach(oldBucket => {
+        delete this.collector[oldBucket];
+      });
+
+    return Object.values(this.collector).reduce(
+      (acc, cum) => ({
+        overview_page: acc.overview_page + cum.overview_page,
+        monitor_page: acc.monitor_page + cum.monitor_page,
+      }),
+      { overview_page: 0, monitor_page: 0 }
+    );
   }
 
   private static getBucket() {
