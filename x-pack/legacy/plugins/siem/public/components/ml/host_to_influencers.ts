@@ -11,10 +11,6 @@ export const hostToInfluencers = (hostItem: HostItem): InfluencerInput[] | null 
   if (hostItem.host != null && hostItem.host.name != null) {
     const influencers: InfluencerInput[] = [
       {
-        fieldName: 'host.hostname', // TODO: Remove this field once the jobs are all updated to have only host.name
-        fieldValue: hostItem.host.name[0],
-      },
-      {
         fieldName: 'host.name',
         fieldValue: hostItem.host.name[0],
       },

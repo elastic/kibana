@@ -17,10 +17,6 @@ describe('host_to_influencer', () => {
     };
     const expectedInfluencer: InfluencerInput[] = [
       {
-        fieldName: 'host.hostname',
-        fieldValue: 'host-name',
-      },
-      {
         fieldName: 'host.name',
         fieldValue: 'host-name',
       },
