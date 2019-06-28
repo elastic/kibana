@@ -17,16 +17,10 @@
  * under the License.
  */
 
-declare module '*.html' {
-  const template: string;
-  // eslint-disable-next-line import/no-default-export
-  export default template;
-}
-
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+jest.doMock('ui/capabilities', () => ({
+  uiCapabilities: {
+    visualize: {
+      save: true,
+    },
+  },
+}));

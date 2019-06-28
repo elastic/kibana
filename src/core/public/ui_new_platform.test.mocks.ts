@@ -17,40 +17,14 @@
  * under the License.
  */
 
-import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../core/public/mocks';
+import { coreMock } from './mocks';
 
-let modalContents: React.Component;
-
-export const getModalContents = () => modalContents;
+export const coreSetupMock = coreMock.createSetup();
+export const coreStartMock = coreMock.createStart();
 
 jest.doMock('ui/new_platform', () => {
   return {
-    npStart: {
-      core: {
-        overlays: {
-          openFlyout: jest.fn(),
-          openModal: (component: React.Component) => {
-            modalContents = component;
-            return {
-              close: jest.fn(),
-            };
-          },
-        },
-      },
-    },
-    npSetup: {
-      core: {
-        fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-        notifications: notificationServiceMock.createSetupContract(),
-      },
-    },
+    npStart: { core: coreStartMock },
+    npSetup: { core: coreSetupMock },
   };
 });
-
-jest.doMock('ui/capabilities', () => ({
-  uiCapabilities: {
-    visualize: {
-      save: true,
-    },
-  },
-}));
