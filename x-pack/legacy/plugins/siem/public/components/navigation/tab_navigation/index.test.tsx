@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
@@ -25,7 +24,7 @@ describe('Tab Navigation', () => {
     );
     const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
     expect(networkTab().prop('isSelected')).toBeFalsy();
-    networkTab().simulate('click', { metaKey: false });
+    networkTab().simulate('click');
     wrapper.update();
     expect(networkTab().prop('isSelected')).toBeTruthy();
   });

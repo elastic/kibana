@@ -5,6 +5,7 @@
  */
 import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import * as React from 'react';
+import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import { trackUiAction as track } from '../../../lib/track_usage';
@@ -49,6 +50,21 @@ const navTabs: NavTab[] = [
     disabled: false,
   },
 ];
+
+const StyledEuiLink = styled(EuiLink)`
+  a {
+    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+  }
+  .euiLink.euiLink--primary {
+    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+  }
+  .navigation-link.euiLink.euiLink--primary {
+    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+  }
+  .navigation-link {
+    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+  }
+`;
 
 interface TabNavigationState {
   selectedTabId: string;
@@ -104,9 +120,13 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
         key={`navigation-${tab.id}`}
         onClick={() => this.handleTabClick(tab.id)}
       >
-        <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
+        <StyledEuiLink
+          className={'navigation-link'}
+          data-test-subj={`navigation-link-${tab.id}`}
+          href={tab.href + this.props.search}
+        >
           {tab.name}
-        </EuiLink>
+        </StyledEuiLink>
       </EuiTab>
     ));
 }
