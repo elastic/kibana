@@ -14,7 +14,7 @@ const defaultSnapshot = {
   versionId: undefined,
   version: undefined,
   indices: [],
-  includeGlobalState: 0,
+  includeGlobalState: undefined,
   state: undefined,
   startTime: undefined,
   startTimeInMillis: undefined,
