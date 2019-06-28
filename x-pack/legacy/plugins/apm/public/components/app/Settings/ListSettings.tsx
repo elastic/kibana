@@ -16,7 +16,8 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiButton
+  EuiButton,
+  EuiLink
 } from '@elastic/eui';
 import { loadCMList } from '../../../services/rest/apm/settings';
 import { useFetcher } from '../../../hooks/useFetcher';
@@ -128,7 +129,7 @@ export function ListSettings() {
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
               label="Beta"
-              tooltipContent="This feature is not GA. Please help us by reporting any bugs."
+              tooltipContent="This feature is still in development. If you have feedback, please reach out in our Discuss forum."
             />
           </EuiFlexItem>
           {hasConfigurations ? (
@@ -153,9 +154,13 @@ export function ListSettings() {
 
         <EuiCallOut title="APM Agent Configuration (BETA)" iconType="iInCircle">
           <p>
-            We're excited to bring you a first look at how you can control your
-            services by fine-tuning agent configurations directly from Kibana.
-            Learn more about this new feature.
+            We're excited to bring you a first look at how you can fine-tuning
+            your agent configuration directly from Kibana without having to
+            redeploy.&nbsp;
+            <EuiLink href="https://www.elastic.co/guide/en/kibana/current/agent-configuration.html">
+              Learn more in our docs
+            </EuiLink>
+            .
           </p>
         </EuiCallOut>
 
