@@ -6,23 +6,18 @@
 
 import { MonitorSummary } from '../../../../common/graphql/types';
 import { addBasePath } from './add_base_path';
-import { buildHref, buildHrefFromList } from './build_href';
+import { buildHrefFromList } from './build_href';
 
 export const getInfraContainerHref = (
   summary: MonitorSummary,
   basePath: string
 ): string | undefined => {
-  const getHref = (value: string | string[]) => {
-    if (!Array.isArray(value)) {
-      return addBasePath(
-        basePath,
-        `/app/infra#/link-to/container-detail/${encodeURIComponent(value)}`
-      );
+  const getHref = (value: string | string[] | undefined) => {
+    if (value === undefined) {
+      return value;
     }
-    return addBasePath(
-      basePath,
-      `/app/infra#/link-to/container-detail/${encodeURIComponent(value[0])}`
-    );
+    const ret = !Array.isArray(value) ? value : value[0];
+    return addBasePath(basePath, `/app/infra#/link-to/container-detail/${encodeURIComponent(ret)}`);
   };
   return buildHrefFromList(summary.state.checks || [], 'container.id', getHref);
 };
@@ -31,19 +26,22 @@ export const getInfraKubernetesHref = (
   summary: MonitorSummary,
   basePath: string
 ): string | undefined => {
-  const getHref = (value: string | string[]) => {
-    if (!Array.isArray(value)) {
-      return addBasePath(basePath, `/app/infra#/link-to/pod-detail/${encodeURIComponent(value)}`);
+  const getHref = (value: string | string[] | undefined) => {
+    if (value === undefined) {
+      return value;
     }
-    // TODO: this link should be updated to "OR" additional pods
-    return addBasePath(basePath, `/app/infra#/link-to/pod-detail/${encodeURIComponent(value[0])}`);
+    const ret = !Array.isArray(value) ? value : value[0];
+    return addBasePath(basePath, `/app/infra#/link-to/pod-detail/${encodeURIComponent(ret)}`);
   };
 
   return buildHrefFromList(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
 };
 
 export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
-  const getHref = (value: string | string[]) => {
+  const getHref = (value: string | string[] | undefined) => {
+    if (value === undefined) {
+      return value;
+    }
     if (!Array.isArray(value)) {
       const expression = encodeURIComponent(`host.ip : ${value}`);
       return addBasePath(
