@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 
-import { AggName, PivotAggsConfig, PivotAggsConfigDict } from '../../common';
+import { AggName, PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../common';
 
 import { PopoverForm } from './popover_form';
 
 interface Props {
   item: PivotAggsConfig;
   otherAggNames: AggName[];
-  options: PivotAggsConfigDict;
+  options: PivotAggsConfigWithUiSupportDict;
   deleteHandler(l: AggName): void;
   onChange(item: PivotAggsConfig): void;
 }

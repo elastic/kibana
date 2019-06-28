@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, Toast } from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
