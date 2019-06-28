@@ -31,7 +31,10 @@ interface LogEntryMessageColumnProps {
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
   ({ columnValue, highlights, isHighlighted, isHovered, isWrapped }) => {
     const message = useMemo(
-      () => (isMessageColumn(columnValue) ? formatMessage(columnValue.message, highlights) : null),
+      () =>
+        isMessageColumn(columnValue)
+          ? formatMessageSegments(columnValue.message, highlights)
+          : null,
       [columnValue, highlights]
     );
 
@@ -70,7 +73,7 @@ const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
   ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
 `;
 
-const formatMessage = (
+const formatMessageSegments = (
   messageSegments: LogEntryMessageSegment[],
   highlights: LogEntryHighlightColumn[]
 ) =>
