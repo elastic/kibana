@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n }  from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCheckbox,
@@ -25,6 +25,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -397,9 +398,14 @@ export class JobTableUi extends Component {
             </EuiTableBody>
           </EuiTable>
         ) : (
-          <div>
-            No rollup jobs to show
-          </div>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobTable.noJobsMatchSearchMessage"
+                defaultMessage="No rollup jobs match your search"
+              />
+            </p>
+          </EuiText>
         )}
 
         <EuiSpacer size="m" />

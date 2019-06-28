@@ -44,7 +44,7 @@ export class JobListUi extends Component {
     loadJobs: PropTypes.func,
     refreshJobs: PropTypes.func,
     openDetailPanel: PropTypes.func,
-    jobs: PropTypes.array,
+    hasJobs: PropTypes.bool,
     isLoading: PropTypes.bool,
   }
 
@@ -249,7 +249,7 @@ export class JobListUi extends Component {
   }
 
   render() {
-    const { isLoading, jobs, jobLoadError } = this.props;
+    const { isLoading, hasJobs, jobLoadError } = this.props;
 
     let content;
 
@@ -259,7 +259,7 @@ export class JobListUi extends Component {
       } else {
         content = this.renderError(jobLoadError);
       }
-    } else if (!isLoading && !jobs.length) {
+    } else if (!isLoading && !hasJobs) {
       content = this.renderEmpty();
     } else {
       content = this.renderList();

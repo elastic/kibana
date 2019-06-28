@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('vertical bar chart', function () {
@@ -264,6 +265,17 @@ export default function ({ getService, getPageObjects }) {
         const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it ('should correctly filter by legend', async () => {
+        await PageObjects.visualize.filterLegend('200');
+        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.common.sleep(1003);
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        const expectedEntries = ['200'];
+        expect(legendEntries).to.eql(expectedEntries);
+        await filterBar.removeFilter('response.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
     });
 

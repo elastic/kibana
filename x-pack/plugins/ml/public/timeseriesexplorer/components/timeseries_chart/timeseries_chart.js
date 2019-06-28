@@ -19,8 +19,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
-import chrome from 'ui/chrome';
-
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -56,8 +54,6 @@ import {
   unhighlightFocusChartAnnotation
 } from './timeseries_chart_annotations';
 
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
-
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
 const focusHeight = focusZoomPanelHeight + focusChartHeight;
@@ -91,6 +87,7 @@ function getSvgHeight() {
 
 export class TimeseriesChart extends React.Component {
   static propTypes = {
+    annotationsEnabled: PropTypes.bool,
     indexAnnotation: PropTypes.func,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
@@ -215,6 +212,7 @@ export class TimeseriesChart extends React.Component {
 
   componentDidMount() {
     const {
+      annotationsEnabled,
       svgWidth
     } = this.props;
 
@@ -247,7 +245,7 @@ export class TimeseriesChart extends React.Component {
     this.fieldFormat = undefined;
 
     // Annotations Brush
-    if (mlAnnotationsEnabled) {
+    if (annotationsEnabled) {
       this.annotateBrush = getAnnotationBrush.call(this);
     }
 
@@ -297,6 +295,7 @@ export class TimeseriesChart extends React.Component {
 
   renderChart() {
     const {
+      annotationsEnabled,
       contextChartData,
       contextForecastData,
       detectorIndex,
@@ -398,7 +397,7 @@ export class TimeseriesChart extends React.Component {
       .attr('transform', 'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')');
 
     // Mask to hide annotations overflow
-    if (mlAnnotationsEnabled) {
+    if (annotationsEnabled) {
       const annotationsMask = svg
         .append('defs')
         .append('mask')
@@ -474,6 +473,7 @@ export class TimeseriesChart extends React.Component {
     // as we want to re-render the paths and points when the zoom area changes.
 
     const {
+      annotationsEnabled,
       contextForecastData
     } = this.props;
 
@@ -490,7 +490,7 @@ export class TimeseriesChart extends React.Component {
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     // Create the elements for annotations
-    if (mlAnnotationsEnabled) {
+    if (annotationsEnabled) {
       const annotateBrush = this.annotateBrush.bind(this);
 
       fcsGroup.append('g')
@@ -572,6 +572,7 @@ export class TimeseriesChart extends React.Component {
 
   renderFocusChart() {
     const {
+      annotationsEnabled,
       focusAggregationInterval,
       focusAnnotationData,
       focusChartData,
@@ -659,7 +660,7 @@ export class TimeseriesChart extends React.Component {
 
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
-      if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
+      if (annotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
         // TODO needs revisting to be a more robust normalization
@@ -695,7 +696,7 @@ export class TimeseriesChart extends React.Component {
         .classed('hidden', !showModelBounds);
     }
 
-    if (mlAnnotationsEnabled) {
+    if (annotationsEnabled) {
       renderAnnotations(
         focusChart,
         focusAnnotationData,
@@ -709,7 +710,7 @@ export class TimeseriesChart extends React.Component {
 
       // disable brushing (creation of annotations) when annotations aren't shown
       focusChart.select('.mlAnnotationBrush')
-        .style('pointer-events', (showAnnotations) ? 'all' : 'none');
+        .style('display', (showAnnotations) ? null : 'none');
     }
 
     focusChart.select('.values-line')
@@ -1285,6 +1286,7 @@ export class TimeseriesChart extends React.Component {
 
   showFocusChartTooltip(marker, circle) {
     const {
+      annotationsEnabled,
       modelPlotEnabled
     } = this.props;
 
@@ -1350,7 +1352,7 @@ export class TimeseriesChart extends React.Component {
       contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
     }
 
-    if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
+    if (annotationsEnabled && _.has(marker, 'annotation')) {
       contents = mlEscape(marker.annotation);
       contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
 
@@ -1426,12 +1428,13 @@ export class TimeseriesChart extends React.Component {
   }
 
   render() {
+    const { annotationsEnabled } = this.props;
     const { annotation, isDeleteModalVisible, isFlyoutVisible } = this.state;
 
     return (
       <React.Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {mlAnnotationsEnabled && isFlyoutVisible &&
+        {annotationsEnabled && isFlyoutVisible &&
           <React.Fragment>
             <AnnotationFlyout
               annotation={annotation}

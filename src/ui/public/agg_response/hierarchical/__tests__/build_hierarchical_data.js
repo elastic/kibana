@@ -175,7 +175,7 @@ describe('buildHierarchicalData', function () {
       expect(results.rows[0].slices).to.have.property('children');
       expect(results.rows[0].slices.children).to.have.length(2);
       expect(results.rows[0].slices.children[0]).to.have.property('aggConfigResult');
-      expect(results.rows[0].slices.children[0].aggConfigResult.$parent.$parent).to.have.property('key', 'png');
+      expect(results.rows[0].slices.children[0].aggConfigResult.$parent).to.have.property('key', 'png');
     });
 
   });

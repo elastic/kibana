@@ -66,7 +66,13 @@ export class BulkUploader {
 
     // this is internal bulk upload, so filter out API-only collectors
     const filterThem = _collectorSet => _collectorSet.getFilteredCollectorSet(c => c.ignoreForInternalUploader !== true);
-    this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
+
+    if (this._timer) {
+      clearInterval(this._timer);
+    } else {
+      this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
+    }
+
     this._timer = setInterval(() => {
       this._fetchAndUpload(filterThem(collectorSet));
     }, this._interval);

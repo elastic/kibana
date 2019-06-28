@@ -43,7 +43,7 @@ Elasticsearch. This value must be a positive integer.
 
 `elasticsearch.sniffOnStart:`:: *Default: false* Attempt to find other Elasticsearch nodes on startup.
 
-`elasticsearch.sniffOnConectionFault:`:: *Default: false* Update the list of Elasticsearch nodes immediately following a connection fault.
+`elasticsearch.sniffOnConnectionFault:`:: *Default: false* Update the list of Elasticsearch nodes immediately following a connection fault.
 
 `elasticsearch.ssl.cert:`:: Optional setting that provides the path to the
 PEM-format SSL certificate. This file validates that your Elasticsearch backend
@@ -122,14 +122,20 @@ dashboards. Kibana creates a new index if the index doesn’t already exist.
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana stores log output.
 
-`logging.quiet:`:: *Default: false* Set the value of this setting to `true` to suppress all logging output other than
-error messages.
+`logging.json:`:: *Default: false* Logs output as JSON. When set to `true`, the 
+logs will be formatted as JSON strings that include timestamp, log level, context, message 
+text and any other metadata that may be associated with the log message itself. 
+If `logging.dest.stdout` is set and there is no interactive terminal ("TTY"), this setting
+will default to `true`.
+
+`logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
+suppress all logging output other than error messages.
 
 `logging.silent:`:: *Default: false* Set the value of this setting to `true` to suppress all logging output.
 
 [[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage information and all requests. Supported on Elastic Cloud Enterprise.
 
-`logging.timezone`:: *Default: UTC* Set to the canonical timezone id (e.g. `US/Pacific`) to log events using that timezone.  A list of timezones can be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+`logging.timezone`:: *Default: UTC* Set to the canonical timezone id (for example, `America/Los_Angeles`) to log events using that timezone.  A list of timezones can be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
 
 `map.includeElasticMapsService:`:: *Default: true* Turns on or off whether layers from the Elastic Maps Service should be included in the vector and tile layer option list.
 By turning this off, only the layers that are configured here will be included.

@@ -29,8 +29,7 @@
           ng-click="showDetails = !showDetails"
           ng-class="showDetails ? 'visLegend__valueTitle--full' : 'visLegend__valueTitle--truncate'"
           class="visLegend__valueTitle"
-          tooltip="{{legendData.label}}"
-          tooltip-animation="false"
+          title="{{legendData.label}}"
           aria-label="{{::'common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel' | i18n: { defaultMessage: '{legendDataLabel}, toggle options', values: { legendDataLabel: legendData.label } } }}"
           data-test-subj="legend-{{legendData.label}}"
         >

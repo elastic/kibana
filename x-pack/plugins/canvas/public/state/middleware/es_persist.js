@@ -7,7 +7,7 @@
 import { isEqual } from 'lodash';
 import { getWorkpad, getWorkpadPersisted } from '../selectors/workpad';
 import { getAssetIds } from '../selectors/assets';
-import { setWorkpad } from '../actions/workpad';
+import { setWorkpad, setRefreshInterval } from '../actions/workpad';
 import { setAssets, resetAssets } from '../actions/assets';
 import * as transientActions from '../actions/transient';
 import * as resolvedArgsActions from '../actions/resolved_args';
@@ -31,6 +31,7 @@ export const esPersistMiddleware = ({ getState }) => {
     setWorkpad, // used for loading and creating workpads
     setAssets, // used when loading assets
     resetAssets, // used when creating new workpads
+    setRefreshInterval, // used to set refresh time interval which is a transient value
     ...Object.values(resolvedArgsActions), // no resolved args affect persisted values
     ...Object.values(transientActions), // no transient actions cause persisted state changes
   ].map(a => a.toString());

@@ -1,3 +1,4 @@
+[role="xpack"]
 [[data-rollups]]
 == Working with rollup indices
 
@@ -14,7 +15,7 @@ historical data for use in visualizations and reports.
 Visualize and view it in a dashboard
 
 
-
+[role="xpack"]
 [[create-and-manage-rollup-job]]
 === Create and manage rollup jobs
 

@@ -1,6 +1,7 @@
 [role="xpack"]
 [[elasticsearch-metrics]]
 == {es} Monitoring Metrics
+[subs="attributes"]
 ++++
 <titleabbrev>{es} Metrics</titleabbrev>
 ++++

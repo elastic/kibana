@@ -514,7 +514,7 @@ module
       // any jitters in the chart caused by previously loading the model mid job.
         $scope.chartData.model = [];
         reloadModelChart()
-          .catch()
+          .catch(() => {})
           .then(() => {
             $scope.chartData.percentComplete = 100;
             $scope.$broadcast('render-results');

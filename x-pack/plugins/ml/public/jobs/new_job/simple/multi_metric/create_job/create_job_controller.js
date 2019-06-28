@@ -641,7 +641,7 @@ module
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
       mlMultiMetricJobService.stopDatafeed($scope.formConfig)
-        .catch()
+        .catch(() => {})
         .then(() => {
           $scope.$applyAsync();
         });

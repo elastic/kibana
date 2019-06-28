@@ -27,9 +27,6 @@ const module = uiModules.get('apps/ml');
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-import chrome from 'ui/chrome';
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
-
 module.directive('mlTimeseriesChart', function ($timeout) {
 
   function link(scope, element) {
@@ -45,6 +42,7 @@ module.directive('mlTimeseriesChart', function ($timeout) {
       svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
       const props = {
+        annotationsEnabled: scope.annotationsEnabled,
         indexAnnotation: ml.annotations.indexAnnotation,
         autoZoomDuration: scope.autoZoomDuration,
         contextAggregationInterval: scope.contextAggregationInterval,
@@ -93,7 +91,8 @@ module.directive('mlTimeseriesChart', function ($timeout) {
     scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
     scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
-    if (mlAnnotationsEnabled) {
+    scope.$watch('annotationsEnabled', renderReactComponent);
+    if (scope.annotationsEnabled) {
       scope.$watchCollection('focusAnnotationData', renderFocusChart);
       scope.$watch('showAnnotations', renderFocusChart);
     }
@@ -118,6 +117,7 @@ module.directive('mlTimeseriesChart', function ($timeout) {
 
   return {
     scope: {
+      annotationsEnabled: '=',
       selectedJob: '=',
       detectorIndex: '=',
       modelPlotEnabled: '=',

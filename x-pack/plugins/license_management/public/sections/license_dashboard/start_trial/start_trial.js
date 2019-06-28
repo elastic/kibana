@@ -80,7 +80,7 @@ export class StartTrial extends React.PureComponent {
                       values={{
                         platinumLicenseFeaturesLinkText: (
                           <EuiLink
-                            href="https://www.elastic.co/subscriptions/xpack"
+                            href="https://www.elastic.co/subscriptions"
                             target="_blank"
                           >
                             <FormattedMessage
@@ -226,7 +226,7 @@ export class StartTrial extends React.PureComponent {
           values={{
             platinumLicenseFeaturesLinkText: (
               <EuiLink
-                href="https://www.elastic.co/subscriptions/xpack"
+                href="https://www.elastic.co/subscriptions"
                 target="_blank"
               >
                 <FormattedMessage

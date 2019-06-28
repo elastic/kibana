@@ -43,8 +43,8 @@ class PipelineEditorUi extends React.Component {
       username,
     } = this.props;
 
-    const pipelineWorkers = settings['pipeline.workers'] ? settings['pipeline.workers'] : 1;
-
+    const pipelineWorkersSet = typeof settings['pipeline.workers'] === 'number';
+    const pipelineWorkers = pipelineWorkersSet ? settings['pipeline.workers'] : 1;
     this.state = {
       maxBytesNumber: settings['queue.max_bytes.number'],
       maxBytesUnit: settings['queue.max_bytes.units'],

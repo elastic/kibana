@@ -248,6 +248,60 @@ export default function ({ getService, getPageObjects }) {
       });
     });
     describe('multi series slice', () => {
+      before(async () => {
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickPieChart');
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Click aggregation Histogram');
+        await PageObjects.visualize.selectAggregation('Histogram');
+        log.debug('Click field memory');
+        await PageObjects.visualize.selectField('memory');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(1003);
+        log.debug('setNumericInterval 4000');
+        await PageObjects.visualize.setNumericInterval('40000');
+        log.debug('Toggle previous editor');
+        await PageObjects.visualize.toggleAggregationEditor(2);
+        await PageObjects.visualize.clickAddBucket();
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('geo.dest');
+        await PageObjects.visualize.clickGo();
+      });
+
+      it ('should show correct chart', async () => {
+        const expectedTableData =  [ [ '0', '55', 'CN', '14' ], [ '0', '55', 'IN', '9' ], [ '0', '55', 'MX', '3' ],
+          [ '0', '55', 'US', '3' ], [ '0', '55', 'BR', '2' ], [ '40,000', '50', 'CN', '7' ],
+          [ '40,000', '50', 'IN', '7' ], [ '40,000', '50', 'US', '5' ], [ '40,000', '50', 'MY', '3' ],
+          [ '40,000', '50', 'ET', '2' ], [ '80,000', '41', 'CN', '9' ], [ '80,000', '41', 'IN', '4' ],
+          [ '80,000', '41', 'US', '4' ], [ '80,000', '41', 'BR', '3' ], [ '80,000', '41', 'IT', '2' ],
+          [ '120,000', '43', 'CN', '8' ], [ '120,000', '43', 'IN', '5' ], [ '120,000', '43', 'US', '4' ],
+          [ '120,000', '43', 'JP', '3' ], [ '120,000', '43', 'RU', '3' ], [ '160,000', '44', 'CN', '15' ],
+          [ '160,000', '44', 'IN', '5' ], [ '160,000', '44', 'IQ', '2' ], [ '160,000', '44', 'JP', '2' ],
+          [ '160,000', '44', 'NG', '2' ], [ '200,000', '40', 'IN', '7' ], [ '200,000', '40', 'CN', '6' ],
+          [ '200,000', '40', 'MX', '3' ], [ '200,000', '40', 'BR', '2' ], [ '200,000', '40', 'ID', '2' ],
+          [ '240,000', '46', 'CN', '6' ], [ '240,000', '46', 'IN', '6' ], [ '240,000', '46', 'US', '6' ],
+          [ '240,000', '46', 'NG', '3' ], [ '240,000', '46', 'CH', '2' ], [ '280,000', '39', 'CN', '11' ],
+          [ '280,000', '39', 'IN', '5' ], [ '280,000', '39', 'BR', '2' ], [ '280,000', '39', 'IT', '2' ],
+          [ '280,000', '39', 'NG', '2' ], [ '320,000', '40', 'CN', '7' ], [ '320,000', '40', 'US', '6' ],
+          [ '320,000', '40', 'MX', '4' ], [ '320,000', '40', 'BD', '2' ], [ '320,000', '40', 'ID', '2' ],
+          [ '360,000', '47', 'IN', '8' ], [ '360,000', '47', 'CN', '6' ], [ '360,000', '47', 'US', '4' ],
+          [ '360,000', '47', 'BD', '3' ], [ '360,000', '47', 'BR', '2' ] ];
+
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await PageObjects.visualize.closeInspector();
+        expect(data).to.eql(expectedTableData);
+      });
+
       it('should still showing pie chart when a subseries have zero data', async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickPieChart');
@@ -337,9 +391,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it ('correctly applies filter', async () => {
-        const expectedTableData = [[ 'win 8', '560', 'CN', '560' ]];
+        const expectedTableData = [
+          [ 'win 8', '560', 'CN', '560' ],
+          [ 'win 7', '537', 'CN', '537' ],
+          [ 'win xp', '526', 'CN', '526' ],
+          [ 'ios', '478', 'CN', '478' ],
+          [ 'osx', '228', 'CN', '228' ]
+        ];
         await PageObjects.visualize.filterLegend('CN');
-        await PageObjects.visualize.applyFilters();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.openInspector();
         await PageObjects.visualize.setInspectorTablePageSize(50);

@@ -1177,7 +1177,7 @@ function getMetricData(
   types,
   entityFields,
   query,
-  metricFunction,
+  metricFunction, // ES aggregation name
   metricFieldName,
   timeFieldName,
   earliestMs,
@@ -1408,16 +1408,17 @@ function getEventRateData(
 // Extra query object can be supplied, or pass null if no additional query.
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
-const SAMPLER_TOP_TERMS_SHARD_SIZE = 50000;
+const SAMPLER_TOP_TERMS_SHARD_SIZE = 20000;
 const ENTITY_AGGREGATION_SIZE = 10;
 const AGGREGATION_MIN_DOC_COUNT = 1;
+const CARDINALITY_PRECISION_THRESHOLD = 100;
 function getEventDistributionData(
   index,
   types,
   splitField,
   filterField = null,
   query,
-  metricFunction,
+  metricFunction, // ES aggregation name
   metricFieldName,
   timeFieldName,
   earliestMs,
@@ -1524,12 +1525,17 @@ function getEventDistributionData(
       if (metricFunction === 'percentiles') {
         metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
       }
+
+      if (metricFunction === 'cardinality') {
+        metricAgg[metricFunction].precision_threshold = CARDINALITY_PRECISION_THRESHOLD;
+      }
       body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
     }
 
     ml.esSearch({
       index,
-      body
+      body,
+      rest_total_hits_as_int: true,
     })
       .then((resp) => {
         // Because of the sampling, results of metricFunctions which use sum or count
@@ -1552,7 +1558,7 @@ function getEventDistributionData(
 
             if (
               metricFunction === 'count'
-              || metricFunction === 'distinct_count'
+              || metricFunction === 'cardinality'
               || metricFunction === 'sum'
             ) {
               value = value * normalizeFactor;

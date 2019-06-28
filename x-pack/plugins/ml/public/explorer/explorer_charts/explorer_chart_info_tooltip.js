@@ -11,9 +11,10 @@ import React from 'react';
 import { CHART_TYPE } from '../explorer_constants';
 
 const CHART_DESCRIPTION = {
-  [CHART_TYPE.EVENT_DISTRIBUTION]: 'The gray dots depict the distribution of occurrences over time for a sample of by_field_values with \
-more frequent event types at the top and rarer ones at the bottom.',
-  [CHART_TYPE.POPULATION_DISTRIBUTION]: 'The gray dots depict the distribution of values over time for a sample of over_field_values.'
+  [CHART_TYPE.EVENT_DISTRIBUTION]: 'The gray dots depict the approximate distribution of occurrences over time for a sample of \
+by_field_values with more frequent event types at the top and rarer ones at the bottom.',
+  [CHART_TYPE.POPULATION_DISTRIBUTION]: 'The gray dots depict the approximate distribution of values over time for a sample of \
+over_field_values.'
 };
 
 import { EuiSpacer } from '@elastic/eui';

@@ -1,11 +1,12 @@
 [role="xpack"]
 [[settings-xpack-kb]]
 == {xpack} Settings in {kib}
+[subs="attributes"]
 ++++
 <titleabbrev>{xpack} Settings</titleabbrev>
 ++++
 
-include::{asciidoc-dir}/../../shared/settings.asciidoc[]
+include::{asciidoc-dir}/../../shared/settings65.asciidoc[]
 
 For more {kib} configuration settings, see <<settings>>.
 

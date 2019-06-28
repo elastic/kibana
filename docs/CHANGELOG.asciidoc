@@ -1,8 +1,5 @@
 [[release-notes]]
-= {kib} Release Notes
-++++
-<titleabbrev>Release Notes</titleabbrev>
-++++
+= Release Notes
 
 [partintro]
 --
@@ -17,6 +14,8 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.6.2>>
+* <<release-notes-6.6.1>>
 * <<release-notes-6.6.0>>
 * <<release-notes-6.5.4>>
 * <<release-notes-6.5.3>>
@@ -83,6 +82,95 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.6.2]]
+== {kib} 6.6.2
+
+See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
+when migrating your application from one version of Kibana to another.
+
+
+[float]
+[[bug-6.6.2]]
+=== Bug fixes
+APM::
+* Avoids crashing the transaction details page if trace duration is 0 {pull}31799[#31799]
+Canvas::
+* Provides a valid `axisconfig` position default {pull}32335[#32335]
+Kibana App::
+* Removes the use of 's' regex flag in {kib} query language {pull}31292[#31292]
+* Fixes vislib legend filters {pull}29592[#29592]
+Machine Learning::
+* Sets default number of shards to 1 when creating a new index for File data visualizer {pull}31567[#31567]
+* Adds missing error handling to annotations request {pull}32384[#32384]
+Management::
+* Fixes bug where rollup job search would display an empty prompt if no jobs matched the search {pull}31642[#31642]
+Monitoring::
+* Ensures that bulk uploader only starts once {pull}31307[#31307]
+* Addresses some UI regressions with shard allocation {pull}29757[#29757]
+Operations::
+* Bumps Node to 10.15.2 {pull}32200[#32200]
+Visualizations::
+* Formats Time Series Visual Builder error message {pull}31569[#31569]
+
+
+
+
+
+[[release-notes-6.6.1]]
+== {kib} 6.6.1
+
+See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
+when migrating your application from one version of Kibana to another.
+
+
+[float]
+[[bug-6.6.1]]
+=== Bug fixes
+Canvas::
+* Wraps URL check in `retry.try` {pull}29536[#29536]
+* Avoids server crash when no value is found {pull}29069[#29069]
+* Identifies Canvas for metrics collection {pull}29078[#29078]
+* Removes text selection on writeable change {pull}28887[#28887]
+* Prevents sort in pie function {pull}27076[#27076]
+* Maintains element selection when using up/down layering operations {pull}29634[#29634]
+* Uses `server.basePath` to create socket connection from interpreter {pull}29393[#29393]
+Kibana App::
+* Renames `defaultSpaceBasePath` to `serverBasePath` {pull}29431[#29431]
+Machine Learning::
+* Fixes race condition related to view by swimlane update {pull}28990[#28990]
+* Adds an integrity check to creating, updating, and deleting annotations {pull}29969[#29969]
+* Removes key attribute from annotation before indexing {pull}30183[#30183]
+* Makes index pattern related links optional {pull}29332[#29332]
+* Fixes unmounting jobs list React component on page change {pull}29980[#29980]
+* Uses intl.formatMessage for File Data Visualizer file picker {pull}29251[#29251]
+Management::
+* Adds Webhook Action type on client {pull}29818[#29818]
+Monitoring::
+* Fixes Logstash date format {pull}29637[#29637]
+* Fixes UI regressions with shard allocation {pull}29757[#29757]
+Operations::
+* Fixes plugin deprecations {pull}29737[#29737]
+* Changes Node version to 10.15.1 {pull}27918[#27918]
+* Fixes Chrome EUI icons on status page {pull}29131[#29131]
+Querying & Filtering::
+* Adds support for matching field names with newlines {pull}29539[#29539]
+Reporting::
+* Fixes date formatting on server for CSV export {pull}29977[#29977]
+Security::
+* Adds missing cluster privileges to role management screen {pull}28692[#28692]
+* Fixes an issue with a cross-site scripting (XSS) vulnerability (CVE-2019-7608). See https://www.elastic.co/community/security[Security issues].
+* Fixes an arbitrary  code execution flaw in the Timelion visualizer (CVE-2019-7609). See https://www.elastic.co/community/security[Security issues].
+* Fixes an arbitrary  code execution flaw in the security audit logger (CVE-2019-7610). See https://www.elastic.co/community/security[Security issues].
+Visualizations::
+* Fixes standard deviation aggregation to prevent crash of Time Series Visual Builder {pull}30798[#30798]
+* Fixes Time Series Visual Builder flot chart render after index pattern change {pull}29949[#29949]
+* Enables `orderBy` and `orderAgg` in visualization editor for rollup visualizations {pull}29894[#29894]
+
+
+
+
+
 
 [[release-notes-6.6.0]]
 == {kib} 6.6.0
@@ -946,7 +1034,7 @@ Platform::
 * Only tries to autoCreateOrUpgrade on the first request {pull}24605[#24605]
 * Improves types in the `@kbn/datemath` package {pull}24671[#24671]
 * Bumps elasticsearch-js and makelogs {pull}24767[#24767]
-* Add support for interceptors. This makes it possible for plugins to transform request config and response of http requests made with kfetch.{pull}22128[#22128]
+* Add support for interceptors. This makes it possible for plugins to transform request config and response of http requests made with kfetch. {pull}22128[#22128]
 * Improves how the Saved Objects client handles s RequestEntityTooLarge error from Elasticsearch {pull}22430[#22430]
 * Turns off the `no-multi-str` rule in eslint config {pull}22525[#22525]
 * Fixes a problem in which more than one search request error would result in an error {pull}24952[#24952]

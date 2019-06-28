@@ -63,7 +63,6 @@ monitoring-shard-allocation {
     }
     &.unassigned {
       .title {
-        color: #999;
         display: none;
       }
     }
@@ -83,15 +82,7 @@ monitoring-shard-allocation {
     font: 10px sans-serif;
     border-left: 1px solid $euiColorEmptyShade;
     position: relative;
-
-    .shard-tooltip {
-      padding: 5px;
-      bottom: 25px;
-      left: 0;
-      position: absolute;
-      border: 1px solid $euiColorLightShade;
-      white-space: nowrap;
-    }
+    display: inline-block;
   }
 
   .legend {

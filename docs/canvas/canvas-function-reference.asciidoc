@@ -1,3 +1,4 @@
+[role="xpack"]
 [[canvas-function-reference]]
 == Canvas function reference
 

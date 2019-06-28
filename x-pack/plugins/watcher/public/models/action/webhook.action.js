@@ -30,24 +30,26 @@ export class WebhookAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
+    this.fields = {};
     allFields.forEach((field) => {
-      this[field] = get(props, field);
+      this.fields[field] = get(props, field);
     });
 
-    this.fullPath = this.url ? this.url : this.host + this.port + this.path;
+    const { url, host, port, path } = this.fields;
+    this.fullPath = url ? url : host + port + path;
   }
 
   get upstreamJson() {
     // Add all required fields to the request body
     let result = requiredFields.reduce((acc, field) => {
-      acc[field] = this[field];
+      acc[field] = this.fields[field];
       return acc;
     }, super.upstreamJson);
 
     // If optional fields have been set, add them to the body
     result = optionalFields.reduce((acc, field) => {
       if (this[field]) {
-        acc[field] = this[field];
+        acc[field] = this.fields[field];
       }
       return acc;
     }, result);
@@ -86,27 +88,4 @@ export class WebhookAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new WebhookAction(upstreamAction);
   }
-
-  /**
-   * NOTE:
-   *
-   * I don't seem to find in the UI where those static properties are actuall used.
-   * It looks like we used to have a UI to create an action and that currently we only have
-   * the "advanced watcher" creation through the JSON editor.
-   *
-   * ---> ./components/watch_actions/components/watch_action/watch_actions.html
-   * is where it seems that this is read. But I can't access that component navigatint the UI
-   *
-   */
-  // static typeName = i18n.translate('xpack.watcher.models.webhookAction.typeName', {
-  //   defaultMessage: 'E-mail',
-  // });
-  // static iconClass = 'kuiIcon fa-envelope-o';
-  // static template = '<watch-email-action></watch-email-action>';
-  // static selectMessage = i18n.translate('xpack.watcher.models.webhookAction.selectMessageText', {
-  //   defaultMessage: 'Send out an e-mail from your server.',
-  // });
-  // static simulatePrompt = i18n.translate('xpack.watcher.models.webhookAction.simulateButtonLabel', {
-  //   defaultMessage: 'Test fire an e-mail now'
-  // });
 }

@@ -83,6 +83,7 @@ const VisFiltersProvider = (Private, getAppState) => {
 
   const filter = (event, { simulate } = {}) => {
     let data = event.datum.aggConfigResult;
+    const shallow = event.shallow;
     const filters = [];
     while (data) {
       if (data.type === 'bucket') {
@@ -98,7 +99,7 @@ const VisFiltersProvider = (Private, getAppState) => {
         }
         filters.push(filter);
       }
-      data = data.$parent;
+      data = shallow ? null : data.$parent;
     }
     if (!simulate) {
       const appState = getAppState();
