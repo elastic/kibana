@@ -9,7 +9,6 @@ import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 describe('getSupportedUrlParams', () => {
   it('returns custom values', () => {
-    expect.assertions(1);
     const customValues = {
       autorefreshInterval: '23',
       autorefreshIsPaused: 'false',
@@ -27,7 +26,6 @@ describe('getSupportedUrlParams', () => {
   });
 
   it('returns default values', () => {
-    expect.assertions(2);
     const {
       AUTOREFRESH_INTERVAL,
       AUTOREFRESH_IS_PAUSED,

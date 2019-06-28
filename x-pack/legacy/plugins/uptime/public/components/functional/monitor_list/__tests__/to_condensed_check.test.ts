@@ -51,12 +51,10 @@ describe('toCondensedCheck', () => {
   });
 
   it('condenses checks across location', () => {
-    expect.assertions(1);
     expect(toCondensedCheck(checks)).toMatchSnapshot();
   });
 
   it('infers an "up" status for a series of "up" checks', () => {
-    expect.assertions(1);
     checks = [
       {
         observer: {
@@ -100,7 +98,6 @@ describe('toCondensedCheck', () => {
   });
 
   it('creates the correct number of condensed checks for multiple locations', () => {
-    expect.assertions(1);
     checks = [
       {
         observer: {
