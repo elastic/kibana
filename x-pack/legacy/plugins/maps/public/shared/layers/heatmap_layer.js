@@ -140,8 +140,8 @@ export class HeatmapLayer extends AbstractLayer {
       // Exception is "Refresh" query.
       updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
     }
-    const updateDueToLayerQuery = searchFilters.layerQuery
-      && !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+    const updateDueToSourceQuery = searchFilters.sourceQuery
+      && !_.isEqual(meta.sourceQuery, searchFilters.sourceQuery);
     const updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
 
     const updateDueToMetricChange = !_.isEqual(meta.metric, searchFilters.metric);
@@ -151,7 +151,7 @@ export class HeatmapLayer extends AbstractLayer {
       && !updateDueToExtent
       && !updateDueToRefreshTimer
       && !updateDueToQuery
-      && !updateDueToLayerQuery
+      && !updateDueToSourceQuery
       && !updateDueToApplyGlobalQuery
       && !updateDueToFilters
       && !updateDueToMetricChange
@@ -165,7 +165,7 @@ export class HeatmapLayer extends AbstractLayer {
   _getSearchFilters(dataFilters) {
     return {
       ...dataFilters,
-      layerQuery: this.getQuery(),
+      sourceQuery: this.getQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
       metric: this._getPropKeyOfSelectedMetric()

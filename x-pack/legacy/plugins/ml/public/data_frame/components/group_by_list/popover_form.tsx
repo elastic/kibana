@@ -8,19 +8,28 @@ import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCodeEditor,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+} from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../common/types/common';
 
 import {
   AggName,
   dateHistogramIntervalFormatRegex,
+  getEsAggFromGroupByConfig,
   isGroupByDateHistogram,
   isGroupByHistogram,
+  isPivotGroupByConfigWithUiSupport,
   histogramIntervalFormatRegex,
   isAggName,
   PivotGroupByConfig,
-  PivotGroupByConfigDict,
+  PivotGroupByConfigWithUiSupportDict,
   PivotSupportedGroupByAggs,
   PivotSupportedGroupByAggsWithInterval,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
@@ -78,7 +87,7 @@ function getDefaultInterval(defaultData: PivotGroupByConfig): string | undefined
 interface Props {
   defaultData: PivotGroupByConfig;
   otherAggNames: AggName[];
-  options: PivotGroupByConfigDict;
+  options: PivotGroupByConfigWithUiSupportDict;
   onChange(item: PivotGroupByConfig): void;
 }
 
@@ -88,9 +97,13 @@ export const PopoverForm: React.SFC<Props> = ({
   onChange,
   options,
 }) => {
+  const isUnsupportedAgg = !isPivotGroupByConfigWithUiSupport(defaultData);
+
   const [agg, setAgg] = useState(defaultData.agg);
   const [aggName, setAggName] = useState(defaultData.aggName);
-  const [field, setField] = useState(defaultData.field);
+  const [field, setField] = useState(
+    isPivotGroupByConfigWithUiSupport(defaultData) ? defaultData.field : ''
+  );
   const [interval, setInterval] = useState(getDefaultInterval(defaultData));
 
   function getUpdatedItem(): PivotGroupByConfig {
@@ -107,17 +120,22 @@ export const PopoverForm: React.SFC<Props> = ({
     return updatedItem as PivotGroupByConfig;
   }
 
-  const optionsArr = dictionaryToArray(options);
-  const availableFields: SelectOption[] = optionsArr
-    .filter(o => o.agg === defaultData.agg)
-    .map(o => {
-      return { text: o.field };
-    });
-  const availableAggs: SelectOption[] = optionsArr
-    .filter(o => o.field === defaultData.field)
-    .map(o => {
-      return { text: o.agg };
-    });
+  const availableFields: SelectOption[] = [];
+  const availableAggs: SelectOption[] = [];
+
+  if (!isUnsupportedAgg) {
+    const optionsArr = dictionaryToArray(options);
+    optionsArr
+      .filter(o => o.agg === defaultData.agg)
+      .forEach(o => {
+        availableFields.push({ text: o.field });
+      });
+    optionsArr
+      .filter(o => isPivotGroupByConfigWithUiSupport(defaultData) && o.field === defaultData.field)
+      .forEach(o => {
+        availableAggs.push({ text: o.agg });
+      });
+  }
 
   let aggNameError = '';
 
@@ -156,6 +174,14 @@ export const PopoverForm: React.SFC<Props> = ({
       <EuiFormRow
         error={!validAggName && [aggNameError]}
         isInvalid={!validAggName}
+        helpText={
+          isUnsupportedAgg
+            ? i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.unsupportedGroupByHelpText', {
+                defaultMessage:
+                  'Only the group_by name can be edited in this form. Please use the advanced editor to edit the other parts of the group_by configuration.',
+              })
+            : ''
+        }
         label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.nameLabel', {
           defaultMessage: 'Group by name',
         })}
@@ -231,6 +257,18 @@ export const PopoverForm: React.SFC<Props> = ({
             )}
           </Fragment>
         </EuiFormRow>
+      )}
+      {isUnsupportedAgg && (
+        <EuiCodeEditor
+          mode="json"
+          theme="github"
+          width="100%"
+          height="200px"
+          value={JSON.stringify(getEsAggFromGroupByConfig(defaultData), null, 2)}
+          setOptions={{ fontSize: '12px', showLineNumbers: false }}
+          isReadOnly
+          aria-label="Read only code editor"
+        />
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>

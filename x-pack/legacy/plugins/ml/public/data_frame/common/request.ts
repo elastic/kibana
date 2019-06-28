@@ -13,13 +13,14 @@ import { dictionaryToArray } from '../../../common/types/common';
 import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
 import { JobDetailsExposedState } from '../components/job_details/job_details_form';
 
-import { PivotGroupByConfig } from '../common';
-
 import {
-  dateHistogramIntervalFormatRegex,
-  DATE_HISTOGRAM_FORMAT,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from './pivot_group_by';
+  getEsAggFromAggConfig,
+  getEsAggFromGroupByConfig,
+  isGroupByDateHistogram,
+  isGroupByHistogram,
+  isGroupByTerms,
+  PivotGroupByConfig,
+} from '../common';
 
 import { PivotAggDict, PivotAggsConfig } from './pivot_aggs';
 import { DateHistogramAgg, HistogramAgg, PivotGroupByDict, TermsAgg } from './pivot_group_by';
@@ -97,14 +98,14 @@ export function getDataFramePreviewRequest(
   }
 
   groupBy.forEach(g => {
-    if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS) {
+    if (isGroupByTerms(g)) {
       const termsAgg: TermsAgg = {
         terms: {
           field: g.field,
         },
       };
       request.pivot.group_by[g.aggName] = termsAgg;
-    } else if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
+    } else if (isGroupByHistogram(g)) {
       const histogramAgg: HistogramAgg = {
         histogram: {
           field: g.field,
@@ -112,38 +113,21 @@ export function getDataFramePreviewRequest(
         },
       };
       request.pivot.group_by[g.aggName] = histogramAgg;
-    } else if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
+    } else if (isGroupByDateHistogram(g)) {
       const dateHistogramAgg: DateHistogramAgg = {
         date_histogram: {
           field: g.field,
           calendar_interval: g.calendar_interval,
         },
       };
-
-      // DATE_HISTOGRAM_FORMAT is an enum which maps interval units like ms/s/m/... to
-      // date_histrogram aggregation formats like 'yyyy-MM-dd'. The following code extracts
-      // the interval unit from the configurations interval and adds a matching
-      // aggregation format to the configuration.
-      const timeUnitMatch = g.calendar_interval.match(dateHistogramIntervalFormatRegex);
-      if (timeUnitMatch !== null && Array.isArray(timeUnitMatch) && timeUnitMatch.length === 2) {
-        // the following is just a TS compatible way of using the
-        // matched string like `d` as the property to access the enum.
-        const format =
-          DATE_HISTOGRAM_FORMAT[timeUnitMatch[1] as keyof typeof DATE_HISTOGRAM_FORMAT];
-        if (format !== undefined) {
-          dateHistogramAgg.date_histogram.format = format;
-        }
-      }
       request.pivot.group_by[g.aggName] = dateHistogramAgg;
+    } else {
+      request.pivot.group_by[g.aggName] = getEsAggFromGroupByConfig(g);
     }
   });
 
   aggs.forEach(agg => {
-    request.pivot.aggregations[agg.aggName] = {
-      [agg.agg]: {
-        field: agg.field,
-      },
-    };
+    request.pivot.aggregations[agg.aggName] = getEsAggFromAggConfig(agg);
   });
 
   return request;
@@ -164,6 +148,17 @@ export function getDataFrameRequest(
     dest: {
       index: jobDetailsState.destinationIndex,
     },
+    // conditionally add continuous mode config
+    ...(jobDetailsState.isContinuousModeEnabled
+      ? {
+          sync: {
+            time: {
+              field: jobDetailsState.continuousModeDateField,
+              delay: jobDetailsState.continuousModeDelay,
+            },
+          },
+        }
+      : {}),
   };
 
   return request;
