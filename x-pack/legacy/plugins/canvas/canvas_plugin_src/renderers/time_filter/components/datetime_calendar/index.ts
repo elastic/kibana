@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from 'recompose';
-import { DatetimeQuickList as Component } from './datetime_quick_list';
-
-export const DatetimeQuickList = compose()(Component);
+export { DatetimeCalendar } from './datetime_calendar';

@@ -5,16 +5,16 @@
  */
 
 import dateMath from '@elastic/datemath';
-import moment from 'moment';
-import { quickRanges } from './quick_ranges';
+import moment, { Moment } from 'moment';
+import { quickRanges, QuickRange } from './quick_ranges';
 import { timeUnits } from './time_units';
 
-const lookupByRange = {};
-quickRanges.forEach(function(frame) {
-  lookupByRange[frame.from + ' to ' + frame.to] = frame;
+const lookupByRange: { [key: string]: QuickRange } = {};
+quickRanges.forEach(frame => {
+  lookupByRange[`${frame.from} to ${frame.to}`] = frame;
 });
 
-function formatTime(time, roundUp = false) {
+function formatTime(time: string | Moment, roundUp = false) {
   if (moment.isMoment(time)) {
     return time.format('lll');
   } else {
@@ -27,24 +27,23 @@ function formatTime(time, roundUp = false) {
   }
 }
 
-function cantLookup(from, to) {
+function cantLookup(from: string, to: string) {
   return `${formatTime(from)} to ${formatTime(to)}`;
 }
 
-export function formatDuration(from, to) {
-  let text;
+export function formatDuration(from: string, to: string) {
   // If both parts are date math, try to look up a reasonable string
   if (from && to && !moment.isMoment(from) && !moment.isMoment(to)) {
-    const tryLookup = lookupByRange[from.toString() + ' to ' + to.toString()];
+    const tryLookup = lookupByRange[`${from.toString()} to ${to.toString()}`];
     if (tryLookup) {
       return tryLookup.display;
     } else {
       const fromParts = from.toString().split('-');
       if (to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
         const rounded = fromParts[1].split('/');
-        text = 'Last ' + rounded[0];
+        let text = `Last  ${rounded[0]}`;
         if (rounded[1]) {
-          text = text + ' rounded to the ' + timeUnits[rounded[1]];
+          text = `${text} rounded to the ${timeUnits[rounded[1]]}`;
         }
 
         return text;

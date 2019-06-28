@@ -11,16 +11,31 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { TimePicker } from '../time_picker';
 import { TimePickerMini } from '../time_picker_mini';
 
-function getFilterMeta(filter) {
+export interface FilterMeta {
+  column: string;
+  from: string;
+  to: string;
+}
+
+function getFilterMeta(filter: string): FilterMeta {
   const ast = fromExpression(filter);
-  const column = get(ast, 'chain[0].arguments.column[0]');
-  const from = get(ast, 'chain[0].arguments.from[0]');
-  const to = get(ast, 'chain[0].arguments.to[0]');
+  const column = get<string>(ast, 'chain[0].arguments.column[0]');
+  const from = get<string>(ast, 'chain[0].arguments.from[0]');
+  const to = get<string>(ast, 'chain[0].arguments.to[0]');
   return { column, from, to };
 }
 
-export const TimeFilter = ({ filter, commit, compact }) => {
-  const setFilter = column => (from, to) => {
+export interface Props {
+  /** Initial value of the filter */
+  filter: string;
+  /** Function invoked when the filter changes */
+  commit: (filter: string) => void;
+  /** Determines if compact or full-sized time picker is displayed */
+  compact?: boolean;
+}
+
+export const TimeFilter = ({ filter, commit, compact }: Props) => {
+  const setFilter = (column: string) => (from: string, to: string) => {
     commit(`timefilter from="${from}" to=${to} column=${column}`);
   };
 
@@ -34,7 +49,7 @@ export const TimeFilter = ({ filter, commit, compact }) => {
 };
 
 TimeFilter.propTypes = {
-  filter: PropTypes.string,
-  commit: PropTypes.func, // Canvas filter
+  filter: PropTypes.string.isRequired,
+  commit: PropTypes.func.isRequired, // Canvas filter
   compact: PropTypes.bool,
 };

@@ -25,6 +25,24 @@ jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
   },
 }));
 
+// Mock datetime parsing so we can get stable results for tests (even while using the `now` format)
+jest.mock('@elastic/datemath', () => {
+  return {
+    parse: (d, opts) => {
+      const dateMath = jest.requireActual('@elastic/datemath'); 
+      return dateMath.parse(d, {...opts, forceNow: new Date('June 1, 2019')});
+    }
+  }
+});
+
+// Mock react-datepicker dep used by eui to avoid rendering the entire large component
+jest.mock('@elastic/eui/packages/react-datepicker', () => {
+  return {
+    __esModule: true,
+    default: 'ReactDatePicker',
+  }
+});
+
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots

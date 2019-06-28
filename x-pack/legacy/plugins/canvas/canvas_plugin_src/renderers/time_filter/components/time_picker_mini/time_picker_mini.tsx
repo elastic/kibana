@@ -4,14 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
+// @ts-ignore untyped local
 import { Popover } from '../../../../../public/components/popover';
 import { PrettyDuration } from '../pretty_duration';
 import { TimePicker } from '../time_picker';
 
-export const TimePickerMini = ({ from, to, onSelect }) => {
-  const button = handleClick => (
+export interface Props {
+  /** Start date string */
+  from: string;
+  /** End date string */
+  to: string;
+  /** Function invoked when date range is changed */
+  onSelect: (from: string, to: string) => void;
+}
+
+export const TimePickerMini: FunctionComponent<Props> = ({ from, to, onSelect }) => {
+  const button = (handleClick: (event: MouseEvent<HTMLButtonElement>) => void) => (
     <button className="canvasTimePickerMini__button" onClick={handleClick}>
       <PrettyDuration from={from} to={to} />
     </button>
@@ -30,7 +40,7 @@ export const TimePickerMini = ({ from, to, onSelect }) => {
 };
 
 TimePickerMini.propTypes = {
-  from: PropTypes.string,
-  to: PropTypes.string,
-  onSelect: PropTypes.func,
+  from: PropTypes.string.isRequired,
+  to: PropTypes.string.isRequired,
+  onSelect: PropTypes.func.isRequired,
 };

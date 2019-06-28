@@ -4,12 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+import { Moment } from 'moment';
 import { DatetimeCalendar } from '../datetime_calendar';
 
-export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
+interface Props {
+  /** Optional initial start date moment */
+  from?: Moment;
+  /** Optional initial end date moment */
+  to?: Moment;
+
+  onSelect: (from?: Moment, to?: Moment) => void;
+}
+
+export const DatetimeRangeAbsolute: FunctionComponent<Props> = ({ from, to, onSelect }) => (
   <div className="canvasDateTimeRangeAbsolute">
     <div>
       <DatetimeCalendar
@@ -19,8 +28,10 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         maxDate={to}
         onValueChange={val => onSelect(val, to)}
         onSelect={val => {
+          if (!val || !from) return;
+
           // sets the time to start of day if only the date was selected
-          if (moment(from).format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
+          if (from.format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
             onSelect(val.startOf('day'), to);
           } else {
             onSelect(val, to);
@@ -36,9 +47,11 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         minDate={from}
         onValueChange={val => onSelect(from, val)}
         onSelect={val => {
+          if (!val || !to) return;
+
           // set the time to end of day if only the date was selected
-          if (moment(to).format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
-            onSelect(from, moment(val).endOf('day'));
+          if (to.format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
+            onSelect(from, val.endOf('day'));
           } else {
             onSelect(from, val);
           }
@@ -51,5 +64,5 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
 DatetimeRangeAbsolute.propTypes = {
   from: PropTypes.object, // a moment
   to: PropTypes.object, // a moment
-  onSelect: PropTypes.func,
+  onSelect: PropTypes.func.isRequired,
 };

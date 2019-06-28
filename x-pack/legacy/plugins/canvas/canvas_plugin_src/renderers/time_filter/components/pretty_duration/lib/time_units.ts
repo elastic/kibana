@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from 'recompose';
-import { DatetimeRangeAbsolute as Component } from './datetime_range_absolute';
-
-export const DatetimeRangeAbsolute = compose()(Component);
+export const timeUnits: { [key: string]: string } = {
+  s: 'second',
+  m: 'minute',
+  h: 'hour',
+  d: 'day',
+  w: 'week',
+  M: 'month',
+  y: 'year',
+};

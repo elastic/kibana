@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const quickRanges = [
+export interface QuickRange {
+  from: string;
+  to: string;
+  display: string;
+  section: number;
+}
+
+export const quickRanges: QuickRange[] = [
   { from: 'now/d', to: 'now/d', display: 'Today', section: 0 },
   { from: 'now/w', to: 'now/w', display: 'This week', section: 0 },
   { from: 'now/M', to: 'now/M', display: 'This month', section: 0 },
