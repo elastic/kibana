@@ -307,7 +307,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     sortDirection?: string | null
   ): Promise<MonitorSummary[]> {
     const params = {
-      index: 'heartbeat-states-8.0.0',
+      index: INDEX_NAMES.HEARTBEAT_STATES,
       body: {
         from: pageIndex * pageSize,
         size: pageSize,
@@ -345,11 +345,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       } else {
         state.checks = [];
       }
-      const f = {
+      return {
         monitor_id,
         state,
       };
-      return f;
     });
 
     const histogramMap = await this.getHistogramForMonitors(request, 'now-15m', 'now', monitorIds);
@@ -480,7 +479,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         } else if (status === 'down') {
           acc.down++;
         } else if (status === 'mixed') {
-          // console.log(JSON.stringify(monitor, null, 2));
           acc.mixed++;
         }
         acc.total++;
