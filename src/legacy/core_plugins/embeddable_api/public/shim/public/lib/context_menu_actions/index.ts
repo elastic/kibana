@@ -17,8 +17,5 @@
  * under the License.
  */
 
-export { attachAction } from './attach_action';
-export { executeTriggerActions } from './execute_trigger_actions';
-
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
+export { buildContextMenuForActions } from './build_eui_context_menu_panels';
+export { openContextMenu } from './open_context_menu';

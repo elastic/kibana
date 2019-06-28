@@ -94,7 +94,7 @@ test('executeTriggerActions executes a single action mapped to a trigger', async
   expect(executeFn).toBeCalledTimes(1);
   expect(executeFn).toBeCalledWith(context);
 });
-/*
+
 test('executeTriggerActions throws an error if the action id does not exist', async () => {
   const testTrigger = {
     id: 'MYTRIGGER',
@@ -151,4 +151,3 @@ test('executeTriggerActions shows a context menu when more than one action is ma
   await executeTriggerActions('MYTRIGGER', context, triggerRegistry, actionRegistry);
   expect(executeFn).toBeCalledTimes(0);
 });
-*/

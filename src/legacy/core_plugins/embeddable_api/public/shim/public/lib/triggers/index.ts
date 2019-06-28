@@ -17,16 +17,7 @@
  * under the License.
  */
 
-import { TriggerRegistry } from '../types';
+export { executeTriggerActions } from './execute_trigger_actions';
 
-export function detachAction(
-  triggerRegistry: TriggerRegistry,
-  { triggerId, actionId }: { triggerId: string; actionId: string }
-) {
-  const trigger = triggerRegistry.get(triggerId);
-  if (!trigger) {
-    throw new Error(`No trigger with is ${triggerId} exists`);
-  }
-
-  trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
-}
+export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
+export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
