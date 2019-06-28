@@ -5,11 +5,17 @@
   "private": true,
   "license": "Elastic-License",
   "scripts": {
-    "build-graphql-types": "node scripts/generate_types_from_graphql.js"
+    "build-graphql-types": "node scripts/generate_types_from_graphql.js",
+    "cypress:open": "cypress open"
   },
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "^4.1.0",
+    "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.110",
-    "@types/react-beautiful-dnd": "^10.0.1"
+    "@types/react-beautiful-dnd": "^10.0.1",
+    "cypress": "^3.3.1",
+    "js-yaml": "^3.13.1",
+    "ts-loader": "^6.0.4"
   },
   "dependencies": {
     "lodash": "^4.17.10",
