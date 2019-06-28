@@ -5,7 +5,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiIcon, EuiPopover, EuiButtonEmpty, EuiFieldText } from '@elastic/eui';
+import { EuiIcon, EuiPopover, EuiButton, EuiButtonEmpty, EuiFieldText } from '@elastic/eui';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface LogHighlightsMenuProps {
@@ -81,9 +81,10 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
       closePopover={closePopover}
       ownFocus
     >
-      <div>
+      <div style={{ width: '210px' }}>
         <EuiFieldText
           placeholder="Term to highlight"
+          fullWidth={true}
           value={highlightTerm}
           onChange={changeHighlightTerm}
           isLoading={isLoading}
@@ -92,6 +93,19 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
             setInputRef(ref);
           }}
         />
+        <ButtonWrapper>
+          <EuiButton
+            color="primary"
+            isDisabled={!highlightTerm}
+            onClick={() => {
+              setHighlightTerm('');
+            }}
+            fullWidth={true}
+            size="s"
+          >
+            Clear highlights
+          </EuiButton>
+        </ButtonWrapper>
       </div>
     </EuiPopover>
   );
@@ -99,4 +113,8 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
 
 const IconWrapper = euiStyled.span`
   padding-left: ${props => props.theme.eui.paddingSizes.xs};
+`;
+
+const ButtonWrapper = euiStyled.div`
+  padding-top: ${props => props.theme.eui.paddingSizes.xs};
 `;
