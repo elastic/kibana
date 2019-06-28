@@ -17,6 +17,7 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface OverviewPageProps {
   basePath: string;
+  logOverviewPageLoad: () => void;
   history: any;
   location: {
     pathname: string;
@@ -29,7 +30,13 @@ type Props = OverviewPageProps;
 
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
-export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
+export const OverviewPage = ({
+  basePath,
+  logOverviewPageLoad,
+  setBreadcrumbs,
+  history,
+  location,
+}: Props) => {
   const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
@@ -38,6 +45,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
+    logOverviewPageLoad();
     if (setHeadingText) {
       setHeadingText(
         i18n.translate('xpack.uptime.overviewPage.headerText', {
