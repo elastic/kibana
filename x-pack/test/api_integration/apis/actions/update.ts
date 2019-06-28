@@ -34,17 +34,6 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: ES_ARCHIVER_ACTION_ID,
-            type: 'action',
-            references: [],
-            version: resp.body.version,
-            updated_at: resp.body.updated_at,
-            attributes: {
-              actionTypeId: 'test.index-record',
-              description: 'My action updated',
-              actionTypeConfig: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-            },
           });
         });
     });
@@ -75,7 +64,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
     });
 
     it('should not return encrypted attributes', async () => {
-      await supertest
+      const { body: updatedAction } = await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -87,23 +76,27 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             },
           },
         })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: ES_ARCHIVER_ACTION_ID,
-            type: 'action',
-            references: [],
-            version: resp.body.version,
-            updated_at: resp.body.updated_at,
-            attributes: {
-              actionTypeId: 'test.index-record',
-              description: 'My action updated',
-              actionTypeConfig: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-            },
-          });
-        });
+        .expect(200);
+      expect(updatedAction).to.eql({
+        id: ES_ARCHIVER_ACTION_ID,
+      });
+      const { body: fetchedAction } = await supertest
+        .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
+        .expect(200);
+      expect(fetchedAction).to.eql({
+        id: ES_ARCHIVER_ACTION_ID,
+        type: 'action',
+        references: [],
+        version: fetchedAction.version,
+        updated_at: fetchedAction.updated_at,
+        attributes: {
+          actionTypeId: 'test.index-record',
+          description: 'My action updated',
+          actionTypeConfig: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+        },
+      });
     });
 
     it('should return 404 when updating a non existing document', async () => {
