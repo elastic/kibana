@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerRoute } from '../common/types';
+import { HttpServiceSetup, CoreStart } from 'src/core/server';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
 export interface CoreSetup {
   http: HttpServiceSetup;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CoreStart {}
-
-export interface HttpServiceSetup {
-  route(route: ServerRoute | ServerRoute[]): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -28,11 +21,12 @@ export type PluginStart = ReturnType<Plugin['start']>;
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup) {
-    const { route } = core.http;
+    const { server } = core.http;
 
     // map routes to handlers
-    routes.forEach(route);
+    routes.forEach(route => server.route(route));
 
+    // the JS API for other consumers
     return {
       getList: fetchList,
     };
