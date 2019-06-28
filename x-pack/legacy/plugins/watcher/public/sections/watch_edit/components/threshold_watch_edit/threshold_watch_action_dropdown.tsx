@@ -49,7 +49,10 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
   const actions = Object.entries(allActionTypes).map(
     ([type, { typeName, iconClass, selectMessage }]) => {
       const isEnabled =
-        settings && settings.actionTypes[type] && settings.actionTypes[type].enabled
+        settings &&
+        settings.actionTypes &&
+        settings.actionTypes[type] &&
+        typeof settings.actionTypes[type].enabled !== 'undefined'
           ? settings.actionTypes[type].enabled
           : true;
       return {
