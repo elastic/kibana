@@ -79,7 +79,7 @@ export class WorkpadZoom extends PureComponent<Props> {
 
   _button = (togglePopover: MouseEventHandler<HTMLButtonElement>) => (
     <EuiButtonIcon
-      iconType="magnifyWithPlus" // TODO: change this to magnifyWithPlus when available
+      iconType="magnifyWithPlus"
       aria-label="Share this workpad"
       onClick={togglePopover}
     />
@@ -115,13 +115,13 @@ export class WorkpadZoom extends PureComponent<Props> {
         name: 'Zoom out',
         icon: 'magnifyWithMinus',
         onClick: zoomOut,
-        disabled: zoomScale === MIN_ZOOM_LEVEL,
+        disabled: zoomScale <= MIN_ZOOM_LEVEL,
       },
       {
         name: 'Reset',
         icon: 'empty',
         onClick: resetZoom,
-        disabled: zoomScale === MAX_ZOOM_LEVEL,
+        disabled: zoomScale >= MAX_ZOOM_LEVEL,
         className: 'canvasContextMenu--topBorder',
       },
     ];

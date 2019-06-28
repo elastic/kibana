@@ -23,14 +23,15 @@ export interface Props {
 // handlers for zooming in and out
 export const zoomHandlerCreators = {
   zoomIn: ({ zoomScale, setZoomScale }: Props) => (): void => {
-    const scaleIndex = ZOOM_LEVELS.indexOf(zoomScale);
     const scaleUp =
-      scaleIndex + 1 < ZOOM_LEVELS.length ? ZOOM_LEVELS[scaleIndex + 1] : MAX_ZOOM_LEVEL;
+      ZOOM_LEVELS.find((zoomLevel: number) => zoomScale < zoomLevel) || MAX_ZOOM_LEVEL;
     setZoomScale(scaleUp);
   },
   zoomOut: ({ zoomScale, setZoomScale }: Props) => (): void => {
-    const scaleIndex = ZOOM_LEVELS.indexOf(zoomScale);
-    const scaleDown = scaleIndex - 1 >= 0 ? ZOOM_LEVELS[scaleIndex - 1] : MIN_ZOOM_LEVEL;
+    const scaleDown =
+      ZOOM_LEVELS.slice()
+        .reverse()
+        .find((zoomLevel: number) => zoomScale > zoomLevel) || MIN_ZOOM_LEVEL;
     setZoomScale(scaleDown);
   },
   resetZoom: ({ setZoomScale }: Props) => (): void => {
