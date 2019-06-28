@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './security_service.factory';
+export { logstashSecurity } from './logstash_security';
