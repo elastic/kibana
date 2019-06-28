@@ -203,6 +203,8 @@ export interface AuthenticationsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface AuthenticationsEdges {
@@ -325,6 +327,12 @@ export interface PageInfo {
   hasNextPage?: boolean | null;
 }
 
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
+}
+
 export interface EventsData {
   kpiEventType?: KpiItem[] | null;
 
@@ -333,6 +341,8 @@ export interface EventsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface KpiItem {
@@ -805,6 +815,8 @@ export interface TimelineData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface TimelineEdges {
@@ -831,6 +843,8 @@ export interface TimelineNonEcsData {
 
 export interface TimelineDetailsData {
   data?: DetailItem[] | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface DetailItem {
@@ -851,6 +865,8 @@ export interface DetailItem {
 
 export interface LastEventTimeData {
   lastSeen?: Date | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface HostsData {
@@ -877,6 +893,8 @@ export interface HostItem {
   host?: HostEcsFields | null;
 
   cloud?: CloudFields | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface CloudFields {
@@ -897,13 +915,9 @@ export interface CloudMachine {
   type?: (string | null)[] | null;
 }
 
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
 export interface FirstLastSeenHost {
+  inspect?: Inspect | null;
+
   firstSeen?: Date | null;
 
   lastSeen?: Date | null;
@@ -919,6 +933,8 @@ export interface IpOverviewData {
   server?: Overview | null;
 
   source?: Overview | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface Overview {
@@ -945,6 +961,8 @@ export interface DomainsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface DomainsEdges {
@@ -993,6 +1011,8 @@ export interface FirstLastSeenDomain {
   firstSeen?: Date | null;
 
   lastSeen?: Date | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface TlsData {
@@ -1001,6 +1021,8 @@ export interface TlsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface TlsEdges {
@@ -1031,6 +1053,8 @@ export interface UsersData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface UsersEdges {
@@ -1075,6 +1099,8 @@ export interface KpiNetworkData {
   dnsQueries?: number | null;
 
   tlsHandshakes?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface KpiNetworkHistogramData {
@@ -1103,6 +1129,8 @@ export interface KpiHostsData {
   uniqueDestinationIps?: number | null;
 
   uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface KpiHostHistogramData {
@@ -1127,6 +1155,8 @@ export interface KpiHostDetailsData {
   uniqueDestinationIps?: number | null;
 
   uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -1135,6 +1165,8 @@ export interface NetworkTopNFlowData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface NetworkTopNFlowEdges {
@@ -1183,6 +1215,8 @@ export interface NetworkDnsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface NetworkDnsEdges {
@@ -1225,6 +1259,8 @@ export interface OverviewNetworkData {
   packetbeatFlow?: number | null;
 
   packetbeatTLS?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface OverviewHostData {
@@ -1243,6 +1279,8 @@ export interface OverviewHostData {
   filebeatSystemModule?: number | null;
 
   winlogbeat?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface UncommonProcessesData {
@@ -1251,6 +1289,8 @@ export interface UncommonProcessesData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface UncommonProcessesEdges {

@@ -18,11 +18,11 @@ import {
   KpiHostHistogram,
   KpiHostGeneralHistogramCount,
   KpiHostAuthHistogramCount,
-  KpiHostDetailsData,
   KpiHostsUniqueIpsHit,
   KpiHostsHostsHit,
 } from './types';
-import { KpiHostHistogramData, KpiHostsData } from '../../graphql/types';
+import { KpiHostHistogramData, KpiHostsData, KpiHostDetailsData } from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
 
 const formatGeneralHistogramData = (
   data: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>
@@ -88,7 +88,22 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       'responses.2.aggregations.unique_destination_ips_histogram.buckets',
       response
     );
+
+    const inspect = {
+      dsl: [
+        inspectStringifyObject(hostsQuery[0]),
+        inspectStringifyObject(authQuery[0]),
+        inspectStringifyObject(uniqueIpsQuery[0]),
+      ],
+      response: [
+        inspectStringifyObject(response.responses[0]),
+        inspectStringifyObject(response.responses[1]),
+        inspectStringifyObject(response.responses[2]),
+      ],
+    };
+
     return {
+      inspect,
       hosts: getOr(null, 'responses.0.aggregations.hosts.value', response),
       hostsHistogram: formatGeneralHistogramData(hostsHistogram),
       authSuccess: getOr(
@@ -147,7 +162,15 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       'responses.1.aggregations.unique_destination_ips_histogram.buckets',
       response
     );
+    const inspect = {
+      dsl: [inspectStringifyObject(authQuery[0]), inspectStringifyObject(uniqueIpsQuery[0])],
+      response: [
+        inspectStringifyObject(response.responses[0]),
+        inspectStringifyObject(response.responses[1]),
+      ],
+    };
     return {
+      inspect,
       authSuccess: getOr(
         null,
         'responses.0.aggregations.authentication_success.doc_count',

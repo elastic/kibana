@@ -46,6 +46,7 @@ export const hostsSchema = gql`
     lastSeen: Date
     host: HostEcsFields
     cloud: CloudFields
+    inspect: Inspect
   }
 
   type HostsEdges {
@@ -61,6 +62,7 @@ export const hostsSchema = gql`
   }
 
   type FirstLastSeenHost {
+    inspect: Inspect
     firstSeen: Date
     lastSeen: Date
   }

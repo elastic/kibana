@@ -6,6 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 
+import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 
 import { buildDnsQuery } from './query_dns.dsl';
@@ -71,7 +72,25 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
       response
     );
 
+    const inspect = {
+      dsl: [
+        inspectStringifyObject(networkEventsQuery[0]),
+        inspectStringifyObject(dnsQuery[0]),
+        inspectStringifyObject(uniquePrivateIpsQuery[0]),
+        inspectStringifyObject(uniqueFlowIdsQuery[0]),
+        inspectStringifyObject(tlsHandshakesQuery[0]),
+      ],
+      response: [
+        inspectStringifyObject(response.responses[0]),
+        inspectStringifyObject(response.responses[1]),
+        inspectStringifyObject(response.responses[2]),
+        inspectStringifyObject(response.responses[3]),
+        inspectStringifyObject(response.responses[4]),
+      ],
+    };
+
     return {
+      inspect,
       networkEvents: getOr(null, 'responses.0.hits.total.value', response),
       dnsQueries: getOr(null, 'responses.1.hits.total.value', response),
       uniqueSourcePrivateIps: getOr(
