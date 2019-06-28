@@ -10,10 +10,11 @@ import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { ml } from '../../../../../services/ml_api_service';
 // @ts-ignore
 import { JobIcon } from '../../../../../components/job_message_icon';
-import { TransformMessage } from '../../../../../../common/types/messages';
+import { TransformMessage } from '../../../../../../common/types/audit_message';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -53,7 +54,7 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId, lastUpdat
     {
       name: '',
       render: (message: TransformMessage) => <JobIcon message={message} />,
-      width: '5%',
+      width: `${theme.euiSizeXL}px`,
     },
     {
       name: i18n.translate('xpack.ml.dfJobsList.jobDetails.messagesPane.timeLabel', {

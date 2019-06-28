@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface MessageBasics {
+export interface AuditMessageBase {
   message: string;
   level: string;
   timestamp: number;
@@ -12,10 +12,10 @@ export interface MessageBasics {
   text?: string;
 }
 
-export interface TransformMessage extends MessageBasics {
+export interface TransformMessage extends AuditMessageBase {
   transform_id: string;
 }
 
-export interface JobMessage extends MessageBasics {
+export interface JobMessage extends AuditMessageBase {
   job_id: string;
 }

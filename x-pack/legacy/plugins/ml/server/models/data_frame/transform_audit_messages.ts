@@ -6,7 +6,7 @@
 
 import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { callWithRequestType } from '../../../common/types/kibana';
-import { TransformMessage } from '../../../common/types/messages';
+import { TransformMessage } from '../../../common/types/audit_message';
 
 const SIZE = 1000;
 
@@ -19,11 +19,15 @@ interface Message {
   sort?: any;
 }
 
+interface BoolQuery {
+  bool: { [key: string]: any };
+}
+
 export function transformAuditMessagesProvider(callWithRequest: callWithRequestType) {
   // search for audit messages,
   // transformId is optional. without it, all jobs will be listed.
   async function getTransformAuditMessages(transformId: string) {
-    const query = {
+    const query: BoolQuery = {
       bool: {
         filter: [
           {
@@ -43,7 +47,6 @@ export function transformAuditMessagesProvider(callWithRequest: callWithRequestT
     if (transformId !== undefined) {
       query.bool.filter.push({
         bool: {
-          // @ts-ignore
           should: [
             {
               term: {

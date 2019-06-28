@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { MessageBasics } from '../../../common/types/messages';
+import { AuditMessageBase } from '../../../common/types/audit_message';
 
 interface Props {
-  message: MessageBasics;
+  message: AuditMessageBase;
   showTooltip: boolean;
 }
 
 const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];
 
-export const JobIcon: SFC<Props> = ({ message, showTooltip = false }) => {
+export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   if (message !== undefined) {
     let color = 'primary';
     const icon = 'alert';
