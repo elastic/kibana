@@ -1,0 +1,6 @@
+{
+  "id": "embeddable",
+  "version": "8",
+  "server": false,
+  "ui": true
+}
