@@ -33,26 +33,31 @@ exports[`MonitorList component renders a no items message when no data is provid
           "render": [Function],
         },
         Object {
-          "field": "monitor_id",
-          "name": "ID",
-          "sortable": true,
-        },
-        Object {
           "field": "state.monitor.name",
           "name": "Name",
+          "render": [Function],
+          "sortable": true,
         },
         Object {
           "field": "state.url.full",
           "name": "URL",
+          "render": [Function],
           "sortable": true,
-        },
-        Object {
-          "field": "state.url.scheme",
-          "name": "Type",
         },
         Object {
           "field": "state.checks",
           "name": "Checks",
+          "render": [Function],
+        },
+        Object {
+          "field": "histogram.points",
+          "name": "Downtime history",
+          "render": [Function],
+        },
+        Object {
+          "align": "right",
+          "field": "state",
+          "name": "Integrations",
           "render": [Function],
         },
       ]
@@ -63,30 +68,7 @@ exports[`MonitorList component renders a no items message when no data is provid
     items={Array []}
     loading={false}
     noItemsMessage="No uptime monitors found"
-    onChange={[MockFunction]}
-    pagination={
-      Object {
-        "hidePerPageOptions": false,
-        "pageIndex": 0,
-        "pageSize": 10,
-        "pageSizeOptions": Array [
-          5,
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 0,
-      }
-    }
     responsive={true}
-    sorting={
-      Object {
-        "sort": Object {
-          "direction": "asc",
-          "field": "monitor_id",
-        },
-      }
-    }
   />
 </EuiPanel>
 `;
@@ -124,26 +106,31 @@ exports[`MonitorList component renders the monitor list 1`] = `
           "render": [Function],
         },
         Object {
-          "field": "monitor_id",
-          "name": "ID",
-          "sortable": true,
-        },
-        Object {
           "field": "state.monitor.name",
           "name": "Name",
+          "render": [Function],
+          "sortable": true,
         },
         Object {
           "field": "state.url.full",
           "name": "URL",
+          "render": [Function],
           "sortable": true,
-        },
-        Object {
-          "field": "state.url.scheme",
-          "name": "Type",
         },
         Object {
           "field": "state.checks",
           "name": "Checks",
+          "render": [Function],
+        },
+        Object {
+          "field": "histogram.points",
+          "name": "Downtime history",
+          "render": [Function],
+        },
+        Object {
+          "align": "right",
+          "field": "state",
+          "name": "Integrations",
           "render": [Function],
         },
       ]
@@ -216,30 +203,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
     }
     loading={false}
     noItemsMessage="No uptime monitors found"
-    onChange={[MockFunction]}
-    pagination={
-      Object {
-        "hidePerPageOptions": false,
-        "pageIndex": 0,
-        "pageSize": 10,
-        "pageSizeOptions": Array [
-          5,
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 2,
-      }
-    }
     responsive={true}
-    sorting={
-      Object {
-        "sort": Object {
-          "direction": "asc",
-          "field": "monitor_id",
-        },
-      }
-    }
   />
 </EuiPanel>
 `;
