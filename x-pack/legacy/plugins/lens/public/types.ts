@@ -10,8 +10,10 @@ import { DragContextState } from './drag_drop';
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
+export type ErrorCallback = (e: { message: string }) => void;
+
 export interface EditorFrameInstance {
-  mount: (element: Element) => void;
+  mount: (element: Element, props: { onError: ErrorCallback }) => void;
   unmount: () => void;
 }
 

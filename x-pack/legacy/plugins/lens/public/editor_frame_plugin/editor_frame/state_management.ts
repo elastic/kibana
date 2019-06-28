@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EditorFrameProps } from '../editor_frame';
+import { Document } from '../../persistence/saved_object_store';
 
 export interface EditorFrameState {
+  persistedId?: string;
+  saving: boolean;
+  title: string;
   visualization: {
     activeId: string | null;
     state: unknown;
@@ -20,12 +25,32 @@ export interface EditorFrameState {
 
 export type Action =
   | {
+      type: 'RESET';
+      state: EditorFrameState;
+    }
+  | {
+      type: 'SAVING';
+      isSaving: boolean;
+    }
+  | {
+      type: 'UPDATE_TITLE';
+      title: string;
+    }
+  | {
+      type: 'UPDATE_PERSISTED_ID';
+      id: string;
+    }
+  | {
       type: 'UPDATE_DATASOURCE_STATE';
       newState: unknown;
     }
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
       newState: unknown;
+    }
+  | {
+      type: 'VISUALIZATION_LOADED';
+      doc: Document;
     }
   | {
       type: 'SWITCH_VISUALIZATION';
@@ -40,6 +65,8 @@ export type Action =
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
+    saving: false,
+    title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
     datasource: {
       state: null,
       isLoading: Boolean(props.initialDatasourceId),
@@ -54,6 +81,31 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
 
 export const reducer = (state: EditorFrameState, action: Action): EditorFrameState => {
   switch (action.type) {
+    case 'SAVING':
+      return { ...state, saving: action.isSaving };
+    case 'RESET':
+      return action.state;
+    case 'UPDATE_PERSISTED_ID':
+      return { ...state, persistedId: action.id };
+    case 'UPDATE_TITLE':
+      return { ...state, title: action.title };
+    case 'VISUALIZATION_LOADED':
+      return {
+        ...state,
+        persistedId: action.doc.id,
+        title: action.doc.title,
+        datasource: {
+          ...state.datasource,
+          activeId: action.doc.datasourceType || null,
+          isLoading: true,
+          state: action.doc.state.datasource,
+        },
+        visualization: {
+          ...state.visualization,
+          activeId: action.doc.visualizationType,
+          state: action.doc.state.visualization,
+        },
+      };
     case 'SWITCH_DATASOURCE':
       return {
         ...state,

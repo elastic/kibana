@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { Server } from 'hapi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
+import mappings from './mappings.json';
 
 import { PLUGIN_ID } from './common';
 
@@ -27,7 +28,22 @@ export const lens: LegacyPluginInitializer = kibana => {
         main: `plugins/${PLUGIN_ID}/index`,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
+      mappings,
+      savedObjectsManagement: {
+        lens: {
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
+          getInAppUrl: (obj: { id: string }) => ({
+            path: `/app/lens#/edit/${encodeURIComponent(obj.id)}`,
+            uiCapabilitiesPath: 'lens.show',
+          }),
+        },
+      },
+      // TODO: savedObjectsManagement is not in the uiExports type definition,
+      // so, we have to either fix the type signature and deal with merge
+      // conflicts, or simply cas to any here, and fix this later.
+    } as any,
 
     config: () => {
       return Joi.object({
