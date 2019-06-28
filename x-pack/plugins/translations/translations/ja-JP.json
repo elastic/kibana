@@ -5152,8 +5152,6 @@
     "xpack.main.featureRegistry.indexPatternFeatureName": "インデックスパターン管理",
     "xpack.main.featureRegistry.savedObjectsManagementFeatureName": "保存されたオブジェクトの管理",
     "xpack.main.featureRegistry.visualizeFeatureName": "可視化",
-    "xpack.main.uiSettings.adminEmailDescription": "監視からのクラスターアラートメール通知など、X-Pack 管理オペレーションの送信先のメールアドレスです。",
-    "xpack.main.uiSettings.adminEmailTitle": "管理者メール",
     "xpack.main.welcomeBanner.licenseIsExpiredDescription": "管理者または {updateYourLicenseLinkText} に直接お問い合わせください。",
     "xpack.main.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText": "ライセンスを更新",
     "xpack.main.welcomeBanner.licenseIsExpiredTitle": "ご使用の {licenseType} ライセンスは期限切れです",

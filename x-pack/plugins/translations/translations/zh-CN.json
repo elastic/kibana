@@ -4318,8 +4318,6 @@
     "xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText": "示例",
     "xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText": "遥测隐私声明",
     "xpack.telemetry.welcomeBanner.yesButtonLabel": "是",
-    "xpack.main.uiSettings.adminEmailDescription": "X-Pack 管理操作的接收人电子邮件地址，例如来自 Monitoring 的集群告警通知。",
-    "xpack.main.uiSettings.adminEmailTitle": "管理电子邮件",
     "xpack.main.welcomeBanner.licenseIsExpiredDescription": "联系您的管理员或直接{updateYourLicenseLinkText}。",
     "xpack.main.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText": "更新您的许可",
     "xpack.main.welcomeBanner.licenseIsExpiredTitle": "您的{licenseType}许可已过期",
