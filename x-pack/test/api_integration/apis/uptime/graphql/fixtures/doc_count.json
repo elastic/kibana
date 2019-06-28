@@ -1,1 +1,1 @@
-{ "getStatesIndexStatus": { "docCount": null, "indexExists": false } }
+{ "statesIndexStatus": { "docCount": { "count": 9 }, "indexExists": true } }
