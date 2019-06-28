@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFieldText, EuiIcon, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+} from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -37,6 +45,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     },
     [setHighlightTerm]
   );
+  const clearHighlightTerm = useCallback(() => setHighlightTerm(''), [setHighlightTerm]);
   useEffect(
     () => {
       debouncedOnChange([highlightTerm]);
@@ -73,32 +82,31 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
       closePopover={closePopover}
       ownFocus
     >
-      <div style={{ width: '210px' }}>
-        <EuiFieldText
-          placeholder="Term to highlight"
-          fullWidth={true}
-          value={highlightTerm}
-          onChange={changeHighlightTerm}
-          isLoading={isLoading}
-          aria-label="Term to highlight"
-          inputRef={ref => {
-            setInputRef(ref);
-          }}
-        />
-        <ButtonWrapper>
-          <EuiButton
-            color="primary"
-            isDisabled={!highlightTerm}
-            onClick={() => {
-              setHighlightTerm('');
-            }}
-            fullWidth={true}
-            size="s"
-          >
-            Clear highlights
-          </EuiButton>
-        </ButtonWrapper>
-      </div>
+      <LogHighlightsMenuContent>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiFieldText
+              placeholder="Terms to highlight"
+              fullWidth={true}
+              value={highlightTerm}
+              onChange={changeHighlightTerm}
+              isLoading={isLoading}
+              aria-label="Terms to highlight"
+              inputRef={ref => {
+                setInputRef(ref);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label="Clear terms to highlight"
+              color="danger"
+              iconType="trash"
+              onClick={clearHighlightTerm}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </LogHighlightsMenuContent>
     </EuiPopover>
   );
 };
@@ -107,6 +115,6 @@ const IconWrapper = euiStyled.span`
   padding-left: ${props => props.theme.eui.paddingSizes.xs};
 `;
 
-const ButtonWrapper = euiStyled.div`
-  padding-top: ${props => props.theme.eui.paddingSizes.xs};
+const LogHighlightsMenuContent = euiStyled.div`
+  width: 300px;
 `;
