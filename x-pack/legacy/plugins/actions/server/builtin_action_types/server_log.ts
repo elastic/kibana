@@ -19,7 +19,7 @@ const PARAMS_SCHEMA = Joi.object().keys({
 });
 
 export const actionType: ActionType = {
-  id: 'kibana.server-log',
+  id: '.server-log',
   name: 'server-log',
   unencryptedAttributes: [],
   validate: {

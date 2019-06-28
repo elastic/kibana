@@ -73,4 +73,5 @@ const createHttpServiceMock = () => {
 export const httpServiceMock = {
   create: createHttpServiceMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

@@ -11,8 +11,11 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 // eslint-disable-next-line import/no-default-export
 export default function serverLogTest({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('create server-log action', () => {
+    after(() => esArchiver.unload('empty_kibana'));
+
     it('should return 200 when creating a builtin server-log action', async () => {
       await supertest
         .post('/api/action')
@@ -20,7 +23,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         .send({
           attributes: {
             description: 'A server.log action',
-            actionTypeId: 'kibana.server-log',
+            actionTypeId: '.server-log',
             actionTypeConfig: {},
           },
         })
@@ -31,7 +34,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
             id: resp.body.id,
             attributes: {
               description: 'A server.log action',
-              actionTypeId: 'kibana.server-log',
+              actionTypeId: '.server-log',
               actionTypeConfig: {},
             },
             references: [],

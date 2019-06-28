@@ -162,6 +162,6 @@ test('throws an error when params is invalid', async () => {
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
   await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"params invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"The actionParams is invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
   );
 });

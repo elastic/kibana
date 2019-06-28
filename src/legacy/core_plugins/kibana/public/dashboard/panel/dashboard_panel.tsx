@@ -94,6 +94,7 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
     if (!initialized) {
       embeddableIsInitializing();
       embeddableFactory
+        // @ts-ignore -- going away with Embeddable V2
         .create(panel, embeddableStateChanged)
         .then((embeddable: Embeddable) => {
           if (this.mounted) {
