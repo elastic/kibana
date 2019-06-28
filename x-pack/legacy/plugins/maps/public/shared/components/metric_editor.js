@@ -41,7 +41,6 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange }) {
   };
 
   let fieldSelect;
-  let labelInput;
   if (metric.type && metric.type !== 'count') {
     const filterNumberFields = (field) => {
       return field.type === 'number';
@@ -64,6 +63,10 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange }) {
         />
       </EuiFormRow>
     );
+  }
+
+  let labelInput;
+  if (metric.type) {
     labelInput = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.customLabel', {
@@ -102,11 +105,11 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange }) {
 }
 
 MetricEditor.propTypes = {
-  metric: PropTypes.arrayOf(PropTypes.shape({
+  metric: PropTypes.shape({
     type: PropTypes.oneOf(METRIC_AGGREGATION_VALUES),
     field: PropTypes.string,
     label: PropTypes.string,
-  })),
+  }),
   fields: PropTypes.object,  // indexPattern.fields IndexedArray object
   onChange: PropTypes.func.isRequired,
   metricsFilter: PropTypes.func,

@@ -8,30 +8,23 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButtonIcon,
   EuiButton,
   EuiPanel,
 } from '@elastic/eui';
-
-import { METRIC_AGGREGATION_VALUES } from './metric_select';
 import { MetricEditor } from './metric_editor';
 
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
 
-  function onMetricChange(metric, index) {
-    onChange([
-      ...metrics.slice(0, index),
-      metric,
-      ...metrics.slice(index + 1)
-    ]);
-  }
-
   function renderMetrics() {
     return metrics.map((metric, index) => {
-      const onChange = (metric) => {
-        onMetricChange(metric, index);
+      const onMetricChange = (metric) => {
+        onChange([
+          ...metrics.slice(0, index),
+          metric,
+          ...metrics.slice(index + 1)
+        ]);
       };
 
       const onRemove = () => {
@@ -65,7 +58,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
           paddingSize="s"
         >
           <MetricEditor
-            onChange={onChange}
+            onChange={onMetricChange}
             metric={metric}
             fields={fields}
             metricsFilter={metricsFilter}
@@ -113,10 +106,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
 }
 
 MetricsEditor.propTypes = {
-  metrics: PropTypes.arrayOf(PropTypes.shape({
-    type: PropTypes.oneOf(METRIC_AGGREGATION_VALUES),
-    field: PropTypes.string,
-  })),
+  metrics: PropTypes.array,
   fields: PropTypes.object,  // indexPattern.fields IndexedArray object
   onChange: PropTypes.func.isRequired,
   allowMultipleMetrics: PropTypes.bool,
