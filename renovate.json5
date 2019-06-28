@@ -233,22 +233,6 @@
         allowedVersions: '^1.6.2',
       },
       {
-        groupSlug: 'json-stable-stringify',
-        groupName: 'json-stable-stringify related packages',
-        packageNames: [
-          'json-stable-stringify',
-          '@types/json-stable-stringify',
-        ],
-      },
-      {
-        groupSlug: 'lodash.clonedeep',
-        groupName: 'lodash.clonedeep related packages',
-        packageNames: [
-          'lodash.clonedeep',
-          '@types/lodash.clonedeep',
-        ],
-      },
-      {
         groupSlug: 'bluebird',
         groupName: 'bluebird related packages',
         packageNames: [
@@ -385,6 +369,14 @@
         ],
       },
       {
+        groupSlug: 'json-stable-stringify',
+        groupName: 'json-stable-stringify related packages',
+        packageNames: [
+          'json-stable-stringify',
+          '@types/json-stable-stringify',
+        ],
+      },
+      {
         groupSlug: 'json5',
         groupName: 'json5 related packages',
         packageNames: [
@@ -414,6 +406,14 @@
         packageNames: [
           'lodash',
           '@types/lodash',
+        ],
+      },
+      {
+        groupSlug: 'lodash.clonedeep',
+        groupName: 'lodash.clonedeep related packages',
+        packageNames: [
+          'lodash.clonedeep',
+          '@types/lodash.clonedeep',
         ],
       },
       {
