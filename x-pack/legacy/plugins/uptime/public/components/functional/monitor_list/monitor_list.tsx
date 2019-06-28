@@ -174,7 +174,9 @@ export const MonitorListComponent = (props: Props) => {
             },
             {
               field: 'state.monitor.status',
-              name: 'Status',
+              name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+                defaultMessage: 'Status',
+              }),
               render: (status: string, { state: { timestamp } }: MonitorSummary) => {
                 return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
               },
@@ -197,7 +199,9 @@ export const MonitorListComponent = (props: Props) => {
             },
             {
               field: 'state.url.full',
-              name: 'URL',
+              name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+                defaultMessage: 'URL',
+              }),
               render: (url: string, summary: MonitorSummary) => (
                 <Fragment>
                   <EuiLink href={url} target="_blank" color="text">
@@ -209,12 +213,16 @@ export const MonitorListComponent = (props: Props) => {
             },
             {
               field: 'state.checks',
-              name: 'Checks',
+              name: i18n.translate('xpack.uptime.monitorList.checksColumnLabel', {
+                defaultMessage: 'Checks',
+              }),
               render: (checks: any[]) => <EuiBadge>{checks.length}</EuiBadge>,
             },
             {
               field: 'histogram.points',
-              name: 'Downtime history',
+              name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
+                defaultMessage: 'Downtime history',
+              }),
               render: (histogramSeries: SummaryHistogramPoint[] | null) => (
                 <MonitorBarSeries
                   absoluteStartDate={absoluteStartDate}
