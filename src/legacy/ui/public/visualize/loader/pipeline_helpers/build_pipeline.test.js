@@ -157,15 +157,15 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     describe('handles metric function', () => {
       const params = { metric: {} };
       it('without buckets', () => {
-        const schemas = { metric: [0, 1] };
+        const schemas = { metric: [{ accessor: 0 }, { accessor: 1 }] };
         const actual = buildPipelineVisFunction.metric({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
 
       it('with buckets', () => {
         const schemas = {
-          metric: [0, 1],
-          group: [2]
+          metric: [{ accessor: 0 }, { accessor: 1 }],
+          group: [{ accessor: 2 }]
         };
         const actual = buildPipelineVisFunction.metric({ params }, schemas);
         expect(actual).toMatchSnapshot();

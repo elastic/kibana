@@ -10,8 +10,8 @@ import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
-import { RepositoryAdd, RepositoryEdit, SnapshotRestoreHome } from './sections';
-import { loadPermissions } from './services/http';
+import { RepositoryAdd, RepositoryEdit, RestoreSnapshot, SnapshotRestoreHome } from './sections';
+import { useLoadPermissions } from './services/http';
 import { useAppDependencies } from './index';
 
 export const App: React.FunctionComponent = () => {
@@ -29,7 +29,7 @@ export const App: React.FunctionComponent = () => {
       hasPermission: true,
       missingClusterPrivileges: [],
     },
-  } = loadPermissions();
+  } = useLoadPermissions();
 
   if (loadingPermissions) {
     return (
@@ -73,7 +73,7 @@ export const App: React.FunctionComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.app.deniedPermissionDescription"
-                defaultMessage="To use Snapshot Repositories, you must have {clusterPrivilegesCount,
+                defaultMessage="To use Snapshot and Restore, you must have {clusterPrivilegesCount,
                   plural, one {this cluster privilege} other {these cluster privileges}}: {clusterPrivileges}."
                 values={{
                   clusterPrivileges: missingClusterPrivileges.join(', '),
@@ -87,7 +87,7 @@ export const App: React.FunctionComponent = () => {
     );
   }
 
-  const sections: Section[] = ['repositories', 'snapshots'];
+  const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
   const sectionsRegex = sections.join('|');
 
   return (
@@ -99,6 +99,16 @@ export const App: React.FunctionComponent = () => {
           exact
           path={`${BASE_PATH}/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
           component={SnapshotRestoreHome}
+        />
+        <Redirect
+          exact
+          from={`${BASE_PATH}/restore/:repositoryName`}
+          to={`${BASE_PATH}/snapshots`}
+        />
+        <Route
+          exact
+          path={`${BASE_PATH}/restore/:repositoryName/:snapshotId*`}
+          component={RestoreSnapshot}
         />
         <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
       </Switch>

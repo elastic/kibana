@@ -22,3 +22,5 @@ type MethodKeysOf<T> = {
 type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 
 declare module 'axios/lib/adapters/xhr';
+
+type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
