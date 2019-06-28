@@ -17,6 +17,7 @@ import {
 import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
+import { DragDrop } from '../../drag_drop';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -314,10 +315,11 @@ Object {
           title: 'my title',
           state: {},
           datasourceSuggestionId: 0,
+          previewIcon: 'empty',
         },
       ]);
 
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,
@@ -365,16 +367,18 @@ Object {
             isFirst: true,
           },
           datasourceSuggestionId: 1,
+          previewIcon: 'empty',
         },
         {
           score: 0.5,
           title: 'second suggestion',
           state: {},
           datasourceSuggestionId: 0,
+          previewIcon: 'empty',
         },
       ]);
 
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,
@@ -392,7 +396,7 @@ Object {
     });
 
     it("should do nothing when the visualization can't use the suggestions", () => {
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,

@@ -6,18 +6,23 @@
 
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
-
+import { toastNotifications } from 'ui/notify';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
 export function App({ editorFrame }: { editorFrame: EditorFrameInstance }) {
   return (
     <I18nProvider>
-      <div>
-        <h1>Lens</h1>
-
-        <NativeRenderer render={editorFrame.mount} nativeProps={undefined} />
-      </div>
+      <NativeRenderer
+        className="lnsPage"
+        render={editorFrame.mount}
+        nativeProps={{
+          onError: (e: { message: string }) =>
+            toastNotifications.addDanger({
+              title: e.message,
+            }),
+        }}
+      />
     </I18nProvider>
   );
 }

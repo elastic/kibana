@@ -29,9 +29,6 @@ Object {
         ],
         "splitSeriesAccessors": Array [],
         "stackAccessors": Array [],
-        "title": Array [
-          "Foo",
-        ],
         "x": Array [
           Object {
             "chain": Array [
@@ -39,6 +36,9 @@ Object {
                 "arguments": Object {
                   "accessor": Array [
                     "a",
+                  ],
+                  "hide": Array [
+                    false,
                   ],
                   "position": Array [
                     "bottom",
@@ -63,6 +63,13 @@ Object {
               Object {
                 "arguments": Object {
                   "accessors": Array [
+                    "b",
+                    "c",
+                  ],
+                  "hide": Array [
+                    false,
+                  ],
+                  "labels": Array [
                     "b",
                     "c",
                   ],

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import { Visualization, DatasourceSuggestion } from '../../types';
 import { Action } from './state_management';
 
@@ -13,6 +14,8 @@ export interface Suggestion {
   score: number;
   title: string;
   state: unknown;
+  previewExpression?: Ast | string;
+  previewIcon: string;
 }
 
 /**

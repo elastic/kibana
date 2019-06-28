@@ -1,0 +1,96 @@
+
+.lnsPage {
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.lnsHeader {
+  padding: $euiSize;
+  padding-bottom: 0;
+}
+
+.lnsPageMainContent {
+  display: flex;
+}
+
+.lnsSidebar {
+  @include euiScrollBar;
+  overflow: hidden auto;
+  padding: $euiSize;
+  margin: 0;
+  flex: 1 0 18%;
+  min-width: ($euiSize * 16);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.lnsSidebar--right {
+  min-width: ($euiSize * 18);
+}
+
+.lnsPageBody {
+  @include euiScrollBar;
+  padding-top: $euiSize;
+  padding-bottom: $euiSize;
+  overflow: hidden auto;
+
+  &:first-child {
+    padding-left: $euiSize;
+  }
+
+  .lnsPageContent {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+
+    .lnsPageContentHeader {
+      padding: $euiSize;
+      border-bottom: $euiBorderThin;
+      margin-bottom: 0;
+    }
+
+    .lnsPageContentBody {
+      flex-grow: 1;
+      padding: $euiSizeXL;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+
+      > * {
+        flex: 1 1 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+      }
+    }
+  }
+}
+
+.lnsExpressionOutput {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+.lnsTitleInput {
+  width: 100%;
+  min-width: 100%;
+  border: 0;
+  font: inherit;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.2em;
+}
+
+@import './suggestion_panel.scss';

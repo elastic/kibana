@@ -58,6 +58,7 @@ export interface ParamEditorProps {
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
 }
+
 export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   displayName: string;
@@ -69,8 +70,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
   ) => C;
-  inlineOptions?: React.ComponentType<ParamEditorProps>;
-  contextMenu?: (props: ParamEditorProps) => JSX.Element[];
+  paramEditor?: React.ComponentType<ParamEditorProps>;
   toEsAggsConfig: (column: C, columnId: string) => unknown;
 }
 

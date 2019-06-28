@@ -8,6 +8,7 @@ import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
 import { State } from './types';
+import { buildExpression } from './to_expression';
 
 const columnSortOrder = {
   date: 0,
@@ -75,28 +76,55 @@ function getSuggestion(
   // TODO: Localize the title, label, etc
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
+  const state: State = {
+    legend: { isVisible: true, position: Position.Right },
+    seriesType: isDate ? 'line' : 'bar',
+    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
+    stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
+    x: {
+      accessor: xValue.columnId,
+      position: Position.Bottom,
+      showGridlines: false,
+      title: xTitle,
+    },
+    y: {
+      accessors: yValues.map(col => col.columnId),
+      position: Position.Left,
+      showGridlines: false,
+      title: yTitle,
+    },
+  };
+
+  const labels: Partial<Record<string, string>> = {};
+  yValues.forEach(({ columnId, operation: { label } }) => {
+    if (label) {
+      labels[columnId] = label;
+    }
+  });
+
   return {
     title,
     score: 1,
     datasourceSuggestionId,
-    state: {
-      title,
-      legend: { isVisible: true, position: Position.Right },
-      seriesType: isDate ? 'line' : 'bar',
-      splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
-      stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
-      x: {
-        accessor: xValue.columnId,
-        position: Position.Bottom,
-        showGridlines: false,
-        title: xTitle,
+    state,
+    previewIcon: isDate ? 'visLine' : 'visBar',
+    previewExpression: buildExpression(
+      {
+        ...state,
+        x: {
+          ...state.x,
+          hide: true,
+        },
+        y: {
+          ...state.y,
+          hide: true,
+        },
+        legend: {
+          ...state.legend,
+          isVisible: false,
+        },
       },
-      y: {
-        accessors: yValues.map(col => col.columnId),
-        position: Position.Left,
-        showGridlines: false,
-        title: yTitle,
-      },
-    },
+      labels
+    ),
   };
 }

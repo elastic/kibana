@@ -450,6 +450,46 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getDatasourceSuggestionsFromCurrentState', () => {
+    it('returns no suggestions if there are no columns', () => {
+      expect(
+        indexPatternDatasource.getDatasourceSuggestionsFromCurrentState({
+          indexPatterns: expectedIndexPatterns,
+          columnOrder: [],
+          columns: {},
+          currentIndexPatternId: '1',
+        })
+      ).toEqual([]);
+    });
+
+    it('returns a single suggestion containing the current columns', async () => {
+      const state = await indexPatternDatasource.initialize(persistedState);
+      expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)).toEqual([
+        {
+          state: {
+            ...persistedState,
+            indexPatterns: expectedIndexPatterns,
+          },
+          table: {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'col1',
+                operation: {
+                  id: 'op1',
+                  label: 'My Op',
+                  dataType: 'string',
+                  isBucketed: true,
+                },
+              },
+            ],
+          },
+        },
+      ]);
+    });
+  });
+
   describe('#getPublicAPI', () => {
     let publicAPI: DatasourcePublicAPI;
 
@@ -476,6 +516,10 @@ describe('IndexPattern Data Source', () => {
           dataType: 'string',
           isBucketed: true,
         } as Operation);
+      });
+
+      it('should return null for non-existant columns', () => {
+        expect(publicAPI.getOperationForColumnId('col2')).toBe(null);
       });
     });
   });

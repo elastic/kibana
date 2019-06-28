@@ -15,6 +15,12 @@ describe('editor_frame state management', () => {
 
     beforeEach(() => {
       props = {
+        onError: jest.fn(),
+        redirectTo: jest.fn(),
+        store: {
+          load: jest.fn(),
+          save: jest.fn(),
+        },
         datasourceMap: { testDatasource: ({} as unknown) as Datasource },
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
         initialDatasourceId: 'testDatasource',
@@ -56,6 +62,8 @@ describe('editor_frame state management', () => {
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'aaa',
           visualization: {
             activeId: 'testVis',
             state: {},
@@ -79,6 +87,8 @@ describe('editor_frame state management', () => {
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'bbb',
           visualization: {
             activeId: 'testVis',
             state: {},
@@ -103,6 +113,8 @@ describe('editor_frame state management', () => {
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'ccc',
           visualization: {
             activeId: 'testVis',
             state: testVisState,
@@ -129,6 +141,8 @@ describe('editor_frame state management', () => {
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'ddd',
           visualization: {
             activeId: 'testVis',
             state: testVisState,
@@ -154,6 +168,8 @@ describe('editor_frame state management', () => {
             state: {},
             isLoading: false,
           },
+          saving: false,
+          title: 'eee',
           visualization: {
             activeId: 'testVis',
             state: {},
@@ -169,6 +185,178 @@ describe('editor_frame state management', () => {
       expect(newState.visualization.activeId).toBe(null);
       expect(newState.datasource.activeId).toBe('testDatasource2');
       expect(newState.datasource.state).toBe(null);
+    });
+
+    it('should mark as saving', () => {
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          saving: false,
+          title: 'fff',
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'SAVING',
+          isSaving: true,
+        }
+      );
+
+      expect(newState.saving).toBeTruthy();
+    });
+
+    it('should mark as saved', () => {
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          saving: false,
+          title: 'hhh',
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'SAVING',
+          isSaving: false,
+        }
+      );
+
+      expect(newState.saving).toBeFalsy();
+    });
+
+    it('should change the persisted id', () => {
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          saving: false,
+          title: 'iii',
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'UPDATE_PERSISTED_ID',
+          id: 'baz',
+        }
+      );
+
+      expect(newState.persistedId).toEqual('baz');
+    });
+
+    it('should reset the state', () => {
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          saving: false,
+          title: 'jjj',
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'RESET',
+          state: {
+            datasource: {
+              activeId: 'z',
+              isLoading: false,
+              state: { hola: 'muchacho' },
+            },
+            persistedId: 'bar',
+            saving: false,
+            title: 'lll',
+            visualization: {
+              activeId: 'q',
+              state: { my: 'viz' },
+            },
+          },
+        }
+      );
+
+      expect(newState).toMatchObject({
+        datasource: {
+          activeId: 'z',
+          isLoading: false,
+          state: { hola: 'muchacho' },
+        },
+        persistedId: 'bar',
+        saving: false,
+        visualization: {
+          activeId: 'q',
+          state: { my: 'viz' },
+        },
+      });
+    });
+
+    it('should load the state from the doc', () => {
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          saving: false,
+          title: 'mmm',
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'VISUALIZATION_LOADED',
+          doc: {
+            datasourceType: 'a',
+            id: 'b',
+            state: {
+              datasource: { foo: 'c' },
+              visualization: { bar: 'd' },
+            },
+            title: 'heyo!',
+            type: 'lens',
+            visualizationType: 'line',
+          },
+        }
+      );
+
+      expect(newState).toEqual({
+        datasource: {
+          activeId: 'a',
+          isLoading: true,
+          state: {
+            foo: 'c',
+          },
+        },
+        persistedId: 'b',
+        saving: false,
+        title: 'heyo!',
+        visualization: {
+          activeId: 'line',
+          state: {
+            bar: 'd',
+          },
+        },
+      });
     });
   });
 });
