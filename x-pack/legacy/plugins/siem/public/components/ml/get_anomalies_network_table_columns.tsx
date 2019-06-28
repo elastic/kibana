@@ -36,9 +36,7 @@ export const getAnomaliesNetworkTableColumns = (
       getRowItemDraggable({
         rowItem: ip,
         attrName: anomaliesByNetwork.type,
-        idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(
-          anomaliesByNetwork
-        )}-networkIp`,
+        idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(anomaliesByNetwork)}`,
         render: item => <IPDetailsLink ip={item} />,
       }),
   },

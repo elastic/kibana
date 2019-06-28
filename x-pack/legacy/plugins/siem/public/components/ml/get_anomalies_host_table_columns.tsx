@@ -36,7 +36,9 @@ export const getAnomaliesHostTableColumns = (
       getRowItemDraggable({
         rowItem: hostName,
         attrName: 'host.name',
-        idPrefix: `anomalies-host-table-${createCompoundHostKey(anomaliesByHost)}-hostName`,
+        idPrefix: `anomalies-host-table-hostName-${createCompoundHostKey(
+          anomaliesByHost
+        )}-hostName`,
         render: item => <HostDetailsLink hostName={item} />,
       }),
   },
@@ -48,7 +50,7 @@ export const getAnomaliesHostTableColumns = (
       <AnomalyScore
         startDate={startDate}
         endDate={endDate}
-        jobKey={createCompoundHostKey(anomaliesByHost)}
+        jobKey={`anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`}
         narrowDateRange={narrowDateRange}
         interval={interval}
         score={anomaliesByHost.anomaly}
@@ -61,7 +63,9 @@ export const getAnomaliesHostTableColumns = (
     sortable: true,
     render: (entityValue, anomaliesByHost) => (
       <EntityDraggable
-        idPrefix={`anomalies-host-table-${createCompoundHostKey(anomaliesByHost)}-entity`}
+        idPrefix={`anomalies-host-table-entityValue${createCompoundHostKey(
+          anomaliesByHost
+        )}-entity`}
         entityName={anomaliesByHost.anomaly.entityName}
         entityValue={entityValue}
       />
@@ -81,9 +85,9 @@ export const getAnomaliesHostTableColumns = (
               grow={false}
             >
               <EntityDraggable
-                idPrefix={`anomalies-host-table-${entityName}-${entityValue}-${createCompoundHostKey(
+                idPrefix={`anomalies-host-table-influencers-${entityName}-${entityValue}-${createCompoundHostKey(
                   anomaliesByHost
-                )}-influencers`}
+                )}`}
                 entityName={entityName}
                 entityValue={entityValue}
               />
