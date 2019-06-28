@@ -42,22 +42,6 @@ export class FilterEditor extends Component {
     this._loadIndexPatterns();
   }
 
-  // componentDidUpdate(prevProps, prevState) {
-  //   const prevQuery = prevProps.layer.getQuery();
-  //   const currentQuery = this.props.layer.getQuery();
-  //   const prevSavedQuery = prevState.savedQuery;
-  //   const currentSavedQuery = this.state.savedQuery;
-  //   if (prevSavedQuery !== currentSavedQuery) {
-  //     console.log(`the savedQuery prop has changed from ${prevSavedQuery} to ${currentSavedQuery}`);
-  //   }
-  //   if (prevQuery !== currentQuery) {
-  //     console.log(`the query prop has changed from ${prevQuery} to ${currentQuery}`);
-  //   }
-  //   if (prevState.savedQuery !== this.state.savedQuery) {
-  //     console.log(`the incomming savedQuery ${prevState.savedQuery} is different to the one on state ${this.state.savedQuery}`);
-  //   }
-  // }
-
   componentWillUnmount() {
     this._isMounted = false;
   }
@@ -115,21 +99,21 @@ export class FilterEditor extends Component {
     const newSavedQuery = await savedQueryService.getSavedQuery(savedQuery.id);
     await this.setState({ savedQuery: newSavedQuery });
     this.props.setLayerQuery(this.props.layer.getId(), newSavedQuery.attributes.query);
+    this._close();
   }
 
   _onSavedQueryChange = (changedSavedQuery) => {
     this._addOrUpdateSavedQuery(changedSavedQuery, this.state.savedQuery);
   }
 
-  _addOrUpdateSavedQuery = (currentSavedQuery, oldSavedQuery) => {
+  _addOrUpdateSavedQuery = async (currentSavedQuery, oldSavedQuery) => {
     if (!currentSavedQuery) return;
-    this._getSavedQueryFromService(currentSavedQuery);
-    // this.setState({ currentSavedQuery: currentSavedQuery.id });
-    this.setState({ savedQuery: currentSavedQuery });
+    await this._getSavedQueryFromService(currentSavedQuery);
+    await this.setState({ savedQuery: currentSavedQuery });
     if (currentSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
       this.props.setLayerQuery(this.props.layer.getId(), currentSavedQuery.attributes.query);
+      this._close();
     }
-    this._renderOpenButton();
   }
 
   _renderQueryPopover() {
