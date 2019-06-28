@@ -19,7 +19,7 @@ type ClusterPrivilege = Record<string, boolean>;
 interface Response {
   privileges: Privileges;
   upgradeInProgress: boolean;
-  isPlatinumLicense: boolean;
+  isPlatinumOrTrialLicense: boolean;
   mlEnabledInSpace: boolean;
 }
 
@@ -36,21 +36,21 @@ export function privilegesProvider(
     const upgradeInProgress = await isUpgradeInProgress();
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
     const license = checkLicense(xpackMainPlugin.info);
-    const isPlatinumLicense = license.licenseType === LICENSE_TYPE.PLATINUM;
+    const isPlatinumOrTrialLicense = license.licenseType === LICENSE_TYPE.FULL;
     const mlEnabledInSpace = await isMlEnabled();
 
-    const setGettingPrivileges = isPlatinumLicense
-      ? setPlatinumGettingPrivileges
+    const setGettingPrivileges = isPlatinumOrTrialLicense
+      ? setFullGettingPrivileges
       : setBasicGettingPrivileges;
 
-    const setActionPrivileges = isPlatinumLicense
-      ? setPlatinumActionPrivileges
+    const setActionPrivileges = isPlatinumOrTrialLicense
+      ? setFullActionPrivileges
       : setBasicActionPrivileges;
 
     if (mlEnabledInSpace === false) {
       // if ML isn't enabled in the current space,
       // return with the default privileges (all false)
-      return { privileges, upgradeInProgress, isPlatinumLicense, mlEnabledInSpace };
+      return { privileges, upgradeInProgress, isPlatinumOrTrialLicense, mlEnabledInSpace };
     }
 
     if (securityDisabled === true) {
@@ -76,12 +76,12 @@ export function privilegesProvider(
         setActionPrivileges(cluster, privileges);
       }
     }
-    return { privileges, upgradeInProgress, isPlatinumLicense, mlEnabledInSpace };
+    return { privileges, upgradeInProgress, isPlatinumOrTrialLicense, mlEnabledInSpace };
   }
   return { getPrivileges };
 }
 
-function setPlatinumGettingPrivileges(
+function setFullGettingPrivileges(
   cluster: ClusterPrivilege = {},
   privileges: Privileges,
   forceTrue = false
@@ -127,7 +127,7 @@ function setPlatinumGettingPrivileges(
   }
 }
 
-function setPlatinumActionPrivileges(
+function setFullActionPrivileges(
   cluster: ClusterPrivilege = {},
   privileges: Privileges,
   forceTrue = false
