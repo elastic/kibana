@@ -22,7 +22,14 @@ export const mockNewPlatformBackdoor = () => {
     __setup__: () => {},
     __start__: () => {},
     npSetup: {
-      core: {},
+      core: {
+        i18n: {
+          Context: {},
+        },
+        chrome: {
+          recentlyAccessed: false,
+        },
+      },
       plugins: {
         data: {
           expressions: {
@@ -42,7 +49,11 @@ export const mockNewPlatformBackdoor = () => {
       },
     },
     npStart: {
-      core: {},
+      core: {
+        uiSettings: {
+          get: () => true,
+        },
+      },
       plugins: {
         data: {},
       },

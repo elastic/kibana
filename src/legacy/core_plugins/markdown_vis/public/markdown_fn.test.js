@@ -25,7 +25,7 @@ jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/inde
 describe('interpreter/functions#markdown', () => {
   const fn = functionWrapper(kibanaMarkdown);
   const args = {
-    fontSize: 12,
+    font: { spec: { fontSize: 12 } },
     openLinksInNewTab: true,
     markdown: '## hello _markdown_',
   };
