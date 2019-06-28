@@ -64,4 +64,10 @@ export const dataFrame = {
       method: 'POST',
     });
   },
+  getTransformAuditMessages(transformId) {
+    return http({
+      url: `${basePath}/_data_frame/transforms/${transformId}/messages`,
+      method: 'GET',
+    });
+  },
 };
