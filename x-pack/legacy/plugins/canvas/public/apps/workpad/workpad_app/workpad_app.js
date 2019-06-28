@@ -11,6 +11,8 @@ import { Toolbar } from '../../../components/toolbar';
 import { Workpad } from '../../../components/workpad';
 import { WorkpadHeader } from '../../../components/workpad_header';
 
+export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
+
 export class WorkpadApp extends React.PureComponent {
   static propTypes = {
     isWriteable: PropTypes.bool.isRequired,
@@ -45,7 +47,10 @@ export class WorkpadApp extends React.PureComponent {
 
               <div className="canvasLayout__stageContent" onMouseDown={deselectElement}>
                 {/* NOTE: canvasWorkpadContainer is used for exporting */}
-                <div className="canvasWorkpadContainer canvasLayout__stageContentOverflow">
+                <div
+                  id={WORKPAD_CONTAINER_ID}
+                  className="canvasWorkpadContainer canvasLayout__stageContentOverflow"
+                >
                   <Workpad
                     registerLayout={this.registerLayout.bind(this)}
                     unregisterLayout={this.unregisterLayout.bind(this)}

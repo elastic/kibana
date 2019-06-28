@@ -5,8 +5,6 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
 import {
   EuiBadge,
   EuiButton,
@@ -26,7 +24,7 @@ import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
 import { uiMetricService } from '../../../../services/ui_metric';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositories: Repository[];
   managedRepository?: string;
   reload: () => Promise<void>;
@@ -34,13 +32,12 @@ interface Props extends RouteComponentProps {
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-const RepositoryTableUi: React.FunctionComponent<Props> = ({
+export const RepositoryTable: React.FunctionComponent<Props> = ({
   repositories,
   managedRepository,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
-  history,
 }) => {
   const {
     core: { i18n },
@@ -107,7 +104,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             );
 
             return (
-              <EuiToolTip content={label} delay="long">
+              <EuiToolTip content={label}>
                 <EuiButtonIcon
                   aria-label={i18n.translate(
                     'xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel',
@@ -143,7 +140,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                           }
                         );
                   return (
-                    <EuiToolTip content={label} delay="long">
+                    <EuiToolTip content={label}>
                       <EuiButtonIcon
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel',
@@ -252,9 +249,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
-            href={history.createHref({
-              pathname: `${BASE_PATH}/add_repository`,
-            })}
+            href={`#${BASE_PATH}/add_repository`}
             fill
             iconType="plusInCircle"
             data-test-subj="registerRepositoryButton"
@@ -312,5 +307,3 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     />
   );
 };
-
-export const RepositoryTable = withRouter(RepositoryTableUi);

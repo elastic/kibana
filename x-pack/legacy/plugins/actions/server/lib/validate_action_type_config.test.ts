@@ -12,6 +12,7 @@ test('should return passed in config when validation not defined', () => {
     {
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     },
     {
@@ -26,6 +27,7 @@ test('should validate and apply defaults when actionTypeConfig is valid', () => 
     {
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       validate: {
         config: Joi.object()
           .keys({
@@ -50,6 +52,7 @@ test('should validate and throw error when actionTypeConfig is invalid', () => {
       {
         id: 'my-action-type',
         name: 'My action type',
+        unencryptedAttributes: [],
         validate: {
           config: Joi.object()
             .keys({
