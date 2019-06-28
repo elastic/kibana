@@ -67,7 +67,7 @@ export function AddSettingsFlyout({
               This is where you define the configuration you want to sync to
               your service and agent. This initial version is supported by the
               Elastic APM Java agent and for sample rate configuration only. We
-              will continue to add support for central configuration for other
+              will continue to add support for Agent configuration for other
               agents and add more configuration options in future releases.
             </p>
           </EuiText>
