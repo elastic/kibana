@@ -68,12 +68,7 @@ export const DurationChart = ({
         data={ldl.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
         id={locationSpecId}
         key={`locline-${ldl.name}`}
-        name={i18n.translate(
-          'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
-          {
-            defaultMessage: ldl.name,
-          }
-        )}
+        name={ldl.name}
         xAccessor={0}
         xScaleType={ScaleType.Time}
         yAccessors={[1]}
