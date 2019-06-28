@@ -6,7 +6,7 @@
 
 import { getOperationTypesForField, getPotentialColumns } from './operations';
 import { IndexPatternPrivateState } from './indexpattern';
-import { hasField } from './state_helpers';
+import { hasField } from './utils';
 
 const expectedIndexPatterns = {
   1: {

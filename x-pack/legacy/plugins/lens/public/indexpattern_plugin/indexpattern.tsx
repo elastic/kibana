@@ -71,6 +71,7 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   params: {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    orderDirection: 'asc' | 'desc';
   };
 }
 
@@ -299,9 +300,18 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       if (hasBucket) {
-        const column = buildColumnForOperationType(0, hasBucket, undefined, field);
+        const countColumn = buildColumnForOperationType(1, 'count', state.columns);
 
-        const countColumn = buildColumnForOperationType(1, 'count');
+        // let column know about count column
+        const column = buildColumnForOperationType(
+          0,
+          hasBucket,
+          {
+            col2: countColumn,
+          },
+          undefined,
+          field
+        );
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {
@@ -336,9 +346,21 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           f => f.name === currentIndexPattern.timeFieldName
         )!;
 
-        const column = buildColumnForOperationType(0, operations[0], undefined, field);
+        const column = buildColumnForOperationType(
+          0,
+          operations[0],
+          state.columns,
+          undefined,
+          field
+        );
 
-        const dateColumn = buildColumnForOperationType(1, 'date_histogram', undefined, dateField);
+        const dateColumn = buildColumnForOperationType(
+          1,
+          'date_histogram',
+          state.columns,
+          undefined,
+          dateField
+        );
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {

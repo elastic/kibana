@@ -21,7 +21,7 @@ import {
 } from './operation_definitions/metrics';
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
-import { sortByField } from './state_helpers';
+import { sortByField } from './utils';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -67,8 +67,13 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   isApplicableForField: (field: IndexPatternField) => boolean;
   buildColumn: (
     operationId: string,
+    columns: Partial<Record<string, IndexPatternColumn>>,
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
+  ) => C;
+  onOtherColumnChanged?: (
+    currentColumn: C,
+    columns: Partial<Record<string, IndexPatternColumn>>
   ) => C;
   paramEditor?: React.ComponentType<ParamEditorProps>;
   toEsAggsConfig: (column: C, columnId: string) => unknown;
@@ -100,10 +105,11 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
 export function buildColumnForOperationType<T extends OperationType>(
   index: number,
   op: T,
+  columns: Partial<Record<string, IndexPatternColumn>>,
   suggestedOrder?: DimensionPriority,
   field?: IndexPatternField
 ): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, field);
+  return operationDefinitionMap[op].buildColumn(`${index}${op}`, columns, suggestedOrder, field);
 }
 
 export function getPotentialColumns(
@@ -117,14 +123,14 @@ export function getPotentialColumns(
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(index, op, suggestedOrder, field)
+        buildColumnForOperationType(index, op, state.columns, suggestedOrder, field)
       );
     })
     .reduce((prev, current) => prev.concat(current));
 
   operationDefinitions.forEach(operation => {
     if (operation.isApplicableWithoutField) {
-      columns.push(operation.buildColumn(operation.type, suggestedOrder));
+      columns.push(operation.buildColumn(operation.type, state.columns, suggestedOrder));
     }
   });
 

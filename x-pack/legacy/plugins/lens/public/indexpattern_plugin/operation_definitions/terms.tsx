@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
+import { IndexPatternField, TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
@@ -44,9 +44,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   },
   buildColumn(
     operationId: string,
+    columns: Partial<Record<string, IndexPatternColumn>>,
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
   ): TermsIndexPatternColumn {
+    const existingMetricColumn = Object.entries(columns)
+      .filter(([_columnId, column]) => column && !column.isBucketed)
+      .map(([id]) => id)[0];
+
     return {
       operationId,
       label: ofName(field ? field.name : ''),
@@ -57,7 +62,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       isBucketed: true,
       params: {
         size: 5,
-        orderBy: { type: 'alphabetical' },
+        orderBy: existingMetricColumn
+          ? { type: 'column', columnId: existingMetricColumn }
+          : { type: 'alphabetical' },
+        orderDirection: existingMetricColumn ? 'desc' : 'asc',
       },
     };
   },
@@ -70,7 +78,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       field: column.sourceField,
       orderBy:
         column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
-      order: 'desc',
+      order: column.params.orderDirection,
       size: column.params.size,
       otherBucket: false,
       otherBucketLabel: 'Other',
@@ -78,6 +86,23 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       missingBucketLabel: 'Missing',
     },
   }),
+  onOtherColumnChanged: (currentColumn, columns) => {
+    if (currentColumn.params.orderBy.type === 'column') {
+      // check whether the column is still there and still a metric
+      const columnSortedBy = columns[currentColumn.params.orderBy.columnId];
+      if (!columnSortedBy || columnSortedBy.isBucketed) {
+        return {
+          ...currentColumn,
+          params: {
+            ...currentColumn.params,
+            orderBy: { type: 'alphabetical' },
+            orderDirection: 'asc',
+          },
+        };
+      }
+    }
+    return currentColumn;
+  },
   paramEditor: ({ state, setState, columnId: currentColumnId }) => {
     const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     const SEPARATOR = '$$$';
@@ -140,11 +165,46 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
           })}
         >
           <EuiSelect
+            data-test-subj="indexPattern-terms-orderBy"
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
                 updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
+              )
+            }
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+              defaultMessage: 'Order by',
+            })}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+            defaultMessage: 'Order direction',
+          })}
+        >
+          <EuiSelect
+            data-test-subj="indexPattern-terms-orderDirection"
+            options={[
+              {
+                value: 'asc',
+                text: i18n.translate('xpack.lens.indexPattern.terms.orderAscending', {
+                  defaultMessage: 'Ascending',
+                }),
+              },
+              {
+                value: 'desc',
+                text: i18n.translate('xpack.lens.indexPattern.terms.orderDescending', {
+                  defaultMessage: 'Descending',
+                }),
+              },
+            ]}
+            value={currentColumn.params.orderDirection}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setState(
+                updateColumnParam(state, currentColumn, 'orderDirection', e.target.value as
+                  | 'asc'
+                  | 'desc')
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {

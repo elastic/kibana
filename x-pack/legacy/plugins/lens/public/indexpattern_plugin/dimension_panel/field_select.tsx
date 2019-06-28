@@ -15,7 +15,7 @@ import {
   OperationType,
   BaseIndexPatternColumn,
 } from '../indexpattern';
-import { hasField, sortByField } from '../state_helpers';
+import { hasField, sortByField } from '../utils';
 
 export interface FieldSelectProps {
   incompatibleSelectedOperationType: OperationType | null;

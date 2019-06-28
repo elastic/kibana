@@ -31,6 +31,7 @@ describe('terms', () => {
           params: {
             orderBy: { type: 'alphabetical' },
             size: 5,
+            orderDirection: 'asc',
           },
           sourceField: 'category',
         },
@@ -65,29 +66,152 @@ describe('terms', () => {
     });
   });
 
-  describe('popover param editor', () => {
-    it('should render current value and options', () => {
-      const setStateSpy = jest.fn();
-      const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
-      );
+  describe('buildColumn', () => {
+    it('should use existing metric column as order column', () => {
+      const termsColumn = termsOperation.buildColumn('abc', {
+        col1: {
+          operationId: 'op1',
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
 
-      expect(instance.find(EuiSelect).prop('value')).toEqual('alphabetical');
-      expect(
-        instance
-          .find(EuiSelect)
-          .prop('options')
-          .map(({ value }) => value)
-      ).toEqual(['column$$$col2', 'alphabetical']);
+          // Private
+          operationType: 'count',
+        },
+      });
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'column', columnId: 'col1' },
+        })
+      );
+    });
+  });
+
+  describe('onOtherColumnChanged', () => {
+    it('should keep the column if order by column still exists and is metric', () => {
+      const initialColumn: TermsIndexPatternColumn = {
+        operationId: 'op1',
+        label: 'Top value of category',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'column', columnId: 'col1' },
+          size: 5,
+          orderDirection: 'asc',
+        },
+        sourceField: 'category',
+      };
+      const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
+        col1: {
+          operationId: 'op1',
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+
+          // Private
+          operationType: 'count',
+        },
+      });
+      expect(updatedColumn).toBe(initialColumn);
     });
 
-    it('should update state with the order value', () => {
+    it('should switch to alphabetical ordering if the order column is removed', () => {
+      const termsColumn = termsOperation.onOtherColumnChanged!(
+        {
+          operationId: 'op1',
+          label: 'Top value of category',
+          dataType: 'string',
+          isBucketed: true,
+
+          // Private
+          operationType: 'terms',
+          params: {
+            orderBy: { type: 'column', columnId: 'col1' },
+            size: 5,
+            orderDirection: 'asc',
+          },
+          sourceField: 'category',
+        },
+        {}
+      );
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'alphabetical' },
+        })
+      );
+    });
+
+    it('should switch to alphabetical ordering if the order column is not a metric anymore', () => {
+      const termsColumn = termsOperation.onOtherColumnChanged!(
+        {
+          operationId: 'op1',
+          label: 'Top value of category',
+          dataType: 'string',
+          isBucketed: true,
+
+          // Private
+          operationType: 'terms',
+          params: {
+            orderBy: { type: 'column', columnId: 'col1' },
+            size: 5,
+            orderDirection: 'asc',
+          },
+          sourceField: 'category',
+        },
+        {
+          col1: {
+            operationId: 'op1',
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            params: {
+              interval: 'w',
+            },
+            sourceField: 'timestamp',
+          },
+        }
+      );
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'alphabetical' },
+        })
+      );
+    });
+  });
+
+  describe('popover param editor', () => {
+    it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
       );
 
-      instance.find(EuiSelect).prop('onChange')!({
+      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
+
+      expect(select.prop('value')).toEqual('alphabetical');
+
+      expect(select.prop('options').map(({ value }) => value)).toEqual([
+        'column$$$col2',
+        'alphabetical',
+      ]);
+    });
+
+    it('should update state with the order by value', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+      );
+
+      instance
+        .find(EuiSelect)
+        .find('[data-test-subj="indexPattern-terms-orderBy"]')
+        .prop('onChange')!({
         target: {
           value: 'column$$$col2',
         },
@@ -111,7 +235,51 @@ describe('terms', () => {
       });
     });
 
-    it('should render current value', () => {
+    it('should render current order direction value and options', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-orderDirection"]')
+        .find(EuiSelect);
+
+      expect(select.prop('value')).toEqual('asc');
+      expect(select.prop('options').map(({ value }) => value)).toEqual(['asc', 'desc']);
+    });
+
+    it('should update state with the order direction value', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+      );
+
+      instance
+        .find('[data-test-subj="indexPattern-terms-orderDirection"]')
+        .find(EuiSelect)
+        .prop('onChange')!({
+        target: {
+          value: 'desc',
+        },
+      } as React.ChangeEvent<HTMLSelectElement>);
+
+      expect(setStateSpy).toHaveBeenCalledWith({
+        ...state,
+        columns: {
+          ...state.columns,
+          col1: {
+            ...state.columns.col1,
+            params: {
+              ...(state.columns.col1 as TermsIndexPatternColumn).params,
+              orderDirection: 'desc',
+            },
+          },
+        },
+      });
+    });
+
+    it('should render current size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions state={state} setState={setStateSpy} columnId="col1" />

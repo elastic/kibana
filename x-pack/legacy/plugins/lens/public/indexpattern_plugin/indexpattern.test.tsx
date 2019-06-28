@@ -127,6 +127,7 @@ describe('IndexPattern Data Source', () => {
           params: {
             size: 5,
             orderBy: { type: 'alphabetical' },
+            orderDirection: 'asc',
           },
         },
       },
