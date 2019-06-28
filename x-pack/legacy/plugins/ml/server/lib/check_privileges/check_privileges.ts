@@ -17,10 +17,10 @@ import { mlPrivileges } from './privileges';
 type ClusterPrivilege = Record<string, boolean>;
 
 interface Response {
-  privileges: Privileges;
+  capabilities: Privileges;
   upgradeInProgress: boolean;
   isPlatinumOrTrialLicense: boolean;
-  mlEnabledInSpace: boolean;
+  mlFeatureEnabledInSpace: boolean;
 }
 
 export function privilegesProvider(
@@ -37,7 +37,7 @@ export function privilegesProvider(
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
     const license = checkLicense(xpackMainPlugin.info);
     const isPlatinumOrTrialLicense = license.licenseType === LICENSE_TYPE.FULL;
-    const mlEnabledInSpace = await isMlEnabled();
+    const mlFeatureEnabledInSpace = await isMlEnabled();
 
     const setGettingPrivileges = isPlatinumOrTrialLicense
       ? setFullGettingPrivileges
@@ -47,10 +47,15 @@ export function privilegesProvider(
       ? setFullActionPrivileges
       : setBasicActionPrivileges;
 
-    if (mlEnabledInSpace === false) {
+    if (mlFeatureEnabledInSpace === false) {
       // if ML isn't enabled in the current space,
       // return with the default privileges (all false)
-      return { privileges, upgradeInProgress, isPlatinumOrTrialLicense, mlEnabledInSpace };
+      return {
+        capabilities: privileges,
+        upgradeInProgress,
+        isPlatinumOrTrialLicense,
+        mlFeatureEnabledInSpace,
+      };
     }
 
     if (securityDisabled === true) {
@@ -76,7 +81,12 @@ export function privilegesProvider(
         setActionPrivileges(cluster, privileges);
       }
     }
-    return { privileges, upgradeInProgress, isPlatinumOrTrialLicense, mlEnabledInSpace };
+    return {
+      capabilities: privileges,
+      upgradeInProgress,
+      isPlatinumOrTrialLicense,
+      mlFeatureEnabledInSpace,
+    };
   }
   return { getPrivileges };
 }

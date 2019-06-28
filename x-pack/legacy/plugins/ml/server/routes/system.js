@@ -94,7 +94,7 @@ export function systemRoutes({
 
   route({
     method: 'GET',
-    path: '/api/ml/ml_privileges',
+    path: '/api/ml/ml_capabilities',
     async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       try {
