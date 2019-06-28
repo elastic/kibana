@@ -162,7 +162,7 @@ export function AddSettingFlyoutBody({
 
         <EuiFormRow
           label="Transaction sample rate"
-          helpText="Choose a rate between 0.00 and 1.0. Default configuration is 1.0 (100& of traces)."
+          helpText="Choose a rate between 0.00 and 1.0. Default configuration is 1.0 (100% of traces)."
           error={'Sample rate must be between 0.00 and 1'}
           isInvalid={isSampleRateValid}
         >
