@@ -11,9 +11,12 @@ import { SnapshotComponent } from '../snapshot';
 
 describe('Snapshot component', () => {
   const snapshot: SnapshotType = {
-    up: 8,
-    down: 2,
-    total: 10,
+    counts: {
+      up: 8,
+      down: 2,
+      mixed: 0,
+      total: 10,
+    },
     histogram: [
       { upCount: 7, downCount: 3, x: 1548697920000, x0: 1548697620000, y: 1 },
       { upCount: 7, downCount: 3, x: 1548698220000, x0: 1548697920000, y: 1 },
@@ -34,7 +37,13 @@ describe('Snapshot component', () => {
       <SnapshotComponent
         absoluteStartDate={1548697920000}
         absoluteEndDate={1548700920000}
-        colors={{ danger: '#F050F0', mean: '#001100', range: '#FF00FF', success: '#000000' }}
+        colors={{
+          danger: '#F050F0',
+          mean: '#001100',
+          range: '#FF00FF',
+          success: '#000000',
+          warning: '#0F0FFF',
+        }}
         data={{ snapshot }}
         loading={false}
       />
