@@ -40,12 +40,6 @@ describe.skip('<WatchList />', () => {
       testBed = await setup();
     });
 
-    test('should set the correct app title', () => {
-      const { exists, find } = testBed;
-      expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Watcher');
-    });
-
     describe('watches', () => {
       describe('when there are no watches', () => {
         beforeEach(() => {
@@ -97,6 +91,12 @@ describe.skip('<WatchList />', () => {
             await nextTick();
             testBed.component.update();
           });
+        });
+
+        test('should set the correct app title', () => {
+          const { exists, find } = testBed;
+          expect(exists('appTitle')).toBe(true);
+          expect(find('appTitle').text()).toEqual('Watcher');
         });
 
         test('should have a link to the documentation', () => {
