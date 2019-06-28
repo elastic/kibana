@@ -9,23 +9,26 @@ import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function slackTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function emailTest({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('create slack action', () => {
+  describe('create email action', () => {
     after(() => esArchiver.unload('empty_kibana'));
 
-    it('should return 200 when creating a slack action successfully', async () => {
+    it('should return 200 when creating an email action successfully', async () => {
       await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            description: 'A slack action',
-            actionTypeId: '.slack',
+            description: 'An email action',
+            actionTypeId: '.email',
             actionTypeConfig: {
-              webhookUrl: 'http://example.com',
+              service: 'gmail',
+              user: 'bob',
+              password: 'supersecret',
+              from: 'bob@example.com',
             },
           },
         })
@@ -35,9 +38,12 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
             type: 'action',
             id: resp.body.id,
             attributes: {
-              description: 'A slack action',
-              actionTypeId: '.slack',
-              actionTypeConfig: {},
+              description: 'An email action',
+              actionTypeId: '.email',
+              actionTypeConfig: {
+                from: 'bob@example.com',
+                service: 'gmail',
+              },
             },
             references: [],
             updated_at: resp.body.updated_at,
@@ -47,14 +53,14 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         });
     });
 
-    it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
+    it('should respond with a 400 Bad Request when creating an email action with an invalid config', async () => {
       await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            description: 'A slack action',
-            actionTypeId: '.slack',
+            description: 'An email action',
+            actionTypeId: '.email',
             actionTypeConfig: {},
           },
         })
@@ -64,7 +70,7 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The following actionTypeConfig attributes are invalid: webhookUrl [any.required]',
+              'The actionTypeConfig is invalid: [user]: expected value of type [string] but got [undefined]',
           });
         });
     });
