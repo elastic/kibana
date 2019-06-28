@@ -6,7 +6,7 @@
 
 import { MonitorSummary } from '../../../../common/graphql/types';
 import { addBasePath } from './add_base_path';
-import { buildHrefFromList } from './build_href';
+import { buildHref } from './build_href';
 
 export const getInfraContainerHref = (
   summary: MonitorSummary,
@@ -19,7 +19,7 @@ export const getInfraContainerHref = (
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(basePath, `/app/infra#/link-to/container-detail/${encodeURIComponent(ret)}`);
   };
-  return buildHrefFromList(summary.state.checks || [], 'container.id', getHref);
+  return buildHref(summary.state.checks || [], 'container.id', getHref);
 };
 
 export const getInfraKubernetesHref = (
@@ -34,7 +34,7 @@ export const getInfraKubernetesHref = (
     return addBasePath(basePath, `/app/infra#/link-to/pod-detail/${encodeURIComponent(ret)}`);
   };
 
-  return buildHrefFromList(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
+  return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
 };
 
 export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
@@ -62,5 +62,5 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
           )}',kind:kuery)`
         );
   };
-  return buildHrefFromList(summary.state.checks || [], 'monitor.ip', getHref);
+  return buildHref(summary.state.checks || [], 'monitor.ip', getHref);
 };
