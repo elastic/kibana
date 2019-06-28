@@ -36,7 +36,7 @@ soon the expiration date is:
 The 60-day and 30-day thresholds are skipped for Trial licenses, which are only
 valid for 30 days.
 
-Monitoring checks the cluster alert conditions every minute. Cluster
+The {monitor-features} check the cluster alert conditions every minute. Cluster
 alerts are automatically dismissed when the condition is resolved.
 
 include::cluster-alerts-license.asciidoc[]

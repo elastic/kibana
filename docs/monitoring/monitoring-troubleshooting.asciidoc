@@ -28,7 +28,7 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 
 *Symptoms:*
 
-The *Monitoring* page in {kib} is empty. 
+The *Stack Monitoring* page in {kib} is empty. 
 
 *Resolution:*
 
