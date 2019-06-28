@@ -673,6 +673,14 @@
         ],
       },
       {
+        groupSlug: 'nodemailer',
+        groupName: 'nodemailer related packages',
+        packageNames: [
+          'nodemailer',
+          '@types/nodemailer',
+        ],
+      },
+      {
         groupSlug: 'object-hash',
         groupName: 'object-hash related packages',
         packageNames: [
