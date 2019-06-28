@@ -27,6 +27,7 @@ import './app';
 import contextAppRouteTemplate from './index.html';
 import { getRootBreadcrumbs } from '../discover/breadcrumbs';
 import { npStart } from 'ui/new_platform';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 uiRoutes
   .when('/context/:indexPatternId/:type/:id*', {
@@ -77,7 +78,7 @@ function ContextAppRouteController(
     'contextAppRoute.state.successorCount',
   ], () => this.state.save(true));
 
-  const updateSubsciption = queryFilter.getUpdates$().subscribe({
+  const updateSubsciption = subscribeWithScope($scope, queryFilter.getUpdates$(), {
     next: () => {
       this.filters = _.cloneDeep(queryFilter.getFilters());
     }

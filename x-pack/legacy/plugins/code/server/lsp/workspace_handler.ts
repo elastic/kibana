@@ -356,7 +356,7 @@ export class WorkspaceHandler {
     return false;
   }
 
-  private async revisionDir(repositoryUri: string, revision: string) {
+  public async revisionDir(repositoryUri: string, revision: string) {
     return path.join(await this.workspaceDir(repositoryUri), revision);
   }
 

@@ -16,6 +16,8 @@ export const getPrettyShortcut = (shortcut: string): string => {
   result = result.replace(/right/i, '→');
   result = result.replace(/up/i, '↑');
   result = result.replace(/down/i, '↓');
+  result = result.replace(/plus/i, '+');
+  result = result.replace(/minus/i, '-');
 
   return result;
 };

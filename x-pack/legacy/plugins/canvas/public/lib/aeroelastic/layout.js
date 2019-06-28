@@ -26,12 +26,15 @@ import {
   cascadeProperties,
   draggingShape,
   getAdHocChildrenAnnotations,
+  getAlignAction,
+  getAlignDistributeTransformIntents,
   getAlignmentGuideAnnotations,
   getAlterSnapGesture,
   getAnnotatedShapes,
   getConfiguration,
   getConstrainedShapesWithPreexistingAnnotations,
   getCursor,
+  getDistributeAction,
   getDraggedPrimaryShape,
   getFocusedShape,
   getGroupAction,
@@ -89,9 +92,7 @@ const mouseTransformState = select(getMouseTransformState)(
   dragVector
 );
 
-const mouseTransformGesture = select(getMouseTransformGesture)(mouseTransformState);
-
-const transformGestures = mouseTransformGesture;
+const directManipulationTransformGestures = select(getMouseTransformGesture)(mouseTransformState);
 
 const selectedShapeObjects = select(getSelectedShapeObjects)(scene, shapes);
 
@@ -117,15 +118,31 @@ const symmetricManipulation = optionHeld; // as in comparable software applicati
 
 const resizeManipulator = select(getResizeManipulator)(configuration, symmetricManipulation);
 
-const transformIntents = select(getTransformIntents)(
+const directManipulationTransformIntents = select(getTransformIntents)(
   configuration,
-  transformGestures,
+  directManipulationTransformGestures,
   selectedShapes,
   shapes,
   cursorPosition,
   alterSnapGesture,
   resizeManipulator
 );
+
+const alignAction = select(getAlignAction)(actionEvent);
+const distributeAction = select(getDistributeAction)(actionEvent);
+
+const alignDistributeTransformIntents = select(getAlignDistributeTransformIntents)(
+  alignAction,
+  distributeAction,
+  shapes,
+  selectedShapes
+);
+
+const commandTransformIntents = alignDistributeTransformIntents; // will expand in the future, eg. nudge
+
+const transformIntents = select((directIntents, commandIntents) =>
+  directIntents.concat(commandIntents)
+)(directManipulationTransformIntents, commandTransformIntents);
 
 const transformedShapes = select(applyLocalTransforms)(shapes, transformIntents);
 
