@@ -18,17 +18,9 @@
  */
 
 import { registerTrigger, registerAction, attachAction, detachAction } from '..';
-import { createDeps } from './helpers';
+import { createDeps, expectError } from './helpers';
 
 const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
-const expectError = (fn: (...args: any) => any) => {
-  try {
-    fn();
-    throw new Error('Expected an error throw.');
-  } catch (error) {
-    return error;
-  }
-};
 
 test('can register trigger', () => {
   const deps = createDeps();
@@ -65,7 +57,7 @@ test('can register action', () => {
 test('can attach an action to a trigger', () => {
   const deps = createDeps();
   const trigger = {
-    id: 'MYTRIGGER',
+    id: 'MY-TRIGGER',
     actionIds: [],
   };
   const action = {
@@ -77,15 +69,15 @@ test('can attach an action to a trigger', () => {
 
   registerTrigger(deps)(trigger);
   registerAction(deps)(action);
-  attachAction(deps)('MYTRIGGER', HELLO_WORLD_ACTION_ID);
+  attachAction(deps)('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
 
   expect(trigger.actionIds).toEqual([HELLO_WORLD_ACTION_ID]);
 });
 
-test('can dettach an action to a trigger', () => {
+test('can detach an action to a trigger', () => {
   const deps = createDeps();
   const trigger = {
-    id: 'MYTRIGGER',
+    id: 'MY-TRIGGER',
     actionIds: [],
   };
   const action = {
@@ -97,8 +89,8 @@ test('can dettach an action to a trigger', () => {
 
   registerTrigger(deps)(trigger);
   registerAction(deps)(action);
-  attachAction(deps)('MYTRIGGER', HELLO_WORLD_ACTION_ID);
-  detachAction(deps)('MYTRIGGER', HELLO_WORLD_ACTION_ID);
+  attachAction(deps)('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+  detachAction(deps)('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
 
   expect(trigger.actionIds).toEqual([]);
 });

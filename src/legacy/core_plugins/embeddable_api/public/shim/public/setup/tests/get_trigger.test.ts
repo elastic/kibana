@@ -17,10 +17,33 @@
  * under the License.
  */
 
-export * from './types';
-export * from './register_trigger';
-export * from './register_action';
-export * from './register_embeddable_factory';
-export * from './attach_action';
-export * from './detach_action';
-export * from './get_trigger';
+import { getTrigger, registerTrigger } from '..';
+import { createDeps, expectError } from './helpers';
+
+test('can get Trigger from registry', () => {
+  const deps = createDeps();
+  registerTrigger(deps)({
+    actionIds: [],
+    description: 'foo',
+    id: 'bar',
+    title: 'baz',
+  });
+
+  const trigger = getTrigger(deps)('bar');
+
+  expect(trigger).toEqual({
+    actionIds: [],
+    description: 'foo',
+    id: 'bar',
+    title: 'baz',
+  });
+});
+
+test('throws if trigger does not exist', () => {
+  const deps = createDeps();
+
+  const error = expectError(() => getTrigger(deps)('foo'));
+
+  expect(error).toBeInstanceOf(Error);
+  expect(error.message).toMatchInlineSnapshot(`"Trigger [triggerId = foo] does not exist."`);
+});

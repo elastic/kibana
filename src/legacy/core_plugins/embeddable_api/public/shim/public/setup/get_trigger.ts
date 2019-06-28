@@ -17,10 +17,14 @@
  * under the License.
  */
 
-export * from './types';
-export * from './register_trigger';
-export * from './register_action';
-export * from './register_embeddable_factory';
-export * from './attach_action';
-export * from './detach_action';
-export * from './get_trigger';
+import { EmbeddableSetupApiPure } from './types';
+
+export const getTrigger: EmbeddableSetupApiPure['getTrigger'] = ({triggers}) => id => {
+  const trigger = triggers.get(id);
+
+  if (!trigger) {
+    throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
+  }
+
+  return trigger;
+}

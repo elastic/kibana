@@ -17,12 +17,12 @@
 * under the License.
 */
 
-import { Trigger, TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from '../types';
-import { Action } from '../lib/actions';
-import { EmbeddableFactory } from '../lib/embeddables';
+import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from '../types';
+import { Trigger, Action, EmbeddableFactory } from '../lib';
 
 export interface EmbeddableSetupApi {
   registerTrigger: (trigger: Trigger) => void;
+  getTrigger: (id: string) => Trigger;
   registerAction: (action: Action) => void;
   registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
   attachAction: (triggerId: string, actionId: string) => void;

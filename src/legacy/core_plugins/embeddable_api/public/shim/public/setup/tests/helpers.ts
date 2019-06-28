@@ -27,3 +27,12 @@ export const createDeps = (): EmbeddableSetupDependencies => {
   };
   return deps;
 };
+
+export const expectError = (fn: (...args: any) => any) => {
+  try {
+    fn();
+    throw new Error('Expected an error throw.');
+  } catch (error) {
+    return error;
+  }
+};
