@@ -64,7 +64,6 @@ exports[`CondensedCheckList component renders checks 1`] = `
     >
       <EuiBadge
         color="secondary"
-        iconSide="left"
       >
         2 checks
       </EuiBadge>
@@ -125,7 +124,6 @@ exports[`CondensedCheckList component renders checks 1`] = `
     >
       <EuiBadge
         color="primary"
-        iconSide="left"
       >
         2 checks
       </EuiBadge>
@@ -186,7 +184,6 @@ exports[`CondensedCheckList component renders null in place of child status with
     >
       <EuiBadge
         color="secondary"
-        iconSide="left"
       >
         2 checks
       </EuiBadge>
@@ -247,7 +244,6 @@ exports[`CondensedCheckList component renders null in place of child status with
     >
       <EuiBadge
         color="primary"
-        iconSide="left"
       >
         2 checks
       </EuiBadge>
