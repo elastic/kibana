@@ -27,7 +27,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
     >
       <EuiBadge
         color="hollow"
-        iconSide="left"
       >
         9231
       </EuiBadge>

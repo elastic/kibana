@@ -100,6 +100,25 @@ export const basicHandlerCreators = {
   },
 };
 
+// handlers for alignment and distribution
+export const alignmentDistributionHandlerCreators = Object.assign(
+  {},
+  ...[
+    'alignLeft',
+    'alignCenter',
+    'alignRight',
+    'alignTop',
+    'alignMiddle',
+    'alignBottom',
+    'distributeHorizontally',
+    'distributeVertically',
+  ].map((event: string) => ({
+    [event]: ({ commit }: Props) => (): void => {
+      commit('actionEvent', { event });
+    },
+  }))
+);
+
 // handlers for group and ungroup
 export const groupHandlerCreators = {
   groupNodes: ({ commit }: Props) => (): void => {

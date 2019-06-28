@@ -98,10 +98,27 @@
   display: flex;
 }
 
+/**
+ * 1. Ensure tvbTooltip__label text wraps nicely.
+ * 2. Create consistent space between the dot icon and the label.
+ */
+.tvbTooltip__labelContainer {
+  display: flex;
+  flex-wrap: wrap;
+  flex-grow: 1;
+  min-width: 1px; /* 1 */
+  margin-left: $euiSizeXS; /* 2 */
+}
+
+/**
+ * 1. Ensure text wraps nicely.
+ */
 .tvbTooltip__label {
   flex-grow: 1;
-  margin-left: $euiSizeXS;
   margin-right: $euiSizeXS;
+  word-wrap: break-word; /* 1 */
+  overflow-wrap: break-word; /* 1 */
+  min-width: 1px; /* 1 */
 }
 
 .tvbTooltip__icon,
