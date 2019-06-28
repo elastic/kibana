@@ -8,8 +8,10 @@ import { ActionTypeRegistry } from '../action_type_registry';
 
 import { actionType as serverLogActionType } from './server_log';
 import { actionType as slackActionType } from './slack';
+import { actionType as emailActionType } from './email';
 
 export function registerBuiltInActionTypes(actionTypeRegistry: ActionTypeRegistry) {
   actionTypeRegistry.register(serverLogActionType);
   actionTypeRegistry.register(slackActionType);
+  actionTypeRegistry.register(emailActionType);
 }
