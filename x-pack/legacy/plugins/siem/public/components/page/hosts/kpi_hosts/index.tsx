@@ -9,19 +9,25 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { KpiHostsData } from '../../../../graphql/types';
+import { KpiHostsData, KpiHostDetailsData } from '../../../../graphql/types';
 import {
   StatItemsComponent,
   StatItemsProps,
   useKpiMatrixStatus,
   KpiValue,
 } from '../../../stat_items';
-import { fieldTitleMapping } from './column';
+import { kpiHostsMapping } from './kpi_hosts_mapping';
+import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
 
 const kpiWidgetHeight = 247;
 
 interface KpiHostsProps {
   data: KpiHostsData;
+  loading: boolean;
+}
+
+interface KpiHostDetailsProps {
+  data: KpiHostDetailsData;
   loading: boolean;
 }
 
@@ -31,9 +37,11 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
   }
 `;
 
-export const KpiHostsComponent = ({ data, loading }: KpiHostsProps) => {
+export const KpiHostsComponent = ({ data, loading }: KpiHostsProps | KpiHostDetailsProps) => {
+  const mappings =
+    (data as KpiHostsData).hosts !== undefined ? kpiHostsMapping : kpiHostDetailsMapping;
   const statItemsProps: Readonly<Array<StatItemsProps<KpiValue>>> = useKpiMatrixStatus(
-    fieldTitleMapping,
+    mappings,
     data
   );
   return loading ? (

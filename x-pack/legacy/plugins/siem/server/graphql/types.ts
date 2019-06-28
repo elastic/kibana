@@ -165,6 +165,8 @@ export interface Source {
 
   KpiHosts: KpiHostsData;
 
+  KpiHostDetails: KpiHostDetailsData;
+
   KpiIpDetails?: KpiIpDetailsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -1132,6 +1134,24 @@ export interface KpiHostHistogramData {
   y?: number | null;
 }
 
+export interface KpiHostDetailsData {
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+}
+
 export interface KpiIpDetailsData {
   connections?: number | null;
 
@@ -1934,6 +1954,15 @@ export interface KpiHostsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface KpiHostDetailsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
 export interface KpiIpDetailsSourceArgs {
   id?: string | null;
 
@@ -2019,8 +2048,6 @@ export interface PersistNoteMutationArgs {
 }
 export interface DeleteNoteMutationArgs {
   id: string[];
-
-  version?: string | null;
 }
 export interface DeleteNoteByTimelineIdMutationArgs {
   timelineId: string;
@@ -2466,6 +2493,8 @@ export namespace SourceResolvers {
 
     KpiHosts?: KpiHostsResolver<KpiHostsData, TypeParent, Context>;
 
+    KpiHostDetails?: KpiHostDetailsResolver<KpiHostDetailsData, TypeParent, Context>;
+
     KpiIpDetails?: KpiIpDetailsResolver<KpiIpDetailsData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
@@ -2754,6 +2783,21 @@ export namespace SourceResolvers {
     KpiHostsArgs
   >;
   export interface KpiHostsArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
+
+    defaultIndex: string[];
+  }
+
+  export type KpiHostDetailsResolver<
+    R = KpiHostDetailsData,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, KpiHostDetailsArgs>;
+  export interface KpiHostDetailsArgs {
     id?: string | null;
 
     timerange: TimerangeInput;
@@ -6061,6 +6105,83 @@ export namespace KpiHostHistogramDataResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace KpiHostDetailsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiHostDetailsData> {
+    authSuccess?: AuthSuccessResolver<number | null, TypeParent, Context>;
+
+    authSuccessHistogram?: AuthSuccessHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    authFailure?: AuthFailureResolver<number | null, TypeParent, Context>;
+
+    authFailureHistogram?: AuthFailureHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    uniqueSourceIps?: UniqueSourceIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    uniqueDestinationIps?: UniqueDestinationIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+  }
+
+  export type AuthSuccessResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthSuccessHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace KpiIpDetailsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiIpDetailsData> {
     connections?: ConnectionsResolver<number | null, TypeParent, Context>;
@@ -7163,8 +7284,6 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, Context, DeleteNoteArgs>;
   export interface DeleteNoteArgs {
     id: string[];
-
-    version?: string | null;
   }
 
   export type DeleteNoteByTimelineIdResolver<
