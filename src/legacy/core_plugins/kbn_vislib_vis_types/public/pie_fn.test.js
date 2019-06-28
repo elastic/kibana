@@ -35,7 +35,7 @@ const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
   },
 }));
 jest.mock('ui/vis/response_handlers/vislib', () => ({
-  VislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+  vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 }));
 
 describe('interpreter/functions#pie', () => {

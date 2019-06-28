@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('context link in discover', function contextSize() {
+    this.tags('smoke');
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(TEST_DISCOVER_START_TIME, TEST_DISCOVER_END_TIME);

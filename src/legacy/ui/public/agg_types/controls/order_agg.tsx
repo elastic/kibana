@@ -21,7 +21,23 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { safeMakeLabel, isCompatibleAgg } from '../buckets/_terms_helper';
+import { safeMakeLabel, isCompatibleAggregation } from '../agg_utils';
+
+const aggFilter = [
+  '!top_hits',
+  '!percentiles',
+  '!median',
+  '!std_dev',
+  '!derivative',
+  '!moving_avg',
+  '!serial_diff',
+  '!cumulative_sum',
+  '!avg_bucket',
+  '!max_bucket',
+  '!min_bucket',
+  '!sum_bucket',
+];
+const isCompatibleAgg = isCompatibleAggregation(aggFilter);
 
 function OrderAggParamEditor({
   agg,
@@ -116,4 +132,4 @@ function OrderAggParamEditor({
   );
 }
 
-export { OrderAggParamEditor };
+export { OrderAggParamEditor, aggFilter };

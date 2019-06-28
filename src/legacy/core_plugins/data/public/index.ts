@@ -22,8 +22,6 @@
 // and handled by the platform itself in the setup method
 // of the ExpressionExectorService
 // @ts-ignore
-import { getInterpreter } from 'plugins/interpreter/interpreter';
-// @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
 import { ExpressionsService, ExpressionsSetup } from './expressions';
 import { SearchService, SearchSetup } from './search';
@@ -31,7 +29,7 @@ import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
-class DataPlugin {
+export class DataPlugin {
   // Exposed services, sorted alphabetically
   private readonly expressions: ExpressionsService;
   private readonly filter: FilterService;
@@ -48,6 +46,9 @@ class DataPlugin {
   }
 
   public setup(): DataSetup {
+    // TODO: this is imported here to avoid circular imports.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getInterpreter } = require('plugins/interpreter/interpreter');
     return {
       expressions: this.expressions.setup({
         interpreter: {
@@ -71,13 +72,6 @@ class DataPlugin {
   }
 }
 
-/**
- * We export data here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-export const data = new DataPlugin().setup();
-
 /** @public */
 export interface DataSetup {
   expressions: ExpressionsSetup;
@@ -92,3 +86,15 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { Query } from './query';
+
+/** @public static code */
+export { dateHistogramInterval } from '../common/date_histogram_interval';
+/** @public static code */
+export {
+  isValidEsInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  parseEsInterval,
+  ParsedInterval,
+} from '../common/parse_es_interval';

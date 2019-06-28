@@ -239,7 +239,6 @@ describe('QueryBarInput', () => {
         intl={null as any}
       />
     );
-
     expect(mockFetchIndexPatterns).toHaveBeenCalledWith(['logstash-*']);
   });
 });

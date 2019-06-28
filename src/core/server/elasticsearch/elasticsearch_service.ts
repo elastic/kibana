@@ -25,12 +25,17 @@ import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
+import { HttpServiceSetup, GetAuthHeaders } from '../http/';
 
 /** @internal */
 interface CoreClusterClients {
   config: ElasticsearchConfig;
   adminClient: ClusterClient;
   dataClient: ClusterClient;
+}
+
+interface SetupDeps {
+  http: HttpServiceSetup;
 }
 
 /** @public */
@@ -58,7 +63,7 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
       .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
   }
 
-  public async setup(): Promise<ElasticsearchServiceSetup> {
+  public async setup(deps: SetupDeps): Promise<ElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
     const clients$ = this.config$.pipe(
@@ -78,7 +83,7 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
             const coreClients = {
               config,
               adminClient: this.createClusterClient('admin', config),
-              dataClient: this.createClusterClient('data', config),
+              dataClient: this.createClusterClient('data', config, deps.http.auth.getAuthHeaders),
             };
 
             subscriber.next(coreClients);
@@ -103,7 +108,7 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
       createClient: (type: string, clientConfig: ElasticsearchClientConfig) => {
-        return this.createClusterClient(type, clientConfig);
+        return this.createClusterClient(type, clientConfig, deps.http.auth.getAuthHeaders);
       },
     };
   }
@@ -119,7 +124,15 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     }
   }
 
-  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
-    return new ClusterClient(config, this.coreContext.logger.get('elasticsearch', type));
+  private createClusterClient(
+    type: string,
+    config: ElasticsearchClientConfig,
+    getAuthHeaders?: GetAuthHeaders
+  ) {
+    return new ClusterClient(
+      config,
+      this.coreContext.logger.get('elasticsearch', type),
+      getAuthHeaders
+    );
   }
 }

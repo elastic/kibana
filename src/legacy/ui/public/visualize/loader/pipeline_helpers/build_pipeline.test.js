@@ -92,6 +92,12 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
+    it('handles undefined markdown function', () => {
+      const params = { fontSize: 12, openLinksInNewTab: true, foo: 'bar' };
+      const actual = buildPipelineVisFunction.markdown({ params });
+      expect(actual).toMatchSnapshot();
+    });
+
     describe('handles table function', () => {
       it('without splits or buckets', () => {
         const params = { foo: 'bar' };

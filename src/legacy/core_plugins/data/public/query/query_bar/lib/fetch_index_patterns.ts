@@ -28,7 +28,7 @@ export async function fetchIndexPatterns(indexPatternStrings: string[]) {
     return [];
   }
 
-  const searchString = indexPatternStrings.join(' | ');
+  const searchString = indexPatternStrings.map(string => `"${string}"`).join(' | ');
   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
     type: 'index-pattern',
     fields: ['title', 'fields'],

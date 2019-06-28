@@ -36,4 +36,6 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles timelion function 1`] = `"timelion_vis expression='foo' interval='bar' "`;
 
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles undefined markdown function 1`] = `"markdownvis ''  fontSize=12 openLinksInNewTab=true "`;
+
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles vega function 1`] = `"vega spec='this is a test' "`;

@@ -237,31 +237,39 @@ export default function ({ getService }) {
           expect(job.status.job_state).to.eql('started');
         });
 
-        it('should throw a 400 Bad request if the job is already started', async () => {
+        it('should return 200 if the job is already started', async () => {
           await startJob(job.config.id); // Start the job
-
-          const { body } = await startJob(job.config.id).expect(400);
-          expect(body.error).to.eql('Bad Request');
-          expect(body.message).to.contain('Cannot start task for Rollup Job');
+          await startJob(job.config.id).expect(200);
         });
       });
 
       describe('stop', () => {
-        it('should stop the job', async () => {
+        let job;
+
+        beforeEach(async () => {
           const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
-          const { id: jobId } = payload.job;
-
           await createJob(payload);
-          await startJob(jobId);
-          const { body } = await stopJob(jobId).expect(200);
+
+          const { body: { jobs } } = await loadJobs();
+          job = jobs.find(job => job.config.id === payload.job.id);
+        });
+
+        it('should stop the job', async () => {
+          await startJob(job.config.id);
+          const { body } = await stopJob(job.config.id).expect(200);
 
           expect(body).to.eql({ success: true });
 
           // Fetch the job to make sure it has been stopped
+          const jobId = job.config.id;
           const { body: { jobs } } = await loadJobs();
-          const job = jobs.find(job => job.config.id === jobId);
+          job = jobs.find(job => job.config.id === jobId);
           expect(job.status.job_state).to.eql('stopped');
+        });
+
+        it('should return 200 if the job is already stopped', async () => {
+          await stopJob(job.config.id).expect(200);
         });
       });
     });

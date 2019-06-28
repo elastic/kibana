@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import './app';
 import contextAppRouteTemplate from './index.html';
 import { getRootBreadcrumbs } from '../discover/breadcrumbs';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 uiRoutes
   .when('/context/:indexPatternId/:type/:id*', {
@@ -90,7 +90,7 @@ function ContextAppRouteController(
   this.anchorType = $routeParams.type;
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:discover').url;
+  this.discoverUrl = npStart.core.chrome.navLinks.get('kibana:discover').url;
   this.filters = _.cloneDeep(queryFilter.getFilters());
 }
 

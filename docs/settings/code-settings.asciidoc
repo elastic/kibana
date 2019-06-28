@@ -1,0 +1,42 @@
+[role="xpack"]
+[[code-settings-kibana]]
+=== Code Settings in Kibana
+++++
+<titleabbrev>Code settings</titleabbrev>
+++++
+
+Unless you are running multiple Kibana instances as a cluster, you do not need to change any settings to use *Code* by default. If you’d like to change any of the default values, copy and paste the relevant settings below into your `kibana.yml` configuration file.
+
+
+`xpack.code.updateRepoFrequencyMs`::
+Repo update frequency in milliseconds. Defaults to `300000`.
+
+`xpack.code.indexRepoFrequencyMs`::
+Repo index frequency in milliseconds. Defaults to `86400000`.
+
+`xpack.code.lsp.verbose`::
+Whether to show more verbose log for language servers. Defaults to `false`.
+
+`xpack.code.security.enableMavenImport`::
+Whether to support maven. Defaults to `true`.
+
+`xpack.code.security.enableGradleImport`::
+Whether to support gradle. Defaults to `false`.
+
+`xpack.code.security.installNodeDependency`::
+Whether to enable node dependency download. Defaults to `true`.
+
+`xpack.code.security.gitHostWhitelist`::
+Whitelist of hostnames for git clone address. Defaults to `[ 'github.com', 'gitlab.com',  'bitbucket.org', 'gitbox.apache.org', 'eclipse.org',]`.
+
+`xpack.code.security.gitProtocolWhitelist`::
+Whitelist of protocols for git clone address. Defaults to `[ 'https', 'git', 'ssh' ]`.
+
+`xpack.code.security.enableGitCertCheck`::
+Whether enable HTTPS certificate check when clone from HTTPS URL.
+
+`xpack.code.maxWorkspace`::
+Maximal number of workspaces each language server allows to span. Defaults to `5`.
+
+`xpack.code.codeNodeUrl`::
+URL of the Code node. This config is only needed when multiple Kibana instances are set up as a cluster. Defaults to ``

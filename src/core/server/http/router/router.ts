@@ -22,12 +22,12 @@ import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
 import { KibanaRequest } from './request';
 import { KibanaResponse, ResponseFactory, responseFactory } from './response';
-import { RouteConfig, RouteMethod, RouteSchemas } from './route';
+import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 
 export interface RouterRoute {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: RouteMethod;
   path: string;
-  authRequired: boolean;
+  options: RouteConfigOptions;
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
@@ -44,14 +44,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const { path, authRequired = true } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'get');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'GET',
+      method: 'get',
       path,
-      authRequired,
+      options,
     });
   }
 
@@ -62,14 +62,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const { path, authRequired = true } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'post');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'POST',
+      method: 'post',
       path,
-      authRequired,
+      options,
     });
   }
 
@@ -80,14 +80,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const { path, authRequired = true } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'put');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'PUT',
+      method: 'put',
       path,
-      authRequired,
+      options,
     });
   }
 
@@ -98,14 +98,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const { path, authRequired = true } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'delete');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'DELETE',
+      method: 'delete',
       path,
-      authRequired,
+      options,
     });
   }
 

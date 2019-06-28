@@ -16,6 +16,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -213,9 +214,35 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('addLayerButton');
     }
 
+    async openSetViewPopover() {
+      const isOpen = await testSubjects.exists('mapSetViewForm');
+      if (!isOpen) {
+        await retry.try(async () => {
+          await testSubjects.click('toggleSetViewVisibilityButton');
+          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          if (!isOpenAfterClick) {
+            throw new Error('set view popover not opened');
+          }
+        });
+      }
+    }
+
+    async closeSetViewPopover() {
+      const isOpen = await testSubjects.exists('mapSetViewForm');
+      if (isOpen) {
+        await retry.try(async () => {
+          await testSubjects.click('toggleSetViewVisibilityButton');
+          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          if (isOpenAfterClick) {
+            throw new Error('set view popover not closed');
+          }
+        });
+      }
+    }
+
     async setView(lat, lon, zoom) {
       log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
-      await testSubjects.click('toggleSetViewVisibilityButton');
+      await this.openSetViewPopover();
       await testSubjects.setValue('latitudeInput', lat.toString());
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
@@ -225,11 +252,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getView() {
       log.debug('Get view');
-      await testSubjects.click('toggleSetViewVisibilityButton');
+      await this.openSetViewPopover();
       const lat = await testSubjects.getAttribute('latitudeInput', 'value');
       const lon = await testSubjects.getAttribute('longitudeInput', 'value');
       const zoom = await testSubjects.getAttribute('zoomInput', 'value');
-      await testSubjects.click('toggleSetViewVisibilityButton');
+      await this.closeSetViewPopover();
       return {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
@@ -265,6 +292,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('editLayerButton');
     }
 
+    async closeLayerPanel() {
+      await testSubjects.click('layerPanelCancelButton');
+      await this.waitForLayersToLoad();
+    }
+
     async getLayerTOCDetails(layerName) {
       return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapeLayerName(layerName)}`);
     }
@@ -297,11 +329,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('layerAddForm');
     }
 
-    async cancelLayerAdd() {
+    async cancelLayerAdd(layerName) {
       log.debug(`Cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
+        if (layerName) {
+          await this.waitForLayerDeleted(layerName);
+        }
       }
     }
 
@@ -318,20 +353,32 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
+    async setJoinWhereQuery(layerName, query) {
+      await this.openLayerPanel(layerName);
+      await testSubjects.click('mapJoinWhereExpressionButton');
+      const filterEditorContainer = await testSubjects.find('mapJoinWhereFilterEditor');
+      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      await queryBarInFilterEditor.click();
+      const input = await find.activeElement();
+      await input.clearValue();
+      await input.type(query);
+      await testSubjects.click('mapWhereFilterEditorSubmitButton');
+      await this.waitForLayersToLoad();
+    }
+
     async selectVectorSource() {
       log.debug(`Select vector source`);
       await testSubjects.click('vectorShapes');
     }
 
     // Returns first layer by default
-    async selectVectorLayer(vectorLayerName = '') {
-      log.debug(`Select vector layer ${vectorLayerName}`);
-      const optionsStringList = await comboBox.getOptionsList('emsVectorComboBox');
-      const selectedVectorLayer = vectorLayerName
-        ? vectorLayerName
-        : optionsStringList.trim().split('\n')[0];
-      await comboBox.set('emsVectorComboBox', selectedVectorLayer);
-      return selectedVectorLayer;
+    async selectVectorLayer(vectorLayerName) {
+      log.debug(`Select EMS vector layer ${vectorLayerName}`);
+      if (!vectorLayerName) {
+        throw new Error(`You did not provide the EMS layer to select`);
+      }
+      await comboBox.set('emsVectorComboBox', vectorLayerName);
+      await this.waitForLayersToLoad();
     }
 
     async removeLayer(layerName) {
@@ -405,6 +452,19 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
       await PageObjects.timePicker.pauseAutoRefresh();
       await this.waitForLayersToLoad();
+    }
+
+    async lockTooltipAtPosition(xOffset, yOffset) {
+      await retry.try(async () => {
+        const mapContainerElement = await testSubjects.find('mapContainer');
+        await browser.moveMouseTo(mapContainerElement, xOffset, yOffset);
+        await browser.clickMouseButton(mapContainerElement, xOffset, yOffset);
+        // Close button is only displayed with tooltip is locked
+        const hasCloseButton = await testSubjects.exists('mapTooltipCloseButton');
+        if (!hasCloseButton) {
+          throw new Error('Tooltip is not locked at position');
+        }
+      });
     }
   }
   return new GisPage();

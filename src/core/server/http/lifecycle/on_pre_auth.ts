@@ -114,7 +114,7 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler) {
     h: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     try {
-      const result = await fn(KibanaRequest.from(request, undefined), toolkit);
+      const result = await fn(KibanaRequest.from(request), toolkit);
 
       if (!preAuthResult.isValid(result)) {
         throw new Error(

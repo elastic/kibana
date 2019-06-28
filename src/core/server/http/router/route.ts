@@ -18,7 +18,31 @@
  */
 
 import { ObjectType, Schema } from '@kbn/config-schema';
-export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+/**
+ * The set of common HTTP methods supported by Kibana routing.
+ * @public
+ * */
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+
+/**
+ * Route specific configuration.
+ * @public
+ * */
+export interface RouteConfigOptions {
+  /**
+   * A flag shows that authentication for a route:
+   * enabled  when true
+   * disabled when false
+   *
+   * Enabled by default.
+   */
+  authRequired?: boolean;
+
+  /**
+   * Additional metadata tag strings to attach to the route.
+   */
+  tags?: ReadonlyArray<string>;
+}
 
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
   /**
@@ -36,14 +60,7 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
    */
   validate: RouteValidateFactory<P, Q, B> | false;
 
-  /**
-   * A flag shows that authentication for a route:
-   * enabled  when true
-   * disabled when false
-   *
-   * Enabled by default.
-   */
-  authRequired?: boolean;
+  options?: RouteConfigOptions;
 }
 
 export type RouteValidateFactory<

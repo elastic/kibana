@@ -239,6 +239,34 @@
         "number_of_replicas": "1",
         "number_of_shards": "1"
       }
+    },
+    "migrationVersion": {
+      "dynamic": "true",
+      "properties": {
+        "index-pattern": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
+      }
+    },
+    "references": {
+      "type": "nested",
+      "properties": {
+        "name": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "id": {
+          "type": "keyword"
+        }
+      }
     }
   }
 }

@@ -51,11 +51,11 @@ export class Series extends Component {
     this.visDataSubscription = null;
   }
 
-  switchTab = (selectedTab) => {
+  switchTab = selectedTab => {
     this.setState({ selectedTab });
   };
 
-  handleChange = (part) => {
+  handleChange = part => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = assign({}, model, part);
@@ -71,7 +71,7 @@ export class Series extends Component {
     });
   };
 
-  toggleVisible = (e) => {
+  toggleVisible = e => {
     e.preventDefault();
 
     this.setState({
@@ -81,10 +81,11 @@ export class Series extends Component {
 
   componentDidMount() {
     if (this.props.visData$) {
-      this.visDataSubscription = this.props.visData$
-        .subscribe(visData => this.setState({
+      this.visDataSubscription = this.props.visData$.subscribe(visData =>
+        this.setState({
           uiRestrictions: get(visData, 'uiRestrictions'),
-        }));
+        })
+      );
     }
   }
 
@@ -112,15 +113,17 @@ export class Series extends Component {
       togglePanelActivation: this.togglePanelActivation,
       visible: this.state.visible,
       dragHandleProps: this.props.dragHandleProps,
+      indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
     };
-
-    return Boolean(Component) ?
-      (<Component {...params}/>) :
-      (<FormattedMessage
+    return Boolean(Component) ? (
+      <Component {...params} />
+    ) : (
+      <FormattedMessage
         id="tsvb.seriesConfig.missingSeriesComponentDescription"
         defaultMessage="Missing Series component for panel type: {panelType}"
         values={{ panelType: panel.type }}
-      />);
+      />
+    );
   }
 
   componentWillUnmount() {

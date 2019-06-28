@@ -19,17 +19,15 @@
 
 import Boom from 'boom';
 import { adoptToHapiOnPostAuthFormat } from './on_post_auth';
-
-const requestMock = {} as any;
-const createResponseToolkit = (customization = {}): any => ({ ...customization });
+import { httpServerMock } from '../http_server.mocks';
 
 describe('adoptToHapiOnPostAuthFormat', () => {
   it('Should allow passing request to the next handler', async () => {
-    const continueSymbol = {};
+    const continueSymbol = Symbol();
     const onPostAuth = adoptToHapiOnPostAuthFormat((req, t) => t.next());
     const result = await onPostAuth(
-      requestMock,
-      createResponseToolkit({
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit({
         ['continue']: continueSymbol,
       })
     );
@@ -43,8 +41,8 @@ describe('adoptToHapiOnPostAuthFormat', () => {
     const takeoverSymbol = {};
     const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
     const result = await onPostAuth(
-      requestMock,
-      createResponseToolkit({
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit({
         redirect: redirectMock,
       })
     );
@@ -57,7 +55,10 @@ describe('adoptToHapiOnPostAuthFormat', () => {
     const onPostAuth = adoptToHapiOnPostAuthFormat((req, t) => {
       return t.rejected(new Error('unexpected result'), { statusCode: 501 });
     });
-    const result = (await onPostAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onPostAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('unexpected result');
@@ -68,7 +69,10 @@ describe('adoptToHapiOnPostAuthFormat', () => {
     const onPostAuth = adoptToHapiOnPostAuthFormat((req, t) => {
       throw new Error('unknown error');
     });
-    const result = (await onPostAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onPostAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('unknown error');
@@ -77,7 +81,10 @@ describe('adoptToHapiOnPostAuthFormat', () => {
 
   it('Should return Boom.internal error if interceptor returns unexpected result', async () => {
     const onPostAuth = adoptToHapiOnPostAuthFormat((req, toolkit) => undefined as any);
-    const result = (await onPostAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onPostAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toMatchInlineSnapshot(

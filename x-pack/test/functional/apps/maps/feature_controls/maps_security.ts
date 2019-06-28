@@ -15,7 +15,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
 
-  describe('security feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/38414
+  describe.skip('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');

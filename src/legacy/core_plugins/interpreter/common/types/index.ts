@@ -17,29 +17,17 @@
  * under the License.
  */
 
-// @ts-ignore
 import { boolean } from './boolean';
-// @ts-ignore
 import { datatable } from './datatable';
-// @ts-ignore
 import { error } from './error';
-// @ts-ignore
 import { filter } from './filter';
-// @ts-ignore
 import { image } from './image';
-// @ts-ignore
 import { nullType } from './null';
-// @ts-ignore
 import { number } from './number';
-// @ts-ignore
 import { pointseries } from './pointseries';
-// @ts-ignore
 import { render } from './render';
-// @ts-ignore
 import { shape } from './shape';
-// @ts-ignore
 import { string } from './string';
-// @ts-ignore
 import { style } from './style';
 import { kibanaContext } from './kibana_context';
 import { kibanaDatatable } from './kibana_datatable';
@@ -61,5 +49,13 @@ export const typeSpecs = [
   kibanaDatatable,
 ];
 
-export { KibanaContext } from './kibana_context';
-export { KibanaDatatable } from './kibana_datatable';
+// Types
+export * from './datatable';
+export * from './error';
+export * from './filter';
+export * from './image';
+export * from './kibana_context';
+export * from './kibana_datatable';
+export * from './pointseries';
+export * from './render';
+export * from './style';

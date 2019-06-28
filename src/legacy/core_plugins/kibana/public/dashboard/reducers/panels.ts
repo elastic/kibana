@@ -20,7 +20,12 @@
 import _ from 'lodash';
 import { Reducer } from 'redux';
 import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload } from '../actions';
-import { PanelId, PanelState, PanelStateMap } from '../selectors';
+import { PanelId } from '../selectors';
+import { SavedDashboardPanel } from '../types';
+
+interface PanelStateMap {
+  [key: string]: SavedDashboardPanel;
+}
 
 const deletePanel = (panels: PanelStateMap, panelId: PanelId): PanelStateMap => {
   const panelsCopy = { ...panels };
@@ -28,7 +33,7 @@ const deletePanel = (panels: PanelStateMap, panelId: PanelId): PanelStateMap => 
   return panelsCopy;
 };
 
-const updatePanel = (panels: PanelStateMap, panelState: PanelState): PanelStateMap => ({
+const updatePanel = (panels: PanelStateMap, panelState: SavedDashboardPanel): PanelStateMap => ({
   ...panels,
   [panelState.panelIndex]: panelState,
 });

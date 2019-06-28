@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
@@ -167,6 +168,38 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visualize.getMetric();
         expect(percentileRankBytes).to.eql(metricValue);
+      });
+    });
+
+    describe('with filters', function () {
+      it('should prevent filtering without buckets', async function () {
+        let filterCount = 0;
+        await retry.try(async function tryingForTime() {
+          // click first metric bucket
+          await PageObjects.visualize.clickMetricByIndex(0);
+          filterCount = await filterBar.getFilterCount();
+        });
+        expect(filterCount).to.equal(0);
+      });
+
+      it('should allow filtering with buckets', async function () {
+        await PageObjects.visualize.clickMetricEditor();
+        log.debug('Bucket = Split Group');
+        await PageObjects.visualize.clickBucket('Split group');
+        log.debug('Aggregation = Terms');
+        await PageObjects.visualize.selectAggregation('Terms');
+        log.debug('Field = machine.os.raw');
+        await PageObjects.visualize.selectField('machine.os.raw');
+        await PageObjects.visualize.clickGo();
+
+        let filterCount = 0;
+        await retry.try(async function tryingForTime() {
+          // click first metric bucket
+          await PageObjects.visualize.clickMetricByIndex(0);
+          filterCount = await filterBar.getFilterCount();
+        });
+        await filterBar.removeAllFilters();
+        expect(filterCount).to.equal(1);
       });
     });
 

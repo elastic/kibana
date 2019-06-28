@@ -22,6 +22,7 @@ import React from 'react';
 import { Ast } from '@kbn/interpreter/common';
 
 import { ExpressionRunnerOptions, ExpressionRunner } from './expression_runner';
+import { Result } from './expressions_service';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -30,12 +31,19 @@ export type ExpressionRendererProps = Pick<
   Exclude<keyof ExpressionRunnerOptions, 'element'>
 > & {
   expression: string | Ast;
+  /**
+   * If an element is specified, but the response of the expression run can't be rendered
+   * because it isn't a valid response or the specified renderer isn't available,
+   * this callback is called with the given result.
+   */
+  onRenderFailure?: (result: Result) => void;
 };
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
 export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
   expression,
+  onRenderFailure,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -43,7 +51,11 @@ export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
   useEffect(
     () => {
       if (mountpoint.current) {
-        run(expression, { ...options, element: mountpoint.current });
+        run(expression, { ...options, element: mountpoint.current }).catch(result => {
+          if (onRenderFailure) {
+            onRenderFailure(result);
+          }
+        });
       }
     },
     [expression, mountpoint.current]

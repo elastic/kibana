@@ -83,3 +83,8 @@ export interface GenericFtrProviderContext<
    */
   loadTestFile(path: string): void;
 }
+
+export interface FtrConfigProviderContext {
+  log: ToolingLog;
+  readConfigFile(path: string): Promise<Config>;
+}

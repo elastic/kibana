@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Table restricts which saved objects can be deleted based on type 1`] = `
+exports[`Table prevents saved objects from being deleted 1`] = `
 <Fragment>
   <EuiSearchBar
     box={
@@ -35,7 +35,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
           isDisabled={true}
           onClick={[Function]}
           size="m"
-          title="Unable to delete search, index-pattern"
+          title="Unable to delete saved objects"
           type="button"
         >
           <FormattedMessage
@@ -247,10 +247,9 @@ exports[`Table should render normally 1`] = `
           fill={false}
           iconSide="left"
           iconType="trash"
-          isDisabled={true}
+          isDisabled={false}
           onClick={[Function]}
           size="m"
-          title="Unable to delete index-pattern"
           type="button"
         >
           <FormattedMessage

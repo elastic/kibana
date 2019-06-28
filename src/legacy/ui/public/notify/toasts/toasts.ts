@@ -17,15 +17,7 @@
  * under the License.
  */
 
-import { ToastsApi } from '../../../../../core/public';
+import { npSetup } from 'ui/new_platform';
 import { ToastNotifications } from './toast_notifications';
 
-export let toastNotifications: ToastNotifications;
-
-export function __newPlatformSetup__(toasts: ToastsApi) {
-  if (toastNotifications) {
-    throw new Error('ui/notify/toasts already initialized with new platform apis');
-  }
-
-  toastNotifications = new ToastNotifications(toasts);
-}
+export const toastNotifications = new ToastNotifications(npSetup.core.notifications.toasts);

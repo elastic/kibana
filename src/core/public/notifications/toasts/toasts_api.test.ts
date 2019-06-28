@@ -51,7 +51,7 @@ function uiSettingsMock() {
 function toastDeps() {
   return {
     uiSettings: uiSettingsMock(),
-    i18n: i18nServiceMock.createSetupContract(),
+    i18n: i18nServiceMock.createStartContract(),
   };
 }
 

@@ -171,13 +171,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickVisType('markdown');
     }
 
-    async clickAddMetric() {
-      await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+    // clickBucket(bucketName) 'X-axis', 'Split area', 'Split chart'
+    async clickBucket(bucketName, type = 'buckets') {
+      await testSubjects.click(`visEditorAdd_${type}`);
+      await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
     }
 
-    async clickAddBucket() {
-      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
-    }
 
     async clickMetric() {
       await this.clickVisType('metric');
@@ -401,6 +400,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
+    async clickMetricByIndex(index) {
+      log.debug(`clickMetricByIndex(${index})`);
+      const metrics = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container');
+      expect(metrics.length).greaterThan(index);
+      await metrics[index].click();
+    }
+
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -429,13 +435,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async getErrorMessage() {
       const element = await find.byCssSelector('.item>h4');
       return await element.getVisibleText();
-    }
-
-    // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName, type = 'bucket') {
-      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
-      const locator = `[data-test-subj="${testSubject}"] .list-group-menu-item[data-test-subj="${bucketName}"]`;
-      await find.clickByCssSelector(locator);
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
@@ -744,11 +743,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       ));
     }
 
-    async expectNoSaveOption() {
-      const saveButtonExists = await testSubjects.exists('visualizeSaveButton');
-      expect(saveButtonExists).to.be(false);
-    }
-
     async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
@@ -1005,10 +999,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await markdown.getVisibleText();
     }
 
-    async clickColumns() {
-      await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
-    }
-
     async getVisualizationRenderingCount() {
       const visualizationLoader = await testSubjects.find('visualizationLoader');
       const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
@@ -1219,7 +1209,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getBucketErrorMessage() {
-      const error = await find.byCssSelector('.visEditorAggParam__error');
+      const error = await find.byCssSelector('[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText');
       const errorMessage = await error.getProperty('innerText');
       log.debug(errorMessage);
       return errorMessage;
@@ -1238,9 +1228,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickSplitDirection(direction) {
-      const activeParamPanel = await find.byCssSelector('vis-editor-agg-params[aria-hidden="false"]');
-      const button = await testSubjects.findDescendant(`splitBy-${direction}`, activeParamPanel);
-      await button.click();
+      const control = await testSubjects.find('visEditorSplitBy');
+      const radioBtn = await control.findByCssSelector(`[title="${direction}"]`);
+      await radioBtn.click();
     }
 
     async countNestedTables() {

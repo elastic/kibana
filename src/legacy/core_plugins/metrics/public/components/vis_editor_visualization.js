@@ -22,7 +22,13 @@ import { get, isEqual } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval, AUTO_INTERVAL } from './lib/get_interval';
+import {
+  getInterval,
+  convertIntervalIntoUnit,
+  isIntervalValid,
+  isGteInterval,
+  AUTO_INTERVAL,
+} from './lib/get_interval';
 import { PANEL_TYPES } from '../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 250;
@@ -50,9 +56,9 @@ class VisEditorVisualizationUI extends Component {
     this.setState({ dragging: false });
   };
 
-  handleMouseMove = (event) => {
+  handleMouseMove = event => {
     if (this.state.dragging) {
-      this.setState((prevState) => ({
+      this.setState(prevState => ({
         height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY),
       }));
     }
@@ -66,13 +72,7 @@ class VisEditorVisualizationUI extends Component {
       return;
     }
 
-    const {
-      uiState,
-      timeRange,
-      appState,
-      savedObj,
-      onDataChange,
-    } = this.props;
+    const { uiState, timeRange, appState, savedObj, onDataChange } = this.props;
 
     this._handler = loader.embedVisualizationWithSavedObject(this._visEl.current, savedObj, {
       listenOnChange: false,
@@ -81,7 +81,7 @@ class VisEditorVisualizationUI extends Component {
       appState,
     });
 
-    this._subscription = this._handler.data$.subscribe((data) => {
+    this._subscription = this._handler.data$.subscribe(data => {
       this.setPanelInterval(data.visData);
       onDataChange(data);
     });
@@ -101,11 +101,11 @@ class VisEditorVisualizationUI extends Component {
    * We use 15px steps to do the scaling and make sure the chart has at least its
    * defined minimum width (MIN_CHART_HEIGHT).
    */
-  onSizeHandleKeyDown = (ev) => {
+  onSizeHandleKeyDown = ev => {
     const { keyCode } = ev;
     if (keyCode === keyCodes.UP || keyCode === keyCodes.DOWN) {
       ev.preventDefault();
-      this.setState((prevState) => {
+      this.setState(prevState => {
         const newHeight = prevState.height + (keyCode === keyCodes.UP ? -15 : 15);
         return {
           height: Math.max(MIN_CHART_HEIGHT, newHeight),
@@ -118,14 +118,16 @@ class VisEditorVisualizationUI extends Component {
     const type = get(this.props, 'model.type', '');
     const interval = get(this.props, 'model.interval', AUTO_INTERVAL);
 
-    return [
-      PANEL_TYPES.METRIC,
-      PANEL_TYPES.TOP_N,
-      PANEL_TYPES.GAUGE,
-      PANEL_TYPES.MARKDOWN,
-      PANEL_TYPES.TABLE,
-    ].includes(type) && (interval === AUTO_INTERVAL
-      || isGteInterval(interval) || !isIntervalValid(interval));
+    return (
+      [
+        PANEL_TYPES.METRIC,
+        PANEL_TYPES.TOP_N,
+        PANEL_TYPES.GAUGE,
+        PANEL_TYPES.MARKDOWN,
+        PANEL_TYPES.TABLE,
+      ].includes(type) &&
+      (interval === AUTO_INTERVAL || isGteInterval(interval) || !isIntervalValid(interval))
+    );
   }
 
   getFormattedPanelInterval() {
@@ -159,14 +161,7 @@ class VisEditorVisualizationUI extends Component {
   }
 
   render() {
-    const {
-      dirty,
-      autoApply,
-      title,
-      description,
-      onToggleAutoApply,
-      onCommit,
-    } = this.props;
+    const { dirty, autoApply, title, description, onToggleAutoApply, onCommit } = this.props;
     const style = { height: this.state.height };
 
     if (this.state.dragging) {
@@ -175,68 +170,81 @@ class VisEditorVisualizationUI extends Component {
 
     const panelInterval = this.hasShowPanelIntervalValue() && this.getFormattedPanelInterval();
 
-    let applyMessage = (<FormattedMessage
-      id="tsvb.visEditorVisualization.changesSuccessfullyAppliedMessage"
-      defaultMessage="The latest changes have been applied."
-    />);
+    let applyMessage = (
+      <FormattedMessage
+        id="tsvb.visEditorVisualization.changesSuccessfullyAppliedMessage"
+        defaultMessage="The latest changes have been applied."
+      />
+    );
     if (dirty) {
-      applyMessage = (<FormattedMessage
-        id="tsvb.visEditorVisualization.changesHaveNotBeenAppliedMessage"
-        defaultMessage="The changes to this visualization have not been applied."
-      />);
+      applyMessage = (
+        <FormattedMessage
+          id="tsvb.visEditorVisualization.changesHaveNotBeenAppliedMessage"
+          defaultMessage="The changes to this visualization have not been applied."
+        />
+      );
     }
     if (autoApply) {
-      applyMessage = (<FormattedMessage
-        id="tsvb.visEditorVisualization.changesWillBeAutomaticallyAppliedMessage"
-        defaultMessage="The changes will be automatically applied."
-      />);
+      applyMessage = (
+        <FormattedMessage
+          id="tsvb.visEditorVisualization.changesWillBeAutomaticallyAppliedMessage"
+          defaultMessage="The changes will be automatically applied."
+        />
+      );
     }
     const applyButton = (
       <EuiFlexGroup className="tvbEditorVisualization__apply" alignItems="center">
         <EuiFlexItem grow={true}>
           <EuiSwitch
             id="tsvbAutoApplyInput"
-            label={(<FormattedMessage
-              id="tsvb.visEditorVisualization.autoApplyLabel"
-              defaultMessage="Auto apply"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.visEditorVisualization.autoApplyLabel"
+                defaultMessage="Auto apply"
+              />
+            }
             checked={autoApply}
             onChange={onToggleAutoApply}
           />
         </EuiFlexItem>
 
-        {panelInterval &&
-        <EuiFlexItem grow={false}>
-          <EuiText color="default" size="xs">
-            <p>
-              <FormattedMessage
-                id="tsvb.visEditorVisualization.panelInterval"
-                defaultMessage="Interval: {panelInterval}"
-                values={{ panelInterval }}
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        }
+        {panelInterval && (
+          <EuiFlexItem grow={false}>
+            <EuiText color="default" size="xs">
+              <p>
+                <FormattedMessage
+                  id="tsvb.visEditorVisualization.panelInterval"
+                  defaultMessage="Interval: {panelInterval}"
+                  values={{ panelInterval }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
 
         <EuiFlexItem grow={false}>
           <EuiText color={dirty ? 'default' : 'subdued'} size="xs">
-            <p>
-              {applyMessage}
-            </p>
+            <p>{applyMessage}</p>
           </EuiText>
         </EuiFlexItem>
 
-        {!autoApply &&
-        <EuiFlexItem grow={false}>
-          <EuiButton iconType="play" fill size="s" onClick={onCommit} disabled={!dirty} data-test-subj="applyBtn">
-            <FormattedMessage
-              id="tsvb.visEditorVisualization.applyChangesLabel"
-              defaultMessage="Apply changes"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        }
+        {!autoApply && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="play"
+              fill
+              size="s"
+              onClick={onCommit}
+              disabled={!dirty}
+              data-test-subj="applyBtn"
+            >
+              <FormattedMessage
+                id="tsvb.visEditorVisualization.applyChangesLabel"
+                defaultMessage="Apply changes"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
 
@@ -262,7 +270,7 @@ class VisEditorVisualizationUI extends Component {
               defaultMessage: 'Press up/down to adjust the chart size',
             })}
           >
-            <i className="fa fa-ellipsis-h"/>
+            <i className="fa fa-ellipsis-h" />
           </button>
         </div>
       </div>

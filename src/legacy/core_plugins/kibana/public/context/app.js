@@ -38,7 +38,7 @@ import {
 } from './query';
 import { timefilter } from 'ui/timefilter';
 
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 data.filter.loadLegacyDirectives();
 
 const module = uiModules.get('apps/context', [

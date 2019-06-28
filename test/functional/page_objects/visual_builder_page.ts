@@ -22,12 +22,24 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
-  const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
+
+  type Duration =
+    | 'Milliseconds'
+    | 'Seconds'
+    | 'Minutes'
+    | 'Hours'
+    | 'Days'
+    | 'Weeks'
+    | 'Months'
+    | 'Years';
+
+  type FromDuration = Duration | 'Picoseconds' | 'Nanoseconds' | 'Microseconds';
+  type ToDuration = Duration | 'Human readable';
 
   class VisualBuilderPage {
     public async resetPage(
@@ -219,6 +231,48 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
+     * change the data formatter for template in an `options` label tab
+     *
+     * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Number` formatter
+     */
+    public async changeDataFormatter(
+      formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
+    ) {
+      const formatterEl = await find.byCssSelector('[id$="row"] .euiComboBox');
+      await comboBox.setElement(formatterEl, formatter);
+    }
+
+    /**
+     * set duration formatter additional settings
+     *
+     * @param from start format
+     * @param to end format
+     * @param decimalPlaces decimals count
+     */
+    public async setDurationFormatterSettings({
+      from,
+      to,
+      decimalPlaces,
+    }: {
+      from?: FromDuration;
+      to?: ToDuration;
+      decimalPlaces?: string;
+    }) {
+      if (from) {
+        const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
+        await comboBox.setElement(fromCombobox, from);
+      }
+      if (to) {
+        const toCombobox = await find.byCssSelector('[id$="to-row"] .euiComboBox');
+        await comboBox.setElement(toCombobox, to);
+      }
+      if (decimalPlaces) {
+        const decimalPlacesInput = await find.byCssSelector('[id$="decimal"]');
+        await decimalPlacesInput.type(decimalPlaces);
+      }
+    }
+
+    /**
      * write template for aggregation row in the `option` tab
      *
      * @param template always should contain `{{value}}`
@@ -277,15 +331,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async createNewAgg(nth = 0) {
-      return await retry.try(async () => {
-        const elements = await testSubjects.findAll('addMetricAddBtn');
-        await elements[nth].click();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const aggs = await testSubjects.findAll('aggSelector');
-        if (aggs.length < 2) {
-          throw new Error('there should be atleast 2 aggSelectors');
-        }
-      });
+      const elements = await testSubjects.findAll('addMetricAddBtn');
+      await elements[nth].click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const aggs = await testSubjects.findAll('aggSelector');
+      if (aggs.length < 2) {
+        throw new Error('there should be atleast 2 aggSelectors');
+      }
     }
 
     public async selectAggType(value: string, nth = 0) {
@@ -422,6 +474,26 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async cloneSeries(nth: number = 0): Promise<void> {
       const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
+      await cloneBtnArray[nth].click();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    /**
+     * Get aggregation count for the current series
+     *
+     * @param {number} [nth=0] series
+     * @returns {Promise<number>}
+     * @memberof VisualBuilderPage
+     */
+    public async getAggregationCount(nth: number = 0): Promise<number> {
+      const series = await this.getSeries();
+      const aggregation = await series[nth].findAllByCssSelector('[data-test-subj="draggable"]');
+      return aggregation.length;
+    }
+
+    public async deleteSeries(nth: number = 0): Promise<void> {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const cloneBtnArray = await testSubjects.findAll('AddDeleteBtn');
       await cloneBtnArray[nth].click();
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }

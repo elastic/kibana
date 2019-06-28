@@ -21,8 +21,4 @@ import { query } from './query';
 import { dateHistogram } from './date_histogram';
 import { topHits } from './top_hits';
 
-export const processors = [
-  query,
-  dateHistogram,
-  topHits
-];
+export const processors = [query, dateHistogram, topHits];
