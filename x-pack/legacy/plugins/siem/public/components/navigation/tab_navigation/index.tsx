@@ -5,7 +5,7 @@
  */
 import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
+import { injectGlobal } from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import { trackUiAction as track } from '../../../lib/track_usage';
@@ -50,23 +50,19 @@ const navTabs: NavTab[] = [
     disabled: false,
   },
 ];
-
-const StyledEuiLink = styled(EuiLink)`
-  a {
-    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-  }
-  .euiLink.euiLink--primary {
-    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-  }
-  .navigation-link.euiLink.euiLink--primary {
-    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-  }
-  .navigation-link {
-    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+// SIDE EFFECT: the following `injectGlobal` overrides the default styling
+// of euiLink because it's implemented as a Tab,
+// eslint-disable-next-line no-unused-expressions
+injectGlobal`
+  .navigation-link.euiLink.euiLink--primary:focus,
+  .euiLink.euiLink--text:focus {
+    outline: none;
+    background: none;
   }
 `;
 
 interface TabNavigationState {
+  hoveredTabId: string;
   selectedTabId: string;
 }
 
@@ -77,6 +73,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     const selectedTabId = this.mapLocationToTab(pathname);
     this.state = {
       selectedTabId,
+      hoveredTabId: '',
     };
   }
   public componentWillReceiveProps(nextProps: TabNavigationProps): void {
@@ -102,14 +99,6 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       return res;
     }, '');
 
-  private handleTabClick = (id: string) => {
-    this.setState(prevState => ({
-      ...prevState,
-      selectedTabId: id,
-    }));
-    track(`tab_${id}`);
-  };
-
   private renderTabs = () =>
     navTabs.map((tab: NavTab) => (
       <EuiTab
@@ -118,15 +107,20 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
         disabled={tab.disabled}
         isSelected={this.state.selectedTabId === tab.id}
         key={`navigation-${tab.id}`}
-        onClick={() => this.handleTabClick(tab.id)}
+        onClick={() => track(`tab_${tab.id}`)}
+        onMouseOver={() => this.setState(prevState => ({ ...prevState, hoveredTabId: tab.id }))}
+        onFocus={() => this.setState(prevState => ({ ...prevState, hoveredTabId: tab.id }))}
+        onMouseOut={() => this.setState(prevState => ({ ...prevState, hoveredTabId: '' }))}
+        onBlur={() => this.setState(prevState => ({ ...prevState, hoveredTabId: '' }))}
       >
-        <StyledEuiLink
+        <EuiLink
           className={'navigation-link'}
           data-test-subj={`navigation-link-${tab.id}`}
           href={tab.href + this.props.search}
+          color={this.state.hoveredTabId === tab.id ? 'primary' : 'text'}
         >
           {tab.name}
-        </StyledEuiLink>
+        </EuiLink>
       </EuiTab>
     ));
 }

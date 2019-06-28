@@ -18,16 +18,6 @@ describe('Tab Navigation', () => {
 
     expect(hostsTab.prop('isSelected')).toBeTruthy();
   });
-  test('it changes active tab to clicked tab', () => {
-    const wrapper = shallow(
-      <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} />
-    );
-    const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
-    expect(networkTab().prop('isSelected')).toBeFalsy();
-    networkTab().simulate('click');
-    wrapper.update();
-    expect(networkTab().prop('isSelected')).toBeTruthy();
-  });
   test('it changes active tab when nav changes by props', () => {
     const wrapper = shallow(
       <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} />
