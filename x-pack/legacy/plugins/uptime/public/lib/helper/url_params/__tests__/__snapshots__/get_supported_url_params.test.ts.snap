@@ -6,10 +6,6 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "bar",
   "dateRangeStart": "foo",
-  "monitorListPageIndex": 23,
-  "monitorListPageSize": 50,
-  "monitorListSortDirection": "desc",
-  "monitorListSortField": "monitor.status",
   "search": "monitor.status: down",
   "selectedPingStatus": "up",
 }
@@ -21,10 +17,6 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
-  "monitorListPageIndex": 0,
-  "monitorListPageSize": 20,
-  "monitorListSortDirection": "asc",
-  "monitorListSortField": "monitor_id",
   "search": "",
   "selectedPingStatus": "down",
 }
