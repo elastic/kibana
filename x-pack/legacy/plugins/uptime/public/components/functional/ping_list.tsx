@@ -28,6 +28,7 @@ import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
+import { LocationName } from './location_name';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -110,6 +111,11 @@ export const PingListComponent = ({
           </EuiText>
         </div>
       ),
+    },
+    {
+      field: 'observer.geo.name',
+      dataType: 'number',
+      name: (location: string) => <LocationName location={location} />,
     },
     {
       field: 'monitor.ip',
