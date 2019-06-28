@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { registerTrigger, registerAction, attachAction, detachAction } from '..';
-import { createDeps, expectError } from './helpers';
+import { pureSetupApi } from '..';
+import { createDeps } from './helpers';
+import { expectError } from '../../tests';
 
+const { registerTrigger, registerAction, attachAction, detachAction } = pureSetupApi;
 const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
 
 test('can register trigger', () => {

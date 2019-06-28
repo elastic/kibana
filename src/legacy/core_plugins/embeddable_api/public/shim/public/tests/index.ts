@@ -17,14 +17,21 @@
 * under the License.
 */
 
-import { EmbeddableSetupDependencies } from '../types';
+import { EmbeddablePublicPlugin } from '../plugin';
 
-export const createDeps = (): EmbeddableSetupDependencies => {
-  const deps: EmbeddableSetupDependencies = {
-    api: {} as any,
-    triggers: new Map<any, any>(),
-    actions: new Map<any, any>(),
-    embeddableFactories: new Map<any, any>(),
-  };
-  return deps;
+export const createSetupApi = () => {
+  const plugin = new EmbeddablePublicPlugin({});
+  const core = {} as any;
+  const api = plugin.setup(core);
+
+  return [api, plugin, core];
+};
+
+export const expectError = (fn: (...args: any) => any) => {
+  try {
+    fn();
+    throw new Error('Expected an error throw.');
+  } catch (error) {
+    return error;
+  }
 };
