@@ -37,9 +37,27 @@ const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
   interval: '>=10s',
 };
 
+const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
+  {
+    aggregation: MetricsExplorerAggregation.avg,
+    field: 'system.cpu.user.pct',
+    color: MetricsExplorerColor.color0,
+  },
+  {
+    aggregation: MetricsExplorerAggregation.avg,
+    field: 'kubernetes.pod.cpu.usage.node.pct',
+    color: MetricsExplorerColor.color1,
+  },
+  {
+    aggregation: MetricsExplorerAggregation.avg,
+    field: 'docker.cpu.total.pct',
+    color: MetricsExplorerColor.color2,
+  },
+];
+
 const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   aggregation: MetricsExplorerAggregation.avg,
-  metrics: [],
+  metrics: DEFAULT_METRICS,
 };
 
 export const useMetricsExplorerOptions = () => {

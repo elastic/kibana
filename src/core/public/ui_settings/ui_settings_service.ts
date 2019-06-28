@@ -21,7 +21,7 @@ import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
-import { UiSettingsClient } from './ui_settings_client';
+import { UiSettingsClient, UiSettingsClientContract } from './ui_settings_client';
 
 interface UiSettingsServiceDeps {
   http: HttpSetup;
@@ -33,7 +33,7 @@ export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): UiSettingsSetup {
+  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): UiSettingsClientContract {
     this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
@@ -49,7 +49,7 @@ export class UiSettingsService {
     return this.uiSettingsClient;
   }
 
-  public start(): UiSettingsStart {
+  public start(): UiSettingsClientContract {
     return this.uiSettingsClient!;
   }
 
@@ -63,9 +63,3 @@ export class UiSettingsService {
     }
   }
 }
-
-/** @public */
-export type UiSettingsSetup = UiSettingsClient;
-
-/** @public */
-export type UiSettingsStart = UiSettingsClient;
