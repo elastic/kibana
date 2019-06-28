@@ -38,4 +38,4 @@ export interface DataFrameTransformWithId extends DataFrameTransform {
 }
 
 // Don't allow intervals of '0', don't allow floating intervals.
-export const delayFormatRegex = /^[1-9][0-9]*(ms|s|m|h|d|w|M|q|y)$/;
+export const delayFormatRegex = /^[1-9][0-9]*(nanos|micros|ms|s|m|h|d)$/;
