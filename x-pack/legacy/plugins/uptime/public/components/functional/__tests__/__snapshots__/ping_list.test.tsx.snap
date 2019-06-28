@@ -120,9 +120,20 @@ exports[`PingList component renders sorted list without errors 1`] = `
                           "label": "All",
                           "value": "All",
                         },
+                        Object {
+                          "label": "nyc",
+                          "value": "nyc",
+                        },
                       ]
                     }
-                    selectedOptions={Array []}
+                    selectedOptions={
+                      Array [
+                        Object {
+                          "label": "All",
+                          "value": "All",
+                        },
+                      ]
+                    }
                     singleSelection={
                       Object {
                         "asPlainText": true,
