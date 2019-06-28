@@ -32,7 +32,7 @@ interface MonitorChartsProps {
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
 export const MonitorChartsComponent = (props: Props) => {
-  const { danger, data, mean, range, success, monitorId, dateRangeStart, dateRangeEnd } = props;
+  const { data, mean, range, monitorId, dateRangeStart, dateRangeEnd } = props;
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },

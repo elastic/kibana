@@ -39,9 +39,6 @@ interface MonitorPageProps {
 export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
   const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
   const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
-  const [geoLocation] = useState<string | undefined>(
-    parsedPath[1] ? decodeURI(parsedPath[1]) : undefined
-  );
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [params, updateUrlParams] = useUrlParams(history, location);
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;

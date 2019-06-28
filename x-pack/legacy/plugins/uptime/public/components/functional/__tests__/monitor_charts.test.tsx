@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import moment from 'moment';
 import { MonitorChartsComponent } from '../monitor_charts';
 import { MonitorChart } from '../../../../common/graphql/types';
 
