@@ -76,7 +76,7 @@ export interface InfraWrappableRequest<Payload = any, Params = any, Query = any>
   payload: Payload;
   params: Params;
   query: Query;
-  [internalInfraFrameworkRequest]: any;
+  [internalInfraFrameworkRequest]?: any;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
