@@ -38,7 +38,7 @@ export const setupMlJob = async ({
   configTemplate,
   indexPatternName = 'auditbeat-*',
   groups = ['siem'],
-  prefix = 'siem-api-',
+  prefix = '',
 }: MlSetupArgs) => {
   const response = await fetch(`/api/ml/modules/setup/${configTemplate}`, {
     method: 'POST',
@@ -126,8 +126,6 @@ export const stopDatafeeds = async (datafeedIds: string[]) => {
 
 /**
  * Fetches Job Details for given jobIds
- *
- * TODO: Remove after Frank's ML PR makes it in
  *
  * @param jobIds
  */

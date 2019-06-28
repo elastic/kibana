@@ -25,8 +25,12 @@ export const ML_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CREATE_JOBS = i18n.translate('xpack.siem.components.mlPopup.addJobsTitle', {
+export const CREATE_JOBS = i18n.translate('xpack.siem.components.mlPopup.createJobsTitle', {
   defaultMessage: 'Create jobs',
+});
+
+export const CREATING_JOBS = i18n.translate('xpack.siem.components.mlPopup.creatingJobsTitle', {
+  defaultMessage: 'Creating jobs...',
 });
 
 export const JOB_DETAILS = i18n.translate('xpack.siem.components.mlPopup.jobDetailsTitle', {

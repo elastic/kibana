@@ -6,24 +6,14 @@
 
 import { useEffect, useState } from 'react';
 import { jobsSummary } from '../api';
-
-interface Job {
-  datafeedId: string;
-  datafeedIndices: string[];
-  datafeedState: string;
-  description: string;
-  earliestTimestampMs: number;
-  groups: string[];
-  hasDatafeed: boolean;
-  id: string;
-  isSingleMetricViewerJob: boolean;
-  jobState: string;
-  latestTimestampMs: number;
-  memory_status: string;
-  processed_record_count: number;
-}
+import { Job } from '../types';
 
 type Return = [boolean, Job[] | null];
+
+export const getSiemJobsFromJobsSummary = (data: Job[]) =>
+  data.reduce((jobs: Job[], job: Job) => {
+    return job.groups.includes('siem') ? [...jobs, job] : jobs;
+  }, []);
 
 export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false): Return => {
   const [jobSummaryData, setJobSummaryData] = useState<Job[] | null>(null);
@@ -33,10 +23,8 @@ export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false):
     if (jobIds.length > 0) {
       const data: Job[] = await jobsSummary(jobIds);
 
-      // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App???
-      const siemJobs = data.reduce((jobs: Job[], job: Job) => {
-        return job.groups.includes('siem') ? [...jobs, job] : jobs;
-      }, []);
+      // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?
+      const siemJobs = getSiemJobsFromJobsSummary(data);
 
       setJobSummaryData(siemJobs);
     }

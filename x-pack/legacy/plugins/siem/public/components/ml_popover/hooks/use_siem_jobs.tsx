@@ -11,6 +11,11 @@ import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_fram
 
 type Return = [boolean, string[]];
 
+export const getSiemJobIdsFromGroupsData = (data: Group[]) =>
+  data.reduce((jobIds: string[], group: Group) => {
+    return group.id === 'siem' ? [...jobIds, ...group.jobIds] : jobIds;
+  }, []);
+
 export const useSiemJobs = (refetchData: boolean): Return => {
   const [siemJobs, setSiemJobs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,9 +26,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
       'kbn-version': config.kbnVersion,
     });
 
-    const siemJobIds = data.reduce((jobIds: string[], group: Group) => {
-      return group.id === 'siem' ? [...jobIds, ...group.jobIds] : jobIds;
-    }, []);
+    const siemJobIds = getSiemJobIdsFromGroupsData(data);
 
     setSiemJobs(siemJobIds);
     setLoading(false);
