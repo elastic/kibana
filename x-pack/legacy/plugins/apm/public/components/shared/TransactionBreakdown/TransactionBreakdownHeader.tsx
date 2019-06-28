@@ -50,7 +50,7 @@ const TransactionBreakdownHeader: React.FC<{
           </h3>
         </EuiTitle>
       </EuiFlexItem>
-      {!hideShowChartButton && (
+      {!hideShowChartButton ? (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
@@ -66,7 +66,7 @@ const TransactionBreakdownHeader: React.FC<{
                 })}
           </EuiButtonEmpty>
         </EuiFlexItem>
-      )}
+      ) : null}
     </EuiFlexGroup>
   );
 };
