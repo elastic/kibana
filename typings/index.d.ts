@@ -28,3 +28,5 @@ type MethodKeysOf<T> = {
 }[keyof T];
 
 type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
+
+type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };

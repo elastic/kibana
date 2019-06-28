@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { getModalContents } from '../../../../np_core.test.mocks';
+import '../../../../ui_capabilities.test.mocks';
+import { coreStartMock } from '../../../../../../../../core/public/ui_new_platform.test.mocks';
 
 import React from 'react';
 import {
@@ -79,7 +79,8 @@ test('create new calls factory.adds a panel to the container', async done => {
 
   await nextTick();
 
-  (getModalContents().props as ContactCardInitializerProps).onCreate({
+  const overlayMock = coreStartMock.overlays;
+  ((overlayMock.openModal.mock.calls[0][0] as any).props as ContactCardInitializerProps).onCreate({
     firstName: 'Dany',
     lastName: 'Targaryan',
   });
