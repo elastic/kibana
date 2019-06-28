@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import process from 'process';
+import { resolve, dirname } from 'path';
 
-import { pkg } from '../../../legacy/utils/package_json';
+// `require` is necessary for this to work inside x-pack code as well
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pkg = require('../../../../package.json');
 
 export interface PackageInfo {
   version: string;
@@ -53,6 +54,7 @@ export interface CliArgs {
   basePath: boolean;
   optimize: boolean;
   open: boolean;
+  oss: boolean;
 }
 
 export class Env {
@@ -60,7 +62,8 @@ export class Env {
    * @internal
    */
   public static createDefault(options: EnvOptions): Env {
-    return new Env(process.cwd(), options);
+    const repoRoot = dirname(require.resolve('../../../../package.json'));
+    return new Env(repoRoot, options);
   }
 
   /** @internal */
@@ -113,9 +116,10 @@ export class Env {
 
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
+      options.cliArgs.oss ? '' : resolve(this.homeDir, 'x-pack', 'plugins'),
       resolve(this.homeDir, 'plugins'),
       resolve(this.homeDir, '..', 'kibana-extra'),
-    ];
+    ].filter(Boolean);
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);

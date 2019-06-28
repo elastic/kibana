@@ -28,7 +28,7 @@ export class Collector {
    * @param {Function} options.formatForBulkUpload - optional
    * @param {Function} options.rest - optional other properties
    */
-  constructor(server, { type, init, fetch, formatForBulkUpload = null, ...options } = {}) {
+  constructor(server, { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options } = {}) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
     }
@@ -49,6 +49,9 @@ export class Collector {
 
     const defaultFormatterForBulkUpload = result => ({ type, payload: result });
     this._formatForBulkUpload = formatForBulkUpload || defaultFormatterForBulkUpload;
+    if (typeof isReady === 'function') {
+      this.isReady = isReady;
+    }
   }
 
   /*
@@ -68,5 +71,9 @@ export class Collector {
    */
   formatForBulkUpload(result) {
     return this._formatForBulkUpload(result);
+  }
+
+  isReady() {
+    throw `isReady() must be implemented in ${this.type} collector`;
   }
 }

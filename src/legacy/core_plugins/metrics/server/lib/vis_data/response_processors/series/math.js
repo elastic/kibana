@@ -19,13 +19,13 @@
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
 import { startsWith, flatten, values, first, last } from 'lodash';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
-import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
-import getSplits from '../../helpers/get_splits';
-import mapBucket from '../../helpers/map_bucket';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
+import { getSplits } from '../../helpers/get_splits';
+import { mapBucket } from '../../helpers/map_bucket';
 import { evaluate } from 'tinymath';
 
-export function mathAgg(resp, panel, series) {
+export function mathAgg(resp, panel, series, meta) {
   return next => results => {
     const mathMetric = last(series.metrics);
     if (mathMetric.type !== 'math') return next(results);
@@ -38,7 +38,7 @@ export function mathAgg(resp, panel, series) {
       return true;
     });
     const decoration = getDefaultDecoration(series);
-    const splits = getSplits(resp, panel, series);
+    const splits = getSplits(resp, panel, series, meta);
     const mathSeries = splits.map(split => {
       if (mathMetric.variables.length) {
         // Gather the data for the splits. The data will either be a sibling agg or
@@ -52,9 +52,7 @@ export function mathAgg(resp, panel, series) {
             });
           } else {
             const percentileMatch = v.field.match(percentileValueMatch);
-            const m = percentileMatch
-              ? { ...metric, percent: percentileMatch[1] }
-              : { ...metric };
+            const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
             acc[v.name] = split.timeseries.buckets.map(mapBucket(m));
           }
           return acc;

@@ -1,3 +1,4 @@
+[role="xpack"]
 [[visualize-rollup-data]]
 === Create a visualization using rolled up data
 

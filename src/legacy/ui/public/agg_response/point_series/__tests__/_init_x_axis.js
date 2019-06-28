@@ -17,53 +17,116 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
+import moment from 'moment';
 import { initXAxis } from '../_init_x_axis';
+import { makeFakeXAspect } from '../_fake_x_aspect';
 
 describe('initXAxis', function () {
+  let chart;
+  let table;
 
-  const baseChart = {
-    aspects: {
-      x: [{
-        format: {},
-        title: 'label',
-        params: {}
-      }]
-    }
-  };
+  beforeEach(function () {
+    chart = {
+      aspects: {
+        x: [{
+          ...makeFakeXAspect(),
+          accessor: 0,
+          title: 'label',
+        }],
+      }
+    };
+
+    table = {
+      columns: [{ id: '0' }],
+      rows: [
+        { '0': 'hello' },
+        { '0': 'world' },
+        { '0': 'foo' },
+        { '0': 'bar' },
+        { '0': 'baz' },
+      ],
+    };
+  });
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
-    const chart = _.cloneDeep(baseChart);
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormat', chart.aspects.x[0].format);
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
-    const chart = _.cloneDeep(baseChart);
-    chart.aspects.x[0].params.date = true;
+    chart.aspects.x[0].params.interval = 10;
 
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormat', chart.aspects.x[0].format)
       .and.have.property('ordered');
   });
 
-  it('reads the interval param from the x agg', function () {
-    const chart = _.cloneDeep(baseChart);
+  describe('xAxisOrderedValues', function () {
+    it('sets the xAxisOrderedValues property', function () {
+      initXAxis(chart, table);
+      expect(chart).to.have.property('xAxisOrderedValues');
+    });
+
+    it('returns a list of values, preserving the table order', function () {
+      initXAxis(chart, table);
+      expect(chart.xAxisOrderedValues).to.eql(['hello', 'world', 'foo', 'bar', 'baz']);
+    });
+
+    it('only returns unique values', function () {
+      table = {
+        columns: [{ id: '0' }],
+        rows: [
+          { '0': 'hello' },
+          { '0': 'world' },
+          { '0': 'hello' },
+          { '0': 'world' },
+          { '0': 'foo' },
+          { '0': 'bar' },
+          { '0': 'baz' },
+          { '0': 'hello' },
+        ],
+      };
+      initXAxis(chart, table);
+      expect(chart.xAxisOrderedValues).to.eql(['hello', 'world', 'foo', 'bar', 'baz']);
+    });
+
+    it('returns the defaultValue if using fake x aspect', function () {
+      chart = {
+        aspects: {
+          x: [makeFakeXAspect()],
+        }
+      };
+      initXAxis(chart, table);
+      expect(chart.xAxisOrderedValues).to.eql(['_all']);
+    });
+  });
+
+  it('reads the date interval param from the x agg', function () {
+    chart.aspects.x[0].params.interval = 'P1D';
     chart.aspects.x[0].params.date = true;
-    chart.aspects.x[0].params.interval = 10;
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormat', chart.aspects.x[0].format)
       .and.have.property('ordered');
 
-    expect(chart.ordered)
-      .to.be.an('object')
-      .and.have.property('interval', 10);
+    expect(moment.isDuration(chart.ordered.interval)).to.be(true);
+    expect(chart.ordered.interval.toISOString()).to.eql('P1D');
+  });
+
+  it('reads the numeric interval param from the x agg', function () {
+    chart.aspects.x[0].params.interval = 0.5;
+    initXAxis(chart, table);
+    expect(chart)
+      .to.have.property('xAxisLabel', 'label')
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format)
+      .and.have.property('ordered');
+
+    expect(chart.ordered.interval).to.eql(0.5);
   });
 });

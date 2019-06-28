@@ -20,6 +20,7 @@
 import { Legacy } from 'kibana';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { IPrivate } from 'ui/private';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { SavedVisualizations } from '../types';
 import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
 
@@ -28,7 +29,11 @@ export function visualizeEmbeddableFactoryProvider(Private: IPrivate) {
     savedVisualizations: SavedVisualizations,
     config: Legacy.KibanaConfig
   ) => {
-    return new VisualizeEmbeddableFactory(savedVisualizations, config);
+    return new VisualizeEmbeddableFactory(
+      savedVisualizations,
+      config,
+      Private(VisTypesRegistryProvider)
+    );
   };
   return Private(VisualizeEmbeddableFactoryProvider);
 }

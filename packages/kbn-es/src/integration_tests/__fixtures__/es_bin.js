@@ -19,10 +19,61 @@
  * under the License.
  */
 
+const { createServer } = require('http');
+const { format: formatUrl } = require('url');
 const { exitCode, start } = JSON.parse(process.argv[2]);
 
-if (start) {
-  console.log('started');
+process.exitCode = exitCode;
+
+if (!start) {
+  return;
 }
 
-process.exitCode = exitCode;
+let serverUrl;
+const server = createServer((req, res) => {
+  const url = new URL(req.url, serverUrl);
+  const send = (code, body) => {
+    res.writeHead(code, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(body));
+  };
+
+  if (url.pathname === '/_xpack') {
+    return send(400, {
+      error: {
+        reason: 'foo bar',
+      },
+    });
+  }
+
+  return send(404, {
+    error: {
+      reason: 'not found',
+    },
+  });
+});
+
+// setup server auto close after 1 second of silence
+let serverCloseTimer;
+const delayServerClose = () => {
+  clearTimeout(serverCloseTimer);
+  serverCloseTimer = setTimeout(() => server.close(), 1000);
+};
+server.on('request', delayServerClose);
+server.on('listening', delayServerClose);
+
+server.listen(0, '127.0.0.1', function() {
+  const { port, address: hostname } = server.address();
+  serverUrl = new URL(
+    formatUrl({
+      protocol: 'http:',
+      port,
+      hostname,
+    })
+  );
+
+  console.log(
+    `[o.e.h.AbstractHttpServerTransport] [computer] publish_address {127.0.0.1:${port}}, bound_addresses {[::1]:${port}}, {127.0.0.1:${port}}`
+  );
+
+  console.log('started');
+});

@@ -18,21 +18,23 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
-import { IndexPatternProvider } from '../../index_patterns/_index_pattern';
+import { IndexPattern } from '../../index_patterns/_index_pattern';
 import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
-import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
 import { InvalidJSONProperty } from '../../errors';
+
+const configMock = {
+  get: cfg => cfg
+};
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let SavedObject;
-  let IndexPattern;
   let esDataStub;
   let savedObjectsClientStub;
   let window;
@@ -87,7 +89,6 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.module(
     'kibana',
-    StubIndexPatternsApiClientModule,
     // Use the native window.confirm instead of our specialized version to make testing
     // this easier.
     function ($provide) {
@@ -98,7 +99,6 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.inject(function (es, Private, $window) {
     SavedObject = Private(SavedObjectProvider);
-    IndexPattern = Private(IndexPatternProvider);
     esDataStub = es;
     savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
@@ -339,7 +339,9 @@ describe('Saved Object', function () {
                 type: 'dashboard',
               });
             });
-            savedObject.searchSource.setField('index', new IndexPattern('my-index', null, []));
+            const indexPattern = new IndexPattern('my-index', configMock, null, []);
+            indexPattern.title = indexPattern.id;
+            savedObject.searchSource.setField('index', indexPattern);
             return savedObject
               .save()
               .then(() => {
@@ -690,6 +692,12 @@ describe('Saved Object', function () {
         });
 
         const savedObject = new SavedObject(config);
+        sinon.stub(savedObject, 'hydrateIndexPattern').callsFake(() => {
+          const indexPattern = new IndexPattern(indexPatternId, configMock, null, []);
+          indexPattern.title = indexPattern.id;
+          savedObject.searchSource.setField('index', indexPattern);
+          return Promise.resolve(indexPattern);
+        });
         expect(!!savedObject.searchSource.getField('index')).to.be(false);
 
         return savedObject.init().then(() => {

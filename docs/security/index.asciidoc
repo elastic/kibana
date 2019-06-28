@@ -13,7 +13,7 @@ auditing. For more information, see
 [float]
 === Users
 
-You can create and manage users on the *Management* / *Security* / *Users* page.
+You can create and manage users on the *Management -> Security -> Users* page.
 You can also change their passwords and roles. For more information about
 authentication and built-in users, see
 {stack-ov}/setting-up-authentication.html[Setting up user authentication].
@@ -21,9 +21,8 @@ authentication and built-in users, see
 [float]
 === Roles
 
-You can manage roles on the *Management* / *Security* / *Roles* page, or use
-{kib}'s <<role-management-api>>. For more information on configuring roles for
-{kib} see <<xpack-security-authorization, {kib} Authorization>>.
+You can manage roles on the *Management -> Security -> Roles* page, or use
+the <<role-management-api>>. For more information on configuring roles for {kib}, see <<xpack-security-authorization, Granting access to {kib}>>.
 
 For a more holistic overview of configuring roles for the entire stack,
 see {stack-ov}/authorization.html[Configuring role-based access control].

@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import aggResp from 'fixtures/agg_resp/date_histogram';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterDateHistogram } from '../../../buckets/create_filter/date_histogram';
@@ -82,13 +82,13 @@ describe('AggConfig Filters', function () {
 
       const fieldParams = filter.range[field.name];
       expect(fieldParams).to.have.property('gte');
-      expect(fieldParams.gte).to.be.a('number');
+      expect(fieldParams.gte).to.be.a('string');
 
       expect(fieldParams).to.have.property('lt');
-      expect(fieldParams.lt).to.be.a('number');
+      expect(fieldParams.lt).to.be.a('string');
 
       expect(fieldParams).to.have.property('format');
-      expect(fieldParams.format).to.be('epoch_millis');
+      expect(fieldParams.format).to.be('strict_date_optional_time');
 
       expect(fieldParams.gte).to.be.lessThan(fieldParams.lt);
 
@@ -113,8 +113,8 @@ describe('AggConfig Filters', function () {
         const interval = agg.buckets.getInterval();
         const params = filter.range[field.name];
 
-        expect(params.gte).to.be(+bucketStart);
-        expect(params.lt).to.be(+bucketStart.clone().add(interval));
+        expect(params.gte).to.be(bucketStart.toISOString());
+        expect(params.lt).to.be(bucketStart.clone().add(interval).toISOString());
       });
     });
   });

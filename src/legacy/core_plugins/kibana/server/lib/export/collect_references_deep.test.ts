@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject } from '../../../../../server/saved_objects/service/saved_objects_client';
+import { SavedObject, SavedObjectsClient } from 'src/core/server';
 import { collectReferencesDeep } from './collect_references_deep';
 
 const data = [
@@ -100,7 +100,7 @@ const data = [
 ];
 
 test('collects dashboard and all dependencies', async () => {
-  const savedObjectClient = {
+  const savedObjectClient = ({
     errors: {} as any,
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -115,7 +115,7 @@ test('collects dashboard and all dependencies', async () => {
         ),
       };
     }),
-  };
+  } as unknown) as SavedObjectsClient;
   const objects = await collectReferencesDeep(savedObjectClient, [{ type: 'dashboard', id: '1' }]);
   expect(objects).toMatchInlineSnapshot(`
 Array [

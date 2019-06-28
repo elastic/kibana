@@ -18,20 +18,12 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { InjectedMetadataStartContract } from '../../../../../core/public/injected_metadata';
+import { npSetup } from 'ui/new_platform';
 
-let newPlatformInjectedVars: InjectedMetadataStartContract;
-
-export function __newPlatformInit__(instance: InjectedMetadataStartContract) {
-  if (newPlatformInjectedVars) {
-    throw new Error('ui/chrome/api/injected_vars is already initialized');
-  }
-
-  newPlatformInjectedVars = instance;
-}
+const newPlatformInjectedVars = npSetup.core.injectedMetadata;
 
 export function initChromeInjectedVarsApi(chrome: { [key: string]: any }) {
-  chrome.getInjected = (name: string, defaultValue: any) =>
+  chrome.getInjected = (name?: string, defaultValue?: any) =>
     cloneDeep(
       name
         ? newPlatformInjectedVars.getInjectedVar(name, defaultValue)

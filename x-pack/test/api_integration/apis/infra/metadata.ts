@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
-import { MetadataQuery } from '../../../../plugins/infra/public/graphql/types';
+import { metadataQuery } from '../../../../legacy/plugins/infra/public/containers/metadata/metadata.gql_query';
+import { MetadataQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const metadataTests: KbnTestProvider = ({ getService }) => {
@@ -69,5 +69,5 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default metadataTests;

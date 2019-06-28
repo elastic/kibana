@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
+import '../filters/trust_as_html';
 import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
 

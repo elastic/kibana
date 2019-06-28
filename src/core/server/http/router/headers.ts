@@ -19,15 +19,21 @@
 
 import { pick } from '../../../utils';
 
-export interface Headers {
-  [key: string]: string | string[] | undefined;
-}
+/** @public */
+export type Headers = Record<string, string | string[] | undefined>;
 
 const normalizeHeaderField = (field: string) => field.trim().toLowerCase();
 
-export function filterHeaders(headers: Headers, fieldsToKeep: string[]) {
+export function filterHeaders(
+  headers: Headers,
+  fieldsToKeep: string[],
+  fieldsToExclude: string[] = []
+) {
+  const fieldsToExcludeNormalized = fieldsToExclude.map(normalizeHeaderField);
   // Normalize list of headers we want to allow in upstream request
-  const fieldsToKeepNormalized = fieldsToKeep.map(normalizeHeaderField);
+  const fieldsToKeepNormalized = fieldsToKeep
+    .map(normalizeHeaderField)
+    .filter(name => !fieldsToExcludeNormalized.includes(name));
 
   return pick(headers, fieldsToKeepNormalized);
 }

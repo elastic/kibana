@@ -19,11 +19,10 @@
 
 import { run, combineErrors } from './run';
 import * as Eslint from './eslint';
-import * as Tslint from './tslint';
 import * as Sasslint from './sasslint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
-run(async ({ log }) => {
+run(async ({ log, flags }) => {
   const files = await getFilesForCommit();
   const errors = [];
 
@@ -33,11 +32,13 @@ run(async ({ log }) => {
     errors.push(error);
   }
 
-  for (const Linter of [Eslint, Tslint, Sasslint]) {
+  for (const Linter of [Eslint, Sasslint]) {
     const filesToLint = Linter.pickFilesToLint(log, files);
     if (filesToLint.length > 0) {
       try {
-        await Linter.lintFiles(log, filesToLint);
+        await Linter.lintFiles(log, filesToLint, {
+          fix: flags.fix
+        });
       } catch (error) {
         errors.push(error);
       }
@@ -47,4 +48,17 @@ run(async ({ log }) => {
   if (errors.length) {
     throw combineErrors(errors);
   }
+}, {
+  description: `
+    Run checks on files that are staged for commit
+  `,
+  flags: {
+    boolean: ['fix'],
+    default: {
+      fix: false
+    },
+    help: `
+      --fix              Execute eslint in --fix mode
+    `
+  },
 });

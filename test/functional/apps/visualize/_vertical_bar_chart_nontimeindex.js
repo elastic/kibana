@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -36,13 +36,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       await PageObjects.common.sleep(500);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setCustomInterval('3h');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     };
 
 
@@ -183,8 +183,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -204,15 +203,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.visualize.toggleOpenEditor(3, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os');
         await PageObjects.header.waitUntilLoadingHasFinished();

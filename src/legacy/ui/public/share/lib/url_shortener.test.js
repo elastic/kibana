@@ -21,7 +21,7 @@ jest.mock('ui/kfetch', () => ({}));
 jest.mock('../../chrome', () => ({}));
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { shortenUrl } from './url_shortener';
 
 describe('Url shortener', () => {

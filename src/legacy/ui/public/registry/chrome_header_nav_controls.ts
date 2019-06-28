@@ -17,21 +17,33 @@
  * under the License.
  */
 
-import { NavControl } from '../chrome/directives/header_global_nav';
 import { IndexedArray } from '../indexed_array';
 import { uiRegistry, UIRegistry } from './_registry';
 
-interface BySideDictionary {
-  // this key should be from NavControlSide
-  [side: string]: IndexedArray<NavControl>;
+interface ChromeHeaderNavControlsRegistryAccessors {
+  bySide: { [typeName: string]: IndexedArray<NavControl> };
 }
 
-export interface ChromeHeaderNavControlsRegistry extends UIRegistry<NavControl> {
-  bySide: BySideDictionary;
+export enum NavControlSide {
+  Left = 'left',
+  Right = 'right',
 }
 
-export const chromeHeaderNavControlsRegistry: ChromeHeaderNavControlsRegistry = uiRegistry({
+export interface NavControl {
+  name: string;
+  order: number;
+  side: NavControlSide;
+  render: (targetDomElement: HTMLDivElement) => (() => void);
+}
+
+export type ChromeHeaderNavControlsRegistry = UIRegistry<NavControl> &
+  ChromeHeaderNavControlsRegistryAccessors;
+
+export const chromeHeaderNavControlsRegistry = uiRegistry<
+  NavControl,
+  ChromeHeaderNavControlsRegistryAccessors
+>({
   name: 'chromeHeaderNavControls',
   order: ['order'],
   group: ['side'],
-}) as ChromeHeaderNavControlsRegistry;
+});

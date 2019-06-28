@@ -18,8 +18,7 @@
  */
 
 import { ordinalSuffix } from '../../utils/ordinal_suffix';
-import percentsEditor from '../controls/percentiles.html';
-import '../../number_list';
+import { PercentilesEditor } from '../controls/percentiles';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
@@ -54,7 +53,7 @@ export const percentilesMetricAgg = new MetricAggType({
     },
     {
       name: 'percents',
-      editor: percentsEditor,
+      editorComponent: PercentilesEditor,
       default: [1, 5, 25, 50, 75, 95, 99]
     },
     {

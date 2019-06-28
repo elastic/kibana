@@ -1,21 +1,20 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "allowJs": true,
-    "outDir": "target",
-    "baseUrl": "./",
-    "paths": {
-      "*":[
-        "*"
-      ]
-    },
     "types": [
       "node",
       "mocha"
+    ],
+    "lib": [
+      "esnext",
+      "dom"
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "plugin_functional/plugins/**/*"
   ]
 }

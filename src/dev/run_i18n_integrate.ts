@@ -18,8 +18,9 @@
  */
 
 import chalk from 'chalk';
+import Listr from 'listr';
 
-import { integrateLocaleFiles, mergeConfigs } from './i18n';
+import { ErrorReporter, integrateLocaleFiles, mergeConfigs } from './i18n';
 import { extractDefaultMessages } from './i18n/tasks';
 import { createFailError, run } from './run';
 
@@ -47,24 +48,73 @@ run(
       );
     }
 
-    if (Array.isArray(target)) {
+    if (typeof target === 'boolean' || Array.isArray(target)) {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} --target should be specified only once.`
+        `${chalk.white.bgRed(
+          ' I18N ERROR '
+        )} --target should be specified only once and must have a value.`
+      );
+    }
+
+    if (typeof path === 'boolean' || typeof includeConfig === 'boolean') {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
+      );
+    }
+
+    if (
+      typeof ignoreIncompatible !== 'boolean' ||
+      typeof ignoreUnused !== 'boolean' ||
+      typeof ignoreMissing !== 'boolean' ||
+      typeof dryRun !== 'boolean'
+    ) {
+      throw createFailError(
+        `${chalk.white.bgRed(
+          ' I18N ERROR '
+        )} --ignore-incompatible, --ignore-unused, --ignore-missing, and --dry-run can't have values`
       );
     }
 
     const config = await mergeConfigs(includeConfig);
-    const defaultMessages = await extractDefaultMessages({ path, config });
+    const list = new Listr([
+      {
+        title: 'Extracting Default Messages',
+        task: () => new Listr(extractDefaultMessages({ path, config }), { exitOnError: true }),
+      },
+      {
+        title: 'Intregrating Locale File',
+        task: async ({ messages }) => {
+          await integrateLocaleFiles(messages, {
+            sourceFileName: source,
+            targetFileName: target,
+            dryRun,
+            ignoreIncompatible,
+            ignoreUnused,
+            ignoreMissing,
+            config,
+            log,
+          });
+        },
+      },
+    ]);
 
-    await integrateLocaleFiles(defaultMessages, {
-      sourceFileName: source,
-      targetFileName: target,
-      dryRun,
-      ignoreIncompatible,
-      ignoreUnused,
-      ignoreMissing,
-      config,
-      log,
-    });
+    try {
+      const reporter = new ErrorReporter();
+      const messages: Map<string, { message: string }> = new Map();
+      await list.run({ messages, reporter });
+    } catch (error) {
+      process.exitCode = 1;
+      if (error instanceof ErrorReporter) {
+        error.errors.forEach((e: string | Error) => log.error(e));
+      } else {
+        log.error('Unhandled exception!');
+        log.error(error);
+      }
+    }
+  },
+  {
+    flags: {
+      allowUnexpected: true,
+    },
   }
 );

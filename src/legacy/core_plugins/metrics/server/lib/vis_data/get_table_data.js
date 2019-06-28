@@ -16,35 +16,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { buildRequestBody } from './table/build_request_body';
+import { handleErrorResponse } from './handle_error_response';
 import { get } from 'lodash';
-import buildRequestBody from './table/build_request_body';
-import handleErrorResponse from './handle_error_response';
-import processBucket from './table/process_bucket';
-import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { processBucket } from './table/process_bucket';
+import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
-
+import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 export async function getTableData(req, panel) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
-
+  const panelIndexPattern = panel.index_pattern;
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(
+    req,
+    panelIndexPattern
+  );
+  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
-  const indexPattern = panel.index_pattern;
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
 
-  const params = {
-    index: indexPatternString,
-    ignore_throttled: !includeFrozen,
-    body: buildRequestBody(req, panel, esQueryConfig, indexPatternObject)
+  const meta = {
+    type: panel.type,
+    uiRestrictions: capabilities.uiRestrictions,
   };
+
   try {
-    const resp = await callWithRequest(req, 'search', params);
+    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
+    const [resp] = await searchRequest.search([
+      {
+        body,
+        index: panelIndexPattern,
+      },
+    ]);
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
-    return { type: 'table', series: buckets.map(processBucket(panel)) };
+
+    return {
+      ...meta,
+      series: buckets.map(processBucket(panel)),
+    };
   } catch (err) {
-    if (err.body) {
+    if (err.body || err.name === 'KQLSyntaxError') {
       err.response = err.body;
-      return { type: 'table', ...handleErrorResponse(panel)(err) };
+
+      return {
+        ...meta,
+        ...handleErrorResponse(panel)(err),
+      };
     }
   }
 }

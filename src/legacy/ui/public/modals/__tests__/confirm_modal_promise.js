@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
+import testSubjSelector from '@kbn/test-subj-selector';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import $ from 'jquery';
@@ -43,7 +44,7 @@ describe('ui/modals/confirm_modal_promise', function () {
 
   afterEach(function () {
     $rootScope.$digest();
-    $.findTestSubject('confirmModalConfirmButton').click();
+    $(testSubjSelector('confirmModalConfirmButton')).click();
   });
 
   describe('before timeout completes', function () {
@@ -58,7 +59,7 @@ describe('ui/modals/confirm_modal_promise', function () {
   describe('after timeout completes', function () {
     it('confirmation dialogue is loaded to dom with message', function () {
       $rootScope.$digest();
-      const confirmModalElement = $.findTestSubject('confirmModal');
+      const confirmModalElement = $(testSubjSelector('confirmModal'));
       expect(confirmModalElement).to.not.be(undefined);
 
       const htmlString = confirmModalElement[0].innerHTML;
@@ -73,7 +74,7 @@ describe('ui/modals/confirm_modal_promise', function () {
 
         promise.then(confirmCallback, cancelCallback);
         $rootScope.$digest();
-        const confirmButton = $.findTestSubject('confirmModalConfirmButton');
+        const confirmButton = $(testSubjSelector('confirmModalConfirmButton'));
 
         confirmButton.click();
         expect(confirmCallback.called).to.be(true);
@@ -88,7 +89,7 @@ describe('ui/modals/confirm_modal_promise', function () {
         promise.then(confirmCallback, cancelCallback);
 
         $rootScope.$digest();
-        const noButton = $.findTestSubject('confirmModalCancelButton');
+        const noButton = $(testSubjSelector('confirmModalCancelButton'));
         noButton.click();
 
         expect(cancelCallback.called).to.be(true);

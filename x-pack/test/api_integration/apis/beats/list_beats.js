@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -19,7 +19,7 @@ export default function ({ getService }) {
     it('should return all beats', async () => {
       const { body: apiResponse } = await supertest.get('/api/beats/agents').expect(200);
 
-      const beatsFromApi = apiResponse.beats;
+      const beatsFromApi = apiResponse.list;
 
       expect(beatsFromApi.length).to.be(4);
       expect(beatsFromApi.filter(beat => beat.hasOwnProperty('verified_on')).length).to.be(1);
@@ -29,7 +29,7 @@ export default function ({ getService }) {
     it('should not return access tokens', async () => {
       const { body: apiResponse } = await supertest.get('/api/beats/agents').expect(200);
 
-      const beatsFromApi = apiResponse.beats;
+      const beatsFromApi = apiResponse.list;
 
       expect(beatsFromApi.length).to.be(4);
       expect(beatsFromApi.filter(beat => beat.hasOwnProperty('access_token')).length).to.be(0);

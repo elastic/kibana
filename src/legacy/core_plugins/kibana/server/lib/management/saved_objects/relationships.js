@@ -17,45 +17,53 @@
  * under the License.
  */
 
+import { pick } from 'lodash';
+import { injectMetaAttributes } from './inject_meta_attributes';
+
 export async function findRelationships(type, id, options = {}) {
   const {
     size,
     savedObjectsClient,
     savedObjectTypes,
+    savedObjectsManagement,
   } = options;
 
   const { references = [] } = await savedObjectsClient.get(type, id);
-  const bulkGetOpts = references.map(ref => ({ id: ref.id, type: ref.type }));
+
+  // Use a map to avoid duplicates, it does happen but have a different "name" in the reference
+  const referencedToBulkGetOpts = new Map(
+    references.map(({ type, id }) => [`${type}:${id}`, { id, type }])
+  );
 
   const [referencedObjects, referencedResponse] = await Promise.all([
-    bulkGetOpts.length > 0
-      ? savedObjectsClient.bulkGet(bulkGetOpts)
+    referencedToBulkGetOpts.size > 0
+      ? savedObjectsClient.bulkGet([...referencedToBulkGetOpts.values()])
       : Promise.resolve({ saved_objects: [] }),
     savedObjectsClient.find({
       hasReference: { type, id },
       perPage: size,
-      fields: ['title'],
       type: savedObjectTypes,
     }),
   ]);
 
-  const relationshipObjects = [].concat(
-    referencedObjects.saved_objects.map(extractCommonProperties),
-    referencedResponse.saved_objects.map(extractCommonProperties),
+  return [].concat(
+    referencedObjects.saved_objects
+      .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
+      .map(extractCommonProperties)
+      .map(obj => ({
+        ...obj,
+        relationship: 'child',
+      })),
+    referencedResponse.saved_objects
+      .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
+      .map(extractCommonProperties)
+      .map(obj => ({
+        ...obj,
+        relationship: 'parent',
+      })),
   );
-
-  return relationshipObjects.reduce((result, relationshipObject) => {
-    const objectsForType = (result[relationshipObject.type] || []);
-    const { type, ...relationshipObjectWithoutType } = relationshipObject;
-    result[type] = objectsForType.concat(relationshipObjectWithoutType);
-    return result;
-  }, {});
 }
 
 function extractCommonProperties(savedObject) {
-  return {
-    id: savedObject.id,
-    type: savedObject.type,
-    title: savedObject.attributes.title,
-  };
+  return pick(savedObject, ['id', 'type', 'meta']);
 }

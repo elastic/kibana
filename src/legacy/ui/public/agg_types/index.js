@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import '../directives/validate_agg';
 import './agg_params';
 import { IndexedArray } from '../indexed_array';
 import { countMetricAgg } from './metrics/count';

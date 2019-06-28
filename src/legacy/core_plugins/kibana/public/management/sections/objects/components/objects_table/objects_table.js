@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
+import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { debounce, flattenDeep } from 'lodash';
+import { debounce } from 'lodash';
 import { Header } from './components/header';
 import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
@@ -38,25 +40,30 @@ import {
   EuiCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
+  EuiSwitch,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiModalHeaderTitle,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem
 } from '@elastic/eui';
 import {
-  retrieveAndExportDocs,
-  scanAllTypes,
-  saveToFile,
   parseQuery,
-  getSavedObjectIcon,
   getSavedObjectCounts,
   getRelationships,
   getSavedObjectLabel,
+  fetchExportObjects,
+  fetchExportByType,
+  findObjects,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const INCLUDED_TYPES = [
-  'index-pattern',
-  'visualization',
-  'dashboard',
-  'search',
-];
+export const POSSIBLE_TYPES = chrome.getInjected('importAndExportableTypes');
 
 class ObjectsTableUI extends Component {
   static propTypes = {
@@ -66,20 +73,23 @@ class ObjectsTableUI extends Component {
     basePath: PropTypes.string.isRequired,
     perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
+    confirmModalPromise: PropTypes.func.isRequired,
     services: PropTypes.array.isRequired,
-    getEditUrl: PropTypes.func.isRequired,
-    goInApp: PropTypes.func.isRequired,
+    uiCapabilities: PropTypes.object.isRequired,
+    goInspectObject: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
+    this.savedObjectTypes = POSSIBLE_TYPES;
 
     this.state = {
       totalCount: 0,
       page: 0,
       perPage: props.perPageConfig || 50,
       savedObjects: [],
-      savedObjectCounts: INCLUDED_TYPES.reduce((typeToCountMap, type) => {
+      savedObjectCounts: this.savedObjectTypes.reduce((typeToCountMap, type) => {
         typeToCountMap[type] = 0;
         return typeToCountMap;
       }, {}),
@@ -89,14 +99,13 @@ class ObjectsTableUI extends Component {
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
-      relationshipId: undefined,
-      relationshipType: undefined,
-      relationshipTitle: undefined,
+      relationshipObject: undefined,
       isShowingDeleteConfirmModal: false,
       isShowingExportAllOptionsModal: false,
       isDeleting: false,
       exportAllOptions: [],
       exportAllSelectedOptions: {},
+      isIncludeReferencesDeepChecked: true,
     };
   }
 
@@ -114,7 +123,7 @@ class ObjectsTableUI extends Component {
   fetchCounts = async () => {
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = INCLUDED_TYPES.filter(
+    const filteredTypes = this.savedObjectTypes.filter(
       type => !visibleTypes || visibleTypes.includes(type)
     );
 
@@ -143,7 +152,7 @@ class ObjectsTableUI extends Component {
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.$http,
-      INCLUDED_TYPES,
+      this.savedObjectTypes,
       queryText
     );
 
@@ -162,16 +171,17 @@ class ObjectsTableUI extends Component {
   }
 
   debouncedFetch = debounce(async () => {
-    const { intl, savedObjectsClient } = this.props;
+    const { intl } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
+    // "searchFields" is missing from the "findOptions" but gets injected via the API.
+    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
-      fields: ['title', 'id'],
-      searchFields: ['title'],
-      type: INCLUDED_TYPES.filter(
+      fields: ['id'],
+      type: this.savedObjectTypes.filter(
         type => !visibleTypes || visibleTypes.includes(type)
       ),
     };
@@ -181,7 +191,7 @@ class ObjectsTableUI extends Component {
 
     let resp;
     try {
-      resp = await savedObjectsClient.find(findOptions);
+      resp = await findObjects(findOptions);
     } catch (error) {
       if (this._isMounted) {
         this.setState({
@@ -209,12 +219,7 @@ class ObjectsTableUI extends Component {
       }
 
       return {
-        savedObjects: resp.savedObjects.map(savedObject => ({
-          title: savedObject.attributes.title,
-          type: savedObject.type,
-          id: savedObject.id,
-          icon: getSavedObjectIcon(savedObject.type),
-        })),
+        savedObjects: resp.savedObjects,
         filteredItemCount: resp.total,
         isSearching: false,
       };
@@ -226,12 +231,7 @@ class ObjectsTableUI extends Component {
   };
 
   onSelectionChanged = selection => {
-    const selectedSavedObjects = selection.map(item => ({
-      id: item.id,
-      type: item.type,
-      title: item.title,
-    }));
-    this.setState({ selectedSavedObjects });
+    this.setState({ selectedSavedObjects: selection });
   };
 
   onQueryChange = ({ query }) => {
@@ -260,35 +260,50 @@ class ObjectsTableUI extends Component {
     }, this.fetchSavedObjects);
   };
 
-  onShowRelationships = (id, type, title) => {
+  onShowRelationships = (object) => {
     this.setState({
       isShowingRelationships: true,
-      relationshipId: id,
-      relationshipType: type,
-      relationshipTitle: title,
+      relationshipObject: object,
     });
   };
 
   onHideRelationships = () => {
     this.setState({
       isShowingRelationships: false,
-      relationshipId: undefined,
-      relationshipType: undefined,
-      relationshipTitle: undefined,
+      relationshipObject: undefined,
     });
   };
 
-  onExport = async () => {
-    const { savedObjectsClient } = this.props;
+  onExport = async (includeReferencesDeep) => {
+    const { intl } = this.props;
     const { selectedSavedObjects } = this.state;
-    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    await retrieveAndExportDocs(objects.savedObjects, savedObjectsClient);
+    const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
+
+    let blob;
+    try {
+      blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.export.dangerNotification',
+          defaultMessage: 'Unable to generate export',
+        }),
+      });
+      throw e;
+    }
+
+    saveAs(blob, 'export.ndjson');
+    toastNotifications.addSuccess({
+      title: intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.export.successNotification',
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
   };
 
   onExportAll = async () => {
-    const { $http } = this.props;
-    const { exportAllSelectedOptions } = this.state;
-
+    const { intl } = this.props;
+    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
       (accum, [id, selected]) => {
         if (selected) {
@@ -298,8 +313,28 @@ class ObjectsTableUI extends Component {
       },
       []
     );
-    const results = await scanAllTypes($http, exportTypes);
-    saveToFile(JSON.stringify(flattenDeep(results), null, 2));
+
+    let blob;
+    try {
+      blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.exportAll.dangerNotification',
+          defaultMessage: 'Unable to generate export',
+        }),
+      });
+      throw e;
+    }
+
+    saveAs(blob, 'export.ndjson');
+    toastNotifications.addSuccess({
+      title: intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.exportAll.successNotification',
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
+    this.setState({ isShowingExportAllOptionsModal: false });
   };
 
   finishImport = () => {
@@ -363,6 +398,7 @@ class ObjectsTableUI extends Component {
     return await getRelationships(
       type,
       id,
+      this.savedObjectTypes,
       this.props.$http,
       this.props.basePath
     );
@@ -380,6 +416,8 @@ class ObjectsTableUI extends Component {
         services={this.props.services}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={this.props.newIndexPatternUrl}
+        savedObjectTypes={this.props.savedObjectTypes}
+        confirmModalPromise={this.props.confirmModalPromise}
       />
     );
   }
@@ -391,14 +429,12 @@ class ObjectsTableUI extends Component {
 
     return (
       <Relationships
-        id={this.state.relationshipId}
-        type={this.state.relationshipType}
-        title={this.state.relationshipTitle}
+        savedObject={this.state.relationshipObject}
         getRelationships={this.getRelationships}
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
-        getEditUrl={this.props.getEditUrl}
-        goInApp={this.props.goInApp}
+        goInspectObject={this.props.goInspectObject}
+        canGoInApp={this.props.canGoInApp}
       />
     );
   }
@@ -441,6 +477,7 @@ class ObjectsTableUI extends Component {
           }
           onCancel={onCancel}
           onConfirm={onConfirm}
+          buttonColor="danger"
           cancelButtonText={(
             <FormattedMessage
               id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
@@ -475,12 +512,12 @@ class ObjectsTableUI extends Component {
                   id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName', defaultMessage: 'Type'
                 }),
                 width: '50px',
-                render: type => (
+                render: (type, object) => (
                   <EuiToolTip
                     position="top"
                     content={getSavedObjectLabel(type)}
                   >
-                    <EuiIcon type={getSavedObjectIcon(type)} />
+                    <EuiIcon type={object.meta.icon || 'apps'} />
                   </EuiToolTip>
                 ),
               },
@@ -491,7 +528,7 @@ class ObjectsTableUI extends Component {
                 }),
               },
               {
-                field: 'title',
+                field: 'meta.title',
                 name: intl.formatMessage({
                   id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
                   defaultMessage: 'Title',
@@ -512,12 +549,23 @@ class ObjectsTableUI extends Component {
     );
   }
 
+  changeIncludeReferencesDeep = () => {
+    this.setState(state => ({
+      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
+    }));
+  }
+
+  closeExportAllModal = () => {
+    this.setState({ isShowingExportAllOptionsModal: false });
+  }
+
   renderExportAllOptionsModal() {
     const {
       isShowingExportAllOptionsModal,
       filteredItemCount,
       exportAllOptions,
       exportAllSelectedOptions,
+      isIncludeReferencesDeepChecked,
     } = this.state;
 
     if (!isShowingExportAllOptionsModal) {
@@ -526,53 +574,82 @@ class ObjectsTableUI extends Component {
 
     return (
       <EuiOverlayMask>
-        <EuiConfirmModal
-          title={(<FormattedMessage
-            id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
-            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-            values={{
-              filteredItemCount
-            }}
-          />)}
-          onCancel={() =>
-            this.setState({ isShowingExportAllOptionsModal: false })
-          }
-          onConfirm={this.onExportAll}
-          cancelButtonText={(
-            <FormattedMessage id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel" defaultMessage="Cancel"/>
-          )}
-          confirmButtonText={(
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-              defaultMessage="Export All"
-            />
-          )}
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        <EuiModal
+          onClose={this.closeExportAllModal}
         >
-          <p>
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-              defaultMessage="Select which types to export. The number in parentheses indicates
-              how many of this type are available to export."
-            />
-          </p>
-          <EuiCheckboxGroup
-            options={exportAllOptions}
-            idToSelectedMap={exportAllSelectedOptions}
-            onChange={optionId => {
-              const newExportAllSelectedOptions = {
-                ...exportAllSelectedOptions,
-                ...{
-                  [optionId]: !exportAllSelectedOptions[optionId],
-                },
-              };
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
+                defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+                values={{
+                  filteredItemCount
+                }}
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiFormRow
+              label={<FormattedMessage
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                defaultMessage="Select which types to export"
+              />}
+              labelType="legend"
+            >
+              <EuiCheckboxGroup
+                options={exportAllOptions}
+                idToSelectedMap={exportAllSelectedOptions}
+                onChange={optionId => {
+                  const newExportAllSelectedOptions = {
+                    ...exportAllSelectedOptions,
+                    ...{
+                      [optionId]: !exportAllSelectedOptions[optionId],
+                    },
+                  };
 
-              this.setState({
-                exportAllSelectedOptions: newExportAllSelectedOptions,
-              });
-            }}
-          />
-        </EuiConfirmModal>
+                  this.setState({
+                    exportAllSelectedOptions: newExportAllSelectedOptions,
+                  });
+                }}
+              />
+            </EuiFormRow>
+            <EuiSwitch
+              name="includeReferencesDeep"
+              label={(
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  defaultMessage="Include related objects"
+                />
+              )}
+              checked={isIncludeReferencesDeepChecked}
+              onChange={this.changeIncludeReferencesDeep}
+            />
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty onClick={this.closeExportAllModal}>
+                      <FormattedMessage
+                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill onClick={this.onExportAll}>
+                      <FormattedMessage
+                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+                        defaultMessage="Export all"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalFooter>
+        </EuiModal>
       </EuiOverlayMask>
     );
   }
@@ -592,7 +669,7 @@ class ObjectsTableUI extends Component {
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = INCLUDED_TYPES.map(type => ({
+    const filterOptions = this.savedObjectTypes.map(type => ({
       value: type,
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,
@@ -623,15 +700,16 @@ class ObjectsTableUI extends Component {
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
+          canDelete={this.props.uiCapabilities.savedObjectsManagement.delete}
           onDelete={this.onDelete}
-          getEditUrl={this.props.getEditUrl}
-          goInApp={this.props.goInApp}
+          goInspectObject={this.props.goInspectObject}
           pageIndex={page}
           pageSize={perPage}
           items={savedObjects}
           totalItemCount={filteredItemCount}
           isSearching={isSearching}
           onShowRelationships={this.onShowRelationships}
+          canGoInApp={this.props.canGoInApp}
         />
       </EuiPageContent>
     );

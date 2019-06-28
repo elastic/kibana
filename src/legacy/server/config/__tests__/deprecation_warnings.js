@@ -19,7 +19,7 @@
 
 import { spawn } from 'child_process';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startup');
 const SETUP_NODE_ENV = require.resolve('../../../../setup_node_env');

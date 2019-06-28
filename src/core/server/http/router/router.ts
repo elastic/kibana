@@ -22,14 +22,16 @@ import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
 import { KibanaRequest } from './request';
 import { KibanaResponse, ResponseFactory, responseFactory } from './response';
-import { RouteConfig, RouteMethod, RouteSchemas } from './route';
+import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 
 export interface RouterRoute {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: RouteMethod;
   path: string;
+  options: RouteConfigOptions;
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
+/** @public */
 export class Router {
   public routes: Array<Readonly<RouterRoute>> = [];
 
@@ -42,12 +44,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'get');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'GET',
-      path: route.path,
+      method: 'get',
+      path,
+      options,
     });
   }
 
@@ -58,12 +62,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'post');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'POST',
-      path: route.path,
+      method: 'post',
+      path,
+      options,
     });
   }
 
@@ -74,12 +80,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'put');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'PUT',
-      path: route.path,
+      method: 'put',
+      path,
+      options,
     });
   }
 
@@ -90,12 +98,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
+    const { path, options = {} } = route;
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'delete');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
-      method: 'DELETE',
-      path: route.path,
+      method: 'delete',
+      path,
+      options,
     });
   }
 
@@ -170,4 +180,4 @@ export class Router {
 export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
   req: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   createResponse: ResponseFactory
-) => Promise<KibanaResponse<any>>;
+) => KibanaResponse<any> | Promise<KibanaResponse<any>>;

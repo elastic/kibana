@@ -2,3 +2,10 @@
   color: $euiColorMediumShade;
   margin-left: $euiSizeS !important;
 }
+
+/*
+  Fixes EUI known issue https://github.com/elastic/eui/issues/1749
+*/
+.dscProgressBarTooltip__anchor {
+  display: block;
+}

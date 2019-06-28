@@ -18,6 +18,7 @@
  */
 
 import chalk from 'chalk';
+import fs from 'fs';
 import { relative, resolve as resolvePath } from 'path';
 import { inspect } from 'util';
 
@@ -30,11 +31,17 @@ import {
   isLinkDependency,
   readPackageJson,
 } from './package_json';
-import { installInDir, runScriptInPackage, runScriptInPackageStreaming } from './scripts';
+import {
+  installInDir,
+  runScriptInPackage,
+  runScriptInPackageStreaming,
+  yarnWorkspacesInfo,
+} from './scripts';
 
 interface BuildConfig {
   skip?: boolean;
   intermediateBuildDirectory?: string;
+  oss?: boolean;
 }
 
 interface CleanConfig {
@@ -190,7 +197,41 @@ export class Project {
 
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
     log.write(chalk.bold(`\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`));
-    return installInDir(this.path, extraArgs);
+    await installInDir(this.path, extraArgs);
+    await this.removeExtraneousNodeModules();
+  }
+
+  /**
+   * Yarn workspaces symlinks workspace projects to the root node_modules, even
+   * when there is no depenency on the project. This results in unnecicary, and
+   * often duplicated code in the build archives.
+   */
+  public async removeExtraneousNodeModules() {
+    // this is only relevant for the root workspace
+    if (!this.isWorkspaceRoot) {
+      return;
+    }
+
+    const workspacesInfo = await yarnWorkspacesInfo(this.path);
+    const unusedWorkspaces = new Set(Object.keys(workspacesInfo));
+
+    // check for any cross-project dependency
+    for (const name of Object.keys(workspacesInfo)) {
+      const workspace = workspacesInfo[name];
+      workspace.workspaceDependencies.forEach(w => unusedWorkspaces.delete(w));
+    }
+
+    unusedWorkspaces.forEach(name => {
+      const { dependencies, devDependencies } = this.json;
+      const nodeModulesPath = resolvePath(this.nodeModulesLocation, name);
+      const isDependency = dependencies && dependencies.hasOwnProperty(name);
+      const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
+
+      if (!isDependency && !isDevDependency && fs.existsSync(nodeModulesPath)) {
+        log.write(`No dependency on ${name}, removing link in node_modules`);
+        fs.unlinkSync(nodeModulesPath);
+      }
+    });
   }
 }
 

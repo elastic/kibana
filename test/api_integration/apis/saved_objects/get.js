@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -36,15 +36,10 @@ export default function ({ getService }) {
           .then(resp => {
             expect(resp.body).to.eql({
               id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              migrationVersion: {
-                visualization: '7.0.0'
-              },
               type: 'visualization',
               updated_at: '2017-09-21T18:51:23.794Z',
               version: resp.body.version,
-              migrationVersion: {
-                visualization: '7.0.0',
-              },
+              migrationVersion: resp.body.migrationVersion,
               attributes: {
                 title: 'Count of requests',
                 description: '',
@@ -60,6 +55,7 @@ export default function ({ getService }) {
                 id: '91200a00-9efd-11e7-acb3-3dab96693fab',
               }],
             });
+            expect(resp.body.migrationVersion).to.be.ok();
           })
       ));
 

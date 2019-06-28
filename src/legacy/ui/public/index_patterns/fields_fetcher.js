@@ -17,37 +17,25 @@
  * under the License.
  */
 
-export function createFieldsFetcher(apiClient, config) {
-  class FieldsFetcher {
-    fetch(indexPattern) {
-      if (indexPattern.isTimeBasedInterval()) {
-        const interval = indexPattern.getInterval().name;
-        return this.fetchForTimePattern(indexPattern.title, interval);
-      }
-
-      return this.fetchForWildcard(indexPattern.title, {
-        type: indexPattern.type,
-        params: indexPattern.typeMeta && indexPattern.typeMeta.params,
-      });
-    }
-
-    fetchForTimePattern(indexPatternId) {
-      return apiClient.getFieldsForTimePattern({
-        pattern: indexPatternId,
-        lookBack: config.get('indexPattern:fieldMapping:lookBack'),
-        metaFields: config.get('metaFields'),
-      });
-    }
-
-    fetchForWildcard(indexPatternId, options = {}) {
-      return apiClient.getFieldsForWildcard({
-        pattern: indexPatternId,
-        metaFields: config.get('metaFields'),
-        type: options.type,
-        params: options.params || {},
-      });
-    }
+export class FieldsFetcher {
+  constructor(apiClient, metaFields) {
+    this.apiClient = apiClient;
+    this.metaFields = metaFields;
+  }
+  fetch(indexPattern, options) {
+    return this.fetchForWildcard(indexPattern.title, {
+      ...options,
+      type: indexPattern.type,
+      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+    });
   }
 
-  return new FieldsFetcher();
+  fetchForWildcard(indexPatternId, options = {}) {
+    return this.apiClient.getFieldsForWildcard({
+      pattern: indexPatternId,
+      metaFields: this.metaFields,
+      type: options.type,
+      params: options.params || {},
+    });
+  }
 }

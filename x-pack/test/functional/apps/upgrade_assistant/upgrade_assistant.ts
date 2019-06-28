@@ -6,7 +6,7 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function upgradeAssistantFunctionalTests({
   getService,
   getPageObjects,
@@ -14,7 +14,8 @@ export default function upgradeAssistantFunctionalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant']);
 
-  describe('Upgrade Checkup', () => {
+  describe('Upgrade Checkup', function() {
+    this.tags('smoke');
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => {
       await PageObjects.upgradeAssistant.expectTelemetryHasFinish();

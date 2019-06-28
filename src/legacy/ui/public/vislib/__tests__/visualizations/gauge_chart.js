@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import _ from 'lodash';
@@ -36,7 +36,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
     addTooltip: true,
     addLegend: false,
     gauge: {
-      verticalSplit: false,
+      alignment: 'horizontal',
       autoExtend: false,
       percentageMode: false,
       gaugeStyle: 'Full',
@@ -122,10 +122,19 @@ describe('Vislib Gauge Chart Test Suite', function () {
     expect($(chartEl).find('svg > g > g > text').text()).to.equal('94%77%61%24%45%');
   });
 
+  it('creates gauge with automatic mode', function () {
+    generateVis({
+      gauge: {
+        alignment: 'automatic'
+      }
+    });
+    expect($(chartEl).find('svg').width()).to.equal(197);
+  });
+
   it('creates gauge with vertical mode', function () {
     generateVis({
       gauge: {
-        verticalSplit: true
+        alignment: 'vertical'
       }
     });
     expect($(chartEl).find('svg').width()).to.equal($(chartEl).width());

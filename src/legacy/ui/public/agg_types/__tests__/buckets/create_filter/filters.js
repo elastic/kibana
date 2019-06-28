@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -43,8 +43,8 @@ describe('AggConfig Filters', function () {
             schema: 'segment',
             params: {
               filters: [
-                { input: { query: { query_string: { query: 'type:apache' } } } },
-                { input: { query: { query_string: { query: 'type:nginx' } } } }
+                { input: { query: 'type:apache', language: 'lucene' } },
+                { input: { query: 'type:nginx', language: 'lucene' } }
               ]
             }
           }
@@ -53,9 +53,9 @@ describe('AggConfig Filters', function () {
 
       const aggConfig = vis.aggs.byTypeName.filters[0];
       const filter = createFilterFilters(aggConfig, 'type:nginx');
-      expect(filter.query.query_string.query).to.be('type:nginx');
+      expect(filter.query.bool.must[0].query_string.query).to.be('type:nginx');
       expect(filter.meta).to.have.property('index', indexPattern.id);
-
+      expect(filter.meta).to.have.property('alias', 'type:nginx');
     });
   });
 });

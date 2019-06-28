@@ -18,20 +18,26 @@
  */
 
 import _ from 'lodash';
-import getAggValue from '../../helpers/get_agg_value';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
-export default function percentile(resp, panel, series) {
+import { getAggValue } from '../../helpers/get_agg_value';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
+import { METRIC_TYPES } from '../../../../../common/metric_types';
+
+export function percentile(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
-    if (metric.type !== 'percentile') return next(results);
 
-    getSplits(resp, panel, series).forEach((split) => {
+    if (metric.type !== METRIC_TYPES.PERCENTILE) {
+      return next(results);
+    }
+
+    getSplits(resp, panel, series, meta).forEach(split => {
       metric.percentiles.forEach(percentile => {
-        const label = (split.label) + ` (${percentile.value})`;
+        const percentileValue = percentile.value ? percentile.value : 0;
+        const label = `${split.label} (${percentileValue})`;
         const data = split.timeseries.buckets.map(bucket => {
-          const m = _.assign({}, metric, { percent: percentile.value });
+          const m = _.assign({}, metric, { percent: percentileValue });
           return [bucket.key, getAggValue(bucket, m)];
         });
         if (percentile.mode === 'band') {
@@ -47,7 +53,7 @@ export default function percentile(resp, panel, series) {
             lines: { show: true, fill: percentile.shade, lineWidth: 0 },
             points: { show: false },
             legend: false,
-            fillBetween: `${split.id}:${percentile.id}:${percentile.percentile}`
+            fillBetween: `${split.id}:${percentile.id}:${percentile.percentile}`,
           });
           results.push({
             id: `${split.id}:${percentile.id}:${percentile.percentile}`,
@@ -56,7 +62,7 @@ export default function percentile(resp, panel, series) {
             data: fillData,
             lines: { show: true, fill: false, lineWidth: 0 },
             legend: false,
-            points: { show: false }
+            points: { show: false },
           });
         } else {
           const decoration = getDefaultDecoration(series);
@@ -65,11 +71,10 @@ export default function percentile(resp, panel, series) {
             color: split.color,
             label,
             data,
-            ...decoration
+            ...decoration,
           });
         }
       });
-
     });
     return next(results);
   };

@@ -26,6 +26,7 @@ exports[`rendering render matches snapshot 1`] = `
               fill={true}
               iconSide="left"
               onClick={[Function]}
+              size="m"
               type="button"
             >
               <FormattedMessage
@@ -52,8 +53,7 @@ exports[`rendering render matches snapshot 1`] = `
         body={
           <p>
             <FormattedMessage
-              defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
-                    clear your session data."
+              defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data."
               id="core.fatalErrors.tryRefreshingPageDescription"
               values={Object {}}
             />

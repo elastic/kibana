@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -28,8 +30,8 @@ import {
   GuideText,
 } from '../../components';
 
-const Expression = require('./expression');
-const expressionSource = require('!!raw-loader!./expression');
+import Expression from './expression';
+import expressionSource from '!!raw-loader!./expression';
 const expressionHtml = renderToHtml(Expression, { defaultActiveButton: 'example2' });
 
 export default props => (

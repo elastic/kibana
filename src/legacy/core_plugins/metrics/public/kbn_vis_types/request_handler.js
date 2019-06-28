@@ -20,51 +20,52 @@
 import { validateInterval } from '../lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
+import { kfetch } from 'ui/kfetch';
 
-const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
-  const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
+const MetricsRequestHandlerProvider = function(Private, config) {
+  const timezone = Private(timezoneProvider)();
 
   return {
     name: 'metrics',
-    handler: function ({ uiState, timeRange, filters, query, visParams }) {
-      const timezone = Private(timezoneProvider)();
-      return new Promise((resolve) => {
-        const panel = visParams;
-        const uiStateObj = uiState.get(panel.type, {});
-        const parsedTimeRange = timefilter.calculateBounds(timeRange);
-        const scaledDataFormat = config.get('dateFormat:scaled');
-        const dateFormat = config.get('dateFormat');
-        if (panel && panel.id) {
-          const params = {
-            timerange: { timezone, ...parsedTimeRange },
-            query,
-            filters,
-            panels: [panel],
-            state: uiStateObj
+
+    handler: async ({ uiState, timeRange, filters, query, visParams }) => {
+      const uiStateObj = uiState.get(visParams.type, {});
+      const parsedTimeRange = timefilter.calculateBounds(timeRange);
+      const scaledDataFormat = config.get('dateFormat:scaled');
+      const dateFormat = config.get('dateFormat');
+
+      if (visParams && visParams.id) {
+        try {
+          const maxBuckets = config.get('metrics:max_buckets');
+
+          validateInterval(parsedTimeRange, visParams, maxBuckets);
+
+          const resp = await kfetch({
+            pathname: '/api/metrics/vis/data',
+            method: 'POST',
+            body: JSON.stringify({
+              timerange: {
+                timezone,
+                ...parsedTimeRange,
+              },
+              query,
+              filters,
+              panels: [visParams],
+              state: uiStateObj,
+            }),
+          });
+
+          return {
+            dateFormat,
+            scaledDataFormat,
+            timezone,
+            ...resp,
           };
-
-          try {
-            const maxBuckets = config.get('metrics:max_buckets');
-            validateInterval(parsedTimeRange, panel, maxBuckets);
-            const httpResult = $http.post('../api/metrics/vis/data', params)
-              .then(resp => ({ dateFormat, scaledDataFormat, timezone, ...resp.data }))
-              .catch(resp => { throw resp.data; });
-
-            return httpResult
-              .then(resolve)
-              .catch(resp => {
-                resolve({});
-                const err = new Error(resp.message);
-                err.stack = resp.stack;
-                notify.error(err);
-              });
-          } catch (e) {
-            notify.error(e);
-            return resolve();
-          }
+        } catch (error) {
+          return Promise.reject(error);
         }
-      });
-    }
+      }
+    },
   };
 };
 

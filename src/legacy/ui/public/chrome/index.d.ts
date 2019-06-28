@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { Brand } from '../../../../core/public/chrome';
+import { ChromeBrand } from '../../../../core/public';
 import { SavedObjectsClient } from '../saved_objects';
+import { BadgeApi } from './api/badge';
 import { BreadcrumbsApi } from './api/breadcrumbs';
 import { HelpExtensionApi } from './api/help_extension';
 import { ChromeNavLinks } from './api/nav';
 
-interface IInjector {
+export interface IInjector {
   get<T>(injectable: string): T;
 }
 
 declare interface Chrome extends ChromeNavLinks {
+  badge: BadgeApi;
   breadcrumbs: BreadcrumbsApi;
   helpExtension: HelpExtensionApi;
   addBasePath<T = string>(path: T): T;
@@ -40,8 +42,8 @@ declare interface Chrome extends ChromeNavLinks {
   setVisible(visible: boolean): any;
   getInjected(key: string, defaultValue?: any): any;
   setRootController(name: string, Controller: any): any;
-  setBrand(brand: Brand): this;
-  getBrand(key: keyof Brand): Brand[keyof Brand];
+  setBrand(brand: ChromeBrand): this;
+  getBrand(key: keyof ChromeBrand): ChromeBrand[keyof ChromeBrand];
   addApplicationClass(classNames: string | string[]): this;
   removeApplicationClass(classNames: string | string[]): this;
   getApplicationClasses(): string;
@@ -49,7 +51,8 @@ declare interface Chrome extends ChromeNavLinks {
 
 declare const chrome: Chrome;
 
+// eslint-disable-next-line import/no-default-export
 export default chrome;
+export { Chrome };
 export { Breadcrumb } from './api/breadcrumbs';
-export { NavLink } from './api/nav';
 export { HelpExtension } from './api/help_extension';

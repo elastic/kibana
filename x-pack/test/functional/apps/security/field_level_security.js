@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
@@ -16,16 +16,15 @@ export default function ({ getService, getPageObjects }) {
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('security/flstest');
-      await esArchiver.load('empty_kibana');
+      await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
+      await esArchiver.load('security/flstest/kibana'); //(savedobject)
       browser.setWindowSize(1600, 1000);
-      await PageObjects.settings.createIndexPattern('flstest', null);
     });
 
-    it('should add new role viewssnrole', async function () {
+    it('should add new role a_viewssnrole', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
-      await PageObjects.security.addRole('viewssnrole', {
+      await PageObjects.security.addRole('a_viewssnrole', {
         elasticsearch: {
           'indices': [{
             'names': ['flstest'],
@@ -41,12 +40,12 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
       const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
-      expect(roles).to.have.key('viewssnrole');
-      expect(roles.viewssnrole.reserved).to.be(false);
+      expect(roles).to.have.key('a_viewssnrole');
+      expect(roles.a_viewssnrole.reserved).to.be(false);
     });
 
-    it('should add new role view_no_ssn_role', async function () {
-      await PageObjects.security.addRole('view_no_ssn_role', {
+    it('should add new role a_view_no_ssn_role', async function () {
+      await PageObjects.security.addRole('a_view_no_ssn_role', {
         elasticsearch: {
           'indices': [{
             'names': ['flstest'],
@@ -61,8 +60,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
       const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
-      expect(roles).to.have.key('view_no_ssn_role');
-      expect(roles.view_no_ssn_role.reserved).to.be(false);
+      expect(roles).to.have.key('a_view_no_ssn_role');
+      expect(roles.a_view_no_ssn_role.reserved).to.be(false);
     });
 
     it('should add new user customer1 ', async function () {
@@ -70,11 +69,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.addUser({
         username: 'customer1', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'customer one', email: 'flstest@elastic.com', save: true,
-        roles: ['kibana_user', 'viewssnrole']
+        roles: ['kibana_user', 'a_viewssnrole']
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.customer1.roles).to.eql(['kibana_user', 'viewssnrole']);
+      expect(users.customer1.roles).to.eql(['kibana_user', 'a_viewssnrole']);
     });
 
     it('should add new user customer2 ', async function () {
@@ -82,11 +81,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.addUser({
         username: 'customer2', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'customer two', email: 'flstest@elastic.com', save: true,
-        roles: ['kibana_user', 'view_no_ssn_role']
+        roles: ['kibana_user', 'a_view_no_ssn_role']
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.customer2.roles).to.eql(['kibana_user', 'view_no_ssn_role']);
+      expect(users.customer2.roles).to.eql(['kibana_user', 'a_view_no_ssn_role']);
     });
 
     it('user customer1 should see ssn', async function () {

@@ -1,0 +1,11 @@
+.markdown-body {
+  color: $euiColorDarkestShade;
+  a, a:visited {
+    color: $euiColorPrimary;
+    text-decoration: underline;
+  }
+}
+
+.markdown-body .highlight pre, .markdown-body pre {
+  background-color: $euiColorLightestShade;;
+}

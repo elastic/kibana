@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { createAction } from 'redux-actions';
 import { KibanaAction } from '../../selectors/types';
 
@@ -37,7 +39,5 @@ export interface UpdateDescriptionAction
 
 export type MetadataActions = UpdateDescriptionAction | UpdateTitleAction;
 
-export const updateDescription = createAction<UpdateDescriptionAction>(
-  MetadataActionTypeKeys.UPDATE_DESCRIPTION
-);
-export const updateTitle = createAction<UpdateTitleAction>(MetadataActionTypeKeys.UPDATE_TITLE);
+export const updateDescription = createAction<string>(MetadataActionTypeKeys.UPDATE_DESCRIPTION);
+export const updateTitle = createAction<string>(MetadataActionTypeKeys.UPDATE_TITLE);

@@ -30,10 +30,11 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiPopover,
-  rgbToHex,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 
 interface State {
   isPopoverOpen: boolean;
@@ -47,18 +48,23 @@ interface Props {
     isBeta?: boolean;
     onClick: () => void;
   }>;
+  uiCapabilities: UICapabilities;
 }
 
-export class CreateButton extends Component<Props, State> {
+class CreateButtonComponent extends Component<Props, State> {
   public state = {
     isPopoverOpen: false,
   };
 
   public render() {
-    const { options, children } = this.props;
+    const { options, children, uiCapabilities } = this.props;
     const { isPopoverOpen } = this.state;
 
     if (!options || !options.length) {
+      return null;
+    }
+
+    if (!uiCapabilities.indexPatterns.save) {
       return null;
     }
 
@@ -137,9 +143,8 @@ export class CreateButton extends Component<Props, State> {
   };
 
   private renderBetaBadge = () => {
-    const color = rgbToHex(euiColorAccent);
     return (
-      <EuiBadge color={color}>
+      <EuiBadge color={euiColorAccent}>
         <FormattedMessage
           id="kbn.management.indexPatternList.createButton.betaLabel"
           defaultMessage="Beta"
@@ -148,3 +153,5 @@ export class CreateButton extends Component<Props, State> {
     );
   };
 }
+
+export const CreateButton = injectUICapabilities(CreateButtonComponent);

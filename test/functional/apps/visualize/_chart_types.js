@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -44,11 +44,11 @@ export default function ({ getService, getPageObjects }) {
         'Metric',
         'Pie',
         'Region Map',
+        'TSVB',
         'Tag Cloud',
         'Timelion',
         'Vega',
         'Vertical Bar',
-        'Visual Builder',
       ];
 
       // find all the chart types and make sure there all there

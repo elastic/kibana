@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects([
     'common',
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
-      await PageObjects.settings.createIndexPattern('testlargestring', null);
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'testlargestring'  });
     });
 
     it('verify the large string book present', async function () {

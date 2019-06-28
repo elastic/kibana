@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import TagCloud from '../tag_cloud';
 import d3 from 'd3';

@@ -28,6 +28,16 @@ jest.mock('./ui/inspector_panel', () => ({
 }));
 jest.mock('ui/i18n', () => ({ I18nContext: ({ children }) => children }));
 
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      overlay: {
+        openFlyout: jest.fn(),
+      },
+    }
+  },
+}));
+
 import { viewRegistry } from './view_registry';
 
 function setViews(views) {
@@ -51,61 +61,6 @@ describe('Inspector', () => {
     it('should throw an error if no views available', () => {
       setViews([]);
       expect(() => Inspector.open({})).toThrow();
-    });
-
-    describe('return value', () => {
-      beforeEach(() => {
-        setViews([{}]);
-      });
-
-      it('should be an object with a close function', () => {
-        const session = Inspector.open({});
-        expect(typeof session.close).toBe('function');
-      });
-
-      it('should emit the "closed" event if another inspector opens', () => {
-        const session = Inspector.open({});
-        const spy = jest.fn();
-        session.on('closed', spy);
-        Inspector.open({});
-        expect(spy).toHaveBeenCalled();
-      });
-
-      it('should emit the "closed" event if you call close', () => {
-        const session = Inspector.open({});
-        const spy = jest.fn();
-        session.on('closed', spy);
-        session.close();
-        expect(spy).toHaveBeenCalled();
-      });
-
-      it('can be bound to an angular scope', () => {
-        const session = Inspector.open({});
-        const spy = jest.fn();
-        session.on('closed', spy);
-        const scope = {
-          $on: jest.fn(() => () => {})
-        };
-        session.bindToAngularScope(scope);
-        expect(scope.$on).toHaveBeenCalled();
-        const onCall = scope.$on.mock.calls[0];
-        expect(onCall[0]).toBe('$destroy');
-        expect(typeof onCall[1]).toBe('function');
-        // Call $destroy callback, as angular would when the scope gets destroyed
-        onCall[1]();
-        expect(spy).toHaveBeenCalled();
-      });
-
-      it('will remove from angular scope when closed', () => {
-        const session = Inspector.open({});
-        const unwatchSpy = jest.fn();
-        const scope = {
-          $on: jest.fn(() => unwatchSpy)
-        };
-        session.bindToAngularScope(scope);
-        session.close();
-        expect(unwatchSpy).toHaveBeenCalled();
-      });
     });
   });
 });

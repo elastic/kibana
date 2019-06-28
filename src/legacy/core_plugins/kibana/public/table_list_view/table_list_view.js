@@ -62,8 +62,6 @@ class TableListViewUi extends React.Component {
       showLimitError: false,
       filter: this.props.initialFilter,
       selectedIds: [],
-      sortField: 'title',
-      sortDirection: 'asc',
       page: 0,
       perPage: 20,
     };
@@ -92,11 +90,12 @@ class TableListViewUi extends React.Component {
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
+    // Also, in case filter is empty, items are being pre-sorted alphabetically.
     if (filter === this.state.filter) {
       this.setState({
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: response.hits,
+        items: (!filter ? _.sortBy(response.hits, 'title') : response.hits),
         totalItems: response.total,
         showLimitError: response.total > this.props.listingLimit,
       });
@@ -316,13 +315,13 @@ class TableListViewUi extends React.Component {
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
-    const selection = {
+    const selection = this.props.deleteItems ? {
       onSelectionChange: (selection) => {
         this.setState({
           selectedIds: selection.map(item => { return item.id; })
         });
       }
-    };
+    } : null;
 
     const actions = [{
       name: i18n.translate('kbn.table_list_view.listing.table.editActionName', {
@@ -336,14 +335,6 @@ class TableListViewUi extends React.Component {
       onClick: this.props.editItem
     }];
 
-    const sorting = {};
-    if (this.state.sortField) {
-      sorting.sort = {
-        field: this.state.sortField,
-        direction: this.state.sortDirection,
-      };
-    }
-
     const search = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
@@ -354,7 +345,7 @@ class TableListViewUi extends React.Component {
     };
 
     const columns = this.props.tableColumns.slice();
-    if (!this.state.hideWriteControls) {
+    if (this.props.editItem) {
       columns.push({
         name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
           defaultMessage: 'Actions'
@@ -371,7 +362,6 @@ class TableListViewUi extends React.Component {
         values={{ entityNamePlural: this.props.entityNamePlural }}
       />
     );
-
     return (
       <EuiInMemoryTable
         itemId="id"
@@ -382,8 +372,7 @@ class TableListViewUi extends React.Component {
         message={noItemsMessage}
         selection={selection}
         search={search}
-        sorting={sorting}
-        hasActions={!this.state.hideWriteControls}
+        sorting={true}
         data-test-subj="itemsInMemTable"
       />
     );
@@ -399,7 +388,7 @@ class TableListViewUi extends React.Component {
 
   renderListing() {
     let createButton;
-    if (!this.props.hideWriteControls) {
+    if (this.props.createItem) {
       createButton = (
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -476,12 +465,11 @@ TableListViewUi.propTypes = {
   noItemsFragment: PropTypes.object,
 
   findItems: PropTypes.func.isRequired,
-  deleteItems: PropTypes.func.isRequired,
-  createItem: PropTypes.func.isRequired,
-  editItem: PropTypes.func.isRequired,
+  deleteItems: PropTypes.func,
+  createItem: PropTypes.func,
+  editItem: PropTypes.func,
 
   listingLimit: PropTypes.number,
-  hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
 
   entityName: PropTypes.string.isRequired,

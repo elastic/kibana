@@ -18,6 +18,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -38,13 +39,14 @@ const columns = [
   {
     field: 'title',
     name: 'Pattern',
-    render: (name: string, { id }: { id: string }) => (
-      <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${id}`}>
+    render: (name: string, index: { id: string; default: boolean }) => (
+      <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${index.id}`}>
         {name}
+        {index.default && <EuiBadge className="indexPatternList__badge">Default</EuiBadge>}
       </EuiButtonEmpty>
     ),
     dataType: 'string',
-    sortable: true,
+    sortable: ({ sort }: { sort: string }) => sort,
   },
 ];
 
@@ -56,7 +58,7 @@ const pagination = {
 const sorting = {
   sort: {
     field: 'title',
-    direction: 'desc',
+    direction: 'asc',
   },
 };
 
@@ -85,14 +87,14 @@ export class IndexPatternTable extends React.Component<Props, State> {
 
   public render() {
     return (
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" data-test-subj="indexPatternTable">
         {this.state.showFlyout && (
           <CreateIndexPatternPrompt onClose={() => this.setState({ showFlyout: false })} />
         )}
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="euiIEFlexWrapFix">
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiText>
                   <h2>
                     <FormattedMessage
@@ -123,6 +125,7 @@ export class IndexPatternTable extends React.Component<Props, State> {
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiInMemoryTable
+          allowNeutralSort={false}
           itemId="id"
           isSelectable={false}
           items={this.props.indexPatterns}

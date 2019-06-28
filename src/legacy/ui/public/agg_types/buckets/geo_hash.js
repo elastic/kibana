@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
-import precisionTemplate from '../controls/precision.html';
+import { AutoPrecisionParamEditor } from '../controls/auto_precision';
+import { UseGeocentroidParamEditor } from '../controls/use_geocentroid';
+import { IsFilteredByCollarParamEditor } from '../controls/is_filtered_by_collar';
+import { PrecisionParamEditor } from '../controls/precision';
 import { geohashColumns } from '../../utils/decode_geo_hash';
 import { geoContains, scaleBounds } from '../../utils/geo_utils';
 import { i18n } from '@kbn/i18n';
@@ -80,47 +82,48 @@ export const geoHashBucketAgg = new BucketAggType({
     },
     {
       name: 'autoPrecision',
+      editorComponent: AutoPrecisionParamEditor,
       default: true,
-      write: _.noop
-    },
-    {
-      name: 'isFilteredByCollar',
-      default: true,
-      write: _.noop
-    },
-    {
-      name: 'useGeocentroid',
-      default: true,
-      write: _.noop
-    },
-    {
-      name: 'mapZoom',
-      default: 2,
-      write: _.noop
-    },
-    {
-      name: 'mapCenter',
-      default: [0, 0],
-      write: _.noop
-    },
-    {
-      name: 'mapBounds',
-      default: null,
-      write: _.noop
+      write: () => {},
     },
     {
       name: 'precision',
-      editor: precisionTemplate,
+      editorComponent: PrecisionParamEditor,
       default: defaultPrecision,
       deserialize: getPrecision,
-      controller: function () {
-      },
       write: function (aggConfig, output) {
         const currZoom = aggConfig.params.mapZoom;
         const autoPrecisionVal = zoomPrecision[currZoom];
         output.params.precision = aggConfig.params.autoPrecision ?
           autoPrecisionVal : getPrecision(aggConfig.params.precision);
       }
+    },
+    {
+      name: 'useGeocentroid',
+      editorComponent: UseGeocentroidParamEditor,
+      default: true,
+      write: () => {},
+    },
+    {
+      name: 'isFilteredByCollar',
+      editorComponent: IsFilteredByCollarParamEditor,
+      default: true,
+      write: () => {},
+    },
+    {
+      name: 'mapZoom',
+      default: 2,
+      write: () => {},
+    },
+    {
+      name: 'mapCenter',
+      default: [0, 0],
+      write: () => {},
+    },
+    {
+      name: 'mapBounds',
+      default: null,
+      write: () => {},
     }
   ],
   getRequestAggs: function (agg) {

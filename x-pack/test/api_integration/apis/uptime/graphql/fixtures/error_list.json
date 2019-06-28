@@ -1,36 +1,44 @@
 {
   "errorList": [
     {
-      "latestMessage": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
-      "monitorId": "auto-http-0X3675F89EF0612091",
-      "type": "io",
       "count": 843,
+      "latestMessage": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+      "location": null,
+      "monitorId": "auto-http-0X3675F89EF0612091",
+      "name": null,
       "statusCode": null,
-      "timestamp": "2019-01-28T18:43:15.077Z"
+      "timestamp": "2019-01-28T18:43:15.077Z",
+      "type": "io"
     },
     {
-      "latestMessage": "dial tcp 127.0.0.1:9200: connect: connection refused",
-      "monitorId": "auto-tcp-0X81440A68E839814C",
-      "type": "io",
       "count": 748,
+      "latestMessage": "dial tcp 127.0.0.1:9200: connect: connection refused",
+      "location": null,
+      "monitorId": "auto-tcp-0X81440A68E839814C",
+      "name": null,
       "statusCode": null,
-      "timestamp": "2019-01-28T17:59:34.075Z"
+      "timestamp": "2019-01-28T17:59:34.075Z",
+      "type": "io"
     },
     {
-      "latestMessage": "lookup www.reddit.com: no such host",
-      "monitorId": "auto-http-0XD9AE729FC1C1E04A",
-      "type": "io",
-      "count": 1,
-      "statusCode": null,
-      "timestamp": "2019-01-28T18:03:10.077Z"
-    },
-    {
-      "latestMessage": "received status code 301 expecting 200",
-      "monitorId": "auto-http-0XA8096548ECEB85B7",
-      "type": "validate",
       "count": 645,
+      "latestMessage": "received status code 301 expecting 200",
+      "location": null,
+      "monitorId": "auto-http-0XA8096548ECEB85B7",
+      "name": null,
       "statusCode": "301",
-      "timestamp": "2019-01-28T18:43:07.078Z"
+      "timestamp": "2019-01-28T18:43:07.078Z",
+      "type": "validate"
+    },
+    {
+      "count": 1,
+      "latestMessage": "lookup www.reddit.com: no such host",
+      "location": null,
+      "monitorId": "auto-http-0XD9AE729FC1C1E04A",
+      "name": null,
+      "statusCode": null,
+      "timestamp": "2019-01-28T18:03:10.077Z",
+      "type": "io"
     }
   ]
 }

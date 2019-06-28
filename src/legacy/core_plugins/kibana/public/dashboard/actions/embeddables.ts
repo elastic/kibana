@@ -17,13 +17,16 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import _ from 'lodash';
 import { createAction } from 'redux-actions';
-import { getEmbeddableCustomization, getPanel } from '../../selectors';
-import { PanelId, PanelState } from '../selectors';
-import { updatePanel } from './panels';
-
 import { EmbeddableMetadata, EmbeddableState } from 'ui/embeddable';
+import { getEmbeddableCustomization, getPanel } from '../../selectors';
+import { PanelId } from '../selectors';
+import { updatePanel } from './panels';
+import { SavedDashboardPanel } from '../types';
+
 import { KibanaAction, KibanaThunk } from '../../selectors/types';
 
 export enum EmbeddableActionTypeKeys {
@@ -111,7 +114,7 @@ export function embeddableStateChanged(changeData: {
     const customization = getEmbeddableCustomization(getState(), panelId);
     if (!_.isEqual(embeddableState.customization, customization)) {
       const originalPanelState = getPanel(getState(), panelId);
-      const newPanelState: PanelState = {
+      const newPanelState: SavedDashboardPanel = {
         ...originalPanelState,
         embeddableConfig: _.cloneDeep(embeddableState.customization),
       };

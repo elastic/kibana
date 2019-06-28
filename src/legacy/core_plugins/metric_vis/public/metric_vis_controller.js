@@ -28,7 +28,7 @@ import { MetricVisValue } from './components/metric_vis_value';
 export class MetricVisComponent extends Component {
 
   _getLabels() {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
     const max = _.last(colorsRange).to;
@@ -43,7 +43,7 @@ export class MetricVisComponent extends Component {
   }
 
   _getColors() {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     const invertColors = config.invertColors;
     const colorSchema = config.colorSchema;
     const colorsRange = config.colorsRange;
@@ -58,7 +58,7 @@ export class MetricVisComponent extends Component {
   }
 
   _getBucket(val) {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     let bucket = _.findIndex(config.colorsRange, range => {
       return range.from <= val && range.to > val;
     });
@@ -91,7 +91,8 @@ export class MetricVisComponent extends Component {
   };
 
   _processTableGroups(table) {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
+    const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
     const max = _.last(config.colorsRange).to;
@@ -102,12 +103,12 @@ export class MetricVisComponent extends Component {
     let bucketColumnId;
     let bucketFormatter;
 
-    if (config.bucket) {
-      bucketColumnId = table.columns[config.bucket.accessor].id;
-      bucketFormatter = getFormat(config.bucket.format);
+    if (dimensions.bucket) {
+      bucketColumnId = table.columns[dimensions.bucket.accessor].id;
+      bucketFormatter = getFormat(dimensions.bucket.format);
     }
 
-    config.metrics.forEach(metric => {
+    dimensions.metrics.forEach(metric => {
       const columnIndex = metric.accessor;
       const column = table.columns[columnIndex];
       const formatter = getFormat(metric.format);
@@ -146,12 +147,12 @@ export class MetricVisComponent extends Component {
   }
 
   _filterBucket = (metric) => {
-    const config = this.props.vis.params.metric;
-    if (!config.bucket) {
+    const dimensions = this.props.visParams.dimensions;
+    if (!dimensions.bucket) {
       return;
     }
     const table = this.props.visData;
-    this.props.vis.API.events.filter({ table, column: config.bucket.accessor, row: metric.rowIndex });
+    this.props.vis.API.events.filter({ table, column: dimensions.bucket.accessor, row: metric.rowIndex });
   };
 
   _renderMetric = (metric, index) => {
@@ -159,9 +160,9 @@ export class MetricVisComponent extends Component {
       <MetricVisValue
         key={index}
         metric={metric}
-        fontSize={this.props.vis.params.metric.style.fontSize}
-        onFilter={metric.filterKey && metric.bucketAgg ? this._filterBucket : null}
-        showLabel={this.props.vis.params.metric.labels.show}
+        fontSize={this.props.visParams.metric.style.fontSize}
+        onFilter={this.props.visParams.dimensions.bucket ? this._filterBucket : null}
+        showLabel={this.props.visParams.metric.labels.show}
       />
     );
   };

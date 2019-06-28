@@ -18,18 +18,18 @@
  */
 
 import $ from 'jquery';
-import { has, get } from 'lodash';
-import aggSelectHtml from './agg_select.html';
-import advancedToggleHtml from './advanced_toggle.html';
-import '../../../filters/match_any';
-import './agg_param';
+import { get } from 'lodash';
 import { aggTypes } from '../../../agg_types';
-import { uiModules } from '../../../modules';
-import { documentationLinks } from '../../../documentation_links/documentation_links';
-import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
-import { editorConfigProviders } from '../config/editor_config_providers';
 import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
+import { uiModules } from '../../../modules';
+import { editorConfigProviders } from '../config/editor_config_providers';
+import advancedToggleHtml from './advanced_toggle.html';
+import './agg_param';
+import './agg_select';
+import './controls/agg_controls';
+import aggParamsTemplate from './agg_params.html';
+import { groupAggregationsBy } from './default_editor_utils';
 
 uiModules
   .get('app/visualize')
@@ -56,6 +56,22 @@ uiModules
           updateEditorConfig('default');
         });
 
+        $scope.groupedAggTypeOptions = groupAggregationsBy($scope.aggTypeOptions, 'subtype');
+        $scope.isSubAggregation = $scope.$index >= 1 && $scope.groupName === 'buckets';
+
+        $scope.onAggTypeChange = (agg, value) => {
+          if (agg.type !== value) {
+            agg.type = value;
+          }
+        };
+
+        // params could be either agg.params or state.params
+        $scope.onParamChange = (params, paramName, value) => {
+          if(params[paramName] !== value) {
+            params[paramName] = value;
+          }
+        };
+
         function updateEditorConfig(property = 'fixedValue') {
           $scope.editorConfig = editorConfigProviders.getConfigForAgg(
             aggTypes.byType[$scope.groupName],
@@ -81,37 +97,12 @@ uiModules
         updateEditorConfig();
         $scope.$watchCollection('agg.params', updateEditorConfig);
 
-        // this will contain the controls for the schema (rows or columns?), which are unrelated to
-        // controls for the agg, which is why they are first
-        addSchemaEditor();
-
-        // allow selection of an aggregation
-        addAggSelector();
-
-        function addSchemaEditor() {
-          const $schemaEditor = $('<div>').addClass('schemaEditors form-group').appendTo($el);
-
-          if ($scope.agg.schema.editor) {
-            $schemaEditor.append($scope.agg.schema.editor);
-            $compile($schemaEditor)($scope.$new());
-          }
-        }
-
-        function addAggSelector() {
-          const $aggSelect = $(aggSelectHtml).appendTo($el);
-          $compile($aggSelect)($scope);
-        }
-
         // params for the selected agg, these are rebuilt every time the agg in $aggSelect changes
         let $aggParamEditors; //  container for agg type param editors
         let $aggParamEditorsScope;
 
         function updateAggParamEditor() {
           updateEditorConfig();
-          $scope.aggHelpLink = null;
-          if (has($scope, 'agg.type.name')) {
-            $scope.aggHelpLink = get(documentationLinks, ['aggs', $scope.agg.type.name]);
-          }
 
           if ($aggParamEditors) {
             $aggParamEditors.remove();
@@ -148,8 +139,9 @@ uiModules
               // if field param exists, compute allowed fields
               if (param.type === 'field') {
                 const availableFields = param.getAvailableFields($scope.agg.getIndexPattern().fields);
-                fields = $scope.indexedFields = $aggParamEditorsScope[`${param.name}Options`] =
+                fields = $aggParamEditorsScope[`${param.name}Options`] =
                   aggTypeFieldFilters.filter(availableFields, param.type, $scope.agg, $scope.vis);
+                $scope.indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
               }
 
               if (fields) {
@@ -185,22 +177,36 @@ uiModules
         // build HTML editor given an aggParam and index
         function getAggParamHTML(param, idx) {
         // don't show params without an editor
-          if (!param.editor) {
+          if (!param.editor && !param.editorComponent) {
             return;
           }
 
           const attrs = {
-            'agg-param': 'agg.type.params[' + idx + ']'
+            'agg-param': 'agg.type.params[' + idx + ']',
+            'agg': 'agg',
           };
 
           if (param.advanced) {
             attrs['ng-show'] = 'advancedToggled';
           }
 
+          if (param.editorComponent) {
+            attrs['editor-component'] = `agg.type.params[${idx}].editorComponent`;
+            attrs['indexed-fields'] = 'indexedFields';
+            // The form should interact with reactified components as well.
+            // So we set the ng-model (using a random ng-model variable) to have the method to set dirty
+            // inside the  agg_param.js directive, which can get access to the ngModelController to manipulate it.
+            attrs['ng-model'] = normalizeModelName(`_internalNgModelState${$scope.agg.id}${param.name}`);
+          }
+
           return $('<vis-agg-param-editor>')
             .attr(attrs)
             .append(param.editor)
             .get(0);
+        }
+
+        function normalizeModelName(modelName = '') {
+          return modelName.replace(/-/g, '_');
         }
       }
     };

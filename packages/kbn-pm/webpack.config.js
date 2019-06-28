@@ -44,15 +44,6 @@ module.exports = {
           {
             loader: 'babel-loader',
           },
-          {
-            loader: 'ts-loader',
-            options: {
-              compilerOptions: {
-                // enable esnext modules so webpack can do its thing better
-                module: 'esnext',
-              },
-            },
-          },
         ],
         exclude: /node_modules/,
       },

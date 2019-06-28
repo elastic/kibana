@@ -32,8 +32,8 @@ import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
-import { Env } from '../core/server/config';
-import { LegacyObjectToConfigAdapter } from '../core/server/legacy_compat';
+import { CliArgs, Env } from '../core/server/config';
+import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
 
 type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
@@ -60,7 +60,10 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
   },
 };
 
-export function createRootWithSettings(...settings: Array<Record<string, any>>) {
+export function createRootWithSettings(
+  settings: Record<string, any>,
+  cliArgs: Partial<CliArgs> = {}
+) {
   const env = Env.createDefault({
     configs: [],
     cliArgs: {
@@ -72,13 +75,15 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
       repl: false,
       basePath: false,
       optimize: false,
+      oss: false,
+      ...cliArgs,
     },
     isDevClusterMaster: false,
   });
 
   return new Root(
     new BehaviorSubject(
-      new LegacyObjectToConfigAdapter(defaultsDeep({}, ...settings, DEFAULTS_SETTINGS))
+      new LegacyObjectToConfigAdapter(defaultsDeep({}, settings, DEFAULTS_SETTINGS))
     ),
     env
   );
@@ -92,7 +97,7 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
  */
 function getSupertest(root: Root, method: HttpMethod, path: string) {
   const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
-  return supertest((root as any).server.http.service.httpServer.server.listener)
+  return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);
 }
@@ -104,8 +109,8 @@ function getSupertest(root: Root, method: HttpMethod, path: string) {
  * @param {Object} [settings={}] Any config overrides for this instance.
  * @returns {Root}
  */
-export function createRoot(settings = {}) {
-  return createRootWithSettings(settings);
+export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  return createRootWithSettings(settings, cliArgs);
 }
 
 /**
@@ -116,7 +121,7 @@ export function createRoot(settings = {}) {
  *  @returns {Root}
  */
 export function createRootWithCorePlugins(settings = {}) {
-  return createRootWithSettings(settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS);
+  return createRootWithSettings(defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS));
 }
 
 /**
@@ -124,7 +129,7 @@ export function createRootWithCorePlugins(settings = {}) {
  * @param root
  */
 export function getKbnServer(root: Root) {
-  return (root as any).server.legacy.service.kbnServer;
+  return (root as any).server.legacy.kbnServer;
 }
 
 export const request: Record<
@@ -231,6 +236,7 @@ export async function startTestServers({
 
   const root = createRootWithCorePlugins(kbnSettings);
 
+  await root.setup();
   await root.start();
 
   const kbnServer = getKbnServer(root);

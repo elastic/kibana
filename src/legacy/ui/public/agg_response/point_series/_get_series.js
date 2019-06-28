@@ -23,21 +23,29 @@ import { addToSiri } from './_add_to_siri';
 
 export function getSeries(table, chart) {
   const aspects = chart.aspects;
+  const xAspect = aspects.x[0];
+  const yAspect = aspects.y[0];
+  const zAspect = aspects.z && aspects.z.length ? aspects.z[0] : aspects.z;
   const multiY = Array.isArray(aspects.y) && aspects.y.length > 1;
   const yScale = chart.yScale;
-  const partGetPoint = _.partial(getPoint, table, aspects.x[0], aspects.series, yScale);
+
+  const partGetPoint = _.partial(getPoint, table, xAspect, aspects.series, yScale);
 
   let series = _(table.rows)
     .transform(function (series, row, rowIndex) {
       if (!multiY) {
-        const point = partGetPoint(row, rowIndex, aspects.y[0], aspects.z);
-        const id = `${point.series}-${aspects.y[0].accessor}`;
-        if (point) addToSiri(series, point, id, point.series, aspects.y[0].format);
+        const point = partGetPoint(row, rowIndex, yAspect, zAspect);
+        if (point) {
+          const id = `${point.series}-${yAspect.accessor}`;
+          point.seriesId = id;
+          addToSiri(series, point, id, point.series, yAspect.format, zAspect && zAspect.format, zAspect && zAspect.title);
+        }
         return;
       }
 
       aspects.y.forEach(function (y) {
-        const point = partGetPoint(row, rowIndex, y, aspects.z);
+
+        const point = partGetPoint(row, rowIndex, y, zAspect);
         if (!point) return;
 
         // use the point's y-axis as it's series by default,
@@ -52,7 +60,8 @@ export function getSeries(table, chart) {
           seriesLabel = prefix + seriesLabel;
         }
 
-        addToSiri(series, point, seriesId, seriesLabel, y.format);
+        point.seriesId = seriesId;
+        addToSiri(series, point, seriesId, seriesLabel, y.format, zAspect && zAspect.format, zAspect && zAspect.title);
       });
 
     }, new Map())
@@ -73,6 +82,5 @@ export function getSeries(table, chart) {
       return y ? y.i : series.length;
     });
   }
-
   return series;
 }

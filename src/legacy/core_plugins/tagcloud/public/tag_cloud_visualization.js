@@ -49,7 +49,7 @@ export class TagCloudVisualization {
     this._truncated = false;
     this._tagCloud = new TagCloud(cloudContainer);
     this._tagCloud.on('select', (event) => {
-      if (!this._vis.params.bucket) {
+      if (!this._visParams.bucket) {
         return;
       }
       this._vis.API.events.filter({
@@ -71,14 +71,11 @@ export class TagCloudVisualization {
 
   }
 
-  async render(data, status) {
+  async render(data, visParams, status) {
     if (!(status.resize || status.data || status.params)) return;
 
-    if (status.params || status.aggs) {
-      this._updateParams();
-    }
-
-    if (status.data || status.params) {
+    if (status.params || status.data) {
+      this._updateParams(visParams);
       this._updateData(data);
     }
 
@@ -99,7 +96,7 @@ export class TagCloudVisualization {
 
     this._label.current.setState({
       label: `${data.columns[0].name} - ${data.columns[1].name}`,
-      shouldShowLabel: this._vis.params.showLabel
+      shouldShowLabel: visParams.showLabel
     });
     this._feedbackMessage.current.setState({
       shouldShowTruncate: this._truncated,
@@ -120,8 +117,8 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucket = this._vis.params.bucket;
-    const metric = this._vis.params.metric;
+    const bucket = this._visParams.bucket;
+    const metric = this._visParams.metric;
     const bucketFormatter = bucket ? getFormat(bucket.format) : null;
     const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
     const metricColumn = data.columns[metric.accessor].id;
@@ -151,8 +148,9 @@ export class TagCloudVisualization {
 
   }
 
-  _updateParams() {
-    this._tagCloud.setOptions(this._vis.params);
+  _updateParams(visParams) {
+    this._visParams = visParams;
+    this._tagCloud.setOptions(visParams);
   }
 
   _resize() {

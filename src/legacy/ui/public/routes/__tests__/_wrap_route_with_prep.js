@@ -18,7 +18,7 @@
  */
 
 import RouteManager from '../route_manager';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 
 import _ from 'lodash';
@@ -48,7 +48,7 @@ describe('wrapRouteWithPrep fn', function () {
       let Promise;
       let $injector;
 
-      ngMock.inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
+      ngMock.inject(function (_Promise_, _$injector_) {
         Promise = _Promise_;
         $injector = _$injector_;
       });

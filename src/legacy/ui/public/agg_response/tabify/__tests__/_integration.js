@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyAggResponse } from '../tabify';
 import { VisProvider } from '../../../vis';
@@ -138,7 +138,7 @@ describe('tabifyAggResponse Integration', function () {
       // the default for a non-hierarchical vis is to display
       // only complete rows, and only put the metrics at the end.
 
-      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, { minimalColumns: true });
+      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, { metricsAtAllLevels: false });
 
       expectColumns(tabbed, [ext, src, os, avg]);
 

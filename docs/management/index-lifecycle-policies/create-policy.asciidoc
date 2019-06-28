@@ -1,3 +1,4 @@
+[role="xpack"]
 [[creating-index-lifecycle-policies]]
 === Creating an index lifecycle policy
 
@@ -24,17 +25,16 @@ image::images/index-lifecycle-policies-create.png[][UI for creating an index lif
 ==== Defining the phases of the index lifecycle
 
 You can define up to four phases in the index lifecycle. For each phase, you 
-can enable actions to optimize performance for that phase. Transitioning 
-between phases is based on the age of the index.
+can enable actions to optimize performance for that phase.
 
 The four phases in the index lifecycle are:
 
-* *Hot.* The index is actively being queried and written to. You can optionally 
+* *Hot.* The index is actively being queried and written to. You can 
 roll over to a new index when the 
-original index reaches a specified size or age.  When a rollover occurs, a new 
+original index reaches a specified size, document count, or age.  When a rollover occurs, a new 
 index is created, added to the index alias, and designated as the new “hot” 
 index. You can still query the previous indices, but you only ever write to 
-the “hot” index. See {ref}/indices-rollover-index.html[Rollover index] for more information.
+the “hot” index. See <<setting-a-rollover-action>>.
 
 * *Warm.* The index is typically searched at a lower rate than when the data is 
 hot. The index is not used for storing new data, but might occasionally add 
@@ -59,6 +59,27 @@ The index lifecycle always includes an active hot phase. The warm, cold, and
 delete phases are optional. For example, you might define all four phases for 
 one policy and only a hot and delete phase for another.  See {ref}/_actions.html[Actions]
 for more information on the actions available in each phase. 
+
+[[setting-a-rollover-action]]
+==== Setting a rollover action
+
+The {ref}/indices-rollover-index.html[rollover] action enables you to automatically roll over to a new index based 
+on the index size, document count, or age. Rolling over to a new index based on 
+these criteria is preferable to time-based rollovers. Rolling over at an arbitrary 
+time often results in many small indices, which can have a negative impact on performance and resource usage.
+
+When you create an index lifecycle policy, the rollover action is enabled 
+by default.  The default size for triggering the rollover is 50 gigabytes, and 
+the default age is 30 days. The rollover occurs when any of the criteria are met.
+
+With the rollover action enabled, you can move to the warm phase on rollover or you can 
+time the move for a specified number of hours or days after the rollover. The 
+move to the cold and delete phases is based on the time from the rollover.
+
+If you are using daily indices (created by Logstash or another client) and you 
+want to use the index lifecycle policy to manage aging data, you can
+disable the rollover action in the hot phase. You can then
+transition to the warm, cold, and delete phases based on the time of index creation.
 
 ==== Setting the index priority
 

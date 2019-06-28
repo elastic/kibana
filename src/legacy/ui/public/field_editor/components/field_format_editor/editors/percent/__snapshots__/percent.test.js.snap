@@ -12,7 +12,7 @@ exports[`PercentFormatEditor should render normally 1`] = `
         <EuiLink
           color="primary"
           href="https://adamwdraper.github.io/Numeral-js/"
-          target="_window"
+          target="_blank"
           type="button"
         >
           <FormattedMessage
@@ -22,7 +22,6 @@ exports[`PercentFormatEditor should render normally 1`] = `
           />
            
           <EuiIcon
-            size="m"
             type="link"
           />
         </EuiLink>
@@ -42,6 +41,7 @@ exports[`PercentFormatEditor should render normally 1`] = `
         }
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}

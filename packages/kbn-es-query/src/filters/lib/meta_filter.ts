@@ -38,9 +38,9 @@ export interface FilterMeta {
 }
 
 export interface Filter {
-  $state: FilterState;
+  $state?: FilterState;
   meta: FilterMeta;
-  query?: any;
+  query?: object;
 }
 
 export interface LatLon {
@@ -62,7 +62,7 @@ export function buildEmptyFilter(isPinned: boolean, index?: string): Filter {
 }
 
 export function isFilterPinned(filter: Filter) {
-  return filter.$state.store === FilterStateStore.GLOBAL_STATE;
+  return filter.$state && filter.$state.store === FilterStateStore.GLOBAL_STATE;
 }
 
 export function toggleFilterDisabled(filter: Filter) {

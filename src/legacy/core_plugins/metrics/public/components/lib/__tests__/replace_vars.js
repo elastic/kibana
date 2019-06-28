@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import replaceVars from '../replace_vars';
+import { replaceVars } from '../replace_vars';
 
 describe('replaceVars(str, args, vars)', () => {
   it('replaces vars with values', () => {

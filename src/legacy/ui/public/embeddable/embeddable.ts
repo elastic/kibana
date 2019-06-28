@@ -18,6 +18,7 @@
  */
 
 import { Adapters } from 'ui/inspector';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { ContainerState } from './types';
 
 export interface EmbeddableMetadata {
@@ -25,7 +26,7 @@ export interface EmbeddableMetadata {
    * Should specify any index pattern the embeddable uses. This will be used by the container to list out
    * available fields to filter on.
    */
-  indexPatterns?: object[];
+  indexPatterns?: StaticIndexPattern[];
 
   /**
    * The title, or name, of the embeddable.
@@ -39,6 +40,13 @@ export interface EmbeddableMetadata {
    * offer for editing directly on the dashboard.
    */
   editUrl?: string;
+
+  editLabel?: string;
+
+  /**
+   * A flag indicating if this embeddable can be edited.
+   */
+  editable?: boolean;
 }
 
 export abstract class Embeddable {

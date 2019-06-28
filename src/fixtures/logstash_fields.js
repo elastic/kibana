@@ -25,7 +25,7 @@ function stubbedLogstashFields() {
   return [
     //                                  |aggregatable
     //                                  |      |searchable
-    // name               esType        |      |      |metadata
+    // name               esType        |      |      |metadata       | parent      | subType
     ['bytes',             'long',       true,  true,  { count: 10 } ],
     ['ssl',               'boolean',    true,  true,  { count: 20 } ],
     ['@timestamp',        'date',       true,  true,  { count: 30 } ],
@@ -41,7 +41,7 @@ function stubbedLogstashFields() {
     ['geo.coordinates',   'geo_point',  true,  true ],
     ['extension',         'keyword',    true,  true ],
     ['machine.os',        'text',       true,  true ],
-    ['machine.os.raw',    'keyword',    true,  true ],
+    ['machine.os.raw',    'keyword',    true,  true,   {},            'machine.os', 'multi' ],
     ['geo.src',           'keyword',    true,  true ],
     ['_id',               '_id',        true,  true ],
     ['_type',             '_type',      true,  true ],
@@ -59,7 +59,9 @@ function stubbedLogstashFields() {
       esType,
       aggregatable,
       searchable,
-      metadata = {}
+      metadata = {},
+      parent = undefined,
+      subType = undefined,
     ] = row;
 
     const {
@@ -76,6 +78,7 @@ function stubbedLogstashFields() {
     return {
       name,
       type,
+      esTypes: [esType],
       readFromDocValues: shouldReadFieldFromDocValues(aggregatable, esType),
       aggregatable,
       searchable,
@@ -83,6 +86,8 @@ function stubbedLogstashFields() {
       script,
       lang,
       scripted,
+      parent,
+      subType,
     };
   });
 }

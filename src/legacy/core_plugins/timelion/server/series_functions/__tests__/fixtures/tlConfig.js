@@ -18,23 +18,12 @@
  */
 
 import moment from 'moment';
+import { of } from 'rxjs';
 import sinon from 'sinon';
 import timelionDefaults from '../../../lib/get_namespaced_settings';
 import esResponse from './es_response';
 
 export default function () {
-
-  const config = {
-    get(key) {
-      switch (key) {
-        case 'elasticsearch.shardTimeout':
-          return 30000;
-        default:
-          throw new Error(`unexpected config ${key}`);
-      }
-    }
-  };
-
   const functions = require('../../../lib/load_functions')('series_functions');
   const server = {
     plugins: {
@@ -52,7 +41,15 @@ export default function () {
         })
       }
     },
-    config: () => config,
+    newPlatform: {
+      setup: {
+        core: {
+          elasticsearch: {
+            legacy: { config$: of({ shardTimeout: moment.duration(30000) }) }
+          }
+        }
+      }
+    },
   };
 
   const tlConfig = require('../../../handlers/lib/tl_config.js')({

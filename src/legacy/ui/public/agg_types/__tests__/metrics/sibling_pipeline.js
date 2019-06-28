@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import { bucketSumMetricAgg } from '../../metrics/bucket_sum';
@@ -60,7 +60,7 @@ describe('sibling pipeline aggs', function () {
               id: '6',
               type: 'date_histogram',
               schema: 'bucket',
-              params: { field: '@timestamp' }
+              params: { field: '@timestamp', interval: '10s' }
             }
           };
 
@@ -115,7 +115,7 @@ describe('sibling pipeline aggs', function () {
             id: '6',
             type: 'date_histogram',
             schema: 'bucket',
-            params: { field: '@timestamp' },
+            params: { field: '@timestamp', interval: '10s', },
           }
         });
         expect(aggDsl[metric.name].buckets_path).to.be('2-bucket>2-metric');
@@ -135,7 +135,7 @@ describe('sibling pipeline aggs', function () {
             id: '6',
             type: 'date_histogram',
             schema: 'bucket',
-            params: { field: '@timestamp' },
+            params: { field: '@timestamp', interval: '10s' },
           }
         });
         expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');

@@ -103,6 +103,39 @@
 {
   "type": "doc",
   "value": {
+    "id": "4",
+    "index": "geo_shapes",
+    "source": {
+      "geometry": {
+        "coordinates": [
+            [
+              40,
+              5
+            ],
+            [
+              35,
+              -5
+            ],
+            [
+              45,
+              -5
+            ],
+            [
+              40,
+              5
+            ]
+          ],
+        "type": "linestring"
+      },
+      "name": "tango"
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
     "id": "1",
     "index": "meta_for_geo_shapes",
     "source": {

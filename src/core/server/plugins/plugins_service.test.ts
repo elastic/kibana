@@ -17,24 +17,22 @@
  * under the License.
  */
 
-const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
-const mockDiscover = jest.fn();
-jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
-
-jest.mock('./plugins_system');
-
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { logger } from '../logging/__mocks__';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginDiscoveryError } from './discovery';
-import { Plugin } from './plugin';
+import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
+import { config } from './plugins_config';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
@@ -42,7 +40,19 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-beforeEach(() => {
+const setupDeps = {
+  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+  http: httpServiceMock.createSetupContract(),
+};
+const logger = loggingServiceMock.create();
+
+['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {
+  jest.doMock(join(path, 'server'), () => ({}), {
+    virtual: true,
+  });
+});
+
+beforeEach(async () => {
   mockPackage.raw = {
     branch: 'feature-v1',
     version: 'v1',
@@ -60,6 +70,7 @@ beforeEach(() => {
     env,
     logger
   );
+  await configService.setSchema(config.path, config.schema);
   pluginsService = new PluginsService({ env, logger, configService });
 
   [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
@@ -69,17 +80,17 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-test('`start` throws if plugin has an invalid manifest', async () => {
+test('`setup` throws if plugin has an invalid manifest', async () => {
   mockDiscover.mockReturnValue({
     error$: from([PluginDiscoveryError.invalidManifest('path-1', new Error('Invalid JSON'))]),
     plugin$: from([]),
   });
 
-  await expect(pluginsService.start()).rejects.toMatchInlineSnapshot(`
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Invalid JSON (invalid-manifest, path-1)]
 `);
-  expect(logger.mockCollect().error).toMatchInlineSnapshot(`
+  expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: Invalid JSON (invalid-manifest, path-1)],
@@ -88,7 +99,7 @@ Array [
 `);
 });
 
-test('`start` throws if plugin required Kibana version is incompatible with the current version', async () => {
+test('`setup` throws if plugin required Kibana version is incompatible with the current version', async () => {
   mockDiscover.mockReturnValue({
     error$: from([
       PluginDiscoveryError.incompatibleVersion('path-3', new Error('Incompatible version')),
@@ -96,11 +107,11 @@ test('`start` throws if plugin required Kibana version is incompatible with the 
     plugin$: from([]),
   });
 
-  await expect(pluginsService.start()).rejects.toMatchInlineSnapshot(`
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Incompatible version (incompatible-version, path-3)]
 `);
-  expect(logger.mockCollect().error).toMatchInlineSnapshot(`
+  expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: Incompatible version (incompatible-version, path-3)],
@@ -109,11 +120,11 @@ Array [
 `);
 });
 
-test('`start` throws if discovered plugins with conflicting names', async () => {
+test('`setup` throws if discovered plugins with conflicting names', async () => {
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new Plugin(
+      new PluginWrapper(
         'path-4',
         {
           id: 'conflicting-id',
@@ -127,7 +138,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-5',
         {
           id: 'conflicting-id',
@@ -144,25 +155,26 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
     ]),
   });
 
-  await expect(pluginsService.start()).rejects.toMatchInlineSnapshot(
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Plugin with id "conflicting-id" is already registered!]`
   );
 
   expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
-  expect(mockPluginSystem.startPlugins).not.toHaveBeenCalled();
+  expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
 });
 
-test('`start` properly detects plugins that should be disabled.', async () => {
+test('`setup` properly detects plugins that should be disabled.', async () => {
   jest
     .spyOn(configService, 'isEnabledAtPath')
     .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
 
-  mockPluginSystem.startPlugins.mockResolvedValue(new Map());
+  mockPluginSystem.setupPlugins.mockResolvedValue(new Map());
+  mockPluginSystem.uiPlugins.mockReturnValue({ public: new Map(), internal: new Map() });
 
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new Plugin(
+      new PluginWrapper(
         'path-1',
         {
           id: 'explicitly-disabled-plugin',
@@ -176,7 +188,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-2',
         {
           id: 'plugin-with-missing-required-deps',
@@ -190,7 +202,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-3',
         {
           id: 'plugin-with-disabled-transitive-dep',
@@ -204,7 +216,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-4',
         {
           id: 'another-explicitly-disabled-plugin',
@@ -221,11 +233,16 @@ test('`start` properly detects plugins that should be disabled.', async () => {
     ]),
   });
 
-  expect(await pluginsService.start()).toBeInstanceOf(Map);
-  expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
-  expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
+  const start = await pluginsService.setup(setupDeps);
 
-  expect(logger.mockCollect().info).toMatchInlineSnapshot(`
+  expect(start.contracts).toBeInstanceOf(Map);
+  expect(start.uiPlugins.public).toBeInstanceOf(Map);
+  expect(start.uiPlugins.internal).toBeInstanceOf(Map);
+  expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
+  expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+  expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
+
+  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
 Array [
   Array [
     "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
@@ -243,8 +260,8 @@ Array [
 `);
 });
 
-test('`start` properly invokes `discover` and ignores non-critical errors.', async () => {
-  const firstPlugin = new Plugin(
+test('`setup` properly invokes `discover` and ignores non-critical errors.', async () => {
+  const firstPlugin = new PluginWrapper(
     'path-1',
     {
       id: 'some-id',
@@ -259,7 +276,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     { logger } as any
   );
 
-  const secondPlugin = new Plugin(
+  const secondPlugin = new PluginWrapper(
     'path-2',
     {
       id: 'some-other-id',
@@ -283,12 +300,15 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     plugin$: from([firstPlugin, secondPlugin]),
   });
 
-  const pluginContracts = new Map();
-  mockPluginSystem.startPlugins.mockResolvedValue(pluginContracts);
+  const contracts = new Map();
+  const discoveredPlugins = { public: new Map(), internal: new Map() };
+  mockPluginSystem.setupPlugins.mockResolvedValue(contracts);
+  mockPluginSystem.uiPlugins.mockReturnValue(discoveredPlugins);
 
-  const startContract = await pluginsService.start();
+  const setup = await pluginsService.setup(setupDeps);
 
-  expect(startContract).toBe(pluginContracts);
+  expect(setup.contracts).toBe(contracts);
+  expect(setup.uiPlugins).toBe(discoveredPlugins);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
@@ -296,9 +316,11 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
   expect(mockDiscover).toHaveBeenCalledTimes(1);
   expect(mockDiscover).toHaveBeenCalledWith(
     {
+      additionalPluginPaths: [],
       initialize: true,
       pluginSearchPaths: [
         resolve(process.cwd(), 'src', 'plugins'),
+        resolve(process.cwd(), 'x-pack', 'plugins'),
         resolve(process.cwd(), 'plugins'),
         resolve(process.cwd(), '..', 'kibana-extra'),
       ],
@@ -306,7 +328,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     { env, logger, configService }
   );
 
-  const logs = logger.mockCollect();
+  const logs = loggingServiceMock.collect(logger);
   expect(logs.info).toHaveLength(0);
   expect(logs.error).toHaveLength(0);
 });
@@ -314,4 +336,41 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
 test('`stop` stops plugins system', async () => {
   await pluginsService.stop();
   expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+});
+
+test('`setup` registers plugin config schema in config service', async () => {
+  const configSchema = schema.string();
+  jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
+  jest.doMock(
+    join('path-with-schema', 'server'),
+    () => ({
+      config: {
+        schema: configSchema,
+      },
+    }),
+    {
+      virtual: true,
+    }
+  );
+  mockDiscover.mockReturnValue({
+    error$: from([]),
+    plugin$: from([
+      new PluginWrapper(
+        'path-with-schema',
+        {
+          id: 'some-id',
+          version: 'some-version',
+          configPath: 'path',
+          kibanaVersion: '7.0.0',
+          requiredPlugins: [],
+          optionalPlugins: [],
+          server: true,
+          ui: true,
+        },
+        { logger } as any
+      ),
+    ]),
+  });
+  await pluginsService.setup(setupDeps);
+  expect(configService.setSchema).toBeCalledWith('path', configSchema);
 });

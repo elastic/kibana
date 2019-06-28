@@ -19,8 +19,9 @@
 
 // @ts-ignore: implicit any for JS file
 import { uiRegistry } from 'ui/registry/_registry';
+import { ShareActionProvider } from './share_action';
 
-export const ShareContextMenuExtensionsRegistryProvider = uiRegistry({
+export const ShareContextMenuExtensionsRegistryProvider = uiRegistry<ShareActionProvider>({
   name: 'shareContextMenuExtensions',
   index: ['id'],
 });

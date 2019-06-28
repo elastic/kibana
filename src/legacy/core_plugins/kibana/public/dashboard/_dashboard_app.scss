@@ -7,15 +7,8 @@
 .dshStartScreen {
   text-align: center;
   padding: $euiSize;
-  background-color: $euiColorLightestShade;
-  color: $euiColorDarkShade;
 
   > * {
     max-width: 36em !important;
   }
-}
-
-.dshSaveModal,
-.dshCloneModal {
-  max-width: 450px;
 }

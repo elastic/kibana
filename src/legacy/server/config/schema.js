@@ -152,7 +152,7 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    timezone: Joi.string().allow(false).default('UTC')
+    timezone: Joi.string()
   }).default(),
 
   ops: Joi.object({
@@ -173,6 +173,10 @@ export default () => Joi.object({
     batchSize: Joi.number().default(100),
     scrollDuration: Joi.string().default('15m'),
     pollInterval: Joi.number().default(1500),
+  }).default(),
+
+  stats: Joi.object({
+    maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)
   }).default(),
 
   optimize: Joi.object({
@@ -197,6 +201,7 @@ export default () => Joi.object({
         )
         .default('#cheap-source-map'),
     }),
+    workers: Joi.number().min(1),
     profile: Joi.boolean().default(false)
   }).default(),
   status: Joi.object({
@@ -204,6 +209,7 @@ export default () => Joi.object({
   }).default(),
   map: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
+    proxyElasticMapsServiceInMaps: Joi.boolean().default(false),
     tilemap: Joi.object({
       url: Joi.string(),
       options: Joi.object({
@@ -243,12 +249,26 @@ export default () => Joi.object({
         }))
       })).default([])
     }).default(),
-    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.0/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.0'),
+    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.2'),
+    emsTileLayerId: Joi.object({
+      bright: Joi.string().default('road_map'),
+      desaturated: Joi.string().default('road_map_desaturated'),
+      dark: Joi.string().default('dark_map'),
+    }).default({
+      bright: 'road_map',
+      desaturated: 'road_map_desaturated',
+      dark: 'dark_map',
+    }),
   }).default(),
 
   i18n: Joi.object({
     locale: Joi.string().default('en'),
+  }).default(),
+
+  savedObjects: Joi.object({
+    maxImportPayloadBytes: Joi.number().default(10485760),
+    maxImportExportSize: Joi.number().default(10000),
   }).default(),
 
 }).default();

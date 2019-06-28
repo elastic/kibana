@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function addToSiri(series, point, id, label, format) {
+export function addToSiri(series, point, id, yLabel, yFormat, zFormat, zLabel) {
   id = id == null ? '' : id + '';
 
   if (series.has(id)) {
@@ -27,9 +27,12 @@ export function addToSiri(series, point, id, label, format) {
 
   series.set(id, {
     id: id.split('-').pop(),
-    label: label == null ? id : label,
+    rawId: id,
+    label: yLabel == null ? id : yLabel,
     count: 0,
     values: [point],
-    format: format,
+    format: yFormat,
+    zLabel,
+    zFormat
   });
 }

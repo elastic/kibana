@@ -18,11 +18,10 @@
  */
 
 import _ from 'lodash';
-import '../../directives/validate_ip';
-import '../../directives/validate_cidr_mask';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterIpRange } from './create_filter/ip_range';
-import ipRangesTemplate from '../controls/ip_ranges.html';
+import { IpRangeTypeParamEditor } from '../controls/ip_range_type';
+import { IpRangesParamEditor } from '../controls/ip_ranges';
 import { i18n } from '@kbn/i18n';
 
 export const ipRangeBucketAgg = new BucketAggType({
@@ -52,6 +51,7 @@ export const ipRangeBucketAgg = new BucketAggType({
       filterFieldTypes: 'ip'
     }, {
       name: 'ipRangeType',
+      editorComponent: IpRangeTypeParamEditor,
       default: 'fromTo',
       write: _.noop
     }, {
@@ -66,7 +66,7 @@ export const ipRangeBucketAgg = new BucketAggType({
           { mask: '128.0.0.0/2' }
         ]
       },
-      editor: ipRangesTemplate,
+      editorComponent: IpRangesParamEditor,
       write: function (aggConfig, output) {
         const ipRangeType = aggConfig.params.ipRangeType;
         let ranges = aggConfig.params.ranges[ipRangeType];

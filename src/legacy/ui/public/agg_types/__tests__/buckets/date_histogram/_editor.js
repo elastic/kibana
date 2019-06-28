@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from '../../../../vis';
 import { intervalOptions } from '../../../buckets/_interval_options';
@@ -100,7 +100,7 @@ describe('editor', function () {
     beforeEach(ngMock.inject(function () {
       field = _.sample(indexPattern.fields);
       interval = _.sample(intervalOptions);
-      params = render({ field: field, interval: interval });
+      params = render({ field: field, interval: interval.val });
     }));
 
     it('renders the field editor', function () {
@@ -108,15 +108,15 @@ describe('editor', function () {
 
       expect(params).to.have.property('field');
       expect(params.field).to.have.property('$el');
-      expect(params.field.modelValue()).to.be(field);
+      expect($scope.agg.params.field).to.be(field);
     });
 
     it('renders the interval editor', function () {
-      expect(agg.params.interval).to.be(interval);
+      expect(agg.params.interval).to.be(interval.val);
 
       expect(params).to.have.property('interval');
       expect(params.interval).to.have.property('$el');
-      expect(params.interval.modelValue()).to.be(interval);
+      expect($scope.agg.params.interval).to.be(interval.val);
     });
   });
 

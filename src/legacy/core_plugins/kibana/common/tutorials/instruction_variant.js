@@ -18,6 +18,7 @@
  */
 
 export const INSTRUCTION_VARIANT = {
+  ESC: 'esc',
   OSX: 'osx',
   DEB: 'deb',
   RPM: 'rpm',
@@ -31,10 +32,12 @@ export const INSTRUCTION_VARIANT = {
   JS: 'js',
   GO: 'go',
   JAVA: 'java',
+  DOTNET: 'dotnet',
   LINUX: 'linux',
 };
 
 const DISPLAY_MAP = {
+  [INSTRUCTION_VARIANT.ESC]: 'Elastic Cloud',
   [INSTRUCTION_VARIANT.OSX]: 'macOS',
   [INSTRUCTION_VARIANT.DEB]: 'DEB',
   [INSTRUCTION_VARIANT.RPM]: 'RPM',
@@ -48,6 +51,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.JS]: 'RUM (JS)',
   [INSTRUCTION_VARIANT.GO]: 'Go',
   [INSTRUCTION_VARIANT.JAVA]: 'Java',
+  [INSTRUCTION_VARIANT.DOTNET]: '.NET',
   [INSTRUCTION_VARIANT.LINUX]: 'Linux',
 };
 

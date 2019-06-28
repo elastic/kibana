@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import moment from 'moment';
 
 function TabifyBuckets(aggResp, aggParams, timeRange) {
   if (_.has(aggResp, 'buckets')) {
@@ -103,10 +104,10 @@ TabifyBuckets.prototype._dropPartials = function (params, timeRange) {
   const interval = this.buckets[1].key - this.buckets[0].key;
 
   this.buckets = this.buckets.filter(bucket => {
-    if (bucket.key < timeRange.gte) {
+    if (moment(bucket.key).isBefore(timeRange.gte)) {
       return false;
     }
-    if (bucket.key + interval > timeRange.lte) {
+    if (moment(bucket.key + interval).isAfter(timeRange.lte)) {
       return false;
     }
     return true;

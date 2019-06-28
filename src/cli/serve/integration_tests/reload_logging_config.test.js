@@ -83,7 +83,7 @@ describe('Server logging configuration', function () {
     it('should be reloadable via SIGHUP process signaling', async function () {
       expect.assertions(3);
 
-      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile], {
+      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile, '--oss'], {
         stdio: 'pipe'
       });
 
@@ -174,13 +174,14 @@ describe('Server logging configuration', function () {
 
       child = spawn(process.execPath, [
         kibanaPath,
+        '--oss',
         '--config', testConfigFile,
         '--logging.dest', logPath,
         '--plugins.initialize', 'false',
         '--logging.json', 'false'
       ]);
 
-      watchFileUntil(logPath, /Server running at/, 2 * minute)
+      watchFileUntil(logPath, /http server running/, 2 * minute)
         .then(() => {
           // once the server is running, archive the log file and issue SIGHUP
           fs.renameSync(logPath, logPathArchived);

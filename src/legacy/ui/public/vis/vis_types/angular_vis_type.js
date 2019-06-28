@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { BaseVisTypeProvider } from './base_vis_type';
+import { BaseVisType } from './base_vis_type';
 import $ from 'jquery';
 
 
-export function AngularVisTypeProvider(Private, $compile, $rootScope) {
-  const BaseVisType = Private(BaseVisTypeProvider);
+export function AngularVisTypeProvider($compile, $rootScope) {
 
   class AngularVisController {
     constructor(domeElement, vis) {
@@ -30,13 +29,14 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
       this.vis = vis;
     }
 
-    render(esResponse, status) {
+    render(esResponse, visParams, status) {
 
       return new Promise((resolve, reject) => {
         const updateScope = () => {
           this.$scope.vis = this.vis;
           this.$scope.visState = this.vis.getState();
           this.$scope.esResponse = esResponse;
+          this.$scope.visParams = visParams;
           this.$scope.renderComplete = resolve;
           this.$scope.renderFailed = reject;
           this.$scope.resize = Date.now();

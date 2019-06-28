@@ -19,19 +19,15 @@
 
 import d3 from 'd3';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import $ from 'jquery';
-import { VislibLibLayoutSplitsColumnChartChartSplitProvider } from '../../../../../lib/layout/splits/column_chart/chart_split';
-import { VislibLibLayoutSplitsColumnChartChartTitleSplitProvider } from '../../../../../lib/layout/splits/column_chart/chart_title_split';
-import { VislibLibLayoutSplitsColumnChartXAxisSplitProvider } from '../../../../../lib/layout/splits/column_chart/x_axis_split';
-import { VislibLibLayoutSplitsColumnChartYAxisSplitProvider } from '../../../../../lib/layout/splits/column_chart/y_axis_split';
+import { chartSplit } from '../../../../../lib/layout/splits/column_chart/chart_split';
+import { chartTitleSplit } from '../../../../../lib/layout/splits/column_chart/chart_title_split';
+import { xAxisSplit } from '../../../../../lib/layout/splits/column_chart/x_axis_split';
+import { yAxisSplit } from '../../../../../lib/layout/splits/column_chart/y_axis_split';
 
 describe('Vislib Split Function Test Suite', function () {
   describe('Column Chart', function () {
-    let chartSplit;
-    let chartTitleSplit;
-    let xAxisSplit;
-    let yAxisSplit;
     let el;
     const data = {
       rows: [
@@ -155,12 +151,7 @@ describe('Vislib Split Function Test Suite', function () {
     };
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
-      chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
-      xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
-      yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
-
+    beforeEach(ngMock.inject(function () {
       el = d3.select('body').append('div')
         .attr('class', 'visualization')
         .datum(data);
