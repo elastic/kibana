@@ -10,10 +10,6 @@ import { VectorStyle } from '../styles/vector_style';
 
 export class LeftInnerJoin {
 
-  static toHash(descriptor) {
-    return JSON.stringify(descriptor);
-  }
-
   constructor(joinDescriptor, inspectorAdapters) {
     this._descriptor = joinDescriptor;
     this._rightSource = new ESJoinSource(joinDescriptor.right, inspectorAdapters);
@@ -38,7 +34,7 @@ export class LeftInnerJoin {
   }
 
   getSourceId() {
-    return LeftInnerJoin.toHash(this._descriptor);
+    return `join_source_${this._rightSource.getId()}`;
   }
 
   getLeftFieldName() {
@@ -64,10 +60,6 @@ export class LeftInnerJoin {
 
   getRightJoinSource() {
     return this._rightSource;
-  }
-
-  getId() {
-    return this._descriptor.id;
   }
 
   toDescriptor() {

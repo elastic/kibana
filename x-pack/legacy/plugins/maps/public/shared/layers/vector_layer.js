@@ -287,6 +287,7 @@ export class VectorLayer extends AbstractLayer {
 
     const searchFilters = {
       ...dataFilters,
+      fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
     };
@@ -332,6 +333,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getSearchFilters(dataFilters) {
+
     const fieldNames = [
       ...this._source.getFieldNames(),
       ...this._style.getSourceFieldNames(),

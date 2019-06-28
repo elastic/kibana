@@ -46,7 +46,7 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   destroy() {
-    this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
+    this._inspectorAdapters.requests.resetRequest(this.getId());
   }
 
   cloneDescriptor() {
@@ -131,7 +131,7 @@ export class AbstractESSource extends AbstractVectorSource {
         inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName,
-        requestId: this._descriptor.id,
+        requestId: this.getId(),
         requestDesc: requestDescription
       });
     } catch(error) {
@@ -279,6 +279,10 @@ export class AbstractESSource extends AbstractVectorSource {
 
   isBoundsAware() {
     return true;
+  }
+
+  getId() {
+    return this._descriptor.id;
   }
 
 }
