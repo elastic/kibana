@@ -50,16 +50,6 @@ const navTabs: NavTab[] = [
     disabled: false,
   },
 ];
-// SIDE EFFECT: the following `injectGlobal` overrides the default styling
-// of euiLink because it's implemented as a Tab,
-// eslint-disable-next-line no-unused-expressions
-// injectGlobal`
-//   .navigation-link.euiLink.euiLink--primary:focus,
-//   .euiLink.euiLink--text:focus {
-//     outline: none;
-//     background: none;
-//   }
-// `;
 
 const MyEuiTab = styled(EuiTab)`
   .euiLink {
