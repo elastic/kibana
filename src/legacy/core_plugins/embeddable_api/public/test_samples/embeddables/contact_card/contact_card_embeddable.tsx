@@ -20,11 +20,9 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Container } from '../../../containers';
-import { triggerRegistry } from '../../../triggers';
 import { EmbeddableOutput, Embeddable, EmbeddableInput } from '../../../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 import { ContactCardEmbeddableComponent } from './contact_card';
-import { SEND_MESSAGE_ACTION } from '../../actions/send_message_action';
 
 export interface ContactCardEmbeddableInput extends EmbeddableInput {
   firstName: string;
@@ -88,8 +86,3 @@ export class ContactCardEmbeddable extends Embeddable<
 }
 
 export const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
-
-triggerRegistry.set(CONTACT_USER_TRIGGER, {
-  id: CONTACT_USER_TRIGGER,
-  actionIds: [SEND_MESSAGE_ACTION],
-});

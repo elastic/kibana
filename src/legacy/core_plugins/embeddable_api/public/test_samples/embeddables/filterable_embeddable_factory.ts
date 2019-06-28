@@ -23,7 +23,7 @@ import {
   FilterableEmbeddableInput,
   FILTERABLE_EMBEDDABLE,
 } from './filterable_embeddable';
-import { embeddableFactories, EmbeddableFactory } from '../../embeddables';
+import { EmbeddableFactory } from '../../embeddables';
 import { IContainer } from '../../containers';
 
 export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmbeddableInput> {
@@ -43,5 +43,3 @@ export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmb
     return new FilterableEmbeddable(initialInput, parent);
   }
 }
-
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());

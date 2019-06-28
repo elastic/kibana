@@ -19,15 +19,7 @@
 import React from 'react';
 import { npStart } from 'ui/new_platform';
 import { EuiFlyoutBody } from '@elastic/eui';
-import {
-  Action,
-  ActionContext,
-  actionRegistry,
-  IncompatibleActionError,
-  triggerRegistry,
-  CONTEXT_MENU_TRIGGER,
-} from '../..';
-import { attachAction } from '../../triggers/attach_action';
+import { Action, ActionContext, IncompatibleActionError } from '../..';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
@@ -81,6 +73,3 @@ export class SendMessageAction extends Action {
     );
   }
 }
-
-actionRegistry.set(SEND_MESSAGE_ACTION, new SendMessageAction());
-attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: SEND_MESSAGE_ACTION });

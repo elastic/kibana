@@ -20,7 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { embeddableFactories, EmbeddableFactory } from '../../../embeddables';
+import { EmbeddableFactory } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
@@ -64,5 +64,3 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
     return new ContactCardEmbeddable(initialInput, parent);
   }
 }
-
-embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());

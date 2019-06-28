@@ -28,7 +28,14 @@ export {
   isErrorEmbeddable,
 } from './embeddables';
 
-export { ViewMode, Trigger, EmbeddablePlugin } from './types';
+export {
+  ViewMode,
+  Trigger,
+  EmbeddablePlugin,
+  TriggerRegistry,
+  ActionRegistry,
+  EmbeddableFactoryRegistry,
+} from './types';
 
 export { Action, ActionContext, IncompatibleActionError } from './actions';
 

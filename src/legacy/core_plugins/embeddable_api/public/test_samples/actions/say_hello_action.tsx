@@ -19,8 +19,7 @@
 import React from 'react';
 import { npStart } from 'ui/new_platform';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { triggerRegistry, CONTEXT_MENU_TRIGGER, attachAction } from '../../triggers';
-import { Action, ActionContext, actionRegistry, IncompatibleActionError } from '../../actions';
+import { Action, ActionContext, IncompatibleActionError } from '../../actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
@@ -88,6 +87,3 @@ export class SayHelloAction extends Action {
     }
   }
 }
-
-actionRegistry.set(SAY_HELLO_ACTION, new SayHelloAction());
-attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: SAY_HELLO_ACTION });

@@ -32,9 +32,13 @@ import { SAY_HELLO_ACTION } from './test_samples/actions/say_hello_action';
 import { HELLO_WORLD_ACTION_ID } from './test_samples';
 import { getActionsForTrigger } from './get_actions_for_trigger';
 import { attachAction } from './triggers/attach_action';
+import { CONTEXT_MENU_TRIGGER } from './triggers';
 
 const triggerRegistry: TriggerRegistry = new Map();
 const actionRegistry: ActionRegistry = new Map();
+
+actionRegistry.set(SAY_HELLO_ACTION, new SayHelloAction());
+attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: SAY_HELLO_ACTION });
 
 beforeEach(() => {
   actionRegistry.clear();

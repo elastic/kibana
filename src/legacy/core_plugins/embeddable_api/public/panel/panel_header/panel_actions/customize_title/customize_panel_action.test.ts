@@ -34,13 +34,13 @@ import { Container, isErrorEmbeddable } from '../../../..';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { CustomizePanelTitleAction } from './customize_panel_action';
-import { EmbeddableFactory } from '../../../../embeddables';
+import { EmbeddableFactoryRegistry } from '../../../../types';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
+  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   return new HelloWorldContainer(input, embeddableFactories);
 }

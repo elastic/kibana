@@ -33,6 +33,7 @@ import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from './panel_header/panel_actions/edit_panel_action';
 import { getActionsForTrigger } from '../get_actions_for_trigger';
+import { embeddableFactories } from '../state/registries';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
@@ -51,7 +52,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
   private mounted: boolean = false;
-  constructor(props: Props, private triggerRegistry: TriggerRegistry, private actionRegistry: ActionRegistry) {
+  constructor(
+    props: Props,
+    private triggerRegistry: TriggerRegistry,
+    private actionRegistry: ActionRegistry
+  ) {
     super(props);
     const { embeddable } = this.props;
     const viewMode = embeddable.getInput().viewMode
@@ -169,7 +174,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new AddPanelAction(),
       new InspectPanelAction(),
       new RemovePanelAction(),
-      new EditPanelAction(),
+      new EditPanelAction(embeddableFactories),
     ];
 
     const sorted = actions.concat(extraActions).sort((a, b) => {

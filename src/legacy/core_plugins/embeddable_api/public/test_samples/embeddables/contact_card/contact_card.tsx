@@ -30,9 +30,12 @@ import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { executeTriggerActions } from '../../../triggers';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
+import { TriggerRegistry, ActionRegistry } from '../../../types';
 
 interface Props {
   embeddable: ContactCardEmbeddable;
+  triggerRegistry: TriggerRegistry;
+  actionRegistry: ActionRegistry;
 }
 
 interface State {
@@ -75,10 +78,15 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
   }
 
   emitContactTrigger = () => {
-    executeTriggerActions(CONTACT_USER_TRIGGER, {
-      embeddable: this.props.embeddable,
-      triggerContext: {},
-    });
+    executeTriggerActions(
+      CONTACT_USER_TRIGGER,
+      {
+        embeddable: this.props.embeddable,
+        triggerContext: {},
+      },
+      this.props.triggerRegistry,
+      this.props.actionRegistry
+    );
   };
 
   getCardFooterContent = () => (

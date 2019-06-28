@@ -29,10 +29,13 @@ import {
   HelloWorldContainer,
 } from '../test_samples/index';
 import { ApplyFilterAction } from './apply_filter_action';
-import { embeddableFactories, isErrorEmbeddable, EmbeddableOutput } from '../embeddables';
+import { isErrorEmbeddable, EmbeddableOutput } from '../embeddables';
 import { FilterableContainerFactory } from '../test_samples/embeddables/filterable_container_factory';
 import { FilterableEmbeddableInput } from '../test_samples/embeddables/filterable_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { EmbeddableFactoryRegistry } from '../types';
+
+const embeddableFactories: EmbeddableFactoryRegistry = new Map();
 
 beforeAll(() => {
   embeddableFactories.set(FILTERABLE_CONTAINER, new FilterableContainerFactory());

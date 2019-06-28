@@ -20,23 +20,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
-
-import { embeddableFactories } from '../../../embeddables/embeddable_factories_registry';
 import { Action, ActionContext } from '../../../actions';
-import { ViewMode } from '../../../types';
+import { ViewMode, EmbeddableFactoryRegistry } from '../../../types';
 import { EmbeddableFactoryNotFoundError } from '../../../embeddables';
 
 export const EDIT_PANEL_ACTION_ID = 'editPanel';
 
 export class EditPanelAction extends Action {
   public readonly type = EDIT_PANEL_ACTION_ID;
-  constructor() {
+  constructor(private embeddableFactories: EmbeddableFactoryRegistry) {
     super(EDIT_PANEL_ACTION_ID);
     this.order = 15;
   }
 
   public getDisplayName({ embeddable }: ActionContext) {
-    const factory = embeddableFactories.get(embeddable.type);
+    const factory = this.embeddableFactories.get(embeddable.type);
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(embeddable.type);
     }

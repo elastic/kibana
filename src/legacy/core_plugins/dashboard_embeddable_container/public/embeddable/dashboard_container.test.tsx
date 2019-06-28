@@ -24,8 +24,6 @@ import React from 'react';
 import {
   isErrorEmbeddable,
   ViewMode,
-  actionRegistry,
-  triggerRegistry,
   CONTEXT_MENU_TRIGGER,
   attachAction,
   EmbeddableFactory,
