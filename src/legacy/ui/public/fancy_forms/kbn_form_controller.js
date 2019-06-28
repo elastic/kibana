@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export function decorateFormController($delegate, $injector) {
   const [directive] = $delegate;
   const FormController = directive.controller;
@@ -50,13 +48,6 @@ export function decorateFormController($delegate, $injector) {
       return this._getInvalidModels()
         .filter(model => model.$touched || model.$dirty)
         .length;
-    }
-
-    describeErrors() {
-      return i18n.translate('common.ui.fancyForm.errorDescription',
-        {
-          defaultMessage: 'Errors'
-        });
     }
 
     $setTouched() {

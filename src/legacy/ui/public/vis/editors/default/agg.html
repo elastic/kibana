@@ -28,8 +28,13 @@
     </span>
 
     <!-- error -->
-    <span ng-if="!editorOpen && aggForm.softErrorCount() > 0" class="visEditorSidebar__collapsibleTitleDescription visEditorSidebar__collapsibleTitleDescription--danger" title="{{aggForm.describeErrors()}}">
-      {{ aggForm.describeErrors() }}
+    <span
+      ng-if="!editorOpen && aggForm.softErrorCount() > 0"
+      class="visEditorSidebar__collapsibleTitleDescription visEditorSidebar__collapsibleTitleDescription--danger"
+      title="{{::'common.ui.vis.editors.agg.errorsText' | i18n: { defaultMessage: 'Errors' } }}"
+      i18n-id="common.ui.vis.editors.agg.errorsText"
+      i18n-default-message="Errors"
+    >
     </span>
 
     <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
