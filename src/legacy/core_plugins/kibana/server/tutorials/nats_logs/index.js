@@ -43,7 +43,7 @@ export function natsLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
       },
     }),
-    // euiIconType: 'logoNats',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/nats.svg',
     artifacts: {
       dashboards: [
         {
