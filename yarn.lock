@@ -17158,10 +17158,10 @@ jsts@1.1.2:
   resolved "https://registry.yarnpkg.com/jsts/-/jsts-1.1.2.tgz#d205d2cc8393081d9e484ae36282110695edc230"
   integrity sha1-0gXSzIOTCB2eSErjYoIRBpXtwjA=
 
-jsts@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/jsts/-/jsts-2.0.4.tgz#5fb91aaea070ebedf0121454ed90b074027e8241"
-  integrity sha512-YCfCuEgG9ynMFazjIH0YAtliFlaIcYmRqBY6EQP+VjNDEjuu4Il+91RDQWP4hAS7TXOeN/NYF/OL7Fmvg69pKg==
+jsts@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/jsts/-/jsts-1.6.2.tgz#c0efc885edae06ae84f78cbf2a0110ba929c5925"
+  integrity sha512-JNfDQk/fo5MeXx4xefvCyHZD22/DHowHr5K07FdgCJ81MEqn02HsDV5FQvYTz60ZIOv/+hhGbsVzXX5cuDWWlA==
 
 jsx-ast-utils@^2.0.1:
   version "2.0.1"
