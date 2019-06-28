@@ -4,15 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, Dispatch, ReducerAction } from 'react';
 import { AppState } from '../../types';
 
-const StateContext = createContext<AppState>({});
+type StateReducer = (state: AppState, action: { type: string; [key: string]: any }) => void;
+type ReducedStateContext = [Partial<AppState>, Dispatch<ReducerAction<StateReducer>>];
 
-export const initialState = {};
+const StateContext = createContext<ReducedStateContext>([{}, () => {}]);
 
-export const reducer = (state: any, action: { type: string }) => {
-  switch (action.type) {
+export const initialState = {
+  permissions: {},
+};
+
+export const reducer: StateReducer = (state, action) => {
+  const { type, permissions } = action;
+  switch (type) {
+    case 'updatePermissions':
+      return {
+        ...state,
+        permissions,
+      };
     default:
       return state;
   }
@@ -20,4 +31,4 @@ export const reducer = (state: any, action: { type: string }) => {
 
 export const AppStateProvider = StateContext.Provider;
 
-export const useAppState = () => useContext<AppState>(StateContext);
+export const useAppState = () => useContext<ReducedStateContext>(StateContext);

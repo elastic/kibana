@@ -5,7 +5,11 @@
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
-import { APP_PERMISSIONS } from '../../../common/constants';
+import {
+  APP_REQUIRED_CLUSTER_PRIVILAGES,
+  APP_RESTORE_INDEX_PRIVILAGES,
+} from '../../../common/constants';
+import { AppPermissions } from '../../../common/types';
 import { Plugins } from '../../../shim';
 
 let xpackMainPlugin: any;
@@ -19,7 +23,22 @@ export function getXpackMainPlugin() {
   return xpackMainPlugin;
 }
 
-export const getPermissionsHandler: RouterRouteHandler = async (req, callWithRequest) => {
+const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean }): string[] => {
+  return Object.keys(privilegesObject).reduce(
+    (privileges: string[], privilegeName: string): string[] => {
+      if (!privilegesObject[privilegeName]) {
+        privileges.push(privilegeName);
+      }
+      return privileges;
+    },
+    []
+  );
+};
+
+export const getPermissionsHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<AppPermissions> => {
   const xpackInfo = getXpackMainPlugin() && getXpackMainPlugin().info;
   if (!xpackInfo) {
     // xpackInfo is updated via poll, so it may not be available until polling has begun.
@@ -27,35 +46,49 @@ export const getPermissionsHandler: RouterRouteHandler = async (req, callWithReq
     throw wrapCustomError(new Error('Security info unavailable'), 503);
   }
 
+  const permissionsResult: AppPermissions = {
+    hasPermission: true,
+    missingClusterPrivileges: [],
+    missingIndexPrivileges: [],
+  };
+
   const securityInfo = xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security');
   if (!securityInfo || !securityInfo.isAvailable() || !securityInfo.isEnabled()) {
     // If security isn't enabled, let the user use app.
-    return {
-      hasPermission: true,
-      missingClusterPrivileges: [],
-    };
+    return permissionsResult;
   }
 
+  // Get cluster priviliges
   const { has_all_requested: hasPermission, cluster } = await callWithRequest('transport.request', {
     path: '/_security/user/_has_privileges',
     method: 'POST',
     body: {
-      cluster: APP_PERMISSIONS,
+      cluster: APP_REQUIRED_CLUSTER_PRIVILAGES,
     },
   });
 
-  const missingClusterPrivileges = Object.keys(cluster).reduce(
-    (permissions: string[], permissionName: string): string[] => {
-      if (!cluster[permissionName]) {
-        permissions.push(permissionName);
-      }
-      return permissions;
-    },
-    []
-  );
+  // Find missing cluster privileges and set overall app permissions
+  permissionsResult.missingClusterPrivileges = extractMissingPrivileges(cluster || {});
+  permissionsResult.hasPermission = hasPermission;
 
-  return {
-    hasPermission,
-    missingClusterPrivileges,
-  };
+  // Get all index privileges the user has
+  const { indices } = await callWithRequest('transport.request', {
+    path: '/_security/user/_privileges',
+    method: 'GET',
+  });
+
+  // Check if they have at the required index privilages for at least one index
+  const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {
+    return (
+      privileges.includes('all') ||
+      APP_RESTORE_INDEX_PRIVILAGES.filter(privilage => !privileges.includes(privilage)).length === 0
+    );
+  });
+
+  // If they don't, return list of required index privilages
+  if (!oneIndexWithAllPrivileges) {
+    permissionsResult.missingIndexPrivileges = [...APP_RESTORE_INDEX_PRIVILAGES];
+  }
+
+  return permissionsResult;
 };
