@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get, set } from 'lodash';
 import { DatabaseAdapter } from '../../database';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
 
@@ -65,7 +66,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
   });
 
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
-    expect.assertions(2);
+    expect.assertions(4);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
     const database = {
@@ -76,11 +77,27 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const adapter = new ElasticsearchMonitorsAdapter(database);
     await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now');
     expect(searchMock).toHaveBeenCalledTimes(1);
+    // protect against possible rounding errors polluting the snapshot comparison
+    const fixedInterval = parseInt(
+      get(
+        searchMock.mock.calls[0][1],
+        'body.aggs.timeseries.date_histogram.fixed_interval',
+        ''
+      ).split('ms')[0],
+      10
+    );
+    expect(fixedInterval).not.toBeNaN();
+    expect(fixedInterval).toBeCloseTo(36000, 3);
+    set(
+      searchMock.mock.calls[0][1],
+      'body.aggs.timeseries.date_histogram.fixed_interval',
+      '36000ms'
+    );
     expect(searchMock.mock.calls[0]).toMatchSnapshot();
   });
 
   it('getMonitorChartsData will provide expected filters when a location is specified', async () => {
-    expect.assertions(2);
+    expect.assertions(4);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
     const database = {
@@ -91,6 +108,22 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const adapter = new ElasticsearchMonitorsAdapter(database);
     await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now', 'Philadelphia');
     expect(searchMock).toHaveBeenCalledTimes(1);
+    // protect against possible rounding errors polluting the snapshot comparison
+    const fixedInterval = parseInt(
+      get(
+        searchMock.mock.calls[0][1],
+        'body.aggs.timeseries.date_histogram.fixed_interval',
+        ''
+      ).split('ms')[0],
+      10
+    );
+    expect(fixedInterval).not.toBeNaN();
+    expect(fixedInterval).toBeCloseTo(36000, 3);
+    set(
+      searchMock.mock.calls[0][1],
+      'body.aggs.timeseries.date_histogram.fixed_interval',
+      '36000ms'
+    );
     expect(searchMock.mock.calls[0]).toMatchSnapshot();
   });
 });
