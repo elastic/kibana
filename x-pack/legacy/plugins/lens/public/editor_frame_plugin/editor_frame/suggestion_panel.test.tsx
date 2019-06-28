@@ -68,7 +68,6 @@ describe('suggestion_panel', () => {
       visualizationState: {},
       dispatch: dispatchMock,
       ExpressionRenderer: expressionRendererMock,
-      datasourcePublicAPI: mockDatasource.publicAPIMock,
     };
   });
 

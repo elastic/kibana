@@ -13,11 +13,7 @@ import { NativeRenderer } from '../native_renderer';
 export function App({ editorFrame }: { editorFrame: EditorFrameInstance }) {
   return (
     <I18nProvider>
-      <div>
-        <h1>Lens</h1>
-
-        <NativeRenderer render={editorFrame.mount} nativeProps={undefined} />
-      </div>
+      <NativeRenderer className="lnsPage" render={editorFrame.mount} nativeProps={undefined} />
     </I18nProvider>
   );
 }

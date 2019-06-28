@@ -11,7 +11,7 @@ import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
-import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
+import { Datasource, Visualization } from '../../types';
 import { getSuggestions, toSwitchAction, Suggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { prependDatasourceExpression } from './expression_helpers';
@@ -22,7 +22,6 @@ export interface SuggestionPanelProps {
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  datasourcePublicAPI: DatasourcePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
 }
@@ -98,7 +97,6 @@ export function SuggestionPanel({
   visualizationMap,
   visualizationState,
   dispatch,
-  datasourcePublicAPI,
   ExpressionRenderer: ExpressionRendererComponent,
 }: SuggestionPanelProps) {
   const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsFromCurrentState(
@@ -112,8 +110,7 @@ export function SuggestionPanel({
     datasourceSuggestions,
     visualizationMap,
     activeVisualizationId,
-    visualizationState,
-    datasourcePublicAPI
+    visualizationState
   );
 
   return (
