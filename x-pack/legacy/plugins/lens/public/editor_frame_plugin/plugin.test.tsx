@@ -89,6 +89,8 @@ describe('editor_frame plugin', () => {
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint);
 
+    // wait for two ticks because vis initialization happens in a separate effect
+    await waitForPromises();
     await waitForPromises();
 
     expect(mockVisualization.initialize).toHaveBeenCalled();
