@@ -6,16 +6,17 @@
 
 import React, { memo, useMemo } from 'react';
 
-import euiStyled, { css } from '../../../../../../common/eui_styled_components';
+import { css } from '../../../../../../common/eui_styled_components';
 import {
   isConstantSegment,
   isFieldSegment,
-  LogEntryMessageSegment,
+  isHighlightMessageColumn,
+  isMessageColumn,
   LogEntryColumn,
   LogEntryHighlightColumn,
-  isMessageColumn,
-  isHighlightMessageColumn,
+  LogEntryMessageSegment,
 } from '../../../utils/log_entry';
+import { highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
 
@@ -57,12 +58,6 @@ const unwrappedContentStyle = css`
   white-space: pre;
 `;
 
-const HighlightMarker = euiStyled.span`
-  color: ${props =>
-    props.theme.darkMode ? props.theme.eui.euiTextColor : props.theme.eui.euiColorGhost}
-  background-color: ${props => props.theme.eui.euiColorSecondary}
-`;
-
 const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
   isHovered: boolean;
   isHighlighted: boolean;
@@ -90,7 +85,7 @@ const formatMessage = (
 
 const formatMessageSegment = (
   messageSegment: LogEntryMessageSegment,
-  [firstHighlight = []]: string[][]
+  [firstHighlight = []]: string[][] // we only support one highlight for now
 ): React.ReactNode => {
   if (isFieldSegment(messageSegment)) {
     return highlightFieldValue(messageSegment.value, firstHighlight, HighlightMarker);
@@ -100,34 +95,3 @@ const formatMessageSegment = (
 
   return 'failed to format message';
 };
-
-const highlightFieldValue = (
-  value: string,
-  highlightTerms: string[],
-  HighlightComponent: React.ComponentType
-) =>
-  highlightTerms.reduce<React.ReactNode[]>(
-    (fragments, highlightTerm, index) => {
-      const lastFragment = fragments[fragments.length - 1];
-
-      if (typeof lastFragment !== 'string') {
-        return fragments;
-      }
-
-      const highlightTermPosition = lastFragment.indexOf(highlightTerm);
-
-      if (highlightTermPosition > -1) {
-        return [
-          ...fragments.slice(0, fragments.length - 1),
-          lastFragment.slice(0, highlightTermPosition),
-          <HighlightComponent key={`highlight-${highlightTerm}-${index}`}>
-            {highlightTerm}
-          </HighlightComponent>,
-          lastFragment.slice(highlightTermPosition + highlightTerm.length),
-        ];
-      } else {
-        return fragments;
-      }
-    },
-    [value]
-  );

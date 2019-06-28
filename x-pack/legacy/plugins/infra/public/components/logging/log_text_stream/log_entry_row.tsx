@@ -12,7 +12,6 @@ import {
   LogEntry,
   LogEntryHighlight,
   LogEntryHighlightColumn,
-  isFieldColumn,
   isTimestampColumn,
 } from '../../../utils/log_entry';
 import {
@@ -140,13 +139,15 @@ export const LogEntryRow = ({
               key={columnConfiguration.messageColumn.id}
               {...columnWidth}
             >
-              <LogEntryMessageColumn
-                columnValue={column}
-                highlights={highlightsByColumnId[column.columnId] || []}
-                isHighlighted={isHighlighted}
-                isHovered={isHovered}
-                isWrapped={wrap}
-              />
+              {column ? (
+                <LogEntryMessageColumn
+                  columnValue={column}
+                  highlights={highlightsByColumnId[column.columnId] || []}
+                  isHighlighted={isHighlighted}
+                  isHovered={isHovered}
+                  isWrapped={wrap}
+                />
+              ) : null}
             </LogEntryColumn>
           );
         } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
@@ -161,12 +162,13 @@ export const LogEntryRow = ({
               key={columnConfiguration.fieldColumn.id}
               {...columnWidth}
             >
-              {isFieldColumn(column) ? (
+              {column ? (
                 <LogEntryFieldColumn
+                  columnValue={column}
+                  highlights={highlightsByColumnId[column.columnId] || []}
                   isHighlighted={isHighlighted}
                   isHovered={isHovered}
                   isWrapped={wrap}
-                  encodedValue={column.value}
                 />
               ) : null}
             </LogEntryColumn>

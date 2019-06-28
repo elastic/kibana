@@ -300,7 +300,7 @@ const convertLogDocumentToEntry = (
       return {
         columnId: logColumn.fieldColumn.id,
         field: logColumn.fieldColumn.field,
-        highlights: [],
+        highlights: document.highlights[logColumn.fieldColumn.field] || [],
         value: stringify(document.fields[logColumn.fieldColumn.field] || null),
       };
     }
