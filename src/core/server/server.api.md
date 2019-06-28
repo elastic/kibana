@@ -326,11 +326,11 @@ export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<PluginName,
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema = unknown> {
     // (undocumented)
     config: {
-        create: <Schema>() => Observable<Schema>;
-        createIfExists: <Schema>() => Observable<Schema | undefined>;
+        create: <T = ConfigSchema>() => Observable<T>;
+        createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
     // (undocumented)
     env: {
