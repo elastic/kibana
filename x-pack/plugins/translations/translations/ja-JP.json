@@ -9537,7 +9537,6 @@
     "xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel": "平均期間",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "ミリ秒単位の監視時間",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "ダウン",
-    "xpack.uptime.monitorList.idColumnLabel": "ID",
     "xpack.uptime.monitorList.monitorHistoryColumnLabel": "ダウンタイム履歴",
     "xpack.uptime.monitorList.monitoringStatusTitle": "監視ステータス",
     "xpack.uptime.monitorList.observabilityIntegrationsColumn.apmIntegrationLink.tooltip": "ここをクリックしてAPM でドメイン「{domain}」を確認します。",
