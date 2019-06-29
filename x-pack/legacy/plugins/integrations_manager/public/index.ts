@@ -10,7 +10,6 @@ import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
 import { Plugin, PluginInitializerContext, PluginStart } from './plugin';
 import { PLUGIN_ID } from '../common/constants';
-import { getNamedPath, RouteName } from '../common/routes';
 
 const REACT_APP_ROOT_ID = `react-${PLUGIN_ID}-root`;
 const template = `<div id="${REACT_APP_ROOT_ID}" class="integrationsManagerReactRoot"></div>`;
