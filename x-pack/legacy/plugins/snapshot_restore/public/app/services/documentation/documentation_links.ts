@@ -44,6 +44,14 @@ class DocumentationLinksService {
   public getSnapshotDocUrl() {
     return `${this.esDocBasePath}/modules-snapshots.html#_snapshot`;
   }
+
+  public getRestoreDocUrl() {
+    return `${this.esDocBasePath}/modules-snapshots.html#restore-snapshot`;
+  }
+
+  public getRestoreIndexSettingsUrl() {
+    return `${this.esDocBasePath}/modules-snapshots.html#_changing_index_settings_during_restore`;
+  }
 }
 
 export const documentationLinksService = new DocumentationLinksService();

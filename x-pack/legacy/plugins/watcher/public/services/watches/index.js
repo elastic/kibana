@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './watches_service.factory';
+export { watches } from './watches';
