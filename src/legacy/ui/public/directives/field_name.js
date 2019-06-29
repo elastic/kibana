@@ -31,6 +31,7 @@ import numberFieldNameIcon from './field_name_icons/number_field_name_icon.html'
 import sourceFieldNameIcon from './field_name_icons/source_field_name_icon.html';
 import stringFieldNameIcon from './field_name_icons/string_field_name_icon.html';
 import unknownFieldNameIcon from './field_name_icons/unknown_field_name_icon.html';
+import { FieldName } from './field_name_react';
 
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana');
@@ -46,7 +47,8 @@ const compiledSourceFieldNameIcon = template(sourceFieldNameIcon);
 const compiledStringFieldNameIcon = template(stringFieldNameIcon);
 const compiledUnknownFieldNameIcon = template(unknownFieldNameIcon);
 
-module.directive('fieldName', function ($rootScope, config) {
+module.directive('fieldName', function ($rootScope, config, reactDirective) {
+  return reactDirective(FieldName);
   return {
     restrict: 'AE',
     scope: {
