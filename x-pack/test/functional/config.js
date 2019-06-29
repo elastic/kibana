@@ -282,7 +282,11 @@ export default async function ({ readConfigFile }) {
       },
       apm: {
         pathname: '/app/apm',
-      }
+      },
+      watcher: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/watcher/watches/',
+      },
     },
 
     // choose where esArchiver should load archives from
