@@ -45,7 +45,7 @@ This field will be used to sort your documents in the top hits aggregation.
 [[terms-join]]
 === Terms join
 
-Use terms joins to augment vector features with additional properties for <<maps-vector-style-data-driven, data driven styling>> and provide richer tooltip content.
+Use terms joins to augment vector features with additional properties for <<maps-vector-style-data-driven, data driven styling>> and richer tooltip content.
 
 Terms joins use a shared key to combine the results of an {es} terms aggregation and vector features.
 
@@ -61,13 +61,13 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 The <<maps-add-choropleth-layer, choropleth layer example>> uses a terms join to shade world countries by web log traffic.
 Darker shades symbolize countries with more web log traffic, and lighter shades symbolize countries with less traffic.
 
-World countries and web log traffic are be joined on the shared key, https://wikipedia.org/wiki/ISO_3166-1_alpha-2[ISO 3166-1 alpha-2 code].
+World countries and web log traffic are joined on the shared key, https://wikipedia.org/wiki/ISO_3166-1_alpha-2[ISO 3166-1 alpha-2 code].
 ISO 3166-1 alpha-2 code is an international standard that identifies countries by a two-letter country code.
 For example, *Sweden* has an ISO 3166-1 alpha-2 code of *SE*.
 
-NOTE: This example uses vector features provided by EMS. You can also use your own vector features.
-
 ==== Left source
+
+NOTE: The cloropeth example uses vector features provided by EMS. You can also use your own vector features.
 
 This example uses https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] World Countries as the vector source.
 Notice the value for *iso2* property in the example feature.
@@ -126,7 +126,7 @@ Example documents from Sample web logs:
 }
 --------------------------------------------------
 
-A {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] will group the sample web log documents by *geo.src* and calculate metrics for each term.
+A {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] groups the sample web log documents by *geo.src* and calculates metrics for each term.
 Notice the value of *key* property for each bucket in the example terms aggregation response.
 This is the value that will be used to join the feature to web log traffic.
 
@@ -142,7 +142,8 @@ Example terms aggregation response:
           avg_of_bytes: {
             value: 3177.25
           }
-        }
+        },
+        ...
       ]
     }
   }
