@@ -69,7 +69,7 @@ For example, *Sweden* has an ISO 3166-1 alpha-2 code of *SE*.
 
 NOTE: The cloropeth example uses vector features provided by EMS. You can also use your own vector features.
 
-This example uses https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] World Countries as the vector source.
+This example uses https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] World Countries for the left source.
 Notice the value for *iso2* property in the example feature.
 This is the value that will be used to join the feature to web log traffic.
 
@@ -91,7 +91,7 @@ Example feature from World Countries:
 
 ==== Right source
 
-This example uses the Kibana sample data set "Sample web logs" as the Elasticsearch index.
+This example uses the Kibana sample data set "Sample web logs" for the right source.
 The *geo.src* field contains the ISO 3166-1 alpha-2 code of the country of origin.
 
 Example documents from Sample web logs:
@@ -164,6 +164,8 @@ the average of the field "bytes" for all documents in the terms bucket.
 image::maps/images/terms_join_metric_config.png[]
 
 ==== Using the terms join metrics for data driven styling
+
+The metrics for each terms aggregation bucket are added to the world country feature with the corresponding ISO 3166-1 alpha-2 code.
 
 The world countries features will now have two additional properties:
 
