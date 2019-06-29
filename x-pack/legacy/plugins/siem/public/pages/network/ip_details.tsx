@@ -46,7 +46,7 @@ interface IPDetailsComponentReduxProps {
   flowTarget: FlowTarget;
 }
 
-type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
+export type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
 export const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({

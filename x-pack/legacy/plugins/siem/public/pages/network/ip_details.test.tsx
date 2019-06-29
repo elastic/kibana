@@ -13,7 +13,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import '../../mock/match_media';
 import '../../mock/ui_settings';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import { IPDetailsComponent, IPDetails } from './ip_details';
+import { IPDetailsComponent, IPDetails, IPDetailsComponentProps } from './ip_details';
 import { FlowTarget } from '../../graphql/types';
 import { createStore, State } from '../../store';
 import { cloneDeep } from 'lodash/fp';
@@ -54,7 +54,7 @@ const getMockHistory = (ip: string) => ({
   listen: jest.fn(),
 });
 
-const getMockProps = (ip: string) => ({
+const getMockProps = (ip: string): IPDetailsComponentProps => ({
   filterQuery: 'coolQueryhuh?',
   flowTarget: FlowTarget.source,
   history: getMockHistory(ip),
@@ -64,7 +64,7 @@ const getMockProps = (ip: string) => ({
     state: '',
     hash: '',
   },
-  match: { params: { ip }, isExact: true, path: '', url: '' },
+  match: { params: { ip, search: '' }, isExact: true, path: '', url: '' },
 });
 
 jest.mock('ui/documentation_links', () => ({
