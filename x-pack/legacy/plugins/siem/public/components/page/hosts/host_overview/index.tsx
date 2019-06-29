@@ -19,7 +19,7 @@ import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/f
 import { LoadingPanel } from '../../../loading';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
-import { AnomalyScores } from '../../../ml/anomaly_scores';
+import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 
 interface HostSummaryProps {

@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
-import { AnomalyScores } from '../../../ml/anomaly_scores';
+import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 
 interface OwnProps {
   data: IpOverviewData;

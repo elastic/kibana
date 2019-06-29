@@ -30,8 +30,8 @@ import { networkModel, networkSelectors, State } from '../../store';
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-import { AnomaliesNetworkTable } from '../../components/ml/anomalies_network_table';
-import { scoreIntervalToDateTime } from '../../components/ml/score_interval_to_datetime';
+import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 

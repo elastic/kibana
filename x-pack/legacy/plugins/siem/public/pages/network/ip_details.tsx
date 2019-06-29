@@ -38,10 +38,10 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-import { AnomalyTableProvider } from '../../components/ml/anomaly_table_provider';
-import { networkToInfluencers } from '../../components/ml/network_to_influencers';
+import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
+import { networkToInfluencers } from '../../components/ml/influencers/network_to_influencers';
 import { InputsModelId } from '../../store/inputs/constants';
-import { scoreIntervalToDateTime } from '../../components/ml/score_interval_to_datetime';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);

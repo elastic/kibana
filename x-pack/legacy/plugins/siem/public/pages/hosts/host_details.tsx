@@ -37,11 +37,11 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { AnomalyTableProvider } from '../../components/ml/anomaly_table_provider';
-import { hostToInfluencers } from '../../components/ml/host_to_influencers';
+import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
+import { hostToInfluencers } from '../../components/ml/influencers/host_to_influencers';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-import { scoreIntervalToDateTime } from '../../components/ml/score_interval_to_datetime';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 
 const type = hostsModel.HostsType.details;

@@ -37,10 +37,10 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { AnomaliesHostTable } from '../../components/ml/anomalies_host_table';
+import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-import { scoreIntervalToDateTime } from '../../components/ml/score_interval_to_datetime';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
