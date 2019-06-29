@@ -6,56 +6,23 @@
 import { PLUGIN_ID } from './constants';
 
 export const API_ROOT = `/api/${PLUGIN_ID}`;
+export const API_LIST_PATTERN = `${API_ROOT}/list`;
+export const API_INFO_PATTERN = `${API_ROOT}/package/{pkgkey}`;
+export const API_ZIP_PATTERN = `${API_INFO_PATTERN}.zip`;
+export const API_TGZ_PATTERN = `${API_INFO_PATTERN}.tar.gz`;
 
-export enum RouteName {
-  API_LIST = 'API_LIST',
-  API_INFO = 'API_INFO',
-  API_ZIP = 'API_ZIP',
-  API_TGZ = 'API_TGZ',
+export function getListPath() {
+  return API_LIST_PATTERN;
 }
 
-type RouteNameKey = keyof typeof RouteName;
-type RouteMap = Record<RouteNameKey, RouteDef>;
-
-interface RouteDef {
-  path: string;
-  generatePath: (replacement?: string) => string;
+export function getInfoPath(pkgkey: string) {
+  return API_INFO_PATTERN.replace('{pkgkey}', pkgkey);
 }
 
-const Routes: RouteMap = {
-  [RouteName.API_LIST]: {
-    path: `${API_ROOT}/list`,
-    generatePath() {
-      return this.path;
-    },
-  },
-  [RouteName.API_INFO]: {
-    path: `${API_ROOT}/package/{pkgkey}`,
-    generatePath: replacePkgkey,
-  },
-  [RouteName.API_ZIP]: {
-    path: `${API_ROOT}/package/{pkgkey}.zip`,
-    generatePath: replacePkgkey,
-  },
-  [RouteName.API_TGZ]: {
-    path: `${API_ROOT}/package/{pkgkey}.tar.gz`,
-    generatePath: replacePkgkey,
-  },
-};
-
-export function getNamedPath(key: RouteNameKey, replacement?: string): string {
-  const route = getNamedRoute(key);
-  if (route.generatePath) return route.generatePath(replacement);
-  return route.path;
+export function getZipPath(pkgkey: string) {
+  return API_ZIP_PATTERN.replace('{pkgkey}', pkgkey);
 }
 
-export function getNamedRoute(key: RouteNameKey): RouteDef {
-  const route = Routes[key];
-  if (!route) throw new Error(`no route with key '${key}'`);
-  return route;
-}
-
-function replacePkgkey(this: RouteDef, pkgkey?: string): string {
-  if (!pkgkey) throw new Error('missing replacement value for pkgkey');
-  return this.path.replace('{pkgkey}', pkgkey);
+export function getTgzPath(pkgkey: string) {
+  return API_TGZ_PATTERN.replace('{pkgkey}', pkgkey);
 }

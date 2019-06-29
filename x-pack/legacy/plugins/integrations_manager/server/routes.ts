@@ -5,7 +5,12 @@
  */
 import { PLUGIN_ID } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
-import { getNamedRoute, RouteName } from '../common/routes';
+import {
+  API_LIST_PATTERN,
+  API_INFO_PATTERN,
+  API_TGZ_PATTERN,
+  API_ZIP_PATTERN,
+} from '../common/routes';
 import { fetchInfo, fetchList, getArchiveInfo } from './registry';
 
 interface PackageRequest extends Request {
@@ -18,19 +23,19 @@ interface PackageRequest extends Request {
 export const routes: ServerRoute[] = [
   {
     method: 'GET',
-    path: getNamedRoute(RouteName.API_LIST).path,
+    path: API_LIST_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: fetchList,
   },
   {
     method: 'GET',
-    path: getNamedRoute(RouteName.API_INFO).path,
+    path: API_INFO_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: async (req: PackageRequest) => fetchInfo(req.params.pkgkey),
   },
   {
     method: 'GET',
-    path: getNamedRoute(RouteName.API_ZIP).path,
+    path: API_ZIP_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: async (req: PackageRequest) => {
       const { pkgkey } = req.params;
@@ -40,7 +45,7 @@ export const routes: ServerRoute[] = [
   },
   {
     method: 'GET',
-    path: getNamedRoute(RouteName.API_TGZ).path,
+    path: API_TGZ_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: async (req: PackageRequest) => {
       const { pkgkey } = req.params;
