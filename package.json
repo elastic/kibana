@@ -423,7 +423,7 @@
     "regenerate": "^1.4.0",
     "sass-lint": "^1.12.1",
     "selenium-webdriver": "^4.0.0-alpha.1",
-    "simple-git": "1.113.0",
+    "simple-git": "1.116.0",
     "sinon": "^7.2.2",
     "strip-ansi": "^3.0.1",
     "supertest": "^3.1.0",
