@@ -23,6 +23,7 @@ const selectQuery = (state: State, id: string): GlobalQuery =>
     isInspected: false,
     loading: false,
     refetch: null,
+    selectedInspectIndex: 0,
   };
 
 export const inputsSelector = () =>

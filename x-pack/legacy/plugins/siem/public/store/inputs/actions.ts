@@ -48,6 +48,7 @@ export const setInspectionParameter = actionCreator<{
   id: string;
   inputId: InputsModelId;
   isInspected: boolean;
+  selectedInspectIndex: number;
 }>('SET_INSPECTION_PARAMETER');
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');

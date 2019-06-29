@@ -140,7 +140,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     },
   }))
   .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
-  .case(setInspectionParameter, (state, { id, inputId, isInspected }) =>
-    setIsInspected({ id, inputId, isInspected, state })
+  .case(setInspectionParameter, (state, { id, inputId, isInspected, selectedInspectIndex }) =>
+    setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state })
   )
   .build();

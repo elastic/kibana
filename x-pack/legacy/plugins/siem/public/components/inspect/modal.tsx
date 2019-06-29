@@ -28,10 +28,13 @@ interface ModalInspectProps {
 }
 
 const MyEuiModal = styled(EuiModal)`
-  height: 60vw;
-  width: 60vw;
+  height: 75vh;
+  .euiModal__flex {
+    width: 60vw;
+  }
   .euiCodeBlock {
-    height: 40vw !important;
+    height: 52vh !important;
+    max-width: 718px;
   }
 `;
 

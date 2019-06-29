@@ -26,6 +26,7 @@ interface InspectButtonReducer {
   isInspected: boolean;
   loading: boolean;
   inspect: inputsModel.InspectQuery | null;
+  selectedInspectIndex: number;
 }
 
 interface InspectButtonDispatch {
@@ -33,6 +34,7 @@ interface InspectButtonDispatch {
     id: string;
     inputId: InputsModelId;
     isInspected: boolean;
+    selectedInspectIndex: number;
   }>;
 }
 
@@ -44,41 +46,46 @@ const InspectButtonComponent = ({
   loading,
   inspectIndex = 0,
   queryId = '',
+  selectedInspectIndex,
   setIsInspected,
   title = '',
-}: InspectButtonProps) => {
-  const [isShowing, setIsShowing] = useState(false);
-
-  return (
-    <>
-      <EuiButtonEmpty
-        iconSide="left"
-        iconType="inspect"
-        isDisabled={loading}
-        isLoading={loading}
-        onClick={() => {
-          setIsInspected({ id: queryId, inputId: 'global', isInspected: true });
-          setIsShowing(true);
-        }}
-        size="s"
-      >
-        {'Inspect'}
-      </EuiButtonEmpty>
-      <ModalInspectQuery
-        closeModal={() => {
-          setIsShowing(false);
-          setIsInspected({ id: queryId, inputId: 'global', isInspected: false });
-        }}
-        isShowing={!loading && isShowing && isInspected}
-        request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
-        response={
-          inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
-        }
-        title={`${title} - Query Inspection`}
-      />
-    </>
-  );
-};
+}: InspectButtonProps) => (
+  <>
+    <EuiButtonEmpty
+      iconSide="left"
+      iconType="inspect"
+      isDisabled={loading}
+      isLoading={loading}
+      onClick={() => {
+        setIsInspected({
+          id: queryId,
+          inputId: 'global',
+          isInspected: true,
+          selectedInspectIndex: inspectIndex,
+        });
+      }}
+      size="xs"
+    >
+      {'Inspect'}
+    </EuiButtonEmpty>
+    <ModalInspectQuery
+      closeModal={() => {
+        setIsInspected({
+          id: queryId,
+          inputId: 'global',
+          isInspected: false,
+          selectedInspectIndex: inspectIndex,
+        });
+      }}
+      isShowing={!loading && selectedInspectIndex === inspectIndex && isInspected}
+      request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
+      response={
+        inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
+      }
+      title={`${title} - Query Inspection`}
+    />
+  </>
+);
 
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();

@@ -12,14 +12,17 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { authenticationsQuery } from './index.gql_query';
 
+const ID = 'authenticationQuery';
+
 export interface AuthenticationArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   authentications: AuthenticationsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -34,6 +37,8 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface AuthenticationsComponentReduxProps {
+  isInspected: boolean;
+  skipQuery: boolean;
   limit: number;
 }
 
@@ -46,10 +51,12 @@ class AuthenticationsComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'authenticationQuery',
+      id = ID,
+      isInspected,
       children,
       filterQuery,
       skip,
+      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -60,7 +67,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
         query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        skip={skip}
+        skip={skip || skipQuery}
         variables={{
           sourceId,
           timerange: {
@@ -75,6 +82,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
           },
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -108,6 +116,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.Authentications.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Authentications.totalCount', data),
@@ -123,8 +132,14 @@ class AuthenticationsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getAuthenticationsSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected, inspect } = getQuery(state, id);
+    return {
+      ...getAuthenticationsSelector(state, type),
+      isInspected,
+      skipQuery: !isInspected && inspect != null,
+    };
   };
   return mapStateToProps;
 };

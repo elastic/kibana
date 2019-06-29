@@ -85,13 +85,16 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       sourceId="default"
                       startDate={from}
                     >
-                      {({ kpiHosts, loading, id, refetch }) => (
+                      {({ kpiHosts, loading, id, inspect, refetch }) => (
                         <KpiHostsComponentManage
-                          id={id}
-                          setQuery={setQuery}
-                          refetch={refetch}
                           data={kpiHosts}
+                          from={from}
+                          id={id}
+                          inspect={inspect}
                           loading={loading}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          to={to}
                         />
                       )}
                     </KpiHostsQuery>
@@ -150,10 +153,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         pageInfo,
                         loadMore,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <AuthenticationTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
@@ -184,10 +189,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         pageInfo,
                         loadMore,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <UncommonProcessTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
@@ -227,9 +234,19 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                      {({
+                        events,
+                        loading,
+                        id,
+                        inspect,
+                        refetch,
+                        totalCount,
+                        pageInfo,
+                        loadMore,
+                      }) => (
                         <EventsTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           data={events!}

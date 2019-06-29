@@ -98,7 +98,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ hostOverview, loading, id, refetch }) => (
+                        {({ hostOverview, loading, id, inspect, refetch }) => (
                           <AnomalyTableProvider
                             influencers={hostToInfluencers(hostOverview)}
                             startDate={from}
@@ -107,6 +107,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             {({ isLoadingAnomaliesData, anomaliesData }) => (
                               <HostOverviewManage
                                 id={id}
+                                inspect={inspect}
                                 refetch={refetch}
                                 setQuery={setQuery}
                                 data={hostOverview}
@@ -138,13 +139,16 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ kpiHostDetails, loading, id, refetch }) => (
+                        {({ kpiHostDetails, id, inspect, loading, refetch }) => (
                           <KpiHostDetailsManage
+                            data={kpiHostDetails}
+                            from={from}
                             id={id}
+                            inspect={inspect}
+                            loading={loading}
                             refetch={refetch}
                             setQuery={setQuery}
-                            data={kpiHostDetails}
-                            loading={loading}
+                            to={to}
                           />
                         )}
                       </KpiHostDetailsQuery>
@@ -166,10 +170,12 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           pageInfo,
                           loadMore,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <AuthenticationTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             loading={loading}
@@ -200,10 +206,12 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           pageInfo,
                           loadMore,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <UncommonProcessTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             loading={loading}
@@ -227,9 +235,19 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         type={type}
                       >
-                        {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                        {({
+                          events,
+                          loading,
+                          id,
+                          inspect,
+                          refetch,
+                          totalCount,
+                          pageInfo,
+                          loadMore,
+                        }) => (
                           <EventsTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             data={events!}

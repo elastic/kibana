@@ -2161,6 +2161,7 @@ export namespace GetAuthenticationsQuery {
     pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2185,6 +2186,8 @@ export namespace GetAuthenticationsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -2283,6 +2286,14 @@ export namespace GetAuthenticationsQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -2436,6 +2447,7 @@ export namespace GetEventsQuery {
     sortField: SortField;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2459,6 +2471,8 @@ export namespace GetEventsQuery {
 
     pageInfo: PageInfo;
 
+    inspect?: Inspect | null;
+
     edges: Edges[];
   };
 
@@ -2476,6 +2490,14 @@ export namespace GetEventsQuery {
     value?: string | null;
 
     tiebreaker?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 
   export type Edges = {
@@ -2756,6 +2778,7 @@ export namespace GetHostOverviewQuery {
     hostName: string;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2780,6 +2803,8 @@ export namespace GetHostOverviewQuery {
     host?: Host | null;
 
     cloud?: Cloud | null;
+
+    inspect?: Inspect | null;
   };
 
   export type Host = {
@@ -2834,6 +2859,14 @@ export namespace GetHostOverviewQuery {
     __typename?: 'CloudMachine';
 
     type?: (string | null)[] | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -3002,6 +3035,7 @@ export namespace GetKpiHostDetailsQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3036,6 +3070,8 @@ export namespace GetKpiHostDetailsQuery {
     uniqueDestinationIps?: number | null;
 
     uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+
+    inspect?: Inspect | null;
   };
 
   export type AuthSuccessHistogram = KpiHostDetailsChartFields.Fragment;
@@ -3045,6 +3081,14 @@ export namespace GetKpiHostDetailsQuery {
   export type UniqueSourceIpsHistogram = KpiHostDetailsChartFields.Fragment;
 
   export type UniqueDestinationIpsHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetKpiHostsQuery {
@@ -3053,6 +3097,7 @@ export namespace GetKpiHostsQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3091,6 +3136,8 @@ export namespace GetKpiHostsQuery {
     uniqueDestinationIps?: number | null;
 
     uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+
+    inspect?: Inspect | null;
   };
 
   export type HostsHistogram = KpiHostChartFields.Fragment;
@@ -3102,6 +3149,14 @@ export namespace GetKpiHostsQuery {
   export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
   export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetKpiNetworkQuery {
@@ -4998,6 +5053,7 @@ export namespace GetUncommonProcessesQuery {
     pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -5022,6 +5078,8 @@ export namespace GetUncommonProcessesQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -5086,6 +5144,14 @@ export namespace GetUncommonProcessesQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 

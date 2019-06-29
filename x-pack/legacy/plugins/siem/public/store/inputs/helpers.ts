@@ -86,10 +86,14 @@ export const updateQuery = ({
                 isInspected: state[inputId].query[queryIndex].isInspected,
                 loading,
                 refetch,
+                selectedInspectIndex: state[inputId].query[queryIndex].selectedInspectIndex,
               },
               ...state[inputId].query.slice(queryIndex + 1),
             ]
-          : [...state[inputId].query, { id, inspect, isInspected: false, loading, refetch }],
+          : [
+              ...state[inputId].query,
+              { id, inspect, isInspected: false, loading, refetch, selectedInspectIndex: 0 },
+            ],
     },
   };
 };
@@ -98,6 +102,7 @@ interface SetIsInspectedParams {
   id: string;
   inputId: InputsModelId;
   isInspected: boolean;
+  selectedInspectIndex: number;
   state: InputsModel;
 }
 
@@ -105,6 +110,7 @@ export const setIsInspected = ({
   id,
   inputId,
   isInspected,
+  selectedInspectIndex,
   state,
 }: SetIsInspectedParams): InputsModel => {
   const myQueryIndex = state[inputId].query.findIndex(q => q.id === id);
@@ -117,7 +123,7 @@ export const setIsInspected = ({
         myQueryIndex > -1
           ? [
               ...state[inputId].query.slice(0, myQueryIndex),
-              { ...myQuery, isInspected },
+              { ...myQuery, isInspected, selectedInspectIndex },
               ...state[inputId].query.slice(myQueryIndex + 1),
             ]
           : [...state[inputId].query],

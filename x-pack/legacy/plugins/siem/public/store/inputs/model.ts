@@ -57,10 +57,11 @@ export interface InspectQuery {
 
 export interface GlobalQuery {
   id: string;
+  inspect: InspectQuery | null;
   isInspected: boolean;
   loading: boolean;
   refetch: null | Refetch | RefetchWithParams;
-  inspect: InspectQuery | null;
+  selectedInspectIndex: number;
 }
 
 export interface InputsRange {

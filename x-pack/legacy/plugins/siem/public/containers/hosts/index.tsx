@@ -31,6 +31,7 @@ const ID = 'hostsQuery';
 
 export interface HostsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   hosts: HostsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -39,7 +40,6 @@ export interface HostsArgs {
   refetch: inputsModel.Refetch;
   startDate: number;
   endDate: number;
-  inspect: inputsModel.InspectQuery;
 }
 
 export interface OwnProps extends QueryTemplateProps {
@@ -52,6 +52,7 @@ export interface OwnProps extends QueryTemplateProps {
 export interface HostsComponentReduxProps {
   isInspected: boolean;
   limit: number;
+  skipQuery: boolean;
   sortField: HostsFields;
   direction: Direction;
 }
@@ -84,6 +85,7 @@ class HostsComponentQuery extends QueryTemplate<
       limit,
       startDate,
       skip,
+      skipQuery = false,
       sourceId,
       sortField,
     } = this.props;
@@ -114,7 +116,7 @@ class HostsComponentQuery extends QueryTemplate<
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
         variables={variables}
-        skip={skip}
+        skip={skip || skipQuery}
       >
         {({ data, loading, fetchMore, refetch }) => {
           this.setFetchMore(fetchMore);
@@ -143,6 +145,7 @@ class HostsComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.Hosts.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Hosts.totalCount', data),
@@ -151,7 +154,6 @@ class HostsComponentQuery extends QueryTemplate<
             endDate,
             pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
             loadMore: this.wrappedLoadMore,
-            inspect: getOr(null, 'source.Hosts.inspect', data),
           });
         }}
       </Query>
@@ -168,8 +170,12 @@ const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return { ...getHostsSelector(state, type), isInspected };
+    const { isInspected, inspect } = getQuery(state, id);
+    return {
+      ...getHostsSelector(state, type),
+      isInspected,
+      skipQuery: !isInspected && inspect != null,
+    };
   };
   return mapStateToProps;
 };

@@ -7,54 +7,87 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
-import { inputsModel } from '../../store';
+import { inputsModel, inputsSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiHostsQuery } from './index.gql_query';
 
+const ID = 'kpiHostsQuery';
+
 export interface KpiHostsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   kpiHosts: KpiHostsData;
   loading: boolean;
   refetch: inputsModel.Refetch;
+}
+
+export interface KpiHostsReducer {
+  isInspected: boolean;
+  skipQuery: boolean;
 }
 
 export interface KpiHostsProps extends QueryTemplateProps {
   children: (args: KpiHostsArgs) => React.ReactNode;
 }
 
-export const KpiHostsQuery = React.memo<KpiHostsProps>(
-  ({ id = 'kpiHostsQuery', children, endDate, filterQuery, skip, sourceId, startDate }) => (
-    <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
-      query={kpiHostsQuery}
-      fetchPolicy="cache-and-network"
-      notifyOnNetworkStatusChange
-      skip={skip}
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate!,
-          to: endDate!,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const kpiHosts = getOr({}, `source.KpiHosts`, data);
-        return children({
-          id,
-          kpiHosts,
-          loading,
-          refetch,
-        });
-      }}
-    </Query>
-  )
+const KpiHostsComponentQuery = ({
+  id = ID,
+  children,
+  endDate,
+  filterQuery,
+  isInspected,
+  skip,
+  skipQuery,
+  sourceId,
+  startDate,
+}: KpiHostsProps & KpiHostsReducer) => (
+  <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
+    query={kpiHostsQuery}
+    fetchPolicy="cache-and-network"
+    notifyOnNetworkStatusChange
+    skip={skip || skipQuery}
+    variables={{
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+      filterQuery: createFilter(filterQuery),
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
+    }}
+  >
+    {({ data, loading, refetch }) => {
+      const kpiHosts = getOr({}, `source.KpiHosts`, data);
+      return children({
+        id,
+        inspect: getOr(null, 'source.KpiHosts.inspect', data),
+        kpiHosts,
+        loading,
+        refetch,
+      });
+    }}
+  </Query>
 );
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: KpiHostsProps) => {
+    const { isInspected, inspect } = getQuery(state, id);
+    return {
+      isInspected,
+      skipQuery: !isInspected && inspect != null,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const KpiHostsQuery = connect(makeMapStateToProps)(KpiHostsComponentQuery);
