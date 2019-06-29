@@ -3,7 +3,6 @@
 exports[`create_description_list renders correctly against snapshot 1`] = `
 <dl
   className="euiDescriptionList euiDescriptionList--row"
-  data-test-subj="anomaly-description-list"
 >
   <EuiDescriptionListTitle
     key="title-0"
@@ -80,6 +79,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
       >
         <EuiLink
           color="primary"
+          data-test-subj="anomaly-description-narrow-range-link"
           onClick={[Function]}
           target="_blank"
           type="button"

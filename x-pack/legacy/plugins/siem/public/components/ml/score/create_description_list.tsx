@@ -64,6 +64,7 @@ export const createDescriptionList = (
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
+              data-test-subj="anomaly-description-narrow-range-link"
               onClick={() => {
                 narrowDateRange(score, interval);
               }}
