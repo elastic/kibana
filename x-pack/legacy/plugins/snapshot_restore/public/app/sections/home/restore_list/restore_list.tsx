@@ -63,7 +63,7 @@ export const RestoreList: React.FunctionComponent = () => {
         body={
           <p>
             <FormattedMessage
-              id="xpack.snapshotRestore.app.deniedPermissionDescription"
+              id="xpack.snapshotRestore.restoreList.deniedPermissionDescription"
               defaultMessage="To view snapshot restore status, you must have {indexPrivilegesCount,
                 plural, one {this index privilege} other {these index privileges}} for one or more indices: {indexPrivileges}."
               values={{
