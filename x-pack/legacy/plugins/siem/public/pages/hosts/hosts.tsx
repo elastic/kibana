@@ -196,6 +196,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                     <AnomaliesHostTable
                       startDate={from}
                       endDate={to}
+                      skip={isInitializing}
                       narrowDateRange={(score, interval) => {
                         const fromTo = scoreIntervalToDateTime(score, interval);
                         setAbsoluteRangeDatePicker({

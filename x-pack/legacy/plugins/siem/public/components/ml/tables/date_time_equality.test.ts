@@ -13,11 +13,13 @@ describe('date_time_equality', () => {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const next: AnomaliesTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const equal = dateTimesAreEqual(prev, next);
     expect(equal).toEqual(true);
@@ -28,11 +30,13 @@ describe('date_time_equality', () => {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('1999').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const next: AnomaliesTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const equal = dateTimesAreEqual(prev, next);
     expect(equal).toEqual(false);
@@ -43,11 +47,13 @@ describe('date_time_equality', () => {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const next: AnomaliesTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('1999').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const equal = dateTimesAreEqual(prev, next);
     expect(equal).toEqual(false);
@@ -58,11 +64,13 @@ describe('date_time_equality', () => {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2001').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const next: AnomaliesTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const equal = dateTimesAreEqual(prev, next);
     expect(equal).toEqual(false);
@@ -73,11 +81,30 @@ describe('date_time_equality', () => {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
     };
     const next: AnomaliesTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2001').valueOf(),
       narrowDateRange: jest.fn(),
+      skip: false,
+    };
+    const equal = dateTimesAreEqual(prev, next);
+    expect(equal).toEqual(false);
+  });
+
+  test('it returns false if skip is not equal', () => {
+    const prev: AnomaliesTableProps = {
+      startDate: new Date('2000').valueOf(),
+      endDate: new Date('2000').valueOf(),
+      narrowDateRange: jest.fn(),
+      skip: true,
+    };
+    const next: AnomaliesTableProps = {
+      startDate: new Date('2000').valueOf(),
+      endDate: new Date('2000').valueOf(),
+      narrowDateRange: jest.fn(),
+      skip: false,
     };
     const equal = dateTimesAreEqual(prev, next);
     expect(equal).toEqual(false);

@@ -18,6 +18,7 @@ interface Args {
   endDate: number;
   startDate: number;
   threshold?: number;
+  skip?: boolean;
 }
 
 type Return = [boolean, Anomalies | null];
@@ -42,6 +43,7 @@ export const useAnomaliesTableData = ({
   startDate,
   endDate,
   threshold = 0,
+  skip = false,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ export const useAnomaliesTableData = ({
     earliestMs: number,
     latestMs: number
   ) => {
-    if (influencersInput != null) {
+    if (influencersInput != null && !skip) {
       const data = await anomaliesTableData(
         {
           jobIds: [],
@@ -83,7 +85,7 @@ export const useAnomaliesTableData = ({
       setLoading(true);
       fetchFunc(influencers, startDate, endDate);
     },
-    [influencersToString(influencers), startDate, endDate]
+    [influencersToString(influencers), startDate, endDate, skip]
   );
 
   return [loading, tableData];

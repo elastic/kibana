@@ -152,6 +152,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                       <AnomaliesNetworkTable
                         startDate={from}
                         endDate={to}
+                        skip={isInitializing}
                         narrowDateRange={(score, interval) => {
                           const fromTo = scoreIntervalToDateTime(score, interval);
                           setAbsoluteRangeDatePicker({

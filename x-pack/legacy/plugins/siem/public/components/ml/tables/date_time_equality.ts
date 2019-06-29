@@ -9,6 +9,7 @@ import { AnomaliesTableProps } from '../types';
 export const dateTimesAreEqual = (
   prevProps: AnomaliesTableProps,
   nextProps: AnomaliesTableProps
-): boolean => {
-  return prevProps.startDate === nextProps.startDate && prevProps.endDate === nextProps.endDate;
-};
+): boolean =>
+  prevProps.startDate === nextProps.startDate &&
+  prevProps.endDate === nextProps.endDate &&
+  prevProps.skip === nextProps.skip;

@@ -32,12 +32,13 @@ const sorting = {
 };
 
 export const AnomaliesHostTable = React.memo<AnomaliesTableProps>(
-  ({ startDate, endDate, narrowDateRange }): JSX.Element => {
+  ({ startDate, endDate, narrowDateRange, skip }): JSX.Element => {
     const [loading, tableData] = useAnomaliesTableData({
       influencers: [],
       startDate,
       endDate,
       threshold: 0,
+      skip,
     });
 
     const hosts = convertAnomaliesToHosts(tableData);

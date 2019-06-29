@@ -77,4 +77,5 @@ export interface AnomaliesTableProps {
   startDate: number;
   endDate: number;
   narrowDateRange: NarrowDateRange;
+  skip: boolean;
 }
