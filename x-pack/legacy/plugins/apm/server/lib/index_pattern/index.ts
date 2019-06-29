@@ -6,7 +6,6 @@
 import { InternalCoreSetup } from 'src/core/server';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 import apmIndexPattern from '../../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
-// import apmCMIndexPattern from './apm_cm_index_pattern.json';
 
 export async function getIndexPattern(core: InternalCoreSetup) {
   const { server } = core.http;
@@ -14,14 +13,9 @@ export async function getIndexPattern(core: InternalCoreSetup) {
   const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
   const savedObjectsClient = getSavedObjectsClient(server);
   try {
-    // await savedObjectsClient.get('index-pattern', '.apm-cm*');
     return await savedObjectsClient.get('index-pattern', apmIndexPattern.id);
   } catch (error) {
     // if GET fails, then create a new index pattern saved object
-    // await savedObjectsClient.create('index-pattern', apmCMIndexPattern, {
-    //   id: '.apm-cm*',
-    //   overwrite: false
-    // });
     return await savedObjectsClient.create(
       'index-pattern',
       {
