@@ -101,6 +101,7 @@ export const MlPopover = React.memo(() => {
     isPopoverOpen ? !refetchSummaryData : refetchSummaryData
   );
   const config = useContext(KibanaConfigContext);
+  const headers = { 'kbn-version': config.kbnVersion };
 
   // All jobs from embedded configTemplates that should be installed
   const embeddedJobIds = getJobsToInstall(configTemplates);
@@ -112,7 +113,7 @@ export const MlPopover = React.memo(() => {
   const configTemplatesToInstall = getConfigTemplatesToInstall(
     configTemplates,
     installedJobIds,
-    config.indexPattern ? config.indexPattern : ''
+    config.indexPattern || ''
   );
 
   // Filter installed job to show all 'siem' group jobs or just embedded
@@ -120,7 +121,7 @@ export const MlPopover = React.memo(() => {
 
   return (
     <EuiPopover
-      id="popover"
+      id="integrations-popover"
       button={
         <EuiButton
           data-test-subj="integrations-button"
@@ -160,6 +161,7 @@ export const MlPopover = React.memo(() => {
                         indexPatternName: configTemplate.defaultIndexPattern,
                         groups: ['siem'],
                         prefix: siemJobPrefix,
+                        headers,
                       });
                     })
                   );
@@ -208,12 +210,14 @@ export const JobDetail = React.memo<{
   onJobStateChange: Function;
 }>(({ jobName, jobDescription, isChecked, onJobStateChange }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const config = useContext(KibanaConfigContext);
+  const headers = { 'kbn-version': config.kbnVersion };
 
   const startDatafeed = async (enable: boolean) => {
     if (enable) {
-      await startDatafeeds([`datafeed-${jobName}`]);
+      await startDatafeeds([`datafeed-${jobName}`], headers);
     } else {
-      await stopDatafeeds([`datafeed-${jobName}`]);
+      await stopDatafeeds([`datafeed-${jobName}`], headers);
     }
     onJobStateChange();
     setIsLoading(false);
