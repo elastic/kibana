@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { get } from 'lodash';
 import { UMAuthAdapter } from '../adapters/auth/adapter_types';
 
-const supportedLicenses = ['standard', 'gold', 'platinum', 'trial'];
+const supportedLicenses = ['basic', 'standard', 'gold', 'platinum', 'trial'];
 
 export class UMAuthDomain {
   constructor(private readonly adapter: UMAuthAdapter, libs: {}) {
