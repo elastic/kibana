@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/Package",
+    "definitions": {
+        "Package": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "requirement": {
+                    "$ref": "#/definitions/Requirement"
+                }
+            },
+            "required": [
+                "description",
+                "icon",
+                "name",
+                "requirement",
+                "version"
+            ],
+            "title": "Package"
+        },
+        "Requirement": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "kibana": {
+                    "$ref": "#/definitions/Kibana"
+                }
+            },
+            "required": [
+                "kibana"
+            ],
+            "title": "Requirement"
+        },
+        "Kibana": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "version.min": {
+                    "type": "string"
+                },
+                "version.max": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "version.max",
+                "version.min"
+            ],
+            "title": "Kibana"
+        }
+    }
+}

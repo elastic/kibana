@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import Joi from '@hapi/joi';
+import Enjoi from 'enjoi';
 import {
   PLUGIN_ID,
   API_INTEGRATIONS_LIST,
@@ -12,6 +15,8 @@ import {
   SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
+import listSchema from '../schemas/consumed/list.schema.json';
+import packageSchema from '../schemas/consumed/package.schema.json';
 import { fetchInfo, fetchList, getArchiveInfo } from './registry';
 import { getClient } from './saved_objects';
 
@@ -21,18 +26,48 @@ interface PostRequest extends Request {
   };
 }
 
+async function defaultFailureHandler(req, h, err) {
+  if (err) {
+    return h.response(err.message);
+  }
+}
+
 // Manager public API paths (currently essentially a proxy to registry service)
 export const routes: ServerRoute[] = [
   {
     method: 'GET',
     path: API_INTEGRATIONS_LIST,
-    options: { tags: [`access:${PLUGIN_ID}`] },
+    options: {
+      tags: [`access:${PLUGIN_ID}`],
+      response: {
+        schema: Enjoi.schema(listSchema),
+        failAction: defaultFailureHandler,
+      },
+    },
     handler: fetchList,
   },
   {
     method: 'GET',
     path: API_INTEGRATIONS_INFO,
-    options: { tags: [`access:${PLUGIN_ID}`] },
+    options: {
+      tags: [`access:${PLUGIN_ID}`],
+      validate: {
+        params: {
+          pkgkey: Joi.string()
+            // TODO: real validation for name-version
+            // switch to name@version
+            .regex(/\w+-\d+\.\d+\.\d+$/)
+            .required(),
+        },
+      },
+      response: {
+        schema: Enjoi.schema({
+          ...packageSchema,
+          ...packageSchema.definitions.Package,
+        }),
+        failAction: defaultFailureHandler,
+      },
+    },
     handler: async (req: Request) => fetchInfo(req.params.pkgkey),
   },
   {
