@@ -10,40 +10,11 @@ import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 import { getEmptyTagValue } from '../../../empty_value';
 import { StatItems, KpiValue } from '../../../stat_items';
 
-const euiColorVis1 = '#3185FC';
+// const euiColorVis1 = '#3185FC';
 const euiColorVis2 = '#DB1374';
 const euiColorVis3 = '#490092';
 
 export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
-  {
-    key: 'packets',
-    fields: [
-      {
-        key: 'sourcePackets',
-        name: i18n.OUT,
-        description: i18n.OUT,
-        color: euiColorVis2,
-        icon: 'visMapCoordinate',
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-      {
-        key: 'destinationPackets',
-        name: i18n.IN,
-        description: i18n.IN,
-        color: euiColorVis3,
-        icon: 'visMapCoordinate',
-        render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
-        },
-      },
-    ],
-    description: i18n.PACKETS,
-    enableAreaChart: true,
-    enableBarChart: true,
-    grow: 1,
-  },
   {
     key: 'bytes',
     fields: [
@@ -77,38 +48,94 @@ export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
       },
     ],
     description: i18n.BYTES,
-    enableAreaChart: true,
+    enableAreaChart: false,
     enableBarChart: true,
-    grow: 1,
+    grow: 2,
+  },
+  {
+    key: 'topTransportIp',
+    fields: [
+      {
+        key: 'topSourceIp',
+        barchartKey: 'topSourceIpTransportBytes',
+        name: i18n.SOURCE_IP,
+        description: i18n.SOURCE_IP,
+        color: euiColorVis2,
+        icon: 'visMapCoordinate',
+        render: value => {
+          if (value != null) {
+            return value;
+          } else {
+            return getEmptyTagValue();
+          }
+        },
+      },
+      {
+        key: 'topDestinationIp',
+        barchartKey: 'topDestinationIpTransportBytes',
+        name: i18n.DESTINATION_IP,
+        description: i18n.DESTINATION_IP,
+        color: euiColorVis3,
+        icon: 'visMapCoordinate',
+        render: value => {
+          if (value != null) {
+            return value;
+          } else {
+            return getEmptyTagValue();
+          }
+        },
+      },
+    ],
+    description: i18n.TOP_TRANSPORT_IP,
+    enableAreaChart: false,
+    enableBarChart: true,
+    grow: 2,
   },
 ];
 
 export const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
-    key: 'connections',
+    key: 'topPort',
     fields: [
       {
-        key: 'connections',
-        color: euiColorVis1,
+        key: 'topDestinationPort',
+        name: i18n.TOP_DESTINATION_PORT,
+        color: euiColorVis2,
+        icon: 'visMapCoordinate',
         render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
+          if (value != null) {
+            return value;
+          } else {
+            return getEmptyTagValue();
+          }
         },
       },
     ],
-    description: i18n.CONNECTIONS,
+    description: i18n.TOP_DESTINATION_PORT,
+    enableAreaChart: false,
+    enableBarChart: false,
     grow: 1,
   },
   {
-    key: 'hosts',
+    key: 'topTransport',
     fields: [
       {
-        key: 'hosts',
+        key: 'topTransport',
+        name: i18n.TOP_TRANSPORT,
+        color: euiColorVis2,
+        icon: 'visMapCoordinate',
         render: value => {
-          return value != null ? value.toLocaleString() : getEmptyTagValue();
+          if (value != null) {
+            return value;
+          } else {
+            return getEmptyTagValue();
+          }
         },
       },
     ],
-    description: i18n.HOSTS,
+    description: i18n.TOP_TRANSPORT,
+    enableAreaChart: false,
+    enableBarChart: false,
     grow: 1,
   },
 ];

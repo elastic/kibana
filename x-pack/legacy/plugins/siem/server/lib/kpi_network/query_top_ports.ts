@@ -4,20 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses } from '../../utils/build_query';
-import { getBytesAggs } from './helpers';
 import { KpiNetworkESMSearchBody } from './types';
 import { RequestBasicOptions } from '../framework';
 
-const getAggs = (attrAuery: 'source' | 'destination') => ({
-  [`top${attrAuery}Ports`]: {
+const getAggs = (attrQuery: 'source' | 'destination') => ({
+  [attrQuery]: {
     terms: {
-      field: `${attrAuery}.port`,
+      field: `${attrQuery}.port`,
       order: {
-        [`${attrAuery}.port`]: 'desc',
+        '1': 'desc',
       },
       size: 5,
     },
-    ...getBytesAggs(),
+    aggs: {
+      '1': {
+        sum: {
+          field: 'source.bytes',
+        },
+      },
+      '3': {
+        sum: {
+          field: 'destination.bytes',
+        },
+      },
+    },
   },
 });
 

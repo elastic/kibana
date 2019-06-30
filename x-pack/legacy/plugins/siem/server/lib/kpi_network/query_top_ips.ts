@@ -7,18 +7,28 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody } from './types';
-import { getBytesAggs } from './helpers';
 
-const getAggs = (attrAuery: 'source' | 'destination') => ({
-  [`top${attrAuery}Ip`]: {
+const getAggs = (attrQuery: 'source' | 'destination') => ({
+  [attrQuery]: {
     terms: {
-      field: `${attrAuery}.ip`,
+      field: `${attrQuery}.ip`,
       order: {
-        '1': 'desc',
+        source: 'desc',
       },
       size: 5,
     },
-    ...getBytesAggs(),
+    aggs: {
+      source: {
+        sum: {
+          field: 'source.bytes',
+        },
+      },
+      destination: {
+        sum: {
+          field: 'destination.bytes',
+        },
+      },
+    },
   },
 });
 

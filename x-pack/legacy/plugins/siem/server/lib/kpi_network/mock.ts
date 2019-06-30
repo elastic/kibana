@@ -279,11 +279,304 @@ export const mockKpiIpDetailsRequest = {
       filterQuery: { term: { ip: '10.142.0.10' } },
     },
     query:
-      'fragment KpiIpDetailsChartFields on KpiIpDetailsHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiIpDetailsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!, $ip: String!) {\n  source(id: $sourceId) {\n    id\n    KpiIpDetails(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex, ip: $ip) {\n      connections\n      hosts\n      sourcePackets\n      sourcePacketsHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      sourceByte\n      sourceByteHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      destinationPackets\n      destinationPacketsHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      destinationByte\n      destinationByteHistogram {\n        ...KpiIpDetailsChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetKpiIpDetailsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!) {\n  source(id: $sourceId) {\n    id\n    KpiIpDetails(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      sourceByte\n      destinationByte\n      topSourceIp\n      topDestinationIp\n      topSourceIpTransportBytes\n      topDestinationIpTransportBytes\n      topDestinationPort\n      topTransport\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
 
+/**
+ * mockKpiIpDetailsResponse
+{
+  "took": 1385,
+  "responses": [
+    {
+      "took": 1198,
+      "timed_out": false,
+      "_shards": {
+        "total": 32,
+        "successful": 32,
+        "skipped": 25,
+        "failed": 0
+      },
+      "hits": {
+        "total": {
+          "value": 3383183,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+      },
+      "aggregations": {
+        "destination": {
+          "value": 19194998916519
+        },
+        "source": {
+          "value": 206303493933520
+        }
+      },
+      "status": 200
+    },
+    {
+      "took": 1377,
+      "timed_out": false,
+      "_shards": {
+        "total": 32,
+        "successful": 32,
+        "skipped": 25,
+        "failed": 0
+      },
+      "hits": {
+        "total": {
+          "value": 3383183,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+      },
+      "aggregations": {
+        "destination": {
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 2096460,
+          "buckets": [
+            {
+              "key": "35.227.125.33",
+              "doc_count": 203938,
+              "destination": {
+                "value": 19173481510870
+              },
+              "source": {
+                "value": 205552178090732
+              }
+            },
+            {
+              "key": "10.142.0.10",
+              "doc_count": 206728,
+              "destination": {
+                "value": 0
+              },
+              "source": {
+                "value": 273770689437
+              }
+            },
+            {
+              "key": "107.190.46.185",
+              "doc_count": 8430,
+              "destination": {
+                "value": 0
+              },
+              "source": {
+                "value": 146454288721
+              }
+            },
+            {
+              "key": "10.142.0.9",
+              "doc_count": 676,
+              "destination": {
+                "value": 0
+              },
+              "source": {
+                "value": 31908657731
+              }
+            },
+            {
+              "key": "104.198.38.169",
+              "doc_count": 145,
+              "destination": {
+                "value": 0
+              },
+              "source": {
+                "value": 25579248995
+              }
+            }
+          ]
+        },
+        "source": {
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 1357660,
+          "buckets": [
+            {
+              "key": "10.128.0.4",
+              "doc_count": 71338,
+              "destination": {
+                "value": 10680686561824
+              },
+              "source": {
+                "value": 119018189350041
+              }
+            },
+            {
+              "key": "10.128.0.5",
+              "doc_count": 74906,
+              "destination": {
+                "value": 8493223862327
+              },
+              "source": {
+                "value": 86299486746697
+              }
+            },
+            {
+              "key": "10.142.0.10",
+              "doc_count": 304545,
+              "destination": {
+                "value": 0
+              },
+              "source": {
+                "value": 634897457454
+              }
+            },
+            {
+              "key": "35.227.125.33",
+              "doc_count": 135526,
+              "destination": {
+                "value": 0
+              },
+              "source": {
+                "value": 243052535952
+              }
+            },
+            {
+              "key": "52.11.199.171",
+              "doc_count": 144,
+              "destination": {
+                "value": 0
+              },
+              "source": {
+                "value": 26739535340
+              }
+            }
+          ]
+        }
+      },
+      "status": 200
+    },
+    {
+      "took": 1177,
+      "timed_out": false,
+      "_shards": {
+        "total": 32,
+        "successful": 32,
+        "skipped": 25,
+        "failed": 0
+      },
+      "hits": {
+        "total": {
+          "value": 3383183,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+      },
+      "aggregations": {
+        "destination": {
+          "doc_count_error_upper_bound": -1,
+          "sum_other_doc_count": 2152196,
+          "buckets": [
+            {
+              "1": {
+                "value": 205326199085162
+              },
+              "3": {
+                "value": 19173481510870
+              },
+              "key": 9200,
+              "doc_count": 226694
+            },
+            {
+              "1": {
+                "value": 274008975078
+              },
+              "3": {
+                "value": 0
+              },
+              "key": 9243,
+              "doc_count": 56997
+            },
+            {
+              "1": {
+                "value": 26775225536
+              },
+              "3": {
+                "value": 0
+              },
+              "key": 38140,
+              "doc_count": 157
+            },
+            {
+              "1": {
+                "value": 5212431341
+              },
+              "3": {
+                "value": 0
+              },
+              "key": 33682,
+              "doc_count": 163
+            },
+            {
+              "1": {
+                "value": 3443728962
+              },
+              "3": {
+                "value": 20832369631
+              },
+              "key": 443,
+              "doc_count": 77299
+            }
+          ]
+        }
+      },
+      "status": 200
+    },
+    {
+      "took": 1184,
+      "timed_out": false,
+      "_shards": {
+        "total": 32,
+        "successful": 32,
+        "skipped": 25,
+        "failed": 0
+      },
+      "hits": {
+        "total": {
+          "value": 3383183,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+      },
+      "aggregations": {
+        "transport": {
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 316,
+          "buckets": [
+            {
+              "1": {
+                "value": 225532996598778
+              },
+              "key": "tcp",
+              "doc_count": 805731
+            },
+            {
+              "1": {
+                "value": 5404352
+              },
+              "key": "udp",
+              "doc_count": 83446
+            },
+            {
+              "1": {
+                "value": 414653
+              },
+              "key": "icmp",
+              "doc_count": 2745
+            }
+          ]
+        }
+      },
+      "status": 200
+    }
+  ]
+}
+ *  */
 export const mockKpiIpDetailsResponse = {
   responses: [
     {

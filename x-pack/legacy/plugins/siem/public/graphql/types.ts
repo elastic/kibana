@@ -1078,25 +1078,21 @@ export interface KpiNetworkHistogramData {
 }
 
 export interface KpiIpDetailsData {
-  connections?: number | null;
-
-  hosts?: number | null;
-
-  sourcePackets?: number | null;
-
-  sourcePacketsHistogram?: KpiNetworkHistogramData[] | null;
-
   sourceByte?: number | null;
-
-  sourceByteHistogram?: KpiNetworkHistogramData[] | null;
-
-  destinationPackets?: number | null;
-
-  destinationPacketsHistogram?: KpiNetworkHistogramData[] | null;
 
   destinationByte?: number | null;
 
-  destinationByteHistogram?: KpiNetworkHistogramData[] | null;
+  topSourceIp?: string | null;
+
+  topDestinationIp?: string | null;
+
+  topSourceIpTransportBytes?: number | null;
+
+  topDestinationIpTransportBytes?: number | null;
+
+  topDestinationPort?: number | null;
+
+  topTransport?: string | null;
 }
 
 export interface KpiHostsData {
@@ -3103,34 +3099,22 @@ export namespace GetKpiIpDetailsQuery {
   export type KpiIpDetails = {
     __typename?: 'KpiIpDetailsData';
 
-    connections?: number | null;
-
-    hosts?: number | null;
-
-    sourcePackets?: number | null;
-
-    sourcePacketsHistogram?: SourcePacketsHistogram[] | null;
-
     sourceByte?: number | null;
-
-    sourceByteHistogram?: SourceByteHistogram[] | null;
-
-    destinationPackets?: number | null;
-
-    destinationPacketsHistogram?: DestinationPacketsHistogram[] | null;
 
     destinationByte?: number | null;
 
-    destinationByteHistogram?: DestinationByteHistogram[] | null;
+    topSourceIp?: string | null;
+
+    topDestinationIp?: string | null;
+
+    topSourceIpTransportBytes?: number | null;
+
+    topDestinationIpTransportBytes?: number | null;
+
+    topDestinationPort?: number | null;
+
+    topTransport?: string | null;
   };
-
-  export type SourcePacketsHistogram = KpiIpDetailsChartFields.Fragment;
-
-  export type SourceByteHistogram = KpiIpDetailsChartFields.Fragment;
-
-  export type DestinationPacketsHistogram = KpiIpDetailsChartFields.Fragment;
-
-  export type DestinationByteHistogram = KpiIpDetailsChartFields.Fragment;
 }
 
 export namespace GetKpiNetworkQuery {
@@ -5216,16 +5200,6 @@ export namespace KpiHostDetailsChartFields {
 export namespace KpiHostChartFields {
   export type Fragment = {
     __typename?: 'KpiHostHistogramData';
-
-    x?: number | null;
-
-    y?: number | null;
-  };
-}
-
-export namespace KpiIpDetailsChartFields {
-  export type Fragment = {
-    __typename?: 'KpiNetworkHistogramData';
 
     x?: number | null;
 

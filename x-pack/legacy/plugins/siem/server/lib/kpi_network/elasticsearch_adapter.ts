@@ -110,48 +110,29 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
       request,
       'msearch',
       {
-        body: [...transportBytesQuery, ...topIpsQuery],
-        // ...topPortsQuery, ...topTransportQuery
+        body: [...transportBytesQuery, ...topIpsQuery, ...topPortsQuery, ...topTransportQuery],
       }
     );
-    console.log('----', JSON.stringify(response));
 
-    const sourcePacketsHistogram = getOr(
+    const topSourceIp = getOr(null, 'responses.1.aggregations.source.buckets.0', response);
+    const topDestinationIp = getOr(
       null,
-      'responses.0.aggregations.source.packetsHistogram.buckets',
+      'responses.1.aggregations.destination.buckets.0',
       response
     );
-    const destinationPacketsHistogram = getOr(
-      null,
-      'responses.0.aggregations.destination.packetsHistogram.buckets',
-      response
-    );
-    const sourceByteHistogram = getOr(
-      null,
-      'responses.0.aggregations.source.bytesHistogram.buckets',
-      response
-    );
-    const destinationByteHistogram = getOr(
-      null,
-      'responses.0.aggregations.destination.bytesHistogram.buckets',
-      response
-    );
-
     return {
-      connections: getOr(null, 'responses.0.aggregations.connections.value', response),
-      hosts: getOr(null, 'responses.0.aggregations.destination.hosts.value', response),
-      sourcePackets: getOr(null, 'responses.0.aggregations.source.packets.value', response),
-      sourcePacketsHistogram: formatHistogramData(sourcePacketsHistogram),
-      destinationPackets: getOr(
+      sourceByte: getOr(null, 'responses.0.aggregations.source.value', response),
+      destinationByte: getOr(null, 'responses.0.aggregations.destination.value', response),
+      topSourceIp: getOr(null, 'key', topSourceIp),
+      topDestinationIp: getOr(null, 'key', topDestinationIp),
+      topSourceIpTransportBytes: getOr(null, 'source.value', topSourceIp),
+      topDestinationIpTransportBytes: getOr(null, 'destination.value', topDestinationIp),
+      topDestinationPort: getOr(
         null,
-        'responses.0.aggregations.destination.packets.value',
+        'responses.2.aggregations.destination.buckets.0.key',
         response
       ),
-      destinationPacketsHistogram: formatHistogramData(destinationPacketsHistogram),
-      sourceByte: getOr(null, 'responses.0.aggregations.source.bytes.value', response),
-      sourceByteHistogram: formatHistogramData(sourceByteHistogram),
-      destinationByte: getOr(null, 'responses.0.aggregations.destination.bytes.value', response),
-      destinationByteHistogram: formatHistogramData(destinationByteHistogram),
+      topTransport: getOr(null, 'responses.3.aggregations.transport.buckets.0.key', response),
     };
   }
 }

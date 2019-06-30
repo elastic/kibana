@@ -24,16 +24,14 @@ export const kpiNetworkSchema = gql`
   }
 
   type KpiIpDetailsData {
-    connections: Float
-    hosts: Float
-    sourcePackets: Float
-    sourcePacketsHistogram: [KpiNetworkHistogramData!]
     sourceByte: Float
-    sourceByteHistogram: [KpiNetworkHistogramData!]
-    destinationPackets: Float
-    destinationPacketsHistogram: [KpiNetworkHistogramData!]
     destinationByte: Float
-    destinationByteHistogram: [KpiNetworkHistogramData!]
+    topSourceIp: String
+    topDestinationIp: String
+    topSourceIpTransportBytes: Float
+    topDestinationIpTransportBytes: Float
+    topDestinationPort: Float
+    topTransport: String
   }
 
   extend type Source {

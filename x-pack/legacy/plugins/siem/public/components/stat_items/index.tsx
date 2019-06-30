@@ -22,7 +22,7 @@ import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
 import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
-import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
+import { KpiHostsData, KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
 import { GlobalTime } from '../../containers/global_time';
 
 const FlexItem = styled(EuiFlexItem)`
@@ -37,6 +37,7 @@ const StatValue = styled(EuiTitle)`
 
 export interface StatItem<T> {
   key: string;
+  barchartKey?: string;
   description?: string;
   value?: number | undefined | null;
   color?: string;
@@ -82,15 +83,16 @@ export const barchartConfigs = {
   },
 };
 export type KpiValue = number | null | undefined;
+export type StatItemData = KpiHostsData | KpiNetworkData | KpiIpDetailsData;
 
 export const addValueToFields = (
   fields: Array<StatItem<KpiValue>>,
-  data: KpiHostsData | KpiNetworkData
+  data: StatItemData
 ): Array<StatItem<KpiValue>> => fields.map(field => ({ ...field, value: get(field.key, data) }));
 
 export const addValueToAreaChart = (
   fields: Array<StatItem<KpiValue>>,
-  data: KpiHostsData | KpiNetworkData
+  data: StatItemData
 ): ChartConfigsData[] =>
   fields
     .filter(field => get(`${field.key}Histogram`, data) != null)
@@ -105,12 +107,14 @@ export const addValueToAreaChart = (
 
 export const addValueToBarChart = (
   fields: Array<StatItem<KpiValue>>,
-  data: KpiHostsData | KpiNetworkData
+  data: StatItemData
 ): ChartConfigsData[] => {
   if (fields.length === 0) return [];
   return fields.reduce((acc: ChartConfigsData[], field: StatItem<KpiValue>, idx: number) => {
     const { key, color } = field;
-    const y: number | null = getOr(null, key, data);
+    const barchartKey = getOr(null, 'barchartKey', field);
+    const y: number | null =
+      barchartKey != null ? getOr(null, barchartKey, data) : getOr(null, key, data);
     const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
     const value: [ChartData] = [
       {
@@ -133,7 +137,7 @@ export const addValueToBarChart = (
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<Array<StatItemsProps<KpiValue>>>,
-  data: KpiHostsData | KpiNetworkData
+  data: StatItemData
 ): Readonly<Array<StatItemsProps<KpiValue>>> => {
   const [statItemsProps, setStatItemsProps] = useState(mappings);
 

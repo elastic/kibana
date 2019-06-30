@@ -8,25 +8,6 @@ import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody } from './types';
 
-const getAggs = () => ({
-  topTransport: {
-    terms: {
-      field: 'network.transport',
-      order: {
-        'network.bytes': 'desc',
-      },
-      size: 3,
-    },
-    aggs: {
-      networkBytes: {
-        sum: {
-          field: 'network.bytes',
-        },
-      },
-    },
-  },
-});
-
 export const buildTopTransportQuery = ({
   filterQuery,
   timerange: { from, to },
@@ -60,7 +41,22 @@ export const buildTopTransportQuery = ({
         },
       },
       aggs: {
-        ...getAggs(),
+        transport: {
+          terms: {
+            field: 'network.transport',
+            order: {
+              '1': 'desc',
+            },
+            size: 3,
+          },
+          aggs: {
+            '1': {
+              sum: {
+                field: 'network.bytes',
+              },
+            },
+          },
+        },
       },
       size: 0,
       track_total_hits: true,
