@@ -70,7 +70,7 @@ describe('filter_manager', () => {
   let updateListener: sinon.SinonSpy<any[], any>;
 
   let filterManager: FilterManager;
-  let indexPatterns: any;
+  let indexPatterns: StubIndexPatterns;
   let readyFilters: Filter[];
 
   beforeEach(() => {

@@ -42,8 +42,8 @@ import { IndexPatterns } from '../../index_patterns';
 export class FilterManager {
   private indexPatterns: IndexPatterns;
   private filters: Filter[] = [];
-  private updated$: Subject<any> = new Subject();
-  private fetch$: Subject<any> = new Subject();
+  private updated$: Subject<void> = new Subject();
+  private fetch$: Subject<void> = new Subject();
 
   constructor(indexPatterns: IndexPatterns) {
     this.indexPatterns = indexPatterns;
@@ -70,10 +70,6 @@ export class FilterManager {
     return FilterManager.mergeFilters(appFilters, globalFilters);
   }
 
-  private filtersUpdated(newFilters: Filter[]): boolean {
-    return !_.isEqual(this.filters, newFilters);
-  }
-
   private static mergeFilters(appFilters: Filter[], globalFilters: Filter[]): Filter[] {
     return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
   }
@@ -87,9 +83,6 @@ export class FilterManager {
   }
 
   private handleStateUpdate(newFilters: Filter[]) {
-    // This is where the angular update magic \ syncing digest happens
-    const filtersUpdated = this.filtersUpdated(newFilters);
-
     // global filters should always be first
     newFilters.sort(
       (a: Filter, b: Filter): number => {
@@ -102,6 +95,8 @@ export class FilterManager {
         }
       }
     );
+
+    const filtersUpdated = !_.isEqual(this.filters, newFilters);
 
     this.filters = newFilters;
     if (filtersUpdated) {
@@ -152,8 +147,8 @@ export class FilterManager {
       pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
     }
 
-    // set the store of all filters
-    // TODO: is this necessary?
+    // Set the store of all filters. For now.
+    // In the future, all filters should come in with filter state store already set.
     const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
     FilterManager.setFiltersStore(filters, store);
 
