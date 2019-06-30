@@ -17,32 +17,15 @@
  * under the License.
  */
 
-import { uiModules } from '../../../modules';
-import template from './tool_bar_pager_buttons.html';
+import { uiModules } from 'ui/modules';
+import { Pager } from './pager';
 
 const app = uiModules.get('kibana');
 
-app.directive('toolBarPagerButtons', function () {
+app.factory('pagerFactory', () => {
   return {
-    restrict: 'E',
-    replace: true,
-    template: template,
-    scope: {
-      hasNextPage: '=',
-      hasPreviousPage: '=',
-      onPageNext: '=',
-      onPagePrevious: '=',
-    },
-    controllerAs: 'toolBarPagerButtons',
-    bindToController: true,
-    controller: class ToolBarPagerButtonsController {
-      nextPage = () => {
-        this.onPageNext();
-      };
-
-      previousPage = () => {
-        this.onPagePrevious();
-      };
+    create(...args) {
+      return new Pager(...args);
     }
   };
 });
