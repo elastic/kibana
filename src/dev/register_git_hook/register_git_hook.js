@@ -54,10 +54,9 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   # PLEASE RE-RUN 'yarn kbn bootstrap' or 'node scripts/register_git_hook' IN THE ROOT
   # OF THE CURRENT PROJECT ${rootPath}
 
-  set -euo pipefail
+  # pre-commit script takes zero arguments: https://git-scm.com/docs/githooks#_pre_commit
 
-  # Export Git hook params
-  export GIT_PARAMS="$@"
+  set -euo pipefail
 
   has_node() {
     command -v node >/dev/null 2>&1
@@ -114,9 +113,9 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   execute_precommit_hook() {
     node scripts/precommit_hook
     PRECOMMIT_FILE="./.git/hooks/pre-commit.local"
-    if [ -x \${PRECOMMIT_FILE} ]; then
-      echo "Executing local precommit hook found in \${PRECOMMIT_FILE}" 
-      "$PRECOMMIT_FILE" "\${GIT_PARAMS[@]}"
+    if [ -x "\${PRECOMMIT_FILE}" ]; then
+      echo "Executing local precommit hook found in \${PRECOMMIT_FILE}"
+      "$PRECOMMIT_FILE"
     fi
   }
 
