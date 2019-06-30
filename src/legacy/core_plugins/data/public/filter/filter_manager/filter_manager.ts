@@ -87,7 +87,7 @@ export class FilterManager {
   }
 
   private handleStateUpdate(newFilters: Filter[]) {
-    // This is where the angular update magic \ syncing diget happens
+    // This is where the angular update magic \ syncing digest happens
     const filtersUpdated = this.filtersUpdated(newFilters);
 
     // global filters should always be first
