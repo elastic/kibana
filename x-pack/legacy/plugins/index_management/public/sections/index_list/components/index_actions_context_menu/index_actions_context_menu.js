@@ -25,6 +25,7 @@ import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../common/constants';
 import { getActionExtensions } from '../../../../index_management_extensions';
 import { getHttpClient } from '../../../../services/api';
+
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
     super(props);
@@ -609,16 +610,17 @@ export class IndexActionsContextMenu extends Component {
   };
 
   renderConfirmFreezeModal = () => {
-    const oneIndexSelected = this.oneIndexSelected();
-    const entity = this.getEntity(oneIndexSelected);
     const { freezeIndices, indexNames } = this.props;
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={
             i18n.translate('xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle', {
-              defaultMessage: 'Confirm Freeze {entity}',
-              values: { entity }
+              defaultMessage: 'Confirm freeze {count, plural, one {index} other {indices}}',
+              values: {
+                count: indexNames.length,
+              }
             })
           }
           onCancel={this.closeConfirmModal}
@@ -635,27 +637,29 @@ export class IndexActionsContextMenu extends Component {
             i18n.translate(
               'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
               {
-                defaultMessage: 'Freeze {entity}',
-                values: { entity }
+                defaultMessage: 'Freeze {count, plural, one {index} other {indices}}',
+                values: {
+                  count: indexNames.length,
+                }
               }
             )
           }
         >
-          <div>
+          <Fragment>
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
-                defaultMessage="You are about to freeze  {oneIndexSelected, plural, one {this} other {these}}"
-                values={{ oneIndexSelected: oneIndexSelected ? 1 : 0 }}
+                defaultMessage="You are about to freeze {count, plural, one {this index} other {these indices}}:"
+                values={{ count: indexNames.length, }}
               />
-              {' '}
-              {entity}:
             </p>
+
             <ul>
               {indexNames.map(indexName => (
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>
+
             <EuiCallOut
               title={
                 i18n.translate(
@@ -678,25 +682,12 @@ export class IndexActionsContextMenu extends Component {
                 />
               </p>
             </EuiCallOut>
-          </div>
+          </Fragment>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
   };
-  oneIndexSelected = () => {
-    return this.props.indexNames.length === 1;
-  };
-  getEntity = oneIndexSelected => {
-    return oneIndexSelected ? (
-      i18n.translate('xpack.idxMgmt.indexActionsMenu.indexMessage', {
-        defaultMessage: 'index'
-      })
-    ) : (
-      i18n.translate('xpack.idxMgmt.indexActionsMenu.indicesMessage', {
-        defaultMessage: 'indices'
-      })
-    );
-  };
+
   render() {
     const { indexNames } = this.props;
     const selectedIndexCount = indexNames.length;
