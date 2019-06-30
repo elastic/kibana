@@ -14,6 +14,7 @@ class BreadcrumbService {
     home: {},
     repositoryAdd: {},
     repositoryEdit: {},
+    restoreSnapshot: {},
   };
 
   public init(chrome: any, managementBreadcrumb: any): void {
@@ -25,10 +26,12 @@ class BreadcrumbService {
     };
     this.breadcrumbs.repositoryAdd = {
       text: textService.breadcrumbs.repositoryAdd,
-      href: `#${BASE_PATH}/add_repository`,
     };
     this.breadcrumbs.repositoryEdit = {
       text: textService.breadcrumbs.repositoryEdit,
+    };
+    this.breadcrumbs.restoreSnapshot = {
+      text: textService.breadcrumbs.restoreSnapshot,
     };
   }
 
