@@ -7,12 +7,25 @@
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
-import { mockMsearchOptions, mockOptions, mockRequest, mockResponse, mockResult } from './mock';
-import * as networkEventsQueryDsl from './query_network_events';
-import * as uniqueFlowIdsQueryDsl from './query_unique_flow';
+import {
+  mockMsearchOptions,
+  mockOptions,
+  mockRequest,
+  mockResponse,
+  mockResult,
+  mockKpiIpDetailsResponse,
+  mockKpiIpDetailsResult,
+} from './mock';
+import * as networkEventsQueryDsl from './query_network_events.dsl';
+import * as uniqueFlowIdsQueryDsl from './query_unique_flow.dsl';
 import * as dnsQueryDsl from './query_dns.dsl';
 import * as tlsHandshakesQueryDsl from './query_tls_handshakes.dsl';
 import * as uniquePrvateIpQueryDsl from './query_unique_private_ips.dsl';
+import * as transportBytesQueryDsl from './query_transport_bytes.dsl';
+import * as topIpsQueryDsl from './query_top_ips.dsl';
+import * as topPortsQueryDsl from './query_top_ports.dsl';
+import * as topTransportQueryDsl from './query_top_transport.dsl';
+
 import { KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
 
 describe('Network Kpi elasticsearch_adapter - getKpiNetwork', () => {
@@ -149,28 +162,49 @@ describe('Network Kpi elasticsearch_adapter - getKpiIpDetails', () => {
     getIndexPatternsService: jest.fn(),
     getSavedObjectsService: jest.fn(),
   };
-  let mockBuildQuery: jest.SpyInstance;
+  let mockBuildTransportBytesQuery: jest.SpyInstance;
+  let mockBuildTopIpsQuery: jest.SpyInstance;
+  let mockBuildTopPortsQuery: jest.SpyInstance;
+  let mockBuildTopTransportQuery: jest.SpyInstance;
   let EsKpiIpDetails: ElasticsearchKpiNetworkAdapter;
   let data: KpiIpDetailsData;
 
   describe('getKpiIpDetails - call stack', () => {
     beforeAll(async () => {
-      mockCallWithRequest.mockResolvedValue(mockResponse);
+      mockCallWithRequest.mockResolvedValue(mockKpiIpDetailsResponse);
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
-      mockBuildQuery = jest.spyOn(generalQueryDsl, 'buildGeneralQuery').mockReturnValue([]);
+      mockBuildTransportBytesQuery = jest
+        .spyOn(transportBytesQueryDsl, 'buildTransportBytesQuery')
+        .mockReturnValue([]);
+      mockBuildTopIpsQuery = jest.spyOn(topIpsQueryDsl, 'buildTopIpsQuery').mockReturnValue([]);
+      mockBuildTopPortsQuery = jest
+        .spyOn(topPortsQueryDsl, 'buildTopPortsQuery')
+        .mockReturnValue([]);
+      mockBuildTopTransportQuery = jest
+        .spyOn(topTransportQueryDsl, 'buildTopTransportQuery')
+        .mockReturnValue([]);
       EsKpiIpDetails = new ElasticsearchKpiNetworkAdapter(mockFramework);
       data = await EsKpiIpDetails.getKpiIpDetails(mockRequest as FrameworkRequest, mockOptions);
     });
 
     afterAll(() => {
       mockCallWithRequest.mockReset();
-      mockBuildQuery.mockRestore();
+      mockBuildTransportBytesQuery.mockRestore();
     });
 
-    test('should build general query with correct option', () => {
-      expect(mockBuildQuery).toHaveBeenCalledWith(mockOptions);
+    test('should build transport bytes query with correct option', () => {
+      expect(mockBuildTransportBytesQuery).toHaveBeenCalledWith(mockOptions);
+    });
+    test('should build top transport IPs query with correct option', () => {
+      expect(mockBuildTopIpsQuery).toHaveBeenCalledWith(mockOptions);
+    });
+    test('should build top transport port query with correct option', () => {
+      expect(mockBuildTopPortsQuery).toHaveBeenCalledWith(mockOptions);
+    });
+    test('should build top transport protocal query with correct option', () => {
+      expect(mockBuildTopTransportQuery).toHaveBeenCalledWith(mockOptions);
     });
 
     test('should send msearch request', () => {
@@ -180,7 +214,7 @@ describe('Network Kpi elasticsearch_adapter - getKpiIpDetails', () => {
 
   describe('Happy Path - get Data', () => {
     beforeAll(async () => {
-      mockCallWithRequest.mockResolvedValue(mockResponse);
+      mockCallWithRequest.mockResolvedValue(mockKpiIpDetailsResponse);
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
@@ -193,7 +227,7 @@ describe('Network Kpi elasticsearch_adapter - getKpiIpDetails', () => {
     });
 
     test('getKpiIpDetails - response with data', () => {
-      expect(data).toEqual(mockResult);
+      expect(data).toEqual(mockKpiIpDetailsResult);
     });
   });
 
@@ -213,16 +247,14 @@ describe('Network Kpi elasticsearch_adapter - getKpiIpDetails', () => {
 
     test('getKpiIpDetails - response without data', async () => {
       expect(data).toEqual({
-        connections: null,
-        hosts: null,
-        sourcePackets: null,
-        sourcePacketsHistogram: null,
-        destinationPackets: null,
-        destinationPacketsHistogram: null,
-        sourceByte: null,
-        sourceByteHistogram: null,
         destinationByte: null,
-        destinationByteHistogram: null,
+        sourceByte: null,
+        topDestinationIp: null,
+        topDestinationIpTransportBytes: null,
+        topDestinationPort: null,
+        topSourceIp: null,
+        topSourceIpTransportBytes: null,
+        topTransport: null,
       });
     });
   });

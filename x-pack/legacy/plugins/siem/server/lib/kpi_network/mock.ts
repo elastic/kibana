@@ -284,525 +284,290 @@ export const mockKpiIpDetailsRequest = {
   query: {},
 };
 
-/**
- * mockKpiIpDetailsResponse
-{
-  "took": 1385,
-  "responses": [
-    {
-      "took": 1198,
-      "timed_out": false,
-      "_shards": {
-        "total": 32,
-        "successful": 32,
-        "skipped": 25,
-        "failed": 0
-      },
-      "hits": {
-        "total": {
-          "value": 3383183,
-          "relation": "eq"
-        },
-        "max_score": null,
-        "hits": []
-      },
-      "aggregations": {
-        "destination": {
-          "value": 19194998916519
-        },
-        "source": {
-          "value": 206303493933520
-        }
-      },
-      "status": 200
-    },
-    {
-      "took": 1377,
-      "timed_out": false,
-      "_shards": {
-        "total": 32,
-        "successful": 32,
-        "skipped": 25,
-        "failed": 0
-      },
-      "hits": {
-        "total": {
-          "value": 3383183,
-          "relation": "eq"
-        },
-        "max_score": null,
-        "hits": []
-      },
-      "aggregations": {
-        "destination": {
-          "doc_count_error_upper_bound": -1,
-          "sum_other_doc_count": 2096460,
-          "buckets": [
-            {
-              "key": "35.227.125.33",
-              "doc_count": 203938,
-              "destination": {
-                "value": 19173481510870
-              },
-              "source": {
-                "value": 205552178090732
-              }
-            },
-            {
-              "key": "10.142.0.10",
-              "doc_count": 206728,
-              "destination": {
-                "value": 0
-              },
-              "source": {
-                "value": 273770689437
-              }
-            },
-            {
-              "key": "107.190.46.185",
-              "doc_count": 8430,
-              "destination": {
-                "value": 0
-              },
-              "source": {
-                "value": 146454288721
-              }
-            },
-            {
-              "key": "10.142.0.9",
-              "doc_count": 676,
-              "destination": {
-                "value": 0
-              },
-              "source": {
-                "value": 31908657731
-              }
-            },
-            {
-              "key": "104.198.38.169",
-              "doc_count": 145,
-              "destination": {
-                "value": 0
-              },
-              "source": {
-                "value": 25579248995
-              }
-            }
-          ]
-        },
-        "source": {
-          "doc_count_error_upper_bound": -1,
-          "sum_other_doc_count": 1357660,
-          "buckets": [
-            {
-              "key": "10.128.0.4",
-              "doc_count": 71338,
-              "destination": {
-                "value": 10680686561824
-              },
-              "source": {
-                "value": 119018189350041
-              }
-            },
-            {
-              "key": "10.128.0.5",
-              "doc_count": 74906,
-              "destination": {
-                "value": 8493223862327
-              },
-              "source": {
-                "value": 86299486746697
-              }
-            },
-            {
-              "key": "10.142.0.10",
-              "doc_count": 304545,
-              "destination": {
-                "value": 0
-              },
-              "source": {
-                "value": 634897457454
-              }
-            },
-            {
-              "key": "35.227.125.33",
-              "doc_count": 135526,
-              "destination": {
-                "value": 0
-              },
-              "source": {
-                "value": 243052535952
-              }
-            },
-            {
-              "key": "52.11.199.171",
-              "doc_count": 144,
-              "destination": {
-                "value": 0
-              },
-              "source": {
-                "value": 26739535340
-              }
-            }
-          ]
-        }
-      },
-      "status": 200
-    },
-    {
-      "took": 1177,
-      "timed_out": false,
-      "_shards": {
-        "total": 32,
-        "successful": 32,
-        "skipped": 25,
-        "failed": 0
-      },
-      "hits": {
-        "total": {
-          "value": 3383183,
-          "relation": "eq"
-        },
-        "max_score": null,
-        "hits": []
-      },
-      "aggregations": {
-        "destination": {
-          "doc_count_error_upper_bound": -1,
-          "sum_other_doc_count": 2152196,
-          "buckets": [
-            {
-              "1": {
-                "value": 205326199085162
-              },
-              "3": {
-                "value": 19173481510870
-              },
-              "key": 9200,
-              "doc_count": 226694
-            },
-            {
-              "1": {
-                "value": 274008975078
-              },
-              "3": {
-                "value": 0
-              },
-              "key": 9243,
-              "doc_count": 56997
-            },
-            {
-              "1": {
-                "value": 26775225536
-              },
-              "3": {
-                "value": 0
-              },
-              "key": 38140,
-              "doc_count": 157
-            },
-            {
-              "1": {
-                "value": 5212431341
-              },
-              "3": {
-                "value": 0
-              },
-              "key": 33682,
-              "doc_count": 163
-            },
-            {
-              "1": {
-                "value": 3443728962
-              },
-              "3": {
-                "value": 20832369631
-              },
-              "key": 443,
-              "doc_count": 77299
-            }
-          ]
-        }
-      },
-      "status": 200
-    },
-    {
-      "took": 1184,
-      "timed_out": false,
-      "_shards": {
-        "total": 32,
-        "successful": 32,
-        "skipped": 25,
-        "failed": 0
-      },
-      "hits": {
-        "total": {
-          "value": 3383183,
-          "relation": "eq"
-        },
-        "max_score": null,
-        "hits": []
-      },
-      "aggregations": {
-        "transport": {
-          "doc_count_error_upper_bound": 0,
-          "sum_other_doc_count": 316,
-          "buckets": [
-            {
-              "1": {
-                "value": 225532996598778
-              },
-              "key": "tcp",
-              "doc_count": 805731
-            },
-            {
-              "1": {
-                "value": 5404352
-              },
-              "key": "udp",
-              "doc_count": 83446
-            },
-            {
-              "1": {
-                "value": 414653
-              },
-              "key": "icmp",
-              "doc_count": 2745
-            }
-          ]
-        }
-      },
-      "status": 200
-    }
-  ]
-}
- *  */
 export const mockKpiIpDetailsResponse = {
+  took: 1385,
   responses: [
     {
-      took: 4295,
+      took: 1198,
       timed_out: false,
       _shards: {
-        total: 31,
-        successful: 31,
-        skipped: 0,
+        total: 32,
+        successful: 32,
+        skipped: 25,
         failed: 0,
       },
       hits: {
         total: {
-          value: 228246187,
+          value: 3383183,
           relation: 'eq',
         },
         max_score: null,
         hits: [],
       },
       aggregations: {
-        connections: {
-          value: 13368,
-        },
         destination: {
-          doc_count: 6454,
-          packetsHistogram: {
-            buckets: [
-              {
-                key_as_string: '2019-06-14T00:00:00.000Z',
-                key: 1560470400000,
-                doc_count: 1775,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-15T00:00:00.000Z',
-                key: 1560556800000,
-                doc_count: 1763,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-16T00:00:00.000Z',
-                key: 1560643200000,
-                doc_count: 1796,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-17T00:00:00.000Z',
-                key: 1560729600000,
-                doc_count: 1111,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-18T00:00:00.000Z',
-                key: 1560816000000,
-                doc_count: 9,
-                count: {
-                  value: 0,
-                },
-              },
-            ],
-            interval: '1d',
-          },
-          bytes: {
-            value: 0,
-          },
-          hosts: {
-            value: 4,
-          },
-          bytesHistogram: {
-            buckets: [
-              {
-                key_as_string: '2019-06-14T00:00:00.000Z',
-                key: 1560470400000,
-                doc_count: 1775,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-15T00:00:00.000Z',
-                key: 1560556800000,
-                doc_count: 1763,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-16T00:00:00.000Z',
-                key: 1560643200000,
-                doc_count: 1796,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-17T00:00:00.000Z',
-                key: 1560729600000,
-                doc_count: 1111,
-                count: {
-                  value: 0,
-                },
-              },
-              {
-                key_as_string: '2019-06-18T00:00:00.000Z',
-                key: 1560816000000,
-                doc_count: 9,
-                count: {
-                  value: 0,
-                },
-              },
-            ],
-            interval: '1d',
-          },
-          packets: {
-            value: 0,
-          },
+          value: 19194998916519,
         },
         source: {
-          doc_count: 6914,
-          packetsHistogram: {
-            buckets: [
-              {
-                key_as_string: '2019-06-14T00:00:00.000Z',
-                key: 1560470400000,
-                doc_count: 1898,
-                count: {
-                  value: 5556185,
-                },
+          value: 206303493933520,
+        },
+      },
+      status: 200,
+    },
+    {
+      took: 1377,
+      timed_out: false,
+      _shards: {
+        total: 32,
+        successful: 32,
+        skipped: 25,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 3383183,
+          relation: 'eq',
+        },
+        max_score: null,
+        hits: [],
+      },
+      aggregations: {
+        destination: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 2096460,
+          buckets: [
+            {
+              key: '35.227.125.33',
+              doc_count: 203938,
+              destination: {
+                value: 19173481510870,
               },
-              {
-                key_as_string: '2019-06-15T00:00:00.000Z',
-                key: 1560556800000,
-                doc_count: 1896,
-                count: {
-                  value: 2669758,
-                },
+              source: {
+                value: 205552178090732,
               },
-              {
-                key_as_string: '2019-06-16T00:00:00.000Z',
-                key: 1560643200000,
-                doc_count: 1908,
-                count: {
-                  value: 2612273,
-                },
+            },
+            {
+              key: '10.142.0.10',
+              doc_count: 206728,
+              destination: {
+                value: 0,
               },
-              {
-                key_as_string: '2019-06-17T00:00:00.000Z',
-                key: 1560729600000,
-                doc_count: 1203,
-                count: {
-                  value: 1710466,
-                },
+              source: {
+                value: 273770689437,
               },
-              {
-                key_as_string: '2019-06-18T00:00:00.000Z',
-                key: 1560816000000,
-                doc_count: 9,
-                count: {
-                  value: 26540,
-                },
+            },
+            {
+              key: '107.190.46.185',
+              doc_count: 8430,
+              destination: {
+                value: 0,
               },
-            ],
-            interval: '1d',
-          },
-          bytes: {
-            value: 80647226799,
-          },
-          hosts: {
-            value: 4,
-          },
-          bytesHistogram: {
-            buckets: [
-              {
-                key_as_string: '2019-06-14T00:00:00.000Z',
-                key: 1560470400000,
-                doc_count: 1898,
-                count: {
-                  value: 35934887439,
-                },
+              source: {
+                value: 146454288721,
               },
-              {
-                key_as_string: '2019-06-15T00:00:00.000Z',
-                key: 1560556800000,
-                doc_count: 1896,
-                count: {
-                  value: 17055922318,
-                },
+            },
+            {
+              key: '10.142.0.9',
+              doc_count: 676,
+              destination: {
+                value: 0,
               },
-              {
-                key_as_string: '2019-06-16T00:00:00.000Z',
-                key: 1560643200000,
-                doc_count: 1908,
-                count: {
-                  value: 16677974647,
-                },
+              source: {
+                value: 31908657731,
               },
-              {
-                key_as_string: '2019-06-17T00:00:00.000Z',
-                key: 1560729600000,
-                doc_count: 1203,
-                count: {
-                  value: 10814051075,
-                },
+            },
+            {
+              key: '104.198.38.169',
+              doc_count: 145,
+              destination: {
+                value: 0,
               },
-              {
-                key_as_string: '2019-06-18T00:00:00.000Z',
-                key: 1560816000000,
-                doc_count: 9,
-                count: {
-                  value: 164391320,
-                },
+              source: {
+                value: 25579248995,
               },
-            ],
-            interval: '1d',
-          },
-          packets: {
-            value: 12575222,
-          },
+            },
+          ],
+        },
+        source: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 1357660,
+          buckets: [
+            {
+              key: '10.128.0.4',
+              doc_count: 71338,
+              destination: {
+                value: 10680686561824,
+              },
+              source: {
+                value: 119018189350041,
+              },
+            },
+            {
+              key: '10.128.0.5',
+              doc_count: 74906,
+              destination: {
+                value: 8493223862327,
+              },
+              source: {
+                value: 86299486746697,
+              },
+            },
+            {
+              key: '10.142.0.10',
+              doc_count: 304545,
+              destination: {
+                value: 0,
+              },
+              source: {
+                value: 634897457454,
+              },
+            },
+            {
+              key: '35.227.125.33',
+              doc_count: 135526,
+              destination: {
+                value: 0,
+              },
+              source: {
+                value: 243052535952,
+              },
+            },
+            {
+              key: '52.11.199.171',
+              doc_count: 144,
+              destination: {
+                value: 0,
+              },
+              source: {
+                value: 26739535340,
+              },
+            },
+          ],
+        },
+      },
+      status: 200,
+    },
+    {
+      took: 1177,
+      timed_out: false,
+      _shards: {
+        total: 32,
+        successful: 32,
+        skipped: 25,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 3383183,
+          relation: 'eq',
+        },
+        max_score: null,
+        hits: [],
+      },
+      aggregations: {
+        destination: {
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 2152196,
+          buckets: [
+            {
+              '1': {
+                value: 205326199085162,
+              },
+              '3': {
+                value: 19173481510870,
+              },
+              key: 9200,
+              doc_count: 226694,
+            },
+            {
+              '1': {
+                value: 274008975078,
+              },
+              '3': {
+                value: 0,
+              },
+              key: 9243,
+              doc_count: 56997,
+            },
+            {
+              '1': {
+                value: 26775225536,
+              },
+              '3': {
+                value: 0,
+              },
+              key: 38140,
+              doc_count: 157,
+            },
+            {
+              '1': {
+                value: 5212431341,
+              },
+              '3': {
+                value: 0,
+              },
+              key: 33682,
+              doc_count: 163,
+            },
+            {
+              '1': {
+                value: 3443728962,
+              },
+              '3': {
+                value: 20832369631,
+              },
+              key: 443,
+              doc_count: 77299,
+            },
+          ],
+        },
+      },
+      status: 200,
+    },
+    {
+      took: 1184,
+      timed_out: false,
+      _shards: {
+        total: 32,
+        successful: 32,
+        skipped: 25,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 3383183,
+          relation: 'eq',
+        },
+        max_score: null,
+        hits: [],
+      },
+      aggregations: {
+        transport: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 316,
+          buckets: [
+            {
+              '1': {
+                value: 225532996598778,
+              },
+              key: 'tcp',
+              doc_count: 805731,
+            },
+            {
+              '1': {
+                value: 5404352,
+              },
+              key: 'udp',
+              doc_count: 83446,
+            },
+            {
+              '1': {
+                value: 414653,
+              },
+              key: 'icmp',
+              doc_count: 2745,
+            },
+          ],
         },
       },
       status: 200,
@@ -811,98 +576,12 @@ export const mockKpiIpDetailsResponse = {
 };
 
 export const mockKpiIpDetailsResult = {
-  connections: 13368,
-  hosts: 4,
-  sourcePackets: 12575222,
-  sourcePacketsHistogram: [
-    {
-      x: new Date('2019-06-14T00:00:00.000Z').valueOf(),
-      y: 5556185,
-    },
-    {
-      x: new Date('2019-06-15T00:00:00.000Z').valueOf(),
-      y: 2669758,
-    },
-    {
-      x: new Date('2019-06-16T00:00:00.000Z').valueOf(),
-      y: 2612273,
-    },
-    {
-      x: new Date('2019-06-17T00:00:00.000Z').valueOf(),
-      y: 1710466,
-    },
-    {
-      x: new Date('2019-06-18T00:00:00.000Z').valueOf(),
-      y: 26540,
-    },
-  ],
-  sourceByte: 80647226799,
-  sourceByteHistogram: [
-    {
-      x: new Date('2019-06-14T00:00:00.000Z').valueOf(),
-      y: 35934887439,
-    },
-    {
-      x: new Date('2019-06-15T00:00:00.000Z').valueOf(),
-      y: 17055922318,
-    },
-    {
-      x: new Date('2019-06-16T00:00:00.000Z').valueOf(),
-      y: 16677974647,
-    },
-    {
-      x: new Date('2019-06-17T00:00:00.000Z').valueOf(),
-      y: 10814051075,
-    },
-    {
-      x: new Date('2019-06-18T00:00:00.000Z').valueOf(),
-      y: 164391320,
-    },
-  ],
-  destinationPackets: 0,
-  destinationPacketsHistogram: [
-    {
-      x: new Date('2019-06-14T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-15T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-16T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-17T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-18T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-  ],
-  destinationByte: 0,
-  destinationByteHistogram: [
-    {
-      x: new Date('2019-06-14T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-15T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-16T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-17T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-    {
-      x: new Date('2019-06-18T00:00:00.000Z').valueOf(),
-      y: 0,
-    },
-  ],
+  sourceByte: 206303493933520,
+  destinationByte: 19194998916519,
+  topSourceIp: '10.128.0.4',
+  topDestinationIp: '35.227.125.33',
+  topSourceIpTransportBytes: 119018189350041,
+  topDestinationIpTransportBytes: 19173481510870,
+  topDestinationPort: 9200,
+  topTransport: 'tcp',
 };

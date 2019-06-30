@@ -21,12 +21,12 @@ import {
 } from './types';
 import { TermAggregation } from '../types';
 import { KpiNetworkHistogramData, KpiNetworkData, KpiIpDetailsData } from '../../graphql/types';
-import { buildNetworkEventsQuery } from './query_network_events';
-import { buildUniqueFlowIdsQuery } from './query_unique_flow';
-import { buildTopIpsQuery } from './query_top_ips';
-import { buildTransportBytesQuery } from './query_transport_bytes';
-import { buildTopPortsQuery } from './query_top_ports';
-import { buildTopTransportQuery } from './query_top_transport';
+import { buildNetworkEventsQuery } from './query_network_events.dsl';
+import { buildUniqueFlowIdsQuery } from './query_unique_flow.dsl';
+import { buildTopIpsQuery } from './query_top_ips.dsl';
+import { buildTransportBytesQuery } from './query_transport_bytes.dsl';
+import { buildTopPortsQuery } from './query_top_ports.dsl';
+import { buildTopTransportQuery } from './query_top_transport.dsl';
 
 const formatHistogramData = (
   data: Array<{ key: number; count: { value: number } }>

@@ -17,101 +17,14 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
       const expected = {
-        connections: 31,
-        hosts: 1,
-        sourcePackets: 1,
-        sourcePacketsHistogram: [
-          {
-            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
-            y: 1,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-        ],
-        sourceByte: 74,
-        sourceByteHistogram: [
-          {
-            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
-            y: 74,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-        ],
-        destinationPackets: 37481,
-        destinationPacketsHistogram: [
-          {
-            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
-            y: 5643,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
-            y: 4751,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
-            y: 27087,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-        ],
-        destinationByte: 56601724,
-        destinationByteHistogram: [
-          {
-            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
-            y: 8530431,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
-            y: 7131226,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-          {
-            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
-            y: 40940067,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-        ],
-        __typename: 'KpiIpDetailsData',
+        sourceByte: 27044769,
+        destinationByte: 953220875,
+        topSourceIp: '10.100.7.196',
+        topDestinationIp: '8.248.211.247',
+        topSourceIpTransportBytes: 27033419,
+        topDestinationIpTransportBytes: 101387911,
+        topDestinationPort: 80,
+        topTransport: 'tcp',
       };
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -141,29 +54,14 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
       const expected = {
-        connections: 1,
-        hosts: 1,
-        sourcePackets: 0,
-        sourcePacketsHistogram: null,
-        sourceByte: 0,
-        sourceByteHistogram: null,
-        destinationPackets: 0,
-        destinationPacketsHistogram: [
-          {
-            x: new Date('2019-02-19T23:22:09.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-        ],
-        destinationByte: 0,
-        destinationByteHistogram: [
-          {
-            x: new Date('2019-02-19T23:22:09.000Z').valueOf(),
-            y: 0,
-            __typename: 'KpiIpDetailsHistogramData',
-          },
-        ],
-        __typename: 'KpiIpDetailsData',
+        sourceByte: 27044769,
+        destinationByte: 953220875,
+        topSourceIp: '10.100.7.196',
+        topDestinationIp: '8.248.211.247',
+        topSourceIpTransportBytes: 27033419,
+        topDestinationIpTransportBytes: 101387911,
+        topDestinationPort: 80,
+        topTransport: 'tcp',
       };
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
