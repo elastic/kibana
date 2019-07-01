@@ -1,72 +1,78 @@
 <div id="graphBasic" ng-controller="graphuiPlugin">
   <!-- Local nav. -->
   <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
-    <!-- Transcluded elements. -->
-    <div data-transclude-slots>
-      <div data-transclude-slot="bottomRow" class="gphGraph__flexGroup">
-        <!-- Select index pattern. -->
-        <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
-          ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
-          <option
-            value=""
-            i18n-id="xpack.graph.topNavMenu.selectIndexPatternOptionLabel"
-            i18n-default-message="Select index pattern…"
-          ></option>
-        </select>
-
-        <!-- Added fields. -->
-        <span
-          class="gphNoUserSelect"
-          ng-repeat="f in selectedFields"
-          ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addedFieldTooltip' | i18n: {
-            defaultMessage: 'Shift + click to toggle if search returns {fName}',
-            values: { fName: f.name }
-          } }}"
-        >
-          <svg class="gphNode" width="30" height="30" ng-click="clickVertexFieldIcon(f, $event)" ng-class="{'gphNode-disabled':f.hopSize<=0}">
-            <circle class="gphNode__circle" r="13" cx="15" cy="15" ng-class="{selectedNode:kbnTopNav.currentKey === 'fieldConfig'&&f === selectedFieldConfig}"
-              ng-attr-style="fill:{{f.color}}" />
-            <text ng-if="f.icon" class="gphNode__text fa" text-anchor="middle" x="15" y="20">
-              {{f.icon.code}}
-            </text>
-          </svg>
-        </span>
-
-        <!-- Add field button. -->
-        <span
-          class="gphNoUserSelect"
-          ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addFieldButtonTooltip' | i18n: { defaultMessage: 'Add a field source for vertices' } }}"
-        >
-          <button
-            class="gphAddButton"
-            ng-disabled="selectedIndex === null"
-            aria-label="{{ ::'xpack.graph.topNavMenu.addFieldButtonAriaLabel' | i18n: { defaultMessage: 'Add a field' } }}"
-            id="addVertexFieldButton"
-            ng-class="{'gphAddButton-focus':selectedIndex !== null&&selectedFields.length === 0}"
-            ng-click="toggleShowAdvancedFieldsConfig()"
-          >
-            <span aria-hidden="true" class="kuiIcon fa-plus"></span>
-          </button>
-        </span>
-
-        <!-- Search. -->
-        <form ng-submit="submit()" name="graphBasicSearch" class="gphGraph__flexGroupFiller" style="width: 100%">
-          <div class="kuiLocalSearch">
-            <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
-              ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
-            <button
-              class="kuiLocalSearchButton"
-              type="submit"
-              ng-disabled="liveResponseFields.length === 0"
-              aria-label="{{ ::'xpack.graph.topNavMenu.searchButtonAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
-            >
-              <span aria-hidden="true" class="kuiIcon fa-search"></span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
   </kbn-top-nav>
+
+  <div class="gphGraph__menus">
+    <graph-load ng-show="menus.showLoad"></graph-load>
+    <graph-save ng-show="menus.showSave"></graph-save>
+    <graph-settings ng-show="menus.showSettings"></graph-settings>
+  </div>
+    
+  <div class="gphGraph__bar">
+    <div class="gphGraph__flexGroup">
+      <!-- Select index pattern. -->
+      <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
+        ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
+        <option
+          value=""
+          i18n-id="xpack.graph.topNavMenu.selectIndexPatternOptionLabel"
+          i18n-default-message="Select index pattern…"
+        ></option>
+      </select>
+
+      <!-- Added fields. -->
+      <span
+        class="gphNoUserSelect"
+        ng-repeat="f in selectedFields"
+        ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addedFieldTooltip' | i18n: {
+          defaultMessage: 'Shift + click to toggle if search returns {fName}',
+          values: { fName: f.name }
+        } }}"
+      >
+        <svg class="gphNode" width="30" height="30" ng-click="clickVertexFieldIcon(f, $event)" ng-class="{'gphNode-disabled':f.hopSize<=0}">
+          <circle class="gphNode__circle" r="13" cx="15" cy="15" ng-class="{selectedNode:kbnTopNav.currentKey === 'fieldConfig'&&f === selectedFieldConfig}"
+            ng-attr-style="fill:{{f.color}}" />
+          <text ng-if="f.icon" class="gphNode__text fa" text-anchor="middle" x="15" y="20">
+            {{f.icon.code}}
+          </text>
+        </svg>
+      </span>
+
+      <!-- Add field button. -->
+      <span
+        class="gphNoUserSelect"
+        ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addFieldButtonTooltip' | i18n: { defaultMessage: 'Add a field source for vertices' } }}"
+      >
+        <button
+          class="gphAddButton"
+          ng-disabled="selectedIndex === null"
+          aria-label="{{ ::'xpack.graph.topNavMenu.addFieldButtonAriaLabel' | i18n: { defaultMessage: 'Add a field' } }}"
+          id="addVertexFieldButton"
+          ng-class="{'gphAddButton-focus':selectedIndex !== null&&selectedFields.length === 0}"
+          ng-click="toggleShowAdvancedFieldsConfig()"
+        >
+          <span aria-hidden="true" class="kuiIcon fa-plus"></span>
+        </button>
+      </span>
+
+      <!-- Search. -->
+      <form ng-submit="submit()" name="graphBasicSearch" class="gphGraph__flexGroupFiller" style="width: 100%">
+        <div class="kuiLocalSearch">
+          <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
+            ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
+          <button
+            class="kuiLocalSearchButton"
+            type="submit"
+            ng-disabled="liveResponseFields.length === 0"
+            aria-label="{{ ::'xpack.graph.topNavMenu.searchButtonAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
+          >
+            <span aria-hidden="true" class="kuiIcon fa-search"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div class="config" ng-show="kbnTopNav.currentKey === 'fields'" data-test-subj="fieldSelectionList">
     <div class="config">

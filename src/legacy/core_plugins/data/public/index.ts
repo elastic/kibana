@@ -49,6 +49,7 @@ export class DataPlugin {
     // TODO: this is imported here to avoid circular imports.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getInterpreter } = require('plugins/interpreter/interpreter');
+    const indexPatternsService = this.indexPatterns.setup();
     return {
       expressions: this.expressions.setup({
         interpreter: {
@@ -56,8 +57,10 @@ export class DataPlugin {
           renderersRegistry,
         },
       }),
-      indexPatterns: this.indexPatterns.setup(),
-      filter: this.filter.setup(),
+      indexPatterns: indexPatternsService,
+      filter: this.filter.setup({
+        indexPatterns: indexPatternsService.indexPatterns,
+      }),
       search: this.search.setup(),
       query: this.query.setup(),
     };
@@ -87,6 +90,7 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
 export { Query } from './query';
+export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';
 
 /** @public static code */
 export { dateHistogramInterval } from '../common/date_histogram_interval';
