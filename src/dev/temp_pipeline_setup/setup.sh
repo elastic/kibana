@@ -2,7 +2,7 @@
 
 set -e
 
-dir="$(pwd)"
+dir="${WORKSPACE}"
 cacheDir="${MAIN_CACHE_DIR}"
 
 RED='\033[0;31m'
@@ -22,19 +22,18 @@ export FORCE_COLOR=1
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
   echo "Setting up node.js and yarn in $dir"
 else
-  echo "${RED}src/dev/ci_setup/setup.sh must be run within a kibana repo${C_RESET}"
+  echo "${RED}${TEMP_PIPELINE_SETUP_DIR}/setup.sh must be run within a kibana repo${C_RESET}"
   exit 1
 fi
 
 
-export KIBANA_DIR="$dir"
+export KIBANA_DIR="${WORKSPACE}"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 
 parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
 
-kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
-export KIBANA_PKG_BRANCH="$kbnBranch"
+export KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
 
 echo " -- KIBANA_DIR='$KIBANA_DIR'"
 echo " -- XPACK_DIR='$XPACK_DIR'"
