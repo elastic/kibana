@@ -69,7 +69,12 @@ const ExpandableTable = (EuiInMemoryTable as any) as ComponentWithConstructor<Ex
 
 export class TransformTable extends ExpandableTable {
   static getDerivedStateFromProps(nextProps: any, prevState: any) {
-    const derivedState = { ...prevState.prevProps };
+    const derivedState = {
+      ...prevState.prevProps,
+      pageIndex: nextProps.pagination.initialPageIndex,
+      pageSize: nextProps.pagination.initialPageSize,
+    };
+
     if (nextProps.items !== prevState.prevProps.items) {
       Object.assign(derivedState, {
         prevProps: {
@@ -77,10 +82,6 @@ export class TransformTable extends ExpandableTable {
         },
       });
     }
-    Object.assign(derivedState, {
-      pageIndex: nextProps.pagination.initialPageIndex,
-      pageSize: nextProps.pagination.initialPageSize,
-    });
 
     const { sortName, sortDirection } = getInitialSorting(nextProps.columns, nextProps.sorting);
     if (
