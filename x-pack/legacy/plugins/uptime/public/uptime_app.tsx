@@ -51,6 +51,8 @@ export interface UptimeAppProps {
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
+  logMonitorPageLoad: () => void;
+  logOverviewPageLoad: () => void;
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setBadge: UMUpdateBadge;
@@ -65,6 +67,8 @@ const Application = (props: UptimeAppProps) => {
     isApmAvailable,
     isInfraAvailable,
     isLogsAvailable,
+    logMonitorPageLoad,
+    logOverviewPageLoad,
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
@@ -167,6 +171,7 @@ const Application = (props: UptimeAppProps) => {
                             render={routerProps => (
                               <OverviewPage
                                 basePath={basePath}
+                                logOverviewPageLoad={logOverviewPageLoad}
                                 setBreadcrumbs={setBreadcrumbs}
                                 {...routerProps}
                               />
@@ -176,6 +181,7 @@ const Application = (props: UptimeAppProps) => {
                             path="/monitor/:id/:location?"
                             render={routerProps => (
                               <MonitorPage
+                                logMonitorPageLoad={logMonitorPageLoad}
                                 query={client.query}
                                 setBreadcrumbs={setBreadcrumbs}
                                 {...routerProps}

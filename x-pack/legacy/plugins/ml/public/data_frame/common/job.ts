@@ -18,7 +18,12 @@ export interface DataFrameJob {
   source: {
     index: IndexPattern;
   };
-  sync?: object;
+  sync?: {
+    time: {
+      field: string;
+      delay: string;
+    };
+  };
 }
 
 export interface DataFrameTransform extends DataFrameJob {
@@ -31,3 +36,6 @@ export interface DataFrameTransform extends DataFrameJob {
 export interface DataFrameTransformWithId extends DataFrameTransform {
   id: string;
 }
+
+// Don't allow intervals of '0', don't allow floating intervals.
+export const delayFormatRegex = /^[1-9][0-9]*(nanos|micros|ms|s|m|h|d)$/;

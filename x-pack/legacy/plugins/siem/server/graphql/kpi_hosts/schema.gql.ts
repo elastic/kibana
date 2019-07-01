@@ -25,6 +25,17 @@ export const kpiHostsSchema = gql`
     uniqueDestinationIpsHistogram: [KpiHostHistogramData!]
   }
 
+  type KpiHostDetailsData {
+    authSuccess: Float
+    authSuccessHistogram: [KpiHostHistogramData!]
+    authFailure: Float
+    authFailureHistogram: [KpiHostHistogramData!]
+    uniqueSourceIps: Float
+    uniqueSourceIpsHistogram: [KpiHostHistogramData!]
+    uniqueDestinationIps: Float
+    uniqueDestinationIpsHistogram: [KpiHostHistogramData!]
+  }
+
   extend type Source {
     KpiHosts(
       id: String
@@ -32,5 +43,12 @@ export const kpiHostsSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
     ): KpiHostsData!
+
+    KpiHostDetails(
+      id: String
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): KpiHostDetailsData!
   }
 `;

@@ -6,11 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { GeojsonFileSource } from '../../../shared/layers/sources/client_file_source';
-import {
-  EuiSpacer,
-  EuiPanel,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const ImportEditor = ({
@@ -20,29 +16,18 @@ export const ImportEditor = ({
   const editor = GeojsonFileSource.renderEditor(editorProperties);
   return (
     <Fragment>
-      {
-        isIndexingTriggered
-          ? null
-          : (
-            <Fragment>
-              <EuiButtonEmpty
-                size="xs"
-                flush="left"
-                onClick={clearSource}
-                iconType="arrowLeft"
-              >
-                <FormattedMessage
-                  id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
-                  defaultMessage="Change data source"
-                />
-              </EuiButtonEmpty>
-              <EuiSpacer size="s" />
-            </Fragment>
-          )
-      }
-      <EuiPanel>
-        {editor}
-      </EuiPanel>
+      {isIndexingTriggered ? null : (
+        <Fragment>
+          <EuiButtonEmpty size="xs" flush="left" onClick={clearSource} iconType="arrowLeft">
+            <FormattedMessage
+              id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
+              defaultMessage="Change data source"
+            />
+          </EuiButtonEmpty>
+          <EuiSpacer size="s" />
+        </Fragment>
+      )}
+      <EuiPanel style={{ position: 'relative' }}>{editor}</EuiPanel>
     </Fragment>
   );
 };

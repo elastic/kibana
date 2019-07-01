@@ -10,6 +10,7 @@
   ],
   "exclude": [
     "test/**/*",
+    "legacy/plugins/siem/cypress/**/*",
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {

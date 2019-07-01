@@ -59,15 +59,21 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
           );
         },
         getTooltipForSavedObject: savedObject => {
-          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title;
-          return `${savedObject.attributes.title} (${visType})`;
+          return `${savedObject.attributes.title} (${
+            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title
+          })`;
         },
         showSavedObject: savedObject => {
+          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+          const visType = visTypes.byName[typeName];
+          if (!visType) {
+            return false;
+          }
+
           if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
             return true;
           }
-          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.byName[typeName];
+
           return visType.stage !== 'experimental';
         },
       },

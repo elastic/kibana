@@ -29,10 +29,11 @@ declare interface Ml {
     getDataFrameTransformsPreview(payload: any): Promise<any>;
     startDataFrameTransformsJob(jobId: string): Promise<any>;
     stopDataFrameTransformsJob(jobId: string): Promise<any>;
+    getTransformAuditMessages(transformId: string): Promise<any>;
   };
 
   hasPrivileges(obj: object): Promise<any>;
-  checkMlPrivileges(): Promise<{ privileges: Privileges; upgradeInProgress: boolean }>;
+  checkMlPrivileges(): Promise<{ capabilities: Privileges; upgradeInProgress: boolean }>;
   esSearch: any;
   getIndices(): Promise<EsIndex[]>;
 
