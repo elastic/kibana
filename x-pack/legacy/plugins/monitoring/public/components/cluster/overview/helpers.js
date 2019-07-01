@@ -26,14 +26,14 @@ export function HealthStatusIndicator(props) {
     red: 'danger'
   };
 
-  const statusColor = statusColorMap[props.status];
+  const statusColor = statusColorMap[props.status] || 'n/a';
 
   return (
     <EuiHealth color={statusColor} data-test-subj="statusIcon">
       <FormattedMessage
         id="xpack.monitoring.cluster.overview.healthStatusDescription"
         defaultMessage="Health is {status}"
-        values={{ status: props.status }}
+        values={{ status: props.status || 'n/a' }}
       />
     </EuiHealth>
   );

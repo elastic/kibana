@@ -173,7 +173,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
   };
 
   let migrationStatusStep = null;
-  if (product.isInternalCollector) {
+  if (product.isInternalCollector || product.isNetNewUser) {
     let status = null;
     if (hasCheckedStatus) {
       status = (

@@ -53,7 +53,7 @@ export class EuiMonitoringTable extends React.PureComponent {
         }),
         sortable: product => {
           const list = get(setupMode, 'data.byUuid', {});
-          const status = list[product[uuidField]] || {};
+          const status = list[get(product, uuidField)] || {};
 
           if (status.isInternalCollector) {
             return 4;
@@ -75,7 +75,7 @@ export class EuiMonitoringTable extends React.PureComponent {
         },
         render: (product) => {
           const list = get(setupMode, 'data.byUuid', {});
-          const status = list[product[uuidField]] || {};
+          const status = list[get(product, uuidField)] || {};
 
           let statusBadge = null;
           if (status.isInternalCollector) {
@@ -130,7 +130,7 @@ export class EuiMonitoringTable extends React.PureComponent {
         }),
         sortable: product => {
           const list = get(setupMode, 'data.byUuid', {});
-          const status = list[product[uuidField]] || {};
+          const status = list[get(product, uuidField)] || {};
 
           if (status.isInternalCollector || status.isNetNewUser) {
             return 1;
@@ -147,7 +147,7 @@ export class EuiMonitoringTable extends React.PureComponent {
           return 0;
         },
         render: (product) => {
-          const uuid = product[uuidField];
+          const uuid = get(product, uuidField);
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[uuid] || {};
           const instance = {

@@ -182,10 +182,19 @@ export class Flyout extends Component {
     let willDisableDoneButton = !product.isFullyMigrated;
     let willShowNextButton = activeStep !== INSTRUCTION_STEP_DISABLE_INTERNAL;
 
-    if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT && productName === ELASTICSEARCH_CUSTOM_ID) {
-      willShowNextButton = false;
-      // ES can be fully migrated for net new users
-      willDisableDoneButton = !product.isPartiallyMigrated && !product.isFullyMigrated;
+    if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+      if (productName === ELASTICSEARCH_CUSTOM_ID) {
+        willShowNextButton = false;
+        // ES can be fully migrated for net new users
+        willDisableDoneButton = !product.isPartiallyMigrated && !product.isFullyMigrated;
+      }
+      else {
+        // Do not bother taking them to the disable internal step for non ES use cases
+        // since disabling is an individual action per node, versus ES where it is
+        // a cluster setting
+        willShowNextButton = !product.isFullyMigrated;
+        willDisableDoneButton = !product.isFullyMigrated;
+      }
     }
 
     if (willShowNextButton) {

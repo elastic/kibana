@@ -32,9 +32,14 @@ export function Overview(props) {
                 ml={props.cluster.ml}
                 changeUrl={props.changeUrl}
                 license={props.cluster.license}
+                setupMode={props.setupMode}
                 showLicenseExpiration={props.showLicenseExpiration}
               />
-              <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
+              <KibanaPanel
+                {...props.cluster.kibana}
+                setupMode={props.setupMode}
+                changeUrl={props.changeUrl}
+              />
             </Fragment>
           )
           : null

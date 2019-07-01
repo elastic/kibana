@@ -8,6 +8,7 @@ import { get, uniq } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
+import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/status/constants';
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 const APM_CUSTOM_ID = 'apm';
@@ -224,6 +225,15 @@ function shouldSkipBucket(product, bucket) {
   return false;
 }
 
+async function getLiveKibanaInstance(req) {
+  const { collectorSet } = req.server.usage;
+  const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
+  if (!await kibanaStatsCollector.isReady()) {
+    return null;
+  }
+  return collectorSet.toApiFieldNames(await kibanaStatsCollector.fetch());
+}
+
 /**
  * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
  * and determine which products fall into one of four states:
@@ -269,6 +279,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
   ]);
 
   const liveEsNodes = await getLivesNodes(req);
+  const liveKibanaInstance = await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
 
   const status = PRODUCTS.reduce((products, product) => {
@@ -296,6 +307,15 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
           isNetNewUser: true
         },
       }), {});
+    }
+
+    if (product.name === KIBANA_SYSTEM_ID && liveKibanaInstance) {
+      productStatus.byUuid = {
+        [get(liveKibanaInstance, 'kibana.uuid')]: {
+          instance: liveKibanaInstance,
+          isNetNewUser: true
+        }
+      };
     }
 
     // If there is no data, then they are a net new user

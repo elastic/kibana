@@ -6,10 +6,11 @@
 
 import React, { PureComponent } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
-import { capitalize } from 'lodash';
+import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { KibanaStatusIcon } from '../status_icon';
+import { StatusIcon } from 'plugins/monitoring/components/status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -125,7 +126,6 @@ const getColumns = (kbnUrl, scope) => {
 export class KibanaInstances extends PureComponent {
   render() {
     const {
-      instances,
       clusterStatus,
       angular,
       setupMode,
@@ -133,6 +133,31 @@ export class KibanaInstances extends PureComponent {
       pagination,
       onTableChange
     } = this.props;
+
+    // Merge the instances data with the setup data if enabled
+    const instances = this.props.instances || [];
+    if (setupMode.enabled && setupMode.data) {
+      // We want to create a seamless experience for the user by merging in the setup data
+      // and the node data from monitoring indices in the likely scenario where some instances
+      // are using MB collection and some are using no collection
+      const instancesByUuid = instances.reduce((byUuid, node) => ({
+        ...byUuid,
+        [get(node, 'kibana.uuid')]: node
+      }), {});
+
+      instances.push(...Object.entries(setupMode.data.byUuid)
+        .reduce((instances, [nodeUuid, instance]) => {
+          if (!instancesByUuid[nodeUuid]) {
+            instances.push({
+              kibana: {
+                ...instance.instance.kibana,
+                status: StatusIcon.TYPES.GRAY
+              }
+            });
+          }
+          return instances;
+        }, []));
+    }
 
     const dataFlattened = instances.map(item => ({
       ...item,
