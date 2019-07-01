@@ -9,7 +9,6 @@ import { getOr } from 'lodash/fp';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 
 import { buildDnsQuery } from './query_dns.dsl';
-import { buildGeneralQuery } from './query_general.dsl';
 import { buildTlsHandshakeQuery } from './query_tls_handshakes.dsl';
 import { buildUniquePrvateIpQuery } from './query_unique_private_ips.dsl';
 import {
@@ -21,6 +20,8 @@ import {
 } from './types';
 import { TermAggregation } from '../types';
 import { KpiNetworkHistogramData, KpiNetworkData } from '../../graphql/types';
+import { buildNetworkEventsQuery } from './query_network_events';
+import { buildUniqueFlowIdsQuery } from './query_unique_flow';
 
 const formatHistogramData = (
   data: Array<{ key: number; count: { value: number } }>
@@ -42,15 +43,9 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
     request: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<KpiNetworkData> {
-    const generalQuery: KpiNetworkESMSearchBody[] = buildGeneralQuery(options);
-    const uniqueSourcePrivateIpsQuery: KpiNetworkESMSearchBody[] = buildUniquePrvateIpQuery(
-      'source',
-      options
-    );
-    const uniqueDestinationPrivateIpsQuery: KpiNetworkESMSearchBody[] = buildUniquePrvateIpQuery(
-      'destination',
-      options
-    );
+    const networkEventsQuery: KpiNetworkESMSearchBody[] = buildNetworkEventsQuery(options);
+    const uniqueFlowIdsQuery: KpiNetworkESMSearchBody[] = buildUniqueFlowIdsQuery(options);
+    const uniquePrivateIpsQuery: KpiNetworkESMSearchBody[] = buildUniquePrvateIpQuery(options);
     const dnsQuery: KpiNetworkESMSearchBody[] = buildDnsQuery(options);
     const tlsHandshakesQuery: KpiNetworkESMSearchBody[] = buildTlsHandshakeQuery(options);
     const response = await this.framework.callWithRequest<
@@ -58,42 +53,42 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
       TermAggregation
     >(request, 'msearch', {
       body: [
-        ...generalQuery,
-        ...uniqueSourcePrivateIpsQuery,
-        ...uniqueDestinationPrivateIpsQuery,
+        ...networkEventsQuery,
         ...dnsQuery,
+        ...uniquePrivateIpsQuery,
+        ...uniqueFlowIdsQuery,
         ...tlsHandshakesQuery,
       ],
     });
     const uniqueSourcePrivateIpsHistogram = getOr(
       null,
-      'responses.1.aggregations.histogram.buckets',
+      'responses.2.aggregations.source.histogram.buckets',
       response
     );
     const uniqueDestinationPrivateIpsHistogram = getOr(
       null,
-      'responses.2.aggregations.histogram.buckets',
+      'responses.2.aggregations.destination.histogram.buckets',
       response
     );
 
     return {
       networkEvents: getOr(null, 'responses.0.hits.total.value', response),
-      uniqueFlowId: getOr(null, 'responses.0.aggregations.unique_flow_id.value', response),
+      dnsQueries: getOr(null, 'responses.1.hits.total.value', response),
       uniqueSourcePrivateIps: getOr(
         null,
-        'responses.1.aggregations.unique_private_ips.value',
+        'responses.2.aggregations.source.unique_private_ips.value',
         response
       ),
       uniqueSourcePrivateIpsHistogram: formatHistogramData(uniqueSourcePrivateIpsHistogram),
       uniqueDestinationPrivateIps: getOr(
         null,
-        'responses.2.aggregations.unique_private_ips.value',
+        'responses.2.aggregations.destination.unique_private_ips.value',
         response
       ),
       uniqueDestinationPrivateIpsHistogram: formatHistogramData(
         uniqueDestinationPrivateIpsHistogram
       ),
-      dnsQueries: getOr(null, 'responses.3.hits.total.value', response),
+      uniqueFlowId: getOr(null, 'responses.3.aggregations.unique_flow_id.value', response),
       tlsHandshakes: getOr(null, 'responses.4.hits.total.value', response),
     };
   }

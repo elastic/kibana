@@ -16,26 +16,10 @@ import {
   updateCloneProgress,
   updateDeleteProgress,
   updateIndexProgress,
+  StatusSuccessPayload,
+  RepoStatus,
+  RepoState,
 } from '../actions';
-
-export enum RepoState {
-  CLONING,
-  DELETING,
-  INDEXING,
-  READY,
-  CLONE_ERROR,
-  DELETE_ERROR,
-  INDEX_ERROR,
-}
-
-export interface RepoStatus {
-  repoUri: string;
-  progress: number;
-  cloneProgress?: any;
-  timestamp?: Date;
-  state?: RepoState;
-  errorMessage?: string;
-}
 
 export interface StatusState {
   status: { [key: string]: RepoStatus };
@@ -48,16 +32,18 @@ const initialState: StatusState = {
   loading: false,
 };
 
-export const status = handleActions(
+type StatusPayload = RepoStatus & Error & StatusSuccessPayload & string;
+
+export const status = handleActions<StatusState, StatusPayload>(
   {
-    [String(loadStatus)]: (state: StatusState) =>
+    [String(loadStatus)]: state =>
       produce<StatusState>(state, draft => {
         draft.loading = true;
       }),
-    [String(loadStatusSuccess)]: (state: StatusState, action: any) =>
+    [String(loadStatusSuccess)]: (state, action: Action<StatusSuccessPayload>) =>
       produce<StatusState>(state, draft => {
-        Object.keys(action.payload).forEach((repoUri: RepositoryUri) => {
-          const statuses = action.payload[repoUri];
+        Object.keys(action.payload!).forEach((repoUri: RepositoryUri) => {
+          const statuses = action.payload![repoUri]!;
           if (statuses.deleteStatus) {
             // 1. Look into delete status first
             const progress = statuses.deleteStatus.progress;
@@ -121,14 +107,14 @@ export const status = handleActions(
         });
         draft.loading = false;
       }),
-    [String(loadStatusFailed)]: (state: StatusState, action: any) =>
+    [String(loadStatusFailed)]: (state, action: Action<Error>) =>
       produce<StatusState>(state, draft => {
         draft.loading = false;
         draft.error = action.payload;
       }),
-    [String(updateCloneProgress)]: (state: StatusState, action: any) =>
+    [String(updateCloneProgress)]: (state, action: Action<RepoStatus>) =>
       produce<StatusState>(state, draft => {
-        const progress = action.payload.progress;
+        const progress = action.payload!.progress;
         let s = RepoState.CLONING;
         if (
           progress === WorkerReservedProgress.ERROR ||
@@ -138,14 +124,14 @@ export const status = handleActions(
         } else if (progress === WorkerReservedProgress.COMPLETED) {
           s = RepoState.READY;
         }
-        draft.status[action.payload.repoUri] = {
-          ...action.payload,
+        draft.status[action.payload!.uri] = {
+          ...action.payload!,
           state: s,
         };
       }),
-    [String(updateIndexProgress)]: (state: StatusState, action: any) =>
+    [String(updateIndexProgress)]: (state, action: Action<RepoStatus>) =>
       produce<StatusState>(state, draft => {
-        const progress = action.payload.progress;
+        const progress = action.payload!.progress;
         let s = RepoState.INDEXING;
         if (
           progress === WorkerReservedProgress.ERROR ||
@@ -155,16 +141,16 @@ export const status = handleActions(
         } else if (progress === WorkerReservedProgress.COMPLETED) {
           s = RepoState.READY;
         }
-        draft.status[action.payload.repoUri] = {
-          ...action.payload,
+        draft.status[action.payload!.uri] = {
+          ...action.payload!,
           state: s,
         };
       }),
-    [String(updateDeleteProgress)]: (state: StatusState, action: any) =>
+    [String(updateDeleteProgress)]: (state, action: Action<RepoStatus>) =>
       produce<StatusState>(state, draft => {
-        const progress = action.payload.progress;
+        const progress = action.payload!.progress;
         if (progress === WorkerReservedProgress.COMPLETED) {
-          delete draft.status[action.payload.repoUri];
+          delete draft.status[action.payload!.uri];
         } else {
           let s = RepoState.DELETING;
           if (
@@ -174,15 +160,15 @@ export const status = handleActions(
             s = RepoState.DELETE_ERROR;
           }
 
-          draft.status[action.payload.repoUri] = {
-            ...action.payload,
+          draft.status[action.payload!.uri] = {
+            ...action.payload!,
             state: s,
           };
         }
       }),
-    [String(deleteRepoFinished)]: (state: StatusState, action: Action<any>) =>
-      produce<StatusState>(state, (draft: StatusState) => {
-        delete draft.status[action.payload];
+    [String(deleteRepoFinished)]: (state, action: Action<string>) =>
+      produce<StatusState>(state, draft => {
+        delete draft.status[action.payload!];
       }),
   },
   initialState

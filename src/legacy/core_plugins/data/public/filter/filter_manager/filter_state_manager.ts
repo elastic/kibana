@@ -25,7 +25,7 @@ import { FilterManager } from './filter_manager';
 
 /**
  * FilterStateManager is responsible for watching for filter changes
- * and synching with FilterManager, as well as syncing FilterManager changes
+ * and syncing with FilterManager, as well as syncing FilterManager changes
  * back to the URL.
  **/
 export class FilterStateManager {
