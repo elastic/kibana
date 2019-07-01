@@ -373,37 +373,39 @@ export class VectorLayer extends AbstractLayer {
 
   async _performInnerJoins(sourceResult, joinStates, updateSourceData) {
 
-    let shouldUpdate = false;
+    //should update the store iff
+    //-- source result was refreshed
+    //-- any of the join configurations changed (joinState changed)
+    //-- visibility of any of the features has changed
+
+    let shouldUpdateStore = sourceResult.refreshed || joinStates.some((joinState) => joinState.dataHasChanged);
+
+    if (!shouldUpdateStore) {
+      return;
+    }
+
     for (let i = 0; i < sourceResult.featureCollection.features.length; i++) {
       const feature = sourceResult.featureCollection.features[i];
       const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
-      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = true;//new visibility will be determined based on join-results
+
+
+      let canDoAllJoins = true;
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
         const leftInnerJoin = joinState.join;
         const rightMetricFields = leftInnerJoin.getRightMetricFields();
-
-        let canJoin;
-        if (sourceResult.refreshed || joinState.dataHasChanged) {
-          // Perform join when
-          // - source data changed but join data has not
-          // - join data changed but source data has not
-          // - both source and join data changed
-          canJoin = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
-          shouldUpdate = true;
-        } else {
-          //re-evalute visibility based on join
-          canJoin = leftInnerJoin.canJoin(feature, joinState.propertiesMap);
-        }
-        feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] && canJoin;
+        const canJoinOnCurrent = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
+        canDoAllJoins = canDoAllJoins  && canJoinOnCurrent;
       }
 
-      if (oldVisbility !== feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]) {
-        shouldUpdate = true;
+      if (oldVisbility !== canDoAllJoins) {
+        shouldUpdateStore = true;
       }
+
+      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = canDoAllJoins;
     }
 
-    if (shouldUpdate) {
+    if (shouldUpdateStore) {
       updateSourceData({ ...sourceResult.featureCollection });
     }
   }
