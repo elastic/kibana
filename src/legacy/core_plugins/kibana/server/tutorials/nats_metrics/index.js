@@ -26,7 +26,7 @@ export function natsMetricsSpecProvider(server, context) {
   return {
     id: 'natsMetrics',
     name: i18n.translate('kbn.server.tutorials.natsMetrics.nameTitle', {
-      defaultMessage: 'Nats metrics',
+      defaultMessage: 'NATS metrics',
     }),
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.natsMetrics.shortDescription', {
@@ -45,7 +45,7 @@ export function natsMetricsSpecProvider(server, context) {
         {
           id: 'Metricbeat-Nats-Dashboard-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.natsMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Nats metrics dashboard',
+            defaultMessage: 'NATS metrics dashboard',
           }),
           isOverview: true
         }

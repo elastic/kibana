@@ -29,7 +29,7 @@ export function natsLogsSpecProvider(server, context) {
   return {
     id: 'natsLogs',
     name: i18n.translate('kbn.server.tutorials.natsLogs.nameTitle', {
-      defaultMessage: 'Nats logs',
+      defaultMessage: 'NATS logs',
     }),
     category: TUTORIAL_CATEGORY.LOGGING,
     isBeta: true,
@@ -49,7 +49,7 @@ export function natsLogsSpecProvider(server, context) {
         {
           id: 'Filebeat-nats-overview-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.natsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Nats logs dashboard',
+            defaultMessage: 'NATS logs dashboard',
           }),
           isOverview: true
         }
