@@ -310,6 +310,10 @@ export class AbstractLayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
+  isDataLoaded() {
+    throw new Error('should implement Layer#isDataLoaded');
+  }
+
   async getBounds() {
     return {
       min_lon: -180,

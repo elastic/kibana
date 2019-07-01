@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 export class GisMap extends Component {
 
   state = {
-    isRenderTimeoutComplete: false,
+    isInitialLoadRenderTimeoutComplete: false,
   }
 
   componentDidMount() {
@@ -74,7 +74,7 @@ export class GisMap extends Component {
     setTimeout(
       () => {
         if (this._isMounted) {
-          this.setState({ isRenderTimeoutComplete: true });
+          this.setState({ isInitialLoadRenderTimeoutComplete: true });
         }
       },
       1000
@@ -83,7 +83,6 @@ export class GisMap extends Component {
 
   render() {
     const {
-      areLayersLoaded,
       layerDetailsVisible,
       addLayerVisible,
       noFlyoutVisible,
@@ -136,7 +135,7 @@ export class GisMap extends Component {
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
-        data-render-complete={areLayersLoaded && this.state.isRenderTimeoutComplete}
+        data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
         data-shared-item
       >
         <EuiFlexItem className="mapMapWrapper">
