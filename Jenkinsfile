@@ -44,9 +44,9 @@ pipeline {
           script {
             dumpWorkspaceSize() // dump size to screen BEFORE checking out es
           }
-          sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
+          // sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
           script {
-            dumpWorkspaceSize() // dump size to screen AFTER checking out es
+            // dumpWorkspaceSize() // dump size to screen AFTER checking out es
             tarWorkspace()
           }
           sh "tar -czf ${WORKSPACE_CACHE_NAME}"
