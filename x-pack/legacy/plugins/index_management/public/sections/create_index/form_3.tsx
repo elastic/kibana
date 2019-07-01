@@ -52,7 +52,7 @@ export const Form3 = () => {
   const { form } = useForm<MyForm>({ onSubmit, schema: formSchema });
 
   const onAddValueToCombo = (field: FieldType) => async (value: string) => {
-    const { isValid } = await field.validateArrayItem(undefined, value);
+    const { isValid } = await field.validate({ value });
 
     if (!isValid) {
       // There is an issue with the ComboBox, and we need to wrap the update inside a setTimeout
@@ -76,7 +76,7 @@ export const Form3 = () => {
 
   const onSearchComboUpdate = (field: FieldType) => (value: string) => {
     if (value) {
-      field.setErrors([]);
+      field.clearErrors('arrayItem');
     }
   };
 
@@ -157,21 +157,17 @@ export const Form3 = () => {
       >
         <UseField path="comboBoxFieldWithValidation" form={form}>
           {field => {
+            // Errors for the field
+            const errorsField = form.isSubmitted ? field.getErrorsMessages() : '';
+
+            // Errors of an invalid array item that the user tries to add
+            const errorsArrayItem = field.getErrorsMessages('arrayItem');
+
             const isInvalid = field.errors.length
-              ? form.isSubmitted || field.errors[0].alwaysVisible
+              ? form.isSubmitted || errorsArrayItem !== null
               : false;
 
-            // Errors for the field
-            const errorsField = form.isSubmitted
-              ? field.getErrorsMessages()
-              : field.getErrorsMessages(true);
-
-            // Errors of an invalid item that was introduced
-            const errorsArrayItem = form.isSubmitted
-              ? field.getErrorsMessages(false, true)
-              : field.getErrorsMessages(true, true);
-
-            // Concatenate messages.
+            // Concatenate error messages.
             const error =
               errorsField && errorsArrayItem
                 ? `${errorsField}, ${errorsArrayItem}`

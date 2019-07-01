@@ -75,15 +75,13 @@ export const formSchema: FormSchema<MyForm> = {
     validations: [
       { validator: emptyField, exitOnFail: true },
       { validator: minLengthField(3), message: 'Please add at least 3 items' },
-    ],
-    validationsArrayItems: [
       {
         validator: ({ value }) => {
-          if (value.startsWith('a')) {
+          if (typeof value === 'string' && value.startsWith('a')) {
             return {
               code: 'ERR_WRONG_FIRST_CHAR',
               message: 'The value cannot start witht the letter "a"',
-              alwaysVisible: true,
+              type: 'arrayItem',
             };
           }
         },

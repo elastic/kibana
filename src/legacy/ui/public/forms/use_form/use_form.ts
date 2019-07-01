@@ -53,7 +53,6 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     helpText = '',
     type = 'text',
     validations = [],
-    validationsArrayItems = [],
     formatters = [],
     fieldsToValidateOnChange = [path],
     isValidationAsync = false,
@@ -63,7 +62,6 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     typeof defaultValue === 'function' ? defaultValue() : defaultValue
   );
   const [errors, setErrors] = useState<ValidationError[]>([]);
-  const [arrayItemErrors, setArrayItemErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -75,17 +73,24 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     formatters.push(toInt);
   }
 
-  const doValidate = async (
-    validationsToRun: ValidationConfig[],
-    setErrorsDispatcher: React.Dispatch<React.SetStateAction<ValidationError[]>>,
-    formData?: any,
-    valueToValidate?: unknown
-  ) => {
+  const filterErrors = (_errors: ValidationError[], errorType = 'field'): ValidationError[] =>
+    _errors.filter(error => {
+      if (!{}.hasOwnProperty.call(error, 'type')) {
+        return errorType !== 'field';
+      }
+      return error.type !== errorType;
+    });
+
+  const clearErrors: Field['clearErrors'] = (errorType = 'field') => {
+    setErrors(previousErrors => filterErrors(previousErrors, errorType));
+  };
+
+  const validate: Field['validate'] = async (validationData = {}) => {
+    let { formData, value: valueToValidate } = validationData;
     formData = formData || form.getFormData({ unflatten: false });
     valueToValidate = valueToValidate || value;
 
     setValidating(true);
-    setErrorsDispatcher([]);
 
     // By the time our validate function has reached completion, it’s possible
     // that validate() will have been called again. If this is the case, we need
@@ -150,7 +155,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     // Sequencially execute all the validations for the field
     if (isValidationAsync) {
-      await validationsToRun.reduce(
+      await validations.reduce(
         (promise, validation) =>
           promise.then(async () => {
             const validationResult = await validateFieldAsync(validation);
@@ -163,7 +168,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
         Promise.resolve()
       );
     } else {
-      validationsToRun.forEach(validation => {
+      validations.forEach(validation => {
         const validationResult = validateFieldSync(validation);
 
         if (validationResult) {
@@ -176,7 +181,12 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     if (validateIteration === validateCounter.current) {
       // This is the most recent invocation
       setValidating(false);
-      setErrorsDispatcher(validationErrors);
+      setErrors(previousErrors => {
+        // We first filter out the "field" errors
+        // Other custom type of error will have to be manually cleared out from inside the application
+        const filteredErrors = filterErrors(previousErrors);
+        return [...filteredErrors, ...validationErrors];
+      });
     }
 
     return {
@@ -184,16 +194,6 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       errors: validationErrors,
     };
   };
-
-  // Validate the field value using the "validations" configuration.
-  const validate: Field['validate'] = async (formData, valueToValidate) =>
-    doValidate(validations, setErrors, formData, valueToValidate);
-
-  // When the field value is an Array, we can declare a set of validations to validate
-  // an item _before_ it is added to the Array.
-  // For that we will use the "validationsArrayItems" configuration.
-  const validateArrayItem: Field['validateArrayItem'] = async (formData, valueToValidate) =>
-    doValidate(validationsArrayItems, setArrayItemErrors, formData, valueToValidate);
 
   const runFormatters = (input: unknown): unknown => {
     if (typeof input === 'string' && input.trim() === '') {
@@ -237,18 +237,18 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     setStateValue(runFormatters(newValue));
   };
 
-  const getErrorsMessages: Field['getErrorsMessages'] = (
-    onlyAlwaysVisible = false,
-    fromArrayItemErrors = false
-  ) => {
-    const errorsArray = fromArrayItemErrors ? arrayItemErrors : errors;
-
-    return errorsArray.reduce((messages, error) => {
-      if (onlyAlwaysVisible && !error.alwaysVisible) {
-        return messages;
+  const getErrorsMessages: Field['getErrorsMessages'] = (errorType = 'field') => {
+    const errorMessages = errors.reduce((messages, error) => {
+      if (
+        error.type === errorType ||
+        (errorType === 'field' && !{}.hasOwnProperty.call(error, 'type'))
+      ) {
+        return messages ? `${messages}, ${error.message}` : (error.message as string);
       }
-      return messages ? `${messages}, ${error.message}` : (error.message as string);
+      return messages;
     }, '');
+
+    return errorMessages ? errorMessages : null;
   };
 
   useEffect(
@@ -268,15 +268,14 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     helpText,
     value,
     errors,
-    arrayItemErrors,
     type,
     form,
     isPristine,
     isValidating,
     isUpdating,
     validate,
-    validateArrayItem,
     setErrors,
+    clearErrors,
     setValue,
     onChange,
     getErrorsMessages,
@@ -332,7 +331,7 @@ export const useForm = <T = FormData>({
 
     const formData = getFormData({ unflatten: false });
 
-    await Promise.all(fieldsToValidate.map(field => field.validate(formData)));
+    await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
 
     const isFormValid = fieldsToArray().every(field => !field.errors.length);
     setIsValid(isFormValid);

@@ -66,22 +66,17 @@ export interface Field {
   readonly type: string;
   readonly value: unknown;
   readonly errors: ValidationError[];
-  readonly arrayItemErrors: ValidationError[];
   readonly isPristine: boolean;
   readonly isValidating: boolean;
   readonly isUpdating: boolean;
   readonly form: Form;
-  getErrorsMessages: (onlyAlwaysVisible?: boolean, fromArrayItemErrors?: boolean) => string;
+  getErrorsMessages: (errorType?: 'field' | string) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
   validate: (
-    formData?: any,
-    valueToValidate?: unknown
-  ) => Promise<{ isValid: boolean; errors: ValidationError[] }>;
-  validateArrayItem: (
-    formData?: any,
-    valueToValidate?: unknown
+    validateData?: { formData?: any; value?: unknown }
   ) => Promise<{ isValid: boolean; errors: ValidationError[] }>;
   setErrors: (errors: ValidationError[]) => void;
+  clearErrors: (type: string) => void;
   setValue: (value: FieldValue) => void;
 }
 
@@ -107,7 +102,7 @@ export type FormSubmitHandler<T> = (formData: T, isValid: boolean) => Promise<vo
 export interface ValidationError {
   code: string;
   message: string | ((error: ValidationError) => string);
-  alwaysVisible?: boolean;
+  type?: string;
   [key: string]: any;
 }
 
