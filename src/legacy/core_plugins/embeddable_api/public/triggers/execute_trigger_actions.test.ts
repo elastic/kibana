@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import '../np_core.test.mocks';
+import '../ui_capabilities.test.mocks';
+import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
@@ -55,13 +56,13 @@ class TestAction extends Action {
 }
 
 beforeEach(() => {
-  triggerRegistry.reset();
-  actionRegistry.reset();
+  triggerRegistry.clear();
+  actionRegistry.clear();
   executeFn.mockReset();
 });
 
 afterAll(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 test('executeTriggerActions executes a single action mapped to a trigger', async () => {

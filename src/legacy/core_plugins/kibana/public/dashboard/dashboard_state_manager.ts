@@ -24,9 +24,9 @@ import { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_mon
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 import { Timefilter } from 'ui/timefilter';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { Filter } from '@kbn/es-query';
 import moment from 'moment';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { DashboardViewMode } from './dashboard_view_mode';
@@ -73,11 +73,10 @@ import {
   DashboardAppState,
   SavedDashboardPanel,
   SavedDashboardPanelMap,
-  StagedFilter,
   DashboardAppStateParameters,
+  AddFilterFn,
+  DashboardAppStateDefaults,
 } from './types';
-
-export type AddFilterFuntion = ({ field, value, operator, index }: StagedFilter) => void;
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -98,9 +97,9 @@ export class DashboardStateManager {
   private hideWriteControls: boolean;
   public isDirty: boolean;
   private changeListeners: Array<(status: { dirty: boolean }) => void>;
-  private stateMonitor: StateMonitor<DashboardAppStateParameters>;
+  private stateMonitor: StateMonitor<DashboardAppStateDefaults>;
   private panelIndexPatternMapping: { [key: string]: StaticIndexPattern[] } = {};
-  private addFilter: AddFilterFuntion;
+  private addFilter: AddFilterFn;
   private unsubscribe: () => void;
 
   /**
@@ -119,7 +118,7 @@ export class DashboardStateManager {
     savedDashboard: SavedObjectDashboard;
     AppStateClass: TAppStateClass<DashboardAppState>;
     hideWriteControls: boolean;
-    addFilter: AddFilterFuntion;
+    addFilter: AddFilterFn;
   }) {
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
@@ -151,7 +150,7 @@ export class DashboardStateManager {
     /**
      * Creates a state monitor and saves it to this.stateMonitor. Used to track unsaved changes made to appState.
      */
-    this.stateMonitor = stateMonitorFactory.create<DashboardAppStateParameters>(
+    this.stateMonitor = stateMonitorFactory.create<DashboardAppStateDefaults>(
       this.appState,
       this.stateDefaults
     );
@@ -278,7 +277,7 @@ export class DashboardStateManager {
 
   _pushFiltersToStore() {
     const state = store.getState();
-    const dashboardFilters = this.getDashboardFilterBars();
+    const dashboardFilters = this.savedDashboard.getFilters();
     if (
       !_.isEqual(
         FilterUtils.cleanFiltersForComparison(dashboardFilters),
@@ -321,7 +320,7 @@ export class DashboardStateManager {
 
     const stagedFilters = getStagedFilters(store.getState());
     stagedFilters.forEach(filter => {
-      this.addFilter(filter);
+      this.addFilter(filter, this.getAppState());
     });
     if (stagedFilters.length > 0) {
       this.saveState();
@@ -386,8 +385,8 @@ export class DashboardStateManager {
     return {
       timeTo: this.savedDashboard.timeTo,
       timeFrom: this.savedDashboard.timeFrom,
-      filterBars: this.getDashboardFilterBars(),
-      query: this.getDashboardQuery(),
+      filterBars: this.savedDashboard.getFilters(),
+      query: this.savedDashboard.getQuery(),
     };
   }
 
@@ -453,14 +452,6 @@ export class DashboardStateManager {
    */
   public getIsTimeSavedWithDashboard() {
     return this.savedDashboard.timeRestore;
-  }
-
-  public getDashboardFilterBars() {
-    return FilterUtils.getFilterBarsForDashboard(this.savedDashboard);
-  }
-
-  public getDashboardQuery() {
-    return FilterUtils.getQueryFilterForDashboard(this.savedDashboard);
   }
 
   public getLastSavedFilterBars(): Filter[] {

@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { kpiHostsQuery } from '../../../../plugins/siem/public/containers/kpi_hosts/index.gql_query';
-import { GetKpiHostsQuery } from '../../../../plugins/siem/public/graphql/types';
+import { kpiHostsQuery } from '../../../../legacy/plugins/siem/public/containers/kpi_hosts/index.gql_query';
+import { GetKpiHostsQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const kpiHostsTests: KbnTestProvider = ({ getService }) => {

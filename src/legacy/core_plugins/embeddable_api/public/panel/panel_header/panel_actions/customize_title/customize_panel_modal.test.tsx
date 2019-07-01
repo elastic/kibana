@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import '../../../../np_core.test.mocks';
+import '../../../../ui_capabilities.test.mocks';
+import '../../../../../../../../core/public/ui_new_platform.test.mocks';
 
 import React from 'react';
 import {
@@ -34,14 +35,13 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { CustomizePanelModal } from './customize_panel_modal';
 import { Container, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { createRegistry } from '../../../../create_registry';
 import { EmbeddableFactory } from '../../../../embeddables';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   container = new HelloWorldContainer({ id: '123', panels: {} }, embeddableFactories);
   const contactCardEmbeddable = await container.addNewEmbeddable<

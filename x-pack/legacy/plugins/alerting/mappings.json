@@ -1,0 +1,34 @@
+{
+  "alert": {
+    "properties": {
+      "alertTypeId": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "long"
+      },
+      "actions": {
+        "type": "nested",
+        "properties": {
+          "group": {
+            "type": "keyword"
+          },
+          "actionRef": {
+            "type": "keyword"
+          },
+          "params": {
+            "enabled": false,
+            "type": "object"
+          }
+        }
+      },
+      "alertTypeParams": {
+        "enabled": false,
+        "type": "object"
+      },
+      "scheduledTaskId": {
+        "type": "keyword"
+      }
+    }
+  }
+}

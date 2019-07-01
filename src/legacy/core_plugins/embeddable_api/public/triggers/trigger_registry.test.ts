@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import '../np_core.test.mocks';
+import '../ui_capabilities.test.mocks';
+import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import { triggerRegistry } from '../triggers';
 import { HELLO_WORLD_ACTION_ID } from '../test_samples';
@@ -25,11 +26,11 @@ import { attachAction } from './attach_action';
 import { detachAction } from './detach_action';
 
 beforeAll(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 afterAll(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 test('TriggerRegistry adding and getting a new trigger', async () => {

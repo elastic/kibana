@@ -6,14 +6,14 @@
 
 import expect from '@kbn/expect';
 
-import { eventsQuery } from '../../../../plugins/siem/public/containers/events/index.gql_query';
-import { LastEventTimeGqlQuery } from '../../../../plugins/siem/public/containers/events/last_event_time/last_event_time.gql_query';
+import { eventsQuery } from '../../../../legacy/plugins/siem/public/containers/events/index.gql_query';
+import { LastEventTimeGqlQuery } from '../../../../legacy/plugins/siem/public/containers/events/last_event_time/last_event_time.gql_query';
 
 import {
   Direction,
   GetEventsQuery,
   GetLastEventTimeQuery,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();

@@ -21,7 +21,12 @@ import { Adapters } from 'ui/inspector';
 import { Observable } from 'rxjs';
 import { IContainer } from '../containers';
 import { ViewMode } from '../types';
-export interface EmbeddableInput {
+
+interface TIndexSignature {
+  [key: string]: unknown;
+}
+
+export interface EmbeddableInput extends TIndexSignature {
   viewMode?: ViewMode;
   title?: string;
   id: string;

@@ -72,7 +72,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
 
   let CURRENT_REQ_ID = 0;
 
-  function sendCurrentRequestToES() {
+  function sendCurrentRequestToES(addedToHistoryCb) {
 
     const reqId = ++CURRENT_REQ_ID;
 
@@ -139,11 +139,15 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
 
             // we have someone on the other side. Add to history
             history.addToHistory(esPath, esMethod, esData);
+            if (addedToHistoryCb) {
+              addedToHistoryCb();
+            }
 
             let value = xhr.responseText;
             const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
 
-            if (mode === null || mode === 'application/json') {
+            // Apply triple quotes to output.
+            if (settings.getTripleQuotes() && (mode === null || mode === 'application/json')) {
               // assume json - auto pretty
               try {
                 value = utils.expandLiteralStrings(value);
@@ -211,7 +215,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
   input.commands.addCommand({
     name: 'send to elasticsearch',
     bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    exec: sendCurrentRequestToES
+    exec: () => sendCurrentRequestToES()
   });
   input.commands.addCommand({
     name: 'open documentation',

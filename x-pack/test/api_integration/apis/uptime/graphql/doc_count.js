@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { docCountQueryString } from '../../../../../plugins/uptime/public/queries';
+import { docCountQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import docCount from './fixtures/doc_count';
 
 export default function ({ getService }) {

@@ -12,10 +12,10 @@ import {
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
-} from '../../../../plugins/siem/public/graphql/types';
-import { HostOverviewQuery } from '../../../../plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
-import { HostFirstLastSeenGqlQuery } from './../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
-import { HostsTableQuery } from './../../../../plugins/siem/public/containers/hosts/hosts_table.gql_query';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
+import { HostOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
+import { HostFirstLastSeenGqlQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
+import { HostsTableQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();

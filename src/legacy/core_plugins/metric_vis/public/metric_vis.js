@@ -103,7 +103,7 @@ function MetricVisProvider(Private) {
         }, {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

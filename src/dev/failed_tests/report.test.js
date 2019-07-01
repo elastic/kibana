@@ -50,10 +50,10 @@ Array [
       expect(failures).toMatchInlineSnapshot(`
 Array [
   Object {
-    "classname": "X-Pack Jest Tests.x-pack/plugins/code/server/lsp",
+    "classname": "X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp",
     "failure": "
         TypeError: Cannot read property '0' of undefined
-    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
+    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
       ",
     "name": "launcher can reconnect if process died",
     "time": "7.060",
@@ -120,7 +120,7 @@ Wait timed out after 10055ms
       expect(console.log.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
-    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"before all\\" hook
+    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"before all\\" hook
     
           Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
     <html>
@@ -136,7 +136,7 @@ Array [
         ",
   ],
   Array [
-    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"after all\\" hook
+    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"after all\\" hook
     
           TypeError: Cannot read property 'shutdown' of undefined
       at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)
