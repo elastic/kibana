@@ -37,8 +37,8 @@ export const DESTINATION = i18n.translate('xpack.siem.kpiNetwork.source.destinat
   defaultMessage: 'Destination',
 });
 
-export const DIST = i18n.translate('xpack.siem.kpiNetwork.source.distTitle', {
-  defaultMessage: 'Dist.',
+export const DEST = i18n.translate('xpack.siem.kpiNetwork.source.destTitle', {
+  defaultMessage: 'Dest.',
 });
 
 export const LOADING = i18n.translate('xpack.siem.kpiNetwork.source.loadingDescription', {

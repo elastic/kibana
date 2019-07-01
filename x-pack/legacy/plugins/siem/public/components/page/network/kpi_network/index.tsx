@@ -48,7 +48,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueDestinationPrivateIps',
         value: null,
-        name: i18n.DIST,
+        name: i18n.DEST,
         description: i18n.DESTINATION,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
