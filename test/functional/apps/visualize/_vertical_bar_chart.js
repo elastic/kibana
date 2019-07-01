@@ -227,6 +227,19 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('vertical bar in percent mode', async () => {
+      it('should show ticks with percentage values', async function () {
+        const axisId = 'ValueAxis-1';
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions(axisId);
+        await PageObjects.visualize.selectYAxisMode('percentage');
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = ['0%', '20%', '40%', '60%', '80%', '100%'];
+        expect(labels).to.eql(expectedLabels);
+      });
+    });
+
     describe('vertical bar with Split series', function () {
       before(initBarChart);
 
