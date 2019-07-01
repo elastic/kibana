@@ -9,24 +9,23 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
+  HostFields,
+  HostItem,
   HostsEdges,
   HostsFields,
   HostsSortField,
-  HostItem,
-  HostFields,
   OsFields,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import {
+  Columns,
   Criteria,
   ItemsPerRow,
   LoadMoreTable,
-  Columns,
   SortingBasicTable,
 } from '../../../load_more_table';
 
