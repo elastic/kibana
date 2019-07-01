@@ -29,6 +29,8 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
+  getSnapshotHistogram: HistogramDataPoint[];
+
   getMonitorChartsData?: MonitorChart | null;
   /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
@@ -41,8 +43,11 @@ export interface Query {
 }
 
 export interface PingResults {
+  /** Total number of matching pings */
   total: UnsignedInteger;
-
+  /** Unique list of all locations the query matched */
+  locations: string[];
+  /** List of pings */
   pings: Ping[];
 }
 /** A request sent from a monitor to a host */
@@ -386,8 +391,6 @@ export interface Snapshot {
   down?: number | null;
 
   total?: number | null;
-
-  histogram: HistogramDataPoint[];
 }
 
 export interface HistogramDataPoint {
@@ -403,10 +406,8 @@ export interface HistogramDataPoint {
 }
 /** The data used to populate the monitor charts. */
 export interface MonitorChart {
-  /** The max and min values for the monitor duration. */
-  durationArea: MonitorDurationAreaPoint[];
   /** The average values for the monitor duration. */
-  durationLine: MonitorDurationAveragePoint[];
+  locationDurationLines: LocationDurationLine[];
   /** The counts of up/down checks for the monitor. */
   status: StatusData[];
   /** The maximum status doc count in this chart. */
@@ -414,14 +415,11 @@ export interface MonitorChart {
   /** The maximum duration value in this chart. */
   durationMaxValue: number;
 }
-/** Represents a monitor's duration performance in microseconds at a point in time. */
-export interface MonitorDurationAreaPoint {
-  /** The timeseries value for this point in time. */
-  x: UnsignedInteger;
-  /** The min duration value in microseconds at this time. */
-  yMin?: number | null;
-  /** The max duration value in microseconds at this point. */
-  yMax?: number | null;
+
+export interface LocationDurationLine {
+  name: string;
+
+  line: MonitorDurationAveragePoint[];
 }
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {
@@ -489,6 +487,15 @@ export interface DataPoint {
 
   y?: number | null;
 }
+/** Represents a monitor's duration performance in microseconds at a point in time. */
+export interface MonitorDurationAreaPoint {
+  /** The timeseries value for this point in time. */
+  x: UnsignedInteger;
+  /** The min duration value in microseconds at this time. */
+  yMin?: number | null;
+  /** The max duration value in microseconds at this point. */
+  yMax?: number | null;
+}
 
 // ====================================================
 // Arguments
@@ -523,6 +530,15 @@ export interface GetSnapshotQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+}
+export interface GetSnapshotHistogramQueryArgs {
+  dateRangeStart: string;
+
+  dateRangeEnd: string;
+
+  filters?: string | null;
+
+  monitorId?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
   monitorId: string;

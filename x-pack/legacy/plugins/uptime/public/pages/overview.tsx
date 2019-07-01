@@ -5,11 +5,18 @@
  */
 
 // @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiSearchBar, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
+import {
+  EmptyState,
+  ErrorList,
+  FilterBar,
+  MonitorList,
+  Snapshot,
+  SnapshotHistogram,
+} from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
@@ -17,6 +24,7 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface OverviewPageProps {
   basePath: string;
+  logOverviewPageLoad: () => void;
   history: any;
   location: {
     pathname: string;
@@ -31,7 +39,13 @@ export type UptimeSearchBarQueryChangeHandler = (
   queryChangedEvent: { query?: { text: string }; queryText?: string }
 ) => void;
 
-export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
+export const OverviewPage = ({
+  basePath,
+  logOverviewPageLoad,
+  setBreadcrumbs,
+  history,
+  location,
+}: Props) => {
   const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
@@ -40,6 +54,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
+    logOverviewPageLoad();
     if (setHeadingText) {
       setHeadingText(
         i18n.translate('xpack.uptime.overviewPage.headerText', {
@@ -84,12 +99,25 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <Snapshot
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
-          colors={colors}
-          variables={sharedProps}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={4}>
+            <Snapshot
+              absoluteStartDate={absoluteStartDate}
+              absoluteEndDate={absoluteEndDate}
+              colors={colors}
+              variables={sharedProps}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={8}>
+            <SnapshotHistogram
+              absoluteStartDate={absoluteStartDate}
+              absoluteEndDate={absoluteEndDate}
+              successColor={colors.success}
+              dangerColor={colors.danger}
+              variables={sharedProps}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <MonitorList
           absoluteStartDate={absoluteStartDate}
