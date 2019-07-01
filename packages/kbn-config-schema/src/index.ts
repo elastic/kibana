@@ -72,7 +72,7 @@ function uri(options?: URIOptions): Type<string> {
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean>(value: T): Type<T> {
+function literal<T extends string | number | boolean | null>(value: T): Type<T> {
   return new LiteralType(value);
 }
 
