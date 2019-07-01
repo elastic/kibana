@@ -12,6 +12,7 @@ import {
   EuiPopoverTitle,
   EuiExpression,
   EuiFormErrorText,
+  EuiFormHelpText,
 } from '@elastic/eui';
 import { MetricsEditor } from '../../../../shared/components/metrics_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -105,6 +106,12 @@ export class MetricsExpression extends Component {
               defaultMessage="Metrics"
             />
           </EuiPopoverTitle>
+          <EuiFormHelpText className="mapJoinExpressionHelpText">
+            <FormattedMessage
+              id="xpack.maps.layerPanel.metricsExpression.helpText"
+              defaultMessage={`Configure the metrics for the right source. These are the values that are added to this layer's features.`}
+            />
+          </EuiFormHelpText>
           {this._renderMetricsEditor()}
         </div>
       </EuiPopover>
