@@ -41,9 +41,12 @@ pipeline {
       }
     }
     stage('kibana-intake') {
-      agent { label 'linux || immutable' } \        deleteDir()
-        // sh './test/scripts/jenkins_unit.sh'
+      agent { label 'linux || immutable' } 
+      options { skipDefaultCheckout() }
+      steps {
+        deleteDir()
         sh 'echo "Download workspace cache"'
+        // sh './test/scripts/jenkins_unit.sh'
       }
     }
     stage('Component Integration Tests') {
