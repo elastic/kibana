@@ -10,6 +10,7 @@ import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 import {
+  GEO_JSON_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME
@@ -37,26 +38,26 @@ const FILL_LAYER_MB_FILTER = [
   ...VISIBILITY_FILTER_CLAUSE,
   [
     'any',
-    ['==', ['geometry-type'], 'Polygon'],
-    ['==', ['geometry-type'], 'MultiPolygon']
+    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
   ]
 ];
 
 const LINE_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
   [
     'any',
-    ['==', ['geometry-type'], 'Polygon'],
-    ['==', ['geometry-type'], 'MultiPolygon'],
-    ['==', ['geometry-type'], 'LineString'],
-    ['==', ['geometry-type'], 'MultiLineString']
+    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
   ]
 ];
 
 const POINT_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
   [
     'any',
-    ['==', ['geometry-type'], 'Point'],
-    ['==', ['geometry-type'], 'MultiPoint']
+    ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
   ]
 ];
 
