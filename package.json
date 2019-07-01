@@ -169,6 +169,7 @@
     "handlebars": "4.1.2",
     "hapi": "^17.5.3",
     "hapi-auth-cookie": "^9.0.0",
+    "hapi-swaggered": "^3.0.3",
     "hjson": "3.1.2",
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",

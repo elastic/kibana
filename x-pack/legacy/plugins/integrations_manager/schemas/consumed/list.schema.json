@@ -1,11 +1,14 @@
 {
     "$schema": "http://json-schema.org/draft-06/schema#",
-    "type": "array",
-    "items": {
-        "$ref": "#/definitions/ListElement"
-    },
+    "$ref": "#/definitions/IntegrationList",
     "definitions": {
-        "ListElement": {
+        "IntegrationList": {
+          "type": "array",
+          "items": {
+              "$ref": "#/definitions/IntegrationListElement"
+          }
+        },
+        "IntegrationListElement": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -32,7 +35,7 @@
                 "name",
                 "version"
             ],
-            "title": "ListElement"
+            "title": "IntegrationListElement"
         }
     }
 }

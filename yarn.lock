@@ -3672,6 +3672,13 @@
     "@types/podium" "*"
     "@types/shot" "*"
 
+"@types/hapi__joi@*", "@types/hapi__joi@^15.0.2":
+  version "15.0.2"
+  resolved "https://registry.yarnpkg.com/@types/hapi__joi/-/hapi__joi-15.0.2.tgz#94f37e9afab4db6a03f3d9e80dc939eb1f7b9a4f"
+  integrity sha512-EsOuX8cbAdSgp/9mo5NoI4vMnZ68c8Jk1fl3tyA07zd9aOq4q4udsJ2/YjhaFw0u2Zp6hBonUBrKEWotZg7PDQ==
+  dependencies:
+    "@types/hapi__joi" "*"
+
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-3.0.0.tgz#636403dc4e0b2649421c4158e5c404416f3f0330"
@@ -14147,6 +14154,24 @@ hapi-auth-cookie@^9.0.0:
     hoek "5.x.x"
     joi "13.x.x"
 
+hapi-swaggered@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/hapi-swaggered/-/hapi-swaggered-3.0.2.tgz#aaa634cc9e24f2843a1e4735836edf17597db11c"
+  integrity sha512-+eSleEgkeK2iZJobOxeCkSEsbPxZ95g2mxjssSg6odtNJ5/ILMeMFLWavz6h781hRHaUg8TUFDv9cpb3oqrBgA==
+  dependencies:
+    hoek "^5.0.2"
+    joi "^13.0.2"
+    lodash "^4.17.4"
+
+hapi-swaggered@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/hapi-swaggered/-/hapi-swaggered-3.0.3.tgz#b179309a92e2c736acb224ab60621bbe341a92ff"
+  integrity sha512-mr2DsUtsspdM2qbeGuJgAXoAB5ZAHtsufJR48BffaRptHv3DxPtvLn6jgAVvNw/xQ1GOadJApd43LGygt99pZQ==
+  dependencies:
+    hoek "^5.0.3"
+    joi "^13.1.2"
+    lodash "^4.17.5"
+
 hapi@^17.5.3:
   version "17.6.0"
   resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.6.0.tgz#158a2276253a8de727be678c4daeb1f73929e588"
@@ -14509,7 +14534,7 @@ hoek@4.2.1, hoek@4.x.x:
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-4.2.1.tgz#9634502aa12c445dd5a7c5734b572bb8738aacbb"
   integrity sha512-QLg82fGkfnJ/4iy1xZ81/9SIJiq1NGFUMGs6ParyjBZr6jW2Ufj/snDqTHixNlHdPNwN2RLVD0Pi3igeK9+JfA==
 
-hoek@5.x.x, hoek@^5.0.4:
+hoek@5.x.x, hoek@^5.0.2, hoek@^5.0.3, hoek@^5.0.4:
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-5.0.4.tgz#0f7fa270a1cafeb364a4b2ddfaa33f864e4157da"
   integrity sha512-Alr4ZQgoMlnere5FZJsIyfIjORBqZll5POhDsF4q64dPuJR6rNxXdDxtHSQq8OXRurhmx+PWYEE8bXRROY8h0w==
@@ -16723,7 +16748,7 @@ jju@~1.4.0:
   resolved "https://registry.yarnpkg.com/jju/-/jju-1.4.0.tgz#a3abe2718af241a2b2904f84a625970f389ae32a"
   integrity sha1-o6vicYryQaKykE+EpiWXDzia4yo=
 
-joi@13.x.x, joi@^13.5.2:
+joi@13.x.x, joi@^13.0.2, joi@^13.1.2, joi@^13.5.2:
   version "13.7.0"
   resolved "https://registry.yarnpkg.com/joi/-/joi-13.7.0.tgz#cfd85ebfe67e8a1900432400b4d03bbd93fb879f"
   integrity sha512-xuY5VkHfeOYK3Hdi91ulocfuFopwgbSORmIwzcwHKESQhC7w1kD5jaVSPnqDxS2I8t3RZ9omCKAxNwXN5zG1/Q==

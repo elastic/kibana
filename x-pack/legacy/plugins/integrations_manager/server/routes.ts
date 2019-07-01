@@ -26,22 +26,19 @@ interface PostRequest extends Request {
   };
 }
 
-async function defaultFailureHandler(req, h, err) {
-  if (err) {
-    return h.response(err.message);
-  }
-}
-
 // Manager public API paths (currently essentially a proxy to registry service)
 export const routes: ServerRoute[] = [
   {
     method: 'GET',
     path: API_INTEGRATIONS_LIST,
     options: {
-      tags: [`access:${PLUGIN_ID}`],
+      tags: [`access:${PLUGIN_ID}`, 'api'],
       response: {
-        schema: Enjoi.schema(listSchema),
-        failAction: defaultFailureHandler,
+        // TODO: Figure out why we need .meta and to spread
+        schema: Enjoi.schema({
+          ...listSchema,
+          ...listSchema.definitions.IntegrationListElement,
+        }).meta({ className: 'IntegrationListElement' }),
       },
     },
     handler: fetchList,
@@ -50,22 +47,21 @@ export const routes: ServerRoute[] = [
     method: 'GET',
     path: API_INTEGRATIONS_INFO,
     options: {
-      tags: [`access:${PLUGIN_ID}`],
+      tags: [`access:${PLUGIN_ID}`, 'api'],
       validate: {
         params: {
           pkgkey: Joi.string()
-            // TODO: real validation for name-version
-            // switch to name@version
+            // TODO: real validation for name-semver
             .regex(/\w+-\d+\.\d+\.\d+$/)
             .required(),
         },
       },
       response: {
+        // TODO: Figure out why we need .meta and to spread
         schema: Enjoi.schema({
           ...packageSchema,
           ...packageSchema.definitions.Package,
-        }),
-        failAction: defaultFailureHandler,
+        }).meta({ className: 'Package' }),
       },
     },
     handler: async (req: Request) => fetchInfo(req.params.pkgkey),
