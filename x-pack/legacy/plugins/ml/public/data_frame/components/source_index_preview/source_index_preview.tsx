@@ -226,8 +226,12 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
     const render = (d: any) => {
       if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-        // If the cells data is an array of strings, return as a comma separated list
-        return d.map(item => formatField(item)).join(', ');
+        // If the cells data is an array of strings, return as a comma separated list.
+        // The list will get limited to 5 items with `…` at the end if there's more in the original array.
+        return `${d
+          .map(item => formatField(item))
+          .slice(0, 5)
+          .join(', ')}${d.length > 5 ? ', …' : ''}`;
       } else if (Array.isArray(d)) {
         // If the cells data is an array of e.g. objects, display a 'array' badge with a
         // tooltip that explains that this type of field is not supported in this table.
