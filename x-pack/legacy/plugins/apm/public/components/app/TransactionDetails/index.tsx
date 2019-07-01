@@ -44,9 +44,7 @@ export function TransactionDetails() {
       </ApmHeader>
 
       <ChartsTimeContextProvider>
-        <EuiPanel>
-          <TransactionBreakdown />
-        </EuiPanel>
+        <TransactionBreakdown />
 
         <EuiSpacer size="s" />
 
