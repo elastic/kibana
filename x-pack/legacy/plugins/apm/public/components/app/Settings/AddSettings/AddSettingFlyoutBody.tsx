@@ -18,9 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { Config } from '../ListSettings';
-
-export const ENVIRONMENT_NOT_SET = 'ENVIRONMENT_NOT_SET';
+import { Config } from '../SettingsList';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
 export function AddSettingFlyoutBody({
   selectedConfig,
@@ -44,8 +43,8 @@ export function AddSettingFlyoutBody({
   setEnvironment: React.Dispatch<React.SetStateAction<string | undefined>>;
   serviceName?: string;
   setServiceName: React.Dispatch<React.SetStateAction<string | undefined>>;
-  sampleRate: string | number;
-  setSampleRate: React.Dispatch<React.SetStateAction<string | number>>;
+  sampleRate: number;
+  setSampleRate: React.Dispatch<React.SetStateAction<number>>;
   serviceNames: string[];
   serviceNamesStatus?: FETCH_STATUS;
   environments: Array<{
@@ -59,7 +58,7 @@ export function AddSettingFlyoutBody({
   const environmentOptions = environments.map(({ name, available }) => ({
     disabled: !available,
     text:
-      name === ENVIRONMENT_NOT_SET
+      name === ENVIRONMENT_NOT_DEFINED
         ? i18n.translate(
             'xpack.apm.settings.cm.flyOut.serviceEnvironmentNotSetOptionLabel',
             {
@@ -142,7 +141,7 @@ export function AddSettingFlyoutBody({
                 environment &&
                 isSelectedEnvironmentValid &&
                 environmentStatus === 'success') ||
-              sampleRate === ''
+              isNaN(sampleRate)
             )
           }
         >
@@ -196,10 +195,10 @@ export function AddSettingFlyoutBody({
           isInvalid={
             !(
               (Boolean(selectedConfig) &&
-                (sampleRate === '' || isSampleRateValid)) ||
+                (isNaN(sampleRate) || isSampleRateValid)) ||
               (!selectedConfig &&
                 (!(serviceName || environment) ||
-                  (sampleRate === '' || isSampleRateValid)))
+                  (isNaN(sampleRate) || isSampleRateValid)))
             )
           }
         >
@@ -213,12 +212,10 @@ export function AddSettingFlyoutBody({
                 defaultMessage: 'Set sample rate'
               }
             )}
-            value={sampleRate}
+            value={isNaN(sampleRate) ? '' : sampleRate}
             onChange={e => {
               e.preventDefault();
-              const parsedValue = parseFloat(e.target.value);
-
-              setSampleRate(isNaN(parsedValue) ? '' : parsedValue);
+              setSampleRate(parseFloat(e.target.value));
             }}
           />
         </EuiFormRow>

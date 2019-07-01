@@ -22,20 +22,17 @@ import React, { useState } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isNumber } from 'util';
-import {
-  AddSettingFlyoutBody,
-  ENVIRONMENT_NOT_SET
-} from './AddSettingFlyoutBody';
-import { Config } from '../ListSettings';
+import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
+import { Config } from '../SettingsList';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import {
   loadCMServices,
   loadCMEnvironments,
   deleteCMConfiguration,
   updateCMConfiguration,
-  saveCMConfiguration
+  createCMConfiguration
 } from '../../../../services/rest/apm/settings';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
 interface Props {
   onClose: () => void;
@@ -56,18 +53,20 @@ export function AddSettingsFlyout({
 
   const [environment, setEnvironment] = useState<string | undefined>(
     selectedConfig
-      ? selectedConfig.service.environment || ENVIRONMENT_NOT_SET
+      ? selectedConfig.service.environment || ENVIRONMENT_NOT_DEFINED
       : undefined
   );
   const [serviceName, setServiceName] = useState<string | undefined>(
     selectedConfig ? selectedConfig.service.name : undefined
   );
-  const [sampleRate, setSampleRate] = useState<number | string>(
-    selectedConfig ? parseFloat(selectedConfig.settings.sample_rate) : ''
+  const [sampleRate, setSampleRate] = useState<number>(
+    selectedConfig ? parseFloat(selectedConfig.settings.sample_rate) : NaN
   );
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher<
     string[]
-  >(loadCMServices, [], { preservePreviousResponse: false });
+  >(async () => (await loadCMServices()).sort(), [], {
+    preservePreviousResponse: false
+  });
   const { data: environments = [], status: environmentStatus } = useFetcher<
     Array<{ name: string; available: boolean }>
   >(
@@ -83,8 +82,7 @@ export function AddSettingsFlyout({
     env =>
       env.name === environment && (Boolean(selectedConfig) || env.available)
   );
-  const isSampleRateValid =
-    isNumber(sampleRate) && sampleRate >= 0 && sampleRate <= 1;
+  const isSampleRateValid = sampleRate >= 0 && sampleRate <= 1;
 
   return (
     <EuiPortal>
@@ -231,10 +229,10 @@ async function deleteConfig(selectedConfig: Config) {
       text: (
         <FormattedMessage
           id="xpack.apm.settings.cm.deleteConfigFailedText"
-          defaultMessage="Something when wrong when deleting a configuration for {serviceName}. Error: {errorMessage}"
+          defaultMessage="Something went wrong when deleting a configuration for {serviceName}. Error: {errorMessage}"
           values={{
             serviceName: `"${selectedConfig.service.name}"`,
-            errrorMessage: `"${error.message}"`
+            errorMessage: `"${error.message}"`
           }}
         />
       )
@@ -248,13 +246,13 @@ async function saveConfig({
   environment,
   configurationId
 }: {
-  sampleRate: number | string;
+  sampleRate: number;
   serviceName: string | undefined;
   environment: string | undefined;
   configurationId?: string;
 }) {
   try {
-    if (!isNumber(sampleRate) || !serviceName) {
+    if (isNaN(sampleRate) || !serviceName) {
       throw new Error('Missing arguments');
     }
 
@@ -265,7 +263,7 @@ async function saveConfig({
       service: {
         name: serviceName,
         environment:
-          environment === ENVIRONMENT_NOT_SET ? undefined : environment
+          environment === ENVIRONMENT_NOT_DEFINED ? undefined : environment
       }
     };
 
@@ -289,7 +287,7 @@ async function saveConfig({
         )
       });
     } else {
-      await saveCMConfiguration(configuration);
+      await createCMConfiguration(configuration);
       toastNotifications.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.cm.createConfigSucceededTitle',
@@ -317,10 +315,10 @@ async function saveConfig({
         text: (
           <FormattedMessage
             id="xpack.apm.settings.cm.editConfigFailedText"
-            defaultMessage="Something when wrong when editing the configuration for {serviceName}. Error: {errorMessage}"
+            defaultMessage="Something went wrong when editing the configuration for {serviceName}. Error: {errorMessage}"
             values={{
               serviceName: `"${serviceName}"`,
-              errrorMessage: `"${error.message}"`
+              errorMessage: `"${error.message}"`
             }}
           />
         )
@@ -333,10 +331,10 @@ async function saveConfig({
         text: (
           <FormattedMessage
             id="xpack.apm.settings.cm.createConfigFailedText"
-            defaultMessage="Something when wrong when creating a configuration for {serviceName}. Error: {errorMessage}"
+            defaultMessage="Something went wrong when creating a configuration for {serviceName}. Error: {errorMessage}"
             values={{
               serviceName: `"${serviceName}"`,
-              errrorMessage: `"${error.message}"`
+              errorMessage: `"${error.message}"`
             }}
           />
         )

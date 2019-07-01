@@ -8,7 +8,7 @@ import { CMUpdateConfigurationAPIResponse } from '../../../../server/lib/setting
 import { callApi } from '../callApi';
 import { CentralConfigurationIntake } from '../../../../server/lib/settings/cm/configuration';
 import { CMServicesAPIResponse } from '../../../../server/lib/settings/cm/get_service_names';
-import { CMSaveConfigurationAPIResponse } from '../../../../server/lib/settings/cm/save_configuration';
+import { CMCreateConfigurationAPIResponse } from '../../../../server/lib/settings/cm/create_configuration';
 import { CMListAPIResponse } from '../../../../server/lib/settings/cm/list_configurations';
 import { CMEnvironmentsAPIResponse } from '../../../../server/lib/settings/cm/get_environments';
 
@@ -28,10 +28,10 @@ export async function loadCMEnvironments({
   });
 }
 
-export async function saveCMConfiguration(
+export async function createCMConfiguration(
   configuration: CentralConfigurationIntake
 ) {
-  return callApi<CMSaveConfigurationAPIResponse>({
+  return callApi<CMCreateConfigurationAPIResponse>({
     pathname: `/api/apm/settings/cm/new`,
     method: 'POST',
     body: JSON.stringify(configuration)

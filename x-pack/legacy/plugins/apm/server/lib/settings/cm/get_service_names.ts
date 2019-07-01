@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx/target';
 import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../typings/common';
 import {
@@ -43,7 +42,6 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
   };
 
   const resp = await client.search(params);
-  const aggs = resp.aggregations;
-  const buckets = idx(aggs, _ => _.services.buckets) || [];
+  const buckets = resp.aggregations.services.buckets;
   return buckets.map(bucket => bucket.key);
 }

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAllEnvionments } from './get_all_environments';
+import { getAllEnvironments } from './get_all_environments';
 import { Setup } from '../../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../../typings/common';
-import { getUnavailableEnvionments } from './get_unavailable_environments';
+import { getUnavailableEnvironments } from './get_unavailable_environments';
 
 export type CMEnvironmentsAPIResponse = PromiseReturnType<
   typeof getEnvironments
@@ -21,8 +21,8 @@ export async function getEnvironments({
   setup: Setup;
 }) {
   const [allEnvironments, unavailableEnvironments] = await Promise.all([
-    getAllEnvionments({ serviceName, setup }),
-    getUnavailableEnvionments({ serviceName, setup })
+    getAllEnvironments({ serviceName, setup }),
+    getUnavailableEnvironments({ serviceName, setup })
   ]);
 
   return allEnvironments.map(environment => {

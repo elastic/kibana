@@ -30,20 +30,22 @@ import { APMLink } from '../../shared/Links/APMLink';
 
 export type Config = CMListAPIResponse[0];
 
-export function ListSettings() {
+export function SettingsList() {
   const { data = [], refresh } = useFetcher(loadCMList, []);
   const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const COLUMNS: Array<ITableColumn<Config>> = [
     {
+      field: 'service.name',
       name: i18n.translate(
         'xpack.apm.settings.cm.configTable.serviceNameColumnLabel',
         {
           defaultMessage: 'Service name'
         }
       ),
-      render: (config: Config) => (
+      sortable: true,
+      render: (_, config: Config) => (
         <EuiButtonEmpty
           size="s"
           color="primary"
@@ -243,7 +245,12 @@ export function ListSettings() {
         <EuiSpacer size="m" />
 
         {hasConfigurations ? (
-          <ManagedTable columns={COLUMNS} items={data} initialPageSize={50} />
+          <ManagedTable
+            columns={COLUMNS}
+            items={data}
+            initialSort={{ field: 'service.name', direction: 'asc' }}
+            initialPageSize={50}
+          />
         ) : (
           <EuiEmptyPrompt
             iconType="controlsHorizontal"

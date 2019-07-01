@@ -9,7 +9,7 @@ import { InternalCoreSetup } from 'src/core/server';
 import Joi from 'joi';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNames } from '../lib/settings/cm/get_service_names';
-import { saveConfiguration } from '../lib/settings/cm/save_configuration';
+import { createConfiguration } from '../lib/settings/cm/create_configuration';
 import { updateConfiguration } from '../lib/settings/cm/update_configuration';
 import { CentralConfigurationIntake } from '../lib/settings/cm/configuration';
 import { searchConfigurations } from '../lib/settings/cm/search';
@@ -113,7 +113,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
     }
   });
 
-  // store configuration
+  // create configuration
   server.route({
     method: 'POST',
     path: `/api/apm/settings/cm/new`,
@@ -128,7 +128,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
     handler: async req => {
       const setup = setupRequest(req);
       const configuration = req.payload as CentralConfigurationIntake;
-      return await saveConfiguration({
+      return await createConfiguration({
         configuration,
         setup
       }).catch(defaultErrorHandler);

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx/target';
 import { Setup } from '../../../helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
-export async function getAllEnvionments({
+export async function getAllEnvironments({
   serviceName,
   setup
 }: {
@@ -43,7 +43,7 @@ export async function getAllEnvionments({
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            missing: 'ENVIRONMENT_NOT_SET',
+            missing: ENVIRONMENT_NOT_DEFINED,
             size: 100
           }
         }
@@ -52,7 +52,6 @@ export async function getAllEnvionments({
   };
 
   const resp = await client.search(params);
-  const aggs = resp.aggregations;
-  const buckets = idx(aggs, _ => _.environments.buckets) || [];
+  const buckets = resp.aggregations.environments.buckets;
   return buckets.map(bucket => bucket.key);
 }

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx/target';
 import { Setup } from '../../../helpers/setup_request';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
-export async function getUnavailableEnvionments({
+export async function getUnavailableEnvironments({
   serviceName,
   setup
 }: {
@@ -33,7 +33,7 @@ export async function getUnavailableEnvionments({
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            missing: 'ENVIRONMENT_NOT_SET',
+            missing: ENVIRONMENT_NOT_DEFINED,
             size: 100
           }
         }
@@ -42,7 +42,6 @@ export async function getUnavailableEnvionments({
   };
 
   const resp = await client.search(params);
-  const aggs = resp.aggregations;
-  const buckets = idx(aggs, _ => _.environments.buckets) || [];
+  const buckets = resp.aggregations.environments.buckets;
   return buckets.map(bucket => bucket.key);
 }

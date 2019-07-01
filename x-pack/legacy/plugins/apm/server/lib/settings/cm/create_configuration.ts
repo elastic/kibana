@@ -8,10 +8,10 @@ import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../typings/common';
 import { CentralConfigurationIntake } from './configuration';
 
-export type CMSaveConfigurationAPIResponse = PromiseReturnType<
-  typeof saveConfiguration
+export type CMCreateConfigurationAPIResponse = PromiseReturnType<
+  typeof createConfiguration
 >;
-export async function saveConfiguration({
+export async function createConfiguration({
   configuration,
   setup
 }: {

@@ -37,7 +37,7 @@ interface Props<T> {
   initialPageSize?: number;
   hidePerPageOptions?: boolean;
   initialSort?: {
-    field: Extract<keyof T, string>;
+    field: Required<ITableColumn<T>>['field'];
     direction: string;
   };
   noItemsMessage?: React.ReactNode;

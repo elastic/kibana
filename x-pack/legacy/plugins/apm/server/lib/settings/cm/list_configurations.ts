@@ -16,11 +16,6 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
     index: config.get<string>('apm_oss.cmIndex')
   };
 
-  // const resp = await client<CentralConfiguration>('search', params);
-  // return resp.hits.hits.map(item => ({
-  //   id: item._id,
-  //   ...item._source
-  // }));
   const resp = await client.search<CentralConfiguration>(params);
   return resp.hits.hits.map(item => ({
     id: item._id,
