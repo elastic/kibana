@@ -22,15 +22,17 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    stage('Extract Boot Cache, Setup, and Checkout Sibling Elastic Search') {
+    // stage('Extract Boot Cache, Setup, and Checkout Sibling Elastic Search') {
+    stage('Extract Boot Cache') {
       agent { label 'linux || immutable' } 
       steps {
         dir("${env.BASE_DIR}"){
           script {
             dumpEnv()
           }
-          sh '${CI_DIR}run_pipeline.sh'
-          sh 'echo "\n\t### create and upload workspace cache to gcs"'
+          // sh '${CI_DIR}run_pipeline.sh'
+          sh 'src/dev/temp_pipeline_setup/extract_bootstrap_cache.sh'
+          sh 'echo "\n\t### [TODO] create and upload workspace cache to gcs"'
         }
       }
     }
