@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { HelloWorldAction, SayHelloAction, EmptyEmbeddable } from '../test_samples/index';
+import { SayHelloAction } from '../test_samples/actions/say_hello_action';
+import { HelloWorldAction } from '../test_samples/actions/hello_world_action';
+import { EmptyEmbeddable } from '../test_samples/embeddables/empty_embeddable';
 
 test('SayHelloAction is not compatible with not matching embeddables', async () => {
   const sayHelloAction = new SayHelloAction(() => {});
