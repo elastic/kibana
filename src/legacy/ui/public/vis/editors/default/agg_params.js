@@ -27,6 +27,7 @@ import { editorConfigProviders } from '../config/editor_config_providers';
 import advancedToggleHtml from './advanced_toggle.html';
 import './agg_param';
 import './agg_select';
+import './controls/agg_controls';
 import aggParamsTemplate from './agg_params.html';
 import { groupAggregationsBy } from './default_editor_utils';
 
@@ -64,9 +65,10 @@ uiModules
           }
         };
 
-        $scope.onParamChange = (agg, paramName, value) => {
-          if(agg.params[paramName] !== value) {
-            agg.params[paramName] = value;
+        // params could be either agg.params or state.params
+        $scope.onParamChange = (params, paramName, value) => {
+          if(params[paramName] !== value) {
+            params[paramName] = value;
           }
         };
 
@@ -94,19 +96,6 @@ uiModules
 
         updateEditorConfig();
         $scope.$watchCollection('agg.params', updateEditorConfig);
-
-        // this will contain the controls for the schema (rows or columns?), which are unrelated to
-        // controls for the agg, which is why they are first
-        addSchemaEditor();
-
-        function addSchemaEditor() {
-          const $schemaEditor = $('<div>').addClass('schemaEditors form-group').appendTo($el);
-
-          if ($scope.agg.schema.editor) {
-            $schemaEditor.append($scope.agg.schema.editor);
-            $compile($schemaEditor)($scope.$new());
-          }
-        }
 
         // params for the selected agg, these are rebuilt every time the agg in $aggSelect changes
         let $aggParamEditors; //  container for agg type param editors

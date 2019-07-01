@@ -1,0 +1,99 @@
+[role="xpack"]
+[[xpack-logs-using]]
+== Using the Logs UI
+
+Customize the Logs UI to focus on the data you want to see and control how you see it.
+
+[role="screenshot"]
+image::logs/images/logs-console.png[Log Console in Kibana]
+
+[float]
+[[logs-search]]
+=== Use the power of Search
+The Search bar is always available. Use it to perform adhoc and structured
+searches by taking advantage of the <<kuery-query>> with autocompletion
+suggestions.
+
+[role="screenshot"]
+image::logs/images/logs-usage-query-bar.png[Logs query bar]
+
+[float]
+[[logs-configure-source]]
+=== Adapt to your log source
+Using a custom index pattern to store the log entries, want to limit the
+entries presented in a space or change the fields displayed in the columns? Use
+<<xpack-logs-configuring,configure source>> to change the index pattern and
+other settings.
+
+[role="screenshot"]
+image::logs/images/logs-usage-column-headers.png[Logs column headers]
+
+[float]
+[[logs-time]]
+=== Jump to a specific time period
+Use the time selector to focus on a specific timeframe.
+
+[role="screenshot"]
+image::logs/images/logs-usage-time-picker.png[Logs time selector]
+
+To quickly jump to a nearby point in time, click on the timeline to the right.
+
+[role="screenshot"]
+image::logs/images/logs-usage-timeline.png[Logs timeline]
+
+
+[float]
+[[logs-customize]]
+=== Customize your view
+Use *Customize* to adjust your console view and to set the time scale of the log data.
+
+* *Text size.*  Select `Small`, `Medium`, or `Large`.
+* *Wrap long lines.* Enable or disable line wrap.
+* *Minimap Scale.* Set the scale to 'year', 'month', 'week', 'day', 'hour', or 'minute'.
+
+[role="screenshot"]
+image::logs/images/logs-usage-customize.png[Logs view customization popover]
+
+[float]
+[[logs-stream]]
+=== Stream or pause logs
+You can stream data for live log tailing, or pause streaming to focus on historical log data.
+
+[role="screenshot"]
+image::logs/images/logs-usage-start-streaming.png[Logs start streaming]
+
+[role="screenshot"]
+image::logs/images/logs-usage-stop-streaming.png[Logs stop streaming]
+
+When you are streaming logs, the most recent log appears at the bottom on the console.
+
+[role="screenshot"]
+image::logs/images/logs-usage-streaming-indicator.png[Logs streaming indicator]
+
+Historical data offers infinite scrolling.
+
+[float]
+[[logs-event-inspector]]
+=== Inspect a log event
+Click on a log event in the stream to inspect it.
+
+[role="screenshot"]
+image::logs/images/logs-stream-click-entry.png[Highlighted log gentry in the stream]
+
+This will display a list of all of the fields associated with this log event.
+
+[role="screenshot"]
+image::logs/images/log-details-flyover.png[Log event document details flyover]
+
+By clicking the icon next to one of the listed values, you can filter the logs stream to display only events corresponding to that particular value.
+
+[role="screenshot"]
+image::logs/images/log-details-filter.png[Filtering from the log event details flyover]
+
+[role="screenshot"]
+image::logs/images/logs-stream-filtered-by-value.png[Log console after filtering by a value in the details flyover]
+
+You can use the Actions menu to view any monitor or APM trace that the log event may be associated with.
+
+[role="screenshot"]
+image::logs/images/log-details-actions.png[Log event document details with actions menu open]

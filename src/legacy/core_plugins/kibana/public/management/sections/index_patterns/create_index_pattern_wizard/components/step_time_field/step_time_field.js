@@ -127,12 +127,9 @@ export class StepTimeFieldComponent extends Component {
     } catch (error) {
       if (!this.mounted) return;
       this.setState({
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
+        isCreating: false,
       });
-    } finally {
-      if (this.mounted) {
-        this.setState({ isCreating: false });
-      }
     }
   }
 

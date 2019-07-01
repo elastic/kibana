@@ -29,15 +29,13 @@ jest.mock('./ui/inspector_panel', () => ({
 jest.mock('ui/i18n', () => ({ I18nContext: ({ children }) => children }));
 
 jest.mock('ui/new_platform', () => ({
-  getNewPlatform: () => ({
-    start: {
-      core: {
-        overlay: {
-          openFlyout: jest.fn(),
-        },
-      }
+  npStart: {
+    core: {
+      overlay: {
+        openFlyout: jest.fn(),
+      },
     }
-  }),
+  },
 }));
 
 import { viewRegistry } from './view_registry';

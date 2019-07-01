@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BarChartBaseComponent render with customized configs should 2 render BarSeries 1`] = `[Function]`;
+
+exports[`BarChartBaseComponent render with default configs if no customized configs given should 2 render BarSeries 1`] = `[Function]`;

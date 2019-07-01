@@ -24,7 +24,6 @@ import { calculateLabel } from '../../../../../common/calculate_label';
 export function seriesAgg(resp, panel, series) {
   return next => results => {
     if (series.aggregate_by && series.aggregate_function) {
-
       const targetSeries = [];
       // Filter out the seires with the matching metric and store them
       // in targetSeries
@@ -46,4 +45,3 @@ export function seriesAgg(resp, panel, series) {
     return next(results);
   };
 }
-

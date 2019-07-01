@@ -8,10 +8,13 @@ export default function ({ loadTestFile }) {
   describe('apis', function () {
     this.tags('ciGroup6');
 
+    loadTestFile(require.resolve('./actions'));
+    loadTestFile(require.resolve('./alerting'));
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
+    loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./infra'));
@@ -23,5 +26,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./siem'));
     loadTestFile(require.resolve('./code'));
+    loadTestFile(require.resolve('./short_urls'));
   });
 }

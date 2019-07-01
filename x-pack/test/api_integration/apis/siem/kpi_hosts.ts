@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { kpiHostsQuery } from '../../../../plugins/siem/public/containers/kpi_hosts/index.gql_query';
-import { GetKpiHostsQuery } from '../../../../plugins/siem/public/graphql/types';
+import { kpiHostsQuery } from '../../../../legacy/plugins/siem/public/containers/kpi_hosts/index.gql_query';
+import { GetKpiHostsQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const kpiHostsTests: KbnTestProvider = ({ getService }) => {
@@ -24,121 +24,73 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         hosts: 1,
         hostsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 1,
-            },
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 0,
-            },
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 1,
-            },
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 1,
-            },
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
         ],
         authSuccess: 0,
-        authSuccessHistogram: [],
+        authSuccessHistogram: null,
         authFailure: 0,
-        authFailureHistogram: [],
+        authFailureHistogram: null,
         uniqueSourceIps: 121,
         uniqueSourceIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 52,
-            },
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 52,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 0,
-            },
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 31,
-            },
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 31,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 88,
-            },
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 88,
             __typename: 'KpiHostHistogramData',
           },
         ],
         uniqueDestinationIps: 154,
         uniqueDestinationIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 61,
-            },
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 61,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 0,
-            },
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 45,
-            },
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 45,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 114,
-            },
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 114,
             __typename: 'KpiHostHistogramData',
           },
         ],
@@ -176,121 +128,73 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         hosts: 1,
         hostsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 1,
-            },
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 0,
-            },
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 1,
-            },
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 1,
-            },
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
         ],
         authSuccess: 0,
-        authSuccessHistogram: [],
+        authSuccessHistogram: null,
         authFailure: 0,
-        authFailureHistogram: [],
+        authFailureHistogram: null,
         uniqueSourceIps: 121,
         uniqueSourceIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 52,
-            },
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 52,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 0,
-            },
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 31,
-            },
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 31,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 88,
-            },
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 88,
             __typename: 'KpiHostHistogramData',
           },
         ],
         uniqueDestinationIps: 154,
         uniqueDestinationIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 61,
-            },
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+            y: 61,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 0,
-            },
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 45,
-            },
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
+            y: 45,
             __typename: 'KpiHostHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'Count',
-              doc_count: null,
-              value: 114,
-            },
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
+            y: 114,
             __typename: 'KpiHostHistogramData',
           },
         ],

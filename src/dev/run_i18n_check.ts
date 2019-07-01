@@ -20,8 +20,8 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { integrateLocaleFiles, mergeConfigs } from './i18n';
-import { extractDefaultMessages } from './i18n/tasks';
+import { ErrorReporter, mergeConfigs } from './i18n';
+import { extractDefaultMessages, extractUntrackedMessages, checkCompatibility } from './i18n/tasks';
 import { createFailError, run } from './run';
 
 run(
@@ -60,48 +60,58 @@ run(
     }
 
     const config = await mergeConfigs(includeConfig);
-    const defaultMessages = await extractDefaultMessages({ path, config });
+    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
     if (config.translations.length === 0) {
       return;
     }
 
     const list = new Listr(
-      config.translations.map(translationsPath => ({
-        task: async () => {
-          // If `--fix` is set we should try apply all possible fixes and override translations file.
-          await integrateLocaleFiles(defaultMessages, {
-            sourceFileName: translationsPath,
-            targetFileName: fix ? translationsPath : undefined,
-            dryRun: !fix,
-            ignoreIncompatible: fix || !!ignoreIncompatible,
-            ignoreUnused: fix || !!ignoreUnused,
-            ignoreMissing: fix || !!ignoreMissing,
-            config,
-            log,
-          });
+      [
+        {
+          title: 'Checking For Untracked Messages based on .i18nrc.json',
+          task: () => new Listr(extractUntrackedMessages(srcPaths, config), { exitOnError: true }),
         },
-        title: `Compatibility check with ${translationsPath}`,
-      })),
+        {
+          title: 'Validating Default Messages',
+          task: () =>
+            new Listr(extractDefaultMessages({ path: srcPaths, config }), { exitOnError: true }),
+        },
+        {
+          title: 'Compatibility Checks',
+          task: () =>
+            new Listr(
+              checkCompatibility(
+                config,
+                {
+                  ignoreIncompatible: !!ignoreIncompatible,
+                  ignoreUnused: !!ignoreUnused,
+                  ignoreMissing: !!ignoreMissing,
+                  fix,
+                },
+                log
+              ),
+              { exitOnError: true }
+            ),
+        },
+      ],
       {
-        concurrent: true,
-        exitOnError: false,
+        concurrent: false,
+        exitOnError: true,
       }
     );
 
     try {
-      await list.run();
+      const reporter = new ErrorReporter();
+      const messages: Map<string, { message: string }> = new Map();
+      await list.run({ messages, reporter });
     } catch (error) {
       process.exitCode = 1;
-
-      if (!error.errors) {
+      if (error instanceof ErrorReporter) {
+        error.errors.forEach((e: string | Error) => log.error(e));
+      } else {
         log.error('Unhandled exception!');
         log.error(error);
-        process.exit();
-      }
-
-      for (const e of error.errors) {
-        log.error(e);
       }
     }
   },

@@ -23,13 +23,12 @@ export function getAxisLabelString(interval) {
   const convertedValue = convertIntervalIntoUnit(interval);
 
   if (convertedValue) {
-    return i18n.translate('tsvb.axisLabelOptions.axisLabel',
-      {
-        defaultMessage: 'per {unitValue} {unitString}',
-        values: {
-          unitValue: convertedValue.unitValue,
-          unitString: convertedValue.unitString,
-        },
-      });
+    return i18n.translate('tsvb.axisLabelOptions.axisLabel', {
+      defaultMessage: 'per {unitValue} {unitString}',
+      values: {
+        unitValue: convertedValue.unitValue,
+        unitString: convertedValue.unitString,
+      },
+    });
   }
 }

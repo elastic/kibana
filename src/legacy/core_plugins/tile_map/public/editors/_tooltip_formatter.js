@@ -18,13 +18,14 @@
  */
 
 import $ from 'jquery';
-
 import { i18n } from '@kbn/i18n';
+
+import template from './_tooltip.html';
 
 export function TileMapTooltipFormatterProvider($compile, $rootScope) {
 
   const $tooltipScope = $rootScope.$new();
-  const $el = $('<div>').html(require('./_tooltip.html'));
+  const $el = $('<div>').html(template);
   $compile($el)($tooltipScope);
 
   return function tooltipFormatter(aggConfig, metricAgg, feature) {

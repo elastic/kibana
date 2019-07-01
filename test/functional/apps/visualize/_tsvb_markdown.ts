@@ -112,6 +112,23 @@ export default function({ getPageObjects }: FtrProviderContext) {
 
         await cleanupMarkdownData(VARIABLE, VARIABLE);
       });
+
+      it('series length should be 2 after cloning', async () => {
+        await visualBuilder.markdownSwitchSubTab('data');
+        await visualBuilder.cloneSeries();
+        const seriesLength = (await visualBuilder.getSeries()).length;
+
+        expect(seriesLength).to.be.equal(2);
+      });
+
+      it('aggregation length should be 2 after cloning', async () => {
+        await visualBuilder.markdownSwitchSubTab('data');
+
+        await visualBuilder.createNewAgg();
+        const aggregationLength = await visualBuilder.getAggregationCount();
+
+        expect(aggregationLength).to.be.equal(2);
+      });
     });
   });
 }

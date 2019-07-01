@@ -126,6 +126,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
+          // for this sleep see https://github.com/elastic/kibana/issues/22299
+          await PageObjects.common.sleep(500);
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();

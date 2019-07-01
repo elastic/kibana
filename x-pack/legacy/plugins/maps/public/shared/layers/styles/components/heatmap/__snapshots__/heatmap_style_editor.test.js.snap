@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeatmapStyleEditor is rendered 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  label="Color range"
+  labelType="label"
+>
+  <EuiSuperSelect
+    compressed={false}
+    fullWidth={false}
+    hasDividers={true}
+    isInvalid={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "inputDisplay": <ColorGradient
+            colorRamp={
+              Array [
+                "rgb(65, 105, 225)",
+                "rgb(0, 256, 256)",
+                "rgb(0, 256, 0)",
+                "rgb(256, 256, 0)",
+                "rgb(256, 0, 0)",
+              ]
+            }
+          />,
+          "text": "theclassic",
+          "value": "theclassic",
+        },
+        Object {
+          "inputDisplay": <ColorGradient
+            colorRampName="Blues"
+          />,
+          "text": "Blues",
+          "value": "Blues",
+        },
+        Object {
+          "inputDisplay": <ColorGradient
+            colorRampName="Greens"
+          />,
+          "text": "Greens",
+          "value": "Greens",
+        },
+        Object {
+          "inputDisplay": <ColorGradient
+            colorRampName="Greys"
+          />,
+          "text": "Greys",
+          "value": "Greys",
+        },
+        Object {
+          "inputDisplay": <ColorGradient
+            colorRampName="Reds"
+          />,
+          "text": "Reds",
+          "value": "Reds",
+        },
+        Object {
+          "inputDisplay": <ColorGradient
+            colorRampName="Yellow to Red"
+          />,
+          "text": "Yellow to Red",
+          "value": "Yellow to Red",
+        },
+        Object {
+          "inputDisplay": <ColorGradient
+            colorRampName="Green to Red"
+          />,
+          "text": "Green to Red",
+          "value": "Green to Red",
+        },
+      ]
+    }
+    valueOfSelected="Blues"
+  />
+</EuiFormRow>
+`;

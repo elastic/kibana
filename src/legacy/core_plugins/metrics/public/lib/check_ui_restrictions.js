@@ -40,7 +40,11 @@ export const isMetricEnabled = (key, restrictions) => {
 
 export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_RESTRICTION) => {
   if (isMetricEnabled(metricType, restrictions)) {
-    return checkUIRestrictions(field, restrictions[RESTRICTION_TYPES.WHITE_LISTER_METRICS], metricType);
+    return checkUIRestrictions(
+      field,
+      restrictions[RESTRICTION_TYPES.WHITE_LISTER_METRICS],
+      metricType
+    );
   }
   return false;
 };

@@ -24,15 +24,17 @@ import { extractIndexPatterns } from '../../common/extract_index_patterns';
 export async function fetchFields(indexPatterns = ['*']) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
   try {
-    const indexFields = await Promise.all(patterns.map((pattern) => {
-      return kfetch({
-        method: 'GET',
-        pathname: '/api/metrics/fields',
-        query: {
-          index: pattern,
-        },
-      });
-    }));
+    const indexFields = await Promise.all(
+      patterns.map(pattern => {
+        return kfetch({
+          method: 'GET',
+          pathname: '/api/metrics/fields',
+          query: {
+            index: pattern,
+          },
+        });
+      })
+    );
     const fields = patterns.reduce((cumulatedFields, currentPattern, index) => {
       return {
         ...cumulatedFields,

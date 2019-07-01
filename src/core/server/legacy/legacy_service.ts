@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
@@ -27,7 +26,6 @@ import { CoreContext } from '../core_context';
 import { DevConfig, DevConfigType } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
-import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -48,6 +46,16 @@ function getLegacyRawConfig(config: Config) {
   return rawConfig;
 }
 
+interface SetupDeps {
+  core: InternalCoreSetup;
+  plugins: Record<string, unknown>;
+}
+
+interface StartDeps {
+  core: InternalCoreStart;
+  plugins: Record<string, unknown>;
+}
+
 /** @internal */
 export class LegacyService implements CoreService {
   private readonly log: Logger;
@@ -55,7 +63,7 @@ export class LegacyService implements CoreService {
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
-  private setupDeps?: InternalCoreSetup;
+  private setupDeps?: SetupDeps;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
@@ -66,10 +74,10 @@ export class LegacyService implements CoreService {
       .atPath<HttpConfigType>('server')
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
   }
-  public async setup(setupDeps: InternalCoreSetup) {
+  public async setup(setupDeps: SetupDeps) {
     this.setupDeps = setupDeps;
   }
-  public async start(startDeps: InternalCoreStart) {
+  public async start(startDeps: StartDeps) {
     const { setupDeps } = this;
     if (!setupDeps) {
       throw new Error('Legacy service is not setup yet.');
@@ -135,25 +143,10 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(
-    config: Config,
-    setupDeps: InternalCoreSetup,
-    startDeps: InternalCoreStart
-  ) {
+  private async createKbnServer(config: Config, setupDeps: SetupDeps, startDeps: StartDeps) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
-      // If core HTTP service is run we'll receive internal server reference and
-      // options that were used to create that server so that we can properly
-      // bridge with the "legacy" Kibana. If server isn't run (e.g. if process is
-      // managed by ClusterManager or optimizer) then we won't have that info,
-      // so we can't start "legacy" server either.
-      serverOptions: startDeps.http.isListening()
-        ? {
-            ...setupDeps.http.options,
-            listener: this.setupProxyListener(setupDeps.http.server),
-          }
-        : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
       setupDeps,
       startDeps,
@@ -181,52 +174,5 @@ export class LegacyService implements CoreService {
     }
 
     return kbnServer;
-  }
-
-  private setupProxyListener(server: HapiServer) {
-    const legacyProxy = new LegacyPlatformProxy(
-      this.coreContext.logger.get('legacy-proxy'),
-      server.listener
-    );
-
-    // We register Kibana proxy middleware right before we start server to allow
-    // all new platform plugins register their routes, so that `legacyProxy`
-    // handles only requests that aren't handled by the new platform.
-    server.route({
-      path: '/{p*}',
-      method: '*',
-      options: {
-        payload: {
-          output: 'stream',
-          parse: false,
-          timeout: false,
-          // Having such a large value here will allow legacy routes to override
-          // maximum allowed payload size set in the core http server if needed.
-          maxBytes: Number.MAX_SAFE_INTEGER,
-        },
-      },
-      handler: async ({ raw: { req, res } }, responseToolkit) => {
-        if (this.kbnServer === undefined) {
-          this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url}.`);
-
-          // If legacy server is not ready yet (e.g. it's still in optimization phase),
-          // we should let client know that and ask to retry after 30 seconds.
-          return responseToolkit
-            .response('Kibana server is not ready yet')
-            .code(503)
-            .header('Retry-After', '30');
-        }
-
-        this.log.trace(`Request will be handled by proxy ${req.method}:${req.url}.`);
-
-        // Forward request and response objects to the legacy platform. This method
-        // is used whenever new platform doesn't know how to handle the request.
-        legacyProxy.emit('request', req, res);
-
-        return responseToolkit.abandon;
-      },
-    });
-
-    return legacyProxy;
   }
 }

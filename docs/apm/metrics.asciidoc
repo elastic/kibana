@@ -1,7 +1,8 @@
 [[metrics]]
 === Metrics overview
 
-The *Metrics* overview shows a combination of transaction, error, CPU, and memory data.
+The *Metrics* overview provides agent-specific metrics,
+which lets you perform more in-depth root cause analysis investigations within the APM UI.
 
 If you're experiencing a problem with your service, you can use this page to attempt to find the underlying cause.
 For example, you might be able to correlate a high number of errors with a long transaction duration, high CPU usage, or a memory leak.   

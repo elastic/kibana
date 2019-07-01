@@ -86,14 +86,21 @@ describe('buildRequestBody(req)', () => {
     const getValidTimeInterval = sinon.spy(() => '10s');
     const capabilities = {
       searchTimezone: 'UTC',
-      getValidTimeInterval
+      getValidTimeInterval,
     };
     const config = {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
     const indexPatternObject = {};
-    const doc = buildRequestBody({ payload: body }, panel, series, config, indexPatternObject, capabilities);
+    const doc = buildRequestBody(
+      { payload: body },
+      panel,
+      series,
+      config,
+      indexPatternObject,
+      capabilities
+    );
 
     expect(doc).to.eql({
       size: 0,
@@ -107,26 +114,26 @@ describe('buildRequestBody(req)', () => {
                   {
                     query_string: {
                       analyze_wildcard: true,
-                      query: '*'
-                    }
-                  }
+                      query: '*',
+                    },
+                  },
                 ],
-                must_not: []
-              }
+                must_not: [],
+              },
             },
             {
               range: {
                 '@timestamp': {
                   gte: '2017-01-26T20:37:35.881Z',
                   lte: '2017-01-26T20:52:35.881Z',
-                  format: 'strict_date_optional_time'
-                }
-              }
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
           ],
           must_not: [],
           should: [],
-        }
+        },
       },
       aggs: {
         timeseries: {
@@ -134,34 +141,34 @@ describe('buildRequestBody(req)', () => {
             'c9b5f9c1-e403-11e6-be91-6f7688e9fac7': {
               bucket_script: {
                 buckets_path: {
-                  count: '_count'
+                  count: '_count',
                 },
                 gap_policy: 'skip',
                 script: {
                   lang: 'expression',
-                  source: 'count * 1'
-                }
-              }
-            }
+                  source: 'count * 1',
+                },
+              },
+            },
           },
           date_histogram: {
             extended_bounds: {
               max: 1485463955881,
-              min: 1485463055881
+              min: 1485463055881,
             },
             field: '@timestamp',
             interval: '10s',
             min_doc_count: 0,
-            time_zone: 'UTC'
+            time_zone: 'UTC',
           },
           meta: {
             bucketSize: 10,
             intervalString: '10s',
             seriesId: 'c9b5f9c0-e403-11e6-be91-6f7688e9fac7',
-            timeField: '@timestamp'
-          }
-        }
-      }
+            timeField: '@timestamp',
+          },
+        },
+      },
     });
   });
 });

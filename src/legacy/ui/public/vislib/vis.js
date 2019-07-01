@@ -21,13 +21,16 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { KbnError } from '../errors';
 import { EventsProvider } from '../events';
-import { VislibVisConfigProvider } from './lib/vis_config';
-import { VisHandlerProvider } from './lib/handler';
+import { VisConfig } from './lib/vis_config';
+import { Handler } from './lib/handler';
+import { setHierarchicalTooltipFormatter } from '../vis/components/tooltip/_hierarchical_tooltip_formatter';
+import { setPointSeriesTooltipFormatter } from '../vis/components/tooltip/_pointseries_tooltip_formatter';
 
-export function VislibVisProvider(Private) {
+export function VislibVisProvider(Private, config) {
   const Events = Private(EventsProvider);
-  const VisConfig = Private(VislibVisConfigProvider);
-  const Handler = Private(VisHandlerProvider);
+
+  setHierarchicalTooltipFormatter(Private);
+  setPointSeriesTooltipFormatter(Private);
 
   /**
    * Creates the visualizations.
@@ -42,6 +45,8 @@ export function VislibVisProvider(Private) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.visConfigArgs = _.cloneDeep(visConfigArgs);
+      this.visConfigArgs.dimmingOpacity = config.get('visualization:dimmingOpacity');
+
     }
 
     hasLegend() {

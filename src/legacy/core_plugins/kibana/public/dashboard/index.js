@@ -23,7 +23,6 @@ import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
-import 'ui/filter_bar';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -39,6 +38,10 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
+
+import { data } from 'plugins/data/setup';
+data.search.loadLegacyDirectives();
+data.filter.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',

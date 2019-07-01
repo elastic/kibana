@@ -11,7 +11,7 @@ export default function savedObjectsManagementApp({
   loadTestFile,
 }: KibanaFunctionalTestDefaultProviders) {
   describe('Saved objects management', function savedObjectsManagementAppTestSuite() {
-    this.tags('ciGroup2');
+    this.tags(['ciGroup2', 'skipFirefox']);
     loadTestFile(require.resolve('./feature_controls/saved_objects_management_security'));
   });
 }

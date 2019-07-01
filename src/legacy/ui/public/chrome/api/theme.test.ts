@@ -19,12 +19,8 @@
 
 import * as Rx from 'rxjs';
 
-import { chromeServiceMock } from '../../../../../core/public/mocks';
-import { __newPlatformSetup__, initChromeThemeApi } from './theme';
-
-const newPlatformChrome = chromeServiceMock.createSetupContract();
-
-__newPlatformSetup__(newPlatformChrome);
+import { newPlatformChrome } from './theme.test.mocks';
+import { initChromeThemeApi } from './theme';
 
 function setup() {
   const brand$ = new Rx.BehaviorSubject({ logo: 'foo', smallLogo: 'foo' });
