@@ -46,11 +46,6 @@ exports[`MonitorList component renders a no items message when no data is provid
             "sortable": true,
           },
           Object {
-            "field": "state.checks",
-            "name": "Checks",
-            "render": [Function],
-          },
-          Object {
             "field": "histogram.points",
             "name": "Downtime history",
             "render": [Function],
@@ -119,11 +114,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "name": "URL",
             "render": [Function],
             "sortable": true,
-          },
-          Object {
-            "field": "state.checks",
-            "name": "Checks",
-            "render": [Function],
           },
           Object {
             "field": "histogram.points",
