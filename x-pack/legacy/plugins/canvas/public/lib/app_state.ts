@@ -17,8 +17,8 @@ import { createTimeInterval, isValidTimeInterval } from './time_interval';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',
-  REFRESH_INTERVAL = '__refresh',
-  AUTOPLAY_INTERVAL = '__autoplay',
+  REFRESH_INTERVAL = '__refreshInterval',
+  AUTOPLAY_INTERVAL = '__autoplayInterval',
 }
 
 export interface AppState {

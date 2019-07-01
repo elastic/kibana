@@ -74,13 +74,13 @@ export class Router extends React.PureComponent {
         this.props.setFullscreen(appState.__fullscreen);
       }
 
-      if (appState.__refresh) {
-        this.props.setRefreshInterval(getTimeInterval(appState.__refresh));
+      if (appState.__refreshInterval) {
+        this.props.setRefreshInterval(getTimeInterval(appState.__refreshInterval));
       }
 
-      if (!!appState.__autoplay) {
+      if (!!appState.__autoplayInterval) {
         this.props.enableAutoplay(true);
-        this.props.setAutoplayInterval(getTimeInterval(appState.__autoplay));
+        this.props.setAutoplayInterval(getTimeInterval(appState.__autoplayInterval));
       }
 
       // notify upstream handler of route change
