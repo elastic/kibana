@@ -61,5 +61,5 @@ export async function setupEsTestIndex(es: any) {
 }
 
 export async function destroyEsTestIndex(es: any) {
-  await es.indices.delete({ index: esTestIndexName });
+  await es.indices.delete({ index: esTestIndexName, ignore: [404] });
 }

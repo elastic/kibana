@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from 'recompose';
 import { connect } from 'react-redux';
 import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
@@ -25,13 +24,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   ...stateProps,
   ...dispatchProps,
   ...ownProps,
-  toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
+  toggleWriteable: () => setWriteable(!stateProps.isWriteable),
 });
 
-export const WorkpadHeader = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  )
+export const WorkpadHeader = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
 )(Component);

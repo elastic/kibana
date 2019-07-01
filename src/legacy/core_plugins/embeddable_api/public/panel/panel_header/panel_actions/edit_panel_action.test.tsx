@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import '../../../np_core.test.mocks';
+import '../../../ui_capabilities.test.mocks';
+import '../../../../../../../core/public/ui_new_platform.test.mocks';
 
 import { EmbeddableInput } from '../../../embeddables/i_embeddable';
 import { Embeddable } from '../../../embeddables/embeddable';
