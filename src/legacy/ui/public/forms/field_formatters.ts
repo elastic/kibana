@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Option } from '@elastic/eui/src/components/selectable/types';
+
 /**
  * NOTE: this does _not_ play well if we enter the "e" letter in a "number" input
  * as it does not trigger an "onChange" event.
@@ -26,3 +28,14 @@
  * @param value The string value to convert to number
  */
 export const toInt = (value: string): number => parseFloat(value);
+
+export const multiSelectOptionsToArrayValue = (value: Option[]) =>
+  value.reduce(
+    (selectedValues, option) => {
+      if (option.checked === 'on') {
+        selectedValues.push(option.label);
+      }
+      return selectedValues;
+    },
+    [] as string[]
+  );

@@ -20,4 +20,21 @@
 // Error codes
 export const ERR_FIELD_MISSING = 'ERR_FIELD_MISSING';
 export const ERR_MIN_LENGTH = 'ERR_MIN_LENGTH';
+export const ERR_MIN_SELECTION = 'ERR_MIN_SELECTION';
 export const ERR_FIELD_FORMAT = 'ERR_FIELD_FORMAT';
+
+// Field types
+export const FIELD_TYPES = {
+  TEXT: 'text',
+  NUMBER: 'number',
+  TOGGLE: 'toggle',
+  COMBO_BOX: 'comboBox',
+  SELECT: 'select',
+  MULTI_SELECT: 'multiSelect',
+};
+
+// Error types
+export const ERROR_TYPES = {
+  FIELD: 'field',
+  ASYNC: 'async',
+};

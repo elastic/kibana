@@ -29,5 +29,5 @@ export const minLengthField = (length = 0) => (
   if (Array.isArray(value)) {
     return minLengthArray(length)(value) ? undefined : minLengthError(length);
   }
-  return minLengthString(length)(value.trim()) ? undefined : minLengthError(length);
+  return minLengthString(length)((value as string).trim()) ? undefined : minLengthError(length);
 };

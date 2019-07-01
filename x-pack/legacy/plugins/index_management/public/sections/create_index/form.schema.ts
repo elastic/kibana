@@ -5,7 +5,8 @@
  */
 
 import { FormSchema } from 'ui/forms/use_form';
-import { emptyField, minLengthField } from 'ui/forms/field_validators';
+import { FIELD_TYPES, ERROR_TYPES } from 'ui/forms/constants';
+import { emptyField, minLengthField, minSelectionField } from 'ui/forms/field_validators';
 import { MyForm } from './types';
 
 export const formSchema: FormSchema<MyForm> = {
@@ -23,12 +24,12 @@ export const formSchema: FormSchema<MyForm> = {
   },
   country: {
     label: 'Country',
-    type: 'select',
+    type: FIELD_TYPES.SELECT,
     validations: [{ validator: emptyField }],
   },
   doWeAgree: {
     label: 'Do we agree on this?',
-    type: 'toggle',
+    type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
   },
   title: {
@@ -66,8 +67,8 @@ export const formSchema: FormSchema<MyForm> = {
           if (value !== 'good') {
             return {
               code: 'ERR_INDEX_NAME',
-              message: 'The "only" valid index name is "good" :)',
-              type: 'invalidIndexName',
+              message: 'The only valid index name you can introduce is "good".',
+              type: ERROR_TYPES.ASYNC,
             };
           }
         },
@@ -77,7 +78,7 @@ export const formSchema: FormSchema<MyForm> = {
   numeric: {
     label: 'Numeric field',
     helpText: 'Help text for the numeric field',
-    type: 'number',
+    type: FIELD_TYPES.NUMBER,
   },
   nested: {
     prop: {
@@ -103,7 +104,7 @@ export const formSchema: FormSchema<MyForm> = {
   },
   comboBoxField: {
     label: 'ComboBox field',
-    type: 'comboBox',
+    type: FIELD_TYPES.COMBO_BOX,
     defaultValue: [],
   },
   comboBoxFieldWithValidation: {
@@ -125,5 +126,12 @@ export const formSchema: FormSchema<MyForm> = {
         },
       },
     ],
+  },
+  selectedIndices: {
+    label: 'Select any of the indices below',
+    helpText: 'Small demo of a multi select field',
+    type: FIELD_TYPES.MULTI_SELECT,
+    errorDisplayDelay: 0,
+    validations: [{ validator: minSelectionField(2) }],
   },
 };

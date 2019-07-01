@@ -17,39 +17,22 @@
  * under the License.
  */
 
-import {
-  ERR_FIELD_FORMAT,
-  ERR_FIELD_MISSING,
-  ERR_MIN_LENGTH,
-  ERR_MIN_SELECTION,
-} from './constants';
+import { ValidationFunc } from '../use_form';
+import { minLengthArray } from '../../validators';
+import { minSelectionError } from '../errors';
+import { multiSelectOptionsToArrayValue } from '../field_formatters';
 
-export const fieldMissingError = (fieldName: string, message = 'Field missing') => ({
-  code: ERR_FIELD_MISSING,
-  fieldName,
-  message,
-});
+/**
+ * Validator to validate that a EuiSelectable has a minimum number
+ * of items selected.
+ * @param total Minimum number of items
+ */
+export const minSelectionField = (total = 0) => (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
 
-export const minLengthError = (
-  length: number,
-  message = (error: any) => `Must have a minimun length of ${error.length}.`
-) => ({
-  code: ERR_MIN_LENGTH,
-  length,
-  message,
-});
-
-export const minSelectionError = (
-  length: number,
-  message = (error: any) => `Must select at least ${error.length} items.`
-) => ({
-  code: ERR_MIN_SELECTION,
-  length,
-  message,
-});
-
-export const formatError = (format: string, message = 'Format error') => ({
-  code: ERR_FIELD_FORMAT,
-  format,
-  message,
-});
+  return minLengthArray(total)(multiSelectOptionsToArrayValue(value as any[]))
+    ? undefined
+    : minSelectionError(total);
+};

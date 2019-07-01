@@ -25,6 +25,8 @@ import {
   EuiSelect,
   EuiComboBox,
   EuiSwitch,
+  EuiSelectable,
+  EuiPanel,
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { Field as FieldType } from 'ui/forms/use_form';
@@ -112,6 +114,25 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
             onChange={field.onChange}
             {...fieldProps}
           />
+        );
+      case 'multiSelect':
+        return (
+          <EuiSelectable
+            allowExclusions={false}
+            height={300}
+            onChange={options => {
+              field.setValue(options);
+            }}
+            options={field.value as any[]}
+            {...fieldProps}
+          >
+            {(list, search) => (
+              <EuiPanel paddingSize="s" hasShadow={false}>
+                {search}
+                {list}
+              </EuiPanel>
+            )}
+          </EuiSelectable>
         );
       default:
         return (

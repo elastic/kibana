@@ -29,7 +29,8 @@ import {
   ValidationError,
 } from './types';
 import { getAt, mapFormFields, unflattenObject } from './utils';
-import { toInt } from '../field_formatters';
+import { toInt, multiSelectOptionsToArrayValue } from '../field_formatters';
+import { FIELD_TYPES, ERROR_TYPES } from '../constants';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
@@ -51,12 +52,15 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     defaultValue = '',
     label = '',
     helpText = '',
-    type = 'text',
+    type = FIELD_TYPES.TEXT,
     validations = [],
     formatters = [],
     fieldsToValidateOnChange = [path],
     isValidationAsync = false,
+    errorDisplayDelay = form.options.errorDisplayDelay,
   } = config;
+
+  let { outputTransform } = config;
 
   const [value, setStateValue] = useState(
     typeof defaultValue === 'function' ? defaultValue() : defaultValue
@@ -68,20 +72,51 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const validateCounter = useRef(0);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Add default formatter for numeric field, if none provided
-  if (type === 'number' && !formatters.length) {
-    formatters.push(toInt);
-  }
+  // If no formatter are provided for certain fields,
+  // we set the default ones.
+  const setDefaultFormatter = () => {
+    if (formatters.length > 0) {
+      return;
+    }
+    // Automatically add the "toInt" formatter for numeric fields
+    if (type === FIELD_TYPES.NUMBER) {
+      formatters.push(toInt);
+    }
+  };
 
-  const filterErrors = (_errors: ValidationError[], errorType = 'field'): ValidationError[] =>
-    _errors.filter(error => {
-      if (!{}.hasOwnProperty.call(error, 'type')) {
-        return errorType !== 'field';
+  const setDefaultOutputTransform = () => {
+    if (outputTransform) {
+      return;
+    }
+
+    if (type === FIELD_TYPES.MULTI_SELECT) {
+      outputTransform = multiSelectOptionsToArrayValue;
+    }
+  };
+
+  setDefaultFormatter();
+  setDefaultOutputTransform();
+
+  const filterErrors = (
+    _errors: ValidationError[],
+    errorType: string | string[] = ERROR_TYPES.FIELD
+  ): ValidationError[] => {
+    const errorTypeToArray = Array.isArray(errorType) ? errorType : [errorType];
+    const isFilteringOutFieldErrors = errorTypeToArray.some(_type => _type === ERROR_TYPES.FIELD);
+
+    return _errors.filter(error => {
+      const hasErrorTypeDefined = {}.hasOwnProperty.call(error, 'type');
+
+      // If no type defined for the error (the default type is "field")
+      // then we filter out the error _if_ we are filtering out field errors
+      if (!hasErrorTypeDefined) {
+        return !isFilteringOutFieldErrors;
       }
-      return error.type !== errorType;
+      return errorTypeToArray.every(_type => error.type !== _type);
     });
+  };
 
-  const clearErrors: Field['clearErrors'] = (errorType = 'field') => {
+  const clearErrors: Field['clearErrors'] = (errorType = ERROR_TYPES.FIELD) => {
     setErrors(previousErrors => filterErrors(previousErrors, errorType));
   };
 
@@ -155,7 +190,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     // Sequencially execute all the validations for the field
     if (isValidationAsync) {
-      clearErrors();
+      clearErrors([ERROR_TYPES.FIELD, ERROR_TYPES.ASYNC]);
 
       await validations.reduce(
         (promise, validation) =>
@@ -198,7 +233,10 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   };
 
   const runFormatters = (input: unknown): unknown => {
-    if (typeof input === 'string' && input.trim() === '') {
+    const isEmptyString = typeof input === 'string' && input.trim() === '';
+    const isMultiSelect = type === FIELD_TYPES.MULTI_SELECT;
+
+    if (isEmptyString || isMultiSelect) {
       return input;
     }
     return formatters.reduce((output, formatter) => formatter(output), input);
@@ -216,7 +254,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     debounceTimeout.current = setTimeout(() => {
       setIsUpdating(false);
-    }, form.options.errorDisplayDelay);
+    }, errorDisplayDelay);
   };
 
   /**
@@ -239,11 +277,15 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     setStateValue(runFormatters(newValue));
   };
 
-  const getErrorsMessages: Field['getErrorsMessages'] = (errorType = 'field') => {
+  const getOutputValue: Field['getOutputValue'] = () => {
+    return outputTransform ? outputTransform(value) : value;
+  };
+
+  const getErrorsMessages: Field['getErrorsMessages'] = (errorType = ERROR_TYPES.FIELD) => {
     const errorMessages = errors.reduce((messages, error) => {
       if (
         error.type === errorType ||
-        (errorType === 'field' && !{}.hasOwnProperty.call(error, 'type'))
+        (errorType === ERROR_TYPES.FIELD && !{}.hasOwnProperty.call(error, 'type'))
       ) {
         return messages ? `${messages}, ${error.message}` : (error.message as string);
       }
@@ -280,6 +322,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     clearErrors,
     setValue,
     onChange,
+    getOutputValue,
     getErrorsMessages,
   };
 
@@ -319,10 +362,13 @@ export const useForm = <T = FormData>({
   const getFormData: Form['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
-          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.value)
+          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.getOutputValue())
         ) as T)
       : Object.entries(fieldsRefs.current).reduce(
-          (acc, [key, field]) => ({ ...acc, [key]: field.value }),
+          (acc, [key, field]) => ({
+            ...acc,
+            [key]: field.getOutputValue(),
+          }),
           {}
         );
 

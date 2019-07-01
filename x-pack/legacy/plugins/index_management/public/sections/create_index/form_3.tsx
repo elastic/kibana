@@ -152,10 +152,7 @@ export const Form3 = () => {
                 <EuiFieldText
                   isInvalid={field.errors.length > 0}
                   value={field.value as string}
-                  onChange={e => {
-                    field.clearErrors('invalidIndexName');
-                    field.onChange(e);
-                  }}
+                  onChange={field.onChange}
                   isLoading={field.isValidating}
                   fullWidth
                 />

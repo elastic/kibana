@@ -76,7 +76,8 @@ export interface Field {
     validateData?: { formData?: any; value?: unknown }
   ) => Promise<{ isValid: boolean; errors: ValidationError[] }>;
   setErrors: (errors: ValidationError[]) => void;
-  clearErrors: (type?: string) => void;
+  clearErrors: (type?: string | string[]) => void;
+  getOutputValue: () => unknown;
   setValue: (value: FieldValue) => void;
 }
 
@@ -89,8 +90,10 @@ export interface FieldConfig<T = FormData> {
   readonly validations?: Array<ValidationConfig<T>>;
   readonly validationsArrayItems?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
+  readonly outputTransform?: OutputTransformFunc;
   readonly fieldsToValidateOnChange?: string[];
   readonly isValidationAsync?: boolean;
+  readonly errorDisplayDelay?: number;
 }
 
 export interface FieldsMap {
@@ -109,7 +112,7 @@ export interface ValidationError {
 export type ValidationFunc<T = any> = (
   data: {
     path: string;
-    value: string;
+    value: unknown;
     formData: T;
     errors: ReadonlyArray<ValidationError>;
   }
@@ -118,6 +121,8 @@ export type ValidationFunc<T = any> = (
 type FormData = Record<string, string>;
 
 type FormatterFunc = (value: any) => unknown;
+
+type OutputTransformFunc = (value: any) => unknown;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...
