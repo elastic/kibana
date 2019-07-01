@@ -39,7 +39,7 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
         .map(ping => {
           return get<string>(ping, 'observer.geo.name');
         })
-        .filter(ping => !ping) || [];
+        .filter(location => !location) || [];
     size = size ? size : 10;
     return {
       total: size,
