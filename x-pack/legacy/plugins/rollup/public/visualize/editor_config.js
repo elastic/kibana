@@ -56,7 +56,7 @@ export function initEditorConfig() {
 
     // Set date histogram time zone based on rollup capabilities
     if (aggTypeName === 'date_histogram') {
-      const interval = fieldAgg.interval;
+      const interval = fieldAgg.fixed_interval || fieldAgg.calendar_interval || fieldAgg.interval;
       return {
         useNormalizedEsInterval: {
           fixedValue: false,
