@@ -19,7 +19,7 @@ import {
 } from './metric_select';
 import { SingleFieldSelect } from './single_field_select';
 
-export function MetricEditor({ fields, metricsFilter, metric, onChange }) {
+export function MetricEditor({ fields, metricsFilter, metric, onChange, removeButton }) {
 
   const onAggChange = (metricAggregationType) => {
     onChange({
@@ -88,6 +88,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange }) {
         label={i18n.translate('xpack.maps.metricsEditor.aggregationLabel', {
           defaultMessage: 'Aggregation'
         })}
+        labelAppend={removeButton}
       >
         <MetricSelect
           onChange={onAggChange}

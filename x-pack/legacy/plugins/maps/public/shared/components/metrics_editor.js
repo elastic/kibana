@@ -38,7 +38,6 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
       if (index > 0) {
         removeButton = (
           <EuiButtonIcon
-            className="mapMetricEditorRemoveButton"
             iconType="trash"
             color="danger"
             aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
@@ -62,8 +61,8 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             metric={metric}
             fields={fields}
             metricsFilter={metricsFilter}
+            removeButton={removeButton}
           />
-          {removeButton}
         </EuiPanel>
       );
     });
