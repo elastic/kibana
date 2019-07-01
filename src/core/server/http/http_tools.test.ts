@@ -85,6 +85,6 @@ test('returns 408 on timeout error', async () => {
   await server.start();
   await supertest(innerServer.listener)
     .get('/')
-    .expect(408)
+    .expect(408);
   await server.stop();
 });
