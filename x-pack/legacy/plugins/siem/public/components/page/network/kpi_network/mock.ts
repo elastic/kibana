@@ -150,28 +150,6 @@ export const mockEnableChartsInitialData = {
 };
 
 export const mockEnableChartsData = {
-  fields: [
-    {
-      key: 'uniqueSourcePrivateIps',
-      value: 383,
-      name: 'Src.',
-      description: 'Source',
-      color: '#DB1374',
-      icon: 'visMapCoordinate',
-    },
-    {
-      key: 'uniqueDestinationPrivateIps',
-      value: 18,
-      name: 'Dist.',
-      description: 'Destination',
-      color: '#490092',
-      icon: 'visMapCoordinate',
-    },
-  ],
-  description: 'Unique Private IPs',
-  enableAreaChart: true,
-  enableBarChart: true,
-  grow: 2,
   areaChart: [
     {
       key: 'uniqueSourcePrivateIpsHistogram',
@@ -211,4 +189,30 @@ export const mockEnableChartsData = {
       value: [{ x: 'Dist.', y: 18, g: 'uniqueDestinationPrivateIps' }],
     },
   ],
+  description: 'Unique Private IPs',
+  enableAreaChart: true,
+  enableBarChart: true,
+  fields: [
+    {
+      key: 'uniqueSourcePrivateIps',
+      value: 383,
+      name: 'Src.',
+      description: 'Source',
+      color: '#DB1374',
+      icon: 'visMapCoordinate',
+    },
+    {
+      key: 'uniqueDestinationPrivateIps',
+      value: 18,
+      name: 'Dist.',
+      description: 'Destination',
+      color: '#490092',
+      icon: 'visMapCoordinate',
+    },
+  ],
+  from: 1560578400000,
+  grow: 2,
+  id: 'statItem',
+  index: 0,
+  to: 1560837600000,
 };

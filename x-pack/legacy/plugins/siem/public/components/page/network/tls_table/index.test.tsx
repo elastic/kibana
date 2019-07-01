@@ -32,12 +32,13 @@ describe('Tls Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <TlsTable
-            totalCount={1}
-            loading={false}
-            loadMore={loadMore}
             data={mockTlsData.edges}
             hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
+            id="tls"
+            loading={false}
+            loadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -53,12 +54,13 @@ describe('Tls Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <TlsTable
-              totalCount={1}
-              loading={false}
-              loadMore={loadMore}
               data={mockTlsData.edges}
               hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
+              id="tls"
+              loading={false}
+              loadMore={loadMore}
               nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

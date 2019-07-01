@@ -40,14 +40,14 @@ describe('Load More Table Component', () => {
         <ReduxStoreProvider store={store}>
           <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
             <HostsTable
+              data={mockData.Hosts.edges}
               id="hostsQuery"
               indexPattern={mockIndexPattern}
-              loading={false}
-              data={mockData.Hosts.edges}
-              totalCount={mockData.Hosts.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
+              loading={false}
               loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
+              totalCount={mockData.Hosts.totalCount}
               type={hostsModel.HostsType.page}
             />
           </KibanaConfigContext.Provider>

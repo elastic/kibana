@@ -18,7 +18,6 @@ import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { GlobalTime } from '../../containers/global_time';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
