@@ -22,6 +22,7 @@ import { AggType } from './agg_type';
 
 export { AggParam, AggParamOption } from './agg_param';
 export { AggType } from './agg_type';
+export { FieldParamType } from './param_types';
 
 export const aggTypes: IndexedArray<AggType> & {
   byType: {

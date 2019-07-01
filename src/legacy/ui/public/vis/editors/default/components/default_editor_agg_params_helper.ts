@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { AggConfig, Vis, VisState } from 'ui/vis';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { IndexPattern } from 'ui/index_patterns';
-// @ts-ignore
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { groupAggregationsBy } from '../default_editor_utils';

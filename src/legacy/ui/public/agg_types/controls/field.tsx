@@ -61,11 +61,7 @@ function FieldParamEditor({
       aggParam.onChange(agg);
     }
   };
-  const errors = [];
-
-  if (customError) {
-    errors.push(customError);
-  }
+  const errors = customError ? [customError] : [];
 
   if (!indexedFields.length) {
     errors.push(
