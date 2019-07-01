@@ -3,7 +3,7 @@
 set -e
 
 dir="$(pwd)"
-cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
+cacheDir="${MAIN_CACHE_DIR}"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
