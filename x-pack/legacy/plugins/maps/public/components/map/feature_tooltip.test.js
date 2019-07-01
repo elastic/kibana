@@ -8,53 +8,57 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { FeatureTooltip } from './feature_tooltip';
 
-class MockTooltipProperty {
-  constructor(key, value, isFilterable) {
-    this._key = key;
-    this._value = value;
-    this._isFilterable = isFilterable;
+class MockLayer {
+
+  constructor(id) {
+    this._id = id;
+  }
+  async getDisplayName() {
+    return `display + ${this._id}`;
   }
 
-  isFilterable() {
-    return this._isFilterable;
-  }
-
-  getFilterAction() {
-    return () => {};
-  }
-
-  getHtmlDisplayValue() {
-    return this._value;
-  }
-
-  getPropertyName() {
-    return this._key;
-  }
 }
+
+
+const MULTI_FEATURE_MULTI_LAYER = [
+  {
+    'id': 'feature1',
+    'layerId': 'layer1'
+  },
+  {
+    'id': 'feature2',
+    'layerId': 'layer1'
+  },
+  {
+    'id': 'feature1',
+    'layerId': 'layer2'
+  }
+];
+
+const SINGLE_FEATURE = [
+  {
+    'id': 'feature1',
+    'layerId': 'layer1'
+  }
+];
 
 const defaultProps = {
   loadFeatureProperties: () => { return []; },
-  tooltipState: {
-    layerId: 'layer1',
-    featureId: 'feature1',
+  findLayerById: (id) => {
+    return new MockLayer(id);
   },
   closeTooltip: () => {},
   showFilterButtons: false,
-  showCloseButton: false
+  isLocked: false
 };
 
+describe('FeatureTooltip (single)', async () => {
 
-const mockTooltipProperties = [
-  new MockTooltipProperty('foo', 'bar', true),
-  new MockTooltipProperty('foo', 'bar', false)
-];
-
-describe('FeatureTooltip', async () => {
-
-  test('should not show close button and not show filter button', async () => {
+  test('should not show close button', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
+        features={SINGLE_FEATURE}
       />
     );
 
@@ -67,11 +71,12 @@ describe('FeatureTooltip', async () => {
       .toMatchSnapshot();
   });
 
-  test('should show close button, but not filter button', async () => {
+  test('should show close button', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
-        showCloseButton={true}
+        isLocked={true}
+        features={SINGLE_FEATURE}
       />
     );
 
@@ -84,12 +89,15 @@ describe('FeatureTooltip', async () => {
       .toMatchSnapshot();
   });
 
-  test('should show only filter button for filterable properties', async () => {
+});
+
+describe('FeatureTooltip (multi)', async () => {
+
+  test('should not show close button / should show count', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
-        showFilterButtons={true}
-        loadFeatureProperties={() => { return mockTooltipProperties; }}
+        features={MULTI_FEATURE_MULTI_LAYER}
       />
     );
 
@@ -102,13 +110,12 @@ describe('FeatureTooltip', async () => {
       .toMatchSnapshot();
   });
 
-  test('should show both filter buttons and close button', async () => {
+  test('should show close button / should show count', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
-        showFilterButtons={true}
-        showCloseButton={true}
-        loadFeatureProperties={() => { return mockTooltipProperties; }}
+        isLocked={true}
+        features={MULTI_FEATURE_MULTI_LAYER}
       />
     );
 
@@ -121,13 +128,12 @@ describe('FeatureTooltip', async () => {
       .toMatchSnapshot();
   });
 
-  test('should show error message if unable to load tooltip content', async () => {
+  test('should show close button / should show count / should show arrows / should show layer filter', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
-        showFilterButtons={true}
-        showCloseButton={true}
-        loadFeatureProperties={() => { throw new Error('Simulated load properties error'); }}
+        isLocked={true}
+        features={MULTI_FEATURE_MULTI_LAYER}
       />
     );
 
@@ -139,6 +145,7 @@ describe('FeatureTooltip', async () => {
     expect(component)
       .toMatchSnapshot();
   });
+
 
 
 });

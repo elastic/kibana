@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create_influencers renders correctly against snapshot 1`] = `
+<Connect(DraggableWrapperComponent)
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "id-prefix-entity-name-entity-value",
+      "kqlQuery": "",
+      "name": "entity-value",
+      "queryMatch": Object {
+        "field": "entity-name",
+        "operator": ":",
+        "value": "entity-value",
+      },
+    }
+  }
+  key="id-prefix-entity-name-entity-value"
+  render={[Function]}
+/>
+`;
