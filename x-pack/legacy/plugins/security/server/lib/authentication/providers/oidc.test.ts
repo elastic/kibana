@@ -17,11 +17,13 @@ describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;
   let callWithRequest: sinon.SinonStub;
   let callWithInternalUser: sinon.SinonStub;
+  let tokens: ReturnType<typeof mockAuthenticationProviderOptions>['tokens'];
   beforeEach(() => {
     const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
     const providerSpecificOptions = { realm: 'oidc1' };
-    callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
-    callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
+    callWithRequest = providerOptions.client.callWithRequest;
+    callWithInternalUser = providerOptions.client.callWithInternalUser;
+    tokens = providerOptions.tokens;
 
     provider = new OIDCAuthenticationProvider(providerOptions, providerSpecificOptions);
   });
@@ -327,10 +329,11 @@ describe('OIDCAuthenticationProvider', () => {
     it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
       const user = { username: 'user' };
       const request = requestFixture();
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'valid-refresh-token' };
 
       callWithRequest
         .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
           'shield.authenticate'
         )
         .rejects({ statusCode: 401 });
@@ -342,16 +345,11 @@ describe('OIDCAuthenticationProvider', () => {
         )
         .resolves(user);
 
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'valid-refresh-token' },
-        })
-        .resolves({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' });
+      tokens.refresh
+        .withArgs(tokenPair.refreshToken)
+        .resolves({ accessToken: 'new-access-token', refreshToken: 'new-refresh-token' });
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'valid-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers.authorization).toBe('Bearer new-access-token');
       expect(authenticationResult.succeeded()).toBe(true);
@@ -364,10 +362,11 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('fails if token from the state is expired and refresh attempt failed too.', async () => {
       const request = requestFixture();
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'invalid-refresh-token' };
 
       callWithRequest
         .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
           'shield.authenticate'
         )
         .rejects({ statusCode: 401 });
@@ -376,16 +375,9 @@ describe('OIDCAuthenticationProvider', () => {
         statusCode: 500,
         message: 'Something is wrong with refresh token.',
       };
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' },
-        })
-        .returns(Promise.reject(refreshFailureReason));
+      tokens.refresh.withArgs(tokenPair.refreshToken).rejects(refreshFailureReason);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'invalid-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -394,6 +386,7 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('redirects to OpenID Connect Provider for non-AJAX requests if refresh token is expired or already refreshed.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
       callWithInternalUser.withArgs('shield.oidcPrepare').resolves({
         state: 'statevalue',
@@ -408,21 +401,14 @@ describe('OIDCAuthenticationProvider', () => {
 
       callWithRequest
         .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
           'shield.authenticate'
         )
         .rejects({ statusCode: 401 });
 
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' },
-        })
-        .rejects({ statusCode: 400 });
+      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcPrepare', {
         body: { realm: `oidc1` },
@@ -445,29 +431,23 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('fails for AJAX requests with user friendly message if refresh token is expired.', async () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
       callWithRequest
         .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
           'shield.authenticate'
         )
         .rejects({ statusCode: 401 });
 
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' },
-        })
-        .rejects({ statusCode: 400 });
+      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toEqual(
-        Boom.badRequest('Both elasticsearch access and refresh tokens are expired.')
+        Boom.badRequest('Both access and refresh tokens are expired.')
       );
     });
 
