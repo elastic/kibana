@@ -17,14 +17,15 @@
  * under the License.
  */
 
+import { CoreSetup, PluginsServiceSetup } from 'src/core/server';
 // @ts-ignore
 import { tsvb } from './tsvb_fn';
 // @ts-ignore
 import { MetricsVis } from './kbn_vis_type';
 
 class Plugin {
-  // @ts-ignore
-  public setup(core, plugins) {
+  // TODO: Remove 'any' as soon as PluginsServiceSetup is completed.
+  public setup(core: CoreSetup, plugins: PluginsServiceSetup | any) {
     plugins.data.expressions.functionsRegistry.register(tsvb);
     // register the provider with the visTypes registry so that other know it exists
     plugins.visualizations.types.VisTypesRegistryProvider.register(() => MetricsVis);

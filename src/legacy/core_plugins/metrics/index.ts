@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
-import { InternalCoreSetup } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { plugin } from './server/';
 
 // eslint-disable-next-line import/no-default-export
@@ -45,7 +45,7 @@ export default function(kibana: any) {
 
     init(server: Legacy.Server) {
       const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as InternalCoreSetup;
+      const core = { http: { server } } as CoreSetup | any; // TODO: Remove 'any' as soon as CoreSetup is completed.
 
       plugin(initializerContext).setup(core);
     },
