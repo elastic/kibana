@@ -46,8 +46,10 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
     urlParams: { start, end }
   } = useUrlParams();
 
-  const noHits = series.every(serie => serie.data.length === 0);
-
+  const noHits = series.every(
+    serie =>
+      serie.data.filter(value => 'y' in value && value.y !== null).length === 0
+  );
   const { time, setTime } = useChartsTime();
 
   const hoverXHandlers = useMemo(
