@@ -18,7 +18,7 @@ export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
-      // the minimum privilege for using ML with a platinum license is being able to get the jobs list.
+      // the minimum privilege for using ML with a platinum or trial license is being able to get the jobs list.
       // all other functionality is controlled by the return privileges object
       if (privileges.canGetJobs) {
         return resolve(privileges);
