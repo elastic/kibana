@@ -16,7 +16,7 @@ pipeline {
       environment {
         // PIPELINE_DIR = "./.ci/pipeline-setup/"
         CI_DIR = "./.ci/"
-        PIPELINE_DIR = "./.ci/pipeline-setup/"
+        PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
       }
       steps {
         dir("${env.BASE_DIR}"){
