@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-import { Pager } from './pager';
+import { uiModules } from '../../../../modules';
 
-const app = uiModules.get('kibana');
+import { decorateFormController } from './kbn_form_controller';
+import { decorateModelController } from './kbn_model_controller';
 
-app.factory('pagerFactory', () => {
-  return {
-    create(...args) {
-      return new Pager(...args);
-    }
-  };
-});
+uiModules
+  .get('kibana')
+  .config(function ($provide) {
+    $provide.decorator('formDirective', decorateFormController);
+    $provide.decorator('ngFormDirective', decorateFormController);
+    $provide.decorator('ngModelDirective', decorateModelController);
+  });
