@@ -85,7 +85,7 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.status', { defaultMessage: 'Status' }),
-      sortable: true,
+      sortable: (item: DataFrameJobListRow) => item.state.task_state,
       truncateText: true,
       render(item: DataFrameJobListRow) {
         const color = item.state.task_state === 'started' ? 'primary' : 'hollow';
@@ -95,7 +95,8 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
-      sortable: true,
+      sortable: (item: DataFrameJobListRow) =>
+        typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch',
       truncateText: true,
       render(item: DataFrameJobListRow) {
         const mode = typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch';
@@ -105,10 +106,9 @@ export const getColumns = (
       width: '100px',
     },
     {
-      name: i18n.translate('xpack.ml.dataframe.progressIconTipContent', {
-        defaultMessage: 'Progress',
-      }),
-      sortable: true,
+      name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
+      sortable: (item: DataFrameJobListRow) =>
+        item.state.progress !== undefined ? item.state.progress.percent_complete : 0,
       truncateText: true,
       render(item: DataFrameJobListRow) {
         let progress = 0;
