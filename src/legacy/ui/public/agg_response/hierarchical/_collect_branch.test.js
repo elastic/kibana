@@ -20,46 +20,97 @@
 import collectBranch from './_collect_branch';
 
 describe('collectBranch()', () => {
-  let results;
-  const convert = name => `converted: ${name}`;
+  let item;
+  const table = {
+    columns: [
+      { id: 'col1', name: 'Bucket1 Formatted Name' },
+      { id: 'col2', name: 'Bucket2 Formatted Name' },
+      { id: 'col3', name: 'Bucket3 Formatted Name' },
+    ],
+    rows: [
+      { col1: 'bucket1', col2: 'bucket2', col3: 'bucket3' },
+    ],
+  };
 
   beforeEach(() => {
-    results = collectBranch({
+    item = {
       name: 'bucket3',
       depth: 3,
       size: 6,
-      field: { format: { convert } },
+      rawData: {
+        column: 2,
+        row: 0,
+        value: 'bucket3',
+        table,
+      },
       parent: {
         name: 'bucket2',
         depth: 2,
         size: 12,
+        rawData: {
+          column: 1,
+          row: 0,
+          value: 'bucket2',
+          table,
+        },
         parent: {
           name: 'bucket1',
           depth: 1,
           size: 24,
-          parent: {}
-        }
-      }
-    });
+          rawData: {
+            column: 0,
+            row: 0,
+            value: 'bucket1',
+            table,
+          },
+          parent: {},
+        },
+      },
+    };
   });
 
   it('should return an array with bucket objects', () => {
+    const results = collectBranch(item);
     expect(results).toHaveLength(3);
 
     expect(results[0]).toHaveProperty('metric', 24);
     expect(results[0]).toHaveProperty('depth', 0);
     expect(results[0]).toHaveProperty('bucket', 'bucket1');
-    expect(results[0]).toHaveProperty('field', 'bucket1');
+    expect(results[0]).toHaveProperty('field', 'Bucket1 Formatted Name');
 
     expect(results[1]).toHaveProperty('metric', 12);
     expect(results[1]).toHaveProperty('depth', 1);
     expect(results[1]).toHaveProperty('bucket', 'bucket2');
-    expect(results[1]).toHaveProperty('field', 'bucket2');
+    expect(results[1]).toHaveProperty('field', 'Bucket2 Formatted Name');
 
     expect(results[2]).toHaveProperty('metric', 6);
     expect(results[2]).toHaveProperty('depth', 2);
     expect(results[2]).toHaveProperty('bucket', 'bucket3');
+    expect(results[2]).toHaveProperty('field', 'Bucket3 Formatted Name');
+  });
+
+  it('should fall back to item name when now rawData exists', () => {
+    delete item.rawData;
+    delete item.parent.rawData;
+    delete item.parent.parent.rawData;
+    const results = collectBranch(item);
+    expect(results).toHaveLength(3);
+    expect(results[0]).toHaveProperty('field', 'bucket1');
+    expect(results[1]).toHaveProperty('field', 'bucket2');
     expect(results[2]).toHaveProperty('field', 'bucket3');
   });
 
+  it('should fall back to printing the depth level when neither rawData nor name exists', () => {
+    delete item.rawData;
+    delete item.parent.rawData;
+    delete item.parent.parent.rawData;
+    delete item.name;
+    delete item.parent.name;
+    delete item.parent.parent.name;
+    const results = collectBranch(item);
+    expect(results).toHaveLength(3);
+    expect(results[0]).toHaveProperty('field', 'level 1');
+    expect(results[1]).toHaveProperty('field', 'level 2');
+    expect(results[2]).toHaveProperty('field', 'level 3');
+  });
 });
