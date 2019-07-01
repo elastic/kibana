@@ -41,7 +41,7 @@ export interface IpOverviewProps extends QueryTemplateProps {
 }
 
 const IpOverviewComponentQuery = pure<IpOverviewProps & IpOverviewReduxProps>(
-  ({ id = ID, isInspected, children, filterQuery, skip, skipQuery, sourceId, ip }) => (
+  ({ id = ID, isInspected, children, filterQuery, skip, skipQuery = false, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}
       fetchPolicy="cache-and-network"

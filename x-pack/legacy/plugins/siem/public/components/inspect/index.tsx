@@ -7,7 +7,6 @@
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
@@ -85,7 +84,7 @@ const InspectButtonComponent = ({
       response={
         inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
       }
-      title={`${title} ${i18n.TITLE}`}
+      title={title}
     />
   </>
 );

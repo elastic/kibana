@@ -67,7 +67,7 @@ class UsersComponentQuery extends QueryTemplate<
       filterQuery,
       ip,
       skip,
-      skipQuery,
+      skipQuery = false,
       sourceId,
       startDate,
       endDate,

@@ -65,7 +65,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
       filterQuery,
       isPtrIncluded,
       skip,
-      skipQuery,
+      skipQuery = false,
       sourceId,
       startDate,
       endDate,

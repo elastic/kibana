@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const TOOLTIP_CONTENT = i18n.translate('xpack.siem.inspect.tooltipDescription', {
-  defaultMessage: 'Inspect query',
+  defaultMessage: 'Inspect',
 });
 
 export const TITLE = i18n.translate('xpack.siem.inspect.modalTitle', {
-  defaultMessage: '- Query Inspection',
+  defaultMessage: 'Inspect',
 });
 
 export const CLOSE = i18n.translate('xpack.siem.inspect.modal.closeTitle', {
