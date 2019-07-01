@@ -63,11 +63,17 @@ export class FeatureTable extends Component<Props, {}> {
 
     const items: TableRow[] = features
       .sort((feature1, feature2) => {
-        if (Object.keys(feature1.privileges).length === 0 && Object.keys(feature2.privileges).length > 0) {
+        if (
+          Object.keys(feature1.privileges).length === 0 &&
+          Object.keys(feature2.privileges).length > 0
+        ) {
           return 1;
         }
 
-        if (Object.keys(feature2.privileges).length === 0 && Object.keys(feature1.privileges).length > 0) {
+        if (
+          Object.keys(feature2.privileges).length === 0 &&
+          Object.keys(feature1.privileges).length > 0
+        ) {
           return -1;
         }
 

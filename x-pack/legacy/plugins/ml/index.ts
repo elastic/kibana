@@ -31,7 +31,7 @@ export const ml = (kibana: any) => {
     config(Joi: Root) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        excludeFromBasePrivileges: Joi.boolean().default(true)
+        excludeFromBasePrivileges: Joi.boolean().default(true),
       }).default();
     },
 
