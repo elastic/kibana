@@ -28,7 +28,7 @@ pipeline {
           // sh '${PIPELINE_DIR}setup.sh'
           // sh '${PIPELINE_DIR}checkout_sibling_es.sh'
 
-          sh './ci/run.sh'
+          sh './.ci/run.sh'
           
           sh 'echo "\n\t### create and upload workspace cache to gcs"'
         }
