@@ -136,18 +136,18 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(({ data, loading 
       </EuiFlexItem>
     </FlexGroup>
   ) : (
-      <EuiFlexGroup wrap>
-        <EuiFlexItem grow={1}>
-          {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
-            <React.Fragment key={`kpi-network-row-${idx}`}>
-              {idx % kipsPerRow === 1 && <EuiSpacer size="l" />}
-              <KpiNetworkBaseComponent data={data} fieldsMapping={mappingsPerLine} />
-            </React.Fragment>
-          ))}
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <KpiNetworkBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    <EuiFlexGroup wrap>
+      <EuiFlexItem grow={1}>
+        {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
+          <React.Fragment key={`kpi-network-row-${idx}`}>
+            {idx % kipsPerRow === 1 && <EuiSpacer size="l" />}
+            <KpiNetworkBaseComponent data={data} fieldsMapping={mappingsPerLine} />
+          </React.Fragment>
+        ))}
+      </EuiFlexItem>
+      <EuiFlexItem grow={1}>
+        <KpiNetworkBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 });
