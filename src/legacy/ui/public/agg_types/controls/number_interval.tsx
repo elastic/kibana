@@ -72,7 +72,7 @@ function NumberIntervalParamEditor({
 
   return (
     <EuiFormRow
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}

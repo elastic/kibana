@@ -110,7 +110,7 @@ function FieldParamEditor({
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {

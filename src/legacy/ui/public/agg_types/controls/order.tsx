@@ -49,7 +49,7 @@ function OrderParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      compressed
     >
       <EuiSelect
         options={aggParam.options.raw}

@@ -44,7 +44,7 @@ function StringParamEditor({
     <EuiFormRow
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       isInvalid={showValidation ? !isValid : false}
     >
       <EuiFieldText

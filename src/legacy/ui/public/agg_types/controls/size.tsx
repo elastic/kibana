@@ -58,7 +58,7 @@ function SizeParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      compressed
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}

@@ -118,7 +118,12 @@ function OrderByParamEditor({
     : [];
 
   return (
-    <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation ? !isValid : false}>
+    <EuiFormRow
+      label={label}
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      compressed
+    >
       <EuiSelect
         options={[...options, ...defaultOptions]}
         value={value}
