@@ -43,6 +43,7 @@ interface Column {
 }
 
 interface Props {
+  lastUpdate: number;
   transformId: string;
 }
 
@@ -88,7 +89,7 @@ function getDataFromTransform(
   return { groupByArr, previewRequest };
 }
 
-export const PreviewPane: React.SFC<Props> = ({ transformId }) => {
+export const PreviewPane: React.SFC<Props> = ({ transformId, lastUpdate }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
   const [groupByArray, setGroupByArray] = useState<string[] | []>([]);
   const [columns, setColumns] = useState<Column[] | []>([]);
@@ -113,9 +114,12 @@ export const PreviewPane: React.SFC<Props> = ({ transformId }) => {
     }
   }
 
-  useEffect(() => {
-    getPreview();
-  }, []);
+  useEffect(
+    () => {
+      getPreview();
+    },
+    [lastUpdate]
+  );
   useEffect(
     () => {
       if (dataFramePreviewData.length > 0) {
