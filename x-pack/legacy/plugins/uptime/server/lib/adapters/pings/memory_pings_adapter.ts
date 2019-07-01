@@ -36,10 +36,10 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
 
     const locations =
       this.pingsDB
-        .map(p => {
-          return get<string>(p, 'observer.geo.name');
+        .map(ping => {
+          return get<string>(ping, 'observer.geo.name');
         })
-        .filter(p => !p) || [];
+        .filter(ping => !ping) || [];
     size = size ? size : 10;
     return {
       total: size,

@@ -59,16 +59,16 @@ export const DurationChart = ({
   // this id is used for the line chart representing the average duration length
   const averageSpecId = getSpecId('average-');
 
-  const lineSeries = locationDurationLines.map(ldl => {
-    const locationSpecId = getSpecId('loc-avg' + ldl.name);
+  const lineSeries = locationDurationLines.map(line => {
+    const locationSpecId = getSpecId('loc-avg' + line.name);
     return (
       <LineSeries
         curve={CurveType.CURVE_MONOTONE_X}
         customSeriesColors={getColorsMap(meanColor, averageSpecId)}
-        data={ldl.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
+        data={line.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
         id={locationSpecId}
-        key={`locline-${ldl.name}`}
-        name={ldl.name}
+        key={`locline-${line.name}`}
+        name={line.name}
         xAccessor={0}
         xScaleType={ScaleType.Time}
         yAccessors={[1]}

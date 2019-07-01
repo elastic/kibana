@@ -79,12 +79,12 @@ export const MonitorPage = ({
     BaseLocationOptions
   );
 
-  const locationVar = selectedLocation[0].value === 'All' ? null : selectedLocation[0].value;
+  const selLocationVal = selectedLocation[0].value === 'All' ? null : selectedLocation[0].value;
 
   const sharedVariables = {
     dateRangeStart,
     dateRangeEnd,
-    location: locationVar,
+    location: selLocationVal,
     monitorId,
   };
 

@@ -49,8 +49,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     if (status) {
       filter.push({ term: { 'monitor.status': status } });
     }
+
+    let postFilterClause = {};
     if (location) {
-      filter.push({ term: { 'observer.geo.name': location } });
+      postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
     }
     const queryContext = { bool: { filter } };
     const params = {
@@ -70,6 +72,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
             },
           },
         },
+        ...postFilterClause,
       },
     };
 
@@ -190,7 +193,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       ? query
       : {
           bool: {
-            must: [{ match: { 'monitor.id': monitorId } }, query],
+            must: [query],
+            filter: [{ match: { 'monitor.id': monitorId } }],
           },
         };
 

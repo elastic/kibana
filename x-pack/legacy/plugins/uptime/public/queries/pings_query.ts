@@ -49,6 +49,11 @@ query PingList(
           status
           type
         }
+        observer {
+          geo {
+            name
+          }
+        }
       }
     }
   }

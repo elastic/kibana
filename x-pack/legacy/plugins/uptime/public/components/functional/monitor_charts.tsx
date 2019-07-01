@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext } from 'react';
 import DateMath from '@elastic/datemath';
+import { Moment } from 'moment';
 import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
@@ -40,7 +41,7 @@ export const MonitorChartsComponent = (props: Props) => {
 
     const { colors } = useContext(UptimeSettingsContext);
     const parseDateRange = (r: string): number => {
-      const parsed = DateMath.parse(r);
+      const parsed: Moment | undefined = DateMath.parse(r);
       return parsed ? parsed.valueOf() : 0;
     };
     return (
