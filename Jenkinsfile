@@ -50,18 +50,21 @@ pipeline {
 
     stage('Component Integration Tests') {
       agent { label 'linux || immutable' } 
+      options { skipDefaultCheckout() }
       steps {
         sh 'echo "Not implemented yet"'
       }
     }
     stage('Functional Tests') {
       agent { label 'linux || immutable' } 
+      options { skipDefaultCheckout() }
       steps {
         sh 'echo "Not implemented yet"'
       }
     }
     stage('Finish') {
       agent { label 'linux || immutable' } 
+      options { skipDefaultCheckout() }
       steps {
         sh 'echo "Not implemented yet"'
       }
