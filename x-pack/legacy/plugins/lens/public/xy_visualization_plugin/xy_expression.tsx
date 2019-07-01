@@ -42,10 +42,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
       options: ['bar', 'line', 'area'],
       help: 'The type of chart to display.',
     },
-    title: {
-      types: ['string'],
-      help: 'The char title.',
-    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: 'Configure the chart legend.',

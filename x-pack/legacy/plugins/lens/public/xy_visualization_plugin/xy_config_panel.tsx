@@ -105,24 +105,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.xyChart.chartTitleLabel', {
-          defaultMessage: 'Title',
-        })}
-      >
-        <EuiFieldText
-          placeholder={i18n.translate('xpack.lens.xyChart.chartTitlePlaceholder', {
-            defaultMessage: 'Title',
-          })}
-          data-test-subj="lnsXY_title"
-          value={state.title}
-          onChange={e => setState({ ...state, title: e.target.value })}
-          aria-label={i18n.translate('xpack.lens.xyChart.chartTitleAriaLabel', {
-            defaultMessage: 'Title',
-          })}
-        />
-      </EuiFormRow>
-
       <EuiFormRow>
         <EuiSwitch
           label={i18n.translate('xpack.lens.xyChart.showLegendLabel', {

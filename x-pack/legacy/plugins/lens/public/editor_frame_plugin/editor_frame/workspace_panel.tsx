@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
-import { DragDrop } from '../../drag_drop';
+import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 
@@ -37,6 +36,7 @@ export function WorkspacePanel({
   dispatch,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
+  const dragDropContext = useContext(DragContext);
   function onDrop(item: unknown) {
     const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsForField(
       datasourceState,
@@ -47,8 +47,7 @@ export function WorkspacePanel({
       datasourceSuggestions,
       visualizationMap,
       activeVisualizationId,
-      visualizationState,
-      datasourcePublicAPI
+      visualizationState
     );
 
     if (suggestions.length === 0) {
@@ -138,7 +137,7 @@ export function WorkspacePanel({
     } else {
       return (
         <ExpressionRendererComponent
-          className="lnsChartWrapper"
+          className="lnsExpressionOutput"
           expression={expression!}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);
@@ -149,7 +148,7 @@ export function WorkspacePanel({
   }
 
   return (
-    <DragDrop draggable={false} droppable={true} onDrop={onDrop}>
+    <DragDrop draggable={false} droppable={Boolean(dragDropContext.dragging)} onDrop={onDrop}>
       {renderVisualization()}
     </DragDrop>
   );

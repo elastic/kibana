@@ -42,6 +42,15 @@ describe('editor_frame', () => {
 
   let expressionRendererMock: ExpressionRenderer;
 
+  const defaultProps = {
+    store: {
+      save: jest.fn(),
+      load: jest.fn(),
+    },
+    redirectTo: jest.fn(),
+    onError: jest.fn(),
+  };
+
   beforeEach(() => {
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
@@ -57,6 +66,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -77,6 +87,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -98,6 +109,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -119,6 +131,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -143,6 +156,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -170,6 +184,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -203,6 +218,7 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: { ...mockVisualization, initialize: () => initialState },
           }}
@@ -229,6 +245,7 @@ describe('editor_frame', () => {
     it('should render the resulting expression using the expression renderer', async () => {
       const instance = mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
@@ -272,6 +289,7 @@ Object {
     it('should re-render config panel after state update', async () => {
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -305,6 +323,7 @@ Object {
     it('should re-render data panel after state update', async () => {
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -338,6 +357,7 @@ Object {
     it('should re-render config panel with updated datasource api after datasource state update', async () => {
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -353,8 +373,8 @@ Object {
       await waitForPromises();
 
       const updatedPublicAPI = {};
-      mockDatasource.getPublicAPI = jest.fn(
-        _ => (updatedPublicAPI as unknown) as DatasourcePublicAPI
+      mockDatasource.getPublicAPI.mockReturnValue(
+        (updatedPublicAPI as unknown) as DatasourcePublicAPI
       );
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
@@ -377,6 +397,7 @@ Object {
     it('should pass the datasource api to the visualization', async () => {
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -403,6 +424,7 @@ Object {
 
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -426,6 +448,7 @@ Object {
     it('should re-create the public api after state has been set', async () => {
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -459,6 +482,7 @@ Object {
     beforeEach(async () => {
       instance = mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
             testVis2: mockVisualization2,
@@ -574,6 +598,7 @@ Object {
     it('should fetch suggestions of currently active datasource', async () => {
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -596,6 +621,7 @@ Object {
     it('should fetch suggestions of all visualizations', async () => {
       mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: mockVisualization,
             testVis2: mockVisualization2,
@@ -619,6 +645,7 @@ Object {
     it('should display suggestions in descending order', async () => {
       const instance = mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -689,6 +716,7 @@ Object {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -744,6 +772,7 @@ Object {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -800,6 +829,7 @@ Object {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
+          {...defaultProps}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
