@@ -45,7 +45,7 @@ export const getAllHandler: RouterRouteHandler = async (
   const repositoryNames = Object.keys(repositoriesByName);
 
   if (repositoryNames.length === 0) {
-    return { snapshots: [], errors: [], repositories: [], managedRepository };
+    return { snapshots: [], errors: [], repositories: [] };
   }
 
   const snapshots: SnapshotDetails[] = [];
@@ -71,7 +71,7 @@ export const getAllHandler: RouterRouteHandler = async (
       // Decorate each snapshot with the repository with which it's associated.
       fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
         fetchedSnapshots.forEach(snapshot => {
-          snapshots.push(deserializeSnapshotDetails(repository, snapshot));
+          snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
         });
       });
 
@@ -88,7 +88,6 @@ export const getAllHandler: RouterRouteHandler = async (
   return {
     snapshots,
     repositories,
-    managedRepository,
     errors,
   };
 };
@@ -98,6 +97,7 @@ export const getOneHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<SnapshotDetails> => {
   const { repository, snapshot } = req.params;
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
   const {
     responses: snapshotResponses,
   }: {
@@ -112,7 +112,11 @@ export const getOneHandler: RouterRouteHandler = async (
   });
 
   if (snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots) {
-    return deserializeSnapshotDetails(repository, snapshotResponses[0].snapshots[0]);
+    return deserializeSnapshotDetails(
+      repository,
+      snapshotResponses[0].snapshots[0],
+      managedRepository
+    );
   }
 
   // If snapshot doesn't exist, ES will return 200 with an error object, so manually throw 404 here

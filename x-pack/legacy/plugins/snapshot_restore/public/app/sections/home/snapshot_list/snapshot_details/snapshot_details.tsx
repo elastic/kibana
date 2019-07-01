@@ -199,6 +199,18 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                             onSnapshotDeleted
                           )
                         }
+                        isDisabled={snapshotDetails.isManagedRepository}
+                        title={
+                          snapshotDetails.isManagedRepository
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.snapshotDetails.deleteManagedRepositorySnapshotButtonTitle',
+                                {
+                                  defaultMessage:
+                                    'You cannot delete a managed repository snapshot.',
+                                }
+                              )
+                            : null
+                        }
                       >
                         <FormattedMessage
                           id="xpack.snapshotRestore.snapshotDetails.deleteButtonLabel"

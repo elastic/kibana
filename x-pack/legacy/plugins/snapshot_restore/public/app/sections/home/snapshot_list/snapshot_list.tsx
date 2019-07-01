@@ -42,7 +42,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const {
     error,
     loading,
-    data: { snapshots = [], repositories = [], managedRepository = undefined, errors = {} },
+    data: { snapshots = [], repositories = [], errors = {} },
     request: reload,
   } = useLoadSnapshots();
 
@@ -283,7 +283,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         <SnapshotTable
           snapshots={snapshots}
           repositories={repositories}
-          managedRepository={managedRepository}
           reload={reload}
           openSnapshotDetailsUrl={openSnapshotDetailsUrl}
           onSnapshotDeleted={onSnapshotDeleted}

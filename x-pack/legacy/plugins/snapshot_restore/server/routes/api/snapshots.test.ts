@@ -87,10 +87,19 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const expectedResponse = {
         errors: {},
         repositories: ['fooRepository', 'barRepository'],
-        managedRepository: 'found-snapshots',
         snapshots: [
-          { ...defaultSnapshot, repository: 'fooRepository', snapshot: 'snapshot1' },
-          { ...defaultSnapshot, repository: 'barRepository', snapshot: 'snapshot2' },
+          {
+            ...defaultSnapshot,
+            repository: 'fooRepository',
+            snapshot: 'snapshot1',
+            isManagedRepository: false,
+          },
+          {
+            ...defaultSnapshot,
+            repository: 'barRepository',
+            snapshot: 'snapshot2',
+            isManagedRepository: false,
+          },
         ],
       };
 
@@ -105,7 +114,6 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         errors: [],
         snapshots: [],
         repositories: [],
-        managedRepository: 'found-snapshots',
       };
 
       const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);
@@ -148,6 +156,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         ...defaultSnapshot,
         snapshot,
         repository,
+        isManagedRepository: false,
       };
 
       const response = await getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit);
