@@ -5,6 +5,7 @@
  */
 
 import { flatten, pick } from 'lodash';
+import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
@@ -42,7 +43,7 @@ export async function getTransactionBreakdown({
     },
     types: {
       terms: {
-        field: 'span.type.keyword',
+        field: 'span.type',
         size: 20,
         order: {
           _count: 'desc'
@@ -51,7 +52,7 @@ export async function getTransactionBreakdown({
       aggs: {
         subtypes: {
           terms: {
-            field: 'span.subtype.keyword',
+            field: 'span.subtype',
             missing: '',
             size: 20,
             order: {
@@ -79,14 +80,14 @@ export async function getTransactionBreakdown({
           must: [
             {
               term: {
-                'service.name.keyword': {
+                [SERVICE_NAME]: {
                   value: serviceName
                 }
               }
             },
             {
               term: {
-                'transaction.type.keyword': {
+                'transaction.type': {
                   value: 'request'
                 }
               }
@@ -97,7 +98,7 @@ export async function getTransactionBreakdown({
               ? [
                   {
                     term: {
-                      'transaction.name.keyword': {
+                      'transaction.name': {
                         value: transactionName
                       }
                     }
