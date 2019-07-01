@@ -40,7 +40,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueSourcePrivateIps',
         value: null,
-        name: i18n.SRC,
+        name: i18n.SOURCE_NAME,
         description: i18n.SOURCE,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
@@ -48,7 +48,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueDestinationPrivateIps',
         value: null,
-        name: i18n.DEST,
+        name: i18n.DESTINATION_NAME,
         description: i18n.DESTINATION,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
@@ -136,18 +136,18 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(({ data, loading 
       </EuiFlexItem>
     </FlexGroup>
   ) : (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
-          <React.Fragment key={`kpi-network-row-${idx}`}>
-            {idx % kipsPerRow === 1 && <EuiSpacer size="l" />}
-            <KpiNetworkBaseComponent data={data} fieldsMapping={mappingsPerLine} />
-          </React.Fragment>
-        ))}
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <KpiNetworkBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
+            <React.Fragment key={`kpi-network-row-${idx}`}>
+              {idx % kipsPerRow === 1 && <EuiSpacer size="l" />}
+              <KpiNetworkBaseComponent data={data} fieldsMapping={mappingsPerLine} />
+            </React.Fragment>
+          ))}
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <KpiNetworkBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
 });
