@@ -7,7 +7,7 @@
 import { seriesHasDownValues } from '../series_has_down_values';
 
 describe('seriesHasDownValues', () => {
-  it('identifies that a series does have y-values', () => {
+  it('identifies that a series does have down values', () => {
     expect(
       seriesHasDownValues([
         { timestamp: 123, down: 23, up: 3 },
@@ -16,7 +16,7 @@ describe('seriesHasDownValues', () => {
     ).toBe(true);
   });
 
-  it('identifies that a series does not have y-values', () => {
+  it('identifies that a series does not have down values', () => {
     expect(
       seriesHasDownValues([{ timestamp: 123, down: 0, up: 0 }, { timestamp: 125, down: 0, up: 0 }])
     ).toBe(false);
