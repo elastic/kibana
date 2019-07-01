@@ -119,17 +119,33 @@ export class VectorLayer extends AbstractLayer {
   getCustomIconAndTooltipContent() {
     const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+
+
+    const noResultsIcon = (
+      <EuiIcon
+        size="m"
+        color="subdued"
+        type="minusInCircle"
+      />
+    );
+
     if (!featureCollection || featureCollection.features.length === 0) {
       return {
-        icon: (
-          <EuiIcon
-            size="m"
-            color="subdued"
-            type="minusInCircle"
-          />
-        ),
+        icon: noResultsIcon,
         tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
           defaultMessage: `No results found.`
+        })
+      };
+    }
+
+
+    if (this._joins.length &&
+      !featureCollection.features.some((feature) => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME])
+    ) {
+      return {
+        icon: noResultsIcon,
+        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundInJoinTooltip', {
+          defaultMessage: `No matching results found in term joins`
         })
       };
     }
