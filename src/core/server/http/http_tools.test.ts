@@ -17,9 +17,16 @@
  * under the License.
  */
 
+import supertest from 'supertest';
 import { Request, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
+
 import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
+import { HttpServer } from './http_server';
+import { HttpConfig } from './http_config';
+import { Router } from './router';
+import { loggingServiceMock } from '../logging/logging_service.mock';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 const emptyOutput = {
   statusCode: 400,
@@ -56,4 +63,26 @@ describe('defaultValidationErrorHandler', () => {
       expect(err.output.payload.validation.keys).toEqual(['0.type', 'value']);
     }
   });
+});
+
+test('returns 408 on timeout error', async () => {
+  const router = new Router('');
+  router.get({ path: '/', validate: false }, async (req, res) => {
+    await new Promise(res => setTimeout(res, 1000));
+    return res.ok({});
+  });
+
+  const logger = loggingServiceMock.create();
+  const server = new HttpServer(logger, 'foo');
+  const { registerRouter, server: innerServer } = await server.setup({
+    socketTimeout: 1,
+    host: '127.0.0.1',
+    maxPayload: new ByteSizeValue(1024),
+    ssl: {},
+  } as HttpConfig);
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener).get('/').expect(408)
+  await server.stop()
 });
