@@ -43,7 +43,9 @@ export const editor = handleActions<EditorState, EditorPayload>(
         draft.refPayload = action.payload;
         draft.showing = true;
         draft.loading = true;
+        // @ts-ignore
         draft.references = initialState.references;
+        // @ts-ignore
         draft.hover = state.currentHover;
         draft.referencesTitle = initialState.referencesTitle;
       }),
@@ -69,6 +71,7 @@ export const editor = handleActions<EditorState, EditorPayload>(
       }),
     [String(hoverResult)]: (state, action: Action<Hover>) =>
       produce<EditorState>(state, draft => {
+        // @ts-ignore
         draft.currentHover = action.payload;
       }),
     [String(revealPosition)]: (state, action: Action<Position>) =>

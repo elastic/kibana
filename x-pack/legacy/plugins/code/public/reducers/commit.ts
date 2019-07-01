@@ -29,6 +29,7 @@ export const commit = handleActions<CommitState, CommitPayload>(
       }),
     [String(loadCommitSuccess)]: (state, action: Action<CommitDiff>) =>
       produce<CommitState>(state, draft => {
+        // @ts-ignore
         draft.commit = action.payload!;
         draft.loading = false;
       }),

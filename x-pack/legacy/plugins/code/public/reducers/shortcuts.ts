@@ -44,6 +44,7 @@ export const shortcuts = handleActions<ShortcutsState, ShortcutPayload>(
     [String(registerShortcut)]: (state, action: Action<HotKey>) =>
       produce<ShortcutsState>(state, draft => {
         const hotKey = action.payload as HotKey;
+        // @ts-ignore
         draft.shortcuts.push(hotKey);
       }),
     [String(unregisterShortcut)]: (state, action: Action<HotKey>) =>

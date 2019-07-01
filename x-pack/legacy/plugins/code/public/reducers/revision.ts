@@ -39,6 +39,7 @@ export const revision = handleActions<RevisionState, RevisionPayload>(
   {
     [String(fetchRepoCommitsSuccess)]: (state, action: Action<CommitInfo[]>) =>
       produce<RevisionState>(state, draft => {
+        // @ts-ignore
         draft.treeCommits[''] = action.payload!;
         draft.loadingCommits = false;
       }),
@@ -49,7 +50,9 @@ export const revision = handleActions<RevisionState, RevisionPayload>(
     [String(fetchRepoBranchesSuccess)]: (state, action: Action<ReferenceInfo[]>) =>
       produce<RevisionState>(state, draft => {
         const references = action.payload!;
+        // @ts-ignore
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
+        // @ts-ignore
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
       }),
     [String(fetchTreeCommits)]: state =>
@@ -66,8 +69,10 @@ export const revision = handleActions<RevisionState, RevisionPayload>(
         if (commits.length === 0) {
           draft.commitsFullyLoaded[path] = true;
         } else if (append) {
+          // @ts-ignore
           draft.treeCommits[path] = draft.treeCommits[path].concat(commits);
         } else {
+          // @ts-ignore
           draft.treeCommits[path] = commits;
         }
         draft.loadingCommits = false;
