@@ -37,6 +37,9 @@ pipeline {
         dir("${env.BASE_DIR}"){
           sh "${TEMP_PIPELINE_SETUP_DIR}/setup.sh"
           sh 'echo "\n\t### [TODO] create and upload workspace cache to gcs"'
+          script {
+            dumpEnv() // Lets see if any vars exported in setup.sh are visible here
+          }
         }
       }
     }
