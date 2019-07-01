@@ -91,9 +91,9 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
 
     const inspect = {
       dsl: [
-        inspectStringifyObject(hostsQuery[0]),
-        inspectStringifyObject(authQuery[0]),
-        inspectStringifyObject(uniqueIpsQuery[0]),
+        inspectStringifyObject(hostsQuery[1]),
+        inspectStringifyObject(authQuery[1]),
+        inspectStringifyObject(uniqueIpsQuery[1]),
       ],
       response: [
         inspectStringifyObject(response.responses[0]),
@@ -101,7 +101,6 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
         inspectStringifyObject(response.responses[2]),
       ],
     };
-
     return {
       inspect,
       hosts: getOr(null, 'responses.0.aggregations.hosts.value', response),
@@ -163,12 +162,13 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       response
     );
     const inspect = {
-      dsl: [inspectStringifyObject(authQuery[0]), inspectStringifyObject(uniqueIpsQuery[0])],
+      dsl: [inspectStringifyObject(authQuery[1]), inspectStringifyObject(uniqueIpsQuery[1])],
       response: [
         inspectStringifyObject(response.responses[0]),
         inspectStringifyObject(response.responses[1]),
       ],
     };
+
     return {
       inspect,
       authSuccess: getOr(

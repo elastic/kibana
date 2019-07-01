@@ -74,11 +74,11 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
 
     const inspect = {
       dsl: [
-        inspectStringifyObject(networkEventsQuery[0]),
-        inspectStringifyObject(dnsQuery[0]),
-        inspectStringifyObject(uniquePrivateIpsQuery[0]),
-        inspectStringifyObject(uniqueFlowIdsQuery[0]),
-        inspectStringifyObject(tlsHandshakesQuery[0]),
+        inspectStringifyObject(networkEventsQuery[1]),
+        inspectStringifyObject(dnsQuery[1]),
+        inspectStringifyObject(uniquePrivateIpsQuery[1]),
+        inspectStringifyObject(uniqueFlowIdsQuery[1]),
+        inspectStringifyObject(tlsHandshakesQuery[1]),
       ],
       response: [
         inspectStringifyObject(response.responses[0]),
@@ -88,7 +88,6 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
         inspectStringifyObject(response.responses[4]),
       ],
     };
-
     return {
       inspect,
       networkEvents: getOr(null, 'responses.0.hits.total.value', response),

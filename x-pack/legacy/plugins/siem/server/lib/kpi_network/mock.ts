@@ -22,10 +22,6 @@ export const mockOptions: RequestBasicOptions = {
   filterQuery: {},
 };
 
-export const mockMsearchOptions = {
-  body: [],
-};
-
 export const mockRequest = {
   params: {},
   payload: {
@@ -215,8 +211,65 @@ export const mockResponse = {
     },
   ],
 };
+const mockMsearchHeader = {
+  index: 'defaultIndex',
+  allowNoIndices: true,
+  ignoreUnavailable: true,
+};
+const mockMsearchBody = (mockQuery: object) => ({
+  query: mockQuery,
+  aggregations: {},
+  size: 0,
+  track_total_hits: false,
+});
+export const mockNetworkEventsQueryDsl = [
+  mockMsearchHeader,
+  mockMsearchBody({ mockNetworkEventsQueryDsl: 'mockNetworkEventsQueryDsl' }),
+];
+export const mockUniqueFlowIdsQueryDsl = [
+  mockMsearchHeader,
+  mockMsearchBody({ mockUniqueFlowIdsQueryDsl: 'mockUniqueFlowIdsQueryDsl' }),
+];
+export const mockUniquePrvateIpsQueryDsl = [
+  mockMsearchHeader,
+  mockMsearchBody({ mockUniquePrvateIpsQueryDsl: 'mockUniquePrvateIpsQueryDsl' }),
+];
+export const mockDnsQueryDsl = [
+  mockMsearchHeader,
+  mockMsearchBody({ mockDnsQueryDsl: 'mockDnsQueryDsl' }),
+];
+export const mockTlsHandshakesQueryDsl = [
+  mockMsearchHeader,
+  mockMsearchBody({ mockTlsHandshakesQueryDsl: 'mockTlsHandshakesQueryDsl' }),
+];
+
+export const mockMsearchOptions = {
+  body: [
+    ...mockNetworkEventsQueryDsl,
+    ...mockDnsQueryDsl,
+    ...mockUniquePrvateIpsQueryDsl,
+    ...mockUniqueFlowIdsQueryDsl,
+    ...mockTlsHandshakesQueryDsl,
+  ],
+};
 
 export const mockResult = {
+  inspect: {
+    dsl: [
+      JSON.stringify(mockNetworkEventsQueryDsl[1], null, 2),
+      JSON.stringify(mockDnsQueryDsl[1], null, 2),
+      JSON.stringify(mockUniquePrvateIpsQueryDsl[1], null, 2),
+      JSON.stringify(mockUniqueFlowIdsQueryDsl[1], null, 2),
+      JSON.stringify(mockTlsHandshakesQueryDsl[1], null, 2),
+    ],
+    response: [
+      JSON.stringify(mockResponse.responses[0], null, 2),
+      JSON.stringify(mockResponse.responses[1], null, 2),
+      JSON.stringify(mockResponse.responses[2], null, 2),
+      JSON.stringify(mockResponse.responses[3], null, 2),
+      JSON.stringify(mockResponse.responses[4], null, 2),
+    ],
+  },
   dnsQueries: 10942,
   networkEvents: 733106,
   tlsHandshakes: 54482,
@@ -251,4 +304,35 @@ export const mockResult = {
       y: 7,
     },
   ],
+};
+
+export const mockResponseNoData = {
+  responses: [null, null, null, null, null],
+};
+
+export const mockResultNoData = {
+  inspect: {
+    dsl: [
+      JSON.stringify(mockNetworkEventsQueryDsl[1], null, 2),
+      JSON.stringify(mockDnsQueryDsl[1], null, 2),
+      JSON.stringify(mockUniquePrvateIpsQueryDsl[1], null, 2),
+      JSON.stringify(mockUniqueFlowIdsQueryDsl[1], null, 2),
+      JSON.stringify(mockTlsHandshakesQueryDsl[1], null, 2),
+    ],
+    response: [
+      JSON.stringify(mockResponseNoData.responses[0], null, 2),
+      JSON.stringify(mockResponseNoData.responses[1], null, 2),
+      JSON.stringify(mockResponseNoData.responses[2], null, 2),
+      JSON.stringify(mockResponseNoData.responses[3], null, 2),
+      JSON.stringify(mockResponseNoData.responses[4], null, 2),
+    ],
+  },
+  networkEvents: null,
+  uniqueFlowId: null,
+  uniqueSourcePrivateIps: null,
+  uniqueSourcePrivateIpsHistogram: null,
+  uniqueDestinationPrivateIps: null,
+  uniqueDestinationPrivateIpsHistogram: null,
+  dnsQueries: null,
+  tlsHandshakes: null,
 };
