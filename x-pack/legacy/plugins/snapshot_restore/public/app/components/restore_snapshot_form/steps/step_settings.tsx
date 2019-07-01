@@ -115,7 +115,6 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
           fullWidth
           describedByIds={['stepSettingsIndexSettingsDescription']}
         >
-          {/* Fragment needed because EuiFormRow can only have one child: https://github.com/elastic/eui/issues/1931 */}
           <Fragment>
             <EuiSwitch
               label={
@@ -227,7 +226,6 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
           fullWidth
           describedByIds={['stepSettingsIgnoreIndexSettingsDescription']}
         >
-          {/* Fragment needed because EuiFormRow can only have one child: https://github.com/elastic/eui/issues/1931 */}
           <Fragment>
             <EuiSwitch
               label={
