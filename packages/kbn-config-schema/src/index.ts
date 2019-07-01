@@ -36,6 +36,8 @@ import {
   MapOfOptions,
   MapOfType,
   MaybeType,
+  NeverOptions,
+  NeverType,
   NumberOptions,
   NumberType,
   ObjectType,
@@ -86,6 +88,10 @@ function byteSize(options?: ByteSizeOptions): Type<ByteSizeValue> {
 
 function duration(options?: DurationOptions): Type<Duration> {
   return new DurationType(options);
+}
+
+function never(options?: NeverOptions): Type<never> {
+  return new NeverType(options);
 }
 
 /**
@@ -186,6 +192,7 @@ export const schema = {
   literal,
   mapOf,
   maybe,
+  never,
   number,
   object,
   oneOf,
