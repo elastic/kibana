@@ -16,11 +16,10 @@ import {
 import { INDEX_NAMES } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 
-type SortChecks = (c: Check) => string[];
-const checksSortBy = (c: Check) => [
-  get<string>(c, 'observer.geo.name'),
-  // TODO: this doesn't _really_ sort by ip, it's a naive string sort
-  get<string>(c, 'monitor.ip'),
+type SortChecks = (check: Check) => string[];
+const checksSortBy = (check: Check) => [
+  get<string>(check, 'observer.geo.name'),
+  get<string>(check, 'monitor.ip'),
 ];
 
 interface LegacyMonitorStatesQueryResult {
