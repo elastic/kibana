@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
+import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
@@ -14,11 +15,12 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
 
 import { ModalInspectQuery } from './modal';
+import * as i18n from './translations';
 
 interface OwnProps {
   queryId: string;
   inspectIndex: number;
-  title: string | React.ReactElement;
+  title: string | React.ReactElement | React.ReactNode;
 }
 
 interface InspectButtonReducer {
@@ -51,23 +53,24 @@ const InspectButtonComponent = ({
   title = '',
 }: InspectButtonProps) => (
   <>
-    <EuiButtonEmpty
-      iconSide="left"
-      iconType="inspect"
-      isDisabled={loading}
-      isLoading={loading}
-      onClick={() => {
-        setIsInspected({
-          id: queryId,
-          inputId: 'global',
-          isInspected: true,
-          selectedInspectIndex: inspectIndex,
-        });
-      }}
-      size="xs"
-    >
-      {'Inspect'}
-    </EuiButtonEmpty>
+    <EuiToolTip delay="regular" position="top" content={i18n.TOOLTIP_CONTENT}>
+      {loading ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
+        <EuiButtonIcon
+          iconSize="m"
+          iconType="inspect"
+          onClick={() => {
+            setIsInspected({
+              id: queryId,
+              inputId: 'global',
+              isInspected: true,
+              selectedInspectIndex: inspectIndex,
+            });
+          }}
+        />
+      )}
+    </EuiToolTip>
     <ModalInspectQuery
       closeModal={() => {
         setIsInspected({
@@ -82,7 +85,7 @@ const InspectButtonComponent = ({
       response={
         inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
       }
-      title={`${title} - Query Inspection`}
+      title={`${title} ${i18n.TITLE}`}
     />
   </>
 );

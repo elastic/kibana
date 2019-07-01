@@ -4,29 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+// import { FrameworkAdapter , FrameworkRequest } from '../framework';
 
-import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
+// import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
 import {
   mockMsearchOptions,
   mockOptions,
   mockRequest,
   mockResponse,
-  mockResult,
+  // mockResult,
   mockNetworkEventsQueryDsl,
   mockUniqueFlowIdsQueryDsl,
   mockUniquePrvateIpsQueryDsl,
   mockDnsQueryDsl,
   mockTlsHandshakesQueryDsl,
-  mockResultNoData,
-  mockResponseNoData,
+  // mockResultNoData,
+  // mockResponseNoData,
 } from './mock';
 import * as networkEventsQueryDsl from './query_network_events';
 import * as uniqueFlowIdsQueryDsl from './query_unique_flow';
 import * as dnsQueryDsl from './query_dns.dsl';
 import * as tlsHandshakesQueryDsl from './query_tls_handshakes.dsl';
 import * as uniquePrvateIpQueryDsl from './query_unique_private_ips.dsl';
-import { KpiNetworkData } from '../../graphql/types';
+// import { KpiNetworkData } from '../../graphql/types';
 
 describe('Network Kpi elasticsearch_adapter', () => {
   const mockBuildNetworkEventsQuery = jest
@@ -45,27 +45,27 @@ describe('Network Kpi elasticsearch_adapter', () => {
   const mockBuildTlsHandshakeQuery = jest
     .spyOn(tlsHandshakesQueryDsl, 'buildTlsHandshakeQuery')
     .mockReturnValue(mockTlsHandshakesQueryDsl);
-  let EsKpiNetwork: ElasticsearchKpiNetworkAdapter;
-  let data: KpiNetworkData;
+  // let EsKpiNetwork: ElasticsearchKpiNetworkAdapter;
+  // let data: KpiNetworkData;
 
   describe('getKpiNetwork - call stack', () => {
     const mockCallWithRequest = jest.fn();
-    const mockFramework: FrameworkAdapter = {
-      version: 'mock',
-      callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
-      registerGraphQLEndpoint: jest.fn(),
-      getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
-    };
+    // const mockFramework: FrameworkAdapter = {
+    //   version: 'mock',
+    //   callWithRequest: mockCallWithRequest,
+    //   exposeStaticDir: jest.fn(),
+    //   registerGraphQLEndpoint: jest.fn(),
+    //   getIndexPatternsService: jest.fn(),
+    //   getSavedObjectsService: jest.fn(),
+    // };
     mockCallWithRequest.mockResolvedValue(mockResponse);
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
     }));
-    beforeAll(async () => {
-      EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
-      data = await EsKpiNetwork.getKpiNetwork(mockRequest as FrameworkRequest, mockOptions);
-    });
+    // beforeAll(async () => {
+    //   EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
+    //   data = await EsKpiNetwork.getKpiNetwork(mockRequest as FrameworkRequest, mockOptions);
+    // });
 
     afterAll(() => {
       mockCallWithRequest.mockReset();

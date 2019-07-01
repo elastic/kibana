@@ -24,7 +24,6 @@ import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
-import { InspectButton } from '../inspect';
 
 const DEFAULT_DATA_TEST_SUBJ = 'load-more-table';
 
@@ -147,6 +146,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       headerTitle,
       headerTooltip,
       headerUnit,
+      id,
       itemsPerRow,
       limit,
       loading,
@@ -215,14 +215,10 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           )}
 
           <HeaderPanel
+            id={id}
             subtitle={
               <>
                 <div>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</div>
-                {this.props.id && (
-                  <div>
-                    <InspectButton queryId={this.props.id} title={headerTitle} inspectIndex={0} />
-                  </div>
-                )}
               </>
             }
             title={headerTitle}

@@ -36,6 +36,9 @@ export const anomaliesTableData = async (
         ...headers,
       },
     });
+    if (response.status !== 200) {
+      throw new Error();
+    }
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data

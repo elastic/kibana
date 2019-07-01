@@ -19,6 +19,8 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
+import * as i18n from './translations';
+
 interface ModalInspectProps {
   closeModal: () => void;
   isShowing: boolean;
@@ -102,7 +104,7 @@ export const ModalInspectQuery = ({
 
         <EuiModalFooter>
           <EuiButton onClick={closeModal} fill data-test-subj="modal-inspect-close">
-            {'Close Modal'}
+            {i18n.CLOSE}
           </EuiButton>
         </EuiModalFooter>
       </MyEuiModal>
