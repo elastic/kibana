@@ -190,6 +190,7 @@
     "@slack/client": "^4.8.0",
     "@slack/webhook": "^5.0.0",
     "@turf/boolean-contains": "6.0.1",
+    "@types/recompose": "^0.30.6",
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.6.5",
     "angular-ui-ace": "0.2.3",
