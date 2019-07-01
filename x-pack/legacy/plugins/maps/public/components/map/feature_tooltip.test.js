@@ -49,8 +49,7 @@ const defaultProps = {
   },
   closeTooltip: () => {},
   showFilterButtons: false,
-  showCloseButton: false,
-  showFeatureList: false
+  isLocked: false
 };
 
 describe('FeatureTooltip (single)', async () => {
@@ -76,7 +75,7 @@ describe('FeatureTooltip (single)', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
-        showCloseButton={true}
+        isLocked={true}
         features={SINGLE_FEATURE}
       />
     );
@@ -115,7 +114,7 @@ describe('FeatureTooltip (multi)', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
-        showCloseButton={true}
+        isLocked={true}
         features={MULTI_FEATURE_MULTI_LAYER}
       />
     );
@@ -133,9 +132,8 @@ describe('FeatureTooltip (multi)', async () => {
     const component = shallow(
       <FeatureTooltip
         {...defaultProps}
-        showCloseButton={true}
+        isLocked={true}
         features={MULTI_FEATURE_MULTI_LAYER}
-        showFeatureList={true}
       />
     );
 

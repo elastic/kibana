@@ -71,7 +71,6 @@ export class FeatureTooltip extends React.Component {
 
   _loadUniqueLayers = async () => {
 
-
     if (this._prevFeatures === this.props.features) {
       return;
     }
@@ -137,11 +136,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderLayerFilterBox() {
-
-    if (!this.props.showFeatureList) {
-      return null;
-    }
-
     if (!this.state.uniqueLayers || this.state.uniqueLayers.length < 2) {
       return null;
     }
@@ -177,7 +171,7 @@ export class FeatureTooltip extends React.Component {
 
   _renderHeader() {
 
-    if (!this.props.showCloseButton && !this.props.showFeatureList) {
+    if (!this.props.isLocked) {
       return null;
     }
 
@@ -213,9 +207,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderCloseButton() {
-    if (!this.props.showCloseButton) {
-      return null;
-    }
     return (
       <EuiButtonIcon
         onClick={this._onCloseTooltip}
@@ -253,24 +244,19 @@ export class FeatureTooltip extends React.Component {
       <EuiText size="s"><b>{(this.state.pageNumber + 1)}</b> of <b>{filteredFeatures.length}</b></EuiText>
     );
 
-    let cycleArrows;
-    if (this.props.showFeatureList) {
-      cycleArrows = (<EuiPagination
-        pageCount={filteredFeatures.length}
-        activePage={this.state.pageNumber}
-        onPageClick={this._onPageChange}
-        compressed
-      />);
-    } else {
-      cycleArrows = null;
-    }
+    const cycleArrows = (this.props.isLocked) ? (<EuiPagination
+      pageCount={filteredFeatures.length}
+      activePage={this.state.pageNumber}
+      onPageClick={this._onPageChange}
+      compressed
+    />) : null;
 
-    const hint = (this.props.showFeatureList && filteredFeatures.length > 20) ? (
+    const hint = (this.props.isLocked && filteredFeatures.length > 20) ? (
       <EuiFlexItem grow={false}>
         <EuiIconTip
           type="iInCircle"
           content={i18n.translate('xpack.maps.tooltip.infoIconHelp', {
-            defaultMessage: 'Use the query bar to filter results.'
+            defaultMessage: 'Use query bar and time picker to limit the features displayed for each layer.'
           })}
         />
       </EuiFlexItem>
