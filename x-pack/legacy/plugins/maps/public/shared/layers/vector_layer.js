@@ -26,7 +26,7 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
-const VISIBILITY_FILTER_CLAUSE = [  'all',
+const VISIBILITY_FILTER_CLAUSE = ['all',
   [
     '==',
     ['get', FEATURE_VISIBLE_PROPERTY_NAME],
@@ -62,8 +62,8 @@ const POINT_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
 ];
 
 
-
 let idCounter = 0;
+
 function generateNumericalId() {
   const newId = idCounter < Number.MAX_SAFE_INTEGER ? idCounter : 0;
   idCounter = newId + 1;
@@ -89,7 +89,7 @@ export class VectorLayer extends AbstractLayer {
 
   constructor(options) {
     super(options);
-    this._joins =  [];
+    this._joins = [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
         this._joins.push(new LeftInnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
@@ -128,7 +128,6 @@ export class VectorLayer extends AbstractLayer {
         type="minusInCircle"
       />
     );
-
     if (!featureCollection || featureCollection.features.length === 0) {
       return {
         icon: noResultsIcon,
@@ -137,7 +136,6 @@ export class VectorLayer extends AbstractLayer {
         })
       };
     }
-
 
     if (this._joins.length &&
       !featureCollection.features.some((feature) => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME])
@@ -149,11 +147,11 @@ export class VectorLayer extends AbstractLayer {
         })
       };
     }
-
     return {
       icon: this._style.getIcon(),
       tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
     };
+
   }
 
   getLayerTypeIconName() {
@@ -173,7 +171,7 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection) {
       return null;
     }
-    const bbox =  turf.bbox(featureCollection);
+    const bbox = turf.bbox(featureCollection);
     return {
       min_lon: bbox[0],
       min_lat: bbox[1],
@@ -350,7 +348,7 @@ export class VectorLayer extends AbstractLayer {
         join: join,
         propertiesMap: propertiesMap,
       };
-    } catch(e) {
+    } catch (e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
         dataHasChanged: false,
@@ -450,7 +448,7 @@ export class VectorLayer extends AbstractLayer {
       };
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
-      return  {
+      return {
         refreshed: false
       };
     }
@@ -637,11 +635,11 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getMbPointLayerId() {
-    return this.getId() +  '_circle';
+    return this.getId() + '_circle';
   }
 
   _getMbSymbolLayerId() {
-    return this.getId() +  '_symbol';
+    return this.getId() + '_symbol';
   }
 
   _getMbLineLayerId() {
@@ -673,7 +671,7 @@ export class VectorLayer extends AbstractLayer {
 
   async getPropertiesForTooltip(properties) {
 
-    let allTooltips =  await this._source.filterAndFormatPropertiesToHtml(properties);
+    let allTooltips = await this._source.filterAndFormatPropertiesToHtml(properties);
     this._addJoinsToSourceTooltips(allTooltips);
 
 
