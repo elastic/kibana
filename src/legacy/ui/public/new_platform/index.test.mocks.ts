@@ -53,6 +53,12 @@ export const mockNewPlatformBackdoor = () => {
         uiSettings: {
           get: () => true,
         },
+        chrome: {
+          recentlyAccessed: false,
+        },
+        i18n: {
+          Context: () => {},
+        },
       },
       plugins: {
         data: {},
