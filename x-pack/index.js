@@ -35,7 +35,6 @@ import { rollup } from './legacy/plugins/rollup';
 import { siem } from './legacy/plugins/siem';
 import { remoteClusters } from './legacy/plugins/remote_clusters';
 import { crossClusterReplication } from './legacy/plugins/cross_cluster_replication';
-import { translations } from './legacy/plugins/translations';
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
 import { ossTelemetry } from './legacy/plugins/oss_telemetry';
@@ -81,7 +80,6 @@ module.exports = function (kibana) {
     siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
-    translations(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
     ossTelemetry(kibana),

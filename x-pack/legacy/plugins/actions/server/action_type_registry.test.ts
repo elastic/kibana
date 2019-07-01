@@ -40,6 +40,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -57,13 +58,7 @@ Array [
 `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
     const call = getCreateTaskRunnerFunction.mock.calls[0][0];
-    expect(call.actionType).toMatchInlineSnapshot(`
-Object {
-  "executor": [MockFunction],
-  "id": "my-action-type",
-  "name": "My action type",
-}
-`);
+    expect(call.actionTypeRegistry).toBeTruthy();
     expect(call.encryptedSavedObjectsPlugin).toBeTruthy();
     expect(call.getServices).toBeTruthy();
   });
@@ -74,12 +69,14 @@ Object {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(() =>
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        unencryptedAttributes: [],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -94,6 +91,7 @@ describe('get()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     });
     const actionType = actionTypeRegistry.get('my-action-type');
@@ -102,6 +100,7 @@ Object {
   "executor": [Function],
   "id": "my-action-type",
   "name": "My action type",
+  "unencryptedAttributes": Array [],
 }
 `);
   });
@@ -120,6 +119,7 @@ describe('list()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     });
     const actionTypes = actionTypeRegistry.list();
@@ -144,6 +144,7 @@ describe('has()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));

@@ -25,6 +25,7 @@ import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { MonitorBarSeries } from './charts';
+import { LocationName } from './location_name';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
@@ -121,11 +122,7 @@ export const MonitorListComponent = ({
                 defaultMessage: 'ID',
               }),
               render: (id: string, monitor: LatestMonitor) => (
-                <MonitorPageLink
-                  id={id}
-                  location={get<string | undefined>(monitor, 'ping.observer.geo.name')}
-                  linkParameters={linkParameters}
-                >
+                <MonitorPageLink id={id} location={undefined} linkParameters={linkParameters}>
                   {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
                     ? monitor.ping.monitor.name
                     : id}
@@ -138,23 +135,7 @@ export const MonitorListComponent = ({
                 defaultMessage: 'Location',
                 description: 'Users can specify a name for a location',
               }),
-              render: (locationName: string | null | undefined) =>
-                !!locationName ? (
-                  locationName
-                ) : (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
-                    target="_blank"
-                  >
-                    {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
-                      defaultMessage: 'Add location',
-                      description:
-                        'Text that instructs the user to navigate to our docs to add a geographic location to their data',
-                    })}
-                    &nbsp;
-                    <EuiIcon size="s" type="popout" />
-                  </EuiLink>
-                ),
+              render: (location: string) => <LocationName location={location} />,
             },
             {
               field: 'ping.url.full',

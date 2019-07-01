@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { idx } from '@kbn/elastic-idx';
+import { EuiToolTip } from '@elastic/eui';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
@@ -79,7 +80,22 @@ export function StickyTransactionProperties({
           defaultMessage: '% of trace'
         }
       ),
-      val: asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL),
+      val:
+        totalDuration !== undefined && duration > totalDuration ? (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.transactionDetails.percentOfTraceLabelExplanation',
+              {
+                defaultMessage:
+                  'The % of trace exceeds 100% because this transaction takes longer than the root transaction.'
+              }
+            )}
+          >
+            <span>&gt;100%</span>
+          </EuiToolTip>
+        ) : (
+          asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL)
+        ),
       width: '25%'
     },
     {
@@ -125,8 +141,8 @@ export function StickyTransactionProperties({
     const { os, device } = userAgent;
     const width = '25%';
     stickyProperties.push({
-      label: i18n.translate('xpack.apm.transactionDetails.browserLabel', {
-        defaultMessage: 'Browser'
+      label: i18n.translate('xpack.apm.transactionDetails.userAgentLabel', {
+        defaultMessage: 'User agent'
       }),
       val: [userAgent.name, userAgent.version].filter(Boolean).join(' '),
       truncated: true,
@@ -135,22 +151,27 @@ export function StickyTransactionProperties({
 
     if (os) {
       stickyProperties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.osLabel', {
-          defaultMessage: 'OS'
+        label: i18n.translate('xpack.apm.transactionDetails.userAgentOsLabel', {
+          defaultMessage: 'User agent OS'
         }),
-        val: os.full,
+        val: os.full || os.name,
         truncated: true,
         width
       });
     }
 
-    stickyProperties.push({
-      label: i18n.translate('xpack.apm.transactionDetails.deviceLabel', {
-        defaultMessage: 'OS'
-      }),
-      val: device.name,
-      width
-    });
+    if (device) {
+      stickyProperties.push({
+        label: i18n.translate(
+          'xpack.apm.transactionDetails.userAgentDeviceLabel',
+          {
+            defaultMessage: 'User agent device'
+          }
+        ),
+        val: device.name,
+        width
+      });
+    }
   }
 
   return <StickyProperties stickyProperties={stickyProperties} />;

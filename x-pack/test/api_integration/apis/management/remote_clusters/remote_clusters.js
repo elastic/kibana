@@ -95,7 +95,8 @@ export default function ({ getService }) {
     });
 
     describe('List', () => {
-      it('should return an array of remote clusters', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/39486
+      it.skip('should return an array of remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
         const { body } = await supertest

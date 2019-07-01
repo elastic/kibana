@@ -224,6 +224,15 @@
         enabled: false,
       },
       {
+        groupSlug: 'jsts',
+        groupName: 'jsts related packages',
+        packageNames: [
+          'jsts',
+          '@types/jsts',
+        ],
+        allowedVersions: '^1.6.2',
+      },
+      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [
@@ -677,6 +686,14 @@
         packageNames: [
           'node-fetch',
           '@types/node-fetch',
+        ],
+      },
+      {
+        groupSlug: 'nodemailer',
+        groupName: 'nodemailer related packages',
+        packageNames: [
+          'nodemailer',
+          '@types/nodemailer',
         ],
       },
       {

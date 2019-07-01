@@ -12,7 +12,8 @@ import {
   SocketMessageReader,
   SocketMessageWriter,
 } from 'vscode-jsonrpc';
-import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+
 import {
   ClientCapabilities,
   ExitNotification,
@@ -22,18 +23,21 @@ import {
   MessageType,
   WorkspaceFolder,
 } from 'vscode-languageserver-protocol/lib/main';
-import { RequestCancelled } from '../../common/lsp_error_codes';
+
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
 import { LspOptions } from '../server_options';
-import { Cancelable } from '../utils/cancelable';
-import { InitializeOptions } from './request_expander';
+import { InternalError, RequestCancelled } from '../../common/lsp_error_codes';
+import { InitializeOptions, WorkspaceStatus } from './request_expander';
 
 export interface ILanguageServerHandler {
   lastAccess?: number;
   handleRequest(request: LspRequest): Promise<ResponseMessage>;
   exit(): Promise<any>;
   unloadWorkspace(workspaceDir: string): Promise<void>;
+  initializeState?(
+    workspaceDir: string
+  ): Promise<{ [lang: string]: WorkspaceStatus }> | WorkspaceStatus;
 }
 
 export class LanguageServerProxy implements ILanguageServerHandler {
@@ -51,7 +55,8 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private readonly logger: Logger;
   private readonly lspOptions: LspOptions;
   private eventEmitter = new EventEmitter();
-  private connectingPromise: Cancelable<MessageConnection> | null = null;
+  private currentServer: net.Server | null = null;
+  private listeningPort: number | null = null;
 
   constructor(targetPort: number, targetHost: string, logger: Logger, lspOptions: LspOptions) {
     this.targetHost = targetHost;
@@ -64,24 +69,39 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     const response: ResponseMessage = {
       jsonrpc: '',
       id: null,
-      error: { code: RequestCancelled, message: 'Server closed' },
     };
-    if (this.closed) {
-      response.error = { code: RequestCancelled, message: 'Server closed' };
+
+    const conn = await this.connected();
+    const params = Array.isArray(request.params) ? request.params : [request.params];
+    if (!request.isNotification) {
+      const file = request.documentUri || request.workspacePath;
+      this.logger.debug(`sending request ${request.method} for ${file}`);
+      response.result = await conn.sendRequest(request.method, ...params);
+      this.logger.debug(`request ${request.method} for ${file} done.`);
     } else {
-      const conn = await this.connect();
-      const params = Array.isArray(request.params) ? request.params : [request.params];
-      if (!request.isNotification) {
-        try {
-          response.result = await conn.sendRequest(request.method, ...params);
-        } catch (error) {
-          response.error = error;
-        }
-      } else {
-        conn.sendNotification(request.method, ...params);
-      }
+      conn.sendNotification(request.method, ...params);
     }
     return response;
+  }
+
+  public connected(): Promise<MessageConnection> {
+    if (this.closed) {
+      return Promise.reject(new ResponseError(RequestCancelled, 'Server closed'));
+    } else if (this.error) {
+      return Promise.reject(new ResponseError(InternalError, 'Server error', this.error));
+    } else if (this.clientConnection) {
+      return Promise.resolve(this.clientConnection);
+    } else {
+      return new Promise<MessageConnection>((resolve, reject) => {
+        this.eventEmitter.on('error', error =>
+          reject(new ResponseError(InternalError, 'Server error', error))
+        );
+        this.eventEmitter.on('exit', () =>
+          reject(new ResponseError(RequestCancelled, 'Server closed'))
+        );
+        this.eventEmitter.on('connect', () => resolve(this.clientConnection!));
+      });
+    }
   }
 
   public async initialize(
@@ -92,7 +112,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     if (this.error) {
       throw this.error;
     }
-    const clientConn = await this.connect();
+    const clientConn = await this.connected();
     const rootUri = workspaceFolders[0].uri;
     if (
       initOptions &&
@@ -108,6 +128,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       capabilities: clientCapabilities,
       rootPath: fileURLToPath(rootUri),
     };
+    this.logger.debug(`sending initialize for ${params.rootPath}`);
     return await clientConn
       .sendRequest(
         'initialize',
@@ -127,7 +148,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   public async shutdown() {
-    const clientConn = await this.connect();
+    const clientConn = await this.connected();
     this.logger.info(`sending shutdown request`);
     return await clientConn.sendRequest('shutdown');
   }
@@ -148,37 +169,37 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     this.eventEmitter.emit('exit');
   }
 
-  public awaitServerConnection() {
+  public startServerConnection() {
     // prevent calling this method multiple times which may cause 'port already in use' error
-    if (!this.connectingPromise) {
-      this.connectingPromise = new Cancelable((res, rej, onCancel) => {
-        const server = net.createServer(socket => {
-          this.initialized = false;
-          server.close();
-          this.eventEmitter.emit('connect');
-          socket.on('close', () => this.onSocketClosed());
-
-          this.logger.info('langserver connection established on port ' + this.targetPort);
-
-          const reader = new SocketMessageReader(socket);
-          const writer = new SocketMessageWriter(socket);
-          this.clientConnection = createMessageConnection(reader, writer, this.logger);
-          this.registerOnNotificationHandler(this.clientConnection);
-          this.clientConnection.listen();
-          res(this.clientConnection);
-        });
-        server.on('error', rej);
-        server.listen(this.targetPort, () => {
-          server.removeListener('error', rej);
-          this.logger.info('Wait langserver connection on port ' + this.targetPort);
-        });
-        onCancel!(error => {
-          server.close();
-          rej(error);
-        });
-      });
+    if (this.currentServer) {
+      if (this.listeningPort === this.targetPort) {
+        return;
+      } else {
+        this.currentServer!.close();
+      }
     }
-    return this.connectingPromise.promise;
+    const server = net.createServer(socket => {
+      this.initialized = false;
+      server.close();
+      this.currentServer = null;
+      socket.on('close', () => this.onSocketClosed());
+      this.eventEmitter.off('changePort', server.close);
+      this.logger.info('langserver connection established on port ' + this.targetPort);
+      const reader = new SocketMessageReader(socket);
+      const writer = new SocketMessageWriter(socket);
+      this.clientConnection = createMessageConnection(reader, writer, this.logger);
+      this.registerOnNotificationHandler(this.clientConnection);
+      this.clientConnection.listen();
+      this.eventEmitter.emit('connect');
+    });
+    server.on('error', this.setError);
+    const port = this.targetPort;
+    server.listen(port, () => {
+      this.listeningPort = port;
+      this.currentServer = server;
+      server.removeListener('error', this.setError);
+      this.logger.info('Wait langserver connection on port ' + this.targetPort);
+    });
   }
 
   /**
@@ -201,36 +222,28 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     this.eventEmitter.on('connect', listener);
   }
 
-  public connect(): Promise<MessageConnection> {
-    if (this.clientConnection) {
-      return Promise.resolve(this.clientConnection);
-    }
-    if (!this.connectingPromise) {
-      this.connectingPromise = new Cancelable(resolve => {
-        this.socket = new net.Socket();
+  public connect() {
+    this.logger.debug('connecting');
+    this.socket = new net.Socket();
 
-        this.socket.on('connect', () => {
-          const reader = new SocketMessageReader(this.socket);
-          const writer = new SocketMessageWriter(this.socket);
-          this.clientConnection = createMessageConnection(reader, writer, this.logger);
-          this.registerOnNotificationHandler(this.clientConnection);
-          this.clientConnection.listen();
-          resolve(this.clientConnection);
-          this.eventEmitter.emit('connect');
-        });
+    this.socket.on('connect', () => {
+      const reader = new SocketMessageReader(this.socket);
+      const writer = new SocketMessageWriter(this.socket);
+      this.clientConnection = createMessageConnection(reader, writer, this.logger);
+      this.registerOnNotificationHandler(this.clientConnection);
+      this.clientConnection.listen();
+      this.eventEmitter.emit('connect');
+    });
 
-        this.socket.on('close', () => this.onSocketClosed());
+    this.socket.on('close', () => this.onSocketClosed());
 
-        this.socket.on('error', () => void 0);
-        this.socket.on('timeout', () => void 0);
-        this.socket.on('drain', () => void 0);
-        this.socket.connect(
-          this.targetPort,
-          this.targetHost
-        );
-      });
-    }
-    return this.connectingPromise.promise;
+    this.socket.on('error', () => void 0);
+    this.socket.on('timeout', () => void 0);
+    this.socket.on('drain', () => void 0);
+    this.socket.connect(
+      this.targetPort,
+      this.targetHost
+    );
   }
 
   public unloadWorkspace(workspaceDir: string): Promise<void> {
@@ -238,8 +251,12 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   private onSocketClosed() {
+    const conn = this.clientConnection;
     this.clientConnection = null;
-    this.connectingPromise = null;
+    if (conn) {
+      conn.dispose();
+    }
+
     this.eventEmitter.emit('close');
   }
 
@@ -278,18 +295,11 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   public changePort(port: number) {
     if (port !== this.targetPort) {
       this.targetPort = port;
-      if (this.connectingPromise) {
-        this.connectingPromise.cancel();
-        this.connectingPromise = null;
-      }
     }
   }
 
   public setError(error: any) {
-    if (this.connectingPromise) {
-      this.connectingPromise.cancel(error);
-      this.connectingPromise = null;
-    }
     this.error = error;
+    this.eventEmitter.emit('error', error);
   }
 }
