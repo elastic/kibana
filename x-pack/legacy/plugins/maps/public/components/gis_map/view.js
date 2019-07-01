@@ -23,23 +23,23 @@ export class GisMap extends Component {
   componentDidMount() {
     this._isMounted = true;
     this.isRenderTimerStarted = false;
-    this.setRefreshTimer();
+    this._setRefreshTimer();
   }
 
   componentDidUpdate() {
-    this.setRefreshTimer();
+    this._setRefreshTimer();
     if (this.props.areLayersLoaded && !this.isRenderTimerStarted) {
       this.isRenderTimerStarted = true;
-      this.startRenderTimer();
+      this._startRenderTimer();
     }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.clearRefreshTimer();
+    this._clearRefreshTimer();
   }
 
-  setRefreshTimer = () => {
+  _setRefreshTimer = () => {
     const { isPaused, interval } = this.props.refreshConfig;
 
     if (this.isPaused === isPaused && this.interval === interval) {
@@ -50,7 +50,7 @@ export class GisMap extends Component {
     this.isPaused = isPaused;
     this.interval = interval;
 
-    this.clearRefreshTimer();
+    this._clearRefreshTimer();
 
     if (!isPaused && interval > 0) {
       this.refreshTimerId = setInterval(
@@ -62,7 +62,7 @@ export class GisMap extends Component {
     }
   };
 
-  clearRefreshTimer = () => {
+  _clearRefreshTimer = () => {
     if (this.refreshTimerId) {
       clearInterval(this.refreshTimerId);
     }
@@ -70,7 +70,7 @@ export class GisMap extends Component {
 
   // Mapbox does not provide any feedback when rendering is complete.
   // Temporary solution is just to wait set period of time after data has loaded.
-  startRenderTimer = () => {
+  _startRenderTimer = () => {
     setTimeout(
       () => {
         if (this._isMounted) {
