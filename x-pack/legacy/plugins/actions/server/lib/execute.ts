@@ -55,13 +55,13 @@ export async function execute({
 
   if (error != null) {
     services.log(
-      ['info', 'x-pack', 'actions'],
+      ['warning', 'x-pack', 'actions'],
       `action executed unsuccessfully: ${actionLabel} - ${error.message}`
     );
     throw error;
   }
 
-  services.log(['info', 'x-pack', 'actions'], `action executed successfully: ${actionLabel}`);
+  services.log(['debug', 'x-pack', 'actions'], `action executed successfully: ${actionLabel}`);
 
   // return result if it's JSONable, otherwise a simple success object
   const simpleResult = { status: 'ok' };
