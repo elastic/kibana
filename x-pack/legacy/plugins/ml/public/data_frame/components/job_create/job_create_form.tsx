@@ -188,7 +188,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
         const interval = setInterval(async () => {
           try {
             const stats = await ml.dataFrame.getDataFrameTransformsStats(jobId);
-            if (stats && Array.isArray(stats.transforms)) {
+            if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
               const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
               setProgressPercentComplete(percent);
               if (percent >= 100) {
