@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiInMemoryTableProps, SortDirection } from '@elastic/eui';
 import { getFlattenedFields } from '../../../../components/source_index_preview/common';
@@ -38,29 +38,65 @@ interface TransformData {
 
 interface CompressedTableProps extends EuiInMemoryTableProps {
   compressed: boolean;
+  error: any;
 }
+
+// interface Column {
+//   field: string;
+//   name: string;
+//   sortable: boolean;
+//   truncateText: boolean;
+// }
 
 interface Props {
   transformId: string;
 }
 
-function getPreviewRequest(transformData: TransformData): DataFramePreviewRequest {
+function sortColumns(groupByArr) {
+  return (a: string, b: string) => {
+    // make sure groupBy fields are always most left columns
+    if (groupByArr.some(d => d.aggName === a) && groupByArr.some(d => d.aggName === b)) {
+      return a.localeCompare(b);
+    }
+    if (groupByArr.some(d => d.aggName === a)) {
+      return -1;
+    }
+    if (groupByArr.some(d => d.aggName === b)) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  };
+}
+
+function getDataFromTransform(
+  transformData: TransformData
+): { previewRequest: DataFramePreviewRequest; groupByArr: Array<{ aggName: string }> | [] } {
   const { transforms } = transformData;
   const index = transforms[0].source.index[0]; // TODO do some checking to make sure this doesn't throw
   const pivot = transforms[0].pivot;
+  const groupByArr = [];
 
-  const request: DataFramePreviewRequest = {
+  const previewRequest: DataFramePreviewRequest = {
     source: {
       index,
     },
     pivot,
   };
 
-  return request;
+  if (pivot.group_by !== undefined) {
+    for (const key in pivot.group_by) {
+      if (pivot.group_by.hasOwnProperty(key)) {
+        groupByArr.push({ aggName: key });
+      }
+    }
+  }
+
+  return { groupByArr, previewRequest };
 }
 
 export const PreviewPane: React.SFC<Props> = ({ transformId }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
+  const [groupByArray, setGroupByArray] = useState([]);
   const [columns, setColumns] = useState([]);
   const [sort, setSort] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -69,8 +105,9 @@ export const PreviewPane: React.SFC<Props> = ({ transformId }) => {
   async function getPreview() {
     try {
       const transformData: any = await ml.dataFrame.getDataFrameTransforms(transformId);
-      const previewRequest = getPreviewRequest(transformData);
+      const { previewRequest, groupByArr } = getDataFromTransform(transformData);
       const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
+      setGroupByArray(groupByArr);
       setDataFramePreviewData(resp.preview);
     } catch (error) {
       setIsLoading(false);
@@ -90,6 +127,7 @@ export const PreviewPane: React.SFC<Props> = ({ transformId }) => {
     () => {
       if (dataFramePreviewData.length > 0) {
         const columnKeys = getFlattenedFields(dataFramePreviewData[0]);
+        columnKeys.sort(sortColumns(groupByArray));
         const tableColumns = columnKeys.map(k => {
           return {
             field: k,
