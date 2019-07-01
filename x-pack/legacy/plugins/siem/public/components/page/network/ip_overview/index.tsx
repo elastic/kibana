@@ -28,10 +28,12 @@ import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
+import { InspectButton } from '../../../inspect';
 
 interface OwnProps {
   data: IpOverviewData;
   flowTarget: FlowTarget;
+  id: string;
   ip: string;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -62,6 +64,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 
 export const IpOverview = pure<IpOverviewProps>(
   ({
+    id,
     ip,
     data,
     loading,
@@ -137,6 +140,7 @@ export const IpOverview = pure<IpOverviewProps>(
             />
           </>
         )}
+        <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}

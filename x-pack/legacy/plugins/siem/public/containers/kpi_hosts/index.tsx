@@ -44,7 +44,7 @@ const KpiHostsComponentQuery = ({
   filterQuery,
   isInspected,
   skip,
-  skipQuery,
+  skipQuery = false,
   sourceId,
   startDate,
 }: KpiHostsProps & KpiHostsReducer) => (

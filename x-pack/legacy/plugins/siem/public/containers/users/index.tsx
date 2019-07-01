@@ -18,14 +18,17 @@ import {
   UsersEdges,
   UsersSortField,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { usersQuery } from './index.gql_query';
 
+const ID = 'usersQuery';
+
 export interface UsersArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   users: UsersEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -42,7 +45,9 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface UsersComponentReduxProps {
+  isInspected: boolean;
   limit: number;
+  skipQuery: boolean;
   usersSortField: UsersSortField;
 }
 
@@ -55,12 +60,14 @@ class UsersComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'usersQuery',
+      id = ID,
+      isInspected,
       children,
       usersSortField,
       filterQuery,
       ip,
       skip,
+      skipQuery,
       sourceId,
       startDate,
       endDate,
@@ -72,7 +79,7 @@ class UsersComponentQuery extends QueryTemplate<
         query={usersQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
-        skip={skip}
+        skip={skip || skipQuery}
         variables={{
           sourceId,
           timerange: {
@@ -90,6 +97,7 @@ class UsersComponentQuery extends QueryTemplate<
           },
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -120,6 +128,7 @@ class UsersComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.Users.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Users.totalCount', data),
@@ -135,9 +144,15 @@ class UsersComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getUsersSelector = networkSelectors.usersSelector();
-  const mapStateToProps = (state: State) => ({
-    ...getUsersSelector(state),
-  });
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected, inspect } = getQuery(state, id);
+    return {
+      ...getUsersSelector(state),
+      isInspected,
+      skipQuery: !isInspected && inspect != null,
+    };
+  };
 
   return mapStateToProps;
 };

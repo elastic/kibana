@@ -12,14 +12,17 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { FlowTarget, PageInfo, TlsEdges, TlsSortField, GetTlsQuery } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { tlsQuery } from './index.gql_query';
 
+const ID = 'tlsQuery';
+
 export interface TlsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   tls: TlsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -36,7 +39,9 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface TlsComponentReduxProps {
+  isInspected: boolean;
   limit: number;
+  skipQuery: boolean;
   tlsSortField: TlsSortField;
 }
 
@@ -45,12 +50,14 @@ type TlsProps = OwnProps & TlsComponentReduxProps;
 class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTlsQuery.Variables> {
   public render() {
     const {
-      id = 'tlsQuery',
+      id = ID,
+      isInspected,
       children,
       tlsSortField,
       filterQuery,
       ip,
       skip,
+      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -62,7 +69,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
         query={tlsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
-        skip={skip}
+        skip={skip || skipQuery}
         variables={{
           sourceId,
           timerange: {
@@ -80,6 +87,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
           },
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -110,6 +118,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.Tls.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Tls.totalCount', data),
@@ -125,9 +134,15 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
 
 const makeMapStateToProps = () => {
   const getTlsSelector = networkSelectors.tlsSelector();
-  const mapStateToProps = (state: State) => ({
-    ...getTlsSelector(state),
-  });
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected, inspect } = getQuery(state, id);
+    return {
+      ...getTlsSelector(state),
+      isInspected,
+      skipQuery: !isInspected && inspect != null,
+    };
+  };
 
   return mapStateToProps;
 };
