@@ -509,6 +509,7 @@ export class RemoteClusterForm extends Component {
       localSeedErrors,
       seedInput,
     } = this.state;
+
     const hasErrors = this.hasErrors();
 
     if (!areErrorsVisible || !hasErrors) {
@@ -540,8 +541,8 @@ export class RemoteClusterForm extends Component {
 
     const messagesToBeRendered = (
       errorExplanation.length && errorExplanation.map(errorMessage => (
-        <EuiScreenReaderOnly>
-          <p key={errorMessage.key}>
+        <EuiScreenReaderOnly key={errorMessage.key}>
+          <p>
             {errorMessage.where}<br/>
             {errorMessage.what}
           </p>
