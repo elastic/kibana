@@ -41,6 +41,11 @@ describe('ElasticsearchPingsAdapter class', () => {
         },
         hits: mockHits,
       },
+      aggregations: {
+        locations: {
+          buckets: [{ key: 'foo' }],
+        },
+      },
     };
     mockEsCountResult = {
       count: mockHits.length,
@@ -363,6 +368,15 @@ describe('ElasticsearchPingsAdapter class', () => {
           query: {
             bool: {
               filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
+            },
+          },
+          aggregations: {
+            locations: {
+              terms: {
+                field: 'observer.geo.name',
+                missing: 'N/A',
+                size: 1000,
+              },
             },
           },
           sort: [{ '@timestamp': { order: 'desc' } }],

@@ -10761,8 +10761,6 @@
     "xpack.uptime.monitorCharts.checkStatus.series.upCountLabel": "アップカウント",
     "xpack.uptime.monitorCharts.checkStatus.title": "ステータスを確認",
     "xpack.uptime.monitorCharts.loadingMessage": "読み込み中…",
-    "xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel": "期間",
-    "xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel": "平均期間",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "ミリ秒単位の監視時間",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "ダウン",
     "xpack.uptime.monitorList.geoName": "場所",
