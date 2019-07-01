@@ -63,11 +63,17 @@ export class FeatureTable extends Component<Props, {}> {
 
     const items: TableRow[] = features
       .sort((feature1, feature2) => {
-        if (feature1.reserved && !feature2.reserved) {
+        if (
+          Object.keys(feature1.privileges).length === 0 &&
+          Object.keys(feature2.privileges).length > 0
+        ) {
           return 1;
         }
 
-        if (feature2.reserved && !feature1.reserved) {
+        if (
+          Object.keys(feature2.privileges).length === 0 &&
+          Object.keys(feature1.privileges).length > 0
+        ) {
           return -1;
         }
 
@@ -165,9 +171,9 @@ export class FeatureTable extends Component<Props, {}> {
         </span>
       ),
       render: (roleEntry: Role, record: TableRow) => {
-        const { id: featureId, reserved } = record.feature;
+        const { id: featureId, reserved, privileges } = record.feature;
 
-        if (reserved) {
+        if (reserved && Object.keys(privileges).length === 0) {
           return <EuiText size={'s'}>{reserved.description}</EuiText>;
         }
 
