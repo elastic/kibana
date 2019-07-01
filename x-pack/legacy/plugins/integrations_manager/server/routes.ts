@@ -3,21 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  PLUGIN_ID,
-  API_INTEGRATIONS_LIST,
-  API_INTEGRATIONS_INFO,
-  API_SAVED_OBJECTS_DETAIL,
-  API_SAVED_OBJECTS_ROOT,
-  SAVED_OBJECT_TYPE,
-} from '../common/constants';
+import { PLUGIN_ID } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
+import {
+  API_LIST_PATTERN,
+  API_INFO_PATTERN,
+  API_TGZ_PATTERN,
+  API_ZIP_PATTERN,
+} from '../common/routes';
 import { fetchInfo, fetchList, getArchiveInfo } from './registry';
-import { getClient } from './saved_objects';
 
-interface PostRequest extends Request {
-  payload: {
-    body: string;
+interface PackageRequest extends Request {
+  params: {
+    pkgkey: string;
   };
 }
 
@@ -25,21 +23,21 @@ interface PostRequest extends Request {
 export const routes: ServerRoute[] = [
   {
     method: 'GET',
-    path: API_INTEGRATIONS_LIST,
+    path: API_LIST_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: fetchList,
   },
   {
     method: 'GET',
-    path: API_INTEGRATIONS_INFO,
+    path: API_INFO_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => fetchInfo(req.params.pkgkey),
+    handler: async (req: PackageRequest) => fetchInfo(req.params.pkgkey),
   },
   {
     method: 'GET',
-    path: `${API_INTEGRATIONS_INFO}.zip`,
+    path: API_ZIP_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => {
+    handler: async (req: PackageRequest) => {
       const { pkgkey } = req.params;
       const paths = await getArchiveInfo(`${pkgkey}.zip`);
       return { meta: { pkgkey, paths } };
@@ -47,38 +45,12 @@ export const routes: ServerRoute[] = [
   },
   {
     method: 'GET',
-    path: `${API_INTEGRATIONS_INFO}.tar.gz`,
+    path: API_TGZ_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => {
+    handler: async (req: PackageRequest) => {
       const { pkgkey } = req.params;
       const paths = await getArchiveInfo(`${pkgkey}.tar.gz`);
       return { meta: { pkgkey, paths } };
     },
-  },
-  {
-    method: 'GET',
-    path: API_SAVED_OBJECTS_ROOT,
-    options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => getClient(req).find({ type: SAVED_OBJECT_TYPE }),
-  },
-  {
-    method: 'GET',
-    path: API_SAVED_OBJECTS_DETAIL,
-    options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: Request) => getClient(req).get(SAVED_OBJECT_TYPE, req.params.oid),
-  },
-  {
-    method: 'POST',
-    path: API_SAVED_OBJECTS_ROOT,
-    options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: async (req: PostRequest) =>
-      getClient(req).create(
-        SAVED_OBJECT_TYPE,
-        {
-          is_working: true,
-          other: req.payload.body,
-        },
-        { id: 'TBD', overwrite: true }
-      ),
   },
 ];
