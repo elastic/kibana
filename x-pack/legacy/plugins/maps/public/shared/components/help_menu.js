@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import { EuiButton, EuiHorizontalRule, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiSpacer, EuiLink, EuiText, EuiIcon } from '@elastic/eui';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,21 +16,23 @@ export class HelpMenu extends PureComponent {
       <Fragment>
         <EuiHorizontalRule margin="none" />
         <EuiSpacer />
-        <EuiButton fill iconType="popout" href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`} target="_blank">
-          <FormattedMessage
-            id="xpack.maps.helpMenu.docLabel"
-            defaultMessage="Maps documentation"
-          />
-        </EuiButton>
-        <EuiSpacer />
-        <EuiLink
-          href="https://github.com/elastic/kibana/issues/new"
+        <EuiButton
+          fill
+          iconType="popout"
+          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`}
           target="_blank"
         >
-          {i18n.translate('xpack.maps.helpMenu.feedbackLinkText', {
-            defaultMessage: 'Provide feedback for the Maps application'
-          })}
-        </EuiLink>
+          <FormattedMessage id="xpack.maps.helpMenu.docLabel" defaultMessage="Maps documentation" />
+        </EuiButton>
+        <EuiSpacer />
+        <EuiText size="s">
+          <EuiIcon type="logoGithub" color="primary" /> &nbsp;
+          <EuiLink href="https://github.com/elastic/kibana/issues/new" target="_blank">
+            {i18n.translate('xpack.maps.helpMenu.feedbackLinkText', {
+              defaultMessage: 'Provide feedback for the Maps application',
+            })}
+          </EuiLink>
+        </EuiText>
       </Fragment>
     );
   }

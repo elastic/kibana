@@ -43,7 +43,7 @@ export const statusSelector = (state: RootState, repoUri: RepositoryUri) => {
 
 export const allStatusSelector = (state: RootState) => state.status.status;
 
-export const currentPathSelector = (state: RootState) => state.route.match.params.path;
+export const currentPathSelector = (state: RootState) => state.route.match.params.path || '';
 
 export const treeCommitsSelector = (state: RootState) => {
   const path = currentPathSelector(state);

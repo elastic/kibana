@@ -21,22 +21,19 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import _ from 'lodash';
+import _, { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../common/get_last_value';
 
 function getColors(props) {
   const { model, visData } = props;
-  const series = _.get(visData, `${model.id}.series`, []);
+  const series = get(visData, `${model.id}.series`, []).filter(s => !isUndefined(s));
   let text;
   let gauge;
   if (model.gauge_color_rules) {
     model.gauge_color_rules.forEach(rule => {
       if (rule.operator && rule.value != null) {
-        const value =
-          (series[0] && getLastValue(series[0].data)) ||
-          (series[1] && getLastValue(series[1].data)) ||
-          0;
+        const value = (series[0] && getLastValue(series[0].data)) || 0;
         if (_[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
@@ -51,10 +48,10 @@ function GaugeVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const colors = getColors(props);
 
-  const series = _.get(visData, `${model.id}.series`, [])
+  const series = get(visData, `${model.id}.series`, [])
     .filter(row => row)
     .map((row, i) => {
-      const seriesDef = model.series.find(s => _.includes(row.id, s.id));
+      const seriesDef = model.series.find(s => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
         newProps.formatter = createTickFormatter(
@@ -64,7 +61,7 @@ function GaugeVisualization(props) {
         );
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
-      return _.assign({}, row, newProps);
+      return assign({}, row, newProps);
     });
 
   const panelBackgroundColor = model.background_color || backgroundColor;
