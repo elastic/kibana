@@ -65,8 +65,9 @@ uiModules.get('kibana')
       // the job completes, that way we don't give the user a toast to download their report if they can't.
       // NOTE: this should be looking at configuration rather than the existence of a navLink
       if (core.chrome.navLinks.has('kibana:management')) {
-        const managementUrl = core.chrome.navLinks.get('kibana:management').url;
-        const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
+        const { baseUrl } = core.chrome.navLinks.get('kibana:management');
+        const reportingSectionUrl = `${baseUrl}/kibana/reporting`;
+
         seeReportLink = (
           <p>
             <FormattedMessage
