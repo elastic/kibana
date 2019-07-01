@@ -216,31 +216,25 @@ const mockMsearchHeader = {
   allowNoIndices: true,
   ignoreUnavailable: true,
 };
-const mockMsearchBody = (mockQuery: object) => ({
-  query: mockQuery,
+const mockMsearchBody = {
+  query: {},
   aggregations: {},
   size: 0,
   track_total_hits: false,
-});
-export const mockNetworkEventsQueryDsl = [
-  mockMsearchHeader,
-  mockMsearchBody({ mockNetworkEventsQueryDsl: 'mockNetworkEventsQueryDsl' }),
-];
+};
+export const mockNetworkEventsQueryDsl = [mockMsearchHeader, mockMsearchBody];
 export const mockUniqueFlowIdsQueryDsl = [
   mockMsearchHeader,
-  mockMsearchBody({ mockUniqueFlowIdsQueryDsl: 'mockUniqueFlowIdsQueryDsl' }),
+  { mockUniqueFlowIdsQueryDsl: 'mockUniqueFlowIdsQueryDsl' },
 ];
 export const mockUniquePrvateIpsQueryDsl = [
   mockMsearchHeader,
-  mockMsearchBody({ mockUniquePrvateIpsQueryDsl: 'mockUniquePrvateIpsQueryDsl' }),
+  { mockUniquePrvateIpsQueryDsl: 'mockUniquePrvateIpsQueryDsl' },
 ];
-export const mockDnsQueryDsl = [
-  mockMsearchHeader,
-  mockMsearchBody({ mockDnsQueryDsl: 'mockDnsQueryDsl' }),
-];
+export const mockDnsQueryDsl = [mockMsearchHeader, { mockDnsQueryDsl: 'mockDnsQueryDsl' }];
 export const mockTlsHandshakesQueryDsl = [
   mockMsearchHeader,
-  mockMsearchBody({ mockTlsHandshakesQueryDsl: 'mockTlsHandshakesQueryDsl' }),
+  { mockTlsHandshakesQueryDsl: 'mockTlsHandshakesQueryDsl' },
 ];
 
 export const mockMsearchOptions = {
@@ -253,15 +247,17 @@ export const mockMsearchOptions = {
   ],
 };
 
+const mockDsl = [
+  JSON.stringify(mockNetworkEventsQueryDsl[1], null, 2),
+  JSON.stringify(mockDnsQueryDsl[1], null, 2),
+  JSON.stringify(mockUniquePrvateIpsQueryDsl[1], null, 2),
+  JSON.stringify(mockUniqueFlowIdsQueryDsl[1], null, 2),
+  JSON.stringify(mockTlsHandshakesQueryDsl[1], null, 2),
+];
+
 export const mockResult = {
   inspect: {
-    dsl: [
-      JSON.stringify(mockNetworkEventsQueryDsl[1], null, 2),
-      JSON.stringify(mockDnsQueryDsl[1], null, 2),
-      JSON.stringify(mockUniquePrvateIpsQueryDsl[1], null, 2),
-      JSON.stringify(mockUniqueFlowIdsQueryDsl[1], null, 2),
-      JSON.stringify(mockTlsHandshakesQueryDsl[1], null, 2),
-    ],
+    dsl: mockDsl,
     response: [
       JSON.stringify(mockResponse.responses[0], null, 2),
       JSON.stringify(mockResponse.responses[1], null, 2),
@@ -312,13 +308,7 @@ export const mockResponseNoData = {
 
 export const mockResultNoData = {
   inspect: {
-    dsl: [
-      JSON.stringify(mockNetworkEventsQueryDsl[1], null, 2),
-      JSON.stringify(mockDnsQueryDsl[1], null, 2),
-      JSON.stringify(mockUniquePrvateIpsQueryDsl[1], null, 2),
-      JSON.stringify(mockUniqueFlowIdsQueryDsl[1], null, 2),
-      JSON.stringify(mockTlsHandshakesQueryDsl[1], null, 2),
-    ],
+    dsl: mockDsl,
     response: [
       JSON.stringify(mockResponseNoData.responses[0], null, 2),
       JSON.stringify(mockResponseNoData.responses[1], null, 2),
