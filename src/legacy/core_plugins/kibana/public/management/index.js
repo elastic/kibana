@@ -50,10 +50,11 @@ uiRoutes
     redirectTo: '/management'
   });
 
-const canManageIndexPatterns = capabilities.get().management.kibana.index_patterns;
-const whenMissingRedirectTo = canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
 require('./route_setup/load_default')({
-  whenMissingRedirectTo
+  whenMissingRedirectTo: () => {
+    const canManageIndexPatterns = capabilities.get().management.kibana.index_patterns;
+    return canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
+  }
 });
 
 export function updateLandingPage(version) {
