@@ -1,0 +1,25 @@
+[role="xpack"]
+[[agent-configuration]]
+=== APM Agent configuration
+
+beta[] APM Agent configuration allows you to fine-tune your agent configuration directly in Kibana.
+Best of all, there's no need to redeploy your application.
+
+To get started, simply choose the service and environment you wish to configure.
+Agents will periodically poll APM Server and apply any configuration changes.
+APM Agent configuration takes precedence over any settings set locally in each agent.
+
+IMPORTANT: As this feature is in Beta, a limited number of configuration settings are supported.
+We will extend support in future releases.
+If you have feedback, please reach out in our https://discuss.elastic.co/c/apm[Discuss forum].
+
+==== Supported configurations
+
+===== `TRANSACTION_SAMPLE_RATE`
+
+added[7.3] A sample rate between `0.00` and `1.0`. Default configuration is `1.0` (100% of traces).
+
+Adjusting the sampling rate controls what percent of requests are traced.
+`1.0` means _all_ requests are traced. If you set the `TRANSACTION_SAMPLE_RATE` to a value below `1.0`,
+the agent will randomly sample only a subset of transactions.
+Unsampled transactions only record the name of the transaction, the overall transaction time, and the result.
