@@ -11,6 +11,7 @@ pipeline {
     HOME = "${JENKINS_HOME}"  // /var/lib/jenkins
     MAIN_CACHE_DIR = "${HOME}/.kibana" // /var/lib/jenkins/.kibana 
     BOOTSTRAP_CACHE_DIR = "${MAIN_CACHE_DIR}/bootstrap_cache" // /var/lib/jenkins/.kibana/bootstrap_cache 
+    TEMP_PIPELINE_SETUP_DIR = "src/dev/temp_pipeline_setup"
     
     // PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
 
