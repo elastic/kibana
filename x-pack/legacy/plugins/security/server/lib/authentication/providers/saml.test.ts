@@ -17,10 +17,12 @@ describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
   let callWithRequest: sinon.SinonStub;
   let callWithInternalUser: sinon.SinonStub;
+  let tokens: ReturnType<typeof mockAuthenticationProviderOptions>['tokens'];
   beforeEach(() => {
     const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
-    callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
-    callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
+    callWithRequest = providerOptions.client.callWithRequest;
+    callWithInternalUser = providerOptions.client.callWithInternalUser;
+    tokens = providerOptions.tokens;
 
     provider = new SAMLAuthenticationProvider(providerOptions);
   });
@@ -269,6 +271,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
       const user = { username: 'user' };
       const request = requestFixture();
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'valid-refresh-token' };
 
       callWithRequest
         .withArgs(
@@ -284,16 +287,11 @@ describe('SAMLAuthenticationProvider', () => {
         )
         .resolves(user);
 
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'valid-refresh-token' },
-        })
-        .resolves({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' });
+      tokens.refresh
+        .withArgs(tokenPair.refreshToken)
+        .resolves({ accessToken: 'new-access-token', refreshToken: 'new-refresh-token' });
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'valid-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers.authorization).toBe('Bearer new-access-token');
       expect(authenticationResult.succeeded()).toBe(true);
@@ -306,6 +304,7 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('fails if token from the state is expired and refresh attempt failed with unknown reason too.', async () => {
       const request = requestFixture();
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'invalid-refresh-token' };
 
       callWithRequest
         .withArgs(
@@ -318,16 +317,9 @@ describe('SAMLAuthenticationProvider', () => {
         statusCode: 500,
         message: 'Something is wrong with refresh token.',
       };
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' },
-        })
-        .rejects(refreshFailureReason);
+      tokens.refresh.withArgs(tokenPair.refreshToken).rejects(refreshFailureReason);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'invalid-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -336,6 +328,7 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('fails for AJAX requests with user friendly message if refresh token is expired.', async () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
       callWithRequest
         .withArgs(
@@ -344,16 +337,9 @@ describe('SAMLAuthenticationProvider', () => {
         )
         .rejects({ statusCode: 401 });
 
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' },
-        })
-        .rejects({ statusCode: 400 });
+      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -364,6 +350,7 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('initiates SAML handshake for non-AJAX requests if access token document is missing.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
       callWithInternalUser.withArgs('shield.samlPrepare').resolves({
         id: 'some-request-id',
@@ -380,16 +367,9 @@ describe('SAMLAuthenticationProvider', () => {
           body: { error: { reason: 'token document is missing and must be present' } },
         });
 
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' },
-        })
-        .rejects({ statusCode: 400 });
+      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
         body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
@@ -407,6 +387,7 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('initiates SAML handshake for non-AJAX requests if refresh token is expired.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
       callWithInternalUser.withArgs('shield.samlPrepare').resolves({
         id: 'some-request-id',
@@ -420,16 +401,9 @@ describe('SAMLAuthenticationProvider', () => {
         )
         .rejects({ statusCode: 401 });
 
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' },
-        })
-        .rejects({ statusCode: 400 });
+      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
         body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
@@ -554,6 +528,11 @@ describe('SAMLAuthenticationProvider', () => {
 
       it('fails if fails to invalidate existing access/refresh tokens.', async () => {
         const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
         const user = { username: 'user' };
         callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
@@ -562,14 +541,9 @@ describe('SAMLAuthenticationProvider', () => {
           .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
 
         const failureReason = new Error('Failed to invalidate token!');
-        callWithInternalUser
-          .withArgs('shield.deleteAccessToken', { body: { token: 'existing-valid-token' } })
-          .rejects(failureReason);
+        tokens.invalidate.withArgs(tokenPair).rejects(failureReason);
 
-        const authenticationResult = await provider.authenticate(request, {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        });
+        const authenticationResult = await provider.authenticate(request, tokenPair);
 
         sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
           body: { ids: [], content: 'saml-response-xml' },
@@ -581,6 +555,11 @@ describe('SAMLAuthenticationProvider', () => {
 
       it('redirects to the home page if new SAML Response is for the same user.', async () => {
         const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
         const user = { username: 'user', authentication_realm: { name: 'saml1' } };
         callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
@@ -588,9 +567,7 @@ describe('SAMLAuthenticationProvider', () => {
           .withArgs('shield.samlAuthenticate')
           .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
 
-        const deleteAccessTokenStub = callWithInternalUser
-          .withArgs('shield.deleteAccessToken')
-          .resolves({ invalidated_tokens: 1 });
+        tokens.invalidate.withArgs(tokenPair).resolves();
 
         const authenticationResult = await provider.authenticate(request, {
           accessToken: 'existing-valid-token',
@@ -601,13 +578,8 @@ describe('SAMLAuthenticationProvider', () => {
           body: { ids: [], content: 'saml-response-xml' },
         });
 
-        sinon.assert.calledTwice(deleteAccessTokenStub);
-        sinon.assert.calledWithExactly(deleteAccessTokenStub, 'shield.deleteAccessToken', {
-          body: { token: 'existing-valid-token' },
-        });
-        sinon.assert.calledWithExactly(deleteAccessTokenStub, 'shield.deleteAccessToken', {
-          body: { refresh_token: 'existing-valid-refresh-token' },
-        });
+        sinon.assert.calledOnce(tokens.invalidate);
+        sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
 
         expect(authenticationResult.redirected()).toBe(true);
         expect(authenticationResult.redirectURL).toBe('/test-base-path/');
@@ -615,10 +587,15 @@ describe('SAMLAuthenticationProvider', () => {
 
       it('redirects to `overwritten_session` if new SAML Response is for the another user.', async () => {
         const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
         const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
         callWithRequest
           .withArgs(
-            sinon.match({ headers: { authorization: 'Bearer existing-valid-token' } }),
+            sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
             'shield.authenticate'
           )
           .resolves(existingUser);
@@ -635,26 +612,16 @@ describe('SAMLAuthenticationProvider', () => {
           .withArgs('shield.samlAuthenticate')
           .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
 
-        const deleteAccessTokenStub = callWithInternalUser
-          .withArgs('shield.deleteAccessToken')
-          .resolves({ invalidated_tokens: 1 });
+        tokens.invalidate.withArgs(tokenPair).resolves();
 
-        const authenticationResult = await provider.authenticate(request, {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        });
+        const authenticationResult = await provider.authenticate(request, tokenPair);
 
         sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
           body: { ids: [], content: 'saml-response-xml' },
         });
 
-        sinon.assert.calledTwice(deleteAccessTokenStub);
-        sinon.assert.calledWithExactly(deleteAccessTokenStub, 'shield.deleteAccessToken', {
-          body: { token: 'existing-valid-token' },
-        });
-        sinon.assert.calledWithExactly(deleteAccessTokenStub, 'shield.deleteAccessToken', {
-          body: { refresh_token: 'existing-valid-refresh-token' },
-        });
+        sinon.assert.calledOnce(tokens.invalidate);
+        sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
 
         expect(authenticationResult.redirected()).toBe(true);
         expect(authenticationResult.redirectURL).toBe('/test-base-path/overwritten_session');
@@ -662,6 +629,11 @@ describe('SAMLAuthenticationProvider', () => {
 
       it('redirects to `overwritten_session` if new SAML Response is for another realm.', async () => {
         const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
         const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
         callWithRequest
           .withArgs(
@@ -682,26 +654,16 @@ describe('SAMLAuthenticationProvider', () => {
           .withArgs('shield.samlAuthenticate')
           .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
 
-        const deleteAccessTokenStub = callWithInternalUser
-          .withArgs('shield.deleteAccessToken')
-          .resolves({ invalidated_tokens: 1 });
+        tokens.invalidate.withArgs(tokenPair).resolves();
 
-        const authenticationResult = await provider.authenticate(request, {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        });
+        const authenticationResult = await provider.authenticate(request, tokenPair);
 
         sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
           body: { ids: [], content: 'saml-response-xml' },
         });
 
-        sinon.assert.calledTwice(deleteAccessTokenStub);
-        sinon.assert.calledWithExactly(deleteAccessTokenStub, 'shield.deleteAccessToken', {
-          body: { token: 'existing-valid-token' },
-        });
-        sinon.assert.calledWithExactly(deleteAccessTokenStub, 'shield.deleteAccessToken', {
-          body: { refresh_token: 'existing-valid-refresh-token' },
-        });
+        sinon.assert.calledOnce(tokens.invalidate);
+        sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
 
         expect(authenticationResult.redirected()).toBe(true);
         expect(authenticationResult.redirectURL).toBe('/test-base-path/overwritten_session');

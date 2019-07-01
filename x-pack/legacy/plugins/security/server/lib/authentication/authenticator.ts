@@ -22,6 +22,7 @@ import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
 import { LoginAttempt } from './login_attempt';
 import { AuthenticationProviderSpecificOptions } from './providers/base';
+import { Tokens } from './tokens';
 
 interface ProviderSession {
   provider: string;
@@ -56,15 +57,18 @@ function assertRequest(request: Legacy.Request) {
  */
 function getProviderOptions(server: Legacy.Server) {
   const config = server.config();
+  const client = getClient(server);
+  const log = server.log.bind(server);
 
   return {
-    client: getClient(server),
-    log: server.log.bind(server),
+    client,
+    log,
 
     protocol: server.info.protocol,
     hostname: config.get<string>('server.host'),
     port: config.get<number>('server.port'),
     basePath: config.get<string>('server.basePath'),
+    tokens: new Tokens({ client, log }),
 
     ...config.get('xpack.security.public'),
   };
