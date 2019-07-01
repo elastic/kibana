@@ -143,7 +143,7 @@ function DefaultEditorAggParams({
         }
       });
     },
-    [editorConfig]
+    [agg.type]
   );
 
   useEffect(
