@@ -40,8 +40,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  // console.log('creating job type:', jobCreator.type);
-
   if (jobType === JOB_TYPE.SINGLE_METRIC) {
     jobCreator.modelPlot = true;
   }
@@ -67,7 +65,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   return (
     <Fragment>
-      <EuiPage>
+      <EuiPage style={{ backgroundColor: '#FFF' }}>
         <EuiPageBody>
           <EuiPageContentBody>
             <EuiSpacer size="l" />

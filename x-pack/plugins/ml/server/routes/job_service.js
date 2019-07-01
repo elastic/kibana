@@ -208,7 +208,10 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
         end,
         intervalMs,
         query,
-        aggFieldNamePairs } = request.payload;
+        aggFieldNamePairs,
+        splitFieldName,
+        splitFieldValue
+      } = request.payload;
       const { newJobLineChart } = jobServiceProvider(callWithRequest, request);
       return newJobLineChart(
         indexPatternTitle,
@@ -217,8 +220,10 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
         end,
         intervalMs,
         query,
-        aggFieldNamePairs)
-        .catch(resp => wrapError(resp));
+        aggFieldNamePairs,
+        splitFieldName,
+        splitFieldValue,
+      ).catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

@@ -58,7 +58,9 @@ declare interface Ml {
       end: number,
       intervalMs: number,
       query: object,
-      aggFieldNamePairs: AggFieldNamePair[]
+      aggFieldNamePairs: AggFieldNamePair[],
+      splitFieldName: string | null,
+      splitFieldValue: string | null
     ): Promise<any>;
     getAllJobAndGroupIds(): Promise<any>;
     getLookBackProgress(

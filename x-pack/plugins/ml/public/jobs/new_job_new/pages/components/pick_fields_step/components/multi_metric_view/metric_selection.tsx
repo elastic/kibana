@@ -12,12 +12,13 @@ import { Results, ModelItem, Anomaly } from '../../../../../common/results_loade
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AggFieldPair } from '../../../../../../../../common/types/fields';
+import { AggFieldPair, SplitField } from '../../../../../../../../common/types/fields';
 import { AnomalyChart } from '../../../charts/anomaly_chart';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { DetectorTitle } from '../detector_title';
 import { JobProgress } from '../job_progress';
+import { SplitCards } from '../split_cards';
 
 interface Props {
   isActive: boolean;
@@ -39,7 +40,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   }
   const jobCreator = jc as MultiMetricJobCreator;
 
-  const { fields, aggs } = newJobCapsService;
+  const { fields } = newJobCapsService;
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>([]);
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
@@ -50,9 +51,9 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
+  const [fieldValues, setFieldValues] = useState<string[]>([]);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
-    // setSelectedOptions(selectedOptionsIn);
     addDetector(selectedOptionsIn);
   }
 
@@ -141,6 +142,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
         jobCreator.end,
         aggFieldPairList,
         jobCreator.splitField,
+        fieldValues.length > 0 ? fieldValues[0] : null,
         cs.intervalMs
       );
 
@@ -148,35 +150,45 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     }
   }
 
+  useEffect(
+    () => {
+      // if (splitField !== splitFieldCopy) {
+      if (splitField !== null) {
+        chartLoader
+          .loadFieldExampleValues(splitField)
+          .then(setFieldValues)
+          .catch(() => {});
+      } else {
+        setFieldValues([]);
+      }
+      // setSplitFieldCopy(splitField);
+      // }
+    },
+    [splitField]
+  );
+
+  useEffect(
+    () => {
+      loadCharts();
+    },
+    [fieldValues]
+  );
+
   return (
     <Fragment>
       {isActive && (
         <Fragment>
           {lineChartsData && (
-            <EuiFlexGrid columns={chartSettings.cols as any}>
-              {aggFieldPairList.map((af, i) => (
-                <EuiFlexItem key={i}>
-                  {lineChartsData[i] !== undefined && (
-                    <Fragment>
-                      <DetectorTitle
-                        index={i}
-                        agg={aggFieldPairList[i].agg}
-                        field={aggFieldPairList[i].field}
-                        splitField={splitField}
-                        deleteDtr={deleteDetector}
-                      />
-                      <AnomalyChart
-                        lineChartData={lineChartsData[i]}
-                        modelData={modelData[i]}
-                        anomalyData={anomalyData[i]}
-                        height={chartSettings.height}
-                        width={chartSettings.width}
-                      />
-                    </Fragment>
-                  )}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
+            <ChartGrid
+              aggFieldPairList={aggFieldPairList}
+              chartSettings={chartSettings}
+              splitField={splitField}
+              fieldValues={fieldValues}
+              lineChartsData={lineChartsData}
+              modelData={modelData}
+              anomalyData={anomalyData}
+              deleteDetector={deleteDetector}
+            />
           )}
           <MetricSelector
             fields={fields}
@@ -191,34 +203,75 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
         <Fragment>
           {lineChartsData && (
             <Fragment>
-              <EuiFlexGrid columns={chartSettings.cols as any}>
-                {aggFieldPairList.map((af, i) => (
-                  <EuiFlexItem key={i}>
-                    {lineChartsData[i] !== undefined && (
-                      <Fragment>
-                        <DetectorTitle
-                          index={i}
-                          agg={aggFieldPairList[i].agg}
-                          field={aggFieldPairList[i].field}
-                          splitField={splitField}
-                        />
-                        <AnomalyChart
-                          lineChartData={lineChartsData[i]}
-                          modelData={modelData[i]}
-                          anomalyData={anomalyData[i]}
-                          height={chartSettings.height}
-                          width={chartSettings.width}
-                        />
-                      </Fragment>
-                    )}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
+              <ChartGrid
+                aggFieldPairList={aggFieldPairList}
+                chartSettings={chartSettings}
+                splitField={splitField}
+                fieldValues={fieldValues}
+                lineChartsData={lineChartsData}
+                modelData={modelData}
+                anomalyData={anomalyData}
+              />
               <JobProgress progress={progress} />
             </Fragment>
           )}
         </Fragment>
       )}
     </Fragment>
+  );
+};
+
+interface ChartGridProps {
+  aggFieldPairList: AggFieldPair[];
+  chartSettings: ChartSettings;
+  splitField: SplitField;
+  fieldValues: string[];
+  lineChartsData: LineChartData;
+  modelData: Record<number, ModelItem[]>;
+  anomalyData: Record<number, Anomaly[]>;
+  deleteDetector?: (index: number) => void;
+}
+
+const ChartGrid: FC<ChartGridProps> = ({
+  aggFieldPairList,
+  chartSettings,
+  splitField,
+  fieldValues,
+  lineChartsData,
+  modelData,
+  anomalyData,
+  deleteDetector,
+}) => {
+  return (
+    <SplitCards
+      fieldValues={fieldValues}
+      splitField={splitField}
+      numberOfDetectors={aggFieldPairList.length}
+    >
+      <EuiFlexGrid columns={chartSettings.cols as any}>
+        {aggFieldPairList.map((af, i) => (
+          <EuiFlexItem key={i}>
+            {lineChartsData[i] !== undefined && (
+              <Fragment>
+                <DetectorTitle
+                  index={i}
+                  agg={aggFieldPairList[i].agg}
+                  field={aggFieldPairList[i].field}
+                  splitField={splitField}
+                  deleteDetector={deleteDetector}
+                />
+                <AnomalyChart
+                  lineChartData={lineChartsData[i]}
+                  modelData={modelData[i]}
+                  anomalyData={anomalyData[i]}
+                  height={chartSettings.height}
+                  width={chartSettings.width}
+                />
+              </Fragment>
+            )}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    </SplitCards>
   );
 };

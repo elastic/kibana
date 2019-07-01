@@ -6,7 +6,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { JobCreator } from '../job_creator';
-import { ProgressSubscriber } from '../job_runner';
+// import { ProgressSubscriber } from '../job_runner';
 import { mlResultsService } from '../../../../services/results_service';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';

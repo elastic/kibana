@@ -113,6 +113,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
         jobCreator.end,
         [aggFieldPair],
         null,
+        null,
         chartInterval.getInterval().asMilliseconds()
       );
       if (resp[DTR_IDX] !== undefined) {

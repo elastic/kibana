@@ -34,7 +34,8 @@ export function newJobChartsProvider(callWithRequest: callWithRequestType) {
     intervalMs: number,
     query: object,
     aggFieldNamePairs: AggFieldNamePair[],
-    agg: DslName
+    splitFieldName: string | null,
+    splitFieldValue: string | null
   ) {
     const json: object = getSearchJsonFromConfig(
       indexPatternTitle,
@@ -43,7 +44,9 @@ export function newJobChartsProvider(callWithRequest: callWithRequestType) {
       end,
       intervalMs,
       query,
-      aggFieldNamePairs
+      aggFieldNamePairs,
+      splitFieldName,
+      splitFieldValue
     );
 
     const results = await callWithRequest('search', json);
@@ -123,7 +126,9 @@ function getSearchJsonFromConfig(
   end: number,
   intervalMs: number,
   query: any,
-  aggFieldNamePairs: AggFieldNamePair[]
+  aggFieldNamePairs: AggFieldNamePair[],
+  splitFieldName: string | null,
+  splitFieldValue: string | null
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -157,6 +162,14 @@ function getSearchJsonFromConfig(
       },
     },
   });
+
+  if (splitFieldName !== null && splitFieldValue !== null) {
+    query.bool.must.push({
+      term: {
+        [splitFieldName]: splitFieldValue,
+      },
+    });
+  }
 
   json.body.query = query;
 

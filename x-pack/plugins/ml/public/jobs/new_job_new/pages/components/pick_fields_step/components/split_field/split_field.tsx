@@ -20,7 +20,6 @@ export const SplitField: FC = () => {
 
   const { categoryFields } = newJobCapsService;
   const [splitField, setSplitField] = useState(jobCreator.splitField);
-
   useEffect(
     () => {
       jobCreator.setSplitField(splitField);

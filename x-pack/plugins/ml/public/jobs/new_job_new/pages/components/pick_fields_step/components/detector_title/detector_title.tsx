@@ -14,7 +14,7 @@ interface DetectorTitleProps {
   agg: Aggregation;
   field: Field;
   splitField: SplitField;
-  deleteDtr?: (dtrIds: number) => void;
+  deleteDetector?: (dtrIds: number) => void;
 }
 
 export const DetectorTitle: FC<DetectorTitleProps> = ({
@@ -22,17 +22,19 @@ export const DetectorTitle: FC<DetectorTitleProps> = ({
   agg,
   field,
   splitField,
-  deleteDtr,
+  deleteDetector,
 }) => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>{getTitle(agg, field, splitField)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <span style={{ fontSize: 'small' }}>{getTitle(agg, field, splitField)}</span>
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {deleteDtr !== undefined && (
+        {deleteDetector !== undefined && (
           <EuiButtonIcon
             color={'danger'}
-            onClick={() => deleteDtr(index)}
+            onClick={() => deleteDetector(index)}
             iconType="cross"
             size="s"
             aria-label="Next"
@@ -44,9 +46,10 @@ export const DetectorTitle: FC<DetectorTitleProps> = ({
 };
 
 function getTitle(agg: Aggregation, field: Field, splitField: SplitField): string {
-  let title = `${agg.title}(${field.name})`;
-  if (splitField !== null) {
-    title += ` split by ${splitField.name}`;
-  }
-  return title;
+  // let title = ${agg.title}(${field.name})`;
+  // if (splitField !== null) {
+  //   title += ` split by ${splitField.name}`;
+  // }
+  // return title;
+  return `${agg.title}(${field.name})`;
 }

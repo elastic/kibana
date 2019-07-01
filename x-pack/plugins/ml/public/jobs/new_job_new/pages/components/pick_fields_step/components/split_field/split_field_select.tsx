@@ -34,11 +34,10 @@ export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedFie
       } as DropDownLabel)
   );
 
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField === null ? '' : selectedField.name,
-    },
-  ];
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField.name, field: selectedField } as DropDownLabel);
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0] as DropDownLabel;
@@ -62,7 +61,6 @@ export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedFie
     >
       <EuiFormRow label="Split field" describedByIds={['single-example-aria']}>
         <EuiComboBox
-          // placeholder={placeholder}
           singleSelection={{ asPlainText: true }}
           options={options}
           selectedOptions={selection}
