@@ -76,7 +76,7 @@ export interface Field {
     validateData?: { formData?: any; value?: unknown }
   ) => Promise<{ isValid: boolean; errors: ValidationError[] }>;
   setErrors: (errors: ValidationError[]) => void;
-  clearErrors: (type: string) => void;
+  clearErrors: (type?: string) => void;
   setValue: (value: FieldValue) => void;
 }
 

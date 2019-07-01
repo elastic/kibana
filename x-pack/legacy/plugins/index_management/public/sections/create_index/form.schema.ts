@@ -36,13 +36,41 @@ export const formSchema: FormSchema<MyForm> = {
     helpText: 'Help text for the title field',
     validations: [
       {
-        // Default message
+        // With default message
         validator: emptyField,
+        exitOnFail: true,
       },
       {
-        // Custom message
+        // With custom message
         validator: minLengthField(5),
         message: ({ length }) => `Custom message title: must have minimum length of ${length}`,
+      },
+    ],
+  },
+  indexName: {
+    label: 'Index name',
+    helpText: 'Chose a unique index name',
+    isValidationAsync: true,
+    validations: [
+      {
+        validator: async ({ value }) => {
+          const wait = () => {
+            return new Promise(resolve => {
+              setTimeout(resolve, 3000);
+            });
+          };
+
+          // Fake async validation
+          await wait();
+
+          if (value !== 'good') {
+            return {
+              code: 'ERR_INDEX_NAME',
+              message: 'The "only" valid index name is "good" :)',
+              type: 'invalidIndexName',
+            };
+          }
+        },
       },
     ],
   },

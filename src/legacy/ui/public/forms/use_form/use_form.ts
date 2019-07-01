@@ -155,6 +155,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     // Sequencially execute all the validations for the field
     if (isValidationAsync) {
+      clearErrors();
+
       await validations.reduce(
         (promise, validation) =>
           promise.then(async () => {
@@ -327,13 +329,13 @@ export const useForm = <T = FormData>({
   const validateFields: Form['validateFields'] = async fieldNames => {
     const fieldsToValidate = fieldNames
       ? fieldNames.map(name => fieldsRefs.current[name]).filter(field => field !== undefined)
-      : fieldsToArray();
+      : fieldsToArray().filter(field => field.isPristine);
 
     const formData = getFormData({ unflatten: false });
 
     await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
 
-    const isFormValid = fieldsToArray().every(field => !field.errors.length);
+    const isFormValid = fieldsToArray().every(field => !field.errors.length && !field.isValidating);
     setIsValid(isFormValid);
 
     return isFormValid;

@@ -53,6 +53,7 @@ export const Form2 = () => {
           description: 'Description of the name row.',
         }}
       />
+      <UseField path="title" form={form} render={FormRow} renderProps={{ title: 'Title' }} />
       <UseField
         path="nested.prop"
         form={form}

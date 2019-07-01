@@ -128,12 +128,41 @@ export const Form3 = () => {
                 isInvalid={field.form.isSubmitted && field.errors.length > 0}
                 value={field.value as string}
                 onChange={field.onChange}
-                isLoading={field.isValidating}
                 fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
         )}
+      </UseField>
+
+      <UseField path="indexName" form={form}>
+        {field => {
+          return (
+            <FormRow
+              title="Index name (async validation)"
+              description="This field has an asynchronous validation. Try it!"
+            >
+              <EuiFormRow
+                label={field.label}
+                helpText={field.helpText}
+                error={field.errors.length && field.errors[0].message}
+                isInvalid={field.errors.length > 0}
+                fullWidth
+              >
+                <EuiFieldText
+                  isInvalid={field.errors.length > 0}
+                  value={field.value as string}
+                  onChange={e => {
+                    field.clearErrors('invalidIndexName');
+                    field.onChange(e);
+                  }}
+                  isLoading={field.isValidating}
+                  fullWidth
+                />
+              </EuiFormRow>
+            </FormRow>
+          );
+        }}
       </UseField>
 
       <FormRow
