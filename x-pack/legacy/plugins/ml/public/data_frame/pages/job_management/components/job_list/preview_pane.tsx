@@ -10,13 +10,7 @@ import { EuiInMemoryTable, EuiInMemoryTableProps, SortDirection } from '@elastic
 import { getFlattenedFields } from '../../../../components/source_index_preview/common';
 import { ml } from '../../../../../services/ml_api_service';
 
-import {
-  DataFramePreviewRequest,
-  // PivotAggsConfigDict,
-  // PivotGroupByConfig,
-  // PivotGroupByConfigDict,
-  // PivotQuery,
-} from '../../../../common';
+import { DataFramePreviewRequest } from '../../../../common';
 
 interface Transform {
   dest: { index: string };
@@ -41,27 +35,27 @@ interface CompressedTableProps extends EuiInMemoryTableProps {
   error: any;
 }
 
-// interface Column {
-//   field: string;
-//   name: string;
-//   sortable: boolean;
-//   truncateText: boolean;
-// }
+interface Column {
+  field: string;
+  name: string;
+  sortable: boolean;
+  truncateText: boolean;
+}
 
 interface Props {
   transformId: string;
 }
 
-function sortColumns(groupByArr) {
+export function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
-    if (groupByArr.some(d => d.aggName === a) && groupByArr.some(d => d.aggName === b)) {
+    if (groupByArr.some(aggName => aggName === a) && groupByArr.some(aggName => aggName === b)) {
       return a.localeCompare(b);
     }
-    if (groupByArr.some(d => d.aggName === a)) {
+    if (groupByArr.some(aggName => aggName === a)) {
       return -1;
     }
-    if (groupByArr.some(d => d.aggName === b)) {
+    if (groupByArr.some(aggName => aggName === b)) {
       return 1;
     }
     return a.localeCompare(b);
@@ -70,9 +64,9 @@ function sortColumns(groupByArr) {
 
 function getDataFromTransform(
   transformData: TransformData
-): { previewRequest: DataFramePreviewRequest; groupByArr: Array<{ aggName: string }> | [] } {
+): { previewRequest: DataFramePreviewRequest; groupByArr: string[] | [] } {
   const { transforms } = transformData;
-  const index = transforms[0].source.index[0]; // TODO do some checking to make sure this doesn't throw
+  const index = transforms[0].source.index[0];
   const pivot = transforms[0].pivot;
   const groupByArr = [];
 
@@ -82,11 +76,11 @@ function getDataFromTransform(
     },
     pivot,
   };
-
+  // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
   if (pivot.group_by !== undefined) {
     for (const key in pivot.group_by) {
       if (pivot.group_by.hasOwnProperty(key)) {
-        groupByArr.push({ aggName: key });
+        groupByArr.push(key);
       }
     }
   }
@@ -96,8 +90,8 @@ function getDataFromTransform(
 
 export const PreviewPane: React.SFC<Props> = ({ transformId }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
-  const [groupByArray, setGroupByArray] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [groupByArray, setGroupByArray] = useState<string[] | []>([]);
+  const [columns, setColumns] = useState<Column[] | []>([]);
   const [sort, setSort] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -122,7 +116,6 @@ export const PreviewPane: React.SFC<Props> = ({ transformId }) => {
   useEffect(() => {
     getPreview();
   }, []);
-  // TODO: sort so groupBy is always far left
   useEffect(
     () => {
       if (dataFramePreviewData.length > 0) {
