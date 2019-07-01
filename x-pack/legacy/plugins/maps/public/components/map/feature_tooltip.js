@@ -218,8 +218,6 @@ export class FeatureTooltip extends React.Component {
 
 
   _onPageChange = (pageNumber) => {
-    this.prevLayerId = null;
-    this.prevFeatureId = null;
     this.setState({
       pageNumber: pageNumber,
     });

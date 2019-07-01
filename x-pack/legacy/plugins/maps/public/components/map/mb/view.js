@@ -398,8 +398,6 @@ export class MBMapContainer extends React.Component {
         findLayerById={this._findLayerById}
         closeTooltip={this._onTooltipClose}
         showFilterButtons={this.props.isFilterable && isLocked}
-        // showCloseButton={isLocked}
-        // showFeatureList={isLocked}
         isLocked={isLocked}
       />
     ), this._tooltipContainer);
