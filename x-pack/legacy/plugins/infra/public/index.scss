@@ -22,6 +22,6 @@
 // This is a temporary workaround for https://github.com/elastic/kibana/issues/39808
 // A real fix will most likely depend on changes in elastic-charts.
 
-.infra-ui-metrics-explorer-chart .echTooltip {
-  max-width: 1000px;
+.infMetricsExplorerChart .echTooltip {
+  max-width: 90vw;
 }
