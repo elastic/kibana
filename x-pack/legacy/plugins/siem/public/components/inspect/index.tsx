@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -41,7 +41,7 @@ interface InspectButtonDispatch {
 
 type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
 
-const InspectButtonComponent = ({
+export const InspectButtonComponent = ({
   inspect,
   isInspected,
   loading,
@@ -52,23 +52,26 @@ const InspectButtonComponent = ({
   title = '',
 }: InspectButtonProps) => (
   <>
-    <EuiToolTip delay="regular" position="top" content={i18n.TOOLTIP_CONTENT}>
-      {loading ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
-        <EuiButtonIcon
-          iconSize="m"
-          iconType="inspect"
-          onClick={() => {
-            setIsInspected({
-              id: queryId,
-              inputId: 'global',
-              isInspected: true,
-              selectedInspectIndex: inspectIndex,
-            });
-          }}
-        />
-      )}
+    <EuiToolTip
+      delay="regular"
+      position="top"
+      content={i18n.TOOLTIP_CONTENT}
+      data-test-subj="inspect-tooltip"
+    >
+      <EuiButtonIcon
+        iconSize="m"
+        iconType="inspect"
+        isDisabled={loading}
+        onClick={() => {
+          setIsInspected({
+            id: queryId,
+            inputId: 'global',
+            isInspected: true,
+            selectedInspectIndex: inspectIndex,
+          });
+        }}
+        data-test-subj="inspect-open-modal"
+      />
     </EuiToolTip>
     <ModalInspectQuery
       closeModal={() => {
@@ -85,6 +88,7 @@ const InspectButtonComponent = ({
         inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
       }
       title={title}
+      data-test-subj="inspect-modal"
     />
   </>
 );
