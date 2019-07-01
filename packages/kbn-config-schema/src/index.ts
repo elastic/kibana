@@ -167,7 +167,7 @@ function siblingRef<T>(key: string): SiblingReference<T> {
 
 function conditional<A extends ConditionalTypeValue, B, C>(
   leftOperand: Reference<A>,
-  rightOperand: Reference<A> | A,
+  rightOperand: Reference<A> | A | Type<unknown>,
   equalType: Type<B>,
   notEqualType: Type<C>,
   options?: TypeOptions<B | C>
