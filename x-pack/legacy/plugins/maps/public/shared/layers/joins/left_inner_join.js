@@ -70,15 +70,6 @@ export class LeftInnerJoin {
     }
   }
 
-
-  joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
-    const joinFields = this.getRightMetricFields();
-    for (let i = 0; i < featureCollection.features.length; i++) {
-      const feature = featureCollection.features[i];
-      this.joinPropertiesToFeature(feature, propertiesMap, joinFields);
-    }
-  }
-
   getRightJoinSource() {
     return this._rightSource;
   }
