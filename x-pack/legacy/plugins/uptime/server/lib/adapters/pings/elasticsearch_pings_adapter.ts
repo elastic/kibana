@@ -193,8 +193,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       ? query
       : {
           bool: {
-            must: [query],
-            filter: [{ match: { 'monitor.id': monitorId } }],
+            filter: [{ match: { 'monitor.id': monitorId } }, query],
           },
         };
 
