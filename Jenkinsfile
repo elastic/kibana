@@ -13,9 +13,9 @@ pipeline {
   stages {
     stage('bootstrap') {
       agent { label 'linux || immutable' } 
-      environment {
-        // PIPELINE_DIR = "./.ci/pipeline-setup/"
-      }
+      // environment {
+      //   PIPELINE_DIR = "./.ci/pipeline-setup/"
+      // }
       steps {
         dir("${env.BASE_DIR}"){
           script {
