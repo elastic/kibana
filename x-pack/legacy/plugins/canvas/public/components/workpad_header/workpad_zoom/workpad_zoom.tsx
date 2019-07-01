@@ -14,13 +14,22 @@ import {
 } from '@elastic/eui';
 // @ts-ignore unconverted local component
 import { Popover } from '../../popover';
-import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib/constants';
+import {
+  MAX_ZOOM_LEVEL,
+  MIN_ZOOM_LEVEL,
+  WORKPAD_CANVAS_BUFFER,
+  CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR,
+} from '../../../../common/lib/constants';
 
 export interface Props {
   /**
    * current workpad zoom level
    */
   zoomScale: number;
+  /**
+   * minimum bounding box for the workpad
+   */
+  boundingBox: { left: number; right: number; top: number; bottom: number };
   /**
    * handler to set the workpad zoom level to a specific value
    */
@@ -33,6 +42,10 @@ export interface Props {
    * handler to decrease workpad zoom level
    */
   zoomOut: () => void;
+  /**
+   * reset zoom to 100%
+   */
+  resetZoom: () => void;
 }
 
 const QUICK_ZOOM_LEVELS = [0.5, 1, 2];
@@ -43,11 +56,39 @@ export class WorkpadZoom extends PureComponent<Props> {
     setZoomScale: PropTypes.func.isRequired,
     zoomIn: PropTypes.func.isRequired,
     zoomOut: PropTypes.func.isRequired,
+    resetZoom: PropTypes.func.isRequired,
+    boundingBox: PropTypes.shape({
+      left: PropTypes.number.isRequired,
+      right: PropTypes.number.isRequired,
+      top: PropTypes.number.isRequired,
+      bottom: PropTypes.number.isRequired,
+    }),
+  };
+
+  _fitToWindow = () => {
+    const { boundingBox, setZoomScale } = this.props;
+    const canvasLayoutContent = document.querySelector(
+      `#${CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}`
+    ) as HTMLElement;
+    const layoutWidth = canvasLayoutContent.clientWidth;
+    const layoutHeight = canvasLayoutContent.clientHeight;
+    const boundingWidth =
+      Math.max(layoutWidth, boundingBox.right) -
+      Math.min(0, boundingBox.left) +
+      WORKPAD_CANVAS_BUFFER * 2;
+    const boundingHeight =
+      Math.max(layoutHeight, boundingBox.bottom) -
+      Math.min(0, boundingBox.top) +
+      WORKPAD_CANVAS_BUFFER * 2;
+    const xScale = layoutWidth / boundingWidth;
+    const yScale = layoutHeight / boundingHeight;
+
+    setZoomScale(Math.min(xScale, yScale));
   };
 
   _button = (togglePopover: MouseEventHandler<HTMLButtonElement>) => (
     <EuiButtonIcon
-      iconType="starPlusFilled" // TODO: change this to magnifyWithPlus when available
+      iconType="magnifyWithPlus"
       aria-label="Share this workpad"
       onClick={togglePopover}
     />
@@ -63,21 +104,34 @@ export class WorkpadZoom extends PureComponent<Props> {
     }));
 
   _getPanels = (): EuiContextMenuPanelDescriptor[] => {
-    const { zoomScale, zoomIn, zoomOut } = this.props;
+    const { zoomScale, zoomIn, zoomOut, resetZoom } = this.props;
     const items: EuiContextMenuPanelItemDescriptor[] = [
+      {
+        name: 'Fit to window',
+        icon: 'empty',
+        onClick: this._fitToWindow,
+        disabled: zoomScale === MAX_ZOOM_LEVEL,
+      },
       ...this._getScaleMenuItems(),
       {
         name: 'Zoom in',
-        icon: 'starPlusFilled', // TODO: change this to magnifyWithPlus when available
+        icon: 'magnifyWithPlus',
         onClick: zoomIn,
         disabled: zoomScale === MAX_ZOOM_LEVEL,
         className: 'canvasContextMenu--topBorder',
       },
       {
         name: 'Zoom out',
-        icon: 'starMinusFilled', // TODO: change this to magnifyWithMinus when available
+        icon: 'magnifyWithMinus',
         onClick: zoomOut,
-        disabled: zoomScale === MIN_ZOOM_LEVEL,
+        disabled: zoomScale <= MIN_ZOOM_LEVEL,
+      },
+      {
+        name: 'Reset',
+        icon: 'empty',
+        onClick: resetZoom,
+        disabled: zoomScale >= MAX_ZOOM_LEVEL,
+        className: 'canvasContextMenu--topBorder',
       },
     ];
 

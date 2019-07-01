@@ -50,6 +50,7 @@ export default function(kibana: any) {
       const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
+        unencryptedAttributes: [],
         validate: {
           params: Joi.object()
             .keys({
