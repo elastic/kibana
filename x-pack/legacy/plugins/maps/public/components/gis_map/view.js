@@ -22,15 +22,15 @@ export class GisMap extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.isRenderTimerStarted = false;
+    this._isInitalLoadRenderTimerStarted = false;
     this._setRefreshTimer();
   }
 
   componentDidUpdate() {
     this._setRefreshTimer();
-    if (this.props.areLayersLoaded && !this.isRenderTimerStarted) {
-      this.isRenderTimerStarted = true;
-      this._startRenderTimer();
+    if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
+      this._isInitalLoadRenderTimerStarted = true;
+      this._startInitialLoadRenderTimer();
     }
   }
 
@@ -70,7 +70,7 @@ export class GisMap extends Component {
 
   // Mapbox does not provide any feedback when rendering is complete.
   // Temporary solution is just to wait set period of time after data has loaded.
-  _startRenderTimer = () => {
+  _startInitialLoadRenderTimer = () => {
     setTimeout(
       () => {
         if (this._isMounted) {
