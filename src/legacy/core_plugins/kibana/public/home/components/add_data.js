@@ -186,12 +186,12 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="kbn.home.addData.addDataToKibanaTitle"
                 defaultMessage="Add Data to Kibana"
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiText size="s">
             <p>
