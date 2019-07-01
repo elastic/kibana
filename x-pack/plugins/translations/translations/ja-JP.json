@@ -2356,8 +2356,6 @@
     "kbn.visualize.listing.createNew.title": "最初のビジュアライゼーションの作成",
     "kbn.visualize.listing.experimentalTitle": "Experimental (実験的)",
     "kbn.visualize.listing.experimentalTooltip": "このビジュアライゼーションは今後のリリースで変更または削除される可能性があり、SLA のサポート対象になりません。",
-    "kbn.visualize.listing.listingLimitAdvancedSettingsLinkText": "高度な設定",
-    "kbn.visualize.listing.listingLimitHelpText": "{totalItems} 個のダッシュボードがありますが、「listingLimit」の設定により {listingLimit} 個までしか下の表に表示できません。この設定は次の場所で変更できます",
     "kbn.visualize.listing.noItemsMessage": "ビジュアライゼーションがないようです。",
     "kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel": "ビジュアライゼーションを作成",
     "kbn.visualize.listing.noVisualizationsText": "ビジュアライゼーションがないようです。作ってみましょう！",

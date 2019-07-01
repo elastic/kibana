@@ -1,41 +1,13 @@
 <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem"
      data-test-subj="visualizeLandingPage"
 >
-  <div class="kuiViewContentItem kuiVerticalRhythm" ng-if="listingController.showLimitError">
-    <div class="kuiInfoPanel kuiInfoPanel--warning">
-      <div class="kuiInfoPanelBody">
-        <div class="kuiInfoPanelBody__message">
-          <span
-            i18n-id="kbn.visualize.listing.listingLimitHelpText"
-            i18n-default-message="You have {totalItems} visualizations, but your &quot;listingLimit&quot;
-                                  setting prevents the table below from displaying more than {listingLimit}.
-                                  You can change this setting under"
-            i18n-values="{
-              totalItems: listingController.totalItems,
-              listingLimit: listingController.listingLimit
-            }"
-            i18n-description="Part of composite text kbn.visualize.listing.listingLimitHelpText +
-                              kbn.visualize.listing.listingLimitAdvancedSettingsLinkText"
-          ></span>
-          <a
-            kbn-href="#/management/kibana/settings"
-            class="kuiLink"
-            i18n-id="kbn.visualize.listing.listingLimitAdvancedSettingsLinkText"
-            i18n-default-message="Advanced Settings"
-            i18n-description="Part of composite text kbn.visualize.listing.listingLimitHelpText +
-                              kbn.visualize.listing.listingLimitAdvancedSettingsLinkText"
-          ></a>.
-        </div>
-      </div>
-    </div>
-  </div>
-
   <visualize-listing-table
     find-items="listingController.fetchItems"
     delete-items="listingController.deleteSelectedItems"
     create-item="listingController.createNewVis"
     get-view-url="listingController.getViewUrl"
     edit-item="listingController.editItem"
+    listing-limit="listingController.listingLimit"
   ></visualize-listing-table>
 
   <new-vis-modal
