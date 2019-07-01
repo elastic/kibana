@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBasicTable,
-  EuiPanel,
-  EuiTitle,
-  EuiButtonIcon,
-  EuiBadge,
-  EuiIcon,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiIcon, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -210,13 +202,6 @@ export const MonitorListComponent = (props: Props) => {
                 </Fragment>
               ),
               sortable: true,
-            },
-            {
-              field: 'state.checks',
-              name: i18n.translate('xpack.uptime.monitorList.checksColumnLabel', {
-                defaultMessage: 'Checks',
-              }),
-              render: (checks: any[]) => <EuiBadge>{checks.length}</EuiBadge>,
             },
             {
               field: 'histogram.points',
