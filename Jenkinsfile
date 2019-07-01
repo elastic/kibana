@@ -32,7 +32,8 @@ pipeline {
             dumpEnv()
           }
           // sh '${CI_DIR}run_pipeline.sh'
-          sh 'src/dev/temp_pipeline_setup/extract_bootstrap_cache.sh'
+          // sh 'src/dev/temp_pipeline_setup/extract_bootstrap_cache.sh'
+          sh "${TEMP_PIPELINE_SETUP_DIR}/extract_bootstrap_cache.sh"
           sh 'echo "\n\t### [TODO] create and upload workspace cache to gcs"'
         }
       }
