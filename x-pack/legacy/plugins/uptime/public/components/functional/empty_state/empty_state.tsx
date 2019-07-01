@@ -30,7 +30,7 @@ export const EmptyStateComponent = ({ basePath, children, data, errors }: Props)
     return <EmptyStateError errorMessage={formatUptimeGraphQLErrorList(errors)} />;
   }
   if (data && data.statesIndexStatus) {
-    const { docCount, indexExists } = data.statesIndexStatus;
+    const { indexExists } = data.statesIndexStatus;
     if (!indexExists) {
       return (
         <DataMissing
