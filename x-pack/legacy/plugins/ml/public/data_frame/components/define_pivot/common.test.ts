@@ -41,6 +41,10 @@ describe('Data Frame: Define Pivot Common', () => {
     expect(options).toEqual({
       aggOptions: [
         {
+          label: 'Custom transform aggregations',
+          options: [{ label: 'count()' }],
+        },
+        {
           label: ' the-f[i]e>ld ',
           options: [
             { label: 'avg( the-f[i]e>ld )' },
@@ -48,7 +52,6 @@ describe('Data Frame: Define Pivot Common', () => {
             { label: 'max( the-f[i]e>ld )' },
             { label: 'min( the-f[i]e>ld )' },
             { label: 'sum( the-f[i]e>ld )' },
-            { label: 'value_count( the-f[i]e>ld )' },
           ],
         },
       ],
@@ -83,11 +86,10 @@ describe('Data Frame: Define Pivot Common', () => {
           aggName: 'the-field.sum',
           dropDownName: 'sum( the-f[i]e>ld )',
         },
-        'value_count( the-f[i]e>ld )': {
-          agg: 'value_count',
-          field: ' the-f[i]e>ld ',
-          aggName: 'the-field.value_count',
-          dropDownName: 'value_count( the-f[i]e>ld )',
+        'count()': {
+          agg: 'count',
+          aggName: 'count',
+          dropDownName: 'count()',
         },
       },
       groupByOptions: [{ label: 'histogram( the-f[i]e>ld )' }],

@@ -25,7 +25,7 @@ import {
   isPivotAggsConfigWithUiSupport,
   getEsAggFromAggConfig,
   PivotAggsConfig,
-  PivotAggsConfigWithUiSupportDict,
+  PivotAggsConfigDict,
   PIVOT_SUPPORTED_AGGS,
 } from '../../common';
 
@@ -36,7 +36,7 @@ interface SelectOption {
 interface Props {
   defaultData: PivotAggsConfig;
   otherAggNames: AggName[];
-  options: PivotAggsConfigWithUiSupportDict;
+  options: PivotAggsConfigDict;
   onChange(d: PivotAggsConfig): void;
 }
 
@@ -60,12 +60,12 @@ export const PopoverForm: React.SFC<Props> = ({
   if (!isUnsupportedAgg) {
     const optionsArr = dictionaryToArray(options);
     optionsArr
-      .filter(o => o.agg === defaultData.agg)
-      .forEach(o => {
-        availableFields.push({ text: o.field });
-      });
-    optionsArr
-      .filter(o => isPivotAggsConfigWithUiSupport(defaultData) && o.field === defaultData.field)
+      .filter(
+        o =>
+          isPivotAggsConfigWithUiSupport(o) &&
+          isPivotAggsConfigWithUiSupport(defaultData) &&
+          o.field === defaultData.field
+      )
       .forEach(o => {
         availableAggs.push({ text: o.agg });
       });

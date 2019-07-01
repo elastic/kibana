@@ -8,18 +8,13 @@ import React, { Fragment } from 'react';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import {
-  AggName,
-  PivotAggsConfig,
-  PivotAggsConfigDict,
-  PivotAggsConfigWithUiSupportDict,
-} from '../../common';
+import { AggName, PivotAggsConfig, PivotAggsConfigDict } from '../../common';
 
 import { AggLabelForm } from './agg_label_form';
 
 export interface ListProps {
   list: PivotAggsConfigDict;
-  options: PivotAggsConfigWithUiSupportDict;
+  options: PivotAggsConfigDict;
   deleteHandler(l: string): void;
   onChange(previousAggName: AggName, item: PivotAggsConfig): void;
 }

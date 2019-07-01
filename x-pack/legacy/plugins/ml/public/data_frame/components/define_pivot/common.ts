@@ -16,10 +16,11 @@ import {
   DropDownOption,
   FieldName,
   GroupByConfigWithUiSupport,
-  PivotAggsConfigWithUiSupportDict,
+  PivotAggsConfigDict,
   pivotAggsFieldSupport,
   PivotGroupByConfigWithUiSupportDict,
   pivotGroupByFieldSupport,
+  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
 
@@ -70,12 +71,23 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
-  const aggOptionsData: PivotAggsConfigWithUiSupportDict = {};
+  const aggOptionsData: PivotAggsConfigDict = {};
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
     .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
+
+  // Add the custom count() aggregation
+  const customOption: DropDownOption = { label: 'Custom transform aggregations', options: [] };
+  const countDropDownName = 'count()';
+  customOption.options.push({ label: countDropDownName });
+  aggOptionsData[countDropDownName] = {
+    agg: PIVOT_SUPPORTED_AGGS.COUNT,
+    aggName: PIVOT_SUPPORTED_AGGS.COUNT,
+    dropDownName: countDropDownName,
+  };
+  aggOptions.push(customOption);
 
   fields.forEach(field => {
     // Group by
