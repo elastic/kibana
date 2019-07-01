@@ -36,7 +36,7 @@ pipeline {
       steps {
         dir("${env.BASE_DIR}"){
           sh "${TEMP_PIPELINE_SETUP_DIR}/setup.sh"
-          // sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
+          sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
           sh "du -hcs ${WORKSPACE}" // Get workspace dir size
           sh 'echo "\n\t### [TODO] create and upload workspace cache to  gcs"'
         }
