@@ -15,7 +15,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T17:47:07.075Z",
@@ -32,7 +33,8 @@
           "scheme": null,
           "status": "down",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T17:47:08.078Z",
@@ -49,7 +51,8 @@
           "scheme": null,
           "status": "down",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T17:47:09.075Z",
@@ -66,7 +69,8 @@
           "scheme": null,
           "status": "down",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T17:47:10.075Z",
@@ -83,7 +87,8 @@
           "scheme": null,
           "status": "down",
           "type": "tcp"
-        }
+        },
+        "observer": null
       }
     ]
   }

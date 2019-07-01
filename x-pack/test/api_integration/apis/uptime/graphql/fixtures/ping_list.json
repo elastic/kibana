@@ -15,7 +15,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -32,7 +33,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -46,7 +48,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -60,7 +63,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -74,7 +78,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -88,7 +93,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:14.080Z",
@@ -102,7 +108,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:13.075Z",
@@ -116,7 +123,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:13.074Z",
@@ -130,7 +138,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:13.074Z",
@@ -144,7 +153,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       }
     ]
   }
