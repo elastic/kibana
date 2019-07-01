@@ -6,37 +6,42 @@
 
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function deleteWatches(callWithRequest, watchIds) {
   const deletePromises = watchIds.map(watchId => {
     return callWithRequest('watcher.deleteWatch', {
-      id: watchId
+      id: watchId,
     })
       .then(success => ({ success }))
       .catch(error => ({ error }));
   });
 
-  return Promise.all(deletePromises)
-    .then(results => {
-      const successes = results.filter(result => Boolean(result.success));
-      const errors = results.filter(result => Boolean(result.error));
-
-      return {
-        numSuccesses: successes.length,
-        numErrors: errors.length
-      };
+  return Promise.all(deletePromises).then(results => {
+    const errors = [];
+    const successes = [];
+    results.forEach(({ success, error }) => {
+      if (success) {
+        successes.push(success._id);
+      } else if (error) {
+        errors.push(error._id);
+      }
     });
+
+    return {
+      successes,
+      errors,
+    };
+  });
 }
 
 export function registerDeleteRoute(server) {
-
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/watcher/watches/delete',
     method: 'POST',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -47,7 +52,7 @@ export function registerDeleteRoute(server) {
       }
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

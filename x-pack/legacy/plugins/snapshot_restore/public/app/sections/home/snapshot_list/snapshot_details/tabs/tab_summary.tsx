@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiDescriptionList,
@@ -12,9 +12,11 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
@@ -34,21 +36,6 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
     },
   } = useAppDependencies();
 
-  const includeGlobalStateToHumanizedMap: Record<string, any> = {
-    0: (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
-        defaultMessage="No"
-      />
-    ),
-    1: (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
-        defaultMessage="Yes"
-      />
-    ),
-  };
-
   const {
     versionId,
     version,
@@ -63,15 +50,32 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
     uuid,
   } = snapshotDetails;
 
-  const indicesList = indices.length ? (
+  // Only show 10 indices initially
+  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
+  const hiddenIndicesCount = indices.length > 10 ? indices.length - 10 : 0;
+  const shortIndicesList = indices.length ? (
     <ul>
-      {indices.map((index: string) => (
+      {[...indices].splice(0, 10).map((index: string) => (
         <li key={index}>
           <EuiTitle size="xs">
             <span>{index}</span>
           </EuiTitle>
         </li>
       ))}
+      {hiddenIndicesCount ? (
+        <li key="hiddenIndicesCount">
+          <EuiTitle size="xs">
+            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
+                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
+                values={{ count: hiddenIndicesCount }}
+              />{' '}
+              <EuiIcon type="arrowDown" />
+            </EuiLink>
+          </EuiTitle>
+        </li>
+      ) : null}
     </ul>
   ) : (
     <FormattedMessage
@@ -79,6 +83,32 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
       defaultMessage="-"
     />
   );
+  const fullIndicesList =
+    indices.length && indices.length > 10 ? (
+      <ul>
+        {indices.map((index: string) => (
+          <li key={index}>
+            <EuiTitle size="xs">
+              <span>{index}</span>
+            </EuiTitle>
+          </li>
+        ))}
+        {hiddenIndicesCount ? (
+          <li key="hiddenIndicesCount">
+            <EuiTitle size="xs">
+              <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.snapshotDetails.itemIndicesCollapseAllLink"
+                  defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+                  values={{ count: hiddenIndicesCount }}
+                />{' '}
+                <EuiIcon type="arrowUp" />
+              </EuiLink>
+            </EuiTitle>
+          </li>
+        ) : null}
+      </ul>
+    ) : null;
 
   return (
     <EuiDescriptionList textStyle="reverse">
@@ -133,7 +163,17 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            {includeGlobalStateToHumanizedMap[includeGlobalState]}
+            {includeGlobalState ? (
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
+                defaultMessage="Yes"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
+                defaultMessage="No"
+              />
+            )}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -149,7 +189,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <EuiText>{indicesList}</EuiText>
+            <EuiText>{isShowingFullIndicesList ? fullIndicesList : shortIndicesList}</EuiText>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
