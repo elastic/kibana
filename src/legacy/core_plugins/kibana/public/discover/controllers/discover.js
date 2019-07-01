@@ -53,10 +53,10 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
+import '../components/histogram';
 import { getPainlessError } from './get_painless_error';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
@@ -70,6 +70,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
+import { brushHandler } from '../../../../metrics/public/lib/create_brush_handler';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -190,8 +191,6 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const visualizeLoader = Private(VisualizeLoaderProvider);
-  let visualizeHandler;
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -209,6 +208,7 @@ function discoverController(
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
+  $scope.timefilterUpdateHandler = brushHandler(timefilter);
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -539,6 +539,7 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
+        $scope.$listen(timefilter, 'fetch', $scope.fetch);
         $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
         $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
         $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
@@ -743,15 +744,7 @@ function discoverController(
         .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
         .then(resp => responseHandler(tabifiedData, resp))
         .then(resp => {
-          visualizeHandler.render({
-            as: 'visualization',
-            value: {
-              visType: $scope.vis.type.name,
-              visData: resp,
-              visConfig: $scope.vis.params,
-              params: {},
-            }
-          });
+          $scope.histogramData = resp;
         });
     }
 
@@ -926,13 +919,6 @@ function discoverController(
 
     $scope.searchSource.setField('aggs', function () {
       return $scope.vis.getAggConfig().toDsl();
-    });
-
-    $timeout(async () => {
-      const visEl = $element.find('#discoverHistogram')[0];
-      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
-        autoFetch: false,
-      });
     });
   }
 
