@@ -10,6 +10,7 @@ import { uploadStatus } from './upload_status';
 import { startBasicStatus } from './start_basic_license_status';
 import { uploadErrorMessage } from './upload_error_message';
 import { trialStatus } from './trial_status';
+import { permissions } from './permissions';
 import moment from 'moment-timezone';
 
 export const WARNING_THRESHOLD_IN_DAYS = 25;
@@ -19,8 +20,22 @@ export const licenseManagement = combineReducers({
   uploadStatus,
   uploadErrorMessage,
   trialStatus,
-  startBasicStatus
+  startBasicStatus,
+  permissions,
 });
+
+export const getPermission = state => {
+  return state.permissions.hasPermission;
+};
+
+export const isPermissionsLoading = state => {
+  return state.permissions.loading;
+};
+
+
+export const getPermissionsError = state => {
+  return state.permissions.error;
+};
 
 export const getLicense = state => {
   return state.license;

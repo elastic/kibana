@@ -105,10 +105,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
+  // Currently the endpoint uses a default size of 100 unless a size is supplied.
+  // So until paging is supported in the UI, explicitly supply a size of 1000
+  // to match the max number of docs that the endpoint can return.
   ml.getDataFrameTransforms = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms',
+        fmt: '/_data_frame/transforms/_all?size=1000',
       }
     ],
     method: 'GET'
@@ -125,7 +128,10 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       },
       {
-        fmt: '/_data_frame/transforms/_stats',
+        // Currently the endpoint uses a default size of 100 unless a size is supplied.
+        // So until paging is supported in the UI, explicitly supply a size of 1000
+        // to match the max number of docs that the endpoint can return.
+        fmt: '/_data_frame/transforms/_all/_stats?size=1000',
       }
     ],
     method: 'GET'

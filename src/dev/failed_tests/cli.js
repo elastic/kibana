@@ -17,15 +17,21 @@
  * under the License.
  */
 
+const { resolve } = require('path');
+
+// force cwd
+process.chdir(resolve(__dirname, '../../..'));
+
 if (!process.env.JOB_NAME) {
   console.log('Unable to determine job name');
   process.exit(1);
 }
 
-const [org, proj, branch] = process.env.JOB_NAME.split('+');
+// JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
+const [org, proj, branch] = process.env.JOB_NAME.split(/\+|\//);
 const masterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
 if (!(org === 'elastic' && proj === 'kibana' && masterOrVersion)) {
-  console.log('Failure issues only created on master/version branch jobs');
+  console.log(`Failure issues only created on master/version branch jobs [JOB_NAME=${process.env.JOB_NAME}] [${org}/${proj}/${branch}]`);
   process.exit(0);
 }
 

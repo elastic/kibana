@@ -7,9 +7,7 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.2.
 
-See also <<release-highlights>> and <<release-notes>>.
-
-coming[7.2.0]
+See also <<release-highlights-7.2.0, Release Highlights>> and <<release-notes-7.2.0, Release Notes>>.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide

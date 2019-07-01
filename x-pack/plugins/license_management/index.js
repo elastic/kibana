@@ -6,7 +6,12 @@
 
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from './server/routes/api/license/';
+import {
+  registerLicenseRoute,
+  registerStartTrialRoutes,
+  registerStartBasicRoute,
+  registerPermissionsRoute
+} from './server/routes/api/license/';
 import { createRouter } from '../../server/lib/create_router';
 
 export function licenseManagement(kibana)  {
@@ -27,6 +32,7 @@ export function licenseManagement(kibana)  {
       registerLicenseRoute(router, xpackInfo);
       registerStartTrialRoutes(router, xpackInfo);
       registerStartBasicRoute(router, xpackInfo);
+      registerPermissionsRoute(router, xpackInfo);
     }
   });
 }

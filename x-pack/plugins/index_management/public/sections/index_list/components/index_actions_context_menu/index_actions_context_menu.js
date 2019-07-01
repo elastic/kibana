@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { all } from 'lodash';
 import {
@@ -17,7 +17,8 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask
+  EuiOverlayMask,
+  EuiCheckbox
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../common/constants';
@@ -31,6 +32,7 @@ class IndexActionsContextMenuUi extends Component {
     this.state = {
       isPopoverOpen: false,
       renderConfirmModal: null,
+      isActionConfirmed: false,
     };
   }
   closeConfirmModal = () => {
@@ -38,6 +40,9 @@ class IndexActionsContextMenuUi extends Component {
       renderConfirmModal: null
     });
     this.props.resetSelection && this.props.resetSelection();
+  }
+  confirmAction = isActionConfirmed => {
+    this.setState({ isActionConfirmed });
   }
   panels() {
     const {
@@ -58,6 +63,7 @@ class IndexActionsContextMenuUi extends Component {
       intl,
       reloadIndices,
       unfreezeIndices,
+      hasSystemIndex,
     } = this.props;
     const allOpen = all(indexNames, indexName => {
       return indexStatusByName[indexName] === INDEX_OPEN;
@@ -113,6 +119,11 @@ class IndexActionsContextMenuUi extends Component {
           defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
         }, { selectedIndexCount }),
         onClick: () => {
+          if (hasSystemIndex) {
+            this.closePopover();
+            this.setState({ renderConfirmModal: this.renderConfirmCloseModal });
+            return;
+          }
           this.closePopoverAndExecute(closeIndices);
         }
       });
@@ -366,19 +377,109 @@ class IndexActionsContextMenuUi extends Component {
   };
 
   renderConfirmDeleteModal = () => {
-    const { deleteIndices, indexNames, intl } = this.props;
+    const { deleteIndices, indexNames, intl, hasSystemIndex, isSystemIndexByName } = this.props;
+    const { isActionConfirmed } = this.state;
     const selectedIndexCount = indexNames.length;
+
+    const standardIndexModalBody = (
+      <div>
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
+            defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
+            values={{ selectedIndexCount }}
+          />
+        </p>
+        <ul>
+          {indexNames.map(indexName => (
+            <li key={indexName}>
+              {indexName}
+            </li>
+          ))}
+        </ul>
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
+            defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups."
+          />
+        </p>
+      </div>
+    );
+
+    const systemIndexModalBody = (
+      <div>
+        <EuiSpacer size="l" />
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
+            defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
+            values={{ selectedIndexCount }}
+          />
+        </p>
+        <ul>
+          {indexNames.map(indexName => (
+            <li key={indexName}>
+              {indexName}
+              {isSystemIndexByName[indexName] ? (
+                <Fragment>
+                  {' '}
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexActionsMenu.deleteIndex.systemIndexLabel"
+                    defaultMessage="(System index)"
+                  />
+                </Fragment>
+              ) : ''}
+            </li>
+          ))}
+        </ul>
+        <EuiCallOut
+          title={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
+              defaultMessage: 'Deleting a system index can break Kibana',
+            })
+          }
+          color="danger"
+          iconType="alert"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutDescription"
+              defaultMessage="System indices are critical for internal operations.
+                Deleting an index cannot be undone. Make sure you have appropriate backups."
+            />
+          </p>
+          <EuiCheckbox
+            id="confirmDeleteIndicesCheckbox"
+            label={
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.deleteIndex.checkboxLabel"
+                defaultMessage="I understand the consequences of deleting a system index"
+              />
+            }
+            checked={isActionConfirmed}
+            onChange={e => this.confirmAction(e.target.checked)}
+          />
+        </EuiCallOut>
+      </div>
+    );
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={
             intl.formatMessage({
               id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
-              defaultMessage: 'Confirm delete {selectedIndexCount, plural, one {index} other {indices} }',
+              defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {# indices} }',
             }, { selectedIndexCount })
           }
-          onCancel={this.closeConfirmModal}
+          onCancel={() => {
+            this.confirmAction(false);
+            this.closeConfirmModal();
+          }}
           onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
+          buttonColor="danger"
+          confirmButtonDisabled={hasSystemIndex ? !isActionConfirmed : false}
           cancelButtonText={
             intl.formatMessage({
               id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
@@ -388,45 +489,110 @@ class IndexActionsContextMenuUi extends Component {
           confirmButtonText={
             intl.formatMessage({
               id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Confirm',
+              defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
+            }, { selectedIndexCount })
+          }
+        >
+          {hasSystemIndex ? systemIndexModalBody : standardIndexModalBody}
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  };
+
+  renderConfirmCloseModal = () => {
+    const { closeIndices, indexNames, isSystemIndexByName, intl } = this.props;
+    const { isActionConfirmed } = this.state;
+    const selectedIndexCount = indexNames.length;
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.modalTitle',
+              defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {# indices} }',
+            }, { selectedIndexCount })
+          }
+          onCancel={() => {
+            this.confirmAction(false);
+            this.closeConfirmModal();
+          }}
+          onConfirm={() => this.closePopoverAndExecute(closeIndices)}
+          buttonColor="danger"
+          confirmButtonDisabled={!isActionConfirmed}
+          cancelButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
+              defaultMessage: 'Cancel',
             })
+          }
+          confirmButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.confirmButtonText',
+              defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
+            }, { selectedIndexCount })
           }
         >
           <div>
+            <EuiSpacer size="l" />
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
-                defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
+                id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
+                defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
                 values={{ selectedIndexCount }}
               />
             </p>
             <ul>
               {indexNames.map(indexName => (
-                <li key={indexName}>{indexName}</li>
+                <li key={indexName}>
+                  {indexName}
+                  {isSystemIndexByName[indexName] ? (
+                    <Fragment>
+                      {' '}
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
+                        defaultMessage="(System index)"
+                      />
+                    </Fragment>
+                  ) : ''}
+                </li>
               ))}
             </ul>
             <EuiCallOut
               title={
                 intl.formatMessage({
-                  id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
-                  defaultMessage: 'Proceed with caution!',
+                  id: 'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
+                  defaultMessage: 'Closing a system index can break Kibana',
                 })
               }
-              color="warning"
-              iconType="help"
+              color="danger"
+              iconType="alert"
             >
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
-                  defaultMessage="This operation cannot be undone. Make sure you have appropriate backups."
+                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
+                  defaultMessage="System indices are critical for internal operations.
+                    You can reopen the index using the Open Index API."
                 />
               </p>
+              <EuiCheckbox
+                id="confirmCloseIndicesCheckbox"
+                label={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
+                    defaultMessage="I understand the consequences of closing a system index"
+                  />
+                }
+                checked={isActionConfirmed}
+                onChange={e => this.confirmAction(e.target.checked)}
+              />
             </EuiCallOut>
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
   };
+
   renderConfirmFreezeModal = () => {
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);

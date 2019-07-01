@@ -4,13 +4,11 @@
 <titleabbrev>7.2.0</titleabbrev>
 ++++
 
-coming[7.2.0]
-
 Each release of {kib} brings new features and product improvements. 
 Here are the highlights of the feature and user experience changes in 7.2.0.
 
 Refer to the {kib} {kibana-ref}/breaking-changes-7.2.html[breaking changes] and 
-{kibana-ref}/release-notes.html[release notes]
+{kibana-ref}/release-notes-7.2.0.html[release notes]
 for a list of bug fixes and other changes.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
@@ -189,8 +187,60 @@ enables you to filter anomaly results for one or more selected influencers.
 The query bar suggests influencer field names and values for the selected jobs 
 as you type.
 
+[float]
+=== Simplified creation of {ml} jobs for sample and {metricbeat} data
+
+If you use the {kib} sample data sets, there are now {ml} jobs for the
+sample eCommerce orders and the sample web logs. These jobs demonstrate a
+variety of ways that you can detect anomalous behavior in the sample data. You
+can add the jobs when you {kibana-ref}/add-sample-data.html[load the sample data]
+or use the supplied configuration when you are creating jobs in the Machine
+Learning app.
+
+Likewise, if you use the
+{metricbeat-ref}/metricbeat-module-system.html[{metricbeat} system module] to
+monitor your servers, there is a {ml} wizard that recognizes this type of data.
+For example, with the supplied configuration you can detect unusual increases in
+disk utilization:
+
+[role="screenshot"]
+image::release-notes/images/7.2-metricbeat-ml-modules.png[Embedded map in dark mode]
+
+These wizards expedite the creation of pre-configured jobs, dashboards, searches,
+and visualizations. For more information, see
+{kibana-ref}/ml-jobs.html[Creating {ml} jobs].
+
+[float]
+=== Recent log entries alongside your monitoring data
+
+You can now see your cluster's recent log entries within the *Stack Monitoring*
+application:
+
+[role="screenshot"]
+image::release-notes/images/7.2-monitoring-logs.png["Monitoring recent {es} logs"]
+
+See {kibana-ref}/elasticsearch-metrics.html[{es} monitoring metrics]. If you
+want to see earlier log entries, you can follow a link to the
+{kibana-ref}/xpack-logs.html[Logs UI] and continue your investigation there.
+
+TIP: You must use {filebeat} to collect the logs.
+
+//See {ref}/configuring-filebeat.html[Collecting {es} log data with {filebeat}].
 // end::notable-highlights[]
 
+[float]
+
+=== Observability
+
+Observability has two new notable features.
+
+* Metrics Explorer is a new view in the Infrastructure app. Metrics Explorer 
+enhances how you interact with infrastructure metrics in an ad hoc way.
+
+* APM agents now collect language-specific metrics, in addition to the common 
+key performance indicators. These new metrics are automatically displayed in the APM UI.
+
+For more information, visit the https://www.elastic.co/blog/elastic-observability-update-7-2-0[Observability blog].
 
 [float]
 === Give us your feedback

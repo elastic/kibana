@@ -35,8 +35,11 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
+export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
+
 const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
 const FORECASTS_VIEW_MAX = 5;       // Display links to a maximum of 5 forecasts.
+const FORECAST_DURATION_MAX_MS = FORECAST_DURATION_MAX_DAYS * 86400000;
 const WARN_NUM_PARTITIONS = 100;    // Warn about running a forecast with this number of field values.
 const FORECAST_STATS_POLL_FREQUENCY = 250;  // Frequency in ms at which to poll for forecast request stats.
 const WARN_NO_PROGRESS_MS = 120000; // If no progress in forecast request, abort check and warn.
@@ -102,6 +105,14 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
           defaultMessage: 'Invalid duration format',
         })
       );
+    } else if (duration.asMilliseconds() > FORECAST_DURATION_MAX_MS) {
+      isNewForecastDurationValid = false;
+      newForecastDurationErrors.push(
+        intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeGreaterThanMaximumErrorMessage',
+          defaultMessage: 'Forecast duration must not be greater than {maximumForecastDurationDays} days',
+        }, { maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS })
+      );
     } else if (duration.asMilliseconds() === 0) {
       isNewForecastDurationValid = false;
       newForecastDurationErrors.push(
@@ -163,18 +174,39 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
       });
   };
 
-  runForecastErrorHandler = (resp) => {
+  runForecastErrorHandler = (resp, closeJob) => {
+    const intl = this.props.intl;
+
     this.setState({ forecastProgress: PROGRESS_STATES.ERROR });
     console.log('Time series forecast modal - error running forecast:', resp);
     if (resp && resp.message) {
       this.addMessage(resp.message, MESSAGE_LEVEL.ERROR, true);
     } else {
       this.addMessage(
-        this.props.intl.formatMessage({
+        intl.formatMessage({
           id: 'xpack.ml.timeSeriesExplorer.forecastingModal.unexpectedResponseFromRunningForecastErrorMessage',
           defaultMessage: 'Unexpected response from running forecast. The request may have failed.',
         }),
         MESSAGE_LEVEL.ERROR, true);
+    }
+
+    if (closeJob === true) {
+      this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
+      mlJobService.closeJob(this.props.job.job_id)
+        .then(() => {
+          this.setState({ jobClosingState: PROGRESS_STATES.DONE });
+        })
+        .catch((response) => {
+          console.log('Time series forecast modal - could not close job:', response);
+          this.addMessage(
+            intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithClosingJobErrorMessage',
+              defaultMessage: 'Error closing job',
+            }),
+            MESSAGE_LEVEL.ERROR
+          );
+          this.setState({ jobClosingState: PROGRESS_STATES.ERROR });
+        });
     }
   };
 
@@ -194,10 +226,10 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
         if (resp.forecast_id !== undefined) {
           this.waitForForecastResults(resp.forecast_id, closeJobAfterRunning);
         } else {
-          this.runForecastErrorHandler(resp);
+          this.runForecastErrorHandler(resp, closeJobAfterRunning);
         }
       })
-      .catch(this.runForecastErrorHandler);
+      .catch(resp => this.runForecastErrorHandler(resp, closeJobAfterRunning));
   };
 
   waitForForecastResults = (forecastId, closeJobAfterRunning) => {

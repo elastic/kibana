@@ -12,7 +12,7 @@ import { setTelemetryOptInService, setTelemetryEnabled, setHttpClient, Telemetry
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 
-import App from './app';
+import { App } from './app.container';
 import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';

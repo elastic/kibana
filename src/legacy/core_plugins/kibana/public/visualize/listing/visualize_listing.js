@@ -84,8 +84,6 @@ export function VisualizeListingController($injector, createNewVis) {
     return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
-        this.showLimitError = result.total > config.get('savedObjects:listingLimit');
-        this.listingLimit = config.get('savedObjects:listingLimit');
 
         return {
           total: result.total,
@@ -104,4 +102,6 @@ export function VisualizeListingController($injector, createNewVis) {
       defaultMessage: 'Visualize',
     })
   }]);
+
+  this.listingLimit = config.get('savedObjects:listingLimit');
 }

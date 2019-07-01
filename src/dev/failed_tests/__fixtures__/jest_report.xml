@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites name="jest" timestamp="2019-06-07T03:36:23" time="781.292" tests="5487" skipped="9">
+  <testsuite name="x-pack/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/plugins/code/server/lsp/abstract_launcher.test.ts">
+    <testcase classname="X-Pack Jest Tests.x-pack/plugins/code/server/lsp" name="launcher can start and end a process" time="1.316"/>
+    <testcase classname="X-Pack Jest Tests.x-pack/plugins/code/server/lsp" name="launcher can force kill the process if langServer can not exit" time="3.182"/>
+    <testcase classname="X-Pack Jest Tests.x-pack/plugins/code/server/lsp" name="launcher can reconnect if process died" time="7.060">
+      <failure>
+        <![CDATA[TypeError: Cannot read property '0' of undefined
+    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)]]>
+      </failure>
+    </testcase>
+    <testcase classname="X-Pack Jest Tests.x-pack/plugins/code/server/lsp" name="passive launcher can start and end a process" time="0.435"/>
+    <testcase classname="X-Pack Jest Tests.x-pack/plugins/code/server/lsp" name="passive launcher should restart a process if a process died before connected" time="1.502"/>
+  </testsuite>
+</testsuites>

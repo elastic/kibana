@@ -57,3 +57,15 @@ export function canStartTrial() {
   return $.ajax(options);
 }
 
+export function getPermissions() {
+  const options = {
+    url: chrome.addBasePath('/api/license/permissions'),
+    contentType: 'application/json',
+    cache: false,
+    crossDomain: true,
+    type: 'POST',
+  };
+
+  return $.ajax(options);
+}
+

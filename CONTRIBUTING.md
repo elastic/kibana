@@ -344,10 +344,10 @@ To execute both server and browser tests, but skip linting, use `yarn test:quick
 yarn test:quick
 ```
 
-Use `yarn test:server` when you want to run only the server tests.
+Use `yarn test:mocha` when you want to run the mocha tests.
 
 ```bash
-yarn test:server
+yarn test:mocha
 ```
 
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
@@ -386,7 +386,7 @@ This should work super if you're using the [Kibana plugin generator](https://git
 To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-yarn test:server
+yarn test:mocha
 yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
 

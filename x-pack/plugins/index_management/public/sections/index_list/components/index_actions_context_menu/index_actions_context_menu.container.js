@@ -30,18 +30,24 @@ import {
 
 import {
   getIndexStatusByIndexName,
-  getIndicesByName
+  getIndicesByName,
+  getIsSystemIndexByName,
+  hasSystemIndex,
 } from '../../../../store/selectors';
 
 const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
   const { indexNames } = ownProps;
+
   indexNames.forEach((indexName) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
   });
+
   return {
     indexStatusByName,
-    indices: getIndicesByName(state, indexNames)
+    indices: getIndicesByName(state, indexNames),
+    isSystemIndexByName: getIsSystemIndexByName(indexNames),
+    hasSystemIndex: hasSystemIndex(indexNames),
   };
 };
 
