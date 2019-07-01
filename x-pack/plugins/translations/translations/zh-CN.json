@@ -126,7 +126,6 @@
     "common.ui.aggTypes.histogram.missingMaxMinValuesWarning": "无法检索最大值和最小值以自动缩放直方图存储桶。这可能会导致可视化性能低下。",
     "common.ui.aggTypes.jsonInputTooltip": "此处以 JSON 格式添加的任何属性将与此部分的 elasticsearch 聚合定义合并。例如，词聚合上的“shard_size”。",
     "common.ui.aggTypes.metricLabel": "指标",
-    "common.ui.aggTypes.metrics.aggNotValidErrorMessage": "- 聚合无效 -",
     "common.ui.aggTypes.metrics.averageBucketTitle": "平均存储桶",
     "common.ui.aggTypes.metrics.averageLabel": "{field}平均值",
     "common.ui.aggTypes.metrics.averageTitle": "平均值",

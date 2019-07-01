@@ -141,7 +141,6 @@
     "common.ui.aggTypes.jsonInputLabel": "JSON インプット",
     "common.ui.aggTypes.jsonInputTooltip": "ここに追加された JSON フォーマットのプロパティは、すべてこのセクションの Elasticsearch アグリゲーション定義に融合されます。用語集約における「shard_size」がその例です。",
     "common.ui.aggTypes.metricLabel": "メトリック",
-    "common.ui.aggTypes.metrics.aggNotValidErrorMessage": "- 無効な集約 -",
     "common.ui.aggTypes.metrics.averageBucketTitle": "平均バケット",
     "common.ui.aggTypes.metrics.averageLabel": "平均 {field}",
     "common.ui.aggTypes.metrics.averageTitle": "平均",
