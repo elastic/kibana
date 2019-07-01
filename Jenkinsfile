@@ -31,9 +31,16 @@ pipeline {
           script {
             dumpEnv()
           }
-          // sh '${CI_DIR}run_pipeline.sh'
-          // sh 'src/dev/temp_pipeline_setup/extract_bootstrap_cache.sh'
           sh "${TEMP_PIPELINE_SETUP_DIR}/extract_bootstrap_cache.sh"
+        }
+      }
+    }
+  stage('Install Binaries, Install Dependencies, Rebuild Renovate Config') {
+      agent { label 'linux || immutable' } 
+      options { skipDefaultCheckout() }
+      steps {
+        dir("${env.BASE_DIR}"){
+          sh "${TEMP_PIPELINE_SETUP_DIR}/setup.sh"
           sh 'echo "\n\t### [TODO] create and upload workspace cache to gcs"'
         }
       }
