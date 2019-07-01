@@ -15,15 +15,11 @@ pipeline {
     
     // PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
 
-
-
-
     // PR_SOURCE_BRANCH = "${ghprbSourceBranch}"
     // PR_TARGET_BRANCH = "${ghprbTargetBranch}"
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    // stage('Extract Boot Cache, Setup, and Checkout Sibling Elastic Search') {
     stage('Extract Boot Cache') {
       agent { label 'linux || immutable' } 
       steps {
@@ -35,9 +31,8 @@ pipeline {
         }
       }
     }
-  stage('Install Binaries, Install Dependencies, Rebuild Renovate Config') {
+  stage('Install Binaries, Install Dependencies, Build kbn-pm distributable, Rebuild Renovate Config') {
       agent { label 'linux || immutable' } 
-      options { skipDefaultCheckout() }
       steps {
         dir("${env.BASE_DIR}"){
           sh "${TEMP_PIPELINE_SETUP_DIR}/setup.sh"
@@ -46,16 +41,11 @@ pipeline {
       }
     }
     stage('kibana-intake') {
-      agent { label 'linux || immutable' } 
-      options { skipDefaultCheckout() }
-      steps {
-        deleteDir()
+      agent { label 'linux || immutable' } \        deleteDir()
         // sh './test/scripts/jenkins_unit.sh'
         sh 'echo "Download workspace cache"'
       }
     }
-
-
     stage('Component Integration Tests') {
       agent { label 'linux || immutable' } 
       options { skipDefaultCheckout() }
