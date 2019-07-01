@@ -373,7 +373,7 @@ export class VectorLayer extends AbstractLayer {
 
   async _performInnerJoins(sourceResult, joinStates, updateSourceData) {
 
-    //should update the store iff
+    //should update the store if
     //-- source result was refreshed
     //-- any of the join configurations changed (joinState changed)
     //-- visibility of any of the features has changed
@@ -387,22 +387,20 @@ export class VectorLayer extends AbstractLayer {
     for (let i = 0; i < sourceResult.featureCollection.features.length; i++) {
       const feature = sourceResult.featureCollection.features[i];
       const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
-
-
-      let canDoAllJoins = true;
+      let isFeatureVisible = true;
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
         const leftInnerJoin = joinState.join;
         const rightMetricFields = leftInnerJoin.getRightMetricFields();
         const canJoinOnCurrent = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
-        canDoAllJoins = canDoAllJoins  && canJoinOnCurrent;
+        isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 
-      if (oldVisbility !== canDoAllJoins) {
+      if (oldVisbility !== isFeatureVisible) {
         shouldUpdateStore = true;
       }
 
-      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = canDoAllJoins;
+      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = isFeatureVisible;
     }
 
     if (shouldUpdateStore) {
