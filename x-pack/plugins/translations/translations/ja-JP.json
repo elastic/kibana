@@ -5288,7 +5288,6 @@
     "xpack.maps.mapListing.titleFieldTitle": "タイトル",
     "xpack.maps.mapListing.unableToDeleteToastTitle": "マップを削除できません",
     "xpack.maps.mapSavedObjectLabel": "マップ",
-    "xpack.maps.metricsEditor.addMetricAriaLabel": "メトリックを追加",
     "xpack.maps.metricsEditor.addMetricButtonLabel": "メトリックを追加",
     "xpack.maps.metricsEditor.deleteMetricAriaLabel": "メトリックを削除",
     "xpack.maps.metricsEditor.deleteMetricButtonLabel": "メトリックを削除",
