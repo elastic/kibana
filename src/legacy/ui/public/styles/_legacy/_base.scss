@@ -61,6 +61,14 @@ input[type="checkbox"],
 
   > kbn-top-nav, kbn-top-nav2 {
     z-index: 5;
+
+    > div {
+      padding: $euiSizeS 0px;
+    }
+  }
+
+  .globalQueryBar {
+    padding: 0px $euiSizeS $euiSizeS $euiSizeS;
   }
 
   > nav,

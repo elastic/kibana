@@ -20,28 +20,23 @@
 import React, { Component } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-export type TopNavMenuAction = (menuItem: any, navController: any, anchorElement: any) => void;
-
-export interface TopNavMenuData {
-  key: string;
-  label: string;
-  run: TopNavMenuAction;
-  description?: string;
-  testId?: string;
-  className?: string;
-  disableButton?: boolean | (() => boolean);
-  tooltip?: string | (() => string);
-}
+import { TopNavMenuData, CloseHandler, TopNavMenuAction } from './top_nav_menu_data';
 
 interface Props {
   data: TopNavMenuData;
+  onClick: (key: string, action: TopNavMenuAction, target?: any) => void;
 }
 
 interface State {
   isDisabled: boolean;
+  closeHandler: CloseHandler;
 }
 
 export class TopNavMenuItem extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+  }
+
   private isDisabled(): boolean {
     const menuData = this.props.data;
     const val =
@@ -53,7 +48,7 @@ export class TopNavMenuItem extends Component<Props, State> {
 
   private handleClick() {
     const menuData = this.props.data;
-    menuData.run(null, null, arguments[0].currentTarget);
+    this.props.onClick(menuData.key, menuData.run, arguments[0].currentTarget);
   }
 
   public render() {

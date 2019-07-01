@@ -17,35 +17,38 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TopNavMenuData, TopNavMenuItem } from './top_nav_menu_item';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
+import { TopNavMenuItem } from './top_nav_menu_item';
 
 interface Props {
   config: TopNavMenuData[];
   name: string;
   searchBarOptions?: any;
+  activeItem: string;
 }
 
-interface State {
-  isVisible: boolean;
-}
-
-export class TopNavMenu extends Component<Props, State> {
-  public render() {
-    return (
-      <EuiFlexGroup data-test-subj="top-nav" justifyContent="flexStart" gutterSize="xs">
-        {this.renderItems()}
-      </EuiFlexGroup>
-    );
-  }
-
-  private renderItems() {
-    return this.props.config.map((menuItem, i) => (
+export function TopNavMenu(props: Props) {
+  function renderItems() {
+    return props.config.map((menuItem, i) => (
       <EuiFlexItem grow={false} key={i}>
-        <TopNavMenuItem data={menuItem} />
+        <TopNavMenuItem data={menuItem} onClick={menuItemClickHandler} />
       </EuiFlexItem>
     ));
   }
+
+  function menuItemClickHandler(key: string, action: TopNavMenuAction, target?: any) {
+    action(null, null, target);
+  }
+
+  return (
+    <div>
+      <EuiFlexGroup data-test-subj="top-nav" justifyContent="flexStart" gutterSize="xs">
+        {renderItems()}
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="none" />
+    </div>
+  );
 }
