@@ -124,20 +124,16 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
   };
 
   private toggleContextMenu = () => {
-    if (this.mounted) {
-      this.setState(
-        {
-          isPopoverOpen: !this.state.isPopoverOpen,
-        },
-        async () => {
-          if (this.mounted && this.state.isPopoverOpen) {
-            this.setState({ actionContextMenuPanel: undefined });
-            const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
-            this.setState({ actionContextMenuPanel });
-          }
-        }
-      );
-    }
+    if (!this.mounted) return;
+    const after = () => {
+      if (!this.state.isPopoverOpen) return;
+      this.setState({ actionContextMenuPanel: undefined });
+      this.props.getActionContextMenuPanel().then(actionContextMenuPanel => {
+        if (!this.mounted) return;
+        this.setState({ actionContextMenuPanel });
+      }).catch(error => console.error(error));
+    };
+    this.setState(({isPopoverOpen}) => ({isPopoverOpen: !isPopoverOpen}), after);
   };
 }
 

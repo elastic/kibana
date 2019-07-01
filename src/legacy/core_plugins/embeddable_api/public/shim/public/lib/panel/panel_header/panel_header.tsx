@@ -47,7 +47,7 @@ function PanelHeaderUi({
     'embPanel__header--floater': !title || hidePanelTitles,
   });
 
-  if (isViewMode && (!title || hidePanelTitles)) {
+if (isViewMode && (!title || hidePanelTitles)) {
     return (
       <div className={classes}>
         <PanelOptionsMenu
