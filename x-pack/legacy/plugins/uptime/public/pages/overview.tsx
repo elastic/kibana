@@ -17,6 +17,7 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface OverviewPageProps {
   basePath: string;
+  logOverviewPageLoad: () => void;
   history: any;
   location: {
     pathname: string;
@@ -27,9 +28,17 @@ interface OverviewPageProps {
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
+export type UptimeSearchBarQueryChangeHandler = (
+  queryChangedEvent: { query?: { text: string }; queryText?: string }
+) => void;
 
-export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
+export const OverviewPage = ({
+  basePath,
+  logOverviewPageLoad,
+  setBreadcrumbs,
+  history,
+  location,
+}: Props) => {
   const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
@@ -38,6 +47,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
+    logOverviewPageLoad();
     if (setHeadingText) {
       setHeadingText(
         i18n.translate('xpack.uptime.overviewPage.headerText', {
@@ -49,23 +59,25 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   }, []);
 
   const filterQueryString = search || '';
+  let error: any;
+  let filters: any | undefined;
+  try {
+    // toESQuery will throw errors
+    if (filterQueryString) {
+      filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
+    }
+  } catch (e) {
+    error = e;
+  }
   const sharedProps = {
     dateRangeStart,
     dateRangeEnd,
-    filters: search ? JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString)) : undefined,
+    filters,
   };
 
-  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
-    try {
-      if (query && typeof query.text !== 'undefined') {
-        updateUrl({ search: query.text });
-      }
-      if (refreshApp) {
-        refreshApp();
-      }
-    } catch (e) {
-      updateUrl({ search: '' });
-    }
+  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
+    updateUrl({ search: queryText || '' });
+    refreshApp();
   };
 
   const linkParameters = stringifyUrlParams(params);
@@ -75,6 +87,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
         <FilterBar
           currentQuery={filterQueryString}
+          error={error}
           updateQuery={updateQuery}
           variables={sharedProps}
         />

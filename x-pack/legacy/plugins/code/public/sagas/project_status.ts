@@ -95,8 +95,13 @@ function* handleRepoStatus(action: Action<any>) {
 }
 
 function* handleRepoListStatus(action: Action<Repository[]>) {
-  const repos: Repository[] = action.payload!;
-  yield call(loadRepoListStatus, repos);
+  const route = yield select(routeSelector);
+  if (route.path === ROUTES.ADMIN) {
+    // Only load repository list status in admin page, because in source view
+    // page, we also need to load all repositories but not their status.
+    const repos: Repository[] = action.payload!;
+    yield call(loadRepoListStatus, repos);
+  }
 }
 
 function isInProgress(progress: number): boolean {

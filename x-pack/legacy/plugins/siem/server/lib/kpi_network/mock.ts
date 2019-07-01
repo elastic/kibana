@@ -60,10 +60,24 @@ export const mockResponse = {
         max_score: null,
         hits: [],
       },
-      aggregations: {
-        unique_flow_id: {
-          value: 195415,
+      status: 200,
+    },
+    {
+      took: 64,
+      timed_out: false,
+      _shards: {
+        total: 10,
+        successful: 10,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 10942,
+          relation: 'eq',
         },
+        max_score: null,
+        hits: [],
       },
       status: 200,
     },
@@ -85,43 +99,79 @@ export const mockResponse = {
         hits: [],
       },
       aggregations: {
-        histogram: {
-          buckets: [
-            {
-              key_as_string: '2019-05-09T23:00:00.000Z',
-              key: 1557442800000,
-              doc_count: 42109,
-              count: {
-                value: 14,
+        source: {
+          histogram: {
+            buckets: [
+              {
+                key_as_string: '2019-05-09T23:00:00.000Z',
+                key: 1557442800000,
+                doc_count: 42109,
+                count: {
+                  value: 14,
+                },
               },
-            },
-            {
-              key_as_string: '2019-05-10T11:00:00.000Z',
-              key: 1557486000000,
-              doc_count: 437160,
-              count: {
-                value: 385,
+              {
+                key_as_string: '2019-05-10T11:00:00.000Z',
+                key: 1557486000000,
+                doc_count: 437160,
+                count: {
+                  value: 385,
+                },
               },
-            },
-            {
-              key_as_string: '2019-05-10T23:00:00.000Z',
-              key: 1557529200000,
-              doc_count: 1486,
-              count: {
-                value: 7,
+              {
+                key_as_string: '2019-05-10T23:00:00.000Z',
+                key: 1557529200000,
+                doc_count: 1486,
+                count: {
+                  value: 7,
+                },
               },
-            },
-          ],
-          interval: '12h',
+            ],
+            interval: '12h',
+          },
+          unique_private_ips: {
+            value: 387,
+          },
         },
-        unique_private_ips: {
-          value: 387,
+        destination: {
+          histogram: {
+            buckets: [
+              {
+                key_as_string: '2019-05-09T23:00:00.000Z',
+                key: 1557442800000,
+                doc_count: 36253,
+                count: {
+                  value: 11,
+                },
+              },
+              {
+                key_as_string: '2019-05-10T11:00:00.000Z',
+                key: 1557486000000,
+                doc_count: 421719,
+                count: {
+                  value: 877,
+                },
+              },
+              {
+                key_as_string: '2019-05-10T23:00:00.000Z',
+                key: 1557529200000,
+                doc_count: 1311,
+                count: {
+                  value: 7,
+                },
+              },
+            ],
+            interval: '12h',
+          },
+          unique_private_ips: {
+            value: 878,
+          },
         },
       },
       status: 200,
     },
     {
-      took: 184,
+      took: 384,
       timed_out: false,
       _shards: {
         total: 10,
@@ -131,64 +181,16 @@ export const mockResponse = {
       },
       hits: {
         total: {
-          value: 459283,
+          value: 733106,
           relation: 'eq',
         },
         max_score: null,
         hits: [],
       },
       aggregations: {
-        histogram: {
-          buckets: [
-            {
-              key_as_string: '2019-05-09T23:00:00.000Z',
-              key: 1557442800000,
-              doc_count: 36253,
-              count: {
-                value: 11,
-              },
-            },
-            {
-              key_as_string: '2019-05-10T11:00:00.000Z',
-              key: 1557486000000,
-              doc_count: 421719,
-              count: {
-                value: 877,
-              },
-            },
-            {
-              key_as_string: '2019-05-10T23:00:00.000Z',
-              key: 1557529200000,
-              doc_count: 1311,
-              count: {
-                value: 7,
-              },
-            },
-          ],
-          interval: '12h',
+        unique_flow_id: {
+          value: 195415,
         },
-        unique_private_ips: {
-          value: 878,
-        },
-      },
-      status: 200,
-    },
-    {
-      took: 64,
-      timed_out: false,
-      _shards: {
-        total: 10,
-        successful: 10,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 10942,
-          relation: 'eq',
-        },
-        max_score: null,
-        hits: [],
       },
       status: 200,
     },

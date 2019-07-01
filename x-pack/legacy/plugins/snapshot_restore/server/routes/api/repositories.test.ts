@@ -137,7 +137,12 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         [name]: { type: '', settings: {} },
       };
       const mockEsSnapshotResponse = {
-        snapshots: [{}, {}],
+        responses: [
+          {
+            repository: name,
+            snapshots: [{}, {}],
+          },
+        ],
       };
       const callWithRequest = jest
         .fn()
