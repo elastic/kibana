@@ -48,8 +48,8 @@ export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
   'repository-gcs': REPOSITORY_TYPES.gcs,
 };
 
-export const APP_REQUIRED_CLUSTER_PRIVILAGES = [
+export const APP_REQUIRED_CLUSTER_PRIVILEGES = [
   'cluster:admin/snapshot',
   'cluster:admin/repository',
 ];
-export const APP_RESTORE_INDEX_PRIVILAGES = ['monitor'];
+export const APP_RESTORE_INDEX_PRIVILEGES = ['monitor'];

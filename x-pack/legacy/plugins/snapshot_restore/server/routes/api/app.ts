@@ -6,8 +6,8 @@
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
 import {
-  APP_REQUIRED_CLUSTER_PRIVILAGES,
-  APP_RESTORE_INDEX_PRIVILAGES,
+  APP_REQUIRED_CLUSTER_PRIVILEGES,
+  APP_RESTORE_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { AppPermissions } from '../../../common/types';
 import { Plugins } from '../../../shim';
@@ -63,7 +63,7 @@ export const getPermissionsHandler: RouterRouteHandler = async (
     path: '/_security/user/_has_privileges',
     method: 'POST',
     body: {
-      cluster: APP_REQUIRED_CLUSTER_PRIVILAGES,
+      cluster: APP_REQUIRED_CLUSTER_PRIVILEGES,
     },
   });
 
@@ -77,17 +77,17 @@ export const getPermissionsHandler: RouterRouteHandler = async (
     method: 'GET',
   });
 
-  // Check if they have at the required index privilages for at least one index
+  // Check if they have all the required index privileges for at least one index
   const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {
     return (
       privileges.includes('all') ||
-      APP_RESTORE_INDEX_PRIVILAGES.filter(privilage => !privileges.includes(privilage)).length === 0
+      APP_RESTORE_INDEX_PRIVILEGES.filter(privilage => !privileges.includes(privilage)).length === 0
     );
   });
 
-  // If they don't, return list of required index privilages
+  // If they don't, return list of required index privileges
   if (!oneIndexWithAllPrivileges) {
-    permissionsResult.missingIndexPrivileges = [...APP_RESTORE_INDEX_PRIVILAGES];
+    permissionsResult.missingIndexPrivileges = [...APP_RESTORE_INDEX_PRIVILEGES];
   }
 
   return permissionsResult;
