@@ -68,7 +68,7 @@ export abstract class Action<
   }
 
   /**
-   * If this returns something other than undefined, this is used instead of execute when clicked.
+   * If this returns something truthy, this is used instead of `execute` when clicked.
    */
   public getHref(context: ActionContext<TEmbeddable, TTriggerContext>): string | undefined {
     return undefined;

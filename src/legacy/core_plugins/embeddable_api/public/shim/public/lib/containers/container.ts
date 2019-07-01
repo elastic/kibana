@@ -43,18 +43,15 @@ export abstract class Container<
   protected readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
-  public readonly embeddableFactories: Map<string, EmbeddableFactory>;
 
   private subscription: Subscription;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    embeddableFactories: Map<string, EmbeddableFactory>,
     parent?: Container
   ) {
     super(input, output, parent);
-    this.embeddableFactories = embeddableFactories;
     this.subscription = this.getInput$().subscribe(() => this.maybeUpdateChildren());
   }
 

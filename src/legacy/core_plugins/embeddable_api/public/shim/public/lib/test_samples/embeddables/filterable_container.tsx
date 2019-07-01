@@ -39,7 +39,6 @@ export class FilterableContainer extends Container<
 
   constructor(
     initialInput: FilterableContainerInput,
-    embeddableFactories: Map<string, EmbeddableFactory>,
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, embeddableFactories, parent);

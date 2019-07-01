@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Container, embeddableFactories, EmbeddableFactory } from '../..';
+import { Container, EmbeddableFactory } from '../..';
 import {
   FilterableContainer,
   FilterableContainerInput,
@@ -39,8 +39,6 @@ export class FilterableContainerFactory extends EmbeddableFactory<FilterableCont
   }
 
   public async create(initialInput: FilterableContainerInput, parent?: Container) {
-    return new FilterableContainer(initialInput, embeddableFactories, parent);
+    return new FilterableContainer(initialInput, parent);
   }
 }
-
-embeddableFactories.set(FILTERABLE_CONTAINER, new FilterableContainerFactory());

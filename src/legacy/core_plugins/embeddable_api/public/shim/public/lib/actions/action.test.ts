@@ -17,17 +17,12 @@
  * under the License.
  */
 
-import '../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
-
 import { HelloWorldAction, SayHelloAction, EmptyEmbeddable } from '../test_samples/index';
 
 test('SayHelloAction is not compatible with not matching embeddables', async () => {
   const sayHelloAction = new SayHelloAction(() => {});
   const emptyEmbeddable = new EmptyEmbeddable({ id: '234' });
 
-  // @ts-ignore Typescript is nice and tells us ahead of time this is invalid, but
-  // I want to make sure it also returns false.
   const isCompatible = await sayHelloAction.isCompatible({ embeddable: emptyEmbeddable });
   expect(isCompatible).toBe(false);
 });
