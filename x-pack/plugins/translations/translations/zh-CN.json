@@ -7494,8 +7494,6 @@
     "xpack.uptime.monitorCharts.checkStatus.series.upCountLabel": "运行计数",
     "xpack.uptime.monitorCharts.checkStatus.title": "检查状态",
     "xpack.uptime.monitorCharts.loadingMessage": "正在加载……",
-    "xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel": "持续时间范围",
-    "xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel": "平均持续时间",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "监测持续时间 (ms)",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "关闭",
     "xpack.uptime.monitorList.monitorHistoryColumnLabel": "监测历史记录",

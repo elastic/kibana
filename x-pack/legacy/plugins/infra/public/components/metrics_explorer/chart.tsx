@@ -101,7 +101,7 @@ export const MetricsExplorerChart = injectUICapabilities(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          <div style={{ height, width }}>
+          <div className="infMetricsExplorerChart" style={{ height, width }}>
             {series.rows.length > 0 ? (
               <Chart>
                 {metrics.map((metric, id) => (
