@@ -68,7 +68,7 @@ describe('defaultValidationErrorHandler', () => {
 test('returns 408 on timeout error', async () => {
   const router = new Router('');
   router.get({ path: '/', validate: false }, async (req, res) => {
-    await new Promise(res => setTimeout(res, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return res.ok({});
   });
 
@@ -83,6 +83,8 @@ test('returns 408 on timeout error', async () => {
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener).get('/').expect(408)
-  await server.stop()
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(408)
+  await server.stop();
 });
