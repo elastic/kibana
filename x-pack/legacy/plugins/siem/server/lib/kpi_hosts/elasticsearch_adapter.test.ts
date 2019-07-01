@@ -108,32 +108,20 @@ describe('getKpiHosts', () => {
         mockKpiHostsMsearchOptions
       );
     });
-  });
 
-  describe('Happy Path - get Data', () => {
-    beforeAll(async () => {
-      mockCallWithRequest.mockResolvedValue(mockKpiHostsResponse);
-      jest.doMock('../framework', () => ({
-        callWithRequest: mockCallWithRequest,
-      }));
-      EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-      data = await EsKpiHosts.getKpiHosts(
-        mockKpiHostsRequest as FrameworkRequest,
-        mockKpiHostsOptions
-      );
-    });
-
-    afterAll(() => {
-      mockCallWithRequest.mockReset();
-    });
-
-    test('getKpiHosts - response with data', () => {
+    test('Happy Path - get Data', () => {
       expect(data).toEqual(mockKpiHostsResult);
     });
   });
 
   describe('Unhappy Path - No data', () => {
     beforeAll(async () => {
+      (buildUniqueIpsQuery as jest.Mock).mockReset();
+      (buildUniqueIpsQuery as jest.Mock).mockReturnValue(mockKpiHostsUniqueIpsQuery);
+      (buildAuthQuery as jest.Mock).mockReset();
+      (buildAuthQuery as jest.Mock).mockReturnValue(mockKpiHostsAuthQuery);
+      (buildHostsQuery as jest.Mock).mockReset();
+      (buildHostsQuery as jest.Mock).mockReturnValue(mockHostsQuery);
       mockCallWithRequest.mockResolvedValue(mockKpiHostsResponseNodata);
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -147,6 +135,9 @@ describe('getKpiHosts', () => {
 
     afterAll(() => {
       mockCallWithRequest.mockReset();
+      (buildUniqueIpsQuery as jest.Mock).mockClear();
+      (buildAuthQuery as jest.Mock).mockClear();
+      (buildHostsQuery as jest.Mock).mockClear();
     });
 
     test('getKpiHosts - response without data', async () => {
@@ -189,9 +180,14 @@ describe('getKpiHostDetails', () => {
 
   describe('getKpiHostDetails - call stack', () => {
     beforeAll(async () => {
+      (buildUniqueIpsQuery as jest.Mock).mockReset();
       (buildUniqueIpsQuery as jest.Mock).mockReturnValue(mockKpiHostDetailsUniqueIpsQuery);
+      (buildAuthQuery as jest.Mock).mockReset();
       (buildAuthQuery as jest.Mock).mockReturnValue(mockKpiHostDetailsAuthQuery);
+      (buildHostsQuery as jest.Mock).mockReset();
+      mockCallWithRequest.mockReset();
       mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponse);
+
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
@@ -217,12 +213,11 @@ describe('getKpiHostDetails', () => {
       expect(buildAuthQuery).toHaveBeenCalledWith(mockKpiHostDetailsOptions);
     });
 
-    // test('should not build hosts query', () => {
-    //   expect(buildHostsQuery).not.toHaveBeenCalled();
-    // });
+    test('should not build hosts query', () => {
+      expect(buildHostsQuery).not.toHaveBeenCalled();
+    });
 
     test('should send msearch request', () => {
-      expect(mockCallWithRequest).toHaveBeenCalled();
       expect(mockCallWithRequest).toHaveBeenCalledWith(
         mockKpiHostDetailsRequest,
         'msearch',

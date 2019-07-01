@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { FrameworkAdapter , FrameworkRequest } from '../framework';
-
-// import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
 import {
   mockMsearchOptions,
   mockOptions,
@@ -114,28 +111,8 @@ describe('Network Kpi elasticsearch_adapter', () => {
     test('should send msearch request', () => {
       expect(mockCallWithRequest).toHaveBeenCalledWith(mockRequest, 'msearch', mockMsearchOptions);
     });
-  });
 
-  describe('Happy Path - get Data', () => {
-    beforeAll(async () => {
-      mockCallWithRequest.mockResolvedValue(mockResponse);
-      jest.doMock('../framework', () => ({
-        callWithRequest: mockCallWithRequest,
-      }));
-      EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
-      data = await EsKpiNetwork.getKpiNetwork(mockRequest as FrameworkRequest, mockOptions);
-    });
-
-    afterAll(() => {
-      mockCallWithRequest.mockReset();
-      (buildNetworkEventsQuery as jest.Mock).mockClear();
-      (buildUniqueFlowIdsQuery as jest.Mock).mockClear();
-      (buildDnsQuery as jest.Mock).mockClear();
-      (buildUniquePrvateIpQuery as jest.Mock).mockClear();
-      (buildTlsHandshakeQuery as jest.Mock).mockClear();
-    });
-
-    test('getKpiNetwork - response with data', () => {
+    test('Happy Path - get Data', () => {
       expect(data).toEqual(mockResult);
     });
   });
@@ -143,6 +120,11 @@ describe('Network Kpi elasticsearch_adapter', () => {
   describe('Unhappy Path - No data', () => {
     beforeAll(async () => {
       mockCallWithRequest.mockResolvedValue(mockResponseNoData);
+      (buildNetworkEventsQuery as jest.Mock).mockClear();
+      (buildUniqueFlowIdsQuery as jest.Mock).mockClear();
+      (buildDnsQuery as jest.Mock).mockClear();
+      (buildUniquePrvateIpQuery as jest.Mock).mockClear();
+      (buildTlsHandshakeQuery as jest.Mock).mockClear();
 
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
