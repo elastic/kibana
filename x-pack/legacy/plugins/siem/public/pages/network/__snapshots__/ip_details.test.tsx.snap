@@ -43,5 +43,6 @@ exports[`Ip Details it matches the snapshot 1`] = `
       "url": "",
     }
   }
+  setAbsoluteRangeDatePicker={[MockFunction]}
 />
 `;

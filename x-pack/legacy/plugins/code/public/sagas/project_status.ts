@@ -42,8 +42,8 @@ import {
   pollRepoDeleteStatusStop,
   pollRepoIndexStatusStop,
   importRepoSuccess,
+  RepoState,
 } from '../actions';
-import { RepoState } from '../reducers';
 import {
   cloneCompletedPattern,
   cloneRepoStatusPollingStopPattern,
@@ -200,7 +200,7 @@ const handleRepoCloneStatusProcess = function*(status: any, repoUri: RepositoryU
       updateCloneProgress({
         progress,
         timestamp: moment(timestamp).toDate(),
-        repoUri,
+        uri: repoUri,
         errorMessage,
         cloneProgress,
       })
@@ -227,7 +227,7 @@ const parseIndexStatusPollingRequest = (action: Action<any>) => {
   if (action.type === String(indexRepo) || action.type === String(pollRepoIndexStatusStart)) {
     return action.payload;
   } else if (action.type === String(updateCloneProgress)) {
-    return action.payload.repoUri;
+    return action.payload.uri;
   }
 };
 
@@ -247,7 +247,7 @@ const handleRepoIndexStatusProcess = function*(status: any, repoUri: RepositoryU
       updateIndexProgress({
         progress: status.indexStatus.progress,
         timestamp: moment(status.indexStatus.timestamp).toDate(),
-        repoUri,
+        uri: repoUri,
       })
     );
     // Keep polling if the progress is not 100% yet.
@@ -280,7 +280,7 @@ const handleRepoDeleteStatusProcess = function*(status: any, repoUri: Repository
     yield put(
       updateDeleteProgress({
         progress: WorkerReservedProgress.COMPLETED,
-        repoUri,
+        uri: repoUri,
       })
     );
     return false;
@@ -291,7 +291,7 @@ const handleRepoDeleteStatusProcess = function*(status: any, repoUri: Repository
       updateDeleteProgress({
         progress: status.deleteStatus.progress,
         timestamp: moment(status.deleteStatus.timestamp).toDate(),
-        repoUri,
+        uri: repoUri,
       })
     );
     return isInProgress(status.deleteStatus.progress);
