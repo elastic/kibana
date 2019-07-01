@@ -41,7 +41,9 @@ describe('joinPropertiesToFeature', () => {
     const propertiesMap = new Map();
     propertiesMap.set('CN', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap);
+    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [{
+      propertyKey: COUNT_PROPERTY_NAME
+    }]);
     expect(feature.properties).toEqual({
       iso2: 'CN',
       [COUNT_PROPERTY_NAME]: 61,
@@ -58,7 +60,9 @@ describe('joinPropertiesToFeature', () => {
     };
     const propertiesMap = new Map();
 
-    leftJoin.joinPropertiesToFeatureCollection(feature, propertiesMap);
+    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [{
+      propertyKey: COUNT_PROPERTY_NAME
+    }]);
     expect(feature.properties).toEqual({
       iso2: 'CN',
     });
