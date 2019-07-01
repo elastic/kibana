@@ -18,7 +18,7 @@ import { getSelectedPage } from '../../state/selectors/workpad';
 import { trackCanvasUiMetric } from '../../lib/ui_metric';
 import { ElementTypes as Component } from './element_types';
 
-const customElementAdded = 'custom-element-added';
+const customElementAdded = 'elements-custom-added';
 
 const mapStateToProps = state => ({ pageId: getSelectedPage(state) });
 
