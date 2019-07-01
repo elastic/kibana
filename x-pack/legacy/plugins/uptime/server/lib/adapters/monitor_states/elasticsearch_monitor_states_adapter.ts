@@ -114,9 +114,11 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                     Map monitor = new HashMap();
                     monitor.status = doc["monitor.status"][0];
                     monitor.ip = ip;
-                    def monitorName = doc["monitor.name"][0];
-                    if (monitorName != "") {
-                      monitor.name = monitorName;
+                    if (!doc["monitor.name"].isEmpty()) {
+                      String monitorName = doc["monitor.name"][0];
+                      if (monitor.name != "") {
+                        monitor.name = monitorName;
+                      }
                     }
                     curCheck.monitor = monitor;
                     
@@ -155,6 +157,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   Collection geoNames = new HashSet();
                   Collection podUids = new HashSet();
                   Collection containerIds = new HashSet();
+                  String name = null; 
                   for (state in states) {
                     result.putAll(state.globals);
                     for (entry in state.checksByAgentIdIP.entrySet()) {
@@ -168,6 +171,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                       if (lastBestCheck == null || lastBestCheck.get("@timestamp") < checkTs) {
                         check["@timestamp"] = check["@timestamp"];
                         checks[agentIdIP] = check
+                      }
+
+                      if (check.monitor.name != null && check.monitor.name != "") {
+                        name = check.monitor.name;
                       }
 
                       ips.add(check.monitor.ip);
@@ -195,6 +202,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   
                   Map monitor = new HashMap();
                   monitor.ip = ips;
+                  monitor.name = name;
                   monitor.status = summary.down > 0 ? (summary.up > 0 ? "mixed": "down") : "up";
                   result.monitor = monitor;
                   
@@ -224,6 +232,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         },
       },
     };
+
     if (searchAfter) {
       set(params, 'body.aggs.monitors.composite.after', searchAfter);
     }

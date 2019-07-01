@@ -52,6 +52,7 @@ export const monitorStatesSchema = gql`
 
   type CheckMonitor {
     ip: String
+    name: String
     status: String!
   }
 

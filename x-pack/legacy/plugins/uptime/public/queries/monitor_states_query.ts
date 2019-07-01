@@ -44,6 +44,7 @@ export const monitorStatesQuery = gql`
             }
             monitor {
               ip
+              name
               status
             }
             observer {
