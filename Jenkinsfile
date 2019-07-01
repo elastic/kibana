@@ -10,7 +10,12 @@ pipeline {
 
     HOME = "${JENKINS_HOME}"  // /var/lib/jenkins
     MAIN_CACHE_DIR = "${HOME}/.kibana" // /var/lib/jenkins/.kibana
+
+    WORKSPACE_CACHE_DIR = "${MAIN_CACHE_DIR}/workspace_cache" // /var/lib/jenkins/.kibana/workspace_cache
+    WORKSPACE_CACHE_NAME = "${WORKSPACE_CACHE_DIR}/BUILD_ID-${BUILD_ID}.tgz" // /var/lib/jenkins/.kibana/workspace_cache/BUILD_ID-SOMEBUILDNUMBER.tgz
+
     BOOTSTRAP_CACHE_DIR = "${MAIN_CACHE_DIR}/bootstrap_cache" // /var/lib/jenkins/.kibana/bootstrap_cache
+
     TEMP_PIPELINE_SETUP_DIR = "src/dev/temp_pipeline_setup"
 
     // PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
@@ -36,8 +41,15 @@ pipeline {
       steps {
         dir("${env.BASE_DIR}"){
           sh "${TEMP_PIPELINE_SETUP_DIR}/setup.sh"
+          script {
+            dumpWorkspaceSize() // dump size to screen BEFORE checking out es
+          }
           sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
-          sh "du -hcs ${WORKSPACE}" // Get workspace dir size
+          script {
+            dumpWorkspaceSize() // dump size to screen AFTER checking out es
+            tarWorkspace()
+          }
+          sh "tar -czf ${WORKSPACE_CACHE_NAME}"
           sh 'echo "\n\t### [TODO] create and upload workspace cache to  gcs"'
         }
       }
@@ -72,6 +84,16 @@ pipeline {
         sh 'echo "Not implemented yet"'
       }
     }
+  }
+}
+def tarWorkspace(){
+  script {
+    sh "tar -czf ${WORKSPACE_CACHE_NAME}"
+  }
+}
+def dumpWorkspaceSize(){
+  script {
+    sh "du -hcs ${WORKSPACE}"
   }
 }
 def dumpEnv(){
