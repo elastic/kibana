@@ -1,6 +1,7 @@
 {
   "allPings": {
     "total": 3371,
+    "locations": ["N/A"],
     "pings": [
       {
         "timestamp": "2019-01-28T17:47:06.077Z",

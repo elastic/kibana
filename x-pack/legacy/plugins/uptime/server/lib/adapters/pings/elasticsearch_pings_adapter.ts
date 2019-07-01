@@ -75,8 +75,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const {
       hits: { hits, total },
-      aggregations: { locations },
+      aggregations: aggs,
     } = await this.database.search(request, params);
+
+    const locations = get(aggs, 'locations', { buckets: [{ key: 'N/A', doc_count: 0 }] });
 
     const pings: Ping[] = hits.map(({ _source }: any) => {
       const timestamp = _source['@timestamp'];
