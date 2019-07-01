@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getFilteredQueryAndStatusFilter handles \`match_phrase\` queries 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "match_phrase": Object {
+            "monitor.name": "icmp test",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": undefined,
+}
+`;
+
 exports[`getFilteredQueryAndStatusFilter handles nested query strings 1`] = `
 Object {
   "query": Object {
