@@ -19,6 +19,7 @@ import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
@@ -112,6 +113,10 @@ export function TransactionOverview({
           />
         </EuiFormRow>
       ) : null}
+
+      <TransactionBreakdown />
+
+      <EuiSpacer size="s" />
 
       <TransactionCharts
         hasMLJob={hasMLJob}

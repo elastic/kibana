@@ -5,11 +5,9 @@
  */
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { MSearchHeader, SearchHit } from '../types';
-import { KpiHostHistogramData } from '../../graphql/types';
+import { KpiHostHistogramData, KpiHostsData } from '../../graphql/types';
 
-export interface KpiHostsMappedData {
-  hosts?: number | null;
-  hostsHistogram?: KpiHostHistogramData[] | null;
+export interface KpiHostDetailsData {
   authSuccess?: number | null;
   authSuccessHistogram?: KpiHostHistogramData[] | null;
   authFailure?: number | null;
@@ -21,7 +19,11 @@ export interface KpiHostsMappedData {
 }
 
 export interface KpiHostsAdapter {
-  getKpiHosts(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiHostsMappedData>;
+  getKpiHosts(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiHostsData>;
+  getKpiHostDetails(
+    request: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<KpiHostDetailsData>;
 }
 
 export interface KpiHostHistogram<T> {
@@ -39,7 +41,7 @@ export interface KpiHostAuthHistogramCount {
   doc_count: number;
 }
 
-export interface KpiHostsGeneralHit extends SearchHit {
+export interface KpiHostsHostsHit extends SearchHit {
   aggregations: {
     hosts: {
       value: number;
@@ -47,6 +49,23 @@ export interface KpiHostsGeneralHit extends SearchHit {
     hosts_histogram: {
       buckets: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>;
     };
+  };
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  hits: {
+    max_score: number | null;
+    hits: [];
+  };
+  took: number;
+  timeout: number;
+}
+
+export interface KpiHostsUniqueIpsHit extends SearchHit {
+  aggregations: {
     unique_source_ips: {
       value: number;
     };
