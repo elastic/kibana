@@ -40,7 +40,7 @@ export type ExecutorType = (options: ActionTypeExecutorOptions) => Promise<any>;
 export interface ActionType {
   id: string;
   name: string;
-  unencryptedAttributes?: string[];
+  unencryptedAttributes: string[];
   validate?: {
     params?: any;
     config?: any;
