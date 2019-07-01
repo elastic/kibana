@@ -2,8 +2,6 @@
 
 set -e
 
-BRANCH=${GIT_BRANCH/origin\/} # Maybe using `sed` is a better idea
-targetBranch="${PR_TARGET_BRANCH:-${BRANCH#*/}}"
 # TODO: Un-hardcode the bootstrapCache variable below.
 bootstrapCache="${BOOTSTRAP_CACHE_DIR}/master.tar"
 # targetBranch="${PR_TARGET_BRANCH:-${GIT_BRANCH#*/}}"
