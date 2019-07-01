@@ -5,7 +5,8 @@ pipeline {
   environment {
     BASE_DIR = "."
     CI = true
-    HOME = "${JENKINS_HOME}"
+    HOME = "${JENKINS_HOME}"  // /var/lib/jenkins
+    CACHE_DIR = "${HOME}/.kibana/bootstrap_cache/"  
     // PR_SOURCE_BRANCH = "${ghprbSourceBranch}"
     // PR_TARGET_BRANCH = "${ghprbTargetBranch}"
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
