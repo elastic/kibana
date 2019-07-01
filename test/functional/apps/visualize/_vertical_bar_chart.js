@@ -235,8 +235,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectYAxisMode('percentage');
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
-        const expectedLabels = ['0%', '20%', '40%', '60%', '80%', '100%'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels[0]).to.eql('0%');
+        expect(labels[labels.length - 1]).to.eql('100%');
       });
     });
 

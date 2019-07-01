@@ -106,11 +106,14 @@ export default function ({ getService, getPageObjects }) {
       await toCell.clearValue();
       await toCell.type('10000', { charByChar: true });
       await find.clickByCssSelector('#percentageMode');
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
 
-      const expectedTexts = [ '58.088%', 'win 7: Average bytes', '0%', 'win 7: Min bytes' ];
-      const metricValue = await PageObjects.visualize.getGaugeValue();
-      expect(expectedTexts).to.eql(metricValue);
+      await retry.try(async function tryingForTime() {
+        const expectedTexts = [ '58.088%', 'win 7: Average bytes', '0%', 'win 7: Min bytes' ];
+        const metricValue = await PageObjects.visualize.getGaugeValue();
+        expect(expectedTexts).to.eql(metricValue);
+      });
     });
   });
 }
