@@ -21,10 +21,11 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
   return {
     get() {
       const features = xpackMainPlugin.getFeatures();
+      const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
 
       const allActions = uniq(
         flatten(
-          features.map(feature =>
+          basePrivilegeFeatures.map(feature =>
             Object.values(feature.privileges).reduce<string[]>((acc, privilege) => {
               return [...acc, ...featurePrivilegeBuilder.getActions(privilege, feature)];
             }, [])
@@ -34,7 +35,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
 
       const readActions = uniq(
         flatten(
-          features.map(feature =>
+          basePrivilegeFeatures.map(feature =>
             Object.entries(feature.privileges).reduce<string[]>((acc, [privilegeId, privilege]) => {
               if (privilegeId !== 'read') {
                 return acc;

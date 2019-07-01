@@ -132,6 +132,8 @@ export interface Feature<TPrivileges extends Partial<PrivilegesSet> = Privileges
    */
   id: string;
 
+  excludeFromBasePrivileges?: boolean;
+
   /**
    * Display name for this feature.
    * This will be displayed to end-users, so a translatable string is advised for i18n.
@@ -248,6 +250,7 @@ const schema = Joi.object({
     .regex(featurePrivilegePartRegex)
     .invalid(...prohibitedFeatureIds)
     .required(),
+  excludeFromBasePrivileges: Joi.boolean(),
   name: Joi.string().required(),
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
   icon: Joi.string(),
