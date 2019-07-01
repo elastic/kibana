@@ -19,11 +19,40 @@
 
 import { i18n } from '@kbn/i18n';
 
+export class IncompatibleActionError extends Error {
+  code = 'INCOMPATIBLE_ACTION';
+
+  constructor() {
+    super(
+      i18n.translate('embeddableApi.errors.incompatibleAction', {
+        defaultMessage: 'Action is incompatible',
+      })
+    );
+  }
+}
+
 export class PanelNotFoundError extends Error {
+  code = 'PANEL_NOT_FOUND';
+
   constructor() {
     super(
       i18n.translate('embeddableApi.errors.paneldoesNotExist', {
         defaultMessage: 'Panel not found',
+      })
+    );
+  }
+}
+
+export class EmbeddableFactoryNotFoundError extends Error {
+  code = 'EMBEDDABLE_FACTORY_NOT_FOUND';
+
+  constructor(type: string) {
+    super(
+      i18n.translate('embeddableApi.errors.embeddableFactoryNotFound', {
+        defaultMessage: `{type} can't be loaded. Please upgrade to the default distribution of Elasticsearch and Kibana with the appropriate license.`,
+        values: {
+          type,
+        },
       })
     );
   }
