@@ -3,22 +3,27 @@
 pipeline {
   agent none 
   environment {
-    BASE_DIR = "."
+    // Global vars
     CI = true
+    BASE_DIR = "."
+    CI_DIR = "./.ci/"
+
     HOME = "${JENKINS_HOME}"  // /var/lib/jenkins
-    CACHE_DIR = "${HOME}/.kibana/bootstrap_cache/"  
+    MAIN_CACHE_DIR = "${HOME}/.kibana" // /var/lib/jenkins/.kibana 
+    BOOTSTRAP_CACHE_DIR = "${MAIN_CACHE_DIR}/bootstrap_cache" // /var/lib/jenkins/.kibana/bootstrap_cache 
+    
+    // PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
+
+
+
+
     // PR_SOURCE_BRANCH = "${ghprbSourceBranch}"
     // PR_TARGET_BRANCH = "${ghprbTargetBranch}"
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
   }
   stages {
-    stage('bootstrap') {
+    stage('Extract Boot Cache, Setup, and Checkout Sibling Elastic Search') {
       agent { label 'linux || immutable' } 
-      environment {
-        // PIPELINE_DIR = "./.ci/pipeline-setup/"
-        CI_DIR = "./.ci/"
-        PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
-      }
       steps {
         dir("${env.BASE_DIR}"){
           script {
@@ -38,15 +43,6 @@ pipeline {
         sh 'echo "Download workspace cache"'
       }
     }
-
-
-
-
-
-
-
-
-
 
 
     stage('Component Integration Tests') {
