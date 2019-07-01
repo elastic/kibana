@@ -62,7 +62,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   const indexSettingsDocLink = (
     <EuiLink href={documentationLinksService.getIndexSettingsUrl()} target="_blank">
       <FormattedMessage
-        id="xpack.snapshotRestore.repositoryForm.stepSettings.indexSettingsDocLinkText"
+        id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsDocLinkText"
         defaultMessage="Learn more."
       />
     </EuiLink>
