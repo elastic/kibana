@@ -140,6 +140,7 @@ export const keymap: KeyMap = {
     REFRESH: refreshShortcut,
     ZOOM_IN: getShortcuts('plus', { modifiers: ['ctrl', 'alt'], help: 'Zoom in' }),
     ZOOM_OUT: getShortcuts('minus', { modifiers: ['ctrl', 'alt'], help: 'Zoom out' }),
+    ZOOM_RESET: getShortcuts('[', { modifiers: ['ctrl', 'alt'], help: 'Reset zoom to 100%' }),
   },
   PRESENTATION: {
     displayName: 'Presentation controls',

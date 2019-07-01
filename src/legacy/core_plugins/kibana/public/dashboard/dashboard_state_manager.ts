@@ -75,6 +75,7 @@ import {
   SavedDashboardPanelMap,
   DashboardAppStateParameters,
   AddFilterFn,
+  DashboardAppStateDefaults,
 } from './types';
 
 /**
@@ -96,7 +97,7 @@ export class DashboardStateManager {
   private hideWriteControls: boolean;
   public isDirty: boolean;
   private changeListeners: Array<(status: { dirty: boolean }) => void>;
-  private stateMonitor: StateMonitor<DashboardAppStateParameters>;
+  private stateMonitor: StateMonitor<DashboardAppStateDefaults>;
   private panelIndexPatternMapping: { [key: string]: StaticIndexPattern[] } = {};
   private addFilter: AddFilterFn;
   private unsubscribe: () => void;
@@ -149,7 +150,7 @@ export class DashboardStateManager {
     /**
      * Creates a state monitor and saves it to this.stateMonitor. Used to track unsaved changes made to appState.
      */
-    this.stateMonitor = stateMonitorFactory.create<DashboardAppStateParameters>(
+    this.stateMonitor = stateMonitorFactory.create<DashboardAppStateDefaults>(
       this.appState,
       this.stateDefaults
     );
