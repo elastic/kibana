@@ -161,7 +161,7 @@ Example terms aggregation response. The *key* property is used to join the web l
 
 ==== Using the metrics for data driven styling
 
-The metrics for each terms aggregation bucket are added to the world country feature with the corresponding ISO 3166-1 alpha-2 code.
+The metrics for each terms aggregation bucket are added to the world country feature with the corresponding ISO 3166-1 alpha-2 code. Features that do not have a corresponding terms aggregation bucket are not visible on the map.
 
 The world country features now have two additional properties:
 
