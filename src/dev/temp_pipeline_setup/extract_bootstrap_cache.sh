@@ -4,7 +4,7 @@ set -e
 
 BRANCH=${GIT_BRANCH/origin\/} # Maybe using `sed` is a better idea
 targetBranch="${PR_TARGET_BRANCH:-${BRANCH#*/}}"
-bootstrapCache="$JENKINS_HOME/.kibana/bootstrap_cache/master.tar"
+bootstrapCache="${CACHE_DIR}master.tar"
 # targetBranch="${PR_TARGET_BRANCH:-${GIT_BRANCH#*/}}"
 # bootstrapCache="$HOME/.kibana/bootstrap_cache/$targetBranch.tar"
 
