@@ -145,6 +145,7 @@ export class Plugin {
 
     xpackMainPlugin.registerFeature({
       id: 'ml',
+      excludeFromBasePrivileges: true,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
@@ -152,7 +153,22 @@ export class Plugin {
       navLinkId: 'ml',
       app: ['ml', 'kibana'],
       catalogue: ['ml'],
-      privileges: {},
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
       reserved: {
         privilege: {
           savedObject: {
