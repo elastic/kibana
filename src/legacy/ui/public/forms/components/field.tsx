@@ -22,16 +22,19 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiFieldNumber,
+  EuiSelect,
   EuiComboBox,
+  EuiSwitch,
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { Field as FieldType } from 'ui/forms/use_form';
 
 interface Props {
   field: FieldType;
+  fieldProps?: Record<string, any>;
 }
 
-export const Field = ({ field }: Props) => {
+export const Field = ({ field, fieldProps = {} }: Props) => {
   const isInvalid = !field.isUpdating && field.form.isSubmitted && field.errors.length > 0;
 
   const onAddValueToCombo = (value: string) => {
@@ -73,6 +76,20 @@ export const Field = ({ field }: Props) => {
             // disabled={disabled === true}
             isLoading={field.isValidating}
             fullWidth
+            {...fieldProps}
+          />
+        );
+      case 'select':
+        return (
+          <EuiSelect
+            fullWidth
+            value={field.value as string}
+            onChange={e => {
+              field.setValue(e.target.value);
+            }}
+            hasNoInitialSelection={true}
+            isInvalid={false}
+            {...fieldProps as { options: any; [key: string]: any }}
           />
         );
       case 'comboBox':
@@ -83,8 +100,17 @@ export const Field = ({ field }: Props) => {
             selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
             onCreateOption={onAddValueToCombo}
             onChange={onComboUpdate}
-            // onSearchChange={this.onLeaderIndexPatternInputChange}
             fullWidth
+            {...fieldProps}
+          />
+        );
+      case 'toggle':
+        return (
+          <EuiSwitch
+            label={field.label}
+            checked={field.value as boolean}
+            onChange={field.onChange}
+            {...fieldProps}
           />
         );
       default:
@@ -95,6 +121,7 @@ export const Field = ({ field }: Props) => {
             onChange={field.onChange}
             isLoading={field.isValidating}
             fullWidth
+            {...fieldProps}
           />
         );
     }

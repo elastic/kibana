@@ -27,10 +27,11 @@ interface Props {
   title: string;
   description?: string;
   field?: FieldType;
+  fieldProps?: Record<string, any>;
   children?: React.ReactNode;
 }
 
-export const FormRow = ({ title, description, field, children }: Props) => {
+export const FormRow = ({ title, description, field, fieldProps = {}, children }: Props) => {
   // If a string is provided, create a default Euititle of size "m"
   const _title =
     typeof title === 'string' ? (
@@ -47,7 +48,7 @@ export const FormRow = ({ title, description, field, children }: Props) => {
 
   return (
     <EuiDescribedFormGroup title={_title} description={description} fullWidth>
-      {children ? children : <Field field={field!} />}
+      {children ? children : <Field field={field!} fieldProps={fieldProps} />}
     </EuiDescribedFormGroup>
   );
 };

@@ -86,6 +86,7 @@ export const Form3 = () => {
         <h2>3. Advanced usage</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
+
       <UseField path="name" form={form}>
         {field => (
           <FormRow
@@ -96,13 +97,14 @@ export const Form3 = () => {
           </FormRow>
         )}
       </UseField>
+
       <UseField
         path="nested.prop"
         form={form}
         render={FormRow}
         renderProps={{
           title: 'Nested prop',
-          description: 'Description of the nested.prop.',
+          description: 'Description of the nested prop.',
         }}
       >
         {field => (
@@ -133,6 +135,7 @@ export const Form3 = () => {
           </EuiDescribedFormGroup>
         )}
       </UseField>
+
       <FormRow
         title="Multiple fields in one Form row"
         description="This is an example of multiple fields on 1 form row"
@@ -151,6 +154,7 @@ export const Form3 = () => {
           <UseField path="field.not.on.schema" config={inlineConfig} render={Field} form={form} />
         </EuiFlexItem>
       </FormRow>
+
       <FormRow
         title="Combobox with validation"
         description="Here we have validation _before_ adding a value to the comboBox array"

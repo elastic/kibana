@@ -21,6 +21,16 @@ export const formSchema: FormSchema<MyForm> = {
       },
     ],
   },
+  country: {
+    label: 'Country',
+    type: 'select',
+    validations: [{ validator: emptyField }],
+  },
+  doWeAgree: {
+    label: 'Do we agree on this?',
+    type: 'toggle',
+    defaultValue: false,
+  },
   title: {
     label: 'Title',
     helpText: 'Help text for the title field',

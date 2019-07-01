@@ -21,6 +21,7 @@ export const Form2 = () => {
   };
 
   const { form } = useForm<MyForm>({ onSubmit, schema: formSchema });
+  const countries = [{ value: 'US', text: 'United States' }, { value: 'ES', text: 'Spain' }];
 
   /**
    * NOTE: There is a bug in EUI, the EuiForm component renders
@@ -33,6 +34,16 @@ export const Form2 = () => {
         <h2>2. Using the "render" prop</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
+      <UseField
+        path="country"
+        form={form}
+        render={FormRow}
+        renderProps={{
+          title: 'Country',
+          description: 'Not much to say about a field to select a country.',
+          fieldProps: { options: countries },
+        }}
+      />
       <UseField
         path="name"
         form={form}
@@ -57,6 +68,15 @@ export const Form2 = () => {
         render={FormRow}
         renderProps={{
           title: 'This is a numeric field',
+        }}
+      />
+      <UseField
+        path="doWeAgree"
+        form={form}
+        render={FormRow}
+        renderProps={{
+          title: 'This is a toggle field',
+          description: 'If you activate it, great things will happen.',
         }}
       />
       <EuiSpacer size="m" />
