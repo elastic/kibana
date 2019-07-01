@@ -6,7 +6,6 @@
 
 import { CoreSetup } from 'src/core/public';
 import { xyVisualization } from './xy_visualization';
-
 import {
   renderersRegistry,
   functionsRegistry,

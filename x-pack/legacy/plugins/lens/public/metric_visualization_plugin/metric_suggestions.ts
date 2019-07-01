@@ -31,6 +31,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
   return {
     title,
     score: 1,
+    previewIcon: 'visMetric',
     datasourceSuggestionId: table.datasourceSuggestionId,
     state: {
       title,
