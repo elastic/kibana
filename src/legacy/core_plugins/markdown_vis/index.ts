@@ -19,13 +19,14 @@
 
 import { resolve } from 'path';
 
-export default function (kibana) {
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
   return new kibana.Plugin({
     id: 'vis_type_markdown',
     require: ['visualizations', 'data'],
     uiExports: {
-      hacks: [resolve(__dirname, 'public/setup.ts')],
+      hacks: ['plugins/markdown_vis/setup'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
+    },
   });
 }
