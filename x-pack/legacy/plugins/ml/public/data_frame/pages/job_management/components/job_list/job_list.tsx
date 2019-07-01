@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, SFC, useState } from 'react';
+import React, { SFC, useState } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
-  SortDirection,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
 import { JobId, moveToDataFrameWizard } from '../../../../common';
 
@@ -20,6 +14,7 @@ import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } f
 import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
+import { TransformTable } from './transform_table';
 import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
@@ -39,19 +34,13 @@ function getItemIdToExpandedRowMap(
   );
 }
 
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface ExpandableTableProps extends EuiInMemoryTableProps {
-  itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
-  isExpandable: boolean;
-}
-
-const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
-
 export const DataFrameJobList: SFC = () => {
   const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<JobId[]>([]);
   const [lastUpdate, setlastUpdate] = useState(Date.now());
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
   useRefreshInterval(getJobs, setBlockRefresh, setlastUpdate);
@@ -85,8 +74,26 @@ export const DataFrameJobList: SFC = () => {
     lastUpdate
   );
 
+  const pagination = {
+    initialPageIndex: pageIndex,
+    initialPageSize: pageSize,
+    totalItemCount: dataFrameJobs.length,
+    pageSizeOptions: [10, 20, 50],
+    hidePerPageOptions: false,
+  };
+
+  const onTableChange = ({
+    page = { index: 0, size: 10 },
+  }: {
+    page: { index: number; size: number };
+  }) => {
+    const { index, size } = page;
+    setPageIndex(index);
+    setPageSize(size);
+  };
+
   return (
-    <ExpandableTable
+    <TransformTable
       columns={columns}
       hasActions={false}
       isExpandable={true}
@@ -94,7 +101,8 @@ export const DataFrameJobList: SFC = () => {
       items={dataFrameJobs}
       itemId={DataFrameJobListColumn.id}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      pagination={true}
+      onChange={onTableChange}
+      pagination={pagination}
       sorting={sorting}
     />
   );
