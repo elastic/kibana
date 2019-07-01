@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import collectBranch from '../_collect_branch';
-import expect from '@kbn/expect';
+import collectBranch from './_collect_branch';
 
 describe('collectBranch()', () => {
   let results;
@@ -45,23 +44,22 @@ describe('collectBranch()', () => {
   });
 
   it('should return an array with bucket objects', () => {
-    expect(results).to.be.an(Array);
-    expect(results).to.have.length(3);
+    expect(results).toHaveLength(3);
 
-    expect(results[0]).to.have.property('metric', 24);
-    expect(results[0]).to.have.property('depth', 0);
-    expect(results[0]).to.have.property('bucket', 'bucket1');
-    expect(results[0]).to.have.property('field', 'level 1');
+    expect(results[0]).toHaveProperty('metric', 24);
+    expect(results[0]).toHaveProperty('depth', 0);
+    expect(results[0]).toHaveProperty('bucket', 'bucket1');
+    expect(results[0]).toHaveProperty('field', 'bucket1');
 
-    expect(results[1]).to.have.property('metric', 12);
-    expect(results[1]).to.have.property('depth', 1);
-    expect(results[1]).to.have.property('bucket', 'bucket2');
-    expect(results[1]).to.have.property('field', 'level 2');
+    expect(results[1]).toHaveProperty('metric', 12);
+    expect(results[1]).toHaveProperty('depth', 1);
+    expect(results[1]).toHaveProperty('bucket', 'bucket2');
+    expect(results[1]).toHaveProperty('field', 'bucket2');
 
-    expect(results[2]).to.have.property('metric', 6);
-    expect(results[2]).to.have.property('depth', 2);
-    expect(results[2]).to.have.property('bucket', 'bucket3');
-    expect(results[2]).to.have.property('field', 'level 3');
+    expect(results[2]).toHaveProperty('metric', 6);
+    expect(results[2]).toHaveProperty('depth', 2);
+    expect(results[2]).toHaveProperty('bucket', 'bucket3');
+    expect(results[2]).toHaveProperty('field', 'bucket3');
   });
 
 });
