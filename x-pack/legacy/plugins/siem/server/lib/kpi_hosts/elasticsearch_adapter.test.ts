@@ -25,7 +25,7 @@ import {
 import { buildAuthQuery } from './query_authentication.dsl';
 import { buildUniqueIpsQuery } from './query_unique_ips.dsl';
 import { buildHostsQuery } from './query_hosts.dsl';
-import { KpiHostsData } from '../../graphql/types';
+import { KpiHostsData, KpiHostDetailsData } from '../../graphql/types';
 
 jest.mock('./query_authentication.dsl', () => {
   return {
@@ -171,7 +171,8 @@ describe('getKpiHosts', () => {
 });
 
 describe('getKpiHostDetails', () => {
-  // let data: KpiHostDetailsData;
+  // @ts-ignore
+  let data: KpiHostDetailsData;
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
 
   const mockCallWithRequest = jest.fn();
@@ -187,20 +188,19 @@ describe('getKpiHostDetails', () => {
   jest.doMock('../framework', () => ({
     callWithRequest: mockCallWithRequest,
   }));
+  beforeAll(async () => {
+    EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
+    data = await EsKpiHosts.getKpiHostDetails(
+      mockKpiHostDetailsRequest as FrameworkRequest,
+      mockKpiHostDetailsOptions
+    );
+    // @ts-ignore
+    buildUniqueIpsQuery.mockReturnValue(mockKpiHostDetailsUniqueIpsQuery);
+    // @ts-ignore
+    buildAuthQuery.mockReturnValue(mockKpiHostDetailsAuthQuery);
+  });
 
   describe('getKpiHostDetails - call stack', () => {
-    beforeAll(async () => {
-      EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-      data = await EsKpiHosts.getKpiHostDetails(
-        mockKpiHostDetailsRequest as FrameworkRequest,
-        mockKpiHostDetailsOptions
-      );
-      // @ts-ignore
-      buildUniqueIpsQuery.mockReturnValue(mockKpiHostDetailsUniqueIpsQuery);
-      // @ts-ignore
-      buildAuthQuery.mockReturnValue(mockKpiHostDetailsAuthQuery);
-    });
-
     afterAll(() => {
       mockCallWithRequest.mockRestore();
       // @ts-ignore
