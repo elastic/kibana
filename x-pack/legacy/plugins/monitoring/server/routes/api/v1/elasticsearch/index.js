@@ -12,4 +12,3 @@ export { esOverviewRoute } from './overview';
 export { mlJobRoute } from './ml_jobs';
 export { ccrRoute } from './ccr';
 export { ccrShardRoute } from './ccr_shard';
-export { liveEsNodesRoute } from './live_nodes';
