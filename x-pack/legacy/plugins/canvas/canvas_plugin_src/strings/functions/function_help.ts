@@ -30,7 +30,6 @@ import { help as esdocs } from './esdocs';
 import { help as essql } from './essql';
 import { help as exactly } from './exactly';
 import { help as filterrows } from './filterrows';
-import { help as font } from './font';
 import { help as formatdate } from './formatdate';
 import { help as formatnumber } from './formatnumber';
 import { help as getCell } from './getCell';
@@ -39,6 +38,7 @@ import { help as gte } from './gte';
 import { help as head } from './head';
 import { help as ifFn } from './if';
 import { help as image } from './image';
+import { help as joinRows } from './join_rows';
 import { help as location } from './location';
 import { help as lt } from './lt';
 import { help as lte } from './lte';
@@ -175,7 +175,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   essql,
   exactly,
   filterrows,
-  font,
   formatdate,
   formatnumber,
   getCell,
@@ -183,6 +182,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   gte,
   head,
   if: ifFn,
+  joinRows,
   image,
   location,
   lt,

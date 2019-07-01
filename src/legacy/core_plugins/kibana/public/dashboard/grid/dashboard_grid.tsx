@@ -36,13 +36,7 @@ import {
 } from '../dashboard_constants';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
-import { PanelUtils } from '../panel/panel_utils';
-import {
-  GridData,
-  SavedDashboardPanel,
-  Pre61SavedDashboardPanel,
-  SavedDashboardPanelMap,
-} from '../types';
+import { GridData, SavedDashboardPanel, SavedDashboardPanelMap } from '../types';
 
 let lastValidGridSize = 0;
 
@@ -179,20 +173,6 @@ class DashboardGridUi extends React.Component<Props, State> {
 
   public buildLayoutFromPanels(): GridData[] {
     return _.map(this.props.panels, panel => {
-      // panel version numbers added in 6.1. Any panel without version number is assumed to be 6.0.0
-      const panelVersion =
-        'version' in panel
-          ? PanelUtils.parseVersion(panel.version)
-          : PanelUtils.parseVersion('6.0.0');
-
-      if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 1)) {
-        panel = PanelUtils.convertPanelDataPre_6_1((panel as unknown) as Pre61SavedDashboardPanel);
-      }
-
-      if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 3)) {
-        PanelUtils.convertPanelDataPre_6_3(panel as SavedDashboardPanel, this.props.useMargins);
-      }
-
       return (panel as SavedDashboardPanel).gridData;
     });
   }
