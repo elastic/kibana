@@ -73,7 +73,7 @@ describe('EmptyState component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders empty state with appropriate base path', () => {
+  it('does not render empty state with appropriate base path and no docs', () => {
     statesIndexStatus = {
       docCount: {
         count: 0,

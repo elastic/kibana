@@ -48,18 +48,8 @@ export const EmptyStateComponent = ({ basePath, children, data, errors }: Props)
      * jittery UX any time the components refresh. This way we'll keep the stale
      * state displayed during the fetching process.
      */
-    if (docCount && docCount.count) {
+    if (data && data.statesIndexStatus) {
       return <Fragment>{children}</Fragment>;
-    }
-    if (docCount && docCount.count === 0) {
-      return (
-        <DataMissing
-          basePath={basePath}
-          headingMessage={i18n.translate('xpack.uptime.emptyState.noDataTitle', {
-            defaultMessage: 'No uptime data available',
-          })}
-        />
-      );
     }
   }
   return <EmptyStateLoading />;
