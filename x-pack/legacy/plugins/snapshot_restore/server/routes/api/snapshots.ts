@@ -9,10 +9,14 @@ import {
   wrapCustomError,
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails } from '../../../common/types';
-import { deserializeSnapshotDetails } from '../../lib';
+import { Plugins } from '../../../shim';
+import { deserializeSnapshotDetails, getManagedRepositoryName } from '../../lib';
 import { SnapshotDetailsEs } from '../../types';
 
-export function registerSnapshotsRoutes(router: Router) {
+let callWithInternalUser: any;
+
+export function registerSnapshotsRoutes(router: Router, plugins: Plugins) {
+  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('snapshots', getAllHandler);
   router.get('snapshots/{repository}/{snapshot}', getOneHandler);
   router.delete('snapshots/{ids}', deleteHandler);
@@ -25,7 +29,10 @@ export const getAllHandler: RouterRouteHandler = async (
   snapshots: SnapshotDetails[];
   errors: any[];
   repositories: string[];
+  managedRepository?: string;
 }> => {
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+
   /*
    * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`
    * when no repositories bug is fixed: https://github.com/elastic/elasticsearch/issues/43547
@@ -38,7 +45,7 @@ export const getAllHandler: RouterRouteHandler = async (
   const repositoryNames = Object.keys(repositoriesByName);
 
   if (repositoryNames.length === 0) {
-    return { snapshots: [], errors: [], repositories: [] };
+    return { snapshots: [], errors: [], repositories: [], managedRepository };
   }
 
   const snapshots: SnapshotDetails[] = [];
@@ -81,6 +88,7 @@ export const getAllHandler: RouterRouteHandler = async (
   return {
     snapshots,
     repositories,
+    managedRepository,
     errors,
   };
 };
