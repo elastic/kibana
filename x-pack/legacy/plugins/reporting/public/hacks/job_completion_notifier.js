@@ -13,7 +13,7 @@ import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { JobStatuses } from '../constants/job_statuses';
 import { Path } from 'plugins/xpack_main/services/path';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
 import {
   EuiButton,
@@ -25,7 +25,7 @@ import { npStart } from 'ui/new_platform';
  * Poll for changes to reports. Inform the user of changes when the license is active.
  */
 uiModules.get('kibana')
-  .run((Private, reportingPollConfig) => {
+  .run(reportingPollConfig => {
     // Don't show users any reporting toasts until they're logged in.
     if (Path.isUnauthenticated()) {
       return;
@@ -33,7 +33,6 @@ uiModules.get('kibana')
 
     // We assume that all license types offer Reporting, and that we only need to check if the
     // license is active or expired.
-    const xpackInfo = Private(XPackInfoProvider);
     const isLicenseActive = xpackInfo.getLicense().isActive;
 
     async function showCompletionNotification(job) {
@@ -67,6 +66,7 @@ uiModules.get('kibana')
       if (chrome.navLinks.has('kibana:management')) {
         const { baseUrl } = chrome.navLinks.get('kibana:management');
         const reportingSectionUrl = `${baseUrl}/kibana/reporting`;
+
         seeReportLink = (
           <p>
             <FormattedMessage

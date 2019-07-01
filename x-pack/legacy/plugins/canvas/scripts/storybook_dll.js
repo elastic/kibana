@@ -31,7 +31,7 @@ if (fs.existsSync(DLL_OUTPUT)) {
       'false',
     ],
     {
-      cwd: path.resolve(__dirname, '../../../..'),
+      cwd: path.resolve(__dirname, '../../../../..'),
       stdio: ['ignore', 'inherit', 'inherit'],
       buffer: false,
     }
