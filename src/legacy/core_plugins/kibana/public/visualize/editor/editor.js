@@ -44,6 +44,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
@@ -415,12 +416,12 @@ function VisEditor(
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
-    const filterUpdateSubscription = queryFilter.getUpdates$().subscribe(
-      () => {
+    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+      next: () => {
         $scope.filters = queryFilter.getFilters();
         $scope.fetch();
-      },
-    );
+      }
+    });
 
     // update the searchSource when query updates
     $scope.fetch = function () {

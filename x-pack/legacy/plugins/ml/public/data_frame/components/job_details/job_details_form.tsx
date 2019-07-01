@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import { EuiSwitch, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { DataFrameJobConfig, KibanaContext, isKibanaContext } from '../../common';
+import { DataFrameJobConfig, delayFormatRegex, KibanaContext, isKibanaContext } from '../../common';
 import { EsIndexName, IndexPatternTitle, JobId } from './common';
 
 export interface JobDetailsExposedState {
+  continuousModeDateField: string;
+  continuousModeDelay: string;
   createIndexPattern: boolean;
+  isContinuousModeEnabled: boolean;
   jobId: JobId;
   destinationIndex: EsIndexName;
   touched: boolean;
@@ -26,7 +29,10 @@ export interface JobDetailsExposedState {
 
 export function getDefaultJobDetailsState(): JobDetailsExposedState {
   return {
+    continuousModeDateField: '',
+    continuousModeDelay: '60s',
     createIndexPattern: true,
+    isContinuousModeEnabled: false,
     jobId: '',
     destinationIndex: '',
     touched: false,
@@ -54,6 +60,21 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
   const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
   const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
+
+  // Continuous mode state
+  const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
+    defaults.isContinuousModeEnabled
+  );
+  const dateFieldNames = kibanaContext.currentIndexPattern.fields
+    .filter(f => f.type === 'date')
+    .map(f => f.name)
+    .sort();
+  const isContinuousModeAvailable = dateFieldNames.length > 0;
+  const [continuousModeDateField, setContinuousModeDateField] = useState(
+    isContinuousModeAvailable ? dateFieldNames[0] : ''
+  );
+  const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
+  const isContinuousModeDelayValid = continuousModeDelay.match(delayFormatRegex) !== null;
 
   // fetch existing job IDs and indices once for form validation
   useEffect(() => {
@@ -106,14 +127,32 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     destinationIndex !== '' &&
     !jobIdExists &&
     !indexNameExists &&
-    (!indexPatternTitleExists || !createIndexPattern);
+    (!indexPatternTitleExists || !createIndexPattern) &&
+    (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid));
 
   // expose state to wizard
   useEffect(
     () => {
-      onChange({ createIndexPattern, jobId, destinationIndex, touched: true, valid });
+      onChange({
+        continuousModeDateField,
+        continuousModeDelay,
+        createIndexPattern,
+        isContinuousModeEnabled,
+        jobId,
+        destinationIndex,
+        touched: true,
+        valid,
+      });
     },
-    [createIndexPattern, jobId, destinationIndex, valid]
+    [
+      continuousModeDateField,
+      continuousModeDelay,
+      createIndexPattern,
+      isContinuousModeEnabled,
+      jobId,
+      destinationIndex,
+      valid,
+    ]
   );
 
   return (
@@ -187,6 +226,81 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           onChange={() => setCreateIndexPattern(!createIndexPattern)}
         />
       </EuiFormRow>
+      <EuiFormRow
+        helpText={
+          isContinuousModeAvailable === false
+            ? i18n.translate('xpack.ml.dataframe.jobDetailsForm.continuousModeError', {
+                defaultMessage: 'Continuous mode is not available for indices without date fields.',
+              })
+            : ''
+        }
+      >
+        <EuiSwitch
+          name="mlDataFrameContinuousMode"
+          label={i18n.translate('xpack.ml.dataframe.jobCreateForm.continuousModeLabel', {
+            defaultMessage: 'Continuous mode',
+          })}
+          checked={isContinuousModeEnabled === true}
+          onChange={() => setContinuousModeEnabled(!isContinuousModeEnabled)}
+          disabled={isContinuousModeAvailable === false}
+        />
+      </EuiFormRow>
+      {isContinuousModeEnabled && (
+        <Fragment>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.ml.dataframe.jobDetailsForm.continuousModeDateFieldLabel',
+              {
+                defaultMessage: 'Date field',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.jobDetailsForm.continuousModeDateFieldHelpText',
+              {
+                defaultMessage: 'Select the date field that can be used to identify new documents.',
+              }
+            )}
+          >
+            <EuiSelect
+              options={dateFieldNames.map(text => ({ text }))}
+              value={continuousModeDateField}
+              onChange={e => setContinuousModeDateField(e.target.value)}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.continuousModeDelayLabel', {
+              defaultMessage: 'Delay',
+            })}
+            isInvalid={!isContinuousModeDelayValid}
+            error={
+              !isContinuousModeDelayValid && [
+                i18n.translate('xpack.ml.dataframe.jobDetailsForm.continuousModeDelayError', {
+                  defaultMessage: 'Invalid delay format',
+                }),
+              ]
+            }
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.jobDetailsForm.continuousModeDelayHelpText',
+              {
+                defaultMessage: 'Time delay between current time and latest input data time.',
+              }
+            )}
+          >
+            <EuiFieldText
+              placeholder="delay"
+              value={continuousModeDelay}
+              onChange={e => setContinuousModeDelay(e.target.value)}
+              aria-label={i18n.translate(
+                'xpack.ml.dataframe.jobDetailsForm.continuousModeAriaLabel',
+                {
+                  defaultMessage: 'Choose a delay.',
+                }
+              )}
+              isInvalid={!isContinuousModeDelayValid}
+            />
+          </EuiFormRow>
+        </Fragment>
+      )}
     </EuiForm>
   );
 });
