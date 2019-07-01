@@ -79,6 +79,7 @@
   "resolutions": {
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
+    "**/@types/react": "^16.8.0",
     "**/typescript": "^3.3.3333"
   },
   "workspaces": {
