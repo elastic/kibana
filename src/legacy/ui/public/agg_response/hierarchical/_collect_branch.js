@@ -17,8 +17,7 @@
  * under the License.
  */
 
-// eslint-disable-next-line import/no-default-export
-export default function (leaf) {
+export function collectBranch(leaf) {
   // walk up the branch for each parent
   function walk(item, memo) {
     // record the the depth

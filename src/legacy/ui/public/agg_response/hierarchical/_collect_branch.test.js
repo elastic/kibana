@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import collectBranch from './_collect_branch';
+import { collectBranch } from './_collect_branch';
 
 describe('collectBranch()', () => {
   let item;
