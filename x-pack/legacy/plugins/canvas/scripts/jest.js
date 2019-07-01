@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runXPackScript('jest', ['plugins/canvas']);
+require('./_helpers').runXPackScript('jest', ['legacy/plugins/canvas']);
