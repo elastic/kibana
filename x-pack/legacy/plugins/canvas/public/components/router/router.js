@@ -8,6 +8,7 @@ import React from 'react';
 import { isClassComponent } from 'recompose';
 import PropTypes from 'prop-types';
 import { routerProvider } from '../../lib/router_provider';
+import { getAppState } from '../../lib/app_state';
 import { CanvasLoading } from './canvas_loading';
 
 export class Router extends React.PureComponent {
@@ -22,6 +23,7 @@ export class Router extends React.PureComponent {
     routes: PropTypes.array.isRequired,
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
+    setFullscreen: PropTypes.func.isRequired,
   };
 
   state = {
@@ -57,10 +59,28 @@ export class Router extends React.PureComponent {
       // if this is the first load, execute the route
       if (firstLoad) {
         firstLoad = false;
+
+        // execute the route
         router
           .execute()
           .then(() => onLoad())
           .catch(err => onError(err));
+      }
+
+      // dispatch actions based on the app state
+      const appState = getAppState();
+
+      if (appState.__fullscreen) {
+        this.props.setFullscreen(appState.__fullscreen);
+      }
+
+      if (appState.__refresh) {
+        this.props.setRefreshInterval(appState.__refresh * 1000);
+      }
+
+      if (!!appState.__autoplay) {
+        this.props.enableAutoplay(true);
+        this.props.setAutoplayInterval(appState.__autoplay * 1000);
       }
 
       // notify upstream handler of route change
