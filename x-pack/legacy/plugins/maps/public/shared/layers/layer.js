@@ -311,7 +311,8 @@ export class AbstractLayer {
   }
 
   isDataLoaded() {
-    throw new Error('should implement Layer#isDataLoaded');
+    const sourceDataRequest = this.getSourceDataRequest();
+    return sourceDataRequest && sourceDataRequest.hasData();
   }
 
   async getBounds() {
