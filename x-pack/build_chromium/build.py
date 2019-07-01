@@ -73,8 +73,8 @@ def archive_file(name):
 # must be bundled with the Chromium executable.
 if platform.system() == 'Linux':
   archive_file('headless_shell')
-  archive_file('libEGL.so')
-  archive_file('libGLESv2.so')
+  archive_file('swiftshader/libEGL.so')
+  archive_file('swiftshader/libGLESv2.so')
 elif platform.system() == 'Windows':
   archive_file('headless_shell.exe')
   archive_file('dbghelp.dll')
