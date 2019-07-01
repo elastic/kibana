@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { createSetupApi, of } from '..';
+import { createSetupApi } from '..';
+import { of } from '../helpers';
 import { ActionContext, Action, openContextMenu } from '../../lib';
 import { EmbeddableSetupApi } from '../../setup';
 import {

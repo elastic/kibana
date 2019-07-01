@@ -19,7 +19,7 @@
 
 import { pureSetupApi } from '..';
 import { createDeps } from './helpers';
-import { expectError } from '../../tests';
+import { expectError } from '../../tests/helpers';
 
 const { registerTrigger, registerAction, attachAction, detachAction } = pureSetupApi;
 const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';

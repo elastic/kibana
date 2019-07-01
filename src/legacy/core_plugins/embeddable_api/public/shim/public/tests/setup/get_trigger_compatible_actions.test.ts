@@ -23,7 +23,8 @@ import { RestrictedAction } from '../../lib/test_samples/actions/restricted_acti
 import { EmptyEmbeddable } from '../../lib/test_samples/embeddables/empty_embeddable';
 import { ActionContext, CONTEXT_MENU_TRIGGER } from '../../lib';
 import { EmbeddableSetupApi } from '../../setup';
-import { createSetupApi, of } from '..';
+import { createSetupApi } from '..';
+import { of } from '../helpers';
 import { EmbeddablePublicPlugin } from '../../plugin';
 
 let api: EmbeddableSetupApi;
