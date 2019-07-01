@@ -26,12 +26,17 @@ import { kibanaMarkdown } from './markdown_fn';
 import { functionsRegistry } from '../../interpreter/public/registries';
 import { visualizations, VisualizationsSetup } from '../../visualizations/public';
 
+export interface SetupDeps {
+  visualizations: VisualizationsSetup;
+  data: any;
+}
+
 class VisTypeMarkdownPlugin {
   constructor() {}
 
-  public setup(visualizationsSetup: VisualizationsSetup) {
-    visualizationsSetup.types.VisTypesRegistryProvider.register(() => markdownVis);
-    functionsRegistry.register(kibanaMarkdown);
+  public setup({visualizations, data}: SetupDeps) {
+    visualizations.types.VisTypesRegistryProvider.register(() => markdownVis);
+    data.expressions.registerFunction(kibanaMarkdown);
   }
 
   public start() {}
@@ -39,4 +44,11 @@ class VisTypeMarkdownPlugin {
   public stop() {}
 }
 
-new VisTypeMarkdownPlugin().setup(visualizations);
+new VisTypeMarkdownPlugin().setup({
+  visualizations,
+  data: {
+    expressions: {
+      registerFunction: (fn: any) => functionsRegistry.register(fn),
+    }
+  }
+});
