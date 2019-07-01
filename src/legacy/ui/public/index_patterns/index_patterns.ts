@@ -74,7 +74,7 @@ export class IndexPatterns {
     if (this.savedObjectsCache) {
       return this.savedObjectsCache.map(obj => {
         const result: Record<string, any> = {};
-        fields.forEach(f => (result[f] = _.get(obj, f) || _.get(obj, `attribute.${f}`)));
+        fields.forEach(f => (result[f] = _.get(obj, f) || _.get(obj, `attributes.${f}`)));
         return result;
       });
     }
