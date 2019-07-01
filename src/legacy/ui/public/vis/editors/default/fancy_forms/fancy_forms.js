@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { uiModules } from '../../../../modules';
 
 import { decorateFormController } from './kbn_form_controller';
 import { decorateModelController } from './kbn_model_controller';

@@ -17,15 +17,4 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-import { Pager } from './pager';
-
-const app = uiModules.get('kibana');
-
-app.factory('pagerFactory', () => {
-  return {
-    create(...args) {
-      return new Pager(...args);
-    }
-  };
-});
+export { createSavedObjectsStreamFromNdJson } from './create_saved_objects_stream_from_ndjson';

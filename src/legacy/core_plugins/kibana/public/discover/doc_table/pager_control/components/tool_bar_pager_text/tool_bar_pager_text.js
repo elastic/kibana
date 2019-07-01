@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-import template from './table_info.html';
+import { uiModules } from 'ui/modules';
+import template from './tool_bar_pager_text.html';
 
 const app = uiModules.get('kibana');
 
-app.directive('tableInfo', function () {
+app.directive('toolBarPagerText', function () {
   return {
     restrict: 'E',
     replace: true,
     template: template,
-    transclude: true,
-    controllerAs: 'tableInfo',
+    scope: {
+      startItem: '=',
+      endItem: '=',
+      totalItems: '=',
+    },
+    controllerAs: 'toolBarPagerText',
     bindToController: true,
-    controller: class TableInfoController {
+    controller: class ToolBarPagerTextController {
     }
   };
 });

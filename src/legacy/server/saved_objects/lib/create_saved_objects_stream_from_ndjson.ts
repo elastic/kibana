@@ -16,25 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Readable } from 'stream';
+import { SavedObject } from 'kibana/server';
+import { createSplitStream, createMapStream, createFilterStream } from '../../../utils/streams';
 
-import { uiModules } from '../../../modules';
-import template from './tool_bar_pager_text.html';
-
-const app = uiModules.get('kibana');
-
-app.directive('toolBarPagerText', function () {
-  return {
-    restrict: 'E',
-    replace: true,
-    template: template,
-    scope: {
-      startItem: '=',
-      endItem: '=',
-      totalItems: '=',
-    },
-    controllerAs: 'toolBarPagerText',
-    bindToController: true,
-    controller: class ToolBarPagerTextController {
-    }
-  };
-});
+export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
+  return ndJsonStream
+    .pipe(createSplitStream('\n'))
+    .pipe(
+      createMapStream((str: string) => {
+        if (str && str.trim() !== '') {
+          return JSON.parse(str);
+        }
+      })
+    )
+    .pipe(createFilterStream<SavedObject>(obj => !!obj));
+}
