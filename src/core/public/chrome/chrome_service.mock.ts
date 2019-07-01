@@ -22,11 +22,12 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeService,
-  ChromeStart,
+  InternalChromeStart,
 } from './chrome_service';
 
 const createStartContractMock = () => {
-  const setupContract: jest.Mocked<ChromeStart> = {
+  const startContract: jest.Mocked<InternalChromeStart> = {
+    getComponent: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -48,6 +49,7 @@ const createStartContractMock = () => {
       getLeft$: jest.fn(),
       getRight$: jest.fn(),
     },
+    setAppTitle: jest.fn(),
     setBrand: jest.fn(),
     getBrand$: jest.fn(),
     setIsVisible: jest.fn(),
@@ -64,14 +66,14 @@ const createStartContractMock = () => {
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
   };
-  setupContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
-  setupContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
-  setupContract.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
-  setupContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
-  setupContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
-  setupContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
-  setupContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
-  return setupContract;
+  startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
+  startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
+  startContract.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
+  startContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
+  startContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
+  startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
+  startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
+  return startContract;
 };
 
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;

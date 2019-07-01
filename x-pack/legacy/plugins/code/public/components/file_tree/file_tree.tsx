@@ -14,7 +14,7 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
@@ -243,8 +243,8 @@ export class CodeFileTree extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  node: state.file.tree,
-  openedPaths: state.file.openedPaths,
+  node: state.fileTree.tree,
+  openedPaths: state.fileTree.openedPaths,
 });
 
 const mapDispatchToProps = {

@@ -25,6 +25,8 @@ import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
 
+const DEFAULT_DATA_TEST_SUBJ = 'load-more-table';
+
 export interface ItemsPerRow {
   text: string;
   numberOfRow: number;
@@ -73,6 +75,7 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
         Columns<AB>
       ];
   hasNextPage: boolean;
+  dataTestSubj?: string;
   headerCount: number;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
@@ -96,14 +99,16 @@ interface BasicTableState {
   paginationLoading: boolean;
 }
 
-export interface Columns<T> {
+type Func<T> = (arg: T) => string | number;
+
+export interface Columns<T, U = T> {
   field?: string;
   name: string | React.ReactNode;
   isMobileHeader?: boolean;
-  sortable?: boolean;
+  sortable?: boolean | Func<T>;
   truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T) => void;
+  render?: (item: T, node: U) => void;
   width?: string;
 }
 
@@ -133,6 +138,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   public render() {
     const {
       columns,
+      dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
       hasNextPage,
       headerCount,
       headerSupplement,
@@ -190,7 +196,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         </EuiContextMenuItem>
       ));
     return (
-      <EuiPanel>
+      <EuiPanel data-test-subj={dataTestSubj}>
         <BasicTableContainer>
           {loading && (
             <>
@@ -309,7 +315,7 @@ const FooterAction = styled.div`
  *   The getOr is just there to simplify the test
  *   So we do NOT need to wrap it around TestProvider
  */
-const BackgroundRefetch = styled.div`
+export const BackgroundRefetch = styled.div`
   background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
   margin: -5px;
   height: calc(100% + 10px);

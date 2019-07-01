@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../mock';
 
 import { HostOverview } from './index';
 import { mockData } from './mock';
+import { mockAnomalies } from '../../../ml/mock';
 
 describe('Host Summary Component', () => {
   // this is just a little hack to silence a warning that we'll get until react
@@ -38,7 +39,15 @@ describe('Host Summary Component', () => {
     test('it renders the default Host Summary', () => {
       const wrapper = shallow(
         <TestProviders>
-          <HostOverview loading={false} data={mockData.Hosts.edges[0].node} />
+          <HostOverview
+            startDate={new Date('2019-06-15T06:00:00.000Z').valueOf()}
+            endDate={new Date('2019-06-18T06:00:00.000Z').valueOf()}
+            loading={false}
+            data={mockData.Hosts.edges[0].node}
+            anomaliesData={mockAnomalies}
+            isLoadingAnomaliesData={false}
+            narrowDateRange={jest.fn()}
+          />
         </TestProviders>
       );
 

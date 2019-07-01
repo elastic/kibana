@@ -36,6 +36,7 @@ export default function(kibana: any) {
       ],
       embeddableFactories: [
         'plugins/embeddable_api/test_samples/embeddables/hello_world/hello_world_embeddable_factory',
+        'plugins/embeddable_api/test_samples/embeddables/contact_card/contact_card_embeddable_factory',
       ],
     },
     init(server: Legacy.Server) {
