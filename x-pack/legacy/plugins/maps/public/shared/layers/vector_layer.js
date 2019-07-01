@@ -95,6 +95,23 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
+  isDataLoaded() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest || !sourceDataRequest.hasData()) {
+      return false;
+    }
+
+    const joins = this.getValidJoins();
+    for (let i = 0; i < joins.length; i++) {
+      const joinDataRequest = this.getDataRequest(joins[i].getSourceId());
+      if (!joinDataRequest || !joinDataRequest.hasData()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   getCustomIconAndTooltipContent() {
     const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
