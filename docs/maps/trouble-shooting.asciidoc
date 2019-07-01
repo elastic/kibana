@@ -1,0 +1,22 @@
+[role="xpack"]
+[[maps-troubleshooting]]
+== Troubleshooting
+
+[float]
+=== Using inspector to troubleshoot {es} requests
+
+The Maps application uses the {ref}/search-search.html[{es}} search API] to get documents and aggregation results.
+Use Inspector to troubleshoot these requests.
+
+Open Inspector by clicking *inspect* button.
+
+[float]
+=== Ensure geospatial data
+
+[float]
+=== WMS and TMS tiles are not being displayed
+
+. CORS
+. Tiles are not served in correct coordinate system.
+
+
