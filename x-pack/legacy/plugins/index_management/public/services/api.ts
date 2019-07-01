@@ -28,17 +28,15 @@ import {
   UIM_INDEX_UNFREEZE_MANY,
 } from '../../common/constants';
 
-import {
-  TAB_SETTINGS,
-  TAB_MAPPING,
-  TAB_STATS,
-} from '../constants';
+import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 
-import { trackUiMetric } from './track_ui_metric';
+// @ts-ignore
+import { trackUiMetric } from './track_ui_metric'; // TODO tslint fix
+import { useRequest } from './use_request';
 
-let httpClient;
+let httpClient: ng.IHttpService;
 
-export const setHttpClient = (client) => {
+export const setHttpClient = (client: ng.IHttpService) => {
   httpClient = client;
 };
 
@@ -53,17 +51,17 @@ export async function loadIndices() {
   return response.data;
 }
 
-export async function reloadIndices(indexNames) {
+export async function reloadIndices(indexNames: string[]) {
   const body = {
-    indexNames
+    indexNames,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/reload`, body);
   return response.data;
 }
 
-export async function closeIndices(indices) {
+export async function closeIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/close`, body);
   // Only track successful requests.
@@ -72,9 +70,9 @@ export async function closeIndices(indices) {
   return response.data;
 }
 
-export async function deleteIndices(indices) {
+export async function deleteIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/delete`, body);
   // Only track successful requests.
@@ -83,9 +81,9 @@ export async function deleteIndices(indices) {
   return response.data;
 }
 
-export async function openIndices(indices) {
+export async function openIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/open`, body);
   // Only track successful requests.
@@ -94,9 +92,9 @@ export async function openIndices(indices) {
   return response.data;
 }
 
-export async function refreshIndices(indices) {
+export async function refreshIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/refresh`, body);
   // Only track successful requests.
@@ -105,9 +103,9 @@ export async function refreshIndices(indices) {
   return response.data;
 }
 
-export async function flushIndices(indices) {
+export async function flushIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/flush`, body);
   // Only track successful requests.
@@ -116,10 +114,10 @@ export async function flushIndices(indices) {
   return response.data;
 }
 
-export async function forcemergeIndices(indices, maxNumSegments) {
+export async function forcemergeIndices(indices: any, maxNumSegments: any) {
   const body = {
     indices,
-    maxNumSegments
+    maxNumSegments,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/forcemerge`, body);
   // Only track successful requests.
@@ -128,9 +126,9 @@ export async function forcemergeIndices(indices, maxNumSegments) {
   return response.data;
 }
 
-export async function clearCacheIndices(indices) {
+export async function clearCacheIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/clear_cache`, body);
   // Only track successful requests.
@@ -138,9 +136,9 @@ export async function clearCacheIndices(indices) {
   trackUiMetric(actionType);
   return response.data;
 }
-export async function freezeIndices(indices) {
+export async function freezeIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/freeze`, body);
   // Only track successful requests.
@@ -148,9 +146,9 @@ export async function freezeIndices(indices) {
   trackUiMetric(actionType);
   return response.data;
 }
-export async function unfreezeIndices(indices) {
+export async function unfreezeIndices(indices: any) {
   const body = {
-    indices
+    indices,
   };
   const response = await httpClient.post(`${apiPrefix}/indices/unfreeze`, body);
   // Only track successful requests.
@@ -159,29 +157,29 @@ export async function unfreezeIndices(indices) {
   return response.data;
 }
 
-export async function loadIndexSettings(indexName) {
+export async function loadIndexSettings(indexName: string) {
   const response = await httpClient.get(`${apiPrefix}/settings/${indexName}`);
   return response.data;
 }
 
-export async function updateIndexSettings(indexName, settings) {
+export async function updateIndexSettings(indexName: string, settings: any) {
   const response = await httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
   // Only track successful requests.
   trackUiMetric(UIM_UPDATE_SETTINGS);
   return response;
 }
 
-export async function loadIndexStats(indexName) {
+export async function loadIndexStats(indexName: string) {
   const response = await httpClient.get(`${apiPrefix}/stats/${indexName}`);
   return response.data;
 }
 
-export async function loadIndexMapping(indexName) {
+export async function loadIndexMapping(indexName: string) {
   const response = await httpClient.get(`${apiPrefix}/mapping/${indexName}`);
   return response.data;
 }
 
-export async function loadIndexData(type, indexName) {
+export async function loadIndexData(type: string, indexName: string) {
   switch (type) {
     case TAB_MAPPING:
       return loadIndexMapping(indexName);
@@ -192,4 +190,11 @@ export async function loadIndexData(type, indexName) {
     case TAB_STATS:
       return loadIndexStats(indexName);
   }
+}
+
+export function loadIndexTemplates() {
+  return useRequest({
+    path: `${apiPrefix}/templates`,
+    method: 'get',
+  });
 }

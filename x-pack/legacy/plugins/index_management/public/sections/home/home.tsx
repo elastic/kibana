@@ -21,16 +21,15 @@ import {
 } from '@elastic/eui';
 import { BASE_PATH } from '../../../common/constants';
 import { idxMgmtDocumentationLink } from '../../lib/documentation_links';
+// @ts-ignore
 import { IndexList } from './index_list'; // TODO fix tslint
+import { TemplatesList } from './templates_list';
 
 type Section = 'indices' | 'index_templates';
 
 interface MatchParams {
   section: Section;
 }
-
-// TODO temp
-const IndexTemplates = () => <div>Index Templates tab</div>;
 
 export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -117,7 +116,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
         <Switch>
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}index_templates`} component={IndexTemplates} />
+          <Route exact path={`${BASE_PATH}index_templates`} component={TemplatesList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
