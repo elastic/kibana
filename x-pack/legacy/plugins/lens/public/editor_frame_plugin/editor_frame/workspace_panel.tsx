@@ -6,16 +6,7 @@
 
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
-} from '@elastic/eui';
-
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
@@ -56,8 +47,7 @@ export function WorkspacePanel({
       datasourceSuggestions,
       visualizationMap,
       activeVisualizationId,
-      visualizationState,
-      datasourcePublicAPI
+      visualizationState
     );
 
     if (suggestions.length === 0) {
@@ -158,19 +148,8 @@ export function WorkspacePanel({
   }
 
   return (
-    <EuiPageContent className="lnsPageContent">
-      <EuiPageContentHeader className="lnsPageContentHeader">
-        <EuiPageContentHeaderSection>
-          <EuiTitle size="xs">
-            <h2>New Visualization</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody className="lnsPageContentBody">
-        <DragDrop draggable={false} droppable={Boolean(dragDropContext.dragging)} onDrop={onDrop}>
-          {renderVisualization()}
-        </DragDrop>
-      </EuiPageContentBody>
-    </EuiPageContent>
+    <DragDrop draggable={false} droppable={Boolean(dragDropContext.dragging)} onDrop={onDrop}>
+      {renderVisualization()}
+    </DragDrop>
   );
 }

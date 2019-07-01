@@ -150,7 +150,6 @@ export type SeriesType = 'bar' | 'horizontal_bar' | 'line' | 'area';
 
 export interface XYArgs {
   seriesType: SeriesType;
-  title: string;
   legend: LegendConfig;
   y: YConfig;
   x: XConfig;
@@ -160,7 +159,6 @@ export interface XYArgs {
 
 export interface XYState {
   seriesType: SeriesType;
-  title: string;
   legend: LegendConfig;
   y: YState;
   x: XConfig;

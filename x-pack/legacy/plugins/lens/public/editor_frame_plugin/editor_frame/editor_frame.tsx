@@ -5,6 +5,8 @@
  */
 
 import React, { useEffect, useReducer, useMemo } from 'react';
+import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
@@ -13,19 +15,25 @@ import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
+import { SavedObjectStore, Document } from '../../persistence/saved_object_store';
+import { save } from './save';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface EditorFrameProps {
+  doc?: Document;
+  store: SavedObjectStore;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
-
+  redirectTo: (path: string) => void;
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
-
   ExpressionRenderer: ExpressionRenderer;
+  onError: (e: { message: string }) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
+  const { onError } = props;
 
   // create public datasource api for current state
   // as soon as datasource is available and memoize it
@@ -50,26 +58,46 @@ export function EditorFrame(props: EditorFrameProps) {
     ]
   );
 
+  useEffect(
+    () => {
+      if (props.doc) {
+        dispatch({
+          type: 'VISUALIZATION_LOADED',
+          doc: props.doc,
+        });
+      } else {
+        dispatch({
+          type: 'RESET',
+          state: getInitialState(props),
+        });
+      }
+    },
+    [props.doc]
+  );
+
   // Initialize current datasource
   useEffect(
     () => {
       let datasourceGotSwitched = false;
       if (state.datasource.isLoading && state.datasource.activeId) {
-        props.datasourceMap[state.datasource.activeId].initialize().then(datasourceState => {
-          if (!datasourceGotSwitched) {
-            dispatch({
-              type: 'UPDATE_DATASOURCE_STATE',
-              newState: datasourceState,
-            });
-          }
-        });
+        props.datasourceMap[state.datasource.activeId]
+          .initialize(props.doc && props.doc.state.datasource)
+          .then(datasourceState => {
+            if (!datasourceGotSwitched) {
+              dispatch({
+                type: 'UPDATE_DATASOURCE_STATE',
+                newState: datasourceState,
+              });
+            }
+          })
+          .catch(onError);
 
         return () => {
           datasourceGotSwitched = true;
         };
       }
     },
-    [state.datasource.activeId, state.datasource.isLoading]
+    [props.doc, state.datasource.activeId, state.datasource.isLoading]
   );
 
   // Initialize visualization as soon as datasource is ready
@@ -92,9 +120,41 @@ export function EditorFrame(props: EditorFrameProps) {
     [datasourcePublicAPI, state.visualization.activeId, state.visualization.state]
   );
 
-  if (state.datasource.activeId && !state.datasource.isLoading) {
+  const datasource =
+    state.datasource.activeId && !state.datasource.isLoading
+      ? props.datasourceMap[state.datasource.activeId]
+      : undefined;
+
+  const visualization = state.visualization.activeId
+    ? props.visualizationMap[state.visualization.activeId]
+    : undefined;
+
+  if (datasource) {
     return (
       <FrameLayout
+        navPanel={
+          <nav>
+            <EuiLink
+              onClick={() => {
+                if (datasource && visualization) {
+                  save({
+                    datasource,
+                    dispatch,
+                    visualization,
+                    state,
+                    redirectTo: props.redirectTo,
+                    store: props.store,
+                  }).catch(onError);
+                }
+              }}
+              disabled={state.saving || !state.datasource.activeId || !state.visualization.activeId}
+            >
+              {i18n.translate('xpack.lens.editorFrame.Save', {
+                defaultMessage: 'Save',
+              })}
+            </EuiLink>
+          </nav>
+        }
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}
@@ -114,22 +174,23 @@ export function EditorFrame(props: EditorFrameProps) {
           />
         }
         workspacePanel={
-          <WorkspacePanel
-            activeDatasource={props.datasourceMap[state.datasource.activeId]}
-            activeVisualizationId={state.visualization.activeId}
-            datasourcePublicAPI={datasourcePublicAPI!}
-            datasourceState={state.datasource.state}
-            visualizationState={state.visualization.state}
-            visualizationMap={props.visualizationMap}
-            dispatch={dispatch}
-            ExpressionRenderer={props.ExpressionRenderer}
-          />
+          <WorkspacePanelWrapper title={state.title} dispatch={dispatch}>
+            <WorkspacePanel
+              activeDatasource={datasource}
+              activeVisualizationId={state.visualization.activeId}
+              datasourcePublicAPI={datasourcePublicAPI!}
+              datasourceState={state.datasource.state}
+              visualizationState={state.visualization.state}
+              visualizationMap={props.visualizationMap}
+              dispatch={dispatch}
+              ExpressionRenderer={props.ExpressionRenderer}
+            />
+          </WorkspacePanelWrapper>
         }
         suggestionsPanel={
           <SuggestionPanel
-            activeDatasource={props.datasourceMap[state.datasource.activeId]}
+            activeDatasource={datasource}
             activeVisualizationId={state.visualization.activeId}
-            datasourcePublicAPI={datasourcePublicAPI!}
             datasourceState={state.datasource.state}
             visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}

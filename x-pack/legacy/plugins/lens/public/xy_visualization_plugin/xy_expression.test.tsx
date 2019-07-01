@@ -20,7 +20,6 @@ function sampleArgs() {
 
   const args: XYArgs = {
     seriesType: 'line',
-    title: 'My fanci line chart',
     legend: {
       isVisible: false,
       position: Position.Top,
