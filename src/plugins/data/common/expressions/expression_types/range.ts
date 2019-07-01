@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType, Render } from '../../types';
+import { ExpressionType, Render } from '../../../common/expressions/types';
 
 const name = 'range';
 
