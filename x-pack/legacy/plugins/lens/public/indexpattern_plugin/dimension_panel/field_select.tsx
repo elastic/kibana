@@ -7,8 +7,12 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionProps } from '@elastic/eui';
 import classNames from 'classnames';
+import {
+  // @ts-ignore
+  EuiHighlight,
+} from '@elastic/eui';
 import {
   IndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -16,6 +20,8 @@ import {
   BaseIndexPatternColumn,
 } from '../indexpattern';
 import { hasField, sortByField } from '../state_helpers';
+import { FieldIcon } from '../field_icon';
+import { DataType } from '../../types';
 
 export interface FieldSelectProps {
   incompatibleSelectedOperationType: OperationType | null;
@@ -60,7 +66,7 @@ export function FieldSelect({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: fieldLessColumn.operationId,
+      value: { operationId: fieldLessColumn.operationId, dataType: fieldLessColumn.dataType },
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
           fieldLessColumn
@@ -77,7 +83,7 @@ export function FieldSelect({
       options: uniqueColumnsByField
         .map(col => ({
           label: col.sourceField,
-          value: col.operationId,
+          value: { operationId: col.operationId, dataType: col.dataType },
           compatible: isCompatibleWithCurrentOperation(col),
         }))
         .sort(({ compatible: a }, { compatible: b }) => {
@@ -104,7 +110,7 @@ export function FieldSelect({
       placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
         defaultMessage: 'Field',
       })}
-      options={fieldOptions}
+      options={(fieldOptions as unknown) as EuiComboBoxOptionProps[]}
       isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumn)}
       selectedOptions={
         selectedColumn
@@ -126,10 +132,23 @@ export function FieldSelect({
         }
 
         const column: IndexPatternColumn = filteredColumns.find(
-          ({ operationId }) => operationId === choices[0].value
+          ({ operationId }) =>
+            operationId === ((choices[0].value as unknown) as { operationId: string }).operationId
         )!;
 
         onChangeColumn(column);
+      }}
+      renderOption={(option, searchValue) => {
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={null}>
+              <FieldIcon type={((option.value as unknown) as { dataType: DataType }).dataType} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
       }}
     />
   );
