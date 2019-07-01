@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export const LICENSE_TYPE = {
-  BASIC: 0,
-  FULL: 1,
-};
+export enum LICENSE_TYPE {
+  BASIC,
+  FULL, // platinum or trial
+}

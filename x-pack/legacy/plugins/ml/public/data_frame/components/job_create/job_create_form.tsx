@@ -180,16 +180,20 @@ export const JobCreateForm: SFC<Props> = React.memo(
       }
     };
 
-    if (started === true && progressPercentComplete === undefined) {
+    const isBatchTransform = typeof jobConfig.sync === 'undefined';
+
+    if (started === true && progressPercentComplete === undefined && isBatchTransform) {
       // wrapping in function so we can keep the interval id in local scope
       function startProgressBar() {
         const interval = setInterval(async () => {
           try {
             const stats = await ml.dataFrame.getDataFrameTransformsStats(jobId);
-            const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
-            setProgressPercentComplete(percent);
-            if (percent >= 100) {
-              clearInterval(interval);
+            if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
+              const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
+              setProgressPercentComplete(percent);
+              if (percent >= 100) {
+                clearInterval(interval);
+              }
             }
           } catch (e) {
             toastNotifications.addDanger(
@@ -303,7 +307,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {progressPercentComplete !== undefined && (
+        {progressPercentComplete !== undefined && isBatchTransform && (
           <Fragment>
             <EuiSpacer size="m" />
             <EuiText size="xs">

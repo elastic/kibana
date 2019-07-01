@@ -17,15 +17,32 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
+import template from './tool_bar_pager_buttons.html';
 
-import { decorateFormController } from './kbn_form_controller';
-import { decorateModelController } from './kbn_model_controller';
+const app = uiModules.get('kibana');
 
-uiModules
-  .get('kibana')
-  .config(function ($provide) {
-    $provide.decorator('formDirective', decorateFormController);
-    $provide.decorator('ngFormDirective', decorateFormController);
-    $provide.decorator('ngModelDirective', decorateModelController);
-  });
+app.directive('toolBarPagerButtons', function () {
+  return {
+    restrict: 'E',
+    replace: true,
+    template: template,
+    scope: {
+      hasNextPage: '=',
+      hasPreviousPage: '=',
+      onPageNext: '=',
+      onPagePrevious: '=',
+    },
+    controllerAs: 'toolBarPagerButtons',
+    bindToController: true,
+    controller: class ToolBarPagerButtonsController {
+      nextPage = () => {
+        this.onPageNext();
+      };
+
+      previousPage = () => {
+        this.onPagePrevious();
+      };
+    }
+  };
+});
