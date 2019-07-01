@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Root } from 'joi';
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
@@ -26,6 +27,13 @@ export const ml = (kibana: any) => {
     id: 'ml',
     configPrefix: 'xpack.ml',
     publicDir: resolve(__dirname, 'public'),
+
+    config(Joi: Root) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        excludeFromBasePrivileges: Joi.boolean().default(true)
+      }).default();
+    },
 
     uiExports: {
       app: {

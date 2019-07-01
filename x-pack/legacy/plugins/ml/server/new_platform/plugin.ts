@@ -145,7 +145,7 @@ export class Plugin {
 
     xpackMainPlugin.registerFeature({
       id: 'ml',
-      excludeFromBasePrivileges: true,
+      excludeFromBasePrivileges: this.config.get('xpack.ml.excludeFromBasePrivileges'),
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
