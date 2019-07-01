@@ -44,7 +44,6 @@ export interface OwnProps extends QueryTemplateProps {
 export interface NetworkDnsComponentReduxProps {
   isInspected: boolean;
   limit: number;
-  skipQuery: boolean;
   dnsSortField: NetworkDnsSortField;
   isPtrIncluded: boolean;
 }
@@ -65,7 +64,6 @@ class NetworkDnsComponentQuery extends QueryTemplate<
       filterQuery,
       isPtrIncluded,
       skip,
-      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -76,7 +74,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
         query={networkDnsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
-        skip={skip || skipQuery}
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
@@ -145,11 +143,10 @@ const makeMapStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       ...getNetworkDnsSelector(state),
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
 

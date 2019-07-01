@@ -31,7 +31,6 @@ export interface KpiNetworkArgs {
 
 export interface KpiNetworkReducer {
   isInspected: boolean;
-  skipQuery: boolean;
 }
 
 export interface KpiNetworkProps extends QueryTemplateProps {
@@ -39,22 +38,12 @@ export interface KpiNetworkProps extends QueryTemplateProps {
 }
 
 const KpiNetworkComponentQuery = pure<KpiNetworkProps & KpiNetworkReducer>(
-  ({
-    id = ID,
-    children,
-    filterQuery,
-    isInspected,
-    skip,
-    skipQuery = false,
-    sourceId,
-    startDate,
-    endDate,
-  }) => (
+  ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
       query={kpiNetworkQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
-      skip={skip || skipQuery}
+      skip={skip}
       variables={{
         sourceId,
         timerange: {
@@ -84,10 +73,9 @@ const KpiNetworkComponentQuery = pure<KpiNetworkProps & KpiNetworkReducer>(
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: KpiNetworkProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

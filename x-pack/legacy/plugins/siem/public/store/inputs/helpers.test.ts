@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, noop } from 'lodash/fp';
 
 import { mockGlobalState } from '../../mock';
 
-import { toggleLockTimeline, updateInputTimerange } from './helpers';
+import {
+  toggleLockTimeline,
+  updateInputTimerange,
+  updateQuery,
+  UpdateQueryParams,
+} from './helpers';
 import { InputsModel, TimeRange } from './model';
 
 describe('Inputs', () => {
@@ -90,6 +95,38 @@ describe('Inputs', () => {
       const newState: InputsModel = updateInputTimerange('timeline', newTimerange, state);
       expect(newState.timeline.timerange).toEqual(newTimerange);
       expect(newState.global.timerange).toEqual(state.timeline.timerange);
+    });
+  });
+
+  describe('#updateQuery', () => {
+    test('make sure you can add a query', () => {
+      const newQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        inspect: null,
+        loading: false,
+        refetch: noop,
+        state,
+      };
+      const newState: InputsModel = updateQuery(newQuery);
+      expect(newState.global.query[0]).toEqual(newQuery);
+    });
+
+    test('make sure you can update a query', () => {
+      const newQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        inspect: null,
+        loading: false,
+        refetch: noop,
+        state,
+      };
+      updateQuery(newQuery);
+
+      newQuery.loading = true;
+      const newState: InputsModel = updateQuery(newQuery);
+
+      expect(newState.global.query[0]).toEqual(newQuery);
     });
   });
 });

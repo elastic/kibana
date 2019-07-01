@@ -39,7 +39,6 @@ export interface OwnProps extends QueryTemplateProps {
 export interface EventsComponentReduxProps {
   isInspected: boolean;
   limit: number;
-  skipQuery: boolean;
 }
 
 type EventsProps = OwnProps & EventsComponentReduxProps;
@@ -57,7 +56,6 @@ class EventsComponentQuery extends QueryTemplate<
       isInspected,
       limit,
       skip,
-      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -67,7 +65,7 @@ class EventsComponentQuery extends QueryTemplate<
         query={eventsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        skip={skip || skipQuery}
+        skip={skip}
         variables={{
           filterQuery: createFilter(filterQuery),
           sourceId,
@@ -136,11 +134,10 @@ const makeMapStateToProps = () => {
   const getEventsSelector = hostsSelectors.eventsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       ...getEventsSelector(state, type),
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

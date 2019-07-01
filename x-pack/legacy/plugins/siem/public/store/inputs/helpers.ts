@@ -54,7 +54,7 @@ export const toggleLockTimeline = (linkToId: InputsModelId, state: InputsModel):
   };
 };
 
-interface UpdateQueryParams {
+export interface UpdateQueryParams {
   id: string;
   inputId: InputsModelId;
   inspect: InspectQuery | null;

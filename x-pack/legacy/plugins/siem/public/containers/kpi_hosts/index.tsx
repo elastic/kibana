@@ -31,7 +31,6 @@ export interface KpiHostsArgs {
 
 export interface KpiHostsReducer {
   isInspected: boolean;
-  skipQuery: boolean;
 }
 
 export interface KpiHostsProps extends QueryTemplateProps {
@@ -39,22 +38,12 @@ export interface KpiHostsProps extends QueryTemplateProps {
 }
 
 const KpiHostsComponentQuery = pure<KpiHostsProps & KpiHostsReducer>(
-  ({
-    id = ID,
-    children,
-    endDate,
-    filterQuery,
-    isInspected,
-    skip,
-    skipQuery = false,
-    sourceId,
-    startDate,
-  }) => (
+  ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
       query={kpiHostsQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
-      skip={skip || skipQuery}
+      skip={skip}
       variables={{
         sourceId,
         timerange: {
@@ -84,10 +73,9 @@ const KpiHostsComponentQuery = pure<KpiHostsProps & KpiHostsReducer>(
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: KpiHostsProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

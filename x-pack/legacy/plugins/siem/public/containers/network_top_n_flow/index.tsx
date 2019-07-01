@@ -46,7 +46,6 @@ export interface OwnProps extends QueryTemplateProps {
 export interface NetworkTopNFlowComponentReduxProps {
   isInspected: boolean;
   limit: number;
-  skipQuery: boolean;
   flowDirection: FlowDirection;
   topNFlowSort: NetworkTopNFlowSortField;
   flowTarget: FlowTarget;
@@ -66,7 +65,6 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       children,
       filterQuery,
       skip,
-      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -80,7 +78,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
         query={networkTopNFlowQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
-        skip={skip || skipQuery}
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
@@ -150,11 +148,10 @@ const makeMapStateToProps = () => {
   const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       ...getNetworkTopNFlowSelector(state),
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

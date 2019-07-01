@@ -31,7 +31,6 @@ export interface HostOverviewArgs {
 
 export interface HostOverviewReduxProps {
   isInspected: boolean;
-  skipQuery: boolean;
 }
 
 export interface OwnProps extends QueryTemplateProps {
@@ -53,7 +52,6 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
       children,
       hostName,
       skip,
-      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -63,7 +61,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
         query={HostOverviewQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        skip={skip || skipQuery}
+        skip={skip}
         variables={{
           sourceId,
           hostName,
@@ -96,10 +94,9 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

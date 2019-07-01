@@ -32,7 +32,6 @@ export interface OverviewHostArgs {
 
 export interface OverviewHostReducer {
   isInspected: boolean;
-  skipQuery: boolean;
 }
 
 export interface OverviewHostProps extends QueryTemplateProps {
@@ -43,20 +42,10 @@ export interface OverviewHostProps extends QueryTemplateProps {
 }
 
 const OverviewHostComponentQuery = pure<OverviewHostProps & OverviewHostReducer>(
-  ({
-    id = ID,
-    children,
-    filterQuery,
-    isInspected,
-    skipQuery = false,
-    sourceId,
-    startDate,
-    endDate,
-  }) => (
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
       query={overviewHostQuery}
       fetchPolicy="cache-and-network"
-      skip={skipQuery}
       variables={{
         sourceId,
         timerange: {
@@ -86,10 +75,9 @@ const OverviewHostComponentQuery = pure<OverviewHostProps & OverviewHostReducer>
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OverviewHostProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

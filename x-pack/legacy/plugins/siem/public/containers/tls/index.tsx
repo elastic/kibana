@@ -41,7 +41,6 @@ export interface OwnProps extends QueryTemplateProps {
 export interface TlsComponentReduxProps {
   isInspected: boolean;
   limit: number;
-  skipQuery: boolean;
   tlsSortField: TlsSortField;
 }
 
@@ -57,7 +56,6 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
       filterQuery,
       ip,
       skip,
-      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -69,7 +67,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
         query={tlsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
-        skip={skip || skipQuery}
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
@@ -136,11 +134,10 @@ const makeMapStateToProps = () => {
   const getTlsSelector = networkSelectors.tlsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       ...getTlsSelector(state),
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
 

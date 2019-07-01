@@ -31,7 +31,6 @@ export interface IpOverviewArgs {
 
 export interface IpOverviewReduxProps {
   isInspected: boolean;
-  skipQuery: boolean;
 }
 
 export interface IpOverviewProps extends QueryTemplateProps {
@@ -41,12 +40,12 @@ export interface IpOverviewProps extends QueryTemplateProps {
 }
 
 const IpOverviewComponentQuery = pure<IpOverviewProps & IpOverviewReduxProps>(
-  ({ id = ID, isInspected, children, filterQuery, skip, skipQuery = false, sourceId, ip }) => (
+  ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
-      skip={skip || skipQuery}
+      skip={skip}
       variables={{
         sourceId,
         filterQuery: createFilter(filterQuery),
@@ -73,10 +72,9 @@ const IpOverviewComponentQuery = pure<IpOverviewProps & IpOverviewReduxProps>(
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: IpOverviewProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

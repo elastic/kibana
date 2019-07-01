@@ -38,7 +38,6 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface AuthenticationsComponentReduxProps {
   isInspected: boolean;
-  skipQuery: boolean;
   limit: number;
 }
 
@@ -56,7 +55,6 @@ class AuthenticationsComponentQuery extends QueryTemplate<
       children,
       filterQuery,
       skip,
-      skipQuery = false,
       sourceId,
       startDate,
       endDate,
@@ -67,7 +65,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
         query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        skip={skip || skipQuery}
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
@@ -134,11 +132,10 @@ const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       ...getAuthenticationsSelector(state, type),
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

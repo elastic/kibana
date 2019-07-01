@@ -52,27 +52,22 @@ export const InspectButtonComponent = ({
   title = '',
 }: InspectButtonProps) => (
   <>
-    <EuiToolTip
-      delay="regular"
-      position="top"
-      content={i18n.TOOLTIP_CONTENT}
-      data-test-subj="inspect-tooltip"
-    >
-      <EuiButtonIcon
-        iconSize="m"
-        iconType="inspect"
-        isDisabled={loading}
-        onClick={() => {
-          setIsInspected({
-            id: queryId,
-            inputId: 'global',
-            isInspected: true,
-            selectedInspectIndex: inspectIndex,
-          });
-        }}
-        data-test-subj="inspect-open-modal"
-      />
-    </EuiToolTip>
+    <EuiButtonIcon
+      aria-label={i18n.TOOLTIP_CONTENT}
+      iconSize="m"
+      iconType="inspect"
+      isDisabled={loading}
+      title={i18n.TOOLTIP_CONTENT}
+      onClick={() => {
+        setIsInspected({
+          id: queryId,
+          inputId: 'global',
+          isInspected: true,
+          selectedInspectIndex: inspectIndex,
+        });
+      }}
+      data-test-subj="inspect-open-modal"
+    />
     <ModalInspectQuery
       closeModal={() => {
         setIsInspected({

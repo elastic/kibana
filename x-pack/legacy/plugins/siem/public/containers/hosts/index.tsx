@@ -52,7 +52,6 @@ export interface OwnProps extends QueryTemplateProps {
 export interface HostsComponentReduxProps {
   isInspected: boolean;
   limit: number;
-  skipQuery: boolean;
   sortField: HostsFields;
   direction: Direction;
 }
@@ -85,7 +84,6 @@ class HostsComponentQuery extends QueryTemplate<
       limit,
       startDate,
       skip,
-      skipQuery = false,
       sourceId,
       sortField,
     } = this.props;
@@ -116,7 +114,7 @@ class HostsComponentQuery extends QueryTemplate<
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
         variables={variables}
-        skip={skip || skipQuery}
+        skip={skip}
       >
         {({ data, loading, fetchMore, refetch }) => {
           this.setFetchMore(fetchMore);
@@ -170,11 +168,10 @@ const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       ...getHostsSelector(state, type),
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;

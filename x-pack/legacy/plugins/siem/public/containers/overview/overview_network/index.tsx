@@ -32,7 +32,6 @@ export interface OverviewNetworkArgs {
 
 export interface OverviewNetworkReducer {
   isInspected: boolean;
-  skipQuery: boolean;
 }
 
 export interface OverviewNetworkProps extends QueryTemplateProps {
@@ -43,21 +42,11 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
 }
 
 export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & OverviewNetworkReducer>(
-  ({
-    id = ID,
-    children,
-    filterQuery,
-    isInspected,
-    skipQuery = false,
-    sourceId,
-    startDate,
-    endDate,
-  }) => (
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
       query={overviewNetworkQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
-      skip={skipQuery}
       variables={{
         sourceId,
         timerange: {
@@ -87,10 +76,9 @@ export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & Overvie
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OverviewNetworkProps) => {
-    const { isInspected, inspect } = getQuery(state, id);
+    const { isInspected } = getQuery(state, id);
     return {
       isInspected,
-      skipQuery: !isInspected && inspect != null,
     };
   };
   return mapStateToProps;
