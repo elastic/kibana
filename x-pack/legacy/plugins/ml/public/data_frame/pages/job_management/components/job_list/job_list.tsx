@@ -41,6 +41,8 @@ export const DataFrameJobList: SFC = () => {
   const [lastUpdate, setlastUpdate] = useState(Date.now());
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState<string>(DataFrameJobListColumn.id);
+  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
   useRefreshInterval(getJobs, setBlockRefresh, setlastUpdate);
@@ -63,8 +65,8 @@ export const DataFrameJobList: SFC = () => {
 
   const sorting = {
     sort: {
-      field: DataFrameJobListColumn.id,
-      direction: SortDirection.ASC,
+      field: sortField,
+      direction: sortDirection,
     },
   };
 
@@ -84,12 +86,18 @@ export const DataFrameJobList: SFC = () => {
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
+    sort = { field: DataFrameJobListColumn.id, direction: SortDirection.ASC },
   }: {
     page: { index: number; size: number };
+    sort: { field: string; direction: string };
   }) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
+
+    const { field, direction } = sort;
+    setSortField(field);
+    setSortDirection(direction);
   };
 
   return (

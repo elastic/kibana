@@ -95,7 +95,8 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
-      sortable: true,
+      sortable: (item: DataFrameJobListRow) =>
+        typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch',
       truncateText: true,
       render(item: DataFrameJobListRow) {
         const mode = typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch';
