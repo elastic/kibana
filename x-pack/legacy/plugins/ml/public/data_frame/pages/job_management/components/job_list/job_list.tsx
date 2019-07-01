@@ -96,6 +96,7 @@ export const DataFrameJobList: SFC = () => {
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       pagination={true}
       sorting={sorting}
+      data-test-subj="mlDataFramesTableJobs"
     />
   );
 };
