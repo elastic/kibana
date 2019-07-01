@@ -20,7 +20,7 @@
 import { Action } from './actions';
 import { IEmbeddable } from './embeddables';
 import { IContainer } from './containers';
-import { EmbeddableFactory } from 'ui/embeddable';
+import { EmbeddableFactory } from './embeddables/embeddable_factory';
 
 export interface Trigger {
   id: string;
@@ -36,10 +36,6 @@ export interface PropertySpec {
   description: string;
   value?: string;
 }
-
-// export interface OutputSpec {
-  // [id: string]: PropertySpec;
-// }
 
 export enum ViewMode {
   EDIT = 'edit',
@@ -70,4 +66,4 @@ export interface TriggerContext {
 }
 
 export type GetActionsCompatibleWithTrigger = (triggerId: string, context: TriggerContext) => Promise<Action[]>;
-export type GetEmbeddableFactory = (id: string) => EmbeddableFactory;
+export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;

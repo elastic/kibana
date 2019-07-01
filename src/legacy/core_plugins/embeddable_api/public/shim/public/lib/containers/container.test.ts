@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import '../ui_capabilities.test.mocks';
-
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
 import {
@@ -35,7 +33,7 @@ import {
   HELLO_WORLD_EMBEDDABLE_TYPE,
   HelloWorldEmbeddableFactory,
 } from '../test_samples/index';
-import { isErrorEmbeddable, EmbeddableOutput } from '../embeddables';
+import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
 import { ViewMode } from '../types';
 import {
@@ -44,21 +42,19 @@ import {
 } from '../test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { PanelNotFoundError } from './panel_not_found_error';
+import { PanelNotFoundError } from '../errors';
 
-jest.mock('ui/new_platform');
-
-const embeddableFactories = new Map<string, any>();
-
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new SlowContactCardEmbeddableFactory());
-embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+const __embeddableFactories = new Map<string, EmbeddableFactory>();
+__embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+__embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new SlowContactCardEmbeddableFactory());
+__embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
   embeddableInput = {}
 ) {
-  const container = new HelloWorldContainer(containerInput, embeddableFactories);
+  const container = new HelloWorldContainer(containerInput as any, getFactory);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -83,7 +79,7 @@ test('Container initializes embeddables', async done => {
         },
       },
     },
-    embeddableFactories
+    getFactory
   );
 
   const subscription = container.getOutput$().subscribe(() => {
@@ -135,7 +131,7 @@ test('Container.removeEmbeddable removes and cleans up', async done => {
         },
       },
     },
-    embeddableFactories
+    getFactory
   );
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -307,7 +303,7 @@ test(`Container updates its state when a child's input is updated`, async done =
         // Make sure a brand new container built off the output of container also creates an embeddable
         // with "Dr.", not the default the embeddable was first added with. Makes sure changed input
         // is preserved with the container.
-        const containerClone = new HelloWorldContainer(container.getInput(), embeddableFactories);
+        const containerClone = new HelloWorldContainer(container.getInput(), getFactory);
         const cloneSubscription = Rx.merge(
           containerClone.getOutput$(),
           containerClone.getInput$()
@@ -427,7 +423,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   };
   const container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },
-    embeddableFactories
+    getFactory
   );
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -451,7 +447,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 });
 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
-  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, embeddableFactories);
+  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, getFactory);
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -483,7 +479,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 test('Panel removed from input state', async done => {
   const container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [] },
-    embeddableFactories
+    getFactory
   );
 
   const embeddable = await container.addNewEmbeddable<
@@ -515,7 +511,7 @@ test('Panel removed from input state', async done => {
 test('Panel added to input state', async done => {
   const container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [] },
-    embeddableFactories
+    getFactory
   );
 
   const embeddable = await container.addNewEmbeddable<
@@ -532,7 +528,7 @@ test('Panel added to input state', async done => {
 
   const container2 = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [] },
-    embeddableFactories
+    getFactory
   );
 
   const subscription = container2
@@ -554,11 +550,11 @@ test('Panel added to input state', async done => {
 test('Container changes made directly after adding a new embeddable are propagated', async done => {
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {}, viewMode: ViewMode.EDIT },
-    embeddableFactories
+    getFactory
   );
 
-  embeddableFactories.clear();
-  embeddableFactories.set(
+  __embeddableFactories.clear();
+  __embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
   );
@@ -600,7 +596,7 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
       },
       viewMode: ViewMode.EDIT,
     },
-    embeddableFactories
+    getFactory
   );
 
   container.getOutput$().subscribe(() => {
@@ -625,7 +621,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
       },
       viewMode: ViewMode.EDIT,
     },
-    embeddableFactories
+    getFactory
   );
 
   container.getOutput$().subscribe(() => {
@@ -650,7 +646,7 @@ test('ErrorEmbeddables get updated when parent does', async done => {
       },
       viewMode: ViewMode.EDIT,
     },
-    embeddableFactories
+    getFactory
   );
 
   container.getOutput$().subscribe(() => {
@@ -673,14 +669,14 @@ test('untilEmbeddableLoaded throws an error if there is no such child panel in t
       id: 'hello',
       panels: {},
     },
-    embeddableFactories
+    getFactory
   );
 
   expect(container.untilEmbeddableLoaded('idontexist')).rejects.toThrowError();
 });
 
 test('untilEmbeddableLoaded resolves if child is has an type that does not exist', async done => {
-  embeddableFactories.clear();
+  __embeddableFactories.clear();
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -691,7 +687,7 @@ test('untilEmbeddableLoaded resolves if child is has an type that does not exist
         },
       },
     },
-    embeddableFactories
+    getFactory
   );
 
   const child = await container.untilEmbeddableLoaded('123');
@@ -701,8 +697,8 @@ test('untilEmbeddableLoaded resolves if child is has an type that does not exist
 });
 
 test('untilEmbeddableLoaded resolves if child is loaded in the container', async done => {
-  embeddableFactories.clear();
-  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+  __embeddableFactories.clear();
+  __embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
 
   const container = new HelloWorldContainer(
     {
@@ -714,7 +710,7 @@ test('untilEmbeddableLoaded resolves if child is loaded in the container', async
         },
       },
     },
-    embeddableFactories
+    getFactory
   );
 
   const child = await container.untilEmbeddableLoaded('123');
@@ -724,8 +720,8 @@ test('untilEmbeddableLoaded resolves if child is loaded in the container', async
 });
 
 test('untilEmbeddableLoaded rejects with an error if child is subsequently removed', async done => {
-  embeddableFactories.clear();
-  embeddableFactories.set(
+  __embeddableFactories.clear();
+  __embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
   );
@@ -740,7 +736,7 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
         },
       },
     },
-    embeddableFactories
+    getFactory
   );
 
   container.untilEmbeddableLoaded('123').catch(error => {

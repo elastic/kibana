@@ -21,27 +21,32 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
-import { EmbeddableFactory } from '../../embeddables';
+import { GetEmbeddableFactory } from '../../types';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
 interface InheritedInput {
   id: string;
   viewMode: ViewMode;
+  firstName: string;
   lastName: string;
 }
 
 export class HelloWorldContainer extends Container<InheritedInput> {
   public readonly type = HELLO_WORLD_CONTAINER;
 
-  constructor(input: ContainerInput, embeddableFactories: Map<string, EmbeddableFactory>) {
-    super(input, { embeddableLoaded: {} }, embeddableFactories);
+  constructor(
+    input: ContainerInput<{ firstName: string, lastName: string }>, 
+    getFactory: GetEmbeddableFactory
+  ) {
+    super(input, { embeddableLoaded: {} }, getFactory);
   }
 
   public getInheritedInput(id: string) {
     return {
       id,
       viewMode: this.input.viewMode || ViewMode.EDIT,
+      firstName: '',
       lastName: 'foo',
     };
   }

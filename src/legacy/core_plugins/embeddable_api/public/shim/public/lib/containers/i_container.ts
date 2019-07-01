@@ -22,12 +22,11 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
-  EmbeddableFactory,
   IEmbeddable,
 } from '../embeddables';
 
 export interface PanelState<
-  E extends { id: string; [key: string]: unknown } = { id: string; [key: string]: unknown }
+  E extends { id: string; } = { id: string; }
 > {
   savedObjectId?: string;
 
@@ -45,10 +44,10 @@ export interface ContainerOutput extends EmbeddableOutput {
   embeddableLoaded: { [key: string]: boolean };
 }
 
-export interface ContainerInput extends EmbeddableInput {
+export interface ContainerInput<PanelExplicitInput extends {} = {}> extends EmbeddableInput {
   hidePanelTitles?: boolean;
   panels: {
-    [key: string]: PanelState;
+    [key: string]: PanelState<PanelExplicitInput & { id: string }>;
   };
 }
 
@@ -56,8 +55,6 @@ export interface IContainer<
   I extends ContainerInput = ContainerInput,
   O extends ContainerOutput = ContainerOutput
 > extends IEmbeddable<I, O> {
-  readonly embeddableFactories: Map<string, EmbeddableFactory>;
-
   /**
    * Call if you want to wait until an embeddable with that id has finished loading.
    */

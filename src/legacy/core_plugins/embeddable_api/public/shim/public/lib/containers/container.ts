@@ -29,6 +29,7 @@ import {
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
+import { GetEmbeddableFactory } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -48,6 +49,7 @@ export abstract class Container<
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
+    private readonly getFactory: GetEmbeddableFactory,
     parent?: Container
   ) {
     super(input, output, parent);
@@ -85,7 +87,7 @@ export abstract class Container<
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
   >(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
-    const factory = this.embeddableFactories.get(type) as
+    const factory = this.getFactory(type) as
       | EmbeddableFactory<EEI, EEO, E>
       | undefined;
 
@@ -102,7 +104,7 @@ export abstract class Container<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
   >(type: string, savedObjectId: string): Promise<TEmbeddable | ErrorEmbeddable> {
-    const factory = this.embeddableFactories.get(type) as EmbeddableFactory<
+    const factory = this.getFactory(type) as EmbeddableFactory<
       TEmbeddableInput,
       any,
       TEmbeddable
@@ -300,7 +302,7 @@ export abstract class Container<
     let embeddable: IEmbeddable | ErrorEmbeddable | undefined;
     const inputForChild = this.getInputForChild(panel.explicitInput.id);
     try {
-      const factory = this.embeddableFactories.get(panel.type);
+      const factory = this.getFactory(panel.type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }

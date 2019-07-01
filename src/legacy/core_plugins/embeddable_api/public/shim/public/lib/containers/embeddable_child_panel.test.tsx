@@ -17,27 +17,30 @@
  * under the License.
  */
 
-import '../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   HelloWorldContainer,
   CONTACT_CARD_EMBEDDABLE,
+  SlowContactCardEmbeddableFactory,
 } from '../test_samples';
-import { EmbeddableFactoryRegistry } from '../types';
 import React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
+import { GetEmbeddableFactory } from '../types';
+import { EmbeddableFactory } from '../embeddables';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
-  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, embeddableFactories);
+  const __embeddableFactories = new Map<string, EmbeddableFactory>();
+  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new SlowContactCardEmbeddableFactory());
+  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+
+  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, getFactory);
   const newEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
     firstName: 'Theon',
     lastName: 'Greyjoy',
@@ -68,13 +71,13 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 });
 
 test(`EmbeddableChildPanel renders an error message if the factory doesn't exist`, async () => {
-  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
+  const getFactory: GetEmbeddableFactory = () => undefined;
   const container = new HelloWorldContainer(
     {
       id: 'hello',
       panels: { '1': { type: 'idontexist', explicitInput: { id: '1' } } },
     },
-    embeddableFactories
+    getFactory
   );
 
   const component = mountWithIntl(

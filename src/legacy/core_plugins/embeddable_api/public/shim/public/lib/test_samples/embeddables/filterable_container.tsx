@@ -17,8 +17,8 @@
  * under the License.
  */
 import { Filter } from '@kbn/es-query';
-import { EmbeddableFactory } from '../../embeddables';
 import { Container, ContainerInput } from '../../containers';
+import { GetEmbeddableFactory } from '../../types';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';
 
@@ -39,9 +39,10 @@ export class FilterableContainer extends Container<
 
   constructor(
     initialInput: FilterableContainerInput,
+    getFactory: GetEmbeddableFactory,
     parent?: Container
   ) {
-    super(initialInput, { embeddableLoaded: {} }, embeddableFactories, parent);
+    super(initialInput, { embeddableLoaded: {} }, getFactory, parent);
   }
 
   public getInheritedInput() {
