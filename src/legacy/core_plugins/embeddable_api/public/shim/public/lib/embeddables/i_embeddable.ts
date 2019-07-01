@@ -22,11 +22,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 
-interface TIndexSignature {
-  [key: string]: unknown;
-}
-
-export interface EmbeddableInput extends TIndexSignature {
+export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
   id: string;
@@ -79,17 +75,21 @@ export interface IEmbeddable<
   /**
    * Get the input used to instantiate this embeddable. The input is a serialized representation of
    * this embeddable instance and can be used to clone or re-instantiate it. Input state:
+   * 
    * - Can be updated externally
    * - Can change multiple times for a single embeddable instance.
+   * 
    * Examples: title, pie slice colors, custom search columns and sort order.
    **/
   getInput(): Readonly<I>;
 
   /**
    * Output state is:
+   * 
    * - State that should not change once the embeddable is instantiated, or
-   *  - State that is derived from the input state, or
+   * - State that is derived from the input state, or
    * - State that only the embeddable instance itself knows about, or the factory.
+   * 
    * Examples: editUrl, title taken from a saved object, if your input state was first name and
    *   last name, your output state could be greeting.
    **/
@@ -135,7 +135,7 @@ export interface IEmbeddable<
   reload(): void;
 
   /**
-   * An embeddable can return inspector adapters if it want the inspector to be
+   * An embeddable can return inspector adapters if it wants the inspector to be
    * available via the context menu of that panel.
    * @return Inspector adapters that will be used to open an inspector for.
    */

@@ -52,6 +52,7 @@ export abstract class EmbeddableFactory<
   >,
   TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
 > {
+  // TODO: Rename this to `id` to align with other objects?
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
   public abstract readonly type: string;
@@ -59,8 +60,8 @@ export abstract class EmbeddableFactory<
   public readonly savedObjectMetaData?: SavedObjectMetaData<TSavedObjectAttributes>;
 
   /**
-   * True is this factory create embeddables that are Containers.  Used in the add panel to
-   * conditionally show whether these can be added to another container.  It's just not
+   * True if is this factory create embeddables that are Containers. Used in the add panel to
+   * conditionally show whether these can be added to another container. It's just not
    * supported right now, but once nested containers are officially supported we can probably get
    * rid of this interface.
    */
@@ -74,6 +75,8 @@ export abstract class EmbeddableFactory<
     this.savedObjectMetaData = savedObjectMetaData;
   }
 
+  // TODO: Can this be a property? If this "...should be based of capabilities service...",
+  // TODO: maybe then it should be *async*?
   /**
    * Returns whether the current user should be allowed to edit this type of
    * embeddable. Most of the time this should be based off the capabilities service.
@@ -131,6 +134,7 @@ export abstract class EmbeddableFactory<
   /**
    * Resolves to undefined if a new Embeddable cannot be directly created and the user will instead be redirected
    * elsewhere.
+   * 
    * This will likely change in future iterations when we improve in place editing capabilities.
    */
   public abstract create(
