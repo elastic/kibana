@@ -7,7 +7,7 @@ import { API_BASE_PATH } from '../../../../common/constants';
 import { httpService } from './http';
 import { useRequest } from './use_request';
 
-export const loadPermissions = () => {
+export const useLoadPermissions = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}permissions`),
     method: 'get',
