@@ -163,8 +163,6 @@ noChanges () {
     echo -e "$GIT_CHANGES\n"
     exit 1
   fi 
-fi
-  fi 
 }
 noChanges "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
 
