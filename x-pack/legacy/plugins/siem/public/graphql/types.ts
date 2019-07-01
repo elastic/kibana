@@ -2340,6 +2340,7 @@ export namespace GetDomainsQuery {
     sort: DomainsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2364,6 +2365,8 @@ export namespace GetDomainsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -2436,6 +2439,14 @@ export namespace GetDomainsQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -2876,6 +2887,7 @@ export namespace GetIpOverviewQuery {
     filterQuery?: string | null;
     ip: string;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2900,6 +2912,8 @@ export namespace GetIpOverviewQuery {
     destination?: Destination | null;
 
     host: Host;
+
+    inspect?: Inspect | null;
   };
 
   export type _Source = {
@@ -3026,6 +3040,14 @@ export namespace GetIpOverviewQuery {
     platform?: ToStringArray | null;
 
     version?: ToStringArray | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -3165,6 +3187,7 @@ export namespace GetKpiNetworkQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3199,11 +3222,21 @@ export namespace GetKpiNetworkQuery {
     dnsQueries?: number | null;
 
     tlsHandshakes?: number | null;
+
+    inspect?: Inspect | null;
   };
 
   export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
 
   export type UniqueDestinationPrivateIpsHistogram = KpiNetworkChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetNetworkDnsQuery {
@@ -3215,6 +3248,7 @@ export namespace GetNetworkDnsQuery {
     pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3239,6 +3273,8 @@ export namespace GetNetworkDnsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -3284,6 +3320,14 @@ export namespace GetNetworkDnsQuery {
 
     value?: string | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetNetworkTopNFlowQuery {
@@ -3296,6 +3340,7 @@ export namespace GetNetworkTopNFlowQuery {
     flowTarget: FlowTarget;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3320,6 +3365,8 @@ export namespace GetNetworkTopNFlowQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -3412,6 +3459,14 @@ export namespace GetNetworkTopNFlowQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -4975,6 +5030,7 @@ export namespace GetTlsQuery {
     sort: TlsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -4999,6 +5055,8 @@ export namespace GetTlsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -5043,6 +5101,14 @@ export namespace GetTlsQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -5165,6 +5231,7 @@ export namespace GetUsersQuery {
     sort: UsersSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -5189,6 +5256,8 @@ export namespace GetUsersQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -5237,6 +5306,14 @@ export namespace GetUsersQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 

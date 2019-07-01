@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDescriptionList, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
 import { DescriptionList } from '../../../../../common/utility_types';
-import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
 import { InspectButton } from '../../../inspect';
@@ -53,6 +52,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
   ({
     data,
     loading,
+    id,
     startDate,
     endDate,
     isLoadingAnomaliesData,

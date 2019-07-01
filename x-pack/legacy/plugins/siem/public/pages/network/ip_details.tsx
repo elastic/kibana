@@ -46,6 +46,7 @@ import { scoreIntervalToDateTime } from '../../components/ml/score/score_interva
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
+const IpOverviewManage = manageQuery(IpOverview);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
@@ -98,14 +99,16 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         type={networkModel.NetworkType.details}
                         ip={decodeIpv6(ip)}
                       >
-                        {({ ipOverviewData, loading }) => (
+                        {({ id, inspect, ipOverviewData, loading, refetch }) => (
                           <AnomalyTableProvider
                             influencers={networkToInfluencers(ip)}
                             startDate={from}
                             endDate={to}
                           >
                             {({ isLoadingAnomaliesData, anomaliesData }) => (
-                              <IpOverview
+                              <IpOverviewManage
+                                id={id}
+                                inspect={inspect}
                                 ip={decodeIpv6(ip)}
                                 data={ipOverviewData}
                                 anomaliesData={anomaliesData}
@@ -113,6 +116,8 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                                 isLoadingAnomaliesData={isLoadingAnomaliesData}
                                 type={networkModel.NetworkType.details}
                                 flowTarget={flowTarget}
+                                refetch={refetch}
+                                setQuery={setQuery}
                                 startDate={from}
                                 endDate={to}
                                 narrowDateRange={(score, interval) => {
@@ -141,11 +146,21 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         startDate={from}
                         type={networkModel.NetworkType.details}
                       >
-                        {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                        {({
+                          id,
+                          inspect,
+                          domains,
+                          totalCount,
+                          pageInfo,
+                          loading,
+                          loadMore,
+                          refetch,
+                        }) => (
                           <DomainsTableManage
                             data={domains}
                             indexPattern={indexPattern}
                             id={id}
+                            inspect={inspect}
                             flowTarget={flowTarget}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             ip={ip}
@@ -172,10 +187,20 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         startDate={from}
                         type={networkModel.NetworkType.details}
                       >
-                        {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                        {({
+                          id,
+                          inspect,
+                          users,
+                          totalCount,
+                          pageInfo,
+                          loading,
+                          loadMore,
+                          refetch,
+                        }) => (
                           <UsersTableManage
                             data={users}
                             id={id}
+                            inspect={inspect}
                             flowTarget={flowTarget}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loading={loading}
@@ -201,10 +226,20 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         startDate={from}
                         type={networkModel.NetworkType.details}
                       >
-                        {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                        {({
+                          id,
+                          inspect,
+                          tls,
+                          totalCount,
+                          pageInfo,
+                          loading,
+                          loadMore,
+                          refetch,
+                        }) => (
                           <TlsTableManage
                             data={tls}
                             id={id}
+                            inspect={inspect}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
                             loading={loading}
                             loadMore={loadMore}
