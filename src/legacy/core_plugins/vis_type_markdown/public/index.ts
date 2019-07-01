@@ -34,7 +34,7 @@ export interface SetupDeps {
 class VisTypeMarkdownPlugin {
   constructor() {}
 
-  public setup({visualizations, data}: SetupDeps) {
+  public setup({ visualizations, data }: SetupDeps) {
     visualizations.types.VisTypesRegistryProvider.register(() => markdownVis);
     data.expressions.registerFunction(kibanaMarkdown);
   }
@@ -49,6 +49,6 @@ new VisTypeMarkdownPlugin().setup({
   data: {
     expressions: {
       registerFunction: (fn: any) => functionsRegistry.register(fn),
-    }
-  }
+    },
+  },
 });

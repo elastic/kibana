@@ -57,7 +57,7 @@ export const kibanaMarkdown = (): ExpressionFunction<
     font: {
       types: ['style'],
       help: i18n.translate('visTypeMarkdown.function.font.help', {
-        defaultMessage: 'Font settings.'
+        defaultMessage: 'Font settings.',
       }),
       default: `{font size=12}`,
     },
