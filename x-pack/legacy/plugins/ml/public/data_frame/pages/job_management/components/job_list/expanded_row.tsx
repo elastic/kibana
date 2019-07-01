@@ -69,7 +69,7 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
     {
       id: 'job-preview',
       name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobPreviewLabel', {
-        defaultMessage: 'Preview Table',
+        defaultMessage: 'Preview table',
       }),
       content: <PreviewPane transformId={item.id} />,
     },

@@ -218,7 +218,7 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
           transformId="fq_date_histogram_1m_1441"
         />,
         "id": "job-preview",
-        "name": "Preview Table",
+        "name": "Preview table",
       },
     ]
   }
