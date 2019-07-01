@@ -17,12 +17,19 @@
 * under the License.
 */
 
-import { EmbeddablePublicPlugin } from '../plugin';
+export const expectError = (fn: (...args: any) => any) => {
+  try {
+    fn();
+    throw new Error('Expected an error throw.');
+  } catch (error) {
+    return error;
+  }
+};
 
-export const createSetupApi = () => {
-  const plugin = new EmbeddablePublicPlugin({});
-  const core = {} as any;
-  const api = plugin.setup(core);
-
-  return { api, plugin, core };
+export const of = async <T, P extends Promise<T>>(promise: P): Promise<[T | undefined, Error | any]> => {
+  try {
+    return [await promise, undefined];
+  } catch (error) {
+    return [, error];
+  }
 };

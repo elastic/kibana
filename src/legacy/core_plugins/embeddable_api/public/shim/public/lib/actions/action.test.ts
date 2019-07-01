@@ -23,7 +23,7 @@ test('SayHelloAction is not compatible with not matching embeddables', async () 
   const sayHelloAction = new SayHelloAction(() => {});
   const emptyEmbeddable = new EmptyEmbeddable({ id: '234' });
 
-  const isCompatible = await sayHelloAction.isCompatible({ embeddable: emptyEmbeddable });
+  const isCompatible = await sayHelloAction.isCompatible({ embeddable: emptyEmbeddable as any });
   expect(isCompatible).toBe(false);
 });
 

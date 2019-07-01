@@ -38,8 +38,9 @@ export abstract class Action<
    * Higher numbers are displayed first.
    */
   public order: number = 0;
+  
+  // TODO: Do we need, both, `type` and `id`?
   public abstract readonly type: string;
-
   constructor(public readonly id: string) {}
 
   /**

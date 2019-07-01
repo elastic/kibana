@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export * from './errors';
 export * from './embeddables';
 export * from './types';
 export * from './actions';

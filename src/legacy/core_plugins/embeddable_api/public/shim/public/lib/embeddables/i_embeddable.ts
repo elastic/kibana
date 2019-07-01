@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { Adapters } from '../types';
- import { Observable } from 'rxjs';
-import { IContainer } from '../containers';
+import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 
 interface TIndexSignature {

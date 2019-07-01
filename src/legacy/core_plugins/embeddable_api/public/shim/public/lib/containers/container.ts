@@ -25,11 +25,10 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   EmbeddableFactory,
-  EmbeddableFactoryNotFoundError,
   IEmbeddable,
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
-import { PanelNotFoundError } from './panel_not_found_error';
+import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

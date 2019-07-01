@@ -19,23 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { Container, ContainerInput } from '../containers';
 import { IEmbeddable } from '../embeddables';
 import { Action, ActionContext } from './action';
-import { IncompatibleActionError } from './incompatible_action_error';
-import { IContainer } from '../containers/i_container';
-
-interface ApplyFilterContainerInput extends ContainerInput {
-  filters: Filter[];
-}
+import { IncompatibleActionError } from '../errors';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
-
-function containerAcceptsFilterInput(
-  container: IEmbeddable | IContainer | IContainer<ApplyFilterContainerInput>
-): container is Container<any, ApplyFilterContainerInput> {
-  return (container as Container<any, ApplyFilterContainerInput>).getInput().filters !== undefined;
-}
 
 export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }> {
   public readonly type = APPLY_FILTER_ACTION;
@@ -52,7 +40,7 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
 
   public async isCompatible(context: ActionContext<IEmbeddable, { filters: Filter[] }>) {
     return Boolean(
-      containerAcceptsFilterInput(context.embeddable.getRoot()) &&
+      (context.embeddable.getRoot().getInput().filters !== undefined) &&
         context.triggerContext &&
         context.triggerContext.filters !== undefined
     );
