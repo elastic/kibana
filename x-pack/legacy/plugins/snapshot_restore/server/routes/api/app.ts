@@ -79,10 +79,15 @@ export const getPermissionsHandler: RouterRouteHandler = async (
 
   // Check if they have all the required index privileges for at least one index
   const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {
-    return (
-      privileges.includes('all') ||
-      APP_RESTORE_INDEX_PRIVILEGES.filter(privilage => !privileges.includes(privilage)).length === 0
+    if (privileges.includes('all')) {
+      return true;
+    }
+
+    const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every(privilege =>
+      privileges.includes(privilege)
     );
+
+    return indexHasAllPrivileges;
   });
 
   // If they don't, return list of required index privileges
