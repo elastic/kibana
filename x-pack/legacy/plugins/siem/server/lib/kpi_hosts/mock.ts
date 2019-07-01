@@ -290,6 +290,8 @@ export const mockKpiHostsResponse = {
   responses: [mockHostsReponse, mockAuthResponse, mockUniqueIpsResponse],
 };
 
+export const mockKpiHostsResponseNodata = { responses: [null, null, null] };
+
 const mockMsearchHeader = {
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   allowNoIndices: true,
@@ -415,13 +417,15 @@ export const mockKpiHostDetailsMsearchOptions = {
   body: [...mockKpiHostDetailsAuthQuery, ...mockKpiHostDetailsUniqueIpsQuery],
 };
 
+export const mockKpiHostsQueryDsl = [
+  JSON.stringify(mockHostsQuery[1], null, 2),
+  JSON.stringify(mockKpiHostsAuthQuery[1], null, 2),
+  JSON.stringify(mockKpiHostsUniqueIpsQuery[1], null, 2),
+];
+
 export const mockKpiHostsResult = {
   inspect: {
-    dsl: [
-      JSON.stringify(mockHostsQuery[1], null, 2),
-      JSON.stringify(mockKpiHostsAuthQuery[1], null, 2),
-      JSON.stringify(mockKpiHostsUniqueIpsQuery[1], null, 2),
-    ],
+    dsl: mockKpiHostsQueryDsl,
     response: [
       JSON.stringify(mockKpiHostsResponse.responses[0], null, 2),
       JSON.stringify(mockKpiHostsResponse.responses[1], null, 2),
@@ -515,12 +519,14 @@ export const mockKpiHostDetailsResponseNoData = {
   responses: [null, null],
 };
 
+export const mockKpiHostDetailsDsl = [
+  JSON.stringify(mockKpiHostDetailsAuthQuery[1], null, 2),
+  JSON.stringify(mockKpiHostDetailsUniqueIpsQuery[1], null, 2),
+];
+
 export const mockKpiHostDetailsResult = {
   inspect: {
-    dsl: [
-      JSON.stringify(mockKpiHostsAuthQuery[1], null, 2),
-      JSON.stringify(mockKpiHostsUniqueIpsQuery[1], null, 2),
-    ],
+    dsl: mockKpiHostDetailsDsl,
     response: [
       JSON.stringify(mockKpiHostDetailsResponse.responses[0], null, 2),
       JSON.stringify(mockKpiHostDetailsResponse.responses[1], null, 2),
