@@ -11,7 +11,10 @@ import { pure } from 'recompose';
 
 import { HeaderPanel } from '../../../header_panel';
 import { manageQuery } from '../../../page/manage_query';
-import { OverviewHostQuery } from '../../../../containers/overview/overview_host';
+import {
+  ID as OverviewHostQueryId,
+  OverviewHostQuery,
+} from '../../../../containers/overview/overview_host';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewHostStats } from '../overview_host_stats';
 
@@ -40,6 +43,7 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
     <EuiPanel>
       <HeaderPanel
         border
+        id={OverviewHostQueryId}
         subtitle={
           <FormattedMessage
             id="xpack.siem.overview.hostsSubtitle"
@@ -56,12 +60,13 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
       </HeaderPanel>
 
       <OverviewHostQuery endDate={endDate} sourceId="default" startDate={startDate}>
-        {({ overviewHost, loading, id, refetch }) => (
+        {({ overviewHost, loading, id, inspect, refetch }) => (
           <OverviewHostStatsManage
             loading={loading}
             data={overviewHost}
             setQuery={setQuery}
             id={id}
+            inspect={inspect}
             refetch={refetch}
           />
         )}

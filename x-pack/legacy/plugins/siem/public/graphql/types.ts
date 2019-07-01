@@ -3476,6 +3476,7 @@ export namespace GetOverviewHostQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3510,6 +3511,16 @@ export namespace GetOverviewHostQuery {
     filebeatSystemModule?: number | null;
 
     winlogbeat?: number | null;
+
+    inspect?: Inspect | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -3519,6 +3530,7 @@ export namespace GetOverviewNetworkQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3555,6 +3567,16 @@ export namespace GetOverviewNetworkQuery {
     packetbeatFlow?: number | null;
 
     packetbeatTLS?: number | null;
+
+    inspect?: Inspect | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 

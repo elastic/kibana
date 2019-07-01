@@ -53,7 +53,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
       children,
       hostName,
       skip,
-      skipQuery,
+      skipQuery = false,
       sourceId,
       startDate,
       endDate,

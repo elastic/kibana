@@ -52,7 +52,7 @@ export const HeaderPanel = pure<HeaderPanelProps>(
                 <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />
               </MyEuiFlexItemIcon>
             )}
-            <MyEuiFlexItemIcon component="span">
+            <MyEuiFlexItemIcon grow={false} component="span">
               {id && (
                 <>
                   <InspectButton queryId={id} title={title} inspectIndex={0} />

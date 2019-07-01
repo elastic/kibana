@@ -56,7 +56,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
       filterQuery,
       isInspected,
       skip,
-      skipQuery,
+      skipQuery = false,
       sourceId,
       startDate,
       endDate,

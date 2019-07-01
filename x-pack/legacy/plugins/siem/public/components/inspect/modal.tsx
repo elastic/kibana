@@ -26,7 +26,7 @@ interface ModalInspectProps {
   isShowing: boolean;
   request: string | null;
   response: string | null;
-  title: string;
+  title: string | React.ReactElement | React.ReactNode;
 }
 
 const MyEuiModal = styled(EuiModal)`
@@ -95,7 +95,11 @@ export const ModalInspectQuery = ({
     <EuiOverlayMask>
       <MyEuiModal onClose={closeModal}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            {i18n.TITLE}
+            {` - `}
+            {title}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>

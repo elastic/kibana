@@ -11,7 +11,10 @@ import { pure } from 'recompose';
 
 import { HeaderPanel } from '../../../header_panel';
 import { manageQuery } from '../../../page/manage_query';
-import { OverviewNetworkQuery } from '../../../../containers/overview/overview_network';
+import {
+  ID as OverviewNetworkQueryId,
+  OverviewNetworkQuery,
+} from '../../../../containers/overview/overview_network';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewNetworkStats } from '../overview_network_stats';
 
@@ -40,6 +43,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
     <EuiPanel>
       <HeaderPanel
         border
+        id={OverviewNetworkQueryId}
         subtitle={
           <FormattedMessage
             id="xpack.siem.overview.networkSubtitle"
@@ -56,12 +60,13 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
       </HeaderPanel>
 
       <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
-        {({ overviewNetwork, loading, id, refetch }) => (
+        {({ overviewNetwork, loading, id, inspect, refetch }) => (
           <OverviewNetworkStatsManage
             loading={loading}
             data={overviewNetwork}
-            setQuery={setQuery}
             id={id}
+            inspect={inspect}
+            setQuery={setQuery}
             refetch={refetch}
           />
         )}
