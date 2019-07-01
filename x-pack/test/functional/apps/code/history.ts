@@ -173,10 +173,26 @@ export default function manageRepositoriesFunctionalTests({
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter`;
         await browser.get(url);
         const lineNumber = 20;
+        await retry.try(async () => {
+          const existence = await testSubjects.exists('codeFileTreeNode-File-tsconfig.json');
+          expect(existence).to.be(true);
+        });
+        await testSubjects.click('codeFileTreeNode-File-tsconfig.json');
+        await retry.try(async () => {
+          const existence = await testSubjects.exists('codeFileTreeNode-File-package.json');
+          expect(existence).to.be(true);
+        });
         await testSubjects.click('codeFileTreeNode-File-package.json');
-        const lineNumberElements = await find.allByCssSelector('.line-numbers');
 
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          // click line number should stay in the same file
+          expect(currentUrl.indexOf('package.json')).greaterThan(0);
+        });
+
+        const lineNumberElements = await find.allByCssSelector('.line-numbers');
         await lineNumberElements[lineNumber].click();
+
         await retry.try(async () => {
           const existence = await find.existsByCssSelector('.code-line-number-21', FIND_TIME);
           expect(existence).to.be(true);
