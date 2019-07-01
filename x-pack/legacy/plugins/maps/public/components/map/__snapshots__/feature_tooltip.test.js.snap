@@ -153,7 +153,14 @@ exports[`FeatureTooltip (multi) should show close button / should show count 1`]
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
-    />
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={3}
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
 </Fragment>
 `;
