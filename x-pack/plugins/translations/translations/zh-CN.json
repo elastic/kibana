@@ -2114,7 +2114,6 @@
     "server.sampleData.flightsSpec.delayBucketsTitle": "[航班] 延误存储桶",
     "server.sampleData.flightsSpec.delaysAndCancellationsTitle": "[航班] 延误与取消",
     "server.sampleData.flightsSpec.delayTypeTitle": "[航班] 延误类型",
-    "server.sampleData.flightsSpec.destinationAirportTitle": "[航班] 到达地机场",
     "server.sampleData.flightsSpec.destinationWeatherTitle": "[航班] 到达地天气",
     "server.sampleData.flightsSpec.flightCancellationsTitle": "[航班] 航班取消",
     "server.sampleData.flightsSpec.flightCountAndAverageTicketPriceTitle": "[航班] 航班计数和平均票价",
