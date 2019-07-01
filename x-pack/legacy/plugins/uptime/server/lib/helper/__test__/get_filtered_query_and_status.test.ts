@@ -183,4 +183,10 @@ describe('getFilteredQueryAndStatusFilter', () => {
     const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     expect(result).toMatchSnapshot();
   });
+
+  it('handles `match_phrase` queries', () => {
+    filters = `{"bool":{"must":[{"match_phrase":{"monitor.name":"icmp test"}}]}}`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
 });
