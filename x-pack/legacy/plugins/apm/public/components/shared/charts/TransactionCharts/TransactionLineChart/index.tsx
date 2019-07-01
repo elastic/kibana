@@ -5,11 +5,12 @@
  */
 
 import React, { useMemo } from 'react';
+import { flatten } from 'lodash';
+import d3 from 'd3';
 import {
   Coordinate,
   RectCoordinate
 } from '../../../../../../typings/timeseries';
-import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { useChartsTime } from '../../../../../hooks/useChartsTime';
 import { getEmptySeries } from '../../CustomPlot/getEmptySeries';
 // @ts-ignore
@@ -42,9 +43,11 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
     yMax,
     height
   } = props;
-  const {
-    urlParams: { start, end }
-  } = useUrlParams();
+
+  const flattenedCoordinates = flatten(series.map(serie => serie.data));
+
+  const start = d3.min(flattenedCoordinates, d => d.x);
+  const end = d3.max(flattenedCoordinates, d => d.x);
 
   const noHits = series.every(
     serie =>

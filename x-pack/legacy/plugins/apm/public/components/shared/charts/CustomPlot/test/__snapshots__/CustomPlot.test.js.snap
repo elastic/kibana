@@ -2903,6 +2903,7 @@ Array [
 .c4 {
   color: #98a2b3;
   padding-bottom: 0;
+  padding-right: 8px;
 }
 
 .c7 {

@@ -6,6 +6,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import numeral from '@elastic/numeral';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
 import { asPercent } from '../../../../utils/formatters';
@@ -44,7 +45,9 @@ const TransactionBreakdownGraph: React.FC<Props> = props => {
   }, []);
 
   const formatTooltipValue = useCallback((coordinate: Coordinate) => {
-    return asPercent(coordinate.y || 0, 1);
+    return coordinate.y !== null && coordinate.y !== undefined
+      ? asPercent(coordinate.y, 1)
+      : NOT_AVAILABLE_LABEL;
   }, []);
 
   return (
