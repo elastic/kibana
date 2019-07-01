@@ -7,3 +7,4 @@
 export { SnapshotRestoreHome } from './home';
 export { RepositoryAdd } from './repository_add';
 export { RepositoryEdit } from './repository_edit';
+export { RestoreSnapshot } from './restore_snapshot';

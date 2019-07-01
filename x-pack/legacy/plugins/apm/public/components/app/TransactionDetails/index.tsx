@@ -17,6 +17,7 @@ import { Transaction } from './Transaction';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -31,13 +32,17 @@ export function TransactionDetails() {
   const { data: waterfall } = useWaterfall(urlParams);
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
+  const { transactionName } = urlParams;
+
   return (
     <div>
       <ApmHeader>
         <EuiTitle size="l">
-          <h1>{urlParams.transactionName}</h1>
+          <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
+
+      <TransactionBreakdown />
 
       <EuiSpacer size="s" />
 

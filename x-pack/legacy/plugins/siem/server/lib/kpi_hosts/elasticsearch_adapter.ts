@@ -60,12 +60,12 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       KpiHostsHostsHit | KpiHostsUniqueIpsHit | KpiHostsAuthHit,
       TermAggregation
     >(request, 'msearch', {
-      body: [...uniqueIpsQuery, ...authQuery, ...hostsQuery],
+      body: [...hostsQuery, ...authQuery, ...uniqueIpsQuery],
     });
 
     const hostsHistogram = getOr(
       null,
-      'responses.2.aggregations.hosts_histogram.buckets',
+      'responses.0.aggregations.hosts_histogram.buckets',
       response
     );
     const authSuccessHistogram = getOr(
@@ -80,16 +80,16 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
     );
     const uniqueSourceIpsHistogram = getOr(
       null,
-      'responses.0.aggregations.unique_source_ips_histogram.buckets',
+      'responses.2.aggregations.unique_source_ips_histogram.buckets',
       response
     );
     const uniqueDestinationIpsHistogram = getOr(
       null,
-      'responses.0.aggregations.unique_destination_ips_histogram.buckets',
+      'responses.2.aggregations.unique_destination_ips_histogram.buckets',
       response
     );
     return {
-      hosts: getOr(null, 'responses.2.aggregations.hosts.value', response),
+      hosts: getOr(null, 'responses.0.aggregations.hosts.value', response),
       hostsHistogram: formatGeneralHistogramData(hostsHistogram),
       authSuccess: getOr(
         null,
@@ -103,11 +103,11 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
         response
       ),
       authFailureHistogram: formatAuthHistogramData(authFailureHistogram),
-      uniqueSourceIps: getOr(null, 'responses.0.aggregations.unique_source_ips.value', response),
+      uniqueSourceIps: getOr(null, 'responses.2.aggregations.unique_source_ips.value', response),
       uniqueSourceIpsHistogram: formatGeneralHistogramData(uniqueSourceIpsHistogram),
       uniqueDestinationIps: getOr(
         null,
-        'responses.0.aggregations.unique_destination_ips.value',
+        'responses.2.aggregations.unique_destination_ips.value',
         response
       ),
       uniqueDestinationIpsHistogram: formatGeneralHistogramData(uniqueDestinationIpsHistogram),
@@ -124,47 +124,47 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       KpiHostsUniqueIpsHit | KpiHostsAuthHit,
       TermAggregation
     >(request, 'msearch', {
-      body: [...uniqueIpsQuery, ...authQuery],
+      body: [...authQuery, ...uniqueIpsQuery],
     });
 
     const authSuccessHistogram = getOr(
       null,
-      'responses.1.aggregations.authentication_success_histogram.buckets',
+      'responses.0.aggregations.authentication_success_histogram.buckets',
       response
     );
     const authFailureHistogram = getOr(
       null,
-      'responses.1.aggregations.authentication_failure_histogram.buckets',
+      'responses.0.aggregations.authentication_failure_histogram.buckets',
       response
     );
     const uniqueSourceIpsHistogram = getOr(
       null,
-      'responses.0.aggregations.unique_source_ips_histogram.buckets',
+      'responses.1.aggregations.unique_source_ips_histogram.buckets',
       response
     );
     const uniqueDestinationIpsHistogram = getOr(
       null,
-      'responses.0.aggregations.unique_destination_ips_histogram.buckets',
+      'responses.1.aggregations.unique_destination_ips_histogram.buckets',
       response
     );
     return {
       authSuccess: getOr(
         null,
-        'responses.1.aggregations.authentication_success.doc_count',
+        'responses.0.aggregations.authentication_success.doc_count',
         response
       ),
       authSuccessHistogram: formatAuthHistogramData(authSuccessHistogram),
       authFailure: getOr(
         null,
-        'responses.1.aggregations.authentication_failure.doc_count',
+        'responses.0.aggregations.authentication_failure.doc_count',
         response
       ),
       authFailureHistogram: formatAuthHistogramData(authFailureHistogram),
-      uniqueSourceIps: getOr(null, 'responses.0.aggregations.unique_source_ips.value', response),
+      uniqueSourceIps: getOr(null, 'responses.1.aggregations.unique_source_ips.value', response),
       uniqueSourceIpsHistogram: formatGeneralHistogramData(uniqueSourceIpsHistogram),
       uniqueDestinationIps: getOr(
         null,
-        'responses.0.aggregations.unique_destination_ips.value',
+        'responses.1.aggregations.unique_destination_ips.value',
         response
       ),
       uniqueDestinationIpsHistogram: formatGeneralHistogramData(uniqueDestinationIpsHistogram),
