@@ -24,19 +24,21 @@ export default function (leaf) {
     // record the the depth
     const depth = item.depth - 1;
 
-    // Using the aggConfig determine what the field name is. If the aggConfig
+    // Using the column name determine what the field name is. If the name
     // doesn't exist (which means it's an _all agg) then use the level for
     // the field name
-    const { aggConfig } = item;
-    const field = (aggConfig && aggConfig.makeLabel())
-      || (aggConfig && aggConfig.label)
-      || ('level ' + item.depth);
+    function getFieldName(i) {
+      if (i.rawData && i.rawData.column > -1) {
+        const { column, table } = i.rawData;
+        return table.columns[column].name;
+      }
+      return i.name || `level ${i.depth}`;
+    }
 
     // Add the row to the tooltipScope.rows
     memo.unshift({
-      aggConfig,
       depth: depth,
-      field: field,
+      field: getFieldName(item),
       bucket: item.name,
       metric: item.size,
       item: item
