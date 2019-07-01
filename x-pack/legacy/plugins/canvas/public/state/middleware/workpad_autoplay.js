@@ -10,6 +10,7 @@ import { getInFlight } from '../selectors/resolved_args';
 import { getWorkpad, getPages, getSelectedPageIndex, getAutoplay } from '../selectors/workpad';
 import { routerProvider } from '../../lib/router_provider';
 import { setAutoplayInterval } from '../../lib/app_state';
+import { createTimeInterval } from '../../lib/time_interval';
 
 export const workpadAutoplay = ({ getState }) => next => {
   let playTimeout;
@@ -65,7 +66,7 @@ export const workpadAutoplay = ({ getState }) => next => {
 
     // update appState
     if (autoplay.enabled) {
-      setAutoplayInterval(autoplay.interval / 1000);
+      setAutoplayInterval(createTimeInterval(autoplay.interval));
     } else {
       setAutoplayInterval(0);
     }

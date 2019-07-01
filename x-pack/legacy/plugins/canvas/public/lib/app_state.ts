@@ -13,6 +13,7 @@ import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
 // @ts-ignore untyped local
 import { routerProvider } from './router_provider';
+import { createTimeInterval, isValidTimeInterval } from './time_interval';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',
@@ -22,11 +23,11 @@ export enum AppStateKeys {
 
 export interface AppState {
   [AppStateKeys.FULLSCREEN]?: boolean;
-  [AppStateKeys.REFRESH_INTERVAL]?: number;
-  [AppStateKeys.AUTOPLAY_INTERVAL]?: number;
+  [AppStateKeys.REFRESH_INTERVAL]?: string;
+  [AppStateKeys.AUTOPLAY_INTERVAL]?: string;
 }
 
-function getDefaultState(): AppState {
+export function getDefaultAppState(): AppState {
   const transientState = getInitialState('transient');
   const state: AppState = {};
 
@@ -35,11 +36,11 @@ function getDefaultState(): AppState {
   }
 
   if (transientState.refresh.interval > 0) {
-    state[AppStateKeys.REFRESH_INTERVAL] = transientState.refresh.interval / 1000;
+    state[AppStateKeys.REFRESH_INTERVAL] = createTimeInterval(transientState.refresh.interval);
   }
 
   if (transientState.autoplay.enabled) {
-    state[AppStateKeys.AUTOPLAY_INTERVAL] = transientState.autoplay.interval / 1000;
+    state[AppStateKeys.AUTOPLAY_INTERVAL] = createTimeInterval(transientState.autoplay.interval);
   }
 
   return state;
@@ -55,7 +56,7 @@ export function getCurrentAppState(): AppState {
 }
 
 export function getAppState(key?: string): AppState {
-  const appState = { ...getDefaultState(), ...getCurrentAppState() };
+  const appState = { ...getDefaultAppState(), ...getCurrentAppState() };
   return key ? get(appState, key) : appState;
 }
 
@@ -70,16 +71,18 @@ export function assignAppState(obj: AppState & { [key: string]: any }, appState:
     delete obj[AppStateKeys.FULLSCREEN];
   }
 
-  if (refreshKey) {
-    const refresh = Array.isArray(refreshKey) ? refreshKey[0] : refreshKey;
-    obj[AppStateKeys.REFRESH_INTERVAL] = parseInt(refresh, 10);
+  const refresh = Array.isArray(refreshKey) ? refreshKey[0] : refreshKey;
+
+  if (refresh && isValidTimeInterval(refresh)) {
+    obj[AppStateKeys.REFRESH_INTERVAL] = refresh;
   } else {
     delete obj[AppStateKeys.REFRESH_INTERVAL];
   }
 
-  if (autoplayKey) {
-    const autoplay = Array.isArray(autoplayKey) ? autoplayKey[0] : autoplayKey;
-    obj[AppStateKeys.AUTOPLAY_INTERVAL] = parseInt(autoplay, 10);
+  const autoplay = Array.isArray(autoplayKey) ? autoplayKey[0] : autoplayKey;
+
+  if (autoplay && isValidTimeInterval(autoplay)) {
+    obj[AppStateKeys.AUTOPLAY_INTERVAL] = autoplay;
   } else {
     delete obj[AppStateKeys.AUTOPLAY_INTERVAL];
   }
@@ -100,12 +103,12 @@ export function setFullscreen(payload: boolean) {
   }
 }
 
-export function setAutoplayInterval(payload: number) {
+export function setAutoplayInterval(payload: string) {
   const appState = getAppState();
   const appValue = appState[AppStateKeys.AUTOPLAY_INTERVAL];
 
   if (payload !== appValue) {
-    if (payload === 0 && appValue) {
+    if (!payload && appValue) {
       delete appState[AppStateKeys.AUTOPLAY_INTERVAL];
       routerProvider().updateAppState(appState);
     } else if (payload) {
@@ -115,7 +118,7 @@ export function setAutoplayInterval(payload: number) {
   }
 }
 
-export function setRefreshInterval(payload: number) {
+export function setRefreshInterval(payload: string) {
   const appState = getAppState();
   const appValue = appState[AppStateKeys.REFRESH_INTERVAL];
 

@@ -9,6 +9,7 @@ import { setRefreshInterval } from '../actions/workpad';
 import { inFlightComplete } from '../actions/resolved_args';
 import { getInFlight } from '../selectors/resolved_args';
 import { setRefreshInterval as setAppStateRefreshInterval } from '../../lib/app_state';
+import { createTimeInterval } from '../../lib/time_interval';
 
 export const workpadRefresh = ({ dispatch, getState }) => next => {
   let refreshTimeout;
@@ -49,7 +50,8 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
     if (action.type === setRefreshInterval.toString()) {
       // update the refresh interval
       refreshInterval = action.payload;
-      setAppStateRefreshInterval(refreshInterval / 1000);
+
+      setAppStateRefreshInterval(createTimeInterval(refreshInterval));
 
       // clear any pending timeout
       clearTimeout(refreshTimeout);

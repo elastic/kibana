@@ -9,6 +9,7 @@ import { isClassComponent } from 'recompose';
 import PropTypes from 'prop-types';
 import { routerProvider } from '../../lib/router_provider';
 import { getAppState } from '../../lib/app_state';
+import { getTimeInterval } from '../../lib/time_interval';
 import { CanvasLoading } from './canvas_loading';
 
 export class Router extends React.PureComponent {
@@ -67,7 +68,6 @@ export class Router extends React.PureComponent {
           .catch(err => onError(err));
       }
 
-      // dispatch actions based on the app state
       const appState = getAppState();
 
       if (appState.__fullscreen) {
@@ -75,12 +75,12 @@ export class Router extends React.PureComponent {
       }
 
       if (appState.__refresh) {
-        this.props.setRefreshInterval(appState.__refresh * 1000);
+        this.props.setRefreshInterval(getTimeInterval(appState.__refresh));
       }
 
       if (!!appState.__autoplay) {
         this.props.enableAutoplay(true);
-        this.props.setAutoplayInterval(appState.__autoplay * 1000);
+        this.props.setAutoplayInterval(getTimeInterval(appState.__autoplay));
       }
 
       // notify upstream handler of route change
