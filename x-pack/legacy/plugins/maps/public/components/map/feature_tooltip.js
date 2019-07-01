@@ -77,23 +77,20 @@ export class FeatureTooltip extends React.Component {
 
     this._prevFeatures = this.props.features;
 
-    const uniqueLayerIds = [];
+
+    const countByLayerId = new Map();
     for (let i = 0; i < this.props.features.length; i++) {
-      let index = uniqueLayerIds.findIndex(({ layerId }) => {
-        return layerId === this.props.features[i].layerId;
-      });
-      if (index < 0) {
-        uniqueLayerIds.push({
-          layerId: this.props.features[i].layerId,
-          count: 0
-        });
-        index = uniqueLayerIds.length - 1;
+      let count = countByLayerId.get(this.props.features[i].layerId);
+      if (!count) {
+        count = 0;
       }
-      uniqueLayerIds[index].count++;
+      count++;
+      countByLayerId.set(this.props.features[i].layerId, count);
     }
 
-    const layers = uniqueLayerIds.map(({ layerId }) => {
-      return this.props.findLayerById(layerId);
+    const layers = [];
+    countByLayerId.forEach((count, layerId) => {
+      layers.push(this.props.findLayerById(layerId));
     });
 
     const layerNamePromises = layers.map(layer => {
@@ -105,7 +102,7 @@ export class FeatureTooltip extends React.Component {
       return {
         displayName: layerNames[index],
         id: layer.getId(),
-        count: uniqueLayerIds[index].count
+        count: countByLayerId.get(layer.getId())
       };
     });
 
