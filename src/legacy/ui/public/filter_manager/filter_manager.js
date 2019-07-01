@@ -18,13 +18,15 @@
  */
 
 import _ from 'lodash';
+import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { getPhraseScript } from '@kbn/es-query';
 
 // Adds a filter to a passed state
-export function getFilterGenerator(queryFilter) {
-  const filterGen = {};
+export function FilterManagerProvider(Private) {
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const filterManager = {};
 
-  filterGen.generate = (field, values, operation, index) => {
+  filterManager.generate = (field, values, operation, index) => {
     values = Array.isArray(values) ? values : [values];
     const fieldName = _.isObject(field) ? field.name : field;
     const filters = _.flatten([queryFilter.getAppFilters()]);
@@ -88,10 +90,10 @@ export function getFilterGenerator(queryFilter) {
     return newFilters;
   };
 
-  filterGen.add = function (field, values, operation, index) {
+  filterManager.add = function (field, values, operation, index) {
     const newFilters = this.generate(field, values, operation, index);
     return queryFilter.addFilters(newFilters);
   };
 
-  return filterGen;
+  return filterManager;
 }

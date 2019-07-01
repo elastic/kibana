@@ -441,20 +441,17 @@ class FilterEditorUI extends Component<Props, State> {
       queryDsl,
     } = this.state;
 
-    const { $state } = this.props.filter;
-    if (!$state || !$state.store) {
-      return; // typescript validation
-    }
+    const { store } = this.props.filter.$state;
     const alias = useCustomLabel ? customLabel : null;
 
     if (isCustomEditorOpen) {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
+      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, store);
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = buildFilter(indexPattern, field, operator, params, alias, $state.store);
+      const filter = buildFilter(indexPattern, field, operator, params, alias, store);
       this.props.onSubmit(filter);
     }
   };

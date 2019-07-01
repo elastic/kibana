@@ -18,30 +18,32 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../../errors';
+
+function isScriptedPhrase(filter) {
+  const value = _.get(filter, ['script', 'script', 'params', 'value']);
+  return typeof value !== 'undefined';
+}
 
 function getParams(filter, indexPattern) {
-  const type = 'geo_polygon';
-  const key = _.keys(filter.geo_polygon)
-    .filter(key => key !== 'ignore_unmapped')[0];
-  const params = filter.geo_polygon[key];
+  const isScriptedPhraseFilter = isScriptedPhrase(filter);
+  const type = 'phrase';
+  const key = isScriptedPhraseFilter ? filter.meta.field : Object.keys(filter.query.match)[0];
+  const query = isScriptedPhraseFilter ? filter.script.script.params.value : filter.query.match[key].query;
+  const params = { query };
 
-  // Sometimes a filter will end up with an invalid index param. This could happen for a lot of reasons,
+  // Sometimes a filter will end up with an invalid index or field param. This could happen for a lot of reasons,
   // for example a user might manually edit the url or the index pattern's ID might change due to
   // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
-  // on displaying the raw value if the index is invalid.
-  const points = params.points.map((point) => {
-    return indexPattern
-      ? indexPattern.fields.byName[key].format.convert(point)
-      : JSON.stringify(point);
-  });
-  const value = points.join(', ');
+  // on displaying the raw value if the index or field is invalid.
+  const value = (indexPattern && indexPattern.fields.byName[key]) ? indexPattern.fields.byName[key].format.convert(query) : query;
   return { type, key, value, params };
 }
 
-export function mapGeoPolygon(indexPatterns) {
+export function mapPhrase(indexPatterns) {
   return async function (filter) {
-    if (!filter.geo_polygon) {
+    const isScriptedPhraseFilter = isScriptedPhrase(filter);
+    if (!_.has(filter, ['query', 'match']) && !isScriptedPhraseFilter) {
       throw filter;
     }
 

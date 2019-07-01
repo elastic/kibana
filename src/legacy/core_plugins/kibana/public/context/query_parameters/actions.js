@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { getFilterGenerator } from 'ui/filter_manager';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import {
   MAX_CONTEXT_SIZE,
   MIN_CONTEXT_SIZE,
@@ -30,7 +30,7 @@ import {
 
 export function QueryParameterActionsProvider(indexPatterns, Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterGen = getFilterGenerator(queryFilter);
+  const filterManager = Private(FilterManagerProvider);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
@@ -73,8 +73,7 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
 
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
-    const newFilters = filterGen.generate(field, values, operation, indexPatternId);
-    queryFilter.addFilters(newFilters);
+    filterManager.add(field, values, operation, indexPatternId);
     const indexPattern = await indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
   };

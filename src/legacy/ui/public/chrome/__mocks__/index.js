@@ -31,7 +31,6 @@ const chrome = {
   addBasePath: path => path,
   getInjected: jest.fn(),
   getUiSettingsClient: () => uiSettingsClient,
-  getSavedObjectsClient: () => '',
   getXsrfToken: () => 'kbn-xsrf-token',
 };
 

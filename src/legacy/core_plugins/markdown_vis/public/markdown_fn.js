@@ -35,12 +35,9 @@ export const kibanaMarkdown = () => ({
       aliases: ['_'],
       required: true,
     },
-    font: {
-      types: ['style'],
-      help: i18n.translate('markdownVis.function.font.help', {
-        defaultMessage: 'Font settings.'
-      }),
-      default: `{font size=12}`,
+    fontSize: {
+      types: ['number'],
+      default: 12,
     },
     openLinksInNewTab: {
       types: ['boolean'],
@@ -54,9 +51,7 @@ export const kibanaMarkdown = () => ({
       value: {
         visType: 'markdown',
         visConfig: {
-          markdown: args.markdown,
-          openLinksInNewTab: args.openLinksInNewTab,
-          fontSize: parseInt(args.font.spec.fontSize),
+          ...args,
         },
       }
     };

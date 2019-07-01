@@ -37,8 +37,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 
 // @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactory } from 'ui/embeddable';
 
 import {
@@ -126,10 +125,9 @@ app.directive('dashboardApp', function($injector: IInjector) {
 
   const Private = $injector.get<IPrivate>('Private');
 
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterGen = getFilterGenerator(queryFilter);
+  const filterManager = Private(FilterManagerProvider);
   const addFilter: AddFilterFn = ({ field, value, operator, index }, appState: TAppState) => {
-    filterActions.addFilter(field, value, operator, index, appState, filterGen);
+    filterActions.addFilter(field, value, operator, index, appState, filterManager);
   };
 
   const indexPatterns = $injector.get<{

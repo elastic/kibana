@@ -40,6 +40,5 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
     loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./tag_cloud'));
-    loadTestFile(require.resolve('./metric'));
   });
 }

@@ -169,7 +169,6 @@
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.1",
     "inert": "^5.1.0",
-    "inline-style": "^2.0.0",
     "joi": "^13.5.2",
     "jquery": "^3.4.1",
     "js-yaml": "3.13.1",

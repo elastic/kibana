@@ -18,22 +18,17 @@
  */
 
 import { addFilter } from '../../actions/filter';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
-function getFilterGeneratorStub() {
-  return {
-    add: sinon.stub()
-  };
-}
-
 describe('doc table filter actions', function () {
   NoDigestPromises.activateForSuite();
 
-  let filterGen;
+  let filterManager;
   let indexPattern;
 
   beforeEach(ngMock.module(
@@ -46,7 +41,8 @@ describe('doc table filter actions', function () {
 
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    filterGen = getFilterGeneratorStub();
+    filterManager = Private(FilterManagerProvider);
+    sinon.stub(filterManager, 'add');
   }));
 
   describe('add', function () {
@@ -56,9 +52,9 @@ describe('doc table filter actions', function () {
         query: { query: 'foo', language: 'lucene' }
       };
       const args = ['foo', ['bar'], '+', indexPattern, ];
-      addFilter('foo', ['bar'], '+', indexPattern, state, filterGen);
-      expect(filterGen.add.calledOnce).to.be(true);
-      expect(filterGen.add.calledWith(...args)).to.be(true);
+      addFilter('foo', ['bar'], '+', indexPattern, state, filterManager);
+      expect(filterManager.add.calledOnce).to.be(true);
+      expect(filterManager.add.calledWith(...args)).to.be(true);
     });
 
   });

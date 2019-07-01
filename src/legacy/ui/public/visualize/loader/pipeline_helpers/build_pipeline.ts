@@ -193,55 +193,17 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
 };
 
 export const prepareJson = (variable: string, data: object): string => {
-  if (data === undefined) {
-    return '';
-  }
   return `${variable}='${JSON.stringify(data)
     .replace(/\\/g, `\\\\`)
     .replace(/'/g, `\\'`)}' `;
 };
 
-export const escapeString = (data: string): string => {
-  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
-};
-
-export const prepareString = (variable: string, data?: string): string => {
-  if (data === undefined) {
-    return '';
-  }
+export const prepareString = (variable: string, data: string): string => {
   return `${variable}='${escapeString(data)}' `;
 };
 
-export const prepareValue = (variable: string, data: any, raw: boolean = false) => {
-  if (data === undefined) {
-    return '';
-  }
-  if (raw) {
-    return `${variable}=${data} `;
-  }
-  switch (typeof data) {
-    case 'string':
-      return prepareString(variable, data);
-    case 'object':
-      return prepareJson(variable, data);
-    default:
-      return `${variable}=${data} `;
-  }
-};
-
-export const prepareDimension = (variable: string, data: any) => {
-  if (data === undefined) {
-    return '';
-  }
-
-  let expr = `${variable}={visdimension ${data.accessor} `;
-  if (data.format) {
-    expr += prepareValue('format', data.format.id);
-    expr += prepareJson('formatParams', data.format.params);
-  }
-  expr += '} ';
-
-  return expr;
+export const escapeString = (data: string): string => {
+  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
@@ -269,8 +231,12 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       escapedMarkdown = escapeString(markdown.toString());
     }
     let expr = `markdownvis '${escapedMarkdown}' `;
-    expr += prepareValue('font', `{font size=${fontSize}}`, true);
-    expr += prepareValue('openLinksInNewTab', openLinksInNewTab);
+    if (fontSize) {
+      expr += ` fontSize=${fontSize} `;
+    }
+    if (openLinksInNewTab) {
+      expr += `openLinksInNewTab=${openLinksInNewTab} `;
+    }
     return expr;
   },
   table: (visState, schemas) => {
@@ -281,55 +247,41 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   metric: (visState, schemas) => {
-    const {
-      percentageMode,
-      useRanges,
-      colorSchema,
-      metricColorMode,
-      colorsRange,
-      labels,
-      invertColors,
-      style,
-    } = visState.params.metric;
-    const { metrics, bucket } = buildVisConfig.metric(schemas).dimensions;
-
-    let expr = `metricvis `;
-    expr += prepareValue('percentage', percentageMode);
-    expr += prepareValue('colorScheme', colorSchema);
-    expr += prepareValue('colorMode', metricColorMode);
-    expr += prepareValue('useRanges', useRanges);
-    expr += prepareValue('invertColors', invertColors);
-    expr += prepareValue('showLabels', labels && labels.show);
-    if (style) {
-      expr += prepareValue('bgFill', style.bgFill);
-      expr += prepareValue('font', `{font size=${style.fontSize}}`, true);
-      expr += prepareValue('subText', style.subText);
-      expr += prepareDimension('bucket', bucket);
-    }
-
-    if (colorsRange) {
-      colorsRange.forEach((range: any) => {
-        expr += prepareValue('colorRange', `{range from=${range.from} to=${range.to}}`, true);
-      });
-    }
-
-    metrics.forEach((metric: SchemaConfig) => {
-      expr += prepareDimension('metric', metric);
-    });
-
-    return expr;
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.metric(schemas),
+    };
+    return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
     const { metric, bucket } = buildVisConfig.tagcloud(schemas);
     let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
-    expr += prepareValue('scale', scale);
-    expr += prepareValue('orientation', orientation);
-    expr += prepareValue('minFontSize', minFontSize);
-    expr += prepareValue('maxFontSize', maxFontSize);
-    expr += prepareValue('showLabel', showLabel);
-    expr += prepareDimension('bucket', bucket);
 
+    if (scale) {
+      expr += `scale='${scale}' `;
+    }
+    if (orientation) {
+      expr += `orientation='${orientation}' `;
+    }
+    if (minFontSize) {
+      expr += `minFontSize=${minFontSize} `;
+    }
+    if (maxFontSize) {
+      expr += `maxFontSize=${maxFontSize} `;
+    }
+    if (showLabel !== undefined) {
+      expr += `showLabel=${showLabel} `;
+    }
+
+    if (bucket) {
+      expr += ` bucket={visdimension ${bucket.accessor} `;
+      if (bucket.format) {
+        expr += `format=${bucket.format.id} `;
+        expr += prepareJson('formatParams', bucket.format.params);
+      }
+      expr += '} ';
+    }
     return expr;
   },
   region_map: (visState, schemas) => {

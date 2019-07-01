@@ -23,7 +23,7 @@ import { kibanaMarkdown } from './markdown_fn';
 describe('interpreter/functions#markdown', () => {
   const fn = functionWrapper(kibanaMarkdown);
   const args = {
-    font: { spec: { fontSize: 12 } },
+    fontSize: 12,
     openLinksInNewTab: true,
     markdown: '## hello _markdown_',
   };

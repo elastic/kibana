@@ -17,8 +17,12 @@
  * under the License.
  */
 
-export { FilterManager } from './filter_manager';
-export { FilterStateManager } from './filter_state_manager';
+import { chromeServiceMock } from '../../../../../../core/public/mocks';
 
-// @ts-ignore
-export { uniqFilters } from './lib/uniq_filters';
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));

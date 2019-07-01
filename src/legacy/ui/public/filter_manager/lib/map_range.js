@@ -18,7 +18,7 @@
  */
 
 import { has, get } from 'lodash';
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../../errors';
 
 
 function isScriptedRange(filter) {
@@ -43,7 +43,7 @@ function getParams(filter, indexPattern) {
   // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
   // on displaying the raw value if the index is invalid.
   let value = `${left} to ${right}`;
-  if (indexPattern && indexPattern.fields.byName[key]) {
+  if (indexPattern) {
     const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
     value = `${convert(left)} to ${convert(right)}`;
   }

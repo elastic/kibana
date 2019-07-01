@@ -49,12 +49,7 @@ export class KbnError {
 // http://stackoverflow.com/questions/33870684/why-doesnt-instanceof-work-on-instances-of-error-subclasses-under-babel-node
 // Hence we are inheriting from it this way, instead of using extends Error, and this will then preserve
 // instanceof checks.
-try {
-  createLegacyClass(KbnError).inherits(Error);
-} catch (e) {
-  // Avoid TypeError: Cannot redefine property: prototype
-}
-
+createLegacyClass(KbnError).inherits(Error);
 
 /**
  * Request Failure - When an entire multi request fails

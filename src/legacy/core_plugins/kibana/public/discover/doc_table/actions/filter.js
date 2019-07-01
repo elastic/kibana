@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
+export function addFilter(field, values = [], operation, index, state, filterManager) {
   if (!Array.isArray(values)) {
     values = [values];
   }
 
-  filterGen.add(field, values, operation, index);
+  filterManager.add(field, values, operation, index);
 }

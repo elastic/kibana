@@ -75,7 +75,7 @@ const ui = {
   IndexPatternSelect,
 };
 
-export { validateIndexPattern, constants, fixtures, ui, IndexPatterns };
+export { validateIndexPattern, constants, fixtures, ui };
 
 /** @public */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
