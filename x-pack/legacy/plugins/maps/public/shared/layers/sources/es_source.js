@@ -162,19 +162,19 @@ export class AbstractESSource extends AbstractVectorSource {
       searchSource.setField('query', searchFilters.query);
     }
 
-    if (searchFilters.layerQuery) {
+    if (searchFilters.sourceQuery) {
       const layerSearchSource = new SearchSource();
       layerSearchSource.setField('index', indexPattern);
-      layerSearchSource.setField('query', searchFilters.layerQuery);
+      layerSearchSource.setField('query', searchFilters.sourceQuery);
       searchSource.setParent(layerSearchSource);
     }
 
     return searchSource;
   }
 
-  async getBoundsForFilters({ layerQuery, query, timeFilters, filters, applyGlobalQuery }) {
+  async getBoundsForFilters({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }) {
 
-    const searchSource = await this._makeSearchSource({ layerQuery, query, timeFilters, filters, applyGlobalQuery }, 0);
+    const searchSource = await this._makeSearchSource({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }, 0);
     const geoField = await this._getGeoField();
     const indexPattern = await this._getIndexPattern();
 

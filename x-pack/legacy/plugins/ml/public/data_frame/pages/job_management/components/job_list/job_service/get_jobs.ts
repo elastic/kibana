@@ -7,23 +7,19 @@
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../../services/ml_api_service';
-import {
-  DataFrameJob,
-  DataFrameJobListRow,
-  DataFrameJobState,
-  DataFrameJobStats,
-  JobId,
-} from '../common';
+import { DataFrameTransformWithId, JobId } from '../../../../../common';
+import { DataFrameJobListRow, DataFrameJobState, DataFrameJobStats } from '../common';
 
 interface DataFrameJobStateStats {
   id: JobId;
+  checkpointing: object;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
 }
 
 interface GetDataFrameTransformsResponse {
   count: number;
-  transforms: DataFrameJob[];
+  transforms: DataFrameTransformWithId[];
 }
 
 interface GetDataFrameTransformsStatsResponse {
@@ -52,7 +48,13 @@ export const getJobsFactory = (
             return reducedtableRows;
           }
           // Table with expandable rows requires `id` on the outer most level
-          reducedtableRows.push({ config, id: config.id, state: stats.state, stats: stats.stats });
+          reducedtableRows.push({
+            config,
+            id: config.id,
+            checkpointing: stats.checkpointing,
+            state: stats.state,
+            stats: stats.stats,
+          });
           return reducedtableRows;
         },
         [] as DataFrameJobListRow[]

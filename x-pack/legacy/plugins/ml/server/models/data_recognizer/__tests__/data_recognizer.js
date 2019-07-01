@@ -21,6 +21,8 @@ describe('ML - data recognizer', () => {
     'nginx_ecs',
     'sample_data_ecommerce',
     'sample_data_weblogs',
+    'siem_auditbeat_ecs',
+    'siem_winlogbeat_ecs',
   ];
 
   // check all module IDs are the same as the list above

@@ -26,6 +26,7 @@ import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
+import { MlPopover } from '../../components/ml_popover/ml_popover';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -100,18 +101,24 @@ export const HomePage = pure(() => (
                         <SiemNavigation />
                       </EuiFlexItem>
 
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj="add-data"
-                          href="kibana#home/tutorial_directory/security"
-                          iconType="plusInCircle"
-                        >
-                          <FormattedMessage
-                            id="xpack.siem.global.addData"
-                            defaultMessage="Add data"
-                          />
-                        </EuiButton>
-                      </EuiFlexItem>
+                      <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+                        <EuiFlexItem grow={false}>
+                          <MlPopover />
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            data-test-subj="add-data"
+                            href="kibana#home/tutorial_directory/security"
+                            iconType="plusInCircle"
+                          >
+                            <FormattedMessage
+                              id="xpack.siem.global.addData"
+                              defaultMessage="Add data"
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexGroup>
                   </NavGlobal>
 

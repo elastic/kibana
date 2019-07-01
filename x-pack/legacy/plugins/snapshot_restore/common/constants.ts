@@ -11,7 +11,7 @@ export const PLUGIN = {
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
   getI18nName: (i18n: any): string => {
     return i18n.translate('xpack.snapshotRestore.appName', {
-      defaultMessage: 'Snapshot Repositories',
+      defaultMessage: 'Snapshot and Restore',
     });
   },
 };
