@@ -5,7 +5,8 @@
  */
 
 import { singleLineScript } from '../lib/single_line_script';
-
+import { COMPARATORS } from '../../../../common/constants';
+const { BETWEEN } = COMPARATORS;
 /*
 watch.condition.script.inline
  */
@@ -13,17 +14,39 @@ function buildInline({ aggType, thresholdComparator, hasTermsAgg }) {
   let script = '';
 
   if (aggType === 'count' && !hasTermsAgg) {
-    script = `
+    if (thresholdComparator === BETWEEN) {
+      script = `
+      if (ctx.payload.hits.total >= params.threshold[0] && ctx.payload.hits.total <= params.threshold[1]) {
+        return true;
+      }
+
+      return false;
+    `;
+    } else {
+      script = `
       if (ctx.payload.hits.total ${thresholdComparator} params.threshold) {
         return true;
       }
 
       return false;
     `;
+    }
   }
 
   if (aggType === 'count' && hasTermsAgg) {
-    script = `
+    if (thresholdComparator === BETWEEN) {
+      script = `
+      ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
+      for (int i = 0; i < arr.length; i++) {
+        if (arr[i].doc_count >= params.threshold[0] && arr[i].doc_count <= params.threshold[1]) {
+          return true;
+        }
+      }
+
+      return false;
+    `;
+    } else {
+      script = `
       ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
       for (int i = 0; i < arr.length; i++) {
         if (arr[i].doc_count ${thresholdComparator} params.threshold) {
@@ -33,20 +56,44 @@ function buildInline({ aggType, thresholdComparator, hasTermsAgg }) {
 
       return false;
     `;
-  }
+    }
 
+  }
   if (aggType !== 'count' && !hasTermsAgg) {
-    script = `
+    if (thresholdComparator === BETWEEN) {
+      script = `
+      if (ctx.payload.aggregations.metricAgg.value >= params.threshold[0]
+        && ctx.payload.aggregations.metricAgg.value <= params.threshold[1]) {
+        return true;
+      }
+
+      return false;
+    `;
+    } else {
+      script = `
       if (ctx.payload.aggregations.metricAgg.value ${thresholdComparator} params.threshold) {
         return true;
       }
 
       return false;
     `;
+    }
   }
 
   if (aggType !== 'count' && hasTermsAgg) {
-    script = `
+    if (thresholdComparator === BETWEEN) {
+      script = `
+      ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
+      for (int i = 0; i < arr.length; i++) {
+        if (arr[i]['metricAgg'].value >= params.threshold[0] && arr[i]['metricAgg'].value <= params.threshold[1]) {
+          return true;
+        }
+      }
+
+      return false;
+    `;
+    } else {
+      script = `
       ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
       for (int i = 0; i < arr.length; i++) {
         if (arr[i]['metricAgg'].value ${thresholdComparator} params.threshold) {
@@ -56,6 +103,8 @@ function buildInline({ aggType, thresholdComparator, hasTermsAgg }) {
 
       return false;
     `;
+    }
+
   }
 
   return singleLineScript(script);

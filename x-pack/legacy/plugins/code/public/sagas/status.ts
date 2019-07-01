@@ -60,7 +60,7 @@ export function* watchRepoCloneSuccess() {
 }
 
 function* handleRepoDeleteFinished(action: any) {
-  yield put(deleteRepoFinished(action.payload.repoUri));
+  yield put(deleteRepoFinished(action.payload.uri));
 }
 
 export function* watchRepoDeleteFinished() {

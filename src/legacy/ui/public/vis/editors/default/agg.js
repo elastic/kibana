@@ -22,7 +22,7 @@ import './agg_add';
 import './controls/agg_controls';
 import { Direction } from './keyboard_move';
 import _ from 'lodash';
-import '../../../fancy_forms';
+import './fancy_forms';
 import { uiModules } from '../../../modules';
 import aggTemplate from './agg.html';
 import { move } from '../../../utils/collection';
