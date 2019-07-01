@@ -9,7 +9,10 @@ import sinon from 'sinon';
 import { WorkerReservedProgress } from '../../model';
 import { GitOperations } from '../git_operations';
 import { IndexerFactory } from '../indexer';
-import { RepositoryLspIndexStatusReservedField } from '../indexer/schema';
+import {
+  RepositoryGitStatusReservedField,
+  RepositoryLspIndexStatusReservedField,
+} from '../indexer/schema';
 import { CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { emptyAsyncFunc } from '../test_utils';
@@ -41,7 +44,7 @@ test('Execute index job.', async () => {
     Promise.resolve({
       _source: {
         [RepositoryLspIndexStatusReservedField]: {
-          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          uri: 'github.com/elastic/kibana',
           progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
           revision: 'abcdefg',
@@ -112,7 +115,7 @@ test('Execute index job and then cancel.', async () => {
     Promise.resolve({
       _source: {
         [RepositoryLspIndexStatusReservedField]: {
-          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          uri: 'github.com/elastic/kibana',
           progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
           revision: 'abcdefg',
@@ -356,10 +359,24 @@ test('On index job enqueued.', async () => {
 test('On index job completed.', async () => {
   // Setup EsClient
   const updateSpy = sinon.fake.returns(Promise.resolve());
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryGitStatusReservedField]: {
+          uri: 'github.com/elastic/kibana',
+          progress: WorkerReservedProgress.COMPLETED,
+          timestamp: new Date(),
+          revision: 'master',
+        },
+      },
+    })
+  );
   const esClient = {
     update: emptyAsyncFunc,
+    get: emptyAsyncFunc,
   };
   esClient.update = updateSpy;
+  esClient.get = getSpy;
 
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
@@ -374,6 +391,7 @@ test('On index job completed.', async () => {
     {
       payload: {
         uri: 'github.com/elastic/kibana',
+        revision: 'master',
       },
       options: {},
       timestamp: 0,
@@ -391,10 +409,24 @@ test('On index job completed.', async () => {
 test('On index job completed because of cancellation.', async () => {
   // Setup EsClient
   const updateSpy = sinon.fake.returns(Promise.resolve());
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryGitStatusReservedField]: {
+          uri: 'github.com/elastic/kibana',
+          progress: WorkerReservedProgress.COMPLETED,
+          timestamp: new Date(),
+          revision: 'master',
+        },
+      },
+    })
+  );
   const esClient = {
     update: emptyAsyncFunc,
+    get: emptyAsyncFunc,
   };
   esClient.update = updateSpy;
+  esClient.get = getSpy;
 
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
@@ -409,6 +441,7 @@ test('On index job completed because of cancellation.', async () => {
     {
       payload: {
         uri: 'github.com/elastic/kibana',
+        revision: 'master',
       },
       options: {},
       timestamp: 0,
@@ -425,4 +458,59 @@ test('On index job completed because of cancellation.', async () => {
   // The elasticsearch update won't be called for the sake of
   // cancellation.
   expect(updateSpy.notCalled).toBeTruthy();
+});
+
+test('On index job completed with a different revision in git status.', async () => {
+  // Setup EsClient
+  const updateSpy = sinon.fake.returns(Promise.resolve());
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryGitStatusReservedField]: {
+          uri: 'github.com/elastic/kibana',
+          progress: WorkerReservedProgress.COMPLETED,
+          timestamp: new Date(),
+          revision: 'new-revision',
+        },
+      },
+    })
+  );
+  const esClient = {
+    update: emptyAsyncFunc,
+    get: emptyAsyncFunc,
+  };
+  esClient.update = updateSpy;
+  esClient.get = getSpy;
+
+  const indexWorker = new IndexWorker(
+    {} as Esqueue,
+    log,
+    esClient as EsClient,
+    [],
+    {} as GitOperations,
+    {} as CancellationSerivce
+  );
+  const enqueueJobStub = sinon.stub();
+  indexWorker.enqueueJob = enqueueJobStub;
+
+  await indexWorker.onJobCompleted(
+    {
+      payload: {
+        uri: 'github.com/elastic/kibana',
+        revision: 'old-revision',
+      },
+      options: {},
+      timestamp: 0,
+    },
+    {
+      uri: 'github.com/elastic/kibana',
+      revision: 'master',
+      stats: new Map(),
+    }
+  );
+
+  // An additional index job should be enqueued.
+  expect(enqueueJobStub.calledOnce).toBeTruthy();
+
+  expect(updateSpy.calledTwice).toBeTruthy();
 });

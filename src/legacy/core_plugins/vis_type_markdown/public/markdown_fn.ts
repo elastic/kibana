@@ -19,12 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+import { Style } from '../../interpreter/public/types';
 
 const name = 'markdownVis';
 
 export interface Arguments {
   markdown: string;
-  fontSize: number;
+  font: Style;
   openLinksInNewTab: boolean;
 }
 
@@ -53,12 +54,12 @@ export const kibanaMarkdown = (): ExpressionFunction<
         defaultMessage: 'Markdown to render',
       }),
     },
-    fontSize: {
-      types: ['number'],
-      default: 12,
-      help: i18n.translate('visTypeMarkdown.function.fontSize.help', {
-        defaultMessage: 'Sets the font size',
+    font: {
+      types: ['style'],
+      help: i18n.translate('visTypeMarkdown.function.font.help', {
+        defaultMessage: 'Font settings.'
       }),
+      default: `{font size=12}`,
     },
     openLinksInNewTab: {
       types: ['boolean'],
@@ -75,7 +76,9 @@ export const kibanaMarkdown = (): ExpressionFunction<
       value: {
         visType: 'markdown',
         visConfig: {
-          ...args,
+          markdown: args.markdown,
+          openLinksInNewTab: args.openLinksInNewTab,
+          fontSize: parseInt(args.font.spec.fontSize || '12'),
         },
       },
     };

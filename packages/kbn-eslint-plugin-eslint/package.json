@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "peerDependencies": {
     "eslint": "5.16.0",
-    "babel-eslint": "10.0.1"
+    "babel-eslint": "10.0.2"
   },
   "dependencies": {
     "micromatch": "3.1.10",

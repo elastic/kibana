@@ -7,9 +7,9 @@
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { DescriptionList } from '../../../../../common/utility_types';
 import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
 
@@ -19,20 +19,20 @@ import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/f
 import { LoadingPanel } from '../../../loading';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
+import { AnomalyScores } from '../../../ml/score/anomaly_scores';
+import { Anomalies, NarrowDateRange } from '../../../ml/types';
 
-interface DescriptionList {
-  title: string;
-  description: JSX.Element;
-}
-
-interface OwnProps {
+interface HostSummaryProps {
   data: HostItem;
   loading: boolean;
+  isLoadingAnomaliesData: boolean;
+  anomaliesData: Anomalies | null;
+  startDate: number;
+  endDate: number;
+  narrowDateRange: NarrowDateRange;
 }
 
-type HostSummaryProps = OwnProps;
-
-const DescriptionList = styled(EuiDescriptionList)`
+const DescriptionListStyled = styled(EuiDescriptionList)`
   ${({ theme }) => `
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
@@ -42,112 +42,136 @@ const DescriptionList = styled(EuiDescriptionList)`
 
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
   <EuiFlexItem key={key}>
-    <DescriptionList listItems={descriptionList} />
+    <DescriptionListStyled listItems={descriptionList} />
   </EuiFlexItem>
 );
 
-export const HostOverview = pure<HostSummaryProps>(({ data, loading }) => {
-  const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
-    <DefaultFieldRenderer
-      rowItems={getOr([], fieldName, fieldData)}
-      attrName={fieldName}
-      idPrefix="host-overview"
-    />
-  );
+export const HostOverview = React.memo<HostSummaryProps>(
+  ({
+    data,
+    loading,
+    startDate,
+    endDate,
+    isLoadingAnomaliesData,
+    anomaliesData,
+    narrowDateRange,
+  }) => {
+    const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
+      <DefaultFieldRenderer
+        rowItems={getOr([], fieldName, fieldData)}
+        attrName={fieldName}
+        idPrefix="host-overview"
+      />
+    );
 
-  const descriptionLists: Readonly<DescriptionList[][]> = [
-    [
-      {
-        title: i18n.HOST_ID,
-        description: data.host
-          ? hostIdRenderer({ host: data.host, noLink: true })
-          : getEmptyTagValue(),
-      },
-      {
-        title: i18n.FIRST_SEEN,
-        description:
-          data.host != null && data.host.name && data.host.name.length ? (
-            <FirstLastSeenHost
-              hostname={data.host.name[0]}
-              type={FirstLastSeenHostType.FIRST_SEEN}
+    const descriptionLists: Readonly<DescriptionList[][]> = [
+      [
+        {
+          title: i18n.HOST_ID,
+          description: data.host
+            ? hostIdRenderer({ host: data.host, noLink: true })
+            : getEmptyTagValue(),
+        },
+        {
+          title: i18n.FIRST_SEEN,
+          description:
+            data.host != null && data.host.name && data.host.name.length ? (
+              <FirstLastSeenHost
+                hostname={data.host.name[0]}
+                type={FirstLastSeenHostType.FIRST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
+        },
+        {
+          title: i18n.LAST_SEEN,
+          description:
+            data.host != null && data.host.name && data.host.name.length ? (
+              <FirstLastSeenHost
+                hostname={data.host.name[0]}
+                type={FirstLastSeenHostType.LAST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
+        },
+        {
+          title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
+          description: (
+            <AnomalyScores
+              anomalies={anomaliesData}
+              startDate={startDate}
+              endDate={endDate}
+              isLoading={isLoadingAnomaliesData}
+              narrowDateRange={narrowDateRange}
             />
-          ) : (
-            getEmptyTagValue()
           ),
-      },
-      {
-        title: i18n.LAST_SEEN,
-        description:
-          data.host != null && data.host.name && data.host.name.length ? (
-            <FirstLastSeenHost
-              hostname={data.host.name[0]}
-              type={FirstLastSeenHostType.LAST_SEEN}
+        },
+      ],
+      [
+        {
+          title: i18n.IP_ADDRESSES,
+          description: (
+            <DefaultFieldRenderer
+              rowItems={getOr([], 'host.ip', data)}
+              attrName={'host.ip'}
+              idPrefix="host-overview"
+              render={ip => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
             />
-          ) : (
-            getEmptyTagValue()
           ),
-      },
-    ],
-    [
-      {
-        title: i18n.IP_ADDRESSES,
-        description: (
-          <DefaultFieldRenderer
-            rowItems={getOr([], 'host.ip', data)}
-            attrName={'host.ip'}
-            idPrefix="host-overview"
-            render={ip => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
-          />
-        ),
-      },
-      {
-        title: i18n.MAC_ADDRESSES,
-        description: getDefaultRenderer('host.mac', data),
-      },
-      { title: i18n.PLATFORM, description: getDefaultRenderer('host.os.platform', data) },
-    ],
-    [
-      { title: i18n.OS, description: getDefaultRenderer('host.os.name', data) },
-      { title: i18n.FAMILY, description: getDefaultRenderer('host.os.family', data) },
-      { title: i18n.VERSION, description: getDefaultRenderer('host.os.version', data) },
-      { title: i18n.ARCHITECTURE, description: getDefaultRenderer('host.architecture', data) },
-    ],
-    [
-      {
-        title: i18n.CLOUD_PROVIDER,
-        description: getDefaultRenderer('cloud.provider', data),
-      },
-      {
-        title: i18n.REGION,
-        description: getDefaultRenderer('cloud.region', data),
-      },
-      {
-        title: i18n.INSTANCE_ID,
-        description: getDefaultRenderer('cloud.instance.id', data),
-      },
-      {
-        title: i18n.MACHINE_TYPE,
-        description: getDefaultRenderer('cloud.machine.type', data),
-      },
-    ],
-  ];
+        },
+        {
+          title: i18n.MAC_ADDRESSES,
+          description: getDefaultRenderer('host.mac', data),
+        },
+        { title: i18n.PLATFORM, description: getDefaultRenderer('host.os.platform', data) },
+      ],
+      [
+        { title: i18n.OS, description: getDefaultRenderer('host.os.name', data) },
+        { title: i18n.FAMILY, description: getDefaultRenderer('host.os.family', data) },
+        { title: i18n.VERSION, description: getDefaultRenderer('host.os.version', data) },
+        { title: i18n.ARCHITECTURE, description: getDefaultRenderer('host.architecture', data) },
+      ],
+      [
+        {
+          title: i18n.CLOUD_PROVIDER,
+          description: getDefaultRenderer('cloud.provider', data),
+        },
+        {
+          title: i18n.REGION,
+          description: getDefaultRenderer('cloud.region', data),
+        },
+        {
+          title: i18n.INSTANCE_ID,
+          description: getDefaultRenderer('cloud.instance.id', data),
+        },
+        {
+          title: i18n.MACHINE_TYPE,
+          description: getDefaultRenderer('cloud.machine.type', data),
+        },
+      ],
+    ];
 
-  return (
-    <OverviewWrapper>
-      {loading && (
-        <>
-          <LoadingOverlay />
-          <LoadingPanel
-            height="100%"
-            width="100%"
-            text=""
-            position="absolute"
-            zIndex={3}
-            data-test-subj="LoadingPanelLoadMoreTable"
-          />
-        </>
-      )}
-      {descriptionLists.map((descriptionList, index) => getDescriptionList(descriptionList, index))}
-    </OverviewWrapper>
-  );
-});
+    return (
+      <OverviewWrapper>
+        {loading && (
+          <>
+            <LoadingOverlay />
+            <LoadingPanel
+              height="100%"
+              width="100%"
+              text=""
+              position="absolute"
+              zIndex={3}
+              data-test-subj="LoadingPanelLoadMoreTable"
+            />
+          </>
+        )}
+        {descriptionLists.map((descriptionList, index) =>
+          getDescriptionList(descriptionList, index)
+        )}
+      </OverviewWrapper>
+    );
+  }
+);
