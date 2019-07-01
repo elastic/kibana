@@ -17,21 +17,4 @@
  * under the License.
  */
 
-export { getConfig } from './config';
-export { createRunner } from './runner';
-export { isErrorLogged } from './errors';
-export { exec } from './exec';
-export {
-  read,
-  write,
-  mkdirp,
-  copyAll,
-  getFileHash,
-  untar,
-  deleteAll,
-  deleteEmptyFolders,
-  compress,
-  isFileAccessible,
-} from './fs';
-export { scanDelete } from './scan_delete';
-export { scanCopy } from './scan_copy';
+export { createSavedObjectsStreamFromNdJson } from './create_saved_objects_stream_from_ndjson';

@@ -16,22 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Readable } from 'stream';
+import { SavedObject } from 'kibana/server';
+import { createSplitStream, createMapStream, createFilterStream } from '../../../utils/streams';
 
-export { getConfig } from './config';
-export { createRunner } from './runner';
-export { isErrorLogged } from './errors';
-export { exec } from './exec';
-export {
-  read,
-  write,
-  mkdirp,
-  copyAll,
-  getFileHash,
-  untar,
-  deleteAll,
-  deleteEmptyFolders,
-  compress,
-  isFileAccessible,
-} from './fs';
-export { scanDelete } from './scan_delete';
-export { scanCopy } from './scan_copy';
+export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
+  return ndJsonStream
+    .pipe(createSplitStream('\n'))
+    .pipe(
+      createMapStream((str: string) => {
+        if (str && str.trim() !== '') {
+          return JSON.parse(str);
+        }
+      })
+    )
+    .pipe(createFilterStream<SavedObject>(obj => !!obj));
+}
