@@ -19,6 +19,8 @@ import {
   MonitorPageTitle,
   Ping,
   Snapshot,
+  HistogramDataPoint,
+  GetSnapshotHistogramQueryArgs,
 } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
@@ -74,12 +76,20 @@ export type UMGetMontiorPageTitleResolver = UMResolver<
   UMContext
 >;
 
+export type UMGetSnapshotHistogram = UMResolver<
+  HistogramDataPoint[] | Promise<HistogramDataPoint[]>,
+  any,
+  GetSnapshotHistogramQueryArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
   Query: {
     getMonitors: UMGetMonitorsResolver;
     getSnapshot: UMSnapshotResolver;
+    getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
     getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
@@ -95,7 +105,11 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         monitors: result,
       };
     },
-    async getSnapshot(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
+    async getSnapshot(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters },
+      { req }
+    ): Promise<Snapshot> {
       const { up, down, total } = await libs.monitors.getSnapshotCount(
         req,
         dateRangeStart,
@@ -107,8 +121,20 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         up,
         down,
         total,
-        histogram: await libs.pings.getPingHistogram(req, dateRangeStart, dateRangeEnd, filters),
       };
+    },
+    async getSnapshotHistogram(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters, monitorId },
+      { req }
+    ): Promise<HistogramDataPoint[]> {
+      return await libs.pings.getPingHistogram(
+        req,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        monitorId
+      );
     },
     async getMonitorChartsData(
       resolver,

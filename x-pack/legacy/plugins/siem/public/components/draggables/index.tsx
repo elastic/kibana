@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiToolTip, IconType } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
 import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -117,9 +116,13 @@ export const DefaultDraggable = pure<DefaultDraggableType>(
     ) : null
 );
 
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+export const Badge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
+);
 
 export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
   contextId: string;
