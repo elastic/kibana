@@ -65,32 +65,37 @@ describe('defaultValidationErrorHandler', () => {
   });
 });
 
-test('returns 408 on timeout error', async () => {
-  const router = new Router('');
-  router.get({ path: '/a', validate: false }, async (req, res) => {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    return res.ok({});
-  });
-  router.get({ path: '/b', validate: false }, (req, res) => res.ok({}));
-
+describe('timeouts', () => {
   const logger = loggingServiceMock.create();
   const server = new HttpServer(logger, 'foo');
-  const { registerRouter, server: innerServer } = await server.setup({
-    socketTimeout: 1000,
-    host: '127.0.0.1',
-    maxPayload: new ByteSizeValue(1024),
-    ssl: {},
-  } as HttpConfig);
-  registerRouter(router);
 
-  await server.start();
+  test('returns 408 on timeout error', async () => {
+    const router = new Router('');
+    router.get({ path: '/a', validate: false }, async (req, res) => {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return res.ok({});
+    });
+    router.get({ path: '/b', validate: false }, (req, res) => res.ok({}));
 
-  await supertest(innerServer.listener)
-    .get('/a')
-    .expect(408);
-  await supertest(innerServer.listener)
-    .get('/b')
-    .expect(200);
+    const { registerRouter, server: innerServer } = await server.setup({
+      socketTimeout: 1000,
+      host: '127.0.0.1',
+      maxPayload: new ByteSizeValue(1024),
+      ssl: {},
+    } as HttpConfig);
+    registerRouter(router);
 
-  await server.stop();
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/a')
+      .expect(408);
+    await supertest(innerServer.listener)
+      .get('/b')
+      .expect(200);
+  });
+
+  afterAll(async () => {
+    await server.stop();
+  });
 });
