@@ -46,7 +46,7 @@ export const AuthorizationProvider = ({
 
   // Note: here we have to serialize the HTTP response
   // If we move forward with proposal, we would need to update the SR server response
-  // to implement the interface below..
+  // to implement the interface below so we don't need the serialization.
   const value = {
     ...initialValue,
     loaded: isLoaded,
@@ -55,8 +55,7 @@ export const AuthorizationProvider = ({
           hasAllPermissions: permissionsData.hasPermission,
           missingPrivileges: {
             cluster: permissionsData.missingClusterPrivileges,
-            index: ['some index privilege'],
-            // index: permissionsData.missingIndexPrivileges,
+            index: permissionsData.missingIndexPrivileges,
           },
         }
       : undefined,
