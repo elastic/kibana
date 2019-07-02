@@ -38,6 +38,7 @@ function TimeIntervalParamEditor({
   value,
   setValue,
   showValidation,
+  setTouched,
   setValidity,
 }: AggParamEditorProps<string>) {
   const timeBase: string = get(editorConfig, 'interval.timeBase');
@@ -145,6 +146,7 @@ function TimeIntervalParamEditor({
         placeholder={i18n.translate('common.ui.aggTypes.timeInterval.selectIntervalPlaceholder', {
           defaultMessage: 'Select an interval',
         })}
+        onBlur={setTouched}
       />
     </EuiFormRow>
   );

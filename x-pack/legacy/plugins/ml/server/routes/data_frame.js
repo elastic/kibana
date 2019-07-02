@@ -25,6 +25,20 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'GET',
+    path: '/api/ml/_data_frame/transforms/{jobId}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { jobId } = request.params;
+      return callWithRequest('ml.getDataFrameTransforms', { jobId })
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
     path: '/api/ml/_data_frame/transforms/_stats',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
