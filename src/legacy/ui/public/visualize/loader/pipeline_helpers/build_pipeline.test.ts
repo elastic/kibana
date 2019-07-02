@@ -28,6 +28,7 @@ import {
 } from './build_pipeline';
 import { Vis, VisState } from 'ui/vis';
 import { AggConfig } from 'ui/vis/agg_config';
+import { SearchSource } from 'ui/courier';
 
 jest.mock('ui/agg_types/buckets/date_histogram', () => ({}));
 
@@ -320,18 +321,19 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
   describe('buildPipeline', () => {
     it('calls toExpression on vis_type if it exists', async () => {
-      const vis = {
+      const vis: Vis = {
         getCurrentState: () => {},
         getUiState: () => null,
         isHierarchical: () => false,
         aggs: {
           getResponseAggs: () => [],
         },
+        // @ts-ignore
         type: {
           toExpression: () => 'testing custom expressions',
-        }
+        },
       };
-      const searchSource = {
+      const searchSource: SearchSource = {
         getField: () => null,
       };
       const expression = await buildPipeline(vis, { searchSource });
