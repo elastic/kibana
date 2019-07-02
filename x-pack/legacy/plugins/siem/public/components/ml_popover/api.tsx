@@ -14,6 +14,17 @@ import {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
+import { parseError } from '../ml/api/parse_error_message';
+
+const emptyGroup: Group[] = [];
+
+const emptyMlResponse: SetupMlResponse = { jobs: [], datafeeds: [], kibana: {} };
+
+const emptyStartDatafeedResponse: StartDatafeedResponse = {};
+
+const emptyStopDatafeeds: [StopDatafeedResponse, CloseJobsResponse] = [{}, {}];
+
+const emptyJob: Job[] = [];
 
 /**
  * Fetches ML Groups Data
@@ -32,10 +43,16 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
         ...headers,
       },
     });
+    const message = await parseError(response);
+    if (message != null) {
+      // TODO: Toaster error when this happens instead of returning empty data
+      return emptyGroup;
+    }
+
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [];
+    return emptyGroup;
   }
 };
 
@@ -73,10 +90,16 @@ export const setupMlJob = async ({
         ...headers,
       },
     });
+    const message = await parseError(response);
+    if (message != null) {
+      // TODO: Toaster error when this happens instead of returning empty data
+      return emptyMlResponse;
+    }
+
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return { jobs: [], datafeeds: [], kibana: {} };
+    return emptyMlResponse;
   }
 };
 
@@ -104,10 +127,16 @@ export const startDatafeeds = async (
         ...headers,
       },
     });
+    const message = await parseError(response);
+    if (message != null) {
+      // TODO: Toaster error when this happens instead of returning empty data
+      return emptyStartDatafeedResponse;
+    }
+
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return {};
+    return emptyStartDatafeedResponse;
   }
 };
 
@@ -136,6 +165,12 @@ export const stopDatafeeds = async (
       },
     });
 
+    const message = await parseError(stopDatafeedsResponse);
+    if (message != null) {
+      // TODO: Toaster error when this happens instead of returning empty data
+      return emptyStopDatafeeds;
+    }
+
     const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
 
     const datafeedPrefix = 'datafeed-';
@@ -157,10 +192,16 @@ export const stopDatafeeds = async (
       },
     });
 
+    const messageStopDataFeeds = await parseError(stopDatafeedsResponseJson);
+    if (messageStopDataFeeds != null) {
+      // TODO: Toaster error when this happens instead of returning empty data
+      return emptyStopDatafeeds;
+    }
+
     return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [{}, {}];
+    return emptyStopDatafeeds;
   }
 };
 
@@ -186,9 +227,15 @@ export const jobsSummary = async (
         ...headers,
       },
     });
+    const message = await parseError(response);
+    if (message != null) {
+      // TODO: Toaster error when this happens instead of returning empty data
+      return emptyJob;
+    }
+
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [];
+    return emptyJob;
   }
 };
