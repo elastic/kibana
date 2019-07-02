@@ -17,12 +17,10 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
-  EuiText,
 } from '@elastic/eui';
 import { BASE_PATH } from '../../../common/constants';
 import { idxMgmtDocumentationLink } from '../../lib/documentation_links';
-// @ts-ignore
-import { IndexList } from './index_list'; // TODO fix tslint
+import { IndexList } from './index_list';
 import { TemplatesList } from './templates_list';
 
 type Section = 'indices' | 'index_templates';
@@ -57,8 +55,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     history.push(`${BASE_PATH}${newSection}`);
   };
 
-  // TODO Set breadcrumb
-
   return (
     <EuiPageBody>
       <EuiPageContent>
@@ -81,20 +77,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
               >
                 <FormattedMessage
                   id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
-                  defaultMessage="Index management docs"
+                  defaultMessage="Index Management docs"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.home.idxMgmtDescription"
-              defaultMessage="Update your Elasticsearch indices individually or in bulk."
-            />
-          </EuiText>
         </EuiTitle>
 
         <EuiSpacer size="m" />
@@ -116,6 +103,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
         <Switch>
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
+          <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
           <Route exact path={`${BASE_PATH}index_templates`} component={TemplatesList} />
         </Switch>
       </EuiPageContent>

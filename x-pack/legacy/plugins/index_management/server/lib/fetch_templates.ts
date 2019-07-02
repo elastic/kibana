@@ -12,8 +12,7 @@ export const fetchTemplates = async (callWithRequest: any) => {
     const {
       version,
       order,
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      index_patterns = [],
+      index_patterns: indexPatterns = [],
       settings = {},
       aliases = {},
       mappings = {},
@@ -22,7 +21,7 @@ export const fetchTemplates = async (callWithRequest: any) => {
       name,
       version,
       order,
-      index_patterns,
+      indexPatterns,
       settings,
       aliases,
       mappings,

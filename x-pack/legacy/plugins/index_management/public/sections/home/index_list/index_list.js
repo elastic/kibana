@@ -5,24 +5,31 @@
  */
 
 import React from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
-export class IndexList extends React.PureComponent {
-  render() {
-    const {
-      match: {
-        params: {
-          filter
-        }
-      },
-    } = this.props;
-    return (
-      <div className="im-snapshotTestSubject">
-        <IndexTable filterFromURI={filter}/>
-        <DetailPanel />
-      </div>
-    );
+export function IndexList({
+  match: {
+    params: {
+      filter
+    }
   }
+}) {
+  return (
+    <div className="im-snapshotTestSubject">
+      <EuiTitle size="s">
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.idxMgmt.home.idxMgmtDescription"
+            defaultMessage="Update your Elasticsearch indices individually or in bulk."
+          />
+        </EuiText>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <IndexTable filterFromURI={filter}/>
+      <DetailPanel />
+    </div>
+  );
 }

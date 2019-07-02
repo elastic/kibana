@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { NoMatch } from './components/no_match';
+export { TemplatesTable } from './templates_table';

@@ -42,8 +42,7 @@ import {
   getToggleExtensions,
 } from '../../../../index_management_extensions';
 import { renderBadges } from '../../../../lib/render_badges';
-import { NoMatch } from '../../../no_match';
-import { PageErrorForbidden } from '../../../page_error';
+import { NoMatch, PageErrorForbidden } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {

@@ -4,19 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiEmptyPrompt } from '@elastic/eui';
-
+import { EuiEmptyPrompt, EuiSpacer, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
+import { TemplatesTable } from './templates_table';
 import { loadIndexTemplates } from '../../../services/api';
+import { Template } from '../../../../common/types';
 
 export const TemplatesList: React.FunctionComponent = () => {
-  const { error, isLoading, data: templates } = loadIndexTemplates();
+  const { error, isLoading, data: templates, createRequest: reload } = loadIndexTemplates();
 
   let content;
+
+  const [showSystemTemplates, setShowSystemTemplates] = useState<boolean>(false);
+
+  // Filter out system index templates
+  const filteredTemplates =
+    templates &&
+    templates.filter((template: Template) => {
+      return !template.name.startsWith('.');
+    });
 
   if (isLoading) {
     content = (
@@ -54,8 +62,36 @@ export const TemplatesList: React.FunctionComponent = () => {
         data-test-subj="emptyPrompt"
       />
     );
-  } else {
-    content = <Fragment>{/* TODO Index templates table */} index template list</Fragment>;
+  } else if (templates && templates.length > 0) {
+    content = (
+      <Fragment>
+        <EuiTitle size="s">
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.home.indexTemplatesDescription"
+              defaultMessage="Use index templates to automatically apply mappings and other properties to new indices."
+            />
+          </EuiText>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiSwitch
+          id="checkboxShowSystemIndexTemplates"
+          checked={showSystemTemplates}
+          onChange={event => setShowSystemTemplates(event.target.checked)}
+          label={
+            <FormattedMessage
+              id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
+              defaultMessage="Include system index templates"
+            />
+          }
+        />
+        <EuiSpacer size="l" />
+        <TemplatesTable
+          templates={showSystemTemplates ? templates : filteredTemplates}
+          reload={reload}
+        />
+      </Fragment>
+    );
   }
 
   return <section data-test-subj="indexTemplatesList">{content}</section>;

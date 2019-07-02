@@ -30,8 +30,7 @@ import {
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 
-// @ts-ignore
-import { trackUiMetric } from './track_ui_metric'; // TODO tslint fix
+import { trackUiMetric } from './track_ui_metric';
 import { useRequest } from './use_request';
 
 let httpClient: ng.IHttpService;
