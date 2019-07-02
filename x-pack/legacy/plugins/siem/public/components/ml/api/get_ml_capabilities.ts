@@ -7,6 +7,7 @@
 import chrome from 'ui/chrome';
 import { InfluencerInput, MlCapabilities } from '../types';
 import { throwIfNotOk } from './throw_if_not_ok';
+import { emptyMlCapabilities } from '../empty_ml_capabilities';
 
 export interface Body {
   jobIds: string[];
@@ -20,37 +21,6 @@ export interface Body {
   maxRecords: number;
   maxExamples: number;
 }
-
-const empty: MlCapabilities = {
-  capabilities: {
-    canGetJobs: false,
-    canCreateJob: false,
-    canDeleteJob: false,
-    canOpenJob: false,
-    canCloseJob: false,
-    canForecastJob: false,
-    canGetDatafeeds: false,
-    canStartStopDatafeed: false,
-    canUpdateJob: false,
-    canUpdateDatafeed: false,
-    canPreviewDatafeed: false,
-    canGetCalendars: false,
-    canCreateCalendar: false,
-    canDeleteCalendar: false,
-    canGetFilters: false,
-    canCreateFilter: false,
-    canDeleteFilter: false,
-    canFindFileStructure: false,
-    canGetDataFrameJobs: false,
-    canDeleteDataFrameJob: false,
-    canPreviewDataFrameJob: false,
-    canCreateDataFrameJob: false,
-    canStartStopDataFrameJob: false,
-  },
-  isPlatinumOrTrialLicense: false,
-  mlFeatureEnabledInSpace: false,
-  upgradeInProgress: false,
-};
 
 export const getMlCapabilities = async (
   headers: Record<string, string | undefined>
@@ -69,6 +39,6 @@ export const getMlCapabilities = async (
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return empty;
+    return emptyMlCapabilities;
   }
 };
