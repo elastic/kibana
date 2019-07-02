@@ -88,8 +88,7 @@ pipeline {
 }
 def tarWorkspace(){
   script {
-    sh "tar -czf ${WORKSPACE_CACHE_NAME}"
-  }
+    sh "tar -czf ${WORKSPACE_CACHE_NAME} ${WORKSPACE}"
 }
 def dumpWorkspaceSize(){
   script {
