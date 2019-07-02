@@ -312,8 +312,10 @@ export interface OnPreAuthToolkit {
     }) => OnPreAuthResult;
 }
 
+// Warning: (ae-forgotten-export) The symbol "EmptyPluginContracts" needs to be exported by the entry point index.d.ts
+// 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts, TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts> {
     // (undocumented)
     setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
@@ -323,7 +325,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} =
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts, TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema = unknown> {
