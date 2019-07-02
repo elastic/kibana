@@ -27,7 +27,7 @@ export const pluginsMock = {
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
-  })
+  }),
 };
 
 export const createUiNewPlatformMock = () => {

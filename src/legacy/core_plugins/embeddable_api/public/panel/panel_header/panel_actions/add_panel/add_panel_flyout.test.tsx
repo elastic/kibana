@@ -17,7 +17,7 @@
  * under the License.
  */
 import '../../../../ui_capabilities.test.mocks';
-import { coreStartMock } from '../../../../../../../../core/public/ui_new_platform.test.mocks';
+import { coreStartMock } from 'ui/new_platform/mocks/cores.test.mocks';
 
 import React from 'react';
 import {
