@@ -18,7 +18,7 @@
  */
 
 import '../../../ui_capabilities.test.mocks';
-import '../../../../../../../core/public/ui_new_platform.test.mocks';
+import 'ui/new_platform/mocks/cores.test.mocks';
 
 import { EmbeddableInput } from '../../../embeddables/i_embeddable';
 import { Embeddable } from '../../../embeddables/embeddable';

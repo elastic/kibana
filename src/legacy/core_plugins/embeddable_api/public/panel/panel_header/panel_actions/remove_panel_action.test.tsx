@@ -18,7 +18,7 @@
  */
 
 import '../../../ui_capabilities.test.mocks';
-import '../../../../../../../core/public/ui_new_platform.test.mocks';
+import 'ui/new_platform/mocks/cores.test.mocks';
 
 import {
   FilterableContainer,
