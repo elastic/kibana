@@ -212,7 +212,7 @@ export class JsonUploadAndParse extends Component {
       currentIndexingStage, indexDataResp, indexPatternResp, fileRef,
       indexName, indexTypes, showImportProgress
     } = this.state;
-    const { onFileUpload, onFileRemove, transformDetails } = this.props;
+    const { onFileUpload, transformDetails } = this.props;
 
     return (
       <EuiForm>
@@ -229,7 +229,6 @@ export class JsonUploadAndParse extends Component {
               <JsonIndexFilePicker
                 {...{
                   onFileUpload,
-                  onFileRemove,
                   fileRef,
                   setIndexName: indexName => this.setState({ indexName }),
                   setFileRef: fileRef => this.setState({ fileRef }),
@@ -273,5 +272,6 @@ JsonUploadAndParse.propTypes = {
   ]),
   onIndexReadyStatusChange: PropTypes.func,
   onIndexingComplete: PropTypes.func,
-  onFileUpload: PropTypes.func
+  onFileUpload: PropTypes.func,
+  onFileRemove: PropTypes.func,
 };
