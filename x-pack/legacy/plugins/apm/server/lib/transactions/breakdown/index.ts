@@ -4,19 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, pick } from 'lodash';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { flatten, sortByOrder } from 'lodash';
+import {
+  SERVICE_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  SPAN_SELF_TIME_SUM,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+  TRANSACTION_BREAKDOWN_COUNT
+} from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
+import { MAX_KPIS } from './constants';
 
 export type TransactionBreakdownAPIResponse = PromiseReturnType<
   typeof getTransactionBreakdown
 >;
 
 interface TimeseriesMap {
-  [key: string]: Array<{ x: number; y: number }>;
+  [key: string]: Array<{ x: number; y: number | null }>;
 }
 
 export async function getTransactionBreakdown({
@@ -33,17 +42,17 @@ export async function getTransactionBreakdown({
   const subAggs = {
     sum_all_self_times: {
       sum: {
-        field: 'span.self_time.sum.us'
+        field: SPAN_SELF_TIME_SUM
       }
     },
     total_transaction_breakdown_count: {
       sum: {
-        field: 'transaction.breakdown.count'
+        field: TRANSACTION_BREAKDOWN_COUNT
       }
     },
     types: {
       terms: {
-        field: 'span.type',
+        field: SPAN_TYPE,
         size: 20,
         order: {
           _count: 'desc'
@@ -52,7 +61,7 @@ export async function getTransactionBreakdown({
       aggs: {
         subtypes: {
           terms: {
-            field: 'span.subtype',
+            field: SPAN_SUBTYPE,
             missing: '',
             size: 20,
             order: {
@@ -62,7 +71,7 @@ export async function getTransactionBreakdown({
           aggs: {
             total_self_time_per_subtype: {
               sum: {
-                field: 'span.self_time.sum.us'
+                field: SPAN_SELF_TIME_SUM
               }
             }
           }
@@ -87,7 +96,7 @@ export async function getTransactionBreakdown({
             },
             {
               term: {
-                'transaction.type': {
+                [TRANSACTION_TYPE]: {
                   value: 'request'
                 }
               }
@@ -98,7 +107,7 @@ export async function getTransactionBreakdown({
               ? [
                   {
                     term: {
-                      'transaction.name': {
+                      [TRANSACTION_NAME]: {
                         value: transactionName
                       }
                     }
@@ -145,14 +154,25 @@ export async function getTransactionBreakdown({
     return breakdowns;
   };
 
-  const total = formatBucket(resp.aggregations);
+  const total = sortByOrder(
+    formatBucket(resp.aggregations),
+    'percentage',
+    'desc'
+  ).slice(0, MAX_KPIS);
+
+  const kpiNames = total.map(kpi => kpi.name);
 
   const timeseriesPerSubtype = resp.aggregations.by_date.buckets.reduce(
     (prev, bucket) => {
       const formattedValues = formatBucket(bucket);
       const time = bucket.key;
 
-      return formattedValues.reduce((p, value) => {
+      return kpiNames.reduce((p, kpiName) => {
+        const value = formattedValues.find(val => val.name === kpiName) || {
+          name: kpiName,
+          percentage: null
+        };
+
         const { name, percentage } = value;
         if (!p[name]) {
           p[name] = [];
@@ -166,13 +186,8 @@ export async function getTransactionBreakdown({
     {} as TimeseriesMap
   );
 
-  const filteredTimeseriesPerSubtype = pick(
-    timeseriesPerSubtype,
-    (timeserie, key) => total.find(kpi => kpi.name === key)
-  ) as TimeseriesMap;
-
   return {
     total,
-    timeseries_per_subtype: filteredTimeseriesPerSubtype
+    timeseries_per_subtype: timeseriesPerSubtype
   };
 }

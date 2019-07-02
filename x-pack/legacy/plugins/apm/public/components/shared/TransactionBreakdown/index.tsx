@@ -38,9 +38,9 @@ const NoTransactionsTitle = styled.span`
 `;
 
 const TransactionBreakdown: React.FC<{
-  openByDefault?: boolean;
-}> = ({ openByDefault }) => {
-  const [showChart, setShowChart] = useState(!!openByDefault);
+  initialIsOpen?: boolean;
+}> = ({ initialIsOpen }) => {
+  const [showChart, setShowChart] = useState(!!initialIsOpen);
 
   const {
     data,
@@ -60,7 +60,7 @@ const TransactionBreakdown: React.FC<{
           name,
           color: COLORS[index % COLORS.length]
         };
-      }, {});
+      });
     },
     [total]
   );

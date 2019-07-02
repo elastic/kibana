@@ -16,7 +16,7 @@ interface Props {
   timeseries: Array<{
     name: string;
     color: string;
-    values: Array<{ x: number; y: number }>;
+    values: Array<{ x: number; y: number | null }>;
   }>;
 }
 

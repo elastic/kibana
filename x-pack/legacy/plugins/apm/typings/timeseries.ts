@@ -14,7 +14,7 @@ export interface RectCoordinate {
   x0: number;
 }
 
-export interface TimeSerie {
+export interface TimeSeries {
   title: string;
   titleShort?: string;
   hideLegend?: boolean;

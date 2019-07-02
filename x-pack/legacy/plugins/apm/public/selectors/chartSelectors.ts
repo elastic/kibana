@@ -15,7 +15,7 @@ import { StringMap } from '../../typings/common';
 import {
   Coordinate,
   RectCoordinate,
-  TimeSerie
+  TimeSeries
 } from '../../typings/timeseries';
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
@@ -31,7 +31,7 @@ export interface ITpmBucket {
 export interface ITransactionChartData {
   noHits: boolean;
   tpmSeries: ITpmBucket[];
-  responseTimeSeries: TimeSerie[];
+  responseTimeSeries: TimeSeries[];
 }
 
 const INITIAL_DATA = {
@@ -74,7 +74,7 @@ export function getResponseTimeSeries({
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
 
-  const series: TimeSerie[] = [
+  const series: TimeSeries[] = [
     {
       title: i18n.translate('xpack.apm.transactions.chart.averageLabel', {
         defaultMessage: 'Avg.'

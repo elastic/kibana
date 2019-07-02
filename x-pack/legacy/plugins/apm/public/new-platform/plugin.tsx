@@ -29,7 +29,7 @@ const MainContainer = styled.div`
   min-height: calc(100vh - ${topNavHeight});
 `;
 
-const App = React.memo(() => {
+const App = () => {
   useUpdateBadgeEffect();
 
   return (
@@ -51,7 +51,7 @@ const App = React.memo(() => {
       </UrlParamsProvider>
     </MatchedRouteProvider>
   );
-});
+};
 
 export class Plugin {
   public start(core: CoreStart) {

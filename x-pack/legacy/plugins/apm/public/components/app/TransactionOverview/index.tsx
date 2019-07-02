@@ -116,7 +116,7 @@ export function TransactionOverview({
       ) : null}
 
       <ChartsTimeContextProvider>
-        <TransactionBreakdown openByDefault={true} />
+        <TransactionBreakdown initialIsOpen={true} />
 
         <EuiSpacer size="s" />
 
