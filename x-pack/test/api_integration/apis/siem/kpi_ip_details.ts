@@ -17,6 +17,7 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
       const expected = {
+        __typename: 'KpiIpDetailsData',
         sourceByte: 27044769,
         destinationByte: 953220875,
         topSourceIp: '10.100.7.196',
@@ -54,6 +55,7 @@ const kpiIpDetailsTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
       const expected = {
+        __typename: 'KpiIpDetailsData',
         sourceByte: 27044769,
         destinationByte: 953220875,
         topSourceIp: '10.100.7.196',
