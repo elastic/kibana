@@ -20,10 +20,11 @@
 /* eslint-disable max-classes-per-file */
 
 import { skip } from 'rxjs/operators';
-import { ContactCardEmbeddable, FilterableEmbeddable } from '../test_samples/index';
 import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
+import { ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+import { FilterableEmbeddable } from '../test_samples/embeddables/filterable_embeddable';
 
 class TestClass {
   constructor() {}

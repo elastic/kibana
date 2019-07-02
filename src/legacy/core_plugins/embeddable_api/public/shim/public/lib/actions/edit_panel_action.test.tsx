@@ -20,7 +20,7 @@
 import { EditPanelAction } from './edit_panel_action';
 import { EmbeddableFactory, Embeddable, EmbeddableInput } from '../embeddables';
 import { GetEmbeddableFactory, ViewMode } from '../types';
-import { ContactCardEmbeddable } from '../test_samples';
+import { ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
