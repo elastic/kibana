@@ -93,7 +93,7 @@ export class JoinExpression extends Component {
           defaultMessage: 'Left field'
         })}
         helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabelHelpText', {
-          defaultMessage: 'Left source field containing the shared key'
+          defaultMessage: 'Left source field that contains the shared key.'
         })}
       >
         <EuiComboBox
@@ -150,7 +150,7 @@ export class JoinExpression extends Component {
           defaultMessage: 'Right field'
         })}
         helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabelHelpText', {
-          defaultMessage: 'Right source field containing the shared key'
+          defaultMessage: 'Right source field that contains the shared key.'
         })}
       >
         <SingleFieldSelect

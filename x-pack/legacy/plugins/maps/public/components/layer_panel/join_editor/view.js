@@ -76,7 +76,7 @@ export function JoinEditor({ joins, layer, onChange }) {
             <h5>
               <EuiToolTip
                 content={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoinTooltip', {
-                  defaultMessage: 'Use term joins to augment this layer\'s features with additional properties for data driven styling.'
+                  defaultMessage: 'Use term joins to augment this layer with properties for data driven styling.'
                 })}
               >
                 <FormattedMessage

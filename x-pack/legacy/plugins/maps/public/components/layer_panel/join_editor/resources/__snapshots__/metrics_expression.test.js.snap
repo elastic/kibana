@@ -38,7 +38,7 @@ exports[`Should render default props 1`] = `
       className="mapJoinExpressionHelpText"
     >
       <FormattedMessage
-        defaultMessage="Configure the metrics for the right source. These are the values that are added to this layer's features."
+        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
         id="xpack.maps.layerPanel.metricsExpression.helpText"
         values={Object {}}
       />
@@ -92,7 +92,7 @@ exports[`Should render metrics expression for metrics 1`] = `
       className="mapJoinExpressionHelpText"
     >
       <FormattedMessage
-        defaultMessage="Configure the metrics for the right source. These are the values that are added to this layer's features."
+        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
         id="xpack.maps.layerPanel.metricsExpression.helpText"
         values={Object {}}
       />

@@ -109,7 +109,7 @@ export class MetricsExpression extends Component {
           <EuiFormHelpText className="mapJoinExpressionHelpText">
             <FormattedMessage
               id="xpack.maps.layerPanel.metricsExpression.helpText"
-              defaultMessage={`Configure the metrics for the right source. These are the values that are added to this layer's features.`}
+              defaultMessage={'Configure the metrics for the right source. These values are added to the layer features.'}
             />
           </EuiFormHelpText>
           {this._renderMetricsEditor()}
