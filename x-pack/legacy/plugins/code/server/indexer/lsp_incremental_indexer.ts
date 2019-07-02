@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
-import util from 'util';
-import path from 'path';
-
 import { ProgressReporter } from '.';
 import { Diff, DiffKind } from '../../common/git_diff';
 import { toCanonicalUrl } from '../../common/uri_util';
@@ -124,15 +120,28 @@ export class LspIncrementalIndexer extends LspIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
+    let wsRepo;
+    let workspaceOpened = false;
     try {
-      const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
-        this.repoUri,
-        HEAD
-      );
+      try {
+        const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
+          this.repoUri,
+          HEAD
+        );
+        wsRepo = workspaceRepo;
+        workspaceOpened = true;
+      } catch (error) {
+        // TODO: add specifiy exception reason filters
+        workspaceOpened = false;
+        this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
+        this.log.warn(error);
+      }
+      const workspaceDir = wsRepo && wsRepo.workdir();
       if (this.diff) {
         for (const f of this.diff.files) {
           yield {
             repoUri: this.repoUri,
+            workspaceOpened,
             localRepoPath: workspaceDir,
             filePath: f.path,
             originPath: f.originPath,
@@ -208,15 +217,19 @@ export class LspIncrementalIndexer extends LspIndexer {
       this.log.error(error);
     }
 
-    const localFilePath = path.join(localRepoPath, filePath);
-    const lstat = util.promisify(fs.lstat);
-    const stat = await lstat(localFilePath);
-
-    const readLink = util.promisify(fs.readlink);
-    const readFile = util.promisify(fs.readFile);
-    const content = stat.isSymbolicLink()
-      ? await readLink(localFilePath, 'utf8')
-      : await readFile(localFilePath, 'utf8');
+    let content = '';
+    try {
+      content = await this.getFileSource(request);
+    } catch (error) {
+      if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
+        // Skip this index request if the file is oversized
+        this.log.debug(this.FILE_OVERSIZE_ERROR_MSG);
+        return stats;
+      } else {
+        // Rethrow the issue if for other reasons
+        throw error;
+      }
+    }
 
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
@@ -269,17 +282,14 @@ export class LspIncrementalIndexer extends LspIndexer {
   }
 
   private async handleModifiedRequest(request: LspIncIndexRequest, stats: IndexStats) {
-    const { kind, originRevision, originPath, repoUri, localRepoPath } = request;
+    const { originRevision, originPath } = request;
 
     // 1. first delete all related indexed data
     await this.handleDeletedRequest(
       {
-        repoUri,
-        localRepoPath,
+        ...request,
         revision: originRevision,
         filePath: originPath ? originPath : '',
-        kind,
-        originRevision,
       },
       stats
     );

@@ -27,7 +27,8 @@ export interface IndexRequest {
 
 // The request for LspIndexer
 export interface LspIndexRequest extends IndexRequest {
-  localRepoPath: string; // The repository local file path
+  workspaceOpened: boolean; // If we should extract data from workspace
+  localRepoPath?: string; // The repository local file path
   filePath: string; // The file path within the repository
   revision: string; // The revision of the current repository
 }

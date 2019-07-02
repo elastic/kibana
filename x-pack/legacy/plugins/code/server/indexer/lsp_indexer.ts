@@ -102,16 +102,29 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
+    let wsRepo;
+    let workspaceOpened = false;
     try {
-      const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
-        this.repoUri,
-        HEAD
-      );
+      try {
+        const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
+          this.repoUri,
+          HEAD
+        );
+        wsRepo = workspaceRepo;
+        workspaceOpened = true;
+      } catch (error) {
+        // TODO: add specifiy exception reason filters
+        workspaceOpened = false;
+        this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
+        this.log.warn(error);
+      }
+      const workspaceDir = wsRepo && wsRepo.workdir();
       const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
       for await (const file of fileIterator) {
         const filePath = file.path!;
         const req: LspIndexRequest = {
           repoUri: this.repoUri,
+          workspaceOpened,
           localRepoPath: workspaceDir,
           filePath,
           // Always use HEAD for now until we have multi revision.
@@ -126,6 +139,10 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
+    } finally {
+      if (wsRepo) {
+        wsRepo.cleanup();
+      }
     }
   }
 
@@ -200,31 +217,60 @@ export class LspIndexer extends AbstractIndexer {
     }
   }
 
+  protected FILE_OVERSIZE_ERROR_MSG = 'File size exceeds limit. Skip index.';
+  protected async getFileSource(request: LspIndexRequest): Promise<string> {
+    const { revision, filePath, localRepoPath, workspaceOpened } = request;
+    let content: string = '';
+    if (workspaceOpened) {
+      // Read file content from the workspace repo
+      const localFilePath = `${localRepoPath}${filePath}`;
+      const lstat = util.promisify(fs.lstat);
+      const stat = await lstat(localFilePath);
+
+      if (stat.size > TEXT_FILE_LIMIT) {
+        throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
+      }
+
+      const readLink = util.promisify(fs.readlink);
+      const readFile = util.promisify(fs.readFile);
+      content = stat.isSymbolicLink()
+        ? await readLink(localFilePath, 'utf8')
+        : await readFile(localFilePath, 'utf8');
+    } else {
+      // Fall back to reading file content from the original bare repo
+      const blob = await this.gitOps.fileContent(this.repoUri, filePath, revision);
+      if (blob.rawsize() > TEXT_FILE_LIMIT) {
+        throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
+      }
+      content = blob.content().toString();
+    }
+    return content;
+  }
+
   protected async processRequest(request: LspIndexRequest): Promise<IndexStats> {
     const stats: IndexStats = new Map<IndexStatsKey, number>()
       .set(IndexStatsKey.Symbol, 0)
       .set(IndexStatsKey.Reference, 0)
       .set(IndexStatsKey.File, 0);
-    const { repoUri, revision, filePath, localRepoPath } = request;
+    const { repoUri, revision, filePath } = request;
 
     this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
 
-    const localFilePath = path.join(localRepoPath, filePath);
-    const lstat = util.promisify(fs.lstat);
-    const stat = await lstat(localFilePath);
-
-    if (stat.size > TEXT_FILE_LIMIT) {
-      this.log.debug(`File size exceeds limit. Skip index.`);
-      return stats;
+    let content = '';
+    try {
+      content = await this.getFileSource(request);
+    } catch (error) {
+      if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
+        // Skip this index request if the file is oversized
+        this.log.debug(this.FILE_OVERSIZE_ERROR_MSG);
+        return stats;
+      } else {
+        // Rethrow the issue if for other reasons
+        throw error;
+      }
     }
-
-    const readLink = util.promisify(fs.readlink);
-    const readFile = util.promisify(fs.readFile);
-    const content = stat.isSymbolicLink()
-      ? await readLink(localFilePath, 'utf8')
-      : await readFile(localFilePath, 'utf8');
 
     try {
       const lang = detectLanguageByFilename(filePath);
