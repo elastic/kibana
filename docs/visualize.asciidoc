@@ -42,7 +42,7 @@ To create a visualization:
 locations.
 * *Time Series*
 [horizontal]
-<<timelion-getting-started,Timelion>>:: Compute and combine data from multiple time series
+<<timelion-create,Timelion>>:: Compute and combine data from multiple time series
 data sets.
 <<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
 * *Other*
@@ -157,6 +157,8 @@ include::visualize/pie.asciidoc[]
 include::visualize/tilemap.asciidoc[]
 
 include::visualize/regionmap.asciidoc[]
+
+include::visualize/timelion.asciidoc[]
 
 include::visualize/time-series-visual-builder.asciidoc[]
 
