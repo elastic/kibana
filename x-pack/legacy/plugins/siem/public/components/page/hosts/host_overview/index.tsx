@@ -6,7 +6,7 @@
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { DescriptionList } from '../../../../../common/utility_types';
@@ -21,6 +21,8 @@ import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
+import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
 
 interface HostSummaryProps {
   data: HostItem;
@@ -56,6 +58,8 @@ export const HostOverview = React.memo<HostSummaryProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
+    const capabilities = useContext(MlCapabilitiesContext);
+    const userPermissions = hasMlUserPermissions(capabilities);
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
         rowItems={getOr([], fieldName, fieldData)}
@@ -64,51 +68,58 @@ export const HostOverview = React.memo<HostSummaryProps>(
       />
     );
 
-    const descriptionLists: Readonly<DescriptionList[][]> = [
-      [
-        {
-          title: i18n.HOST_ID,
-          description: data.host
-            ? hostIdRenderer({ host: data.host, noLink: true })
-            : getEmptyTagValue(),
-        },
-        {
-          title: i18n.FIRST_SEEN,
-          description:
-            data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeenHost
-                hostname={data.host.name[0]}
-                type={FirstLastSeenHostType.FIRST_SEEN}
-              />
-            ) : (
-              getEmptyTagValue()
-            ),
-        },
-        {
-          title: i18n.LAST_SEEN,
-          description:
-            data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeenHost
-                hostname={data.host.name[0]}
-                type={FirstLastSeenHostType.LAST_SEEN}
-              />
-            ) : (
-              getEmptyTagValue()
-            ),
-        },
-        {
-          title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
-          description: (
-            <AnomalyScores
-              anomalies={anomaliesData}
-              startDate={startDate}
-              endDate={endDate}
-              isLoading={isLoadingAnomaliesData}
-              narrowDateRange={narrowDateRange}
+    const column: DescriptionList[] = [
+      {
+        title: i18n.HOST_ID,
+        description: data.host
+          ? hostIdRenderer({ host: data.host, noLink: true })
+          : getEmptyTagValue(),
+      },
+      {
+        title: i18n.FIRST_SEEN,
+        description:
+          data.host != null && data.host.name && data.host.name.length ? (
+            <FirstLastSeenHost
+              hostname={data.host.name[0]}
+              type={FirstLastSeenHostType.FIRST_SEEN}
             />
+          ) : (
+            getEmptyTagValue()
           ),
-        },
-      ],
+      },
+      {
+        title: i18n.LAST_SEEN,
+        description:
+          data.host != null && data.host.name && data.host.name.length ? (
+            <FirstLastSeenHost
+              hostname={data.host.name[0]}
+              type={FirstLastSeenHostType.LAST_SEEN}
+            />
+          ) : (
+            getEmptyTagValue()
+          ),
+      },
+    ];
+    const firstColumn = userPermissions
+      ? [
+          ...column,
+          {
+            title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
+            description: (
+              <AnomalyScores
+                anomalies={anomaliesData}
+                startDate={startDate}
+                endDate={endDate}
+                isLoading={isLoadingAnomaliesData}
+                narrowDateRange={narrowDateRange}
+              />
+            ),
+          },
+        ]
+      : column;
+
+    const descriptionLists: Readonly<DescriptionList[][]> = [
+      firstColumn,
       [
         {
           title: i18n.IP_ADDRESSES,
