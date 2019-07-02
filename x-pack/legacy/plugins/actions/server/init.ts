@@ -43,7 +43,7 @@ export function init(server: Legacy.Server) {
       getBasePath: () => basePath,
     };
     return {
-      log: server.log,
+      log: server.log.bind(server),
       callCluster: callWithInternalUser,
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
       ...overwrites,
