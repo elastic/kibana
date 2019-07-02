@@ -73,7 +73,7 @@ const InspectButtonComponent = pure<InspectButtonProps>(
     <InspectContainer showInspect={show}>
       {inputId === 'timeline' && (
         <EuiButtonEmpty
-          aria-label={i18n.TOOLTIP_CONTENT}
+          aria-label={i18n.INSPECT}
           data-test-subj="inspect-empty-button"
           color="text"
           iconSide="left"
@@ -89,18 +89,18 @@ const InspectButtonComponent = pure<InspectButtonProps>(
             });
           }}
         >
-          {i18n.TITLE}
+          {i18n.INSPECT}
         </EuiButtonEmpty>
       )}
       {inputId === 'global' && (
         <EuiButtonIcon
-          aria-label={i18n.TOOLTIP_CONTENT}
+          aria-label={i18n.INSPECT}
           className={show ? '' : ''}
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
           isDisabled={loading || isDisabled}
-          title={i18n.TOOLTIP_CONTENT}
+          title={i18n.INSPECT}
           onClick={() => {
             setIsInspected({
               id: queryId,

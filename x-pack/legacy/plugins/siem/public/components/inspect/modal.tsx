@@ -95,9 +95,7 @@ export const ModalInspectQuery = ({
       <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            {i18n.TITLE}
-            {` `}
-            {title}
+            {i18n.INSPECT} {title}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 

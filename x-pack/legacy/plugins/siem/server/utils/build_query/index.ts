@@ -19,6 +19,6 @@ export const inspectStringifyObject = (obj: unknown) => {
   try {
     return JSON.stringify(obj, null, 2);
   } catch {
-    return 'Sorry about that, something went wrong;';
+    return 'Sorry about that, something went wrong.';
   }
 };

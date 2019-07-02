@@ -61,7 +61,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
-    const [isHover, setIsHover] = useState(false);
+    const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
 
@@ -170,7 +170,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
     ];
 
     return (
-      <OverviewWrapper onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+      <OverviewWrapper
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
         {loading && (
           <>
             <LoadingOverlay />
@@ -184,7 +187,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
             />
           </>
         )}
-        <InspectButton queryId={id} show={isHover} title={i18n.INSPECT_TITLE} inspectIndex={0} />
+        <InspectButton
+          queryId={id}
+          show={showInspect}
+          title={i18n.INSPECT_TITLE}
+          inspectIndex={0}
+        />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}

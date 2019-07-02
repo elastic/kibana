@@ -77,7 +77,7 @@ export const IpOverview = pure<IpOverviewProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
-    const [isHover, setIsHover] = useState(false);
+    const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
     const typeData: Overview = data[flowTarget]!;
@@ -139,7 +139,10 @@ export const IpOverview = pure<IpOverviewProps>(
       ],
     ];
     return (
-      <OverviewWrapper onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+      <OverviewWrapper
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
         {loading && (
           <>
             <LoadingOverlay />
@@ -153,7 +156,12 @@ export const IpOverview = pure<IpOverviewProps>(
             />
           </>
         )}
-        <InspectButton queryId={id} show={isHover} title={i18n.INSPECT_TITLE} inspectIndex={0} />
+        <InspectButton
+          queryId={id}
+          show={showInspect}
+          title={i18n.INSPECT_TITLE}
+          inspectIndex={0}
+        />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}

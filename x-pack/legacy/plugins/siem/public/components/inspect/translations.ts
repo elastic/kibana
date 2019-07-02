@@ -6,11 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TOOLTIP_CONTENT = i18n.translate('xpack.siem.inspect.tooltipDescription', {
-  defaultMessage: 'Inspect',
-});
-
-export const TITLE = i18n.translate('xpack.siem.inspect.modalTitle', {
+export const INSPECT = i18n.translate('xpack.siem.inspectDescription', {
   defaultMessage: 'Inspect',
 });
 
