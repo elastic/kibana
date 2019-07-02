@@ -328,11 +328,7 @@ export class TaskStore {
                   ...Object.entries(this.definitions).map(([type, definition]) => ({
                     bool: {
                       must: [
-                        {
-                          term: {
-                            'task.taskType': type,
-                          },
-                        },
+                        { term: { 'task.taskType': type } },
                         {
                           range: {
                             'task.attempts': {
