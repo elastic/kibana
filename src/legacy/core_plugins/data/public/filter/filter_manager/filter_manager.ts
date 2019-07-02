@@ -20,7 +20,7 @@
 import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 import { npSetup } from 'ui/new_platform';
 
@@ -42,11 +42,18 @@ import { IndexPatterns } from '../../index_patterns';
 export class FilterManager {
   private indexPatterns: IndexPatterns;
   private filters: Filter[] = [];
-  private updated$: Subject<void> = new Subject();
-  private fetch$: Subject<void> = new Subject();
+  private updated$: Subject<any> = new Subject();
+  private fetch$: Subject<any> = new Subject();
+  private updateSubscription$: Subscription | undefined;
 
   constructor(indexPatterns: IndexPatterns) {
     this.indexPatterns = indexPatterns;
+  }
+
+  destroy() {
+    if (this.updateSubscription$) {
+      this.updateSubscription$.unsubscribe();
+    }
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
@@ -67,11 +74,11 @@ export class FilterManager {
       appFilters.splice(i, 1);
     });
 
-    return FilterManager.mergeFilters(appFilters, globalFilters);
+    return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
   }
 
-  private static mergeFilters(appFilters: Filter[], globalFilters: Filter[]): Filter[] {
-    return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
+  private filtersUpdated(newFilters: Filter[]): boolean {
+    return !_.isEqual(this.filters, newFilters);
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
@@ -83,6 +90,9 @@ export class FilterManager {
   }
 
   private handleStateUpdate(newFilters: Filter[]) {
+    // This is where the angular update magic \ syncing diget happens
+    const filtersUpdated = this.filtersUpdated(newFilters);
+
     // global filters should always be first
     newFilters.sort(
       (a: Filter, b: Filter): number => {
@@ -95,8 +105,6 @@ export class FilterManager {
         }
       }
     );
-
-    const filtersUpdated = !_.isEqual(this.filters, newFilters);
 
     this.filters = newFilters;
     if (filtersUpdated) {
@@ -147,28 +155,24 @@ export class FilterManager {
       pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
     }
 
-    // Set the store of all filters. For now.
-    // In the future, all filters should come in with filter state store already set.
+    // set the store of all filters
+    // TODO: is this necessary?
     const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
     FilterManager.setFiltersStore(filters, store);
 
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
-
-    // This is where we add new filters to the correct place (app \ global)
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
-    const currentFilters = this.getPartitionedFilters();
-    currentFilters.appFilters.push(...newPartitionedFilters.appFilters);
-    currentFilters.globalFilters.push(...newPartitionedFilters.globalFilters);
+    const partitionFilters = this.getPartitionedFilters();
+    partitionFilters.appFilters.push(...newPartitionedFilters.appFilters);
+    partitionFilters.globalFilters.push(...newPartitionedFilters.globalFilters);
 
-    const newFilters = this.mergeIncomingFilters(currentFilters);
+    const newFilters = this.mergeIncomingFilters(partitionFilters);
     this.handleStateUpdate(newFilters);
   }
 
   public async setFilters(newFilters: Filter[]) {
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, newFilters);
-    const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
-    const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
-    this.handleStateUpdate(mergedFilters);
+    this.handleStateUpdate(mappedFilters);
   }
 
   public removeFilter(filter: Filter) {
