@@ -321,6 +321,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists(`layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`);
     }
 
+    async hasFilePickerLoadedFile(fileName) {
+      log.debug(`Has file picker loaded file ${fileName}`);
+      const filePickerText = await find.byCssSelector('.euiFilePicker__promptText');
+      const filePickerTextContent = await filePickerText.getVisibleText();
+
+      return fileName === filePickerTextContent;
+    }
+
     /*
      * Layer panel utility functions
      */
@@ -338,6 +346,67 @@ export function GisPageProvider({ getService, getPageObjects }) {
           await this.waitForLayerDeleted(layerName);
         }
       }
+    }
+
+    async importFileButtonEnabled() {
+      log.debug(`Check "Import file" button enabled`);
+      const importFileButton = await testSubjects.find('importFileButton');
+      const isDisabled = await importFileButton.getAttribute('disabled');
+      return !isDisabled;
+    }
+
+    async importLayerReadyForAdd() {
+      log.debug(`Wait until import complete`);
+      await testSubjects.find('indexRespCodeBlock', 5000);
+      let layerAddReady = false;
+      await retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
+        layerAddReady = await this.importFileButtonEnabled();
+        return layerAddReady;
+      });
+      return layerAddReady;
+    }
+
+    async clickImportFileButton() {
+      log.debug(`Click "Import file" button`);
+      await testSubjects.click('importFileButton');
+    }
+
+    async setIndexName(indexName) {
+      log.debug(`Set index name to: ${indexName}`);
+      await testSubjects.setValue('fileUploadIndexNameInput', indexName);
+    }
+
+    async setIndexType(indexType) {
+      log.debug(`Set index type to: ${indexType}`);
+      await find.clickByCssSelector(
+        `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
+      );
+    }
+
+    async indexTypeOptionExists(indexType) {
+      log.debug(`Check index type "${indexType}" available`);
+      return await find.existsByCssSelector(
+        `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
+      );
+    }
+
+    async getCodeBlockParsedJson(dataTestSubjName) {
+      log.debug(`Get parsed code block for ${dataTestSubjName}`);
+      const indexRespCodeBlock = await find.byCssSelector(
+        `[data-test-subj="${dataTestSubjName}"]`
+      );
+      const indexRespJson = await indexRespCodeBlock.getProperty('innerText');
+      return JSON.parse(indexRespJson);
+    }
+
+    async getIndexResults() {
+      log.debug('Get index results');
+      return await this.getCodeBlockParsedJson('indexRespCodeBlock');
+    }
+
+    async getIndexPatternResults() {
+      log.debug('Get index pattern results');
+      return await this.getCodeBlockParsedJson('indexPatternRespCodeBlock');
     }
 
     async setLayerQuery(layerName, query) {
@@ -369,6 +438,25 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async selectVectorSource() {
       log.debug(`Select vector source`);
       await testSubjects.click('vectorShapes');
+    }
+
+    async selectGeoJsonUploadSource() {
+      log.debug(`Select upload geojson vector file`);
+      await testSubjects.click('uploadGeoJsonVectorFile');
+    }
+
+    async uploadJsonFileForIndexing(path) {
+      log.debug(`Setting the path on the file input`);
+      if (browser.isW3CEnabled) {
+        const input = await find.byCssSelector('.euiFilePicker__input');
+        await input.type(path);
+      } else {
+        await find.setValue('.euiFilePicker__input', path);
+      }
+      log.debug(`File selected`);
+
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     // Returns first layer by default
