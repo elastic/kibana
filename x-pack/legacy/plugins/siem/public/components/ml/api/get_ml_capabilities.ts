@@ -5,8 +5,9 @@
  */
 
 import chrome from 'ui/chrome';
-import { Anomalies, InfluencerInput } from '../types';
+import { InfluencerInput, MlCapabilities } from '../types';
 import { throwIfNotOk } from './throw_if_not_ok';
+import { emptyMlCapabilities } from '../empty_ml_capabilities';
 
 export interface Body {
   jobIds: string[];
@@ -21,20 +22,12 @@ export interface Body {
   maxExamples: number;
 }
 
-const empty: Anomalies = {
-  anomalies: [],
-  interval: 'second',
-};
-
-export const anomaliesTableData = async (
-  body: Body,
+export const getMlCapabilities = async (
   headers: Record<string, string | undefined>
-): Promise<Anomalies> => {
+): Promise<MlCapabilities> => {
   try {
-    const response = await fetch('/api/ml/results/anomalies_table_data', {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify(body),
+    const response = await fetch('/api/ml/ml_capabilities', {
+      method: 'GET',
       headers: {
         'kbn-system-api': 'true',
         'content-Type': 'application/json',
@@ -46,6 +39,6 @@ export const anomaliesTableData = async (
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return empty;
+    return emptyMlCapabilities;
   }
 };
