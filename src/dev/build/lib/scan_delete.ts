@@ -49,7 +49,7 @@ export async function scanDelete(options: Options) {
   const { directory, regularExpressions, concurrency = 20, excludePaths } = options;
 
   assertAbsolute(directory);
-  (excludePaths || []).forEach(ed => assertAbsolute(ed));
+  (excludePaths || []).forEach(excluded => assertAbsolute(excluded));
 
   // get an observable of absolute paths within a directory
   const getChildPath$ = (path: string) =>
@@ -62,7 +62,7 @@ export async function scanDelete(options: Options) {
   // and recursively iterating through all children, unless a child matches
   // one of the supplied regular expressions
   const getPathsToDelete$ = (path: string): Rx.Observable<string> => {
-    if (excludePaths && excludePaths.some(ed => path === ed)) {
+    if (excludePaths && excludePaths.some(excluded => path === excluded)) {
       return Rx.EMPTY;
     }
 
