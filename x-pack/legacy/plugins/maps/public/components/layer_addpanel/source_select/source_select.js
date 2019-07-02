@@ -5,10 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  ALL_SOURCES,
-  BETA_SOURCES
-} from '../../../shared/layers/sources/all_sources';
+import { ALL_SOURCES } from '../../../shared/layers/sources/all_sources';
 import {
   EuiTitle,
   EuiSpacer,
@@ -29,7 +26,7 @@ export function SourceSelect({
       ? <EuiIcon type={Source.icon} size="l" />
       : null;
 
-    const sourceTitle = BETA_SOURCES.includes(Source)
+    const sourceTitle = Source.isBeta
       ? <div><span>{Source.title}</span>{generateBetaBadge(Source.title)}</div>
       : Source.title;
 
