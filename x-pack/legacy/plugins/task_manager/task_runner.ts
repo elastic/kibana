@@ -166,13 +166,18 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public async claimOwnership(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
+    const attempts = this.instance.attempts + 1;
+    const now = new Date();
 
     try {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
-        startedAt: new Date(),
-        attempts: this.instance.attempts + 1,
+        startedAt: now,
+        attempts,
+        retryAt: this.definition.getBackpressureDelay
+          ? new Date(now.valueOf() + this.definition.getBackpressureDelay(attempts))
+          : intervalFromDate(now, this.definition.timeout),
       });
 
       return true;
@@ -239,6 +244,7 @@ export class TaskManagerRunner implements TaskRunner {
       state,
       status,
       startedAt: null,
+      retryAt: null,
       attempts: result.error ? this.instance.attempts : 0,
     });
 

@@ -20,6 +20,7 @@ At a high-level, the task manager works like this:
 - Attempt to claim the task by using optimistic concurrency to set:
   - status to `running`
   - `startedAt` to now
+  - `retryAt` to next time task should retry if it times out and is still in `running` status
 - Execute the task, if the previous claim succeeded
 - If the task fails, increment the `attempts` count and reschedule it
 - If the task succeeds:

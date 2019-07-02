@@ -567,6 +567,7 @@ describe('TaskStore', () => {
         runAt,
         scheduledAt: runAt,
         startedAt: null,
+        retryAt: null,
         id: 'task:324242',
         params: { hello: 'world' },
         state: { foo: 'bar' },

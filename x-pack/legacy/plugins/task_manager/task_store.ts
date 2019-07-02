@@ -69,6 +69,7 @@ export interface RawTaskDoc {
       scheduledAt: Date;
       runAt: Date;
       startedAt: Date | null;
+      retryAt: Date | null;
       interval?: string;
       attempts: number;
       status: TaskStatus;
@@ -181,6 +182,7 @@ export class TaskStore {
                 scheduledAt: { type: 'date' },
                 runAt: { type: 'date' },
                 startedAt: { type: 'date' },
+                retryAt: { type: 'date' },
                 interval: { type: 'text' },
                 attempts: { type: 'integer' },
                 status: { type: 'keyword' },
@@ -257,6 +259,7 @@ export class TaskStore {
       status: task.status,
       scheduledAt: task.scheduledAt,
       startedAt: null,
+      retryAt: null,
       runAt: task.runAt,
       state: taskInstance.state || {},
     };
@@ -292,53 +295,46 @@ export class TaskStore {
       query: {
         bool: {
           must: [
-            { range: { 'task.runAt': { lte: 'now' } } },
             { range: { 'kibana.apiVersion': { lte: API_VERSION } } },
             {
               bool: {
-                should: Object.entries(this.definitions).map(([type, definition]) => ({
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          'task.taskType': type,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              range: {
-                                'task.attempts': {
-                                  lt: definition.maxAttempts || this.maxAttempts,
-                                },
-                              },
-                            },
-                            {
-                              exists: {
-                                field: 'task.interval',
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'task.status': 'idle' } },
+                        { range: { 'task.runAt': { lte: 'now' } } },
+                      ],
+                    },
                   },
-                })),
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'task.status': 'running' } },
+                        { range: { 'task.retryAt': { lte: 'now' } } },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             {
               bool: {
                 should: [
-                  { term: { 'task.status': 'idle' } },
-                  Object.entries(this.definitions).map(([type, definition]) => ({
+                  { exists: { field: 'task.interval' } },
+                  ...Object.entries(this.definitions).map(([type, definition]) => ({
                     bool: {
                       must: [
-                        { term: { 'task.status': 'running' } },
-                        { term: { 'task.taskType': type } },
+                        {
+                          term: {
+                            'task.taskType': type,
+                          },
+                        },
                         {
                           range: {
-                            'task.startedAt': { lte: `now-${definition.timeout}` },
+                            'task.attempts': {
+                              lt: definition.maxAttempts || this.maxAttempts,
+                            },
                           },
                         },
                       ],
@@ -460,6 +456,7 @@ function rawSource(doc: TaskInstance, store: TaskStore) {
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
     scheduledAt: doc.scheduledAt || new Date(),
     startedAt: doc.startedAt || null,
+    retryAt: doc.retryAt || null,
     runAt: doc.runAt || new Date(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
   };
