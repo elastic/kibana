@@ -426,21 +426,41 @@ describe('TaskStore', () => {
                 {
                   bool: {
                     must: [
+                      { range: { 'kibana.apiVersion': { lte: 1 } } },
                       {
                         bool: {
                           should: [
                             {
                               bool: {
                                 must: [
-                                  {
-                                    term: {
-                                      'task.taskType': 'foo',
-                                    },
-                                  },
+                                  { term: { 'task.status': 'idle' } },
+                                  { range: { 'task.runAt': { lte: 'now' } } },
+                                ],
+                              },
+                            },
+                            {
+                              bool: {
+                                must: [
+                                  { term: { 'task.status': 'running' } },
+                                  { range: { 'task.retryAt': { lte: 'now' } } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            { exists: { field: 'task.interval' } },
+                            {
+                              bool: {
+                                must: [
+                                  { term: { 'task.taskType': 'foo' } },
                                   {
                                     range: {
                                       'task.attempts': {
-                                        lte: maxAttempts,
+                                        lt: maxAttempts,
                                       },
                                     },
                                   },
@@ -450,15 +470,11 @@ describe('TaskStore', () => {
                             {
                               bool: {
                                 must: [
-                                  {
-                                    term: {
-                                      'task.taskType': 'bar',
-                                    },
-                                  },
+                                  { term: { 'task.taskType': 'bar' } },
                                   {
                                     range: {
                                       'task.attempts': {
-                                        lte: customMaxAttempts,
+                                        lt: customMaxAttempts,
                                       },
                                     },
                                   },
@@ -468,9 +484,6 @@ describe('TaskStore', () => {
                           ],
                         },
                       },
-                      { range: { 'task.runAt': { lte: 'now' } } },
-                      { range: { 'kibana.apiVersion': { lte: 1 } } },
-                      { term: { 'task.status': 'idle' } },
                     ],
                   },
                 },

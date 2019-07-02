@@ -69,7 +69,7 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
 
     expect(instance.id).toEqual(id);
-    expect(instance.attempts).toEqual(initialAttempts + 1);
+    expect(instance.attempts).toEqual(initialAttempts);
     expect(instance.runAt.getTime()).toBeGreaterThan(Date.now());
     expect(instance.params).toEqual({ a: 'b' });
     expect(instance.state).toEqual({ hey: 'there' });
@@ -79,6 +79,8 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       instance: {
         interval: '10m',
+        status: 'running',
+        startedAt: new Date(),
       },
       definitions: {
         bar: {
