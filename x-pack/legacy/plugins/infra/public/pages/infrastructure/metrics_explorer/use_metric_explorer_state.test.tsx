@@ -30,6 +30,25 @@ const renderUseMetricsExplorerStateHook = () =>
 jest.mock('../../../utils/fetch');
 const mockedFetch = fetch as jest.Mocked<typeof fetch>;
 
+const localStorageMock = (function() {
+  let store: { [key: string]: string } = {};
+  return {
+    getItem(key: string) {
+      return store[key] || null;
+    },
+    setItem(key: string, value: any) {
+      store[key] = value.toString();
+    },
+    clear() {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
 describe('useMetricsExplorerState', () => {
   beforeEach(() => mockedFetch.post.mockResolvedValue({ data: resp } as any));
 
