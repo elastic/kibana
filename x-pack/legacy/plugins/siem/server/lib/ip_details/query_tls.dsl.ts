@@ -86,7 +86,7 @@ export const buildTlsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
 
