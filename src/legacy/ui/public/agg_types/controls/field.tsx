@@ -61,11 +61,7 @@ function FieldParamEditor({
       aggParam.onChange(agg);
     }
   };
-  const errors = [];
-
-  if (customError) {
-    errors.push(customError);
-  }
+  const errors = customError ? [customError] : [];
 
   if (!indexedFields.length) {
     errors.push(
@@ -78,7 +74,6 @@ function FieldParamEditor({
         },
       })
     );
-    setTouched();
   }
 
   const isValid = !!value && !errors.length;
@@ -86,6 +81,10 @@ function FieldParamEditor({
   useEffect(
     () => {
       setValidity(isValid);
+
+      if (!!errors.length) {
+        setTouched();
+      }
     },
     [isValid]
   );

@@ -20,7 +20,8 @@ const sumFieldName = 'myFieldGettingSummed';
 const metricExamples = [
   {
     type: 'sum',
-    field: sumFieldName
+    field: sumFieldName,
+    label: 'my custom label'
   },
   {
     // metric config is invalid beause field is missing
@@ -29,6 +30,7 @@ const metricExamples = [
   {
     // metric config is valid because "count" metric does not need to provide field
     type: 'count',
+    label: '' // should ignore empty label fields
   },
 ];
 
@@ -60,7 +62,7 @@ describe('getMetricFields', () => {
       type: 'sum',
       field: sumFieldName,
       propertyKey: '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField',
-      propertyLabel: 'sum myFieldGettingSummed of myIndex:myTermField',
+      propertyLabel: 'my custom label',
     });
     expect(metrics[1]).toEqual({
       type: 'count',

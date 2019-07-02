@@ -34,6 +34,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
   font-size: $canvasLayoutFontSize;
   border-bottom: $euiBorderThin;
   background: $euiColorLightestShade;
+  user-select: none;
 }
 
 .canvasLayout__stageContent {

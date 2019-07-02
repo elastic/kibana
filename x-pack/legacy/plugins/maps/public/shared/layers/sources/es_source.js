@@ -46,7 +46,7 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   destroy() {
-    this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
+    this._inspectorAdapters.requests.resetRequest(this.getId());
   }
 
   cloneDescriptor() {
@@ -84,9 +84,11 @@ export class AbstractESSource extends AbstractVectorSource {
   getMetricFields() {
     return this._getValidMetrics().map(metric => {
       const metricKey = this._formatMetricKey(metric);
-      const metricLabel = this._formatMetricLabel(metric);
+      const metricLabel = metric.label ? metric.label : this._formatMetricLabel(metric);
+      const metricCopy = { ...metric };
+      delete metricCopy.label;
       return {
-        ...metric,
+        ...metricCopy,
         propertyKey: metricKey,
         propertyLabel: metricLabel
       };
@@ -129,7 +131,7 @@ export class AbstractESSource extends AbstractVectorSource {
         inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName,
-        requestId: this._descriptor.id,
+        requestId: this.getId(),
         requestDesc: requestDescription
       });
     } catch(error) {
@@ -162,19 +164,19 @@ export class AbstractESSource extends AbstractVectorSource {
       searchSource.setField('query', searchFilters.query);
     }
 
-    if (searchFilters.layerQuery) {
+    if (searchFilters.sourceQuery) {
       const layerSearchSource = new SearchSource();
       layerSearchSource.setField('index', indexPattern);
-      layerSearchSource.setField('query', searchFilters.layerQuery);
+      layerSearchSource.setField('query', searchFilters.sourceQuery);
       searchSource.setParent(layerSearchSource);
     }
 
     return searchSource;
   }
 
-  async getBoundsForFilters({ layerQuery, query, timeFilters, filters, applyGlobalQuery }) {
+  async getBoundsForFilters({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }) {
 
-    const searchSource = await this._makeSearchSource({ layerQuery, query, timeFilters, filters, applyGlobalQuery }, 0);
+    const searchSource = await this._makeSearchSource({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }, 0);
     const geoField = await this._getGeoField();
     const indexPattern = await this._getIndexPattern();
 
@@ -277,6 +279,10 @@ export class AbstractESSource extends AbstractVectorSource {
 
   isBoundsAware() {
     return true;
+  }
+
+  getId() {
+    return this._descriptor.id;
   }
 
 }

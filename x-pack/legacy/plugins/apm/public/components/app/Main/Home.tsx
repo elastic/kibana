@@ -16,17 +16,19 @@ import { TraceOverview } from '../TraceOverview';
 const homeTabs: IHistoryTab[] = [
   {
     path: '/services',
-    name: i18n.translate('xpack.apm.home.servicesTabLabel', {
+    title: i18n.translate('xpack.apm.home.servicesTabLabel', {
       defaultMessage: 'Services'
     }),
-    render: () => <ServiceOverview />
+    render: () => <ServiceOverview />,
+    name: 'services'
   },
   {
     path: '/traces',
-    name: i18n.translate('xpack.apm.home.tracesTabLabel', {
+    title: i18n.translate('xpack.apm.home.tracesTabLabel', {
       defaultMessage: 'Traces'
     }),
-    render: () => <TraceOverview />
+    render: () => <TraceOverview />,
+    name: 'traces'
   }
 ];
 
