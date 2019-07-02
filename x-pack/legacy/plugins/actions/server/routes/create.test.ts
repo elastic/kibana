@@ -36,7 +36,7 @@ it('creates an action with proper parameters', async () => {
       ],
     },
   };
-  const expectedResult = {
+  const createResult = {
     id: '1',
     type: 'action',
     attributes: {
@@ -57,11 +57,11 @@ it('creates an action with proper parameters', async () => {
     ],
   };
 
-  actionsClient.create.mockResolvedValueOnce(expectedResult);
+  actionsClient.create.mockResolvedValueOnce(createResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual(expectedResult);
+  expect(response).toEqual({ id: '1' });
   expect(actionsClient.create).toHaveBeenCalledTimes(1);
   expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
