@@ -83,8 +83,8 @@ export const buildDnsQuery = ({
           lte: to,
         },
       },
-      ...getDnsFilter(),
     },
+    getDnsFilter(),
   ];
 
   const dslQuery = {
@@ -131,6 +131,6 @@ export const buildDnsQuery = ({
     size: 0,
     track_total_hits: false,
   };
-  console.log(JSON.stringify(dslQuery.body));
+
   return dslQuery;
 };

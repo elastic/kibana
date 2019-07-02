@@ -34,8 +34,6 @@ export const buildQuery = (options: RequestOptions) => {
     return [];
   };
 
-  const filter = [...filterClause, ...getTimerangeFilter(options.timerange)];
-
   const agg = options.fields.includes('kpiEventType')
     ? {
         count_event_type: {
@@ -54,6 +52,8 @@ export const buildQuery = (options: RequestOptions) => {
     ? [{ match_all: {} }, { exists: { field: 'event.action' } }]
     : [{ match_all: {} }];
 
+  const filter = [...filterClause, ...getTimerangeFilter(options.timerange), ...queryMust];
+
   const getSortField = (sortField: SortField) => {
     if (sortField.sortFieldId) {
       const field: string =
@@ -69,7 +69,7 @@ export const buildQuery = (options: RequestOptions) => {
 
   const sort: SortRequest = getSortField(options.sortField!);
 
-  const queryDsl = {
+  const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
@@ -77,7 +77,6 @@ export const buildQuery = (options: RequestOptions) => {
       aggregations: agg,
       query: {
         bool: {
-          must: queryMust,
           filter,
         },
       },
@@ -90,15 +89,15 @@ export const buildQuery = (options: RequestOptions) => {
 
   if (cursor && tiebreaker) {
     return {
-      ...queryDsl,
+      ...dslQuery,
       body: {
-        ...queryDsl.body,
+        ...dslQuery.body,
         search_after: [cursor, tiebreaker],
       },
     };
   }
 
-  return queryDsl;
+  return dslQuery;
 };
 
 export const buildDetailsQuery = (indexName: string, id: string) => ({
