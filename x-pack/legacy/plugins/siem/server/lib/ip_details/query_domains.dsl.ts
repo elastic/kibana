@@ -37,11 +37,6 @@ const getAggs = (
         },
       },
       aggs: {
-        firstSeen: {
-          min: {
-            field: '@timestamp',
-          },
-        },
         lastSeen: {
           max: {
             field: '@timestamp',

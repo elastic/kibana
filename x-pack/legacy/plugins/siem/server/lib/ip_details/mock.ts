@@ -268,10 +268,6 @@ export const mockDomainsResponseBuckets: DomainsBuckets[] = [
     bytes: {
       value: 974964465,
     },
-    firstSeen: {
-      value: 1554146873000,
-      value_as_string: '2019-04-01T19:27:53.000Z',
-    },
     packets: {
       value: 16946245,
     },
@@ -302,7 +298,6 @@ export const mockFormattedSource: DomainsEdges[] = [
       },
       source: {
         domainName: 'example.com',
-        firstSeen: '2019-04-01T19:27:53.000Z',
         lastSeen: '2019-04-10T18:28:39.000Z',
         uniqueIpCount: 805,
       },
@@ -317,7 +312,6 @@ export const mockFormattedDestination: DomainsEdges[] = [
       _id: 'example.com',
       destination: {
         domainName: 'example.com',
-        firstSeen: '2019-04-01T19:27:53.000Z',
         lastSeen: '2019-04-10T18:28:39.000Z',
         uniqueIpCount: 805,
       },
