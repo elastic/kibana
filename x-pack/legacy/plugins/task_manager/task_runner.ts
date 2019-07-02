@@ -11,7 +11,7 @@
  */
 
 import Joi from 'joi';
-import { intervalFromNow, minutesFromNow, intervalFromDate } from './lib/intervals';
+import { minutesFromNow, intervalFromDate } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
 import {

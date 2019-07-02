@@ -88,7 +88,7 @@ describe('TaskManagerRunner', () => {
             },
           }),
         },
-      }
+      },
     });
 
     await runner.run();

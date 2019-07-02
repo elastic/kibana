@@ -21,7 +21,6 @@ import {
   TaskInstance,
   TaskStatus,
 } from './task';
-import { intervalFromNow } from './lib/intervals';
 
 export interface StoreOpts {
   callCluster: ElasticJs;

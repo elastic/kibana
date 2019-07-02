@@ -6,7 +6,6 @@
 
 import Joi from 'joi';
 import { AlertExecutorOptions } from '../types';
-import { ConcreteTaskInstance } from '../../../task_manager';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
@@ -37,17 +36,10 @@ const getCreateTaskRunnerFunctionParams = {
   internalSavedObjectsRepository: savedObjectsClient,
 };
 
-const mockedTaskInstance: ConcreteTaskInstance = {
-  id: '',
-  attempts: 0,
-  status: 'running',
-  primaryTerm: 0,
-  sequenceNumber: 1,
+const mockedTaskInstance = {
   runAt: mockedLastRunAt,
-  scheduledAt: mockedLastRunAt,
-  startedAt: mockedLastRunAt,
   state: {
-    startedAt: mockedLastRunAt,
+    scheduledRunAt: mockedLastRunAt,
   },
   taskType: 'alerting:test',
   params: {
@@ -96,7 +88,8 @@ Object {
   "state": Object {
     "alertInstances": Object {},
     "alertTypeState": undefined,
-    "previousStartedAt": 2019-06-03T18:55:20.982Z,
+    "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
+    "scheduledRunAt": 2019-06-03T18:55:30.982Z,
   },
 }
 `);
@@ -107,7 +100,7 @@ Object {
   "bar": true,
 }
 `);
-  expect(call.startedAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
+  expect(call.scheduledRunAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
   expect(call.services.callCluster).toBeTruthy();

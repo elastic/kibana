@@ -169,7 +169,10 @@ export class AlertsClient {
         basePath,
       },
       state: {
-        previousStartedAt: null,
+        // This is here because we can't rely on the task manager's internal runAt.
+        // It changes it for timeout, etc when a task is running.
+        scheduledRunAt: new Date(Date.now() + alert.interval),
+        previousScheduledRunAt: null,
         alertTypeState: {},
         alertInstances: {},
       },
