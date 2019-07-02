@@ -27,6 +27,7 @@ import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
+import WrapperPlugin from 'wrapper-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -61,7 +62,6 @@ export default class BaseOptimizer {
     this.discoveredPlugins = opts.discoveredPlugins;
     this.profile = opts.profile || false;
     this.workers = opts.workers;
-
     switch (opts.sourceMaps) {
       case true:
         this.sourceMaps = 'source-map';
@@ -303,6 +303,11 @@ export default class BaseOptimizer {
       },
 
       plugins: [
+        // strict mode for the whole bundle
+        new WrapperPlugin({
+          test: /commons\.bundle\.js$/, // only wrap output of bundle files with '.js' extension
+          footer: `\nwindow.addEventListener('unload', function () { console.log('coveragejson:' + JSON.stringify(window.__coverage__)) })`
+        }),
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
@@ -344,15 +349,6 @@ export default class BaseOptimizer {
       module: {
         rules: [
           {
-            test: /\.js$|\.jsx$|\.tsx$/,
-            use: {
-              loader: 'istanbul-instrumenter-loader',
-              options: { esModules: true }
-            },
-            enforce: 'post',
-            exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
-          },
-          {
             test: /\.less$/,
             use: [
               ...getStyleLoaderExtractor(),
@@ -391,6 +387,7 @@ export default class BaseOptimizer {
                   presets: [
                     BABEL_PRESET_PATH,
                   ],
+                  plugins: [ "istanbul" ]
                 },
               }
             ]),

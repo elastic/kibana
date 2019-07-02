@@ -25,7 +25,7 @@ export async function runKibanaServer({ procs, config, options }) {
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: filterCliArgs(collectCliArgs(config, options)),
+    args: ['--max-old-space-size=2048', ...filterCliArgs(collectCliArgs(config, options)), '--optimize.sourceMaps=true'],
     env: {
       FORCE_COLOR: 1,
       ...process.env,
