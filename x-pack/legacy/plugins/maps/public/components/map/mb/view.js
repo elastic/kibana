@@ -434,6 +434,7 @@ export class MBMapContainer extends React.Component {
     if (!targetFeature) {
       return [];
     }
+
     return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
   };
 
