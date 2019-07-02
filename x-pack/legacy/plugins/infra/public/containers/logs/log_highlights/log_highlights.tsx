@@ -62,6 +62,8 @@ export const useLogHighlightsState = ({
                 query: JSON.stringify({
                   multi_match: { query: highlightTerms[0], type: 'phrase', lenient: true },
                 }),
+                countBefore: 1,
+                countAfter: 1,
               },
             ],
           },
