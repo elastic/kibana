@@ -91,6 +91,9 @@ module.factory('SavedGisMap', function (Private) {
   SavedGisMap.prototype.hasLayerListChangedSinceLastSync = function (state) {
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
+    if (!this.layerListJSON) {
+      return true;
+    }
     const currentLayerListJson = JSON.parse(this.layerListJSON);
     return !_.isEqual(layerListConfigOnly, currentLayerListJson);
   };

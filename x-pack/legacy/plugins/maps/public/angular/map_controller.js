@@ -142,6 +142,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state);
     if (hasChanged) {
       event.preventDefault();
+      console.log('showdial');
       showSaveDialog();
     }
   }
