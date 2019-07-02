@@ -63,6 +63,9 @@ export class JsonUploadAndParse extends Component {
   };
 
   _resetFileAndIndexSettings = () => {
+    if (this.props.onFileRemove && this.state.fileRef) {
+      this.props.onFileRemove(this.state.fileRef);
+    }
     this.setState({
       indexTypes: [],
       selectedIndexType: '',
