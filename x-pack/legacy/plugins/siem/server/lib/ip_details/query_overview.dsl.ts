@@ -79,24 +79,15 @@ const getHostAggs = (ip: string) => {
         },
       },
       aggs: {
-        host: {
-          filter: {
-            exists: {
-              field: 'host',
-            },
-          },
-          aggs: {
-            results: {
-              top_hits: {
-                size: 1,
-                _source: ['host'],
-                sort: [
-                  {
-                    '@timestamp': 'desc',
-                  },
-                ],
+        results: {
+          top_hits: {
+            size: 1,
+            _source: ['host'],
+            sort: [
+              {
+                '@timestamp': 'desc',
               },
-            },
+            ],
           },
         },
       },
@@ -124,6 +115,5 @@ export const buildOverviewQuery = ({ defaultIndex, ip }: IpOverviewRequestOption
       track_total_hits: false,
     },
   };
-
   return dslQuery;
 };

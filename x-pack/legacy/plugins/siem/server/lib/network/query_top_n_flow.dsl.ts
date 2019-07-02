@@ -148,13 +148,6 @@ const getUniDirectionAggs = (
                   timestamp: 'desc',
                 },
               },
-              aggs: {
-                timestamp: {
-                  max: {
-                    field: '@timestamp',
-                  },
-                },
-              },
             },
             ip_count: {
               cardinality: {
@@ -166,11 +159,6 @@ const getUniDirectionAggs = (
             packets: {
               sum: {
                 field: 'network.packets',
-              },
-            },
-            timestamp: {
-              max: {
-                field: '@timestamp',
               },
             },
           },
@@ -212,13 +200,6 @@ const getBiDirectionAggs = (
                   timestamp: 'desc',
                 },
               },
-              aggs: {
-                timestamp: {
-                  max: {
-                    field: '@timestamp',
-                  },
-                },
-              },
             },
             ip_count: {
               cardinality: {
@@ -228,11 +209,6 @@ const getBiDirectionAggs = (
             packets: {
               sum: {
                 field: `${flowTarget}.packets`,
-              },
-            },
-            timestamp: {
-              max: {
-                field: '@timestamp',
               },
             },
           },

@@ -204,10 +204,9 @@ export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) =>
 export const getIpOverviewHostAgg = (overviewHostHit: OverviewHostHit | {}) => {
   const hostFields: HostEcsFields | null = getOr(
     null,
-    `host.results.hits.hits[0]._source.host`,
+    `results.hits.hits[0]._source.host`,
     overviewHostHit
   );
-
   return {
     host: {
       ...hostFields,

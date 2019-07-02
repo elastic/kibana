@@ -24,10 +24,6 @@ export interface DirectionBuckets {
 
 export interface NetworkTopNFlowBuckets {
   key: string;
-  timestamp: {
-    value: number;
-    value_as_string: string;
-  };
   bytes: {
     value: number;
   };

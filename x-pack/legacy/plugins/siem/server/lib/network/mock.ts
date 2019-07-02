@@ -149,10 +149,6 @@ export const mockResponse = {
           ip_count: {
             value: 1,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -182,10 +178,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -211,10 +203,6 @@ export const mockResponse = {
           },
           ip_count: {
             value: 5,
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           domain: {
             buckets: [
@@ -245,10 +233,6 @@ export const mockResponse = {
           ip_count: {
             value: 1,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -275,10 +259,6 @@ export const mockResponse = {
           ip_count: {
             value: 3,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -304,10 +284,6 @@ export const mockResponse = {
           },
           ip_count: {
             value: 2,
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -337,10 +313,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -369,10 +341,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -398,10 +366,6 @@ export const mockResponse = {
           },
           ip_count: {
             value: 2,
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           domain: {
             buckets: [
@@ -429,10 +393,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -452,10 +412,6 @@ export const mockResponse = {
                 key: 'inbound',
               },
             ],
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           ip_count: {
             value: 2,
