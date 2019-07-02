@@ -187,7 +187,8 @@ export interface TaskInstance {
   startedAt?: Date | null;
 
   /**
-   * The date and time that this task should re-execute if stuck in "running" / timeout status.
+   * The date and time that this task should re-execute if stuck in "running" / timeout
+   * status. This value is only set when status is set to "running".
    */
   retryAt?: Date | null;
 
@@ -279,7 +280,8 @@ export interface ConcreteTaskInstance extends TaskInstance {
   startedAt: Date | null;
 
   /**
-   * The date and time that this task should re-execute if stuck in "running" / timeout status.
+   * The date and time that this task should re-execute if stuck in "running" / timeout
+   * status. This value is only set when status is set to "running".
    */
   retryAt: Date | null;
 

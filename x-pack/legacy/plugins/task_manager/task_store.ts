@@ -296,6 +296,8 @@ export class TaskStore {
         bool: {
           must: [
             { range: { 'kibana.apiVersion': { lte: API_VERSION } } },
+            // Either a task with idle status and runAt <= now or
+            // status running with a retryAt <= now.
             {
               bool: {
                 should: [
@@ -318,6 +320,7 @@ export class TaskStore {
                 ],
               },
             },
+            // Either task has an interval or the attempts < the maximum configured
             {
               bool: {
                 should: [
