@@ -128,6 +128,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
+  let lastStoreChangeSinceSave;
   function hashChangeListener(event) {
 
     if (window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`)) {
@@ -139,7 +140,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
 
     const state = store.getState();
-    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state);
+    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state, lastStoreChangeSinceSave);
     if (hasChanged) {
       console.log('has chaned');
       event.preventDefault();
@@ -152,7 +153,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       return;
     }
     const state = store.getState();
-    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state);
+    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state, lastStoreChangeSinceSave);
     if (hasChanged) {
       event.preventDefault();
       event.returnValue = 'foobar';//this is required for Chrome
@@ -163,14 +164,17 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   window.removeEventListener('hashchange', hashChangeListener);
   window.addEventListener('hashchange', hashChangeListener);
 
+
   function renderMap() {
 
     // clear old UI state
+
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
     store.dispatch(setReadOnly(!capabilities.get().maps.save));
 
     handleStoreChanges(store);
+    lastStoreChangeSinceSave = store.getState();
     unsubscribe = store.subscribe(() => {
       handleStoreChanges(store);
     });
@@ -313,8 +317,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   async function doSave(saveOptions) {
 
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
-    const state = store.getState();
-    savedMap.syncWithStore(state);
+    lastStoreChangeSinceSave = store.getState();
+    savedMap.syncWithStore(store.getState());
     let id;
 
     try {
