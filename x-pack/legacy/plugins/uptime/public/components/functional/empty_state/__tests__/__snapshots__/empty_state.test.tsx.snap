@@ -1,5 +1,128 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`EmptyState component does not render empty state with appropriate base path and no docs 1`] = `
+<EmptyStateComponent
+  basePath="foo"
+  data={
+    Object {
+      "statesIndexStatus": Object {
+        "docCount": Object {
+          "count": 0,
+        },
+        "indexExists": true,
+      },
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  loading={false}
+>
+  <div>
+    If this is in the snapshot the test should fail
+  </div>
+</EmptyStateComponent>
+`;
+
 exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
 <EmptyStateComponent
   basePath=""
@@ -170,27 +293,16 @@ exports[`EmptyState component doesn't render child components when count is fals
 </EmptyStateComponent>
 `;
 
-exports[`EmptyState component renders child components when count is truthy 1`] = `
-<Fragment>
-  <div>
-    Foo
-  </div>
-  <div>
-    Bar
-  </div>
-  <div>
-    Baz
-  </div>
-</Fragment>
-`;
-
-exports[`EmptyState component renders empty state with appropriate base path 1`] = `
+exports[`EmptyState component notifies when index does not exist 1`] = `
 <EmptyStateComponent
   basePath="foo"
   data={
     Object {
-      "getDocCount": Object {
-        "count": 0,
+      "statesIndexStatus": Object {
+        "docCount": Object {
+          "count": 1,
+        },
+        "indexExists": false,
       },
     }
   }
@@ -298,8 +410,9 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
   }
   loading={false}
 >
-  <EmptyIndex
+  <DataMissing
     basePath="foo"
+    headingMessage="Uptime index not found"
   >
     <EuiFlexGroup
       justifyContent="center"
@@ -330,30 +443,28 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
               >
                 <EuiEmptyPrompt
                   body={
-                    <React.Fragment>
-                      <p>
-                        <FormattedMessage
-                          defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                          id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                          values={
-                            Object {
-                              "configureHeartbeatLink": <EuiLink
-                                color="primary"
-                                href="foo/app/kibana#/home/tutorial/uptimeMonitors"
-                                target="_blank"
-                                type="button"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Configure Heartbeat"
-                                  id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                  values={Object {}}
-                                />
-                              </EuiLink>,
-                            }
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                        id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                        values={
+                          Object {
+                            "configureHeartbeatLink": <EuiLink
+                              color="primary"
+                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                              target="_blank"
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Configure Heartbeat"
+                                id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                values={Object {}}
+                              />
+                            </EuiLink>,
                           }
-                        />
-                      </p>
-                    </React.Fragment>
+                        }
+                      />
+                    </p>
                   }
                   iconColor="subdued"
                   iconType="uptimeApp"
@@ -362,11 +473,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                       size="l"
                     >
                       <h3>
-                        <FormattedMessage
-                          defaultMessage="No uptime data available"
-                          id="xpack.uptime.emptyState.noDataTitle"
-                          values={Object {}}
-                        />
+                        Uptime index not found
                       </h3>
                     </EuiTitle>
                   }
@@ -416,13 +523,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                             <h3
                               className="euiTitle euiTitle--large euiTitle euiTitle--medium"
                             >
-                              <FormattedMessage
-                                defaultMessage="No uptime data available"
-                                id="xpack.uptime.emptyState.noDataTitle"
-                                values={Object {}}
-                              >
-                                No uptime data available
-                              </FormattedMessage>
+                              Uptime index not found
                             </h3>
                           </EuiTitle>
                         </EuiTitle>
@@ -494,8 +595,22 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-  </EmptyIndex>
+  </DataMissing>
 </EmptyStateComponent>
+`;
+
+exports[`EmptyState component renders child components when count is truthy 1`] = `
+<Fragment>
+  <div>
+    Foo
+  </div>
+  <div>
+    Bar
+  </div>
+  <div>
+    Baz
+  </div>
+</Fragment>
 `;
 
 exports[`EmptyState component renders error message when an error occurs 1`] = `

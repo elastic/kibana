@@ -37,6 +37,14 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
     position: 'left',
   };
 
+  const checkpointing: SectionConfig = {
+    title: 'Checkpointing',
+    items: Object.entries(item.checkpointing).map(s => {
+      return { title: s[0].toString(), description: getItemDescription(s[1]) };
+    }),
+    position: 'left',
+  };
+
   const stats: SectionConfig = {
     title: 'Stats',
     items: Object.entries(item.stats).map(s => {
@@ -51,7 +59,7 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
       name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <JobDetailsPane sections={[state, stats]} />,
+      content: <JobDetailsPane sections={[state, checkpointing, stats]} />,
     },
     {
       id: 'job-json',
