@@ -177,7 +177,7 @@ export class TaskManagerRunner implements TaskRunner {
         attempts,
         retryAt: this.definition.getBackpressureDelay
           ? new Date(now.valueOf() + this.definition.getBackpressureDelay(attempts))
-          : intervalFromDate(now, this.definition.timeout),
+          : minutesFromNow(attempts * 5), // incrementally backs off an extra 5m per failure
       });
 
       return true;
