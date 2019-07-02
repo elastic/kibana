@@ -418,9 +418,13 @@ export const mockKpiHostDetailsMsearchOptions = {
 };
 
 export const mockKpiHostsQueryDsl = [
-  JSON.stringify(mockHostsQuery[1], null, 2),
-  JSON.stringify(mockKpiHostsAuthQuery[1], null, 2),
-  JSON.stringify(mockKpiHostsUniqueIpsQuery[1], null, 2),
+  JSON.stringify({ ...mockHostsQuery[0], body: mockHostsQuery[1] }, null, 2),
+  JSON.stringify({ ...mockKpiHostsAuthQuery[0], body: mockKpiHostsAuthQuery[1] }, null, 2),
+  JSON.stringify(
+    { ...mockKpiHostsUniqueIpsQuery[0], body: mockKpiHostsUniqueIpsQuery[1] },
+    null,
+    2
+  ),
 ];
 
 export const mockKpiHostsResult = {
@@ -520,8 +524,16 @@ export const mockKpiHostDetailsResponseNoData = {
 };
 
 export const mockKpiHostDetailsDsl = [
-  JSON.stringify(mockKpiHostDetailsAuthQuery[1], null, 2),
-  JSON.stringify(mockKpiHostDetailsUniqueIpsQuery[1], null, 2),
+  JSON.stringify(
+    { ...mockKpiHostDetailsAuthQuery[0], body: mockKpiHostDetailsAuthQuery[1] },
+    null,
+    2
+  ),
+  JSON.stringify(
+    { ...mockKpiHostDetailsUniqueIpsQuery[0], body: mockKpiHostDetailsUniqueIpsQuery[1] },
+    null,
+    2
+  ),
 ];
 
 export const mockKpiHostDetailsResult = {

@@ -74,11 +74,11 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
 
     const inspect = {
       dsl: [
-        inspectStringifyObject(networkEventsQuery[1]),
-        inspectStringifyObject(dnsQuery[1]),
-        inspectStringifyObject(uniquePrivateIpsQuery[1]),
-        inspectStringifyObject(uniqueFlowIdsQuery[1]),
-        inspectStringifyObject(tlsHandshakesQuery[1]),
+        inspectStringifyObject({ ...networkEventsQuery[0], body: networkEventsQuery[1] }),
+        inspectStringifyObject({ ...dnsQuery[0], body: dnsQuery[1] }),
+        inspectStringifyObject({ ...uniquePrivateIpsQuery[0], body: uniquePrivateIpsQuery[1] }),
+        inspectStringifyObject({ ...uniqueFlowIdsQuery[0], body: uniqueFlowIdsQuery[1] }),
+        inspectStringifyObject({ ...tlsHandshakesQuery[0], body: tlsHandshakesQuery[1] }),
       ],
       response: [
         inspectStringifyObject(response.responses[0]),

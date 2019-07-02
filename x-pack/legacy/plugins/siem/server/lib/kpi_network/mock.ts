@@ -248,11 +248,15 @@ export const mockMsearchOptions = {
 };
 
 const mockDsl = [
-  JSON.stringify(mockNetworkEventsQueryDsl[1], null, 2),
-  JSON.stringify(mockDnsQueryDsl[1], null, 2),
-  JSON.stringify(mockUniquePrvateIpsQueryDsl[1], null, 2),
-  JSON.stringify(mockUniqueFlowIdsQueryDsl[1], null, 2),
-  JSON.stringify(mockTlsHandshakesQueryDsl[1], null, 2),
+  JSON.stringify({ ...mockNetworkEventsQueryDsl[0], body: mockNetworkEventsQueryDsl[1] }, null, 2),
+  JSON.stringify({ ...mockDnsQueryDsl[0], body: mockDnsQueryDsl[1] }, null, 2),
+  JSON.stringify(
+    { ...mockUniquePrvateIpsQueryDsl[0], body: mockUniquePrvateIpsQueryDsl[1] },
+    null,
+    2
+  ),
+  JSON.stringify({ ...mockUniqueFlowIdsQueryDsl[0], body: mockUniqueFlowIdsQueryDsl[1] }, null, 2),
+  JSON.stringify({ ...mockTlsHandshakesQueryDsl[0], body: mockTlsHandshakesQueryDsl[1] }, null, 2),
 ];
 
 export const mockResult = {

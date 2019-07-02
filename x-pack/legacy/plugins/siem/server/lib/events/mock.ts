@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { cloneDeep } from 'lodash/fp';
 import { RequestDetailsOptions } from './types';
 
 export const mockResponseSearchTimelineDetails = {
@@ -2865,14 +2866,21 @@ export const mockResponseMap = {
   },
 };
 
+export const mockDetailsQueryDsl = {
+  mockDetailsQueryDsl: 'mockDetailsQueryDsl',
+};
+
+export const mockQueryDsl = {
+  mockQueryDsl: 'mockQueryDsl',
+};
+
+const mockTimelineDetailsInspectResponse = cloneDeep(mockResponseSearchTimelineDetails);
+delete mockTimelineDetailsInspectResponse.hits.hits[0]._source;
+
 export const mockTimelineDetailsResult = {
   inspect: {
-    dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": "auditbeat-8.0.0-2019.03.29-000003",\n  "ignoreUnavailable": true,\n  "body": {\n    "query": {\n      "terms": {\n        "_id": [\n          "TUfUymkBCQofM5eXGBYL"\n        ]\n      }\n    }\n  },\n  "size": 1\n}',
-    ],
-    response: [
-      '{\n  "took": 5,\n  "timed_out": false,\n  "_shards": {\n    "total": 1,\n    "successful": 1,\n    "skipped": 0,\n    "failed": 0\n  },\n  "hits": {\n    "total": {\n      "value": 1,\n      "relation": "eq"\n    },\n    "max_score": 1,\n    "hits": [\n      {\n        "_index": "auditbeat-8.0.0-2019.03.29-000003",\n        "_type": "_doc",\n        "_id": "TUfUymkBCQofM5eXGBYL",\n        "_score": 1\n      }\n    ]\n  }\n}',
-    ],
+    dsl: [JSON.stringify(mockDetailsQueryDsl, null, 2)],
+    response: [JSON.stringify(mockTimelineDetailsInspectResponse, null, 2)],
   },
   data: [
     {
