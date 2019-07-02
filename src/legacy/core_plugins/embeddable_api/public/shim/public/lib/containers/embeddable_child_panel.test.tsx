@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  HelloWorldContainer,
-  CONTACT_CARD_EMBEDDABLE,
-  SlowContactCardEmbeddableFactory,
-} from '../test_samples';
 import React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
 import { GetEmbeddableFactory } from '../types';
 import { EmbeddableFactory } from '../embeddables';
+import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
+import { ContactCardEmbeddableInput, ContactCardEmbeddableOutput, ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const __embeddableFactories = new Map<string, EmbeddableFactory>();

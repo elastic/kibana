@@ -31,7 +31,7 @@ import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { EditPanelAction } from './panel_header/panel_actions/edit_panel_action';
+import { EditPanelAction } from '../actions';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;

@@ -19,30 +19,25 @@
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  HelloWorldContainer,
-  FilterableContainer,
-  FILTERABLE_EMBEDDABLE,
-  FilterableEmbeddableFactory,
-  FilterableContainerInput,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  SlowContactCardEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-  HelloWorldEmbeddableFactory,
-} from '../test_samples/index';
 import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
 import { ViewMode } from '../types';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
+  FILTERABLE_EMBEDDABLE,
 } from '../test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { PanelNotFoundError } from '../errors';
+import { FilterableEmbeddableFactory } from '../test_samples/embeddables/filterable_embeddable_factory';
+import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../test_samples/embeddables/hello_world/hello_world_embeddable';
+import { HelloWorldEmbeddableFactory } from '../test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
+import { ContactCardEmbeddableInput, ContactCardEmbeddableOutput, ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+import { FilterableContainer, FilterableContainerInput } from '../test_samples/embeddables/filterable_container';
 
 const __embeddableFactories = new Map<string, EmbeddableFactory>();
 __embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
