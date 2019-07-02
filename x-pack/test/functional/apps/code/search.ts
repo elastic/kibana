@@ -15,7 +15,7 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Search', () => {
+  describe('Search', function() {
     const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
     const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
     const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
