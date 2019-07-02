@@ -17,7 +17,7 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
     after(() => esArchiver.unload('empty_kibana'));
 
     it('should return 200 when creating an email action successfully', async () => {
-      await supertest
+      const { body: createdAction } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
@@ -32,25 +32,33 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
             },
           },
         })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            type: 'action',
-            id: resp.body.id,
-            attributes: {
-              description: 'An email action',
-              actionTypeId: '.email',
-              actionTypeConfig: {
-                from: 'bob@example.com',
-                service: 'gmail',
-              },
-            },
-            references: [],
-            updated_at: resp.body.updated_at,
-            version: resp.body.version,
-          });
-          expect(typeof resp.body.id).to.be('string');
-        });
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/action/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        type: 'action',
+        id: fetchedAction.id,
+        attributes: {
+          description: 'An email action',
+          actionTypeId: '.email',
+          actionTypeConfig: {
+            from: 'bob@example.com',
+            service: 'gmail',
+          },
+        },
+        references: [],
+        updated_at: fetchedAction.updated_at,
+        version: fetchedAction.version,
+      });
     });
 
     it('should respond with a 400 Bad Request when creating an email action with an invalid config', async () => {
