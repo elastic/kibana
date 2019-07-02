@@ -78,7 +78,7 @@ describe('filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns);
+    filterManager = new FilterManager(indexPatterns as any);
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.
