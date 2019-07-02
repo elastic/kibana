@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CountParams, CountResponse } from 'elasticsearch';
+
 export interface HistogramQueryResult {
   key: number;
   doc_count: number;
@@ -26,22 +28,8 @@ export interface UMESHistogramBucket {
   x0: number;
 }
 
-export interface CountResult {
-  count: number;
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-}
-
-export interface CountParams {
-  index: string;
-}
-
 export interface DatabaseAdapter {
-  count(request: any, params: CountParams): Promise<CountResult>;
+  count(request: any, params: CountParams): Promise<CountResponse>;
   search(request: any, params: any): Promise<any>;
   head(request: any, params: any): Promise<any>;
 }
