@@ -37,7 +37,7 @@ export const DataMissing = ({ basePath, headingMessage }: DataMissingProps) => (
             <p>
               <FormattedMessage
                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
                 values={{
                   configureHeartbeatLink: (
                     <EuiLink

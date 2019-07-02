@@ -467,7 +467,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
 =======
                     <p>
                       <FormattedMessage
-                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                        defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
                         id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {

@@ -19,7 +19,7 @@ exports[`DataMissing component renders basePath and headingMessage 1`] = `
         body={
           <p>
             <FormattedMessage
-              defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+              defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
               id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
               values={
                 Object {
