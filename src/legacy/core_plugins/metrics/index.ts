@@ -45,7 +45,9 @@ export default function(kibana: any) {
 
     init(server: Legacy.Server) {
       const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as CoreSetup | any; // TODO: Remove 'any' as soon as CoreSetup is completed.
+      // TODO: Remove '@ts-ignore' as soon as CoreSetup is completed.
+      // @ts-ignore
+      const core = { http: { server } } as CoreSetup;
 
       plugin(initializerContext).setup(core);
     },

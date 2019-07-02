@@ -19,9 +19,9 @@
 
 // @ts-ignore
 import { functionsRegistry } from 'plugins/interpreter/registries';
-import { CoreSetup, PluginsServiceSetup } from 'src/core/server';
+import { CoreSetup } from 'src/core/public';
 import { visualizations } from '../../visualizations/public';
-import { plugin } from './plugin';
+import { plugin, TsvbSetupPlugins } from './plugin';
 
 const core = {} as CoreSetup;
 const plugins = {
@@ -31,6 +31,6 @@ const plugins = {
     },
   },
   visualizations,
-} as PluginsServiceSetup | any; // TODO: Remove 'any' as soon as PluginsServiceSetup is completed.
+} as TsvbSetupPlugins;
 
 plugin().setup(core, plugins);
