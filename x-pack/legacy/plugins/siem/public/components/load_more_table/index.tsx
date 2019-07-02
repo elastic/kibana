@@ -98,6 +98,7 @@ interface BasicTableState {
   isEmptyTable: boolean;
   isPopoverOpen: boolean;
   paginationLoading: boolean;
+  showInspect: boolean;
 }
 
 type Func<T> = (arg: T) => string | number;
@@ -121,6 +122,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     isEmptyTable: this.props.pageOfItems.length === 0,
     isPopoverOpen: false,
     paginationLoading: false,
+    showInspect: false,
   };
 
   static getDerivedStateFromProps<T, U, V, W, X, Y, Z, AA, AB>(
@@ -198,7 +200,11 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         </EuiContextMenuItem>
       ));
     return (
-      <EuiPanel data-test-subj={dataTestSubj}>
+      <EuiPanel
+        data-test-subj={dataTestSubj}
+        onMouseEnter={this.mouseEnter}
+        onMouseLeave={this.mouseLeave}
+      >
         <BasicTableContainer>
           {loading && (
             <>
@@ -216,6 +222,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
 
           <HeaderPanel
             id={id}
+            showInspect={this.state.showInspect}
             subtitle={
               <>
                 <div>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</div>
@@ -293,6 +300,20 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       </EuiPanel>
     );
   }
+
+  private mouseEnter = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      showInspect: true,
+    }));
+  };
+
+  private mouseLeave = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      showInspect: false,
+    }));
+  };
 
   private onButtonClick = () => {
     this.setState(prevState => ({

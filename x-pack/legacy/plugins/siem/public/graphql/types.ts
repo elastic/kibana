@@ -3839,6 +3839,7 @@ export namespace GetTimelineQuery {
     sortField: SortField;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3860,9 +3861,19 @@ export namespace GetTimelineQuery {
 
     totalCount: number;
 
+    inspect?: Inspect | null;
+
     pageInfo: PageInfo;
 
     edges: Edges[];
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 
   export type PageInfo = {

@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { pure } from 'recompose';
 
 import { HeaderPanel } from '../../../header_panel';
@@ -38,39 +38,43 @@ export interface OwnProps {
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
 type OverviewHostProps = OwnProps;
-export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQuery }) => (
-  <EuiFlexItem>
-    <EuiPanel>
-      <HeaderPanel
-        border
-        id={OverviewHostQueryId}
-        subtitle={
-          <FormattedMessage
-            id="xpack.siem.overview.hostsSubtitle"
-            defaultMessage="Showing: Last 24 Hours"
-          />
-        }
-        title={
-          <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host Events" />
-        }
-      >
-        <EuiButton href="#/link-to/hosts">
-          <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View Hosts" />
-        </EuiButton>
-      </HeaderPanel>
+export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQuery }) => {
+  const [isHover, setIsHover] = useState(false);
+  return (
+    <EuiFlexItem>
+      <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+        <HeaderPanel
+          border
+          id={OverviewHostQueryId}
+          showInspect={isHover}
+          subtitle={
+            <FormattedMessage
+              id="xpack.siem.overview.hostsSubtitle"
+              defaultMessage="Showing: Last 24 Hours"
+            />
+          }
+          title={
+            <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host Events" />
+          }
+        >
+          <EuiButton href="#/link-to/hosts">
+            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View Hosts" />
+          </EuiButton>
+        </HeaderPanel>
 
-      <OverviewHostQuery endDate={endDate} sourceId="default" startDate={startDate}>
-        {({ overviewHost, loading, id, inspect, refetch }) => (
-          <OverviewHostStatsManage
-            loading={loading}
-            data={overviewHost}
-            setQuery={setQuery}
-            id={id}
-            inspect={inspect}
-            refetch={refetch}
-          />
-        )}
-      </OverviewHostQuery>
-    </EuiPanel>
-  </EuiFlexItem>
-));
+        <OverviewHostQuery endDate={endDate} sourceId="default" startDate={startDate}>
+          {({ overviewHost, loading, id, inspect, refetch }) => (
+            <OverviewHostStatsManage
+              loading={loading}
+              data={overviewHost}
+              setQuery={setQuery}
+              id={id}
+              inspect={inspect}
+              refetch={refetch}
+            />
+          )}
+        </OverviewHostQuery>
+      </EuiPanel>
+    </EuiFlexItem>
+  );
+});

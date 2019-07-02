@@ -6,7 +6,7 @@
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { DescriptionList } from '../../../../../common/utility_types';
@@ -59,6 +59,8 @@ export const HostOverview = React.memo<HostSummaryProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
+    const [isHover, setIsHover] = useState(false);
+
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
         rowItems={getOr([], fieldName, fieldData)}
@@ -157,7 +159,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     ];
 
     return (
-      <OverviewWrapper>
+      <OverviewWrapper onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
         {loading && (
           <>
             <LoadingOverlay />
@@ -171,7 +173,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             />
           </>
         )}
-        <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
+        <InspectButton queryId={id} show={isHover} title={i18n.INSPECT_TITLE} inspectIndex={0} />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}

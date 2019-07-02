@@ -32,12 +32,13 @@ export interface HeaderPanelProps {
   children?: React.ReactNode;
   id?: string;
   subtitle?: string | React.ReactNode;
+  showInspect?: boolean;
   title: string | React.ReactNode;
   tooltip?: string;
 }
 
 export const HeaderPanel = pure<HeaderPanelProps>(
-  ({ border, children, id, subtitle, title, tooltip }) => (
+  ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
@@ -55,7 +56,7 @@ export const HeaderPanel = pure<HeaderPanelProps>(
             <MyEuiFlexItemIcon grow={false} component="span">
               {id && (
                 <>
-                  <InspectButton queryId={id} title={title} inspectIndex={0} />
+                  <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
                 </>
               )}
             </MyEuiFlexItemIcon>

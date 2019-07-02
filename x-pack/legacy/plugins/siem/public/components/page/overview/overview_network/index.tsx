@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { pure } from 'recompose';
 
 import { HeaderPanel } from '../../../header_panel';
@@ -38,39 +38,49 @@ export interface OwnProps {
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 
-export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery }) => (
-  <EuiFlexItem>
-    <EuiPanel>
-      <HeaderPanel
-        border
-        id={OverviewNetworkQueryId}
-        subtitle={
-          <FormattedMessage
-            id="xpack.siem.overview.networkSubtitle"
-            defaultMessage="Showing: Last 24 Hours"
-          />
-        }
-        title={
-          <FormattedMessage id="xpack.siem.overview.networkTitle" defaultMessage="Network Events" />
-        }
-      >
-        <EuiButton href="#/link-to/network/">
-          <FormattedMessage id="xpack.siem.overview.networkAction" defaultMessage="View Network" />
-        </EuiButton>
-      </HeaderPanel>
+export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery }) => {
+  const [isHover, setIsHover] = useState(false);
+  return (
+    <EuiFlexItem>
+      <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+        <HeaderPanel
+          border
+          id={OverviewNetworkQueryId}
+          showInspect={isHover}
+          subtitle={
+            <FormattedMessage
+              id="xpack.siem.overview.networkSubtitle"
+              defaultMessage="Showing: Last 24 Hours"
+            />
+          }
+          title={
+            <FormattedMessage
+              id="xpack.siem.overview.networkTitle"
+              defaultMessage="Network Events"
+            />
+          }
+        >
+          <EuiButton href="#/link-to/network/">
+            <FormattedMessage
+              id="xpack.siem.overview.networkAction"
+              defaultMessage="View Network"
+            />
+          </EuiButton>
+        </HeaderPanel>
 
-      <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
-        {({ overviewNetwork, loading, id, inspect, refetch }) => (
-          <OverviewNetworkStatsManage
-            loading={loading}
-            data={overviewNetwork}
-            id={id}
-            inspect={inspect}
-            setQuery={setQuery}
-            refetch={refetch}
-          />
-        )}
-      </OverviewNetworkQuery>
-    </EuiPanel>
-  </EuiFlexItem>
-));
+        <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
+          {({ overviewNetwork, loading, id, inspect, refetch }) => (
+            <OverviewNetworkStatsManage
+              loading={loading}
+              data={overviewNetwork}
+              id={id}
+              inspect={inspect}
+              setQuery={setQuery}
+              refetch={refetch}
+            />
+          )}
+        </OverviewNetworkQuery>
+      </EuiPanel>
+    </EuiFlexItem>
+  );
+});

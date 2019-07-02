@@ -178,6 +178,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     index,
     to,
   }) => {
+    const [isHover, setIsHover] = useState(false);
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -188,7 +189,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
       <FlexItem grow={grow}>
-        <EuiPanel>
+        <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
               <EuiTitle size="xxxs">
@@ -196,7 +197,12 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
+              <InspectButton
+                queryId={id}
+                title={`KPI ${description}`}
+                inspectIndex={index}
+                show={isHover}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
 

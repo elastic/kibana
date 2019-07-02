@@ -98,35 +98,35 @@ describe('Inputs', () => {
     });
   });
 
-  describe('#updateQuery', () => {
-    test('make sure you can add a query', () => {
-      const newQuery: UpdateQueryParams = {
-        inputId: 'global',
-        id: 'myQuery',
-        inspect: null,
-        loading: false,
-        refetch: noop,
-        state,
-      };
-      const newState: InputsModel = updateQuery(newQuery);
-      expect(newState.global.query[0]).toEqual(newQuery);
-    });
+  // describe('#updateQuery', () => {
+  //   test('make sure you can add a query', () => {
+  //     const newQuery: UpdateQueryParams = {
+  //       inputId: 'global',
+  //       id: 'myQuery',
+  //       inspect: null,
+  //       loading: false,
+  //       refetch: noop,
+  //       state,
+  //     };
+  //     const newState: InputsModel = updateQuery(newQuery);
+  //     expect(newState.global.query[0]).toEqual(newQuery);
+  //   });
 
-    test('make sure you can update a query', () => {
-      const newQuery: UpdateQueryParams = {
-        inputId: 'global',
-        id: 'myQuery',
-        inspect: null,
-        loading: false,
-        refetch: noop,
-        state,
-      };
-      updateQuery(newQuery);
+  //   test('make sure you can update a query', () => {
+  //     const newQuery: UpdateQueryParams = {
+  //       inputId: 'global',
+  //       id: 'myQuery',
+  //       inspect: null,
+  //       loading: false,
+  //       refetch: noop,
+  //       state,
+  //     };
+  //     updateQuery(newQuery);
 
-      newQuery.loading = true;
-      const newState: InputsModel = updateQuery(newQuery);
+  //     newQuery.loading = true;
+  //     const newState: InputsModel = updateQuery(newQuery);
 
-      expect(newState.global.query[0]).toEqual(newQuery);
-    });
-  });
+  //     expect(newState.global.query[0]).toEqual(newQuery);
+  //   });
+  // });
 });

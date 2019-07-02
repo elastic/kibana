@@ -16,8 +16,18 @@ const selectGlobal = (state: State): InputsRange => state.inputs.global;
 
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 
-const selectQuery = (state: State, id: string): GlobalQuery =>
+const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.query.find(q => q.id === id) || {
+    id: '',
+    inspect: null,
+    isInspected: false,
+    loading: false,
+    refetch: null,
+    selectedInspectIndex: 0,
+  };
+
+const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
+  state.inputs.timeline.query.find(q => q.id === id) || {
     id: '',
     inspect: null,
     isInspected: false,
@@ -54,7 +64,13 @@ export const globalQuery = createSelector(
 
 export const globalQueryByIdSelector = () =>
   createSelector(
-    selectQuery,
+    selectGlobalQuery,
+    query => query
+  );
+
+export const timelineQueryByIdSelector = () =>
+  createSelector(
+    selectTimelineQuery,
     query => query
   );
 

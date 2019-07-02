@@ -5,7 +5,7 @@
  */
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -75,6 +75,7 @@ export const IpOverview = pure<IpOverviewProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
+    const [isHover, setIsHover] = useState(false);
     const typeData: Overview = data[flowTarget]!;
     const descriptionLists: Readonly<DescriptionList[][]> = [
       [
@@ -126,7 +127,7 @@ export const IpOverview = pure<IpOverviewProps>(
       ],
     ];
     return (
-      <OverviewWrapper>
+      <OverviewWrapper onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
         {loading && (
           <>
             <LoadingOverlay />
@@ -140,7 +141,7 @@ export const IpOverview = pure<IpOverviewProps>(
             />
           </>
         )}
-        <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
+        <InspectButton queryId={id} show={isHover} title={i18n.INSPECT_TITLE} inspectIndex={0} />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}
