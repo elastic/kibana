@@ -30,7 +30,7 @@ import {
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
-  CleanOtherPlatformFilesFromModulesTask,
+  CleanCtagBuildTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
@@ -135,7 +135,7 @@ export async function buildDistributables(options) {
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
-  await run(CleanOtherPlatformFilesFromModulesTask);
+  await run(CleanCtagBuildTask);
 
   await run(PathLengthTask);
 

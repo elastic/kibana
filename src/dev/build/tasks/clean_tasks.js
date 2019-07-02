@@ -22,6 +22,8 @@ import minimatch from 'minimatch';
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 import { resolve } from 'path';
 
+const RELATIVE_CTAGS_BUILD_DIR = 'node_modules/@elastic/node-ctags/ctags/build';
+
 export const CleanTask = {
   global: true,
   description: 'Cleaning artifacts from previous builds',
@@ -169,7 +171,10 @@ export const CleanExtraFilesFromModulesTask = {
 
     log.info('Deleted %d files', await scanDelete({
       directory: build.resolvePath('node_modules'),
-      regularExpressions
+      regularExpressions,
+      excludePaths: [
+        build.resolvePath(RELATIVE_CTAGS_BUILD_DIR)
+      ]
     }));
 
     if (!build.isOss()) {
@@ -257,35 +262,31 @@ export const CleanEmptyFoldersTask = {
   },
 };
 
-export const CleanOtherPlatformFilesFromModulesTask = {
-  description: 'Cleaning files of other platforms from node_modules',
+export const CleanCtagBuildTask = {
+  description: 'Cleaning extra platform-specific files from @elastic/node-ctag build dir',
 
   async run(config, log, build) {
-    const getExtraFilesInNodeCtags = platform => {
-      const packageRoot = build.resolvePathForPlatform(platform, 'node_modules/@elastic/node-ctags');
-      // Delete unnecessary packages in node-ctags
-      const paths = [ resolve(packageRoot, 'ctags/build/*') ];
-      const nodeAbi = 'node-v' + process.versions.modules;
-      const excludePathTemplate = resolve(packageRoot, `ctags/build/ctags-${nodeAbi}-{platform}-x64`);
-      let excludePath = '';
-      // keep platform-specific builds
+    const getPlatformId = (platform) => {
       if (platform.isWindows()) {
-        excludePath = excludePathTemplate.replace('{platform}', 'win32');
+        return 'win32';
       } else if (platform.isLinux()) {
-        excludePath = excludePathTemplate.replace('{platform}', 'linux');
+        return 'linux';
       } else if (platform.isMac()) {
-        excludePath = excludePathTemplate.replace('{platform}', 'darwin');
+        return 'darwin';
       }
-      if (excludePath) {
-        paths.push(`!${excludePath}`);
-      }
-      return paths;
     };
+
     await Promise.all(
       config.getTargetPlatforms().map(async platform => {
-        if (!build.isOss()) {
-          await deleteAll(getExtraFilesInNodeCtags(platform), log);
+        if (build.isOss()) {
+          return;
         }
+
+        const ctagsBuildDir = build.resolvePathForPlatform(platform, RELATIVE_CTAGS_BUILD_DIR);
+        await deleteAll([
+          resolve(ctagsBuildDir, '*'),
+          `!${resolve(ctagsBuildDir, `ctags-node-v${process.versions.modules}-${getPlatformId(platform)}-x64`)}`
+        ], log);
       })
     );
   }
