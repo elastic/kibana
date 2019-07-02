@@ -31,13 +31,13 @@ export interface MetricsExplorerTimeOptions {
   interval: string;
 }
 
-const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
+export const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
   from: 'now-1h',
   to: 'now',
   interval: '>=10s',
 };
 
-const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
+export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   {
     aggregation: MetricsExplorerAggregation.avg,
     field: 'system.cpu.user.pct',
@@ -55,7 +55,7 @@ const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   },
 ];
 
-const DEFAULT_OPTIONS: MetricsExplorerOptions = {
+export const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   aggregation: MetricsExplorerAggregation.avg,
   metrics: DEFAULT_METRICS,
 };
