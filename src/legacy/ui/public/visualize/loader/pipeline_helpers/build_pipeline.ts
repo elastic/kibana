@@ -464,9 +464,13 @@ export const buildPipeline = async (
     visConfig.dimensions = await buildVislibDimensions(vis, params);
 
     pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
+  } else if (vis.type.toExpression) {
+    pipeline += await vis.type.toExpression(vis, params);
   } else {
+    const visConfig = visState.params;
+    visConfig.dimensions = schemas;
     pipeline += `visualization type='${vis.type.name}'
-    ${prepareJson('visConfig', visState.params)}
+    ${prepareJson('visConfig', visConfig)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
