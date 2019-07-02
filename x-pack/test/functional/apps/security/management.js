@@ -10,6 +10,7 @@ import {
   EDIT_USERS_PATH,
   ROLES_PATH,
   EDIT_ROLES_PATH,
+  CLONE_ROLES_PATH,
 } from '../../../../legacy/plugins/security/public/views/management/management_urls';
 
 export default function ({ getService, getPageObjects }) {
@@ -105,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
         it('Clicking save in create role section brings user back to listing', async () => {
           await PageObjects.security.clickCreateNewRole();
 
-          await testSubjects.setValue('roleFormNameInput', 'my-new-role');
+          await testSubjects.setValue('roleFormNameInput', 'a-my-new-role');
 
           await PageObjects.security.clickSaveEditRole();
 
@@ -115,13 +116,21 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('Can navigate to edit role section', async () => {
-          await PageObjects.settings.clickLinkText('my-new-role');
+          await PageObjects.settings.clickLinkText('a-my-new-role');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
 
           const userNameInput = await testSubjects.find('roleFormNameInput');
           const userName = await userNameInput.getProperty('value');
-          expect(userName).to.equal('my-new-role');
+          expect(userName).to.equal('a-my-new-role');
+        });
+
+        it('Can navigate to clone role section', async () => {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.security.clickElasticsearchRoles();
+          await PageObjects.security.clickCloneRole('a-my-new-role');
+          const currentUrl = await browser.getCurrentUrl();
+          expect(currentUrl).to.contain(CLONE_ROLES_PATH);
         });
 
         it('Can navigate to edit role section from users page', async () => {
