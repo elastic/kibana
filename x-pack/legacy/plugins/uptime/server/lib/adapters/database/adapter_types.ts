@@ -36,8 +36,12 @@ export interface CountResult {
   };
 }
 
+export interface CountParams {
+  index: string;
+}
+
 export interface DatabaseAdapter {
-  count(request: any, params: any): Promise<CountResult>;
+  count(request: any, params: CountParams): Promise<CountResult>;
   search(request: any, params: any): Promise<any>;
   head(request: any, params: any): Promise<any>;
 }

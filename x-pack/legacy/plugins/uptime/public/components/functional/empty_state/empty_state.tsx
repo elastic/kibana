@@ -6,7 +6,6 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { docCountQuery } from '../../../queries';
 import { EmptyStateError } from './empty_state_error';
@@ -27,7 +26,7 @@ type Props = UptimeGraphQLQueryProps<EmptyStateQueryResult> & EmptyStateProps;
 
 export const EmptyStateComponent = ({ basePath, children, data, errors }: Props) => {
   if (errors) {
-    return <EmptyStateError errorMessage={formatUptimeGraphQLErrorList(errors)} />;
+    return <EmptyStateError errors={errors} />;
   }
   if (data && data.statesIndexStatus) {
     const { indexExists, docCount } = data.statesIndexStatus;
@@ -57,9 +56,7 @@ export const EmptyStateComponent = ({ basePath, children, data, errors }: Props)
      * jittery UX any time the components refresh. This way we'll keep the stale
      * state displayed during the fetching process.
      */
-    if (data && data.statesIndexStatus) {
-      return <Fragment>{children}</Fragment>;
-    }
+    return <Fragment>{children}</Fragment>;
   }
   return <EmptyStateLoading />;
 };

@@ -502,8 +502,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const {
       _shards: { total },
       count,
-    } = await this.database.count(request, {});
-
+    } = await this.database.count(request, { index: INDEX_NAMES.HEARTBEAT });
     return {
       indexExists: total > 0,
       docCount: {
