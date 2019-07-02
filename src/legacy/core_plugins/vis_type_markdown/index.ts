@@ -18,19 +18,19 @@
  */
 
 import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+import { LegacyPluginApi } from '../../plugin_discovery/types';
 
-export default function (kibana) {
-
-  return new kibana.Plugin({
-
+// eslint-disable-next-line import/no-default-export
+export default function MarkdownVisTypePlugin(kibana: LegacyPluginApi) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'vis_type_markdown',
+    require: ['data', 'visualizations'],
     uiExports: {
-      visTypes: [
-        'plugins/markdown_vis/markdown_vis'
-      ],
-      interpreter: ['plugins/markdown_vis/markdown_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
+      hacks: ['plugins/vis_type_markdown/index'],
+    },
+  };
 
-  });
-
+  return new kibana.Plugin(config);
 }
