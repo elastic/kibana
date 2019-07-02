@@ -27,3 +27,7 @@ export const ALL_SOURCES = [
   XYZTMSSource,
   WMSSource,
 ];
+
+export const BETA_SOURCES = [
+  GeojsonFileSource,
+];

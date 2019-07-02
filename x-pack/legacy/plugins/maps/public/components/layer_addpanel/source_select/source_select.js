@@ -5,14 +5,19 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALL_SOURCES } from '../../../shared/layers/sources/all_sources';
+import {
+  ALL_SOURCES,
+  BETA_SOURCES
+} from '../../../shared/layers/sources/all_sources';
 import {
   EuiTitle,
   EuiSpacer,
   EuiCard,
   EuiIcon,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
 export function SourceSelect({
@@ -24,12 +29,16 @@ export function SourceSelect({
       ? <EuiIcon type={Source.icon} size="l" />
       : null;
 
+    const sourceTitle = BETA_SOURCES.includes(Source)
+      ? <div><span>{Source.title}</span>{generateBetaBadge()}</div>
+      : Source.title;
+
     return (
       <Fragment key={Source.type}>
         <EuiSpacer size="s" />
         <EuiCard
           className="mapLayerAddpanel__card"
-          title={Source.title}
+          title={sourceTitle}
           icon={icon}
           onClick={() => updateSourceSelection(
             { type: Source.type, isIndexingSource: Source.isIndexingSource })
@@ -54,5 +63,17 @@ export function SourceSelect({
       </EuiTitle>
       {sourceCards}
     </Fragment>
+  );
+}
+
+function generateBetaBadge() {
+  return (
+    <EuiBetaBadge
+      label="Beta"
+      tooltipContent={i18n.translate('xpack.maps.sourceSelect.betaMessageBadge', {
+        defaultMessage:
+          'Maps GeoJSON Upload is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
+      })}
+    />
   );
 }
