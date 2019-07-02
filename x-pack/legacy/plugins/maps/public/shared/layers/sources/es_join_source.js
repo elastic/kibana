@@ -202,4 +202,10 @@ export class ESJoinSource extends AbstractESSource {
       return null;
     }
   }
+
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
+    });
+  }
 }

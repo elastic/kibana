@@ -31,11 +31,15 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
+  type SnapshotCount {
+    up: Int!
+    down: Int!
+    mixed: Int!
+    total: Int!
+  }
+
   type Snapshot {
-    up: Int
-    down: Int
-    total: Int
-    histogram: [HistogramDataPoint!]!
+    counts: SnapshotCount!
   }
 
   type DataPoint {
@@ -57,16 +61,19 @@ export const monitorsSchema = gql`
 
   "The data used to populate the monitor charts."
   type MonitorChart {
-    "The max and min values for the monitor duration."
-    durationArea: [MonitorDurationAreaPoint!]!
     "The average values for the monitor duration."
-    durationLine: [MonitorDurationAveragePoint!]!
+    locationDurationLines: [LocationDurationLine!]!
     "The counts of up/down checks for the monitor."
     status: [StatusData!]!
     "The maximum status doc count in this chart."
     statusMaxCount: Int!
     "The maximum duration value in this chart."
     durationMaxValue: Int!
+  }
+
+  type LocationDurationLine {
+    name: String!
+    line: [MonitorDurationAveragePoint!]!
   }
 
   type MonitorKey {
@@ -147,6 +154,13 @@ export const monitorsSchema = gql`
     ): LatestMonitorsResult
 
     getSnapshot(dateRangeStart: String!, dateRangeEnd: String!, filters: String): Snapshot
+
+    getSnapshotHistogram(
+      dateRangeStart: String!
+      dateRangeEnd: String!
+      filters: String
+      monitorId: String
+    ): [HistogramDataPoint!]!
 
     getMonitorChartsData(
       monitorId: String!
