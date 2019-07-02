@@ -19,7 +19,7 @@
 
 import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfig, Vis, VisState } from 'ui/vis';
+import { AggConfig, VisState } from 'ui/vis';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { IndexPattern } from 'ui/index_patterns';
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
@@ -41,13 +41,9 @@ export interface ParamInstance extends ParamInstanceBase {
   indexedFields: FieldParamType[];
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: unknown;
-  visName: string;
 }
 
-function getAggParamsToRender(
-  { agg, editorConfig, responseValueAggs, state }: ParamInstanceBase,
-  vis: Vis
-) {
+function getAggParamsToRender({ agg, editorConfig, responseValueAggs, state }: ParamInstanceBase) {
   const params = {
     basic: [] as ParamInstance[],
     advanced: [] as ParamInstance[],
@@ -73,7 +69,7 @@ function getAggParamsToRender(
       const availableFields = (param as FieldParamType).getAvailableFields(
         agg.getIndexPattern().fields
       );
-      fields = aggTypeFieldFilters.filter(availableFields, param.type, agg, vis);
+      fields = aggTypeFieldFilters.filter(availableFields, param.type, agg);
       indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
     }
 
@@ -95,7 +91,6 @@ function getAggParamsToRender(
         responseValueAggs,
         state,
         value: agg.params[param.name],
-        visName: vis.type.name,
       } as ParamInstance);
     }
   });
