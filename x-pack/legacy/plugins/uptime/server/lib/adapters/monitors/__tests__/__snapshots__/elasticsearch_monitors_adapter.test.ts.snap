@@ -8,16 +8,24 @@ Array [
       "aggs": Object {
         "timeseries": Object {
           "aggs": Object {
-            "duration": Object {
-              "stats": Object {
-                "field": "monitor.duration.us",
+            "location": Object {
+              "aggs": Object {
+                "duration": Object {
+                  "stats": Object {
+                    "field": "monitor.duration.us",
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "monitor.status",
+                    "shard_size": 2,
+                    "size": 2,
+                  },
+                },
               },
-            },
-            "status": Object {
               "terms": Object {
-                "field": "monitor.status",
-                "shard_size": 2,
-                "size": 2,
+                "field": "observer.geo.name",
+                "missing": "N/A",
               },
             },
           },
@@ -66,16 +74,24 @@ Array [
       "aggs": Object {
         "timeseries": Object {
           "aggs": Object {
-            "duration": Object {
-              "stats": Object {
-                "field": "monitor.duration.us",
+            "location": Object {
+              "aggs": Object {
+                "duration": Object {
+                  "stats": Object {
+                    "field": "monitor.duration.us",
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "monitor.status",
+                    "shard_size": 2,
+                    "size": 2,
+                  },
+                },
               },
-            },
-            "status": Object {
               "terms": Object {
-                "field": "monitor.status",
-                "shard_size": 2,
-                "size": 2,
+                "field": "observer.geo.name",
+                "missing": "N/A",
               },
             },
           },

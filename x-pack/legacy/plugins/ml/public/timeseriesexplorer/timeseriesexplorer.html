@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <div class="series-controls" ng-show="jobs.length > 0">
+  <div class="series-controls" ng-show="jobs.length > 0" data-test-subj="mlSingleMetricViewerSeriesControls">
     <label
       for="selectDetector"
       class="kuiLabel"
@@ -174,7 +174,7 @@
         </div>
       </div>
 
-      <div class="ml-timeseries-chart">
+      <div class="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
 
         <ml-timeseries-chart style="width: 1200px; height: 400px;"
           annotations-enabled="showAnnotationsCheckbox"
