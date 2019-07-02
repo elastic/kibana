@@ -18,10 +18,11 @@ import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
+import { PREPARE_WORKSPACE_ERROR_MSG } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 import { detectLanguage } from '../utils/detect_language';
 import { LspIndexer } from './lsp_indexer';
-import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
+import { DocumentIndexName, SymbolIndexName } from './schema';
 
 export class LspIncrementalIndexer extends LspIndexer {
   protected type: string = 'lsp_inc';
@@ -131,10 +132,13 @@ export class LspIncrementalIndexer extends LspIndexer {
         wsRepo = workspaceRepo;
         workspaceOpened = true;
       } catch (error) {
-        // TODO: add specifiy exception reason filters
-        workspaceOpened = false;
-        this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
-        this.log.warn(error);
+        if (error.message && error.message === PREPARE_WORKSPACE_ERROR_MSG) {
+          workspaceOpened = false;
+          this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
+          this.log.warn(error);
+        } else {
+          throw error;
+        }
       }
       const workspaceDir = wsRepo && wsRepo.workdir();
       if (this.diff) {

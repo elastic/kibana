@@ -22,6 +22,7 @@ import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
+import { PREPARE_WORKSPACE_ERROR_MSG } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 import { detectLanguage, detectLanguageByFilename } from '../utils/detect_language';
 import { AbstractIndexer } from './abstract_indexer';
@@ -113,10 +114,13 @@ export class LspIndexer extends AbstractIndexer {
         wsRepo = workspaceRepo;
         workspaceOpened = true;
       } catch (error) {
-        // TODO: add specifiy exception reason filters
-        workspaceOpened = false;
-        this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
-        this.log.warn(error);
+        if (error.message && error.message === PREPARE_WORKSPACE_ERROR_MSG) {
+          workspaceOpened = false;
+          this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
+          this.log.warn(error);
+        } else {
+          throw error;
+        }
       }
       const workspaceDir = wsRepo && wsRepo.workdir();
       const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
