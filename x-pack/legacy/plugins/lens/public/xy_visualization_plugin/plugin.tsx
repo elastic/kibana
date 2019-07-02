@@ -10,7 +10,6 @@ import { xyVisualization } from './xy_visualization';
 import {
   renderersRegistry,
   functionsRegistry,
-  // @ts-ignore untyped dependency
 } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { InterpreterSetup, RenderFunction } from '../interpreter_types';
 import { xyChart, xyChartRenderer } from './xy_expression';

@@ -12,24 +12,3 @@ export function createMockedDragDropContext(): jest.Mocked<DragContextState> {
     setDragging: jest.fn(),
   };
 }
-
-jest.mock('ui/new_platform');
-
-jest.mock('ui/storage', () => {
-  return {
-    Storage: jest.fn().mockImplementation(() => ({
-      get: jest.fn(),
-      getItem: jest.fn(),
-    })),
-  };
-});
-
-jest.mock('../../../../../../src/legacy/core_plugins/data/public/setup', () => ({
-  data: {
-    query: {
-      ui: {
-        QueryBarInput: jest.fn(),
-      },
-    },
-  },
-}));

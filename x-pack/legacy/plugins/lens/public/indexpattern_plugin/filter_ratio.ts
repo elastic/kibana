@@ -42,7 +42,6 @@ export const calculateFilterRatio: ExpressionFunction<
     }
 
     const entries = Object.entries(data.rows[0]);
-    const [[ratioKey]] = entries.filter(([key]) => key === id);
     const [[valueKey]] = entries.filter(([key]) => key.includes('filter-ratio'));
 
     for (let i = 0; i < data.rows.length; i += 2) {

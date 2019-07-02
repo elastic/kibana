@@ -50,8 +50,15 @@ export const operationDefinitionMap: AllOperationDefinitions = {
   filter_ratio: filterRatioOperation,
 };
 const operationDefinitions: PossibleOperationDefinitions[] = Object.values(operationDefinitionMap);
+// const operationDefinitions: PossibleOperationDefinitions[] = (Object.entries(
+//   operationDefinitionMap
+// ) as Array<[string, PossibleOperationDefinitions]>)
+//   .sort(([a], [b]) => a.localeCompare(b))
+//   .sort(([a], [b]) => (a === 'count' ? -1 : 1))
+//   .map(([_, val]) => val);
 
 export function getOperations(): OperationType[] {
+  // return ['count', 'filter_ratio', 'date_histogram', 'terms', 'avg', 'max', 'min', 'sum'];
   return Object.keys(operationDefinitionMap) as OperationType[];
 }
 

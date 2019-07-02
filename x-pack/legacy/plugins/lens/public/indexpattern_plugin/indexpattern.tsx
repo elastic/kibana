@@ -18,6 +18,7 @@ import {
   DimensionPriority,
   DatasourceSuggestion,
 } from '../types';
+import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
 import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
@@ -79,8 +80,8 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
 export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
   operationType: 'filter_ratio';
   params: {
-    numerator: { language: string; query: string };
-    denominator: { language: string; query: string };
+    numerator: Query;
+    denominator: Query;
   };
 }
 
@@ -100,6 +101,8 @@ export interface IndexPattern {
   timeFieldName?: string | null;
 }
 
+// Represents the computed field information for use by Lens
+// Filterable should be computed based on logic in index_patterns/_field.js
 export interface IndexPatternField {
   name: string;
   type: string;

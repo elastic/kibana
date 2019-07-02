@@ -48,27 +48,41 @@ export function FieldSelect({
   );
 
   function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
-    return incompatibleSelectedOperationType
-      ? col.operationType === incompatibleSelectedOperationType
-      : !selectedColumn || col.operationType === selectedColumn.operationType;
+    if (incompatibleSelectedOperationType) {
+      return col.operationType === incompatibleSelectedOperationType;
+    }
+    return !selectedColumn || col.operationType === selectedColumn.operationType;
   }
 
   const fieldOptions = [];
-  const fieldLessColumn = filteredColumns.find(
+  const bestFieldLessColumn = filteredColumns.find(
     column => !hasField(column) && isCompatibleWithCurrentOperation(column)
   );
-  if (fieldLessColumn) {
+  if (bestFieldLessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: fieldLessColumn.operationId,
+      value: bestFieldLessColumn.operationId,
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
-          fieldLessColumn
+          bestFieldLessColumn
         ),
       }),
     });
+  } else {
+    const anyFieldLessColumn = filteredColumns.find(column => !hasField(column));
+    if (anyFieldLessColumn) {
+      fieldOptions.push({
+        label: i18n.translate('xpack.lens.indexPattern.documentField', {
+          defaultMessage: 'Document',
+        }),
+        value: anyFieldLessColumn.operationId,
+        className: classNames({
+          'lnsConfigPanel__fieldOption--incompatible': true,
+        }),
+      });
+    }
   }
 
   if (uniqueColumnsByField.length > 0) {

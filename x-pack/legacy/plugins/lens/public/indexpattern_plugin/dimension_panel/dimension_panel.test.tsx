@@ -15,6 +15,11 @@ import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 
+jest.mock('../loader');
+jest.mock('ui/new_platform');
+jest.mock('ui/chrome');
+jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
+
 jest.mock('../state_helpers');
 jest.mock('../operations');
 
@@ -29,24 +34,28 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
+        filterable: true,
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        filterable: true,
       },
       {
         name: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        filterable: true,
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
+        filterable: true,
       },
     ],
   },
@@ -163,6 +172,8 @@ describe('IndexPatternDimensionPanel', () => {
     openPopover();
 
     const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options).toHaveLength(2);
 
     expect(options![0].label).toEqual('Document');
 
@@ -541,7 +552,7 @@ describe('IndexPatternDimensionPanel', () => {
         .find(EuiSideNav)
         .prop('items')[0]
         .items.map(({ name }) => name)
-    ).toEqual(['Count', 'Maximum', 'Average', 'Sum', 'Minimum']);
+    ).toEqual(['Maximum', 'Average', 'Sum', 'Minimum', 'Count', 'Filter Ratio']);
   });
 
   it('should add a column on selection of a field', () => {
@@ -642,7 +653,15 @@ describe('IndexPatternDimensionPanel', () => {
           foo: {
             id: 'foo',
             title: 'Foo pattern',
-            fields: [{ aggregatable: true, name: 'bar', searchable: true, type: 'number' }],
+            fields: [
+              {
+                aggregatable: true,
+                name: 'bar',
+                searchable: true,
+                filterable: true,
+                type: 'number',
+              },
+            ],
           },
         },
       };

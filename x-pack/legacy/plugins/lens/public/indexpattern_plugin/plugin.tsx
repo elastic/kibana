@@ -11,7 +11,6 @@ import { toastNotifications } from 'ui/notify';
 import { getIndexPatternDatasource } from './indexpattern';
 
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
-// @ts-ignore untyped dependency
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { renameColumns } from './rename_columns';
 import { calculateFilterRatio } from './filter_ratio';

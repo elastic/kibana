@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Storage } from 'ui/storage';
 import { EuiButton, EuiFormRow } from '@elastic/eui';
+import { Query } from '../../../../../../../src/legacy/core_plugins/data/public/query';
 import { data as dataSetup } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
 import { FilterRatioIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
@@ -77,13 +78,13 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
         >
           <QueryBarInput
             appName={'lens'}
-            indexPatterns={[state.indexPatterns[state.currentIndexPatternId]]}
+            indexPatterns={[state.currentIndexPatternId]}
             query={
               (state.columns[currentColumnId] as FilterRatioIndexPatternColumn).params.numerator
             }
             screenTitle={''}
             store={localStorage}
-            onChange={(newQuery: { language: string; query: string }) => {
+            onChange={(newQuery: Query) => {
               setState(
                 updateColumnParam(
                   state,
@@ -104,13 +105,13 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
           {hasDenominator ? (
             <QueryBarInput
               appName={'lens'}
-              indexPatterns={[state.indexPatterns[state.currentIndexPatternId]]}
+              indexPatterns={[state.currentIndexPatternId]}
               query={
                 (state.columns[currentColumnId] as FilterRatioIndexPatternColumn).params.denominator
               }
               screenTitle={''}
               store={localStorage}
-              onChange={(newQuery: { language: string; query: string }) => {
+              onChange={(newQuery: Query) => {
                 setState(
                   updateColumnParam(
                     state,
