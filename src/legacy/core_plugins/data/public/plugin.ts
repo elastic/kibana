@@ -49,8 +49,8 @@ export class DataPublicPlugin
       filter: this.filter.setup({
         indexPatterns: indexPatternsSetup.indexPatterns,
       }),
-      search: this.search.setup(),
       query: this.query.setup(),
+      search: this.search.setup(),
     };
   }
 
@@ -62,8 +62,8 @@ export class DataPublicPlugin
     this.expressions.stop();
     this.indexPatterns.stop();
     this.filter.stop();
-    this.search.stop();
     this.query.stop();
+    this.search.stop();
   }
 }
 
