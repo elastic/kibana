@@ -5841,7 +5841,6 @@
     "xpack.maps.mapController.saveSuccessMessage": "已保存“{title}”",
     "xpack.maps.mapEmbeddableFactory": "无法加载地图，已保存对象格式错误",
     "xpack.maps.mapListing.advancedSettingsLinkText": "高级设置",
-    "xpack.maps.mapListing.betaMessageBadge": "地图仍为公测版。请通过在 Kibana 报告中报告问题或错误，帮助我们改进产品。",
     "xpack.maps.mapListing.cancelTitle": "取消",
     "xpack.maps.mapListing.createMapButtonLabel": "创建地图",
     "xpack.maps.mapListing.deleteSelectedButtonLabel": "删除选定",
