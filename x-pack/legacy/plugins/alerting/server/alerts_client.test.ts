@@ -37,7 +37,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 function getMockData() {
   return {
     alertTypeId: '123',
-    interval: 10,
+    interval: 10000,
     alertTypeParams: {
       bar: true,
     },
@@ -67,7 +67,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -132,7 +132,7 @@ Object {
     "bar": true,
   },
   "id": "1",
-  "interval": 10,
+  "interval": 10000,
   "scheduledTaskId": "task-123",
 }
 `);
@@ -154,7 +154,7 @@ Object {
   "alertTypeParams": Object {
     "bar": true,
   },
-  "interval": 10,
+  "interval": 10000,
 }
 `);
     expect(savedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -259,7 +259,7 @@ Object {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -308,7 +308,7 @@ Array [
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -367,7 +367,7 @@ describe('get()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -406,7 +406,7 @@ Object {
     "bar": true,
   },
   "id": "1",
-  "interval": 10,
+  "interval": 10000,
 }
 `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -425,7 +425,7 @@ Array [
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -460,7 +460,7 @@ describe('find()', () => {
           type: 'alert',
           attributes: {
             alertTypeId: '123',
-            interval: 10,
+            interval: 10000,
             alertTypeParams: {
               bar: true,
             },
@@ -502,7 +502,7 @@ Array [
       "bar": true,
     },
     "id": "1",
-    "interval": 10,
+    "interval": 10000,
   },
 ]
 `);
@@ -525,7 +525,7 @@ describe('delete()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -600,7 +600,7 @@ describe('update()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -625,7 +625,7 @@ describe('update()', () => {
     const result = await alertsClient.update({
       id: '1',
       data: {
-        interval: 10,
+        interval: 10000,
         alertTypeParams: {
           bar: true,
         },
@@ -658,7 +658,7 @@ Object {
     "bar": true,
   },
   "id": "1",
-  "interval": 10,
+  "interval": 10000,
 }
 `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -679,7 +679,7 @@ Object {
   "alertTypeParams": Object {
     "bar": true,
   },
-  "interval": 10,
+  "interval": 10000,
 }
 `);
     expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
@@ -722,7 +722,7 @@ Object {
       alertsClient.update({
         id: '1',
         data: {
-          interval: 10,
+          interval: 10000,
           alertTypeParams: {
             bar: true,
           },
