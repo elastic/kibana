@@ -11,256 +11,572 @@ import { mlPrivileges } from './privileges';
 const xpackMainPluginWithSecurity = {
   info: {
     isAvailable: () => true,
-    feature: () => ({
-      isEnabled: () => true,
-    }),
+    feature: (f: string) => {
+      switch (f) {
+        case 'ml':
+          return { isEnabled: () => true };
+        case 'security':
+          return { isEnabled: () => true };
+      }
+    },
+    license: {
+      isOneOf: () => true,
+      isActive: () => true,
+      getType: () => 'platinum',
+    },
   },
-};
+} as any;
 
 const xpackMainPluginWithOutSecurity = {
   info: {
     isAvailable: () => true,
-    feature: () => ({
-      isEnabled: () => false,
-    }),
+    feature: (f: string) => {
+      switch (f) {
+        case 'ml':
+          return { isEnabled: () => true };
+        case 'security':
+          return { isEnabled: () => false };
+      }
+    },
+    license: {
+      isOneOf: () => true,
+      isActive: () => true,
+      getType: () => 'platinum',
+    },
   },
-};
+} as any;
+
+const xpackMainPluginWithOutSecurityBasicLicense = {
+  info: {
+    isAvailable: () => true,
+    feature: (f: string) => {
+      switch (f) {
+        case 'ml':
+          return { isEnabled: () => true };
+        case 'security':
+          return { isEnabled: () => false };
+      }
+    },
+    license: {
+      isOneOf: () => false,
+      isActive: () => true,
+      getType: () => 'basic',
+    },
+  },
+} as any;
+
+const xpackMainPluginWithSecurityBasicLicense = {
+  info: {
+    isAvailable: () => true,
+    feature: (f: string) => {
+      switch (f) {
+        case 'ml':
+          return { isEnabled: () => true };
+        case 'security':
+          return { isEnabled: () => true };
+      }
+    },
+    license: {
+      isOneOf: () => false,
+      isActive: () => true,
+      getType: () => 'basic',
+    },
+  },
+} as any;
+
+const mlIsEnabled = async () => true;
+const mlIsNotEnabled = async () => false;
 
 describe('check_privileges', () => {
-  describe('getPrivileges() - right number of privileges', () => {
-    test('es privileges count', async done => {
+  describe('getPrivileges() - right number of capabilities', () => {
+    test('es capabilities count', async done => {
       const count = mlPrivileges.cluster.length;
       expect(count).toBe(35);
       done();
     });
 
-    test('kibana privileges count', async done => {
+    test('kibana capabilities count', async done => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
-      const { privileges } = await getPrivileges();
-      const count = Object.keys(privileges).length;
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
+      const { capabilities } = await getPrivileges();
+      const count = Object.keys(capabilities).length;
       expect(count).toBe(23);
       done();
     });
   });
 
   describe('getPrivileges() with security', () => {
-    test('ml_user privileges only', async done => {
+    test('ml_user capabilities only', async done => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
-      const { privileges, upgradeInProgress } = await getPrivileges();
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
       expect(upgradeInProgress).toBe(false);
-      expect(privileges.canGetJobs).toBe(true);
-      expect(privileges.canCreateJob).toBe(false);
-      expect(privileges.canDeleteJob).toBe(false);
-      expect(privileges.canOpenJob).toBe(false);
-      expect(privileges.canCloseJob).toBe(false);
-      expect(privileges.canForecastJob).toBe(false);
-      expect(privileges.canGetDatafeeds).toBe(true);
-      expect(privileges.canStartStopDatafeed).toBe(false);
-      expect(privileges.canUpdateJob).toBe(false);
-      expect(privileges.canUpdateDatafeed).toBe(false);
-      expect(privileges.canPreviewDatafeed).toBe(false);
-      expect(privileges.canGetCalendars).toBe(true);
-      expect(privileges.canCreateCalendar).toBe(false);
-      expect(privileges.canDeleteCalendar).toBe(false);
-      expect(privileges.canGetFilters).toBe(false);
-      expect(privileges.canCreateFilter).toBe(false);
-      expect(privileges.canDeleteFilter).toBe(false);
-      expect(privileges.canFindFileStructure).toBe(true);
-      expect(privileges.canGetDataFrameJobs).toBe(false);
-      expect(privileges.canDeleteDataFrameJob).toBe(false);
-      expect(privileges.canPreviewDataFrameJob).toBe(false);
-      expect(privileges.canCreateDataFrameJob).toBe(false);
-      expect(privileges.canStartStopDataFrameJob).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(true);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(true);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(true);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(false);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
       done();
     });
 
-    test('full privileges', async done => {
+    test('full capabilities', async done => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
-      const { privileges, upgradeInProgress } = await getPrivileges();
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
       expect(upgradeInProgress).toBe(false);
-      expect(privileges.canGetJobs).toBe(true);
-      expect(privileges.canCreateJob).toBe(true);
-      expect(privileges.canDeleteJob).toBe(true);
-      expect(privileges.canOpenJob).toBe(true);
-      expect(privileges.canCloseJob).toBe(true);
-      expect(privileges.canForecastJob).toBe(true);
-      expect(privileges.canGetDatafeeds).toBe(true);
-      expect(privileges.canStartStopDatafeed).toBe(true);
-      expect(privileges.canUpdateJob).toBe(true);
-      expect(privileges.canUpdateDatafeed).toBe(true);
-      expect(privileges.canPreviewDatafeed).toBe(true);
-      expect(privileges.canGetCalendars).toBe(true);
-      expect(privileges.canCreateCalendar).toBe(true);
-      expect(privileges.canDeleteCalendar).toBe(true);
-      expect(privileges.canGetFilters).toBe(true);
-      expect(privileges.canCreateFilter).toBe(true);
-      expect(privileges.canDeleteFilter).toBe(true);
-      expect(privileges.canFindFileStructure).toBe(true);
-      expect(privileges.canGetDataFrameJobs).toBe(true);
-      expect(privileges.canDeleteDataFrameJob).toBe(true);
-      expect(privileges.canPreviewDataFrameJob).toBe(true);
-      expect(privileges.canCreateDataFrameJob).toBe(true);
-      expect(privileges.canStartStopDataFrameJob).toBe(true);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(true);
+      expect(capabilities.canCreateJob).toBe(true);
+      expect(capabilities.canDeleteJob).toBe(true);
+      expect(capabilities.canOpenJob).toBe(true);
+      expect(capabilities.canCloseJob).toBe(true);
+      expect(capabilities.canForecastJob).toBe(true);
+      expect(capabilities.canGetDatafeeds).toBe(true);
+      expect(capabilities.canStartStopDatafeed).toBe(true);
+      expect(capabilities.canUpdateJob).toBe(true);
+      expect(capabilities.canUpdateDatafeed).toBe(true);
+      expect(capabilities.canPreviewDatafeed).toBe(true);
+      expect(capabilities.canGetCalendars).toBe(true);
+      expect(capabilities.canCreateCalendar).toBe(true);
+      expect(capabilities.canDeleteCalendar).toBe(true);
+      expect(capabilities.canGetFilters).toBe(true);
+      expect(capabilities.canCreateFilter).toBe(true);
+      expect(capabilities.canDeleteFilter).toBe(true);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(true);
+      expect(capabilities.canPreviewDataFrameJob).toBe(true);
+      expect(capabilities.canCreateDataFrameJob).toBe(true);
+      expect(capabilities.canStartStopDataFrameJob).toBe(true);
       done();
     });
 
-    test('upgrade in progress with full privileges', async done => {
+    test('upgrade in progress with full capabilities', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
-      const { privileges, upgradeInProgress } = await getPrivileges();
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
-      expect(privileges.canGetJobs).toBe(true);
-      expect(privileges.canCreateJob).toBe(false);
-      expect(privileges.canDeleteJob).toBe(false);
-      expect(privileges.canOpenJob).toBe(false);
-      expect(privileges.canCloseJob).toBe(false);
-      expect(privileges.canForecastJob).toBe(false);
-      expect(privileges.canGetDatafeeds).toBe(true);
-      expect(privileges.canStartStopDatafeed).toBe(false);
-      expect(privileges.canUpdateJob).toBe(false);
-      expect(privileges.canUpdateDatafeed).toBe(false);
-      expect(privileges.canPreviewDatafeed).toBe(false);
-      expect(privileges.canGetCalendars).toBe(true);
-      expect(privileges.canCreateCalendar).toBe(false);
-      expect(privileges.canDeleteCalendar).toBe(false);
-      expect(privileges.canGetFilters).toBe(true);
-      expect(privileges.canCreateFilter).toBe(false);
-      expect(privileges.canDeleteFilter).toBe(false);
-      expect(privileges.canFindFileStructure).toBe(true);
-      expect(privileges.canGetDataFrameJobs).toBe(true);
-      expect(privileges.canDeleteDataFrameJob).toBe(false);
-      expect(privileges.canPreviewDataFrameJob).toBe(false);
-      expect(privileges.canCreateDataFrameJob).toBe(false);
-      expect(privileges.canStartStopDataFrameJob).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(true);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(true);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(true);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(true);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
       done();
     });
 
-    test('upgrade in progress with partial privileges', async done => {
+    test('upgrade in progress with partial capabilities', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithSecurity);
-      const { privileges, upgradeInProgress } = await getPrivileges();
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
-      expect(privileges.canGetJobs).toBe(true);
-      expect(privileges.canCreateJob).toBe(false);
-      expect(privileges.canDeleteJob).toBe(false);
-      expect(privileges.canOpenJob).toBe(false);
-      expect(privileges.canCloseJob).toBe(false);
-      expect(privileges.canForecastJob).toBe(false);
-      expect(privileges.canGetDatafeeds).toBe(true);
-      expect(privileges.canStartStopDatafeed).toBe(false);
-      expect(privileges.canUpdateJob).toBe(false);
-      expect(privileges.canUpdateDatafeed).toBe(false);
-      expect(privileges.canPreviewDatafeed).toBe(false);
-      expect(privileges.canGetCalendars).toBe(true);
-      expect(privileges.canCreateCalendar).toBe(false);
-      expect(privileges.canDeleteCalendar).toBe(false);
-      expect(privileges.canGetFilters).toBe(false);
-      expect(privileges.canCreateFilter).toBe(false);
-      expect(privileges.canDeleteFilter).toBe(false);
-      expect(privileges.canFindFileStructure).toBe(true);
-      expect(privileges.canGetDataFrameJobs).toBe(false);
-      expect(privileges.canDeleteDataFrameJob).toBe(false);
-      expect(privileges.canPreviewDataFrameJob).toBe(false);
-      expect(privileges.canCreateDataFrameJob).toBe(false);
-      expect(privileges.canStartStopDataFrameJob).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(true);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(true);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(true);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(false);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      done();
+    });
+
+    test('ml_user capabilities with security with basic license', async done => {
+      const callWithRequest = callWithRequestProvider('partialPrivileges');
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurityBasicLicense,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      expect(upgradeInProgress).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(false);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(false);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(false);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(false);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      done();
+    });
+
+    test('full user with security with basic license', async done => {
+      const callWithRequest = callWithRequestProvider('fullPrivileges');
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurityBasicLicense,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      expect(upgradeInProgress).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(false);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(false);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(false);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(true);
+      expect(capabilities.canPreviewDataFrameJob).toBe(true);
+      expect(capabilities.canCreateDataFrameJob).toBe(true);
+      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      done();
+    });
+
+    test('full capabilities, ml disabled in space', async done => {
+      const callWithRequest = callWithRequestProvider('fullPrivileges');
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithSecurity,
+        mlIsNotEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      expect(upgradeInProgress).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(false);
+      expect(capabilities.canGetJobs).toBe(false);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(false);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(false);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(false);
+      expect(capabilities.canGetDataFrameJobs).toBe(false);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
       done();
     });
   });
 
   describe('getPrivileges() without security', () => {
-    test('ml_user privileges only', async done => {
+    test('ml_user capabilities only', async done => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithOutSecurity);
-      const { privileges, upgradeInProgress } = await getPrivileges();
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurity,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
       expect(upgradeInProgress).toBe(false);
-      expect(privileges.canGetJobs).toBe(true);
-      expect(privileges.canCreateJob).toBe(true);
-      expect(privileges.canDeleteJob).toBe(true);
-      expect(privileges.canOpenJob).toBe(true);
-      expect(privileges.canCloseJob).toBe(true);
-      expect(privileges.canForecastJob).toBe(true);
-      expect(privileges.canGetDatafeeds).toBe(true);
-      expect(privileges.canStartStopDatafeed).toBe(true);
-      expect(privileges.canUpdateJob).toBe(true);
-      expect(privileges.canUpdateDatafeed).toBe(true);
-      expect(privileges.canPreviewDatafeed).toBe(true);
-      expect(privileges.canGetCalendars).toBe(true);
-      expect(privileges.canCreateCalendar).toBe(true);
-      expect(privileges.canDeleteCalendar).toBe(true);
-      expect(privileges.canGetFilters).toBe(true);
-      expect(privileges.canCreateFilter).toBe(true);
-      expect(privileges.canDeleteFilter).toBe(true);
-      expect(privileges.canFindFileStructure).toBe(true);
-      expect(privileges.canGetDataFrameJobs).toBe(true);
-      expect(privileges.canDeleteDataFrameJob).toBe(true);
-      expect(privileges.canPreviewDataFrameJob).toBe(true);
-      expect(privileges.canCreateDataFrameJob).toBe(true);
-      expect(privileges.canStartStopDataFrameJob).toBe(true);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(true);
+      expect(capabilities.canCreateJob).toBe(true);
+      expect(capabilities.canDeleteJob).toBe(true);
+      expect(capabilities.canOpenJob).toBe(true);
+      expect(capabilities.canCloseJob).toBe(true);
+      expect(capabilities.canForecastJob).toBe(true);
+      expect(capabilities.canGetDatafeeds).toBe(true);
+      expect(capabilities.canStartStopDatafeed).toBe(true);
+      expect(capabilities.canUpdateJob).toBe(true);
+      expect(capabilities.canUpdateDatafeed).toBe(true);
+      expect(capabilities.canPreviewDatafeed).toBe(true);
+      expect(capabilities.canGetCalendars).toBe(true);
+      expect(capabilities.canCreateCalendar).toBe(true);
+      expect(capabilities.canDeleteCalendar).toBe(true);
+      expect(capabilities.canGetFilters).toBe(true);
+      expect(capabilities.canCreateFilter).toBe(true);
+      expect(capabilities.canDeleteFilter).toBe(true);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(true);
+      expect(capabilities.canPreviewDataFrameJob).toBe(true);
+      expect(capabilities.canCreateDataFrameJob).toBe(true);
+      expect(capabilities.canStartStopDataFrameJob).toBe(true);
       done();
     });
 
-    test('upgrade in progress with full privileges', async done => {
+    test('upgrade in progress with full capabilities', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithOutSecurity);
-      const { privileges, upgradeInProgress } = await getPrivileges();
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurity,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
-      expect(privileges.canGetJobs).toBe(true);
-      expect(privileges.canCreateJob).toBe(false);
-      expect(privileges.canDeleteJob).toBe(false);
-      expect(privileges.canOpenJob).toBe(false);
-      expect(privileges.canCloseJob).toBe(false);
-      expect(privileges.canForecastJob).toBe(false);
-      expect(privileges.canGetDatafeeds).toBe(true);
-      expect(privileges.canStartStopDatafeed).toBe(false);
-      expect(privileges.canUpdateJob).toBe(false);
-      expect(privileges.canUpdateDatafeed).toBe(false);
-      expect(privileges.canPreviewDatafeed).toBe(false);
-      expect(privileges.canGetCalendars).toBe(true);
-      expect(privileges.canCreateCalendar).toBe(false);
-      expect(privileges.canDeleteCalendar).toBe(false);
-      expect(privileges.canGetFilters).toBe(true);
-      expect(privileges.canCreateFilter).toBe(false);
-      expect(privileges.canDeleteFilter).toBe(false);
-      expect(privileges.canFindFileStructure).toBe(true);
-      expect(privileges.canGetDataFrameJobs).toBe(true);
-      expect(privileges.canDeleteDataFrameJob).toBe(false);
-      expect(privileges.canPreviewDataFrameJob).toBe(false);
-      expect(privileges.canCreateDataFrameJob).toBe(false);
-      expect(privileges.canStartStopDataFrameJob).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(true);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(true);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(true);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(true);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
       done();
     });
 
-    test('upgrade in progress with partial privileges', async done => {
+    test('upgrade in progress with partial capabilities', async done => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
-      const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPluginWithOutSecurity);
-      const { privileges, upgradeInProgress } = await getPrivileges();
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurity,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
       expect(upgradeInProgress).toBe(true);
-      expect(privileges.canGetJobs).toBe(true);
-      expect(privileges.canCreateJob).toBe(false);
-      expect(privileges.canDeleteJob).toBe(false);
-      expect(privileges.canOpenJob).toBe(false);
-      expect(privileges.canCloseJob).toBe(false);
-      expect(privileges.canForecastJob).toBe(false);
-      expect(privileges.canGetDatafeeds).toBe(true);
-      expect(privileges.canStartStopDatafeed).toBe(false);
-      expect(privileges.canUpdateJob).toBe(false);
-      expect(privileges.canUpdateDatafeed).toBe(false);
-      expect(privileges.canPreviewDatafeed).toBe(false);
-      expect(privileges.canGetCalendars).toBe(true);
-      expect(privileges.canCreateCalendar).toBe(false);
-      expect(privileges.canDeleteCalendar).toBe(false);
-      expect(privileges.canGetFilters).toBe(true);
-      expect(privileges.canCreateFilter).toBe(false);
-      expect(privileges.canDeleteFilter).toBe(false);
-      expect(privileges.canFindFileStructure).toBe(true);
-      expect(privileges.canGetDataFrameJobs).toBe(true);
-      expect(privileges.canDeleteDataFrameJob).toBe(false);
-      expect(privileges.canPreviewDataFrameJob).toBe(false);
-      expect(privileges.canCreateDataFrameJob).toBe(false);
-      expect(privileges.canStartStopDataFrameJob).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(true);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(true);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(true);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(true);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      done();
+    });
+
+    test('ml_user capabilities without security with basic license', async done => {
+      const callWithRequest = callWithRequestProvider('partialPrivileges');
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurityBasicLicense,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      expect(upgradeInProgress).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(false);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(false);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(false);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(true);
+      expect(capabilities.canPreviewDataFrameJob).toBe(true);
+      expect(capabilities.canCreateDataFrameJob).toBe(true);
+      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      done();
+    });
+
+    test('full user without security with basic license', async done => {
+      const callWithRequest = callWithRequestProvider('fullPrivileges');
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurityBasicLicense,
+        mlIsEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      expect(upgradeInProgress).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canGetJobs).toBe(false);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(false);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(false);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(true);
+      expect(capabilities.canGetDataFrameJobs).toBe(true);
+      expect(capabilities.canDeleteDataFrameJob).toBe(true);
+      expect(capabilities.canPreviewDataFrameJob).toBe(true);
+      expect(capabilities.canCreateDataFrameJob).toBe(true);
+      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      done();
+    });
+
+    test('ml_user capabilities only, ml disabled in space', async done => {
+      const callWithRequest = callWithRequestProvider('partialPrivileges');
+      const { getPrivileges } = privilegesProvider(
+        callWithRequest,
+        xpackMainPluginWithOutSecurity,
+        mlIsNotEnabled
+      );
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      expect(upgradeInProgress).toBe(false);
+      expect(mlFeatureEnabledInSpace).toBe(false);
+      expect(capabilities.canGetJobs).toBe(false);
+      expect(capabilities.canCreateJob).toBe(false);
+      expect(capabilities.canDeleteJob).toBe(false);
+      expect(capabilities.canOpenJob).toBe(false);
+      expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canGetDatafeeds).toBe(false);
+      expect(capabilities.canStartStopDatafeed).toBe(false);
+      expect(capabilities.canUpdateJob).toBe(false);
+      expect(capabilities.canUpdateDatafeed).toBe(false);
+      expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetCalendars).toBe(false);
+      expect(capabilities.canCreateCalendar).toBe(false);
+      expect(capabilities.canDeleteCalendar).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
+      expect(capabilities.canCreateFilter).toBe(false);
+      expect(capabilities.canDeleteFilter).toBe(false);
+      expect(capabilities.canFindFileStructure).toBe(false);
+      expect(capabilities.canGetDataFrameJobs).toBe(false);
+      expect(capabilities.canDeleteDataFrameJob).toBe(false);
+      expect(capabilities.canPreviewDataFrameJob).toBe(false);
+      expect(capabilities.canCreateDataFrameJob).toBe(false);
+      expect(capabilities.canStartStopDataFrameJob).toBe(false);
       done();
     });
   });

@@ -88,6 +88,20 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
         });
       });
 
+      it('Full text search with complex query terms', async () => {
+        log.debug('Full text search with complex query terms');
+        // Fill in the search query bar with a complex query which could result in multiple
+        // terms.
+        await PageObjects.code.fillSearchQuery('postUpdateProfile');
+        await PageObjects.code.submitSearchQuery();
+
+        await retry.tryForTime(5000, async () => {
+          const results = await testSubjects.findAll(searchResultListSelector);
+          expect(results).to.have.length(1);
+          expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
+        });
+      });
+
       it('Apply language filter', async () => {
         log.debug('Apply language filter');
         // Fill in the search query bar with a common prefix of symbols.
