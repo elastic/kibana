@@ -21,8 +21,21 @@ You might also be interested in these tutorial videos:
 * https://www.elastic.co/videos/timelion-plugin-for-kibana-enables-times-series-paris-meetup[Timelion Plugin for Kibana Enables Time Series]
 * https://www.elastic.co/videos/using-kibana-and-timelion-to-analyze-earthquake-data[Using Kibana and Timelion to Analyze Earthquake Data]
 
+[[timelion-getting-started]]
+=== Getting started
+
+Ready to experience all that is Timelion? This getting started tutorial shows
+you how to:
+
+* <<timelion-create, Create a time series chart with multiple expressions>>
+* <<timelion-customize, Customize the visualization type and formatting options>>
+* <<timelion-math, Use mathematical functions to manipulate your data>>
+* <<timelion-conditional, Track trends and use conditional logic to format outliers>>
+* <<timelion-save, Add Timelion visualizations to a dashboard>>
+* <<timelion-inline-help, Access inline help and documentation>>
+
 [[timelion-create]]
-=== Creating time series visualizations
+==== Creating time series visualizations
 
 This tutorial will be using the time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat] to walk you through a number of functions that Timelion offers. To get started, download Metricbeat and follow the https://www.elastic.co/downloads/beats/metricbeat[instructions here] to start ingesting the data locally.
 
@@ -58,7 +71,7 @@ image::images/timelion-create03.png[]
 {nbsp}
 
 [[timelion-customize]]
-=== Customize and format visualizations
+==== Customize and format visualizations
 
 Timelion has plenty of options for customization. You can personalize nearly every aspect of a chart with the functions available. For this tutorial, you will perform the following modifications.
 
@@ -112,7 +125,7 @@ image::images/timelion-customize04.png[]
 Continue on to the next section to learn about mathematical functions.
 
 [[timelion-math]]
-=== Using mathematical functions
+==== Using mathematical functions
 
 You’ve learned how to create and style a Timelion visualization in the previous two sections. This section will explore the mathematical functions Timelion offers. You will continue to use the https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to create a new Timelion visualization for inbound and outbound network traffic. To start, you'll need to add a new Timelion visualization to the sheet.
 
@@ -174,7 +187,7 @@ image::images/timelion-math06.png[]
 Continue on to the next section to learn about conditional logic and tracking trends.
 
 [[timelion-conditional]]
-=== Using conditional logic and tracking trends
+==== Using conditional logic and tracking trends
 
 In this section you will learn how to modify time series data with conditional logic and create a trend with a moving average. This is helpful to easily detect outliers and patterns over time.
 
@@ -237,13 +250,13 @@ image::images/timelion-conditional04.png[]
 Continue on to the next section to learn how to save your timelion sheet and add an expression to your dashboard.
 
 [[timelion-save]]
-=== Save and add to dashboard
+==== Save and add to dashboard
 
 You’ve officially harnessed the power of Timelion to create time series visualizations. The final steps of this tutorial are to save your entire Timelion sheet and save an expression as a dashboard panel.
 
 [role="xpack"]
 [[timelion-read-only-access]]
-==== Read only access
+===== Read only access
 When you have insufficient privileges to save Timelion sheets, the following indicator in Kibana will be
 displayed and the *Save* button won't be visible. For more information on granting access to
 Kibana see <<xpack-security-authorization>>.
@@ -251,7 +264,7 @@ Kibana see <<xpack-security-authorization>>.
 [role="screenshot"]
 image::images/timelion-read-only-badge.png[Example of Timelion's read only access indicator in Kibana's header]
 
-==== Save entire Timelion sheet
+===== Save entire Timelion sheet
 
 Saving an entire Timelion sheet allows you to reload it in the Timelion application and make changes to any of the expressions:
 
@@ -259,7 +272,7 @@ Saving an entire Timelion sheet allows you to reload it in the Timelion applicat
 . Select `Save entire Timelion sheet`
 . Name your sheet and click `Save`
 
-==== Save as dashboard panel
+===== Save as dashboard panel
 
 To save a Timelion expression as a dashboard panel, follow the steps below.
 
