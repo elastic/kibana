@@ -136,14 +136,14 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
  * @public
  */
 export interface Plugin<
-  TSetup,
-  TStart,
-  TPluginsSetup extends Record<PluginName, unknown> = {},
-  TPluginsStart extends Record<PluginName, unknown> = {}
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends {} = {},
+  TPluginsStart extends {} = {}
 > {
-  setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
-  start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
-  stop?: () => void;
+  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+  stop?(): void;
 }
 
 /**
