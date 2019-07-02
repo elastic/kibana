@@ -21,6 +21,9 @@ import { constant, once, compact, flatten } from 'lodash';
 
 
 import { isWorker } from 'cluster';
+import { foo } from 'src/foo';
+import { bar } from 'x-pack/legacy/server/bar';
+
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
@@ -173,6 +176,9 @@ export default class KbnServer {
         ? config.get('server.basePath')
         : ''
     }`);
+
+    foo('kbn_server');
+    bar('kbn_server');
 
     return server;
   }

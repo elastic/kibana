@@ -20,6 +20,8 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
+import { foo } from 'src/foo';
+
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, HttpServiceSetup } from './http';
@@ -98,6 +100,8 @@ export class Server {
 
   public async start() {
     const pluginsStart = await this.plugins.start({});
+
+    foo('core/server');
 
     const coreStart = {
       plugins: pluginsStart,
