@@ -36,7 +36,7 @@ pipeline {
         }
       }
     }
-  stage('Install Binaries, Install Dependencies, Build kbn-pm distributable, Rebuild Renovate Config, Checkout Sibling Version of Elastic Search') {
+    stage('Install Binaries, Install Dependencies, Build kbn-pm distributable, Rebuild Renovate Config, Checkout Sibling Version of Elastic Search') {
       agent { label 'linux || immutable' }
       steps {
         dir("${env.BASE_DIR}"){
@@ -44,12 +44,11 @@ pipeline {
           script {
             dumpWorkspaceSize() // dump size to screen BEFORE checking out es
           }
-          // sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
+          sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
           script {
-            // dumpWorkspaceSize() // dump size to screen AFTER checking out es
+            dumpWorkspaceSize() // dump size to screen AFTER checking out es
             tarWorkspace()
           }
-          sh "tar -czf ${WORKSPACE_CACHE_NAME}"
           sh 'echo "\n\t### [TODO] create and upload workspace cache to  gcs"'
         }
       }
@@ -89,6 +88,7 @@ pipeline {
 def tarWorkspace(){
   script {
     sh "tar -czf ${WORKSPACE_CACHE_NAME} ${WORKSPACE}"
+  }
 }
 def dumpWorkspaceSize(){
   script {
