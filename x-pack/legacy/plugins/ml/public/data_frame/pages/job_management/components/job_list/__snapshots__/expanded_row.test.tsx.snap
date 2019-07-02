@@ -2,6 +2,7 @@
 
 exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
 <EuiTabbedContent
+  autoFocus="initial"
   expand={false}
   initialSelectedTab={
     Object {
@@ -29,6 +30,20 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
               ],
               "position": "left",
               "title": "State",
+            },
+            Object {
+              "items": Array [
+                Object {
+                  "description": "{\\"timestamp\\":\\"2019-06-28T16:09:23.539Z\\",\\"timestamp_millis\\":1561738163539,\\"time_upper_bound\\":\\"2019-06-28T16:09:13.539Z\\",\\"time_upper_bound_millis\\":1561738153539}",
+                  "title": "current",
+                },
+                Object {
+                  "description": "0",
+                  "title": "operations_behind",
+                },
+              ],
+              "position": "left",
+              "title": "Checkpointing",
             },
             Object {
               "items": Array [
@@ -112,6 +127,20 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
                 ],
                 "position": "left",
                 "title": "State",
+              },
+              Object {
+                "items": Array [
+                  Object {
+                    "description": "{\\"timestamp\\":\\"2019-06-28T16:09:23.539Z\\",\\"timestamp_millis\\":1561738163539,\\"time_upper_bound\\":\\"2019-06-28T16:09:13.539Z\\",\\"time_upper_bound_millis\\":1561738153539}",
+                    "title": "current",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "operations_behind",
+                  },
+                ],
+                "position": "left",
+                "title": "Checkpointing",
               },
               Object {
                 "items": Array [
@@ -203,6 +232,54 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
         />,
         "id": "job-json",
         "name": "JSON",
+      },
+      Object {
+        "content": <TransformMessagesPane
+          lastUpdate={12345678}
+          transformId="fq_date_histogram_1m_1441"
+        />,
+        "id": "job-messages",
+        "name": "Messages",
+      },
+      Object {
+        "content": <PreviewPane
+          lastUpdate={12345678}
+          transformConfig={
+            Object {
+              "dest": Object {
+                "index": "fq_data_histogram_1m_1441",
+              },
+              "id": "fq_date_histogram_1m_1441",
+              "pivot": Object {
+                "aggregations": Object {
+                  "avg(response)": Object {
+                    "avg": Object {
+                      "field": "responsetime",
+                    },
+                  },
+                },
+                "group_by": Object {
+                  "date_histogram(@timestamp)": Object {
+                    "date_histogram": Object {
+                      "field": "@timestamp",
+                      "interval": "1m",
+                    },
+                  },
+                },
+              },
+              "source": Object {
+                "index": Array [
+                  "farequote-2019",
+                ],
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+            }
+          }
+        />,
+        "id": "job-preview",
+        "name": "Preview",
       },
     ]
   }

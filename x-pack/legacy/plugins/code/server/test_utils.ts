@@ -32,7 +32,7 @@ const TEST_OPTIONS = {
     enableMavenImport: true,
     enableGradleImport: true,
     installNodeDependency: true,
-    enableGitCertCheck: false,
+    enableGitCertCheck: true,
     gitProtocolWhitelist: ['ssh', 'https', 'git'],
   },
   repos: [],

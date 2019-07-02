@@ -26,6 +26,8 @@ import del from 'del';
 import { makeRe } from 'minimatch';
 import mkdirp from 'mkdirp';
 
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+
 import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
 
@@ -94,6 +96,7 @@ export class UiBundlesController {
       id,
       modules,
       template,
+      extendConfig,
     } = bundleSpec;
 
     if (this._filter.test(id)) {
@@ -102,6 +105,7 @@ export class UiBundlesController {
         modules,
         template,
         controller: this,
+        extendConfig,
       }));
     }
   }
@@ -168,7 +172,11 @@ export class UiBundlesController {
   }
 
   getCacheDirectory(...subPath) {
-    return this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath);
+    return this.resolvePath(
+      '../../built_assets/.cache/ui_bundles',
+      !IS_KIBANA_DISTRIBUTABLE ? this.hashBundleEntries() : '',
+      ...subPath
+    );
   }
 
   getDescription() {
@@ -216,5 +224,9 @@ export class UiBundlesController {
   getIds() {
     return this._bundles
       .map(bundle => bundle.getId());
+  }
+
+  getExtendedConfig(webpackConfig) {
+    return this._bundles.reduce((acc, bundle) => bundle.getExtendedConfig(acc), webpackConfig);
   }
 }

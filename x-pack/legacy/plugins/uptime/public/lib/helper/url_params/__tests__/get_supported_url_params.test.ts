@@ -14,18 +14,15 @@ describe('getSupportedUrlParams', () => {
       autorefreshIsPaused: 'false',
       dateRangeStart: 'foo',
       dateRangeEnd: 'bar',
+      monitorListPageIndex: '23',
+      monitorListPageSize: '50',
+      monitorListSortDirection: 'desc',
+      monitorListSortField: 'monitor.status',
       search: 'monitor.status: down',
       selectedPingStatus: 'up',
     };
     const result = getSupportedUrlParams(customValues);
-    expect(result).toEqual({
-      autorefreshInterval: 23,
-      autorefreshIsPaused: false,
-      dateRangeStart: 'foo',
-      dateRangeEnd: 'bar',
-      search: 'monitor.status: down',
-      selectedPingStatus: 'up',
-    });
+    expect(result).toMatchSnapshot();
   });
 
   it('returns default values', () => {
@@ -38,6 +35,7 @@ describe('getSupportedUrlParams', () => {
       SELECTED_PING_LIST_STATUS,
     } = CLIENT_DEFAULTS;
     const result = getSupportedUrlParams({});
+    expect(result).toMatchSnapshot();
     expect(result).toEqual({
       autorefreshInterval: AUTOREFRESH_INTERVAL,
       autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,

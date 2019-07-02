@@ -20,10 +20,12 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaMarkdown } from './markdown_fn';
 
+jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
+
 describe('interpreter/functions#markdown', () => {
   const fn = functionWrapper(kibanaMarkdown);
   const args = {
-    fontSize: 12,
+    font: { spec: { fontSize: 12 } },
     openLinksInNewTab: true,
     markdown: '## hello _markdown_',
   };

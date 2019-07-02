@@ -10,8 +10,13 @@ import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
 import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';
 import { flatten } from '../../../lib/aeroelastic/functional';
-import { canUserWrite, getFullscreen } from '../../../state/selectors/app';
-import { elementLayer, insertNodes, removeElements } from '../../../state/actions/elements';
+import { canUserWrite, getFullscreen, getZoomScale } from '../../../state/selectors/app';
+import {
+  elementLayer,
+  insertNodes,
+  removeElements,
+  setMultiplePositions,
+} from '../../../state/actions/elements';
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
@@ -24,6 +29,8 @@ const configuration = {
   atopZ: 1000,
   depthSelect: true,
   devColor: 'magenta',
+  dragBoxAnnotationName: 'dragBoxAnnotation',
+  dragBoxZ: 1050, // above alignment guides but below the upcoming hover tooltip
   groupName: 'group',
   groupResize: true,
   guideDistance: 3,
@@ -108,6 +115,7 @@ const mapStateToProps = (state, ownProps) => {
     selectedToplevelNodes,
     selectedNodes: selectedNodeIds.map(id => nodes.find(s => s.id === id)),
     pageStyle: getPageById(state, ownProps.pageId).style,
+    zoomScale: getZoomScale(state),
   };
 };
 
@@ -117,10 +125,12 @@ const mapDispatchToProps = dispatch => ({
   removeNodes: (nodeIds, pageId) => dispatch(removeElements(nodeIds, pageId)),
   selectToplevelNodes: nodes =>
     dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
-  // TODO: Abstract this out, this is similar to layering code in sidebar/index.js:
-  elementLayer: (pageId, elementId, movement) => {
-    dispatch(elementLayer({ pageId, elementId, movement }));
-  },
+  elementLayer: (pageId, elementId, movement) =>
+    dispatch(elementLayer({ pageId, elementId, movement })),
+  setMultiplePositions: pageId => repositionedNodes =>
+    dispatch(
+      setMultiplePositions(repositionedNodes.map(node => ({ ...node, pageId, elementId: node.id })))
+    ),
 });
 
 const mergeProps = (
@@ -132,6 +142,7 @@ const mergeProps = (
   ...restDispatchProps,
   ...restStateProps,
   updateGlobalState: globalStateUpdater(dispatch, state),
+  setMultiplePositions: restDispatchProps.setMultiplePositions(ownProps.pageId),
 });
 
 export const InteractivePage = compose(
