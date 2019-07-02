@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
+import { API_BASE_PATH } from '../../common/constants';
 import { App } from './app';
-import { AppStateProvider, initialState, reducer } from './services/state';
+import { httpService } from './services/http';
+import { AuthorizationProvider } from './lib/authorization';
 import { AppCore, AppDependencies, AppPlugins } from './types';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
@@ -34,20 +36,23 @@ export const useAppDependencies = () => {
 
 const getAppProviders = (deps: AppDependencies) => {
   const {
-    i18n: { Context: I18nContext },
+    i18n: { Context: I18nContext, FormattedMessage },
   } = deps.core;
 
   // Create App dependencies context and get its provider
   const AppDependenciesProvider = setAppDependencies(deps);
 
   return ({ children }: { children: ReactNode }) => (
-    <I18nContext>
-      <HashRouter>
-        <AppDependenciesProvider value={deps}>
-          <AppStateProvider value={useReducer(reducer, initialState)}>{children}</AppStateProvider>
-        </AppDependenciesProvider>
-      </HashRouter>
-    </I18nContext>
+    <AuthorizationProvider
+      permissionEndpoint={httpService.addBasePath(`${API_BASE_PATH}permissions`)}
+      FormattedMessage={FormattedMessage}
+    >
+      <I18nContext>
+        <HashRouter>
+          <AppDependenciesProvider value={deps}>{children}</AppDependenciesProvider>
+        </HashRouter>
+      </I18nContext>
+    </AuthorizationProvider>
   );
 };
 

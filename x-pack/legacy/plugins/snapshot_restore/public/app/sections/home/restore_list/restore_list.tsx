@@ -20,9 +20,9 @@ import { SectionError, SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
-import { useAppState } from '../../../services/state';
 import { uiMetricService } from '../../../services/ui_metric';
 import { RestoreTable } from './restore_table';
+import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;
@@ -43,40 +43,6 @@ export const RestoreList: React.FunctionComponent = () => {
     },
   } = useAppDependencies();
 
-  // Check that we have all index privileges needed to view recovery information
-  const [appState] = useAppState();
-  const { permissions: { missingIndexPrivileges } = { missingIndexPrivileges: [] } } = appState;
-
-  // Render permission missing screen
-  if (missingIndexPrivileges.length) {
-    return (
-      <EuiEmptyPrompt
-        iconType="securityApp"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreList.deniedPermissionTitle"
-              defaultMessage="You're missing index privileges"
-            />
-          </h2>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreList.deniedPermissionDescription"
-              defaultMessage="To view snapshot restore status, you must have {indexPrivilegesCount,
-                plural, one {this index privilege} other {these index privileges}} for one or more indices: {indexPrivileges}."
-              values={{
-                indexPrivileges: missingIndexPrivileges.join(', '),
-                indexPrivilegesCount: missingIndexPrivileges.length,
-              }}
-            />
-          </p>
-        }
-      />
-    );
-  }
-
   // State for tracking interval picker
   const [isIntervalMenuOpen, setIsIntervalMenuOpen] = useState<boolean>(false);
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);
@@ -92,7 +58,7 @@ export const RestoreList: React.FunctionComponent = () => {
     trackUiMetric(UIM_RESTORE_LIST_LOAD);
   }, []);
 
-  let content;
+  let content: JSX.Element;
 
   if (loading) {
     content = (
@@ -219,5 +185,22 @@ export const RestoreList: React.FunctionComponent = () => {
     );
   }
 
-  return <section data-test-subj="restoreList">{content}</section>;
+  return (
+    <WithPrivileges privileges="index">
+      {({ hasPrivileges, missingPrivileges }) => (
+        <Fragment>
+          {hasPrivileges ? (
+            <section data-test-subj="restoreList">{content}</section>
+          ) : (
+            <NotAuthorizedSection
+              sectionName="snapshot restore status"
+              missingPrivileges={missingPrivileges as string[]}
+              privilegeType="index"
+              FormattedMessage={FormattedMessage}
+            />
+          )}
+        </Fragment>
+      )}
+    </WithPrivileges>
+  );
 };
