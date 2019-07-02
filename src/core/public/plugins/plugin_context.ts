@@ -19,11 +19,12 @@
 
 import { omit } from 'lodash';
 
-import { DiscoveredPlugin, PluginName } from '../../server';
+import { DiscoveredPlugin } from '../../server';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { CoreSetup, CoreStart } from '../';
+import { EmptyPluginContracts } from '../../types/plugins';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -61,8 +62,8 @@ export function createPluginInitializerContext(
 export function createPluginSetupContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends EmptyPluginContracts,
+  TPluginsStart extends EmptyPluginContracts
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
@@ -89,8 +90,8 @@ export function createPluginSetupContext<
 export function createPluginStartContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends EmptyPluginContracts,
+  TPluginsStart extends EmptyPluginContracts
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,

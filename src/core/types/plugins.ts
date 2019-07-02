@@ -17,9 +17,5 @@
  * under the License.
  */
 
-/**
- * Use * syntax so that these exports do not break when internal
- * types are stripped.
- */
-export * from './core_service';
-export * from './plugins';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EmptyPluginContracts {}

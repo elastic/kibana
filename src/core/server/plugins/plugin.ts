@@ -25,6 +25,7 @@ import { Type } from '@kbn/config-schema';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
 import { PluginInitializerContext } from './plugin_context';
+import { EmptyPluginContracts } from '../../types/plugins';
 import { CoreSetup, CoreStart } from '..';
 
 export type PluginConfigSchema = Type<unknown> | null;
@@ -138,8 +139,8 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
 export interface Plugin<
   TSetup = void,
   TStart = void,
-  TPluginsSetup extends {} = {},
-  TPluginsStart extends {} = {}
+  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
+  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -155,8 +156,8 @@ export interface Plugin<
 export type PluginInitializer<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown> = {},
-  TPluginsStart extends Record<PluginName, unknown> = {}
+  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
+  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -168,8 +169,8 @@ export type PluginInitializer<
 export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
+  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];

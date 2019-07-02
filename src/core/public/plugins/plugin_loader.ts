@@ -19,6 +19,7 @@
 
 import { PluginName } from '../../server';
 import { PluginInitializer } from './plugin';
+import { EmptyPluginContracts } from '../../types/plugins';
 
 /**
  * Unknown variant for internal use only for when plugins are not known.
@@ -62,8 +63,8 @@ export const LOAD_TIMEOUT = 120 * 1000; // 2 minutes
 export const loadPluginBundle: LoadPluginBundle = <
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown>,
-  TPluginsStart extends Record<string, unknown>
+  TPluginsSetup extends EmptyPluginContracts,
+  TPluginsStart extends EmptyPluginContracts
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
@@ -125,8 +126,8 @@ export const loadPluginBundle: LoadPluginBundle = <
 export type LoadPluginBundle = <
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown>,
-  TPluginsStart extends Record<string, unknown>
+  TPluginsSetup extends EmptyPluginContracts,
+  TPluginsStart extends EmptyPluginContracts
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
