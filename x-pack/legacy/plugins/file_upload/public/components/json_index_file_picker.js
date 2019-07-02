@@ -21,117 +21,114 @@ export class JsonIndexFilePicker extends Component {
   state = {
     fileUploadError: '',
     fileParsingProgress: '',
-    fileRef: null
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.fileRef !== this.props.fileRef) {
-      this.setState({ fileRef: this.props.fileRef });
-    }
-  }
-
   _fileHandler = async fileList => {
-    const {
-      resetFileAndIndexSettings, setParsedFile, onFileRemove, onFileUpload,
-      transformDetails, setFileRef, setIndexName
-    } = this.props;
+    const fileListArr = Array.from(fileList);
+    await this._validateAndParse(fileListArr);
+  };
 
-    const { fileRef } = this.state;
-
-    resetFileAndIndexSettings();
+  _validateAndParse = async fileArr => {
+    this.props.resetFileAndIndexSettings();
     this.setState({ fileUploadError: '' });
-    if (fileList.length === 0) { // Remove
-      setParsedFile(null);
-      if (onFileRemove) {
-        onFileRemove(fileRef);
-      }
-    } else if (fileList.length === 1) { // Parse & index file
-      const file = fileList[0];
-      if (!file.name) {
-        this.setState({
-          fileUploadError: i18n.translate(
-            'xpack.fileUpload.jsonIndexFilePicker.noFileNameError',
-            { defaultMessage: 'No file name provided' })
-        });
+    if (fileArr.length === 0) { // Remove
+      return;
+    } else if (fileArr.length === 1) { // Parse & index file
+      const file = fileArr[0];
+      if (!this._validateFile(file)) {
         return;
       }
-
-      // Check file type, assign default index name
-      const splitNameArr = file.name.split('.');
-      const fileType = splitNameArr.pop();
-      const types = ACCEPTABLE_FILETYPES.reduce((accu, type) => {
-        accu = accu ? `${accu}, ${type}` : type;
-        return accu;
-      }, '');
-      if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
-        this.setState({
-          fileUploadError: (
-            <FormattedMessage
-              id="xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError"
-              defaultMessage="File is not one of acceptable types: {types}"
-              values={{ types }}
-            />
-          )
-        });
-        return;
-      }
-      const initIndexName = splitNameArr[0];
-      setIndexName(initIndexName);
-
-      // Check valid size
-      const { size } = file;
-      if (size > MAX_FILE_SIZE) {
-        this.setState({
-          fileUploadError: (
-            <FormattedMessage
-              id="xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize"
-              defaultMessage="File size {fileSize} bytes exceeds max file size of {maxFileSize}"
-              values={{
-                fileSize: size,
-                maxFileSize: MAX_FILE_SIZE
-              }}
-            />
-          )
-        });
-        return;
-      }
-
-      // Parse file
-      this.setState({ fileParsingProgress: i18n.translate(
-        'xpack.fileUpload.jsonIndexFilePicker.parsingFile',
-        { defaultMessage: 'Parsing file...' })
-      });
-      const parsedFileResult = await parseFile(
-        file, onFileUpload, transformDetails
-      ).catch(err => {
-        this.setState({
-          fileUploadError: (
-            <FormattedMessage
-              id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
-              defaultMessage="Unable to parse file: {error}"
-              values={{
-                error: err.message
-              }}
-            />
-          )
-        });
-      });
-      this.setState({ fileParsingProgress: '' });
-      if (!parsedFileResult) {
-        if (fileRef) {
-          if (onFileRemove) {
-            onFileRemove(fileRef);
-          }
-          setFileRef(null);
-        }
-        return;
-      }
-      setFileRef(file);
-      setParsedFile(parsedFileResult);
-
+      await this._parseFile(file);
     } else {
       // No else
     }
+  };
+
+  _validateFile(file) {
+    const { resetFileAndIndexSettings, setIndexName } = this.props;
+    if (!file.name) {
+      this.setState({
+        fileUploadError: i18n.translate(
+          'xpack.fileUpload.jsonIndexFilePicker.noFileNameError',
+          { defaultMessage: 'No file name provided' })
+      });
+      return false;
+    }
+
+    // Check file type, assign default index name
+    const splitNameArr = file.name.split('.');
+    const fileType = splitNameArr.pop();
+    const types = ACCEPTABLE_FILETYPES.reduce((accu, type) => {
+      accu = accu ? `${accu}, ${type}` : type;
+      return accu;
+    }, '');
+    if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
+      this.setState({
+        fileUploadError: (
+          <FormattedMessage
+            id="xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError"
+            defaultMessage="File is not one of acceptable types: {types}"
+            values={{ types }}
+          />
+        )
+      });
+      resetFileAndIndexSettings();
+      return false;
+    }
+    const initIndexName = splitNameArr[0];
+    setIndexName(initIndexName);
+
+    // Check valid size
+    const { size } = file;
+    if (size > MAX_FILE_SIZE) {
+      this.setState({
+        fileUploadError: (
+          <FormattedMessage
+            id="xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize"
+            defaultMessage="File size {fileSize} bytes exceeds max file size of {maxFileSize}"
+            values={{
+              fileSize: size,
+              maxFileSize: MAX_FILE_SIZE
+            }}
+          />
+        )
+      });
+      return false;
+    }
+    return true;
+  }
+
+  async _parseFile(file) {
+    const {
+      setFileRef, setParsedFile, resetFileAndIndexSettings, onFileUpload, transformDetails
+    } = this.props;
+    // Parse file
+    this.setState({ fileParsingProgress: i18n.translate(
+      'xpack.fileUpload.jsonIndexFilePicker.parsingFile',
+      { defaultMessage: 'Parsing file...' })
+    });
+    const parsedFileResult = await parseFile(
+      file, onFileUpload, transformDetails
+    ).catch(err => {
+      this.setState({
+        fileUploadError: (
+          <FormattedMessage
+            id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
+            defaultMessage="Unable to parse file: {error}"
+            values={{
+              error: err.message
+            }}
+          />
+        )
+      });
+    });
+    this.setState({ fileParsingProgress: '' });
+    if (!parsedFileResult) {
+      resetFileAndIndexSettings();
+      return;
+    }
+    setFileRef(file);
+    setParsedFile(parsedFileResult);
   }
 
   render() {
