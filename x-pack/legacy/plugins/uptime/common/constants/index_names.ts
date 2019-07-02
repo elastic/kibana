@@ -6,4 +6,5 @@
 
 export const INDEX_NAMES = {
   HEARTBEAT: 'heartbeat*',
+  HEARTBEAT_STATES: 'heartbeat-states-7*',
 };

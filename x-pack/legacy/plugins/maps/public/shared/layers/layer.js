@@ -230,7 +230,11 @@ export class AbstractLayer {
   };
 
   getSourceDataRequest() {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === SOURCE_DATA_ID_ORIGIN);
+    return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
+  }
+
+  getDataRequest(id) {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
   }
 
   isLayerLoading() {
@@ -304,6 +308,11 @@ export class AbstractLayer {
 
   getLayerTypeIconName() {
     throw new Error('should implement Layer#getLayerTypeIconName');
+  }
+
+  isDataLoaded() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    return sourceDataRequest && sourceDataRequest.hasData();
   }
 
   async getBounds() {

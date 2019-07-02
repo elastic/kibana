@@ -16,8 +16,6 @@ export * from './errors';
 export * from './expression_form_handlers';
 // @ts-ignore missing local definition
 export * from './fetch';
-// @ts-ignore missing local definition
-export * from './find_in_object';
 export * from './fonts';
 // @ts-ignore missing local definition
 export * from './get_colors_from_palette';
@@ -30,8 +28,6 @@ export * from './handlebars';
 export * from './hex_to_rgb';
 // @ts-ignore missing local definition
 export * from './httpurl';
-// @ts-ignore missing local definition
-export * from './latest_change';
 // @ts-ignore missing local definition
 export * from './missing_asset';
 // @ts-ignore missing local definition

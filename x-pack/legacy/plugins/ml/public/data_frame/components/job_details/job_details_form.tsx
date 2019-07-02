@@ -257,8 +257,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
             helpText={i18n.translate(
               'xpack.ml.dataframe.jobDetailsForm.continuousModeDateFieldHelpText',
               {
-                defaultMessage:
-                  'Pick a date field for the time based continuous data frame transform that reflects ingestion time.',
+                defaultMessage: 'Select the date field that can be used to identify new documents.',
               }
             )}
           >

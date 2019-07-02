@@ -26,6 +26,7 @@ query PingList(
     location: $location
   ) {
       total
+      locations
       pings {
         timestamp
         http {
@@ -47,6 +48,11 @@ query PingList(
           scheme
           status
           type
+        }
+        observer {
+          geo {
+            name
+          }
         }
       }
     }

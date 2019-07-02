@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
@@ -55,6 +56,16 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
     ].map(setting => ({
       label: setting,
     }))
+  );
+
+  // Index settings doc link
+  const indexSettingsDocLink = (
+    <EuiLink href={documentationLinksService.getIndexSettingsUrl()} target="_blank">
+      <FormattedMessage
+        id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsDocLinkText"
+        defaultMessage="Learn more."
+      />
+    </EuiLink>
   );
 
   return (
@@ -104,7 +115,10 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsDescription"
-            defaultMessage="Overrides index settings during restore."
+            defaultMessage="Overrides index settings during restore. {docLink}"
+            values={{
+              docLink: indexSettingsDocLink,
+            }}
           />
         }
         idAria="stepSettingsIndexSettingsDescription"
@@ -115,7 +129,6 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
           fullWidth
           describedByIds={['stepSettingsIndexSettingsDescription']}
         >
-          {/* Fragment needed because EuiFormRow can only have one child: https://github.com/elastic/eui/issues/1931 */}
           <Fragment>
             <EuiSwitch
               label={
@@ -216,7 +229,10 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepSettings.ignoreIndexSettingsDescription"
-            defaultMessage="Resets selected settings to default during restore. "
+            defaultMessage="Resets selected settings to default during restore. {docLink}"
+            values={{
+              docLink: indexSettingsDocLink,
+            }}
           />
         }
         idAria="stepSettingsIgnoreIndexSettingsDescription"
@@ -227,7 +243,6 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
           fullWidth
           describedByIds={['stepSettingsIgnoreIndexSettingsDescription']}
         >
-          {/* Fragment needed because EuiFormRow can only have one child: https://github.com/elastic/eui/issues/1931 */}
           <Fragment>
             <EuiSwitch
               label={

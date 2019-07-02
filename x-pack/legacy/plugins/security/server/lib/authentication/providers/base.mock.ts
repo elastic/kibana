@@ -4,19 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { stub } from 'sinon';
+import { stub, createStubInstance } from 'sinon';
+import { Tokens } from '../tokens';
 import { AuthenticationProviderOptions } from './base';
 
 export function mockAuthenticationProviderOptions(
-  providerOptions: Partial<AuthenticationProviderOptions> = {}
+  providerOptions: Partial<Pick<AuthenticationProviderOptions, 'basePath'>> = {}
 ) {
+  const client = { callWithRequest: stub(), callWithInternalUser: stub() };
+  const log = stub();
+
   return {
     hostname: 'test-hostname',
     port: 1234,
     protocol: 'test-protocol',
-    client: { callWithRequest: stub(), callWithInternalUser: stub() },
-    log: stub(),
+    client,
+    log,
     basePath: '/base-path',
+    tokens: createStubInstance(Tokens),
     ...providerOptions,
   };
 }
