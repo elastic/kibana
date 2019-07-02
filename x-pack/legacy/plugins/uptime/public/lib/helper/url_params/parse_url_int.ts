@@ -5,10 +5,7 @@
  */
 
 // TODO: add a comment explaining the purpose of this function
-export const parseAutorefreshInterval = (
-  value: string | undefined,
-  defaultValue: number
-): number => {
+export const parseUrlInt = (value: string | undefined, defaultValue: number): number => {
   const parsed = parseInt(value || '', 10);
   return isNaN(parsed) ? defaultValue : parsed;
 };
