@@ -475,13 +475,13 @@ export interface OverlayStart {
 }
 
 // @public
-export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
     // (undocumented)
-    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
-    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
+    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
-    stop?: () => void;
+    stop?(): void;
 }
 
 // @public

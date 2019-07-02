@@ -5,7 +5,7 @@
  */
 
 import { Request, ResponseToolkit } from 'hapi';
-import { getAllHandler, getOneHandler } from './snapshots';
+import { getAllHandler, getOneHandler, deleteHandler } from './snapshots';
 
 const defaultSnapshot = {
   repository: undefined,
@@ -14,7 +14,7 @@ const defaultSnapshot = {
   versionId: undefined,
   version: undefined,
   indices: [],
-  includeGlobalState: 0,
+  includeGlobalState: undefined,
   state: undefined,
   startTime: undefined,
   startTimeInMillis: undefined,
@@ -148,6 +148,76 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
+    });
+  });
+
+  describe('deleteHandler()', () => {
+    const ids = ['fooRepository/snapshot-1', 'barRepository/snapshot-2'];
+    const mockCreateRequest = ({
+      params: {
+        ids: ids.join(','),
+      },
+    } as unknown) as Request;
+
+    it('should return successful ES responses', async () => {
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockResolvedValueOnce(mockEsResponse)
+        .mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = {
+        itemsDeleted: [
+          { snapshot: 'snapshot-1', repository: 'fooRepository' },
+          { snapshot: 'snapshot-2', repository: 'barRepository' },
+        ],
+        errors: [],
+      };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return error ES responses', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(mockEsError)
+        .mockRejectedValueOnce(mockEsError);
+      const expectedResponse = {
+        itemsDeleted: [],
+        errors: [
+          { id: { snapshot: 'snapshot-1', repository: 'fooRepository' }, error: mockEsError },
+          { id: { snapshot: 'snapshot-2', repository: 'barRepository' }, error: mockEsError },
+        ],
+      };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return combination of ES successes and errors', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(mockEsError)
+        .mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = {
+        itemsDeleted: [{ snapshot: 'snapshot-2', repository: 'barRepository' }],
+        errors: [
+          {
+            id: { snapshot: 'snapshot-1', repository: 'fooRepository' },
+            error: mockEsError,
+          },
+        ],
+      };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
     });
   });
 });

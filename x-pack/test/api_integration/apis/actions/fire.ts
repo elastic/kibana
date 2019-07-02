@@ -64,9 +64,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(204)
+        .expect(200)
         .then((resp: any) => {
-          expect(resp.body).to.eql({});
+          expect(resp.body).to.be.an('object');
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
@@ -135,9 +135,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(204)
+        .expect(200)
         .then((resp: any) => {
-          expect(resp.body).to.eql({});
+          expect(resp.body).to.be.an('object');
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
