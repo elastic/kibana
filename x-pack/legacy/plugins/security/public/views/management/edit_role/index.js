@@ -19,7 +19,7 @@ import 'plugins/security/services/shield_indices';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
-import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
+import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
@@ -29,10 +29,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
-routes.when(`${EDIT_ROLES_PATH}/:name?`, {
+const routeDefinition = (action) => ({
   template,
   k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-    $route.current.params.name
+    action === 'edit' && $route.current.params.name
       ? getEditRoleBreadcrumbs
       : getCreateRoleBreadcrumbs
   ),
@@ -142,6 +142,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       render(
         <I18nContext>
           <EditRolePage
+            action={action}
             runAsUsers={users}
             role={role}
             indexPatterns={indexPatterns}
@@ -163,3 +164,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     });
   }
 });
+
+routes.when(`${CLONE_ROLES_PATH}/:name`, routeDefinition('clone'));
+routes.when(`${EDIT_ROLES_PATH}/:name?`, routeDefinition('edit'));
