@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSeriesPoint } from '../../../common/graphql/types';
-
-export const seriesHasYValues = (series: MonitorSeriesPoint[]) => {
-  return series.some(point => !!point.y);
-};
+export * from './adapter_types';
+export { ElasticsearchMonitorStatesAdapter } from './elasticsearch_monitor_states_adapter';
+export { UMMemoryMonitorStatesAdapter } from './memory_monitor_states_adapter';

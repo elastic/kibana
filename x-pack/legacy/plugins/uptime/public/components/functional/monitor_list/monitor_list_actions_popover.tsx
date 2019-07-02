@@ -7,16 +7,17 @@
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import React, { useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { LatestMonitor } from '../../../common/graphql/types';
-import { IntegrationGroup } from './integration_group';
-import { UptimeSettingsContext } from '../../contexts';
+import { get } from 'lodash';
+import { MonitorSummary } from '../../../../common/graphql/types';
+import { IntegrationGroup } from '../integration_group';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface MonitorListActionsPopoverProps {
-  monitor: LatestMonitor;
+  summary: MonitorSummary;
 }
 
-export const MonitorListActionsPopover = ({ monitor }: MonitorListActionsPopoverProps) => {
-  const popoverId = `${monitor.id.key}_popover`;
+export const MonitorListActionsPopover = ({ summary }: MonitorListActionsPopoverProps) => {
+  const popoverId = `${summary.monitor_id}_popover`;
   const [popoverIsVisible, setPopoverIsVisible] = useState<boolean>(false);
   const {
     basePath,
@@ -26,6 +27,8 @@ export const MonitorListActionsPopover = ({ monitor }: MonitorListActionsPopover
     isInfraAvailable,
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
+
+  const monitorUrl = get(summary, 'state.url.full', undefined);
 
   return (
     <EuiPopover
@@ -37,7 +40,7 @@ export const MonitorListActionsPopover = ({ monitor }: MonitorListActionsPopover
               defaultMessage: 'Opens integrations popover for monitor with url {monitorUrl}',
               description:
                 'A message explaining that this button opens a popover with links to other apps for a given monitor',
-              values: { monitorUrl: monitor.id.url },
+              values: { monitorUrl },
             }
           )}
           color="subdued"
@@ -56,7 +59,7 @@ export const MonitorListActionsPopover = ({ monitor }: MonitorListActionsPopover
         isApmAvailable={isApmAvailable}
         isInfraAvailable={isInfraAvailable}
         isLogsAvailable={isLogsAvailable}
-        monitor={monitor}
+        summary={summary}
       />
     </EuiPopover>
   );

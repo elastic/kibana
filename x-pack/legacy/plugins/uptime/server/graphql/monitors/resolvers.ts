@@ -98,7 +98,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   };
 } => ({
   Query: {
-    // @ts-ignore TODO update typings and remove this comment
     async getMonitors(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
       const result = await libs.monitors.getMonitors(req, dateRangeStart, dateRangeEnd, filters);
       return {
@@ -110,7 +109,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { dateRangeStart, dateRangeEnd, filters },
       { req }
     ): Promise<Snapshot> {
-      const { up, down, total } = await libs.monitors.getSnapshotCount(
+      const counts = await libs.monitorStates.getSummaryCount(
         req,
         dateRangeStart,
         dateRangeEnd,
@@ -118,9 +117,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       );
 
       return {
-        up,
-        down,
-        total,
+        counts,
       };
     },
     async getSnapshotHistogram(
