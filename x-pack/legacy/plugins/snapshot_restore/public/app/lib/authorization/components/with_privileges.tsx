@@ -19,7 +19,7 @@ interface Props {
   ) => JSX.Element;
 }
 
-const hasPrivilege = (missingPrivileges: string[]) => {
+const hasPrivilege = (missingPrivileges: string[] | undefined) => {
   if (!Array.isArray(missingPrivileges) || missingPrivileges.length === 0) {
     return true;
   }
@@ -27,27 +27,25 @@ const hasPrivilege = (missingPrivileges: string[]) => {
 };
 
 export const WithPrivileges = ({ privileges, children }: Props) => {
-  const { loaded, permissions = { missingPrivileges: {} } } = useContext(AuthorizationContext);
+  const { isLoaded, permissions } = useContext(AuthorizationContext);
 
-  const isLoading = !loaded;
+  const isLoading = !isLoaded;
   const arrayProvided = Array.isArray(privileges);
   const privilegesToArray = arrayProvided ? (privileges as string[]) : ([privileges] as string[]);
 
   const hasPrivileges = isLoading
     ? false
-    : privilegesToArray.every(privilege =>
-        hasPrivilege((permissions.missingPrivileges as any)[privilege])
-      );
+    : privilegesToArray.every(privilege => hasPrivilege(permissions.missingPrivileges[privilege]));
 
   const missingPrivileges = arrayProvided
     ? privilegesToArray.reduce(
         (acc, privilege) => {
-          acc[privilege] = (permissions.missingPrivileges as MissingPrivileges)[privilege] || [];
+          acc[privilege] = permissions.missingPrivileges[privilege] || [];
           return acc;
         },
         {} as MissingPrivileges
       )
-    : (permissions.missingPrivileges as MissingPrivileges)[privileges as string] || [];
+    : permissions.missingPrivileges[privileges as string] || [];
 
   return children({ isLoading, hasPrivileges, missingPrivileges });
 };

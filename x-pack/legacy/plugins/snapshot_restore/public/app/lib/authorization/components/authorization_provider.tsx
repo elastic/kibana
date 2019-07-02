@@ -12,19 +12,23 @@ import { useLoadPermissions } from '../services';
 import { SectionError } from '../../../components';
 
 interface Authorization {
-  loaded: boolean;
-  permissions?: {
+  isLoaded: boolean;
+  permissions: {
     hasAllPermissions: boolean;
-    missingPrivileges?: MissingPrivileges;
+    missingPrivileges: MissingPrivileges;
   };
 }
 
 export interface MissingPrivileges {
-  [key: string]: string[];
+  [key: string]: string[] | undefined;
 }
 
 const initialValue: Authorization = {
-  loaded: false,
+  isLoaded: false,
+  permissions: {
+    hasAllPermissions: true,
+    missingPrivileges: {},
+  },
 };
 
 export const AuthorizationContext = createContext<Authorization>(initialValue);
@@ -48,17 +52,16 @@ export const AuthorizationProvider = ({
   // If we move forward with proposal, we would need to update the SR server response
   // to implement the interface below so we don't need the serialization.
   const value = {
-    ...initialValue,
-    loaded: isLoaded,
-    permissions: isLoaded
-      ? {
-          hasAllPermissions: permissionsData.hasPermission,
-          missingPrivileges: {
+    isLoaded,
+    permissions: {
+      hasAllPermissions: isLoaded ? permissionsData.hasPermission : true,
+      missingPrivileges: isLoaded
+        ? {
             cluster: permissionsData.missingClusterPrivileges,
             index: permissionsData.missingIndexPrivileges,
-          },
-        }
-      : undefined,
+          }
+        : {},
+    },
   };
 
   return error ? (
