@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate-latest';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
@@ -60,7 +60,7 @@ const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   metrics: DEFAULT_METRICS,
 };
 
-function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj) {
+function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj): Obj {
   if (!value) {
     return defaultValue;
   }
@@ -71,7 +71,10 @@ function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj) {
   }
 }
 
-function useStateWithLocalStorage<State>(key: string, defaultState: State) {
+function useStateWithLocalStorage<State>(
+  key: string,
+  defaultState: State
+): [State, Dispatch<SetStateAction<State>>] {
   const storageState = localStorage.getItem(key);
   const [state, setState] = useState<State>(parseJsonOrDefault<State>(storageState, defaultState));
   useEffect(
