@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import { Markdown } from 'ui/markdown/markdown';
+import { MarkdownVisParams } from './markdown_fn';
+
+interface MarkdownVisComponentProps extends MarkdownVisParams {
+  renderComplete: () => {};
+}
 
 /**
  * The MarkdownVisComponent renders markdown to HTML and presents it.
  */
-class MarkdownVisComponent extends Component {
-
+class MarkdownVisComponent extends React.Component<MarkdownVisComponentProps> {
   /**
    * Will be called after the first render when the component is present in the DOM.
    *
@@ -53,10 +57,7 @@ class MarkdownVisComponent extends Component {
    */
   render() {
     return (
-      <div
-        className="mkdVis"
-        style={{ fontSize: `${this.props.fontSize}pt` }}
-      >
+      <div className="mkdVis" style={{ fontSize: `${this.props.fontSize}pt` }}>
         <Markdown
           data-test-subj="markdownBody"
           markdown={this.props.markdown}
@@ -79,7 +80,7 @@ class MarkdownVisComponent extends Component {
  * The way React works, this wrapper nearly brings no overhead, but allows us
  * to use proper lifecycle methods in the actual component.
  */
-export function MarkdownVisWrapper(props) {
+export function MarkdownVisWrapper(props: any) {
   return (
     <MarkdownVisComponent
       fontSize={props.visParams.fontSize}

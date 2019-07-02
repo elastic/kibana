@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { kibanaMarkdown } from './markdown_fn';
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+import { LegacyPluginApi } from '../../plugin_discovery/types';
 
-jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
-
-describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(kibanaMarkdown);
-  const args = {
-    font: { spec: { fontSize: 12 } },
-    openLinksInNewTab: true,
-    markdown: '## hello _markdown_',
+// eslint-disable-next-line import/no-default-export
+export default function MarkdownVisTypePlugin(kibana: LegacyPluginApi) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'vis_type_markdown',
+    require: ['data', 'visualizations'],
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      hacks: ['plugins/vis_type_markdown/index'],
+    },
   };
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(undefined, args);
-    expect(actual).toMatchSnapshot();
-  });
-});
+  return new kibana.Plugin(config);
+}

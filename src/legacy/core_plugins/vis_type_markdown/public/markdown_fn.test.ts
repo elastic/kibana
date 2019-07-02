@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+// @ts-ignore
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { kibanaMarkdown } from './markdown_fn';
 
-export default function (kibana) {
+jest.mock('ui/new_platform', () =>
+  require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor()
+);
 
-  return new kibana.Plugin({
+describe('interpreter/functions#markdown', () => {
+  const fn = functionWrapper(kibanaMarkdown);
+  const args = {
+    font: { spec: { fontSize: 12 } },
+    openLinksInNewTab: true,
+    markdown: '## hello _markdown_',
+  };
 
-    uiExports: {
-      visTypes: [
-        'plugins/markdown_vis/markdown_vis'
-      ],
-      interpreter: ['plugins/markdown_vis/markdown_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-
+  it('returns an object with the correct structure', async () => {
+    const actual = await fn(undefined, args);
+    expect(actual).toMatchSnapshot();
   });
-
-}
+});
