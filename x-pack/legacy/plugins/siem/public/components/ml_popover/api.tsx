@@ -14,7 +14,7 @@ import {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import { parseError } from '../ml/api/parse_error_message';
+import { throwIfNotOk } from '../ml/api/throw_if_not_ok';
 
 const emptyGroup: Group[] = [];
 
@@ -43,12 +43,7 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
         ...headers,
       },
     });
-    const message = await parseError(response);
-    if (message != null) {
-      // TODO: Toaster error when this happens instead of returning empty data
-      return emptyGroup;
-    }
-
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
@@ -90,12 +85,7 @@ export const setupMlJob = async ({
         ...headers,
       },
     });
-    const message = await parseError(response);
-    if (message != null) {
-      // TODO: Toaster error when this happens instead of returning empty data
-      return emptyMlResponse;
-    }
-
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
@@ -127,12 +117,7 @@ export const startDatafeeds = async (
         ...headers,
       },
     });
-    const message = await parseError(response);
-    if (message != null) {
-      // TODO: Toaster error when this happens instead of returning empty data
-      return emptyStartDatafeedResponse;
-    }
-
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
@@ -165,12 +150,7 @@ export const stopDatafeeds = async (
       },
     });
 
-    const message = await parseError(stopDatafeedsResponse);
-    if (message != null) {
-      // TODO: Toaster error when this happens instead of returning empty data
-      return emptyStopDatafeeds;
-    }
-
+    await throwIfNotOk(stopDatafeedsResponse);
     const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
 
     const datafeedPrefix = 'datafeed-';
@@ -192,12 +172,7 @@ export const stopDatafeeds = async (
       },
     });
 
-    const messageStopDataFeeds = await parseError(stopDatafeedsResponseJson);
-    if (messageStopDataFeeds != null) {
-      // TODO: Toaster error when this happens instead of returning empty data
-      return emptyStopDatafeeds;
-    }
-
+    await throwIfNotOk(stopDatafeedsResponseJson);
     return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
@@ -227,12 +202,7 @@ export const jobsSummary = async (
         ...headers,
       },
     });
-    const message = await parseError(response);
-    if (message != null) {
-      // TODO: Toaster error when this happens instead of returning empty data
-      return emptyJob;
-    }
-
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data

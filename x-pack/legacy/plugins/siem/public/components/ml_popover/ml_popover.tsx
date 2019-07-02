@@ -122,7 +122,7 @@ export const MlPopover = React.memo(() => {
   // Filter installed job to show all 'siem' group jobs or just embedded
   const jobsToDisplay = getJobsToDisplay(siemJobSummaryData, embeddedJobIds, showAllJobs);
   if (!hasMlAdminPermissions(capabilities)) {
-    return <></>;
+    return null;
   } else {
     return (
       <EuiPopover

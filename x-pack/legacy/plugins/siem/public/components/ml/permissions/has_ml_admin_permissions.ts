@@ -6,50 +6,29 @@
 
 import { MlCapabilities } from '../types';
 
-export const hasMlAdminPermissions = (capabilities: MlCapabilities): boolean => {
-  const dataFeedPermissions = getDataFeedPermissions(capabilities);
-  const jobPermissions = getJobPermissions(capabilities);
-  const filterPermissions = getFilterPermissions(capabilities);
-  const calendarPermissions = getCalendarPermissions(capabilities);
+export const hasMlAdminPermissions = (capabilities: MlCapabilities): boolean =>
+  getDataFeedPermissions(capabilities) &&
+  getJobPermissions(capabilities) &&
+  getFilterPermissions(capabilities) &&
+  getCalendarPermissions(capabilities);
 
-  const canRead =
-    capabilities.isPlatinumOrTrialLicense &&
-    capabilities.mlFeatureEnabledInSpace &&
-    capabilities.capabilities.canFindFileStructure &&
-    dataFeedPermissions &&
-    jobPermissions &&
-    filterPermissions &&
-    calendarPermissions;
-  return canRead;
-};
+const getDataFeedPermissions = ({ capabilities }: MlCapabilities): boolean =>
+  capabilities.canGetDatafeeds &&
+  capabilities.canStartStopDatafeed &&
+  capabilities.canUpdateDatafeed &&
+  capabilities.canPreviewDatafeed;
 
-const getDataFeedPermissions = ({ capabilities }: MlCapabilities) => {
-  return (
-    capabilities.canGetDatafeeds &&
-    capabilities.canStartStopDatafeed &&
-    capabilities.canUpdateDatafeed &&
-    capabilities.canPreviewDatafeed
-  );
-};
+const getJobPermissions = ({ capabilities }: MlCapabilities): boolean =>
+  capabilities.canCreateJob &&
+  capabilities.canGetJobs &&
+  capabilities.canUpdateJob &&
+  capabilities.canDeleteJob &&
+  capabilities.canOpenJob &&
+  capabilities.canCloseJob &&
+  capabilities.canForecastJob;
 
-const getJobPermissions = ({ capabilities }: MlCapabilities) => {
-  return (
-    capabilities.canCreateJob &&
-    capabilities.canGetJobs &&
-    capabilities.canUpdateJob &&
-    capabilities.canDeleteJob &&
-    capabilities.canOpenJob &&
-    capabilities.canCloseJob &&
-    capabilities.canForecastJob
-  );
-};
+const getFilterPermissions = ({ capabilities }: MlCapabilities) =>
+  capabilities.canGetFilters && capabilities.canCreateFilter && capabilities.canDeleteFilter;
 
-const getFilterPermissions = ({ capabilities }: MlCapabilities) => {
-  return capabilities.canGetFilters && capabilities.canCreateFilter && capabilities.canDeleteFilter;
-};
-
-const getCalendarPermissions = ({ capabilities }: MlCapabilities) => {
-  return (
-    capabilities.canCreateCalendar && capabilities.canGetCalendars && capabilities.canDeleteCalendar
-  );
-};
+const getCalendarPermissions = ({ capabilities }: MlCapabilities) =>
+  capabilities.canCreateCalendar && capabilities.canGetCalendars && capabilities.canDeleteCalendar;

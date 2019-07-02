@@ -34,7 +34,7 @@ const sorting = {
 };
 
 export const AnomaliesHostTable = React.memo<AnomaliesTableProps>(
-  ({ startDate, endDate, narrowDateRange, skip }): JSX.Element => {
+  ({ startDate, endDate, narrowDateRange, skip }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({
       influencers: [],
@@ -55,7 +55,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesTableProps>(
       hidePerPageOptions: false,
     };
     if (!hasMlUserPermissions(capabilities)) {
-      return <></>;
+      return null;
     } else {
       return (
         <EuiPanel>

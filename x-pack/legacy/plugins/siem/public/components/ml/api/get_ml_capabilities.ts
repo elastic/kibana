@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 import { InfluencerInput, MlCapabilities } from '../types';
-import { parseError } from './parse_error_message';
+import { throwIfNotOk } from './throw_if_not_ok';
 
 export interface Body {
   jobIds: string[];
@@ -65,11 +65,7 @@ export const getMlCapabilities = async (
         ...headers,
       },
     });
-    const message = await parseError(response);
-    if (message != null) {
-      // TODO: Toaster error when this happens instead of returning empty data
-      return empty;
-    }
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
