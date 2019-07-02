@@ -33,16 +33,16 @@ export function createAlertRoute(server: Hapi.Server) {
             interval: Joi.alternatives()
               .try(
                 Joi.string()
-                  .regex(SECONDS_REGEX, 'seconds')
+                  .regex(SECONDS_REGEX, 'seconds (5s)')
                   .required(),
                 Joi.string()
-                  .regex(MINUTES_REGEX, 'minutes')
+                  .regex(MINUTES_REGEX, 'minutes (5m)')
                   .required(),
                 Joi.string()
-                  .regex(HOURS_REGEX, 'hours')
+                  .regex(HOURS_REGEX, 'hours (5h)')
                   .required(),
                 Joi.string()
-                  .regex(DAYS_REGEX, 'days')
+                  .regex(DAYS_REGEX, 'days (5d)')
                   .required()
               )
               .required(),
