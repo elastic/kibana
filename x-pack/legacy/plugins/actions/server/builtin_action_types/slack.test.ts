@@ -85,13 +85,13 @@ describe('validateParams()', () => {
     expect(() => {
       validateActionTypeParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"message\\" fails because [\\"message\\" is required]"`
+      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" is required]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
+      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
     );
   });
 });

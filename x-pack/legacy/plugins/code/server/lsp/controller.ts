@@ -187,8 +187,12 @@ export class LanguageServerController implements ILanguageServerHandler {
     return status;
   }
 
-  public supportLanguage(lang: string) {
-    return this.languageServerMap[lang] !== undefined;
+  public getLanguageServerDef(lang: string): LanguageServerDefinition | null {
+    const data = this.languageServerMap[lang];
+    if (data) {
+      return data.definition;
+    }
+    return null;
   }
 
   private async findOrCreateHandler(

@@ -14,6 +14,7 @@ import { DataFrameJobListRow } from './common';
 import { JobDetailsPane, SectionConfig } from './job_details_pane';
 import { JobJsonPane } from './job_json_pane';
 import { TransformMessagesPane } from './transform_messages_pane';
+import { PreviewPane } from './preview_pane';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -37,6 +38,14 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
     position: 'left',
   };
 
+  const checkpointing: SectionConfig = {
+    title: 'Checkpointing',
+    items: Object.entries(item.checkpointing).map(s => {
+      return { title: s[0].toString(), description: getItemDescription(s[1]) };
+    }),
+    position: 'left',
+  };
+
   const stats: SectionConfig = {
     title: 'Stats',
     items: Object.entries(item.stats).map(s => {
@@ -51,7 +60,7 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
       name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <JobDetailsPane sections={[state, stats]} />,
+      content: <JobDetailsPane sections={[state, checkpointing, stats]} />,
     },
     {
       id: 'job-json',
@@ -64,6 +73,13 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
         defaultMessage: 'Messages',
       }),
       content: <TransformMessagesPane transformId={item.id} lastUpdate={lastUpdate} />,
+    },
+    {
+      id: 'job-preview',
+      name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobPreviewLabel', {
+        defaultMessage: 'Preview',
+      }),
+      content: <PreviewPane transformConfig={item.config} lastUpdate={lastUpdate} />,
     },
   ];
   return (

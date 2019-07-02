@@ -12,7 +12,7 @@ test('should return passed in params when validation not defined', () => {
     {
       id: 'my-alert-type',
       name: 'My description',
-      async execute() {},
+      async executor() {},
     },
     {
       foo: true,
@@ -34,7 +34,7 @@ test('should validate and apply defaults when params is valid', () => {
           })
           .required(),
       },
-      async execute() {},
+      async executor() {},
     },
     { param1: 'value' }
   );
@@ -57,7 +57,7 @@ test('should validate and throw error when params is invalid', () => {
             })
             .required(),
         },
-        async execute() {},
+        async executor() {},
       },
       {}
     )

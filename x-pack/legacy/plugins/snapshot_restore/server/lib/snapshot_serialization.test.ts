@@ -54,8 +54,7 @@ describe('deserializeSnapshotDetails', () => {
       version: 'version',
       // Indices are sorted.
       indices: ['index1', 'index2', 'index3'],
-      // Converted from a boolean into 0 or 1.
-      includeGlobalState: 0,
+      includeGlobalState: false,
       // Failures are grouped and sorted by index, and the failures themselves are sorted by shard.
       indexFailures: [
         {
@@ -92,6 +91,7 @@ describe('deserializeSnapshotDetails', () => {
         failed: 1,
         successful: 2,
       },
+      isManagedRepository: false,
     });
   });
 });
