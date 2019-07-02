@@ -30,13 +30,22 @@ export const EmptyStateComponent = ({ basePath, children, data, errors }: Props)
     return <EmptyStateError errorMessage={formatUptimeGraphQLErrorList(errors)} />;
   }
   if (data && data.statesIndexStatus) {
-    const { indexExists } = data.statesIndexStatus;
+    const { indexExists, docCount } = data.statesIndexStatus;
     if (!indexExists) {
       return (
         <DataMissing
           basePath={basePath}
           headingMessage={i18n.translate('xpack.uptime.emptyState.noIndexTitle', {
             defaultMessage: 'Uptime index not found',
+          })}
+        />
+      );
+    } else if (indexExists && docCount && docCount.count === 0) {
+      return (
+        <DataMissing
+          basePath={basePath}
+          headingMessage={i18n.translate('xpack.uptime.emptyState.noDataMessage', {
+            defaultMessage: 'No uptime data found',
           })}
         />
       );
