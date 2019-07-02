@@ -29,7 +29,13 @@ export interface Arguments {
   openLinksInNewTab: boolean;
 }
 
-type Return = Promise<Render<{ visType: 'markdown'; visConfig: Arguments }>>;
+export interface MarkdownVisParams {
+  markdown: string;
+  fontSize: number;
+  openLinksInNewTab: boolean;
+}
+
+type Return = Promise<Render<{ visType: 'markdown'; visConfig: MarkdownVisParams }>>;
 
 export const kibanaMarkdown = (): ExpressionFunction<
   typeof name,

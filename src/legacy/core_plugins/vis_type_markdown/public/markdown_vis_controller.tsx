@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { Markdown } from 'ui/markdown/markdown';
-import { Arguments } from './markdown_fn';
+import { MarkdownVisParams } from './markdown_fn';
 
-interface MarkdownVisComponentProps extends Arguments {
+interface MarkdownVisComponentProps extends MarkdownVisParams {
   renderComplete: () => {};
 }
 
