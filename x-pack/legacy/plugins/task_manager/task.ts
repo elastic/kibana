@@ -107,7 +107,7 @@ export interface TaskDefinition {
   maxAttempts?: number;
 
   /**
-   * Function that returns the delay in miliseconds to wait before attempting the
+   * Function that returns the delay in seconds to wait before attempting the
    * failed task again.
    */
   getBackpressureDelay?: (attempts: number, error?: object) => number;

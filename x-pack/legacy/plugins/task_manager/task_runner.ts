@@ -176,7 +176,7 @@ export class TaskManagerRunner implements TaskRunner {
         startedAt: now,
         attempts,
         retryAt: this.definition.getBackpressureDelay
-          ? new Date(now.valueOf() + this.definition.getBackpressureDelay(attempts))
+          ? new Date(now.valueOf() + this.definition.getBackpressureDelay(attempts) * 1000)
           : minutesFromNow(attempts * 5), // incrementally backs off an extra 5m per failure
       });
 
@@ -231,7 +231,8 @@ export class TaskManagerRunner implements TaskRunner {
       // when result.error is truthy, then we're retrying because it failed
       runAt = this.definition.getBackpressureDelay
         ? new Date(
-            Date.now() + this.definition.getBackpressureDelay(this.instance.attempts, result.error)
+            Date.now() +
+              this.definition.getBackpressureDelay(this.instance.attempts, result.error) * 1000
           )
         : minutesFromNow(this.instance.attempts * 5); // incrementally backs off an extra 5m per failure
     } else {
