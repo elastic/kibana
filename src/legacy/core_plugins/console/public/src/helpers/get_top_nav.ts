@@ -36,7 +36,7 @@ export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
         defaultMessage: 'History',
       }),
       run: () => {
-        toggleHistory();
+        $scope.$evalAsync(toggleHistory);
       },
       testId: 'consoleHistoryButton',
     },
