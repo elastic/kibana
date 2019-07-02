@@ -41,6 +41,10 @@ APIs and the `.kibana` index. The server does _not_ need access to user indices.
 The password for the built-in `kibana` user is typically set as part of the
 {security} configuration process on {es}. For more information, see
 {stack-ov}/built-in-users.html[Built-in users].
+
+NOTE: The internal user "kibana" can't be used to login in Kibana. It doesn't have the `kibana_user` role.
+
+
 --
 
 . Set the `xpack.security.encryptionKey` property in the `kibana.yml`
