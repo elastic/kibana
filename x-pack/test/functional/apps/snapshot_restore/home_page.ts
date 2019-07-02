@@ -19,8 +19,8 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
     });
 
     it('Loads the app', async () => {
-      const appTitle = 'Snapshot Repositories';
-      await log.debug(`Checking for app title to be {appTitle}`);
+      const appTitle = 'Snapshot and Restore';
+      await log.debug(`Checking for app title to be ${appTitle}`);
       const appTitleText = await pageObjects.snapshotRestore.appTitleText();
       expect(appTitleText).to.be(appTitle);
 
