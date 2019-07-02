@@ -146,7 +146,7 @@ app.controller('timelion', function (
 
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {
-      $scope.kbnTopNav.open('help');
+      $scope.toggleMenu('showHelp');
     }
   }, 0);
 
@@ -184,7 +184,9 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.addChartButtonAriaLabel', {
         defaultMessage: 'Add a chart',
       }),
-      run: function () { $scope.newCell(); },
+      run: function () {
+        $scope.$evalAsync(() => $scope.newCell());
+      },
       testId: 'timelionAddChartButton',
     };
 
@@ -197,9 +199,7 @@ app.controller('timelion', function (
         defaultMessage: 'Save Sheet',
       }),
       run: () => {
-        const curState = $scope.menus.showSave;
-        $scope.closeMenus();
-        $scope.menus.showSave = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showSave'));
       },
       testId: 'timelionSaveButton',
     };
@@ -241,12 +241,15 @@ app.controller('timelion', function (
           }),
         };
 
-        confirmModal(
-          i18n.translate('timelion.topNavMenu.delete.modal.warningText', {
-            defaultMessage: `You can't recover deleted sheets.`,
-          }),
-          confirmModalOptions
-        );
+        $scope.$evalAsync(() => {
+          confirmModal(
+            i18n.translate('timelion.topNavMenu.delete.modal.warningText', {
+              defaultMessage: `You can't recover deleted sheets.`,
+            }),
+            confirmModalOptions
+          );
+        });
+
       },
       testId: 'timelionDeleteButton',
     };
@@ -260,9 +263,7 @@ app.controller('timelion', function (
         defaultMessage: 'Open Sheet',
       }),
       run: () => {
-        const curState = $scope.menus.showLoad;
-        $scope.closeMenus();
-        $scope.menus.showLoad = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showLoad'));
       },
       testId: 'timelionOpenButton',
     };
@@ -276,9 +277,7 @@ app.controller('timelion', function (
         defaultMessage: 'Options',
       }),
       run: () => {
-        const curState = $scope.menus.showOptions;
-        $scope.closeMenus();
-        $scope.menus.showOptions = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showOptions'));
       },
       testId: 'timelionOptionsButton',
     };
@@ -292,9 +291,7 @@ app.controller('timelion', function (
         defaultMessage: 'Help',
       }),
       run: () => {
-        const curState = $scope.menus.showHelp;
-        $scope.closeMenus();
-        $scope.menus.showHelp = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showHelp'));
       },
       testId: 'timelionDocsButton',
     };
@@ -321,7 +318,7 @@ app.controller('timelion', function (
       dontShowHelp: function () {
         config.set('timelion:showTutorial', false);
         $scope.setPage(0);
-        $scope.kbnTopNav.close('help');
+        $scope.closeMenus();
       }
     };
 
@@ -330,6 +327,12 @@ app.controller('timelion', function (
       showSave: false,
       showLoad: false,
       showOptions: false,
+    };
+
+    $scope.toggleMenu = (menuName) => {
+      const curState = $scope.menus[menuName];
+      $scope.closeMenus();
+      $scope.menus[menuName] = !curState;
     };
 
     $scope.closeMenus = () => {

@@ -1,23 +1,20 @@
 <div class="timApp app-container" ng-controller="timelion">
+  <span class="kuiLocalTitle">
+    <span class="timApp__stats" ng-show="stats">
+      <span
+        i18n-id="timelion.topNavMenu.statsDescription"
+        i18n-default-message="Query Time {queryTime}ms / Processing Time {processingTime}ms"
+        i18n-values="{
+          queryTime: stats.queryTime - stats.invokeTime,
+          processingTime: stats.sheetTime - stats.queryTime,
+        }"></span>
+    </span>
+  </span>
   <!-- Local nav. -->
-  <kbn-top-nav name="timelion" config="topNavMenu">
-    <!-- Transcluded elements. -->
-    <div data-transclude-slots>
-      <div data-transclude-slot="topLeftCorner">
-        <span class="kuiLocalTitle">
-          <span class="timApp__stats" ng-show="stats">
-            <span
-              i18n-id="timelion.topNavMenu.statsDescription"
-              i18n-default-message="Query Time {queryTime}ms / Processing Time {processingTime}ms"
-              i18n-values="{
-                queryTime: stats.queryTime - stats.invokeTime,
-                processingTime: stats.sheetTime - stats.queryTime,
-              }"></span>
-          </span>
-        </span>
-      </div>
-    </div>
-  </kbn-top-nav>
+  <kbn-top-nav2 name="timelion" config="topNavMenu">
+  </kbn-top-nav2>
+
+
   <div class="timApp__menus">
     <timelion-help ng-show="menus.showHelp"></timelion-help>
     <timelion-save ng-show="menus.showSave"></timelion-save>
