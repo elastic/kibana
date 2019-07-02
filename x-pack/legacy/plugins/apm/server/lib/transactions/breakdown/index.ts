@@ -154,13 +154,13 @@ export async function getTransactionBreakdown({
     return breakdowns;
   };
 
-  const total = sortByOrder(
+  const kpis = sortByOrder(
     formatBucket(resp.aggregations),
     'percentage',
     'desc'
   ).slice(0, MAX_KPIS);
 
-  const kpiNames = total.map(kpi => kpi.name);
+  const kpiNames = kpis.map(kpi => kpi.name);
 
   const timeseriesPerSubtype = resp.aggregations.by_date.buckets.reduce(
     (prev, bucket) => {
@@ -187,7 +187,7 @@ export async function getTransactionBreakdown({
   );
 
   return {
-    total,
+    kpis,
     timeseries_per_subtype: timeseriesPerSubtype
   };
 }

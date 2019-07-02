@@ -27,7 +27,7 @@ describe('getTransactionBreakdown', () => {
       }
     });
 
-    expect(response.total.length).toBe(0);
+    expect(response.kpis.length).toBe(0);
 
     expect(Object.keys(response.timeseries_per_subtype).length).toBe(0);
   });
@@ -49,21 +49,21 @@ describe('getTransactionBreakdown', () => {
       }
     });
 
-    expect(response.total.length).toBe(4);
+    expect(response.kpis.length).toBe(4);
 
-    expect(response.total.map(breakdown => breakdown.name)).toEqual([
+    expect(response.kpis.map(kpi => kpi.name)).toEqual([
       'app',
       'http',
       'postgresql',
       'dispatcher-servlet'
     ]);
 
-    expect(response.total[0]).toEqual({
+    expect(response.kpis[0]).toEqual({
       name: 'app',
       percentage: 0.5408550899466306
     });
 
-    expect(response.total[2]).toEqual({
+    expect(response.kpis[2]).toEqual({
       name: 'postgresql',
       percentage: 0.047366859295002
     });

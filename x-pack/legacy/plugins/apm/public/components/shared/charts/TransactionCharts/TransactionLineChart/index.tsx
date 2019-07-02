@@ -39,9 +39,10 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
     series,
     tickFormatY,
     formatTooltipValue,
-    stacked,
-    yMax,
-    height
+    stacked = false,
+    yMax = 'max',
+    height,
+    truncateLegends
   } = props;
 
   const flattenedCoordinates = flatten(series.map(serie => serie.data));
@@ -103,14 +104,9 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
       stacked={stacked}
       yMax={yMax}
       height={height}
+      truncateLegends={truncateLegends}
     />
   );
-};
-
-TransactionLineChart.defaultProps = {
-  stacked: false,
-  truncateLegends: false,
-  yMax: 'max'
 };
 
 export { TransactionLineChart };

@@ -48,12 +48,12 @@ const TransactionBreakdown: React.FC<{
     receivedDataDuringLifetime
   } = useTransactionBreakdown();
 
-  const total = data ? data.total : undefined;
+  const kpis = data ? data.kpis : undefined;
   const timeseriesPerSubtype = data ? data.timeseries_per_subtype : undefined;
 
   const legends = useMemo(
     () => {
-      const names = total ? total.map(kpi => kpi.name).sort() : [];
+      const names = kpis ? kpis.map(kpi => kpi.name).sort() : [];
 
       return names.map((name, index) => {
         return {
@@ -62,21 +62,21 @@ const TransactionBreakdown: React.FC<{
         };
       });
     },
-    [total]
+    [kpis]
   );
 
-  const kpis = useMemo(
+  const sortedAndColoredKpis = useMemo(
     () => {
-      if (!total) {
+      if (!kpis) {
         return null;
       }
 
       return legends.map(legend => {
         const { color } = legend;
 
-        const breakdown = total.find(
+        const breakdown = kpis.find(
           b => b.name === legend.name
-        ) as typeof total[0];
+        ) as typeof kpis[0];
 
         return {
           ...breakdown,
@@ -84,12 +84,12 @@ const TransactionBreakdown: React.FC<{
         };
       });
     },
-    [total, legends]
+    [kpis, legends]
   );
 
   const loading = status === FETCH_STATUS.LOADING || status === undefined;
 
-  const hasHits = data && data.total.length > 0;
+  const hasHits = data && data.kpis.length > 0;
   const timeseries = useMemo(
     () => {
       if (!timeseriesPerSubtype) {
@@ -120,9 +120,11 @@ const TransactionBreakdown: React.FC<{
             }}
           />
         </EuiFlexItem>
-        {hasHits && kpis ? (
+        {hasHits && sortedAndColoredKpis ? (
           <EuiFlexItem>
-            {kpis && <TransactionBreakdownKpiList kpis={kpis} />}
+            {sortedAndColoredKpis && (
+              <TransactionBreakdownKpiList kpis={sortedAndColoredKpis} />
+            )}
           </EuiFlexItem>
         ) : (
           !loading && (
