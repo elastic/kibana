@@ -1,3 +1,4 @@
+[role="xpack"]
 [[watcher-create-threshold-alert]]
 === Create a threshold alert
 
@@ -13,7 +14,7 @@ to collect metrics from your systems and services.
 and get started with Metricbeat.
 
 [float]
-==== Start Watcher
+==== Get started
 
 . Go to *Management > Elasticsearch > Watcher*.
 
@@ -24,7 +25,7 @@ and get started with Metricbeat.
 ==== Define the watch input and schedule
 
 You're navigated to a page that walks you through creating the alert.
-You're asked to define the watch name, the data that you want to evaluate and
+You're asked to define the watch name, the data that you want to evaluate, and
 how often you want to trigger the watch. 
 
 . Enter a name that you want to call the alert, for example, `cpu_threshold_alert`.
@@ -64,18 +65,17 @@ image:management/watcher-ui/images/threshold-alert/threshold-alert-condition.png
 [float]
 ==== Add an action
 
-Now that the condition is set, you must define an action. The action triggers 
-when the watch condition is met. In this example, you’ll configure an email action. 
-For a complete list of actions and how to configure them, see 
+Now that the condition is set, you must add an action. The action triggers 
+when the watch condition is met. For a complete list of actions and how to configure them, see 
 {stack-ov}/action-conditions.html[Adding conditions to actions].
 
-NOTE: You must have an {stack-ov}/actions-email.html#configuring-email[email account configured]
+In this example, you’ll configure an email action. You must have an {stack-ov}/actions-email.html#configuring-email[email account configured]
 in {es} for this example to work. 
 
 . Click *Add action* and select *Email*.
 
 . In the *To email address* field, enter one or more email addresses to whom 
-you want to send the message when the alert condition is met. 
+you want to send the message when the condition is met. 
 
 . Enter a subject and body for the email.
 +
@@ -94,7 +94,7 @@ the watch history and status.
 [float]
 ==== Delete the alert
 
-In this example, you set the threshold at 25% so you can see the watch fire. In 
+In this example, you set the threshold to 25% so you can see the watch fire. In 
 a  real-world scenario, this threshold is likely too low because the alerts are 
 so frequent. Once you are done experimenting, you should delete the alert. 
 Find the alert on the Watcher overview page and click the trash icon in the *Actions* column.

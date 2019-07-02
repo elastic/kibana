@@ -1,8 +1,14 @@
-
+[role="xpack"]
 [[watcher-getting-started]]
 === View watch history and status
-The Watcher overview page lists all your watches,
-including their state: `Firing`, `Error`, `OK`, or `Disabled`.
+The Watcher overview page lists your watches and includes details such as state,
+last fired, and last triggered.  A watch has one of four states:
+
+* *Firing.* The watch is triggered and actively performing the associated actions.
+* *Error.* The watch is not working properly.
+* *OK.* The watch is not actively firing but working properly.
+* *Disabled.* The watch will not fire under any circumstances.
+
 From this page you can drill down into a watch to investigate its history
 and status.  
 

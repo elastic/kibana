@@ -1,8 +1,11 @@
+[role="xpack"]
 [[watcher-create-advanced-watch]]
 === Create an advanced watch
 
 Advanced watches are for users who are more familiar with {es} query syntax and 
-the Watcher framework. The UI is aligned with using the REST APIs.
+the Watcher framework. The UI is aligned with using the REST APIs. 
+For more information, see {ref}/query-dsl.html[Query DSL].
+
 
 [float]
 ==== Create the watch
