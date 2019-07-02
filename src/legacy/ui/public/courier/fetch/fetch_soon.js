@@ -25,10 +25,6 @@ import { FetchNowProvider } from './fetch_now';
  * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
  * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
  * is loading).
- *
- * @param Private
- * @param Promise
- * @constructor
  */
 export function FetchSoonProvider(Private, Promise, config) {
 
