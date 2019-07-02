@@ -12,6 +12,7 @@ import { DataFrameJobListRow, DataFrameJobState, DataFrameJobStats } from '../co
 
 interface DataFrameJobStateStats {
   id: JobId;
+  checkpointing: object;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
 }
@@ -47,7 +48,13 @@ export const getJobsFactory = (
             return reducedtableRows;
           }
           // Table with expandable rows requires `id` on the outer most level
-          reducedtableRows.push({ config, id: config.id, state: stats.state, stats: stats.stats });
+          reducedtableRows.push({
+            config,
+            id: config.id,
+            checkpointing: stats.checkpointing,
+            state: stats.state,
+            stats: stats.stats,
+          });
           return reducedtableRows;
         },
         [] as DataFrameJobListRow[]

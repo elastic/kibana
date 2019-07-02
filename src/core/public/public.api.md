@@ -179,7 +179,7 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
-    uiSettings: UiSettingsSetup;
+    uiSettings: UiSettingsClientContract;
 }
 
 // @public
@@ -199,7 +199,7 @@ export interface CoreStart {
     // (undocumented)
     overlays: OverlayStart;
     // (undocumented)
-    uiSettings: UiSettingsStart;
+    uiSettings: UiSettingsClientContract;
 }
 
 // @internal
@@ -475,13 +475,13 @@ export interface OverlayStart {
 }
 
 // @public
-export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
     // (undocumented)
-    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
-    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
+    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
-    stop?: () => void;
+    stop?(): void;
 }
 
 // @public
@@ -508,7 +508,7 @@ export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 // @public (undocumented)
 export class ToastsApi {
     constructor(deps: {
-        uiSettings: UiSettingsSetup;
+        uiSettings: UiSettingsClientContract;
     });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
@@ -557,10 +557,7 @@ export class UiSettingsClient {
     }
 
 // @public (undocumented)
-export type UiSettingsSetup = UiSettingsClient;
-
-// @public (undocumented)
-export type UiSettingsStart = UiSettingsClient;
+export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
 export interface UiSettingsState {

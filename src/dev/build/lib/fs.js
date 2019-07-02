@@ -47,6 +47,17 @@ export function assertAbsolute(path) {
   }
 }
 
+export function isFileAccessible(path) {
+  assertAbsolute(path);
+
+  try {
+    fs.accessSync(path);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function longInspect(value) {
   return inspect(value, {
     maxArrayLength: Infinity

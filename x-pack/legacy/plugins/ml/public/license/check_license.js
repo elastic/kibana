@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { XPackInfoProvider } from '../../../xpack_main/public/services/xpack_info';
+import { xpackInfo } from '../../../xpack_main/public/services/xpack_info';
 import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
 import { LICENSE_TYPE } from '../../common/constants/license';
 
@@ -17,8 +17,8 @@ let licenseHasExpired = true;
 let licenseType = null;
 let expiredLicenseBannerId;
 
-export function checkFullLicense(Private, kbnBaseUrl, kbnUrl) {
-  const features = getFeatures(Private);
+export function checkFullLicense(kbnBaseUrl, kbnUrl) {
+  const features = getFeatures();
   licenseType = features.licenseType;
 
   if (features.isAvailable === false) {
@@ -38,8 +38,8 @@ export function checkFullLicense(Private, kbnBaseUrl, kbnUrl) {
   }
 }
 
-export function checkBasicLicense(Private, kbnBaseUrl) {
-  const features = getFeatures(Private);
+export function checkBasicLicense(kbnBaseUrl) {
+  const features = getFeatures();
   licenseType = features.licenseType;
 
   if (features.isAvailable === false) {
@@ -57,8 +57,8 @@ export function checkBasicLicense(Private, kbnBaseUrl) {
 // a wrapper for checkFullLicense which doesn't resolve if the license has expired.
 // this is used by all create jobs pages to redirect back to the jobs list
 // if the user's license has expired.
-export function checkLicenseExpired(Private, kbnBaseUrl, kbnUrl) {
-  return checkFullLicense(Private, kbnBaseUrl, kbnUrl)
+export function checkLicenseExpired(kbnBaseUrl, kbnUrl) {
+  return checkFullLicense(kbnBaseUrl, kbnUrl)
     .then((features) => {
       if (features.hasExpired) {
         kbnUrl.redirect('/jobs');
@@ -94,8 +94,7 @@ function setLicenseExpired(features) {
   }
 }
 
-function getFeatures(Private) {
-  const xpackInfo = Private(XPackInfoProvider);
+function getFeatures() {
   return xpackInfo.get('features.ml');
 }
 
@@ -119,12 +118,6 @@ export function isFullLicense() {
   return (licenseType === LICENSE_TYPE.FULL);
 }
 
-export function xpackFeatureProvider(Private) {
-  const xpackInfo = Private(XPackInfoProvider);
-
-  return {
-    isAvailable(feature) {
-      return xpackInfo.get(`features.${feature}.isAvailable`, false);
-    }
-  };
+export function xpackFeatureAvailable(feature) {
+  return xpackInfo.get(`features.${feature}.isAvailable`, false);
 }

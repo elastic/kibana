@@ -45,6 +45,7 @@ export interface DataFrameJobStats {
 
 export interface DataFrameJobListRow {
   id: JobId;
+  checkpointing: object;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
   config: DataFrameTransformWithId;

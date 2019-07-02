@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React, { Fragment, Component } from 'react';
-import {
-  EuiFilePicker,
-  EuiFormRow,
-  EuiSpacer,
-  EuiCallOut,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiFilePicker, EuiFormRow, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { parseFile } from '../util/file_parser';
@@ -142,68 +135,48 @@ export class JsonIndexFilePicker extends Component {
   }
 
   render() {
-    const { fileParsingProgress, fileUploadError, fileRef } = this.state;
+    const { fileParsingProgress, fileUploadError } = this.state;
 
     return (
       <Fragment>
-        { fileParsingProgress
-          ? <EuiProgress size="xs" color="accent" position="absolute" />
-          : null
-        }
-        {
-          fileRef && !fileUploadError
-            ? null
-            : (
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.fileUpload.jsonIndexFilePicker.fileUploadGuidelines',
-                  { defaultMessage: 'File upload guidelines' }
-                )}
-                iconType="pin"
-              >
-                <div>
-                  <ul>
-                    <li>
-                      {
-                        i18n.translate(
-                          'xpack.fileUpload.jsonIndexFilePicker.formatsAccepted',
-                          { defaultMessage: 'Formats accepted: .json, .geojson' }
-                        )
-                      }
-                    </li>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.fileUpload.jsonIndexFilePicker.maxSize"
-                        defaultMessage="Max size: {maxFileSize}"
-                        values={{
-                          maxFileSize: bytesToSize(MAX_FILE_SIZE)
-                        }}
-                      />
-                    </li>
-                  </ul>
-                </div>
-              </EuiCallOut>
-            )
-        }
-        <EuiSpacer size="m" />
+        {fileParsingProgress ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+
         <EuiFormRow
-          label={(
+          label={
             <FormattedMessage
               id="xpack.fileUpload.jsonIndexFilePicker.filePickerLabel"
               defaultMessage="Select a file to upload"
             />
-          )}
+          }
           isInvalid={fileUploadError !== ''}
           error={[fileUploadError]}
-          helpText={fileParsingProgress}
+          helpText={
+            fileParsingProgress ? (
+              fileParsingProgress
+            ) : (
+              <span>
+                {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.formatsAccepted', {
+                  defaultMessage: 'Formats accepted: .json, .geojson',
+                })}{' '}
+                <br />
+                <FormattedMessage
+                  id="xpack.fileUpload.jsonIndexFilePicker.maxSize"
+                  defaultMessage="Max size: {maxFileSize}"
+                  values={{
+                    maxFileSize: bytesToSize(MAX_FILE_SIZE),
+                  }}
+                />
+              </span>
+            )
+          }
         >
           <EuiFilePicker
-            initialPromptText={(
+            initialPromptText={
               <FormattedMessage
                 id="xpack.fileUpload.jsonIndexFilePicker.filePicker"
                 defaultMessage="Upload file"
               />
-            )}
+            }
             onChange={this._fileHandler}
           />
         </EuiFormRow>
