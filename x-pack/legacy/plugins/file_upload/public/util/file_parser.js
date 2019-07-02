@@ -31,25 +31,37 @@ export async function parseFile(file, previewCallback = null, transformDetails,
     }
   }
 
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = ({ target: { result } }) => {
-      try {
-        const parsedJson = JSON.parse(result);
-        // Clean & validate
-        const cleanAndValidJson = cleanAndValidate(parsedJson);
-        if (!cleanAndValidJson) {
-          return;
-        }
-        if (previewCallback) {
-          const defaultName = _.get(cleanAndValidJson, 'name', 'Import File');
-          previewCallback(cleanAndValidJson, defaultName);
-        }
-        resolve(cleanAndValidJson);
-      } catch (e) {
-        reject(e);
-      }
-    };
+  // Parse file
+  const fr = new FileReader();
+  const jsonResult = await new Promise((resolve, reject) => {
+    fr.onload = parseAndClean(cleanAndValidate, resolve, reject);
     fr.readAsText(file);
   });
+  jsonPreview(jsonResult, previewCallback);
+
+  return jsonResult;
+}
+
+export function jsonPreview(json, previewFunction) {
+  // Call preview (if any)
+  if (json && previewFunction) {
+    const defaultName = _.get(json, 'name', 'Import File');
+    previewFunction(_.cloneDeep(json), defaultName);
+  }
+}
+
+export function parseAndClean(cleanAndValidate, resolve, reject) {
+  return ({ target: { result } }) => {
+    try {
+      const parsedJson = JSON.parse(result);
+      // Clean & validate
+      const cleanAndValidJson = cleanAndValidate(parsedJson);
+      if (!cleanAndValidJson) {
+        return;
+      }
+      resolve(cleanAndValidJson);
+    } catch (e) {
+      reject(e);
+    }
+  };
 }
