@@ -184,38 +184,7 @@ export class LspIncrementalIndexer extends LspIndexer {
   }
 
   private async handleAddedRequest(request: LspIncIndexRequest, stats: IndexStats) {
-    const { repoUri, revision, filePath, localRepoPath } = request;
-
-    const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
-    const symbolNames = new Set<string>();
-
-    try {
-      const response = await this.lspService.sendRequest('textDocument/full', {
-        textDocument: {
-          uri: lspDocUri,
-        },
-        reference: this.options.enableGlobalReference,
-      });
-
-      if (response && response.result.length > 0) {
-        const { symbols, references } = response.result[0];
-        for (const symbol of symbols) {
-          await this.lspBatchIndexHelper.index(SymbolIndexName(repoUri), symbol);
-          symbolNames.add(symbol.symbolInformation.name);
-        }
-        stats.set(IndexStatsKey.Symbol, symbols.length);
-
-        for (const ref of references) {
-          await this.lspBatchIndexHelper.index(ReferenceIndexName(repoUri), ref);
-        }
-        stats.set(IndexStatsKey.Reference, references.length);
-      } else {
-        this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
-      }
-    } catch (error) {
-      this.log.error(`Index symbols or references error. Skip to file indexing.`);
-      this.log.error(error);
-    }
+    const { repoUri, filePath, workspaceOpened } = request;
 
     let content = '';
     try {
@@ -231,13 +200,21 @@ export class LspIncrementalIndexer extends LspIndexer {
       }
     }
 
+    let symbols: Set<string> = new Set<string>();
+    if (workspaceOpened) {
+      const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
+      symbols = symbolNames;
+      stats.set(IndexStatsKey.Symbol, symbolsLength);
+      stats.set(IndexStatsKey.Reference, referencesLength);
+    }
+
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
       repoUri,
       path: filePath,
       content,
       language,
-      qnames: Array.from(symbolNames),
+      qnames: Array.from(symbols),
     };
     await this.docBatchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);

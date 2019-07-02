@@ -247,31 +247,18 @@ export class LspIndexer extends AbstractIndexer {
     return content;
   }
 
-  protected async processRequest(request: LspIndexRequest): Promise<IndexStats> {
-    const stats: IndexStats = new Map<IndexStatsKey, number>()
-      .set(IndexStatsKey.Symbol, 0)
-      .set(IndexStatsKey.Reference, 0)
-      .set(IndexStatsKey.File, 0);
+  protected async execLspIndexing(
+    request: LspIndexRequest
+  ): Promise<{
+    symbolNames: Set<string>;
+    symbolsLength: number;
+    referencesLength: number;
+  }> {
     const { repoUri, revision, filePath } = request;
-
-    this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
-
-    let content = '';
-    try {
-      content = await this.getFileSource(request);
-    } catch (error) {
-      if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
-        // Skip this index request if the file is oversized
-        this.log.debug(this.FILE_OVERSIZE_ERROR_MSG);
-        return stats;
-      } else {
-        // Rethrow the issue if for other reasons
-        throw error;
-      }
-    }
-
+    let symbolsLength = 0;
+    let referencesLength = 0;
     try {
       const lang = detectLanguageByFilename(filePath);
       // filter file by language
@@ -289,12 +276,12 @@ export class LspIndexer extends AbstractIndexer {
             await this.lspBatchIndexHelper.index(SymbolIndexName(repoUri), symbol);
             symbolNames.add(symbol.symbolInformation.name);
           }
-          stats.set(IndexStatsKey.Symbol, symbols.length);
+          symbolsLength = symbols.length;
 
           for (const ref of references) {
             await this.lspBatchIndexHelper.index(ReferenceIndexName(repoUri), ref);
           }
-          stats.set(IndexStatsKey.Reference, references.length);
+          referencesLength = references.length;
         } else {
           this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
         }
@@ -315,13 +302,46 @@ export class LspIndexer extends AbstractIndexer {
       }
     }
 
+    return { symbolNames, symbolsLength, referencesLength };
+  }
+
+  protected async processRequest(request: LspIndexRequest): Promise<IndexStats> {
+    const stats: IndexStats = new Map<IndexStatsKey, number>()
+      .set(IndexStatsKey.Symbol, 0)
+      .set(IndexStatsKey.Reference, 0)
+      .set(IndexStatsKey.File, 0);
+    const { repoUri, revision, filePath, workspaceOpened } = request;
+    this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
+
+    let content = '';
+    try {
+      content = await this.getFileSource(request);
+    } catch (error) {
+      if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
+        // Skip this index request if the file is oversized
+        this.log.debug(this.FILE_OVERSIZE_ERROR_MSG);
+        return stats;
+      } else {
+        // Rethrow the issue if for other reasons
+        throw error;
+      }
+    }
+
+    let symbols: Set<string> = new Set<string>();
+    if (workspaceOpened) {
+      const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
+      symbols = symbolNames;
+      stats.set(IndexStatsKey.Symbol, symbolsLength);
+      stats.set(IndexStatsKey.Reference, referencesLength);
+    }
+
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
       repoUri,
       path: filePath,
       content,
       language,
-      qnames: Array.from(symbolNames),
+      qnames: Array.from(symbols),
     };
     await this.docBatchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);
