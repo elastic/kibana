@@ -23,9 +23,10 @@ export function collectBranch(leaf) {
     // record the the depth
     const depth = item.depth - 1;
 
-    // Using the column name determine what the field name is. If the name
-    // doesn't exist (which means it's an _all agg) then use the level for
-    // the field name
+    // For buckets, we use the column name to determine what the field name is.
+    // If item.rawData doesn't exist, it is a metric in which case we use the
+    // value of item.name. If neither exists, we fall back to the leve for the
+    // field name.
     function getFieldName(i) {
       if (i.rawData && i.rawData.column > -1) {
         const { column, table } = i.rawData;

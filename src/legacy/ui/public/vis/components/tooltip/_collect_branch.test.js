@@ -21,6 +21,7 @@ import { collectBranch } from './_collect_branch';
 
 describe('collectBranch()', () => {
   let item;
+  let itemWithBuckets;
   const table = {
     columns: [
       { id: 'col1', name: 'Bucket1 Formatted Name' },
@@ -34,6 +35,11 @@ describe('collectBranch()', () => {
 
   beforeEach(() => {
     item = {
+      name: 'Count',
+      depth: 1,
+      size: 3,
+    };
+    itemWithBuckets = {
       name: 'bucket3',
       depth: 3,
       size: 6,
@@ -70,7 +76,7 @@ describe('collectBranch()', () => {
   });
 
   it('should return an array with bucket objects', () => {
-    const results = collectBranch(item);
+    const results = collectBranch(itemWithBuckets);
     expect(results).toHaveLength(3);
 
     expect(results[0]).toHaveProperty('metric', 24);
@@ -89,28 +95,16 @@ describe('collectBranch()', () => {
     expect(results[2]).toHaveProperty('field', 'Bucket3 Formatted Name');
   });
 
-  it('should fall back to item name when now rawData exists', () => {
-    delete item.rawData;
-    delete item.parent.rawData;
-    delete item.parent.parent.rawData;
+  it('should fall back to item name when no rawData exists', () => {
     const results = collectBranch(item);
-    expect(results).toHaveLength(3);
-    expect(results[0]).toHaveProperty('field', 'bucket1');
-    expect(results[1]).toHaveProperty('field', 'bucket2');
-    expect(results[2]).toHaveProperty('field', 'bucket3');
+    expect(results).toHaveLength(1);
+    expect(results[0]).toHaveProperty('field', 'Count');
   });
 
   it('should fall back to printing the depth level when neither rawData nor name exists', () => {
-    delete item.rawData;
-    delete item.parent.rawData;
-    delete item.parent.parent.rawData;
     delete item.name;
-    delete item.parent.name;
-    delete item.parent.parent.name;
     const results = collectBranch(item);
-    expect(results).toHaveLength(3);
+    expect(results).toHaveLength(1);
     expect(results[0]).toHaveProperty('field', 'level 1');
-    expect(results[1]).toHaveProperty('field', 'level 2');
-    expect(results[2]).toHaveProperty('field', 'level 3');
   });
 });
