@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls toExpression on vis_type if it exists 1`] = `"kibana | kibana_context | testing custom expressions"`;
+
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles markdown function 1`] = `"markdownvis '## hello _markdown_' font={font size=12} openLinksInNewTab=true "`;
