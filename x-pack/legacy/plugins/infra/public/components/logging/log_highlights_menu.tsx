@@ -25,12 +25,20 @@ interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
   isLoading: boolean;
   activeHighlights: boolean;
+  previousHighlightLogEntryIndex: number | null;
+  nextHighlightLogEntryIndex: number | null;
+  goToPreviousHighlight: () => void;
+  goToNextHighlight: () => void;
 }
 
 export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   onChange,
   isLoading,
   activeHighlights,
+  previousHighlightLogEntryIndex,
+  goToPreviousHighlight,
+  nextHighlightLogEntryIndex,
+  goToNextHighlight,
 }) => {
   const {
     isVisible: isPopoverOpen,
@@ -99,6 +107,24 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               title={clearTermsButtonLabel}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label={goToPreviousHighlightLabel}
+              iconType="arrowUp"
+              onClick={goToPreviousHighlight}
+              title={goToPreviousHighlightLabel}
+              isDisabled={!previousHighlightLogEntryIndex}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label={goToNextHighlightLabel}
+              iconType="arrowDown"
+              onClick={goToNextHighlight}
+              title={goToNextHighlightLabel}
+              isDisabled={!nextHighlightLogEntryIndex}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </LogHighlightsMenuContent>
     </EuiPopover>
@@ -113,6 +139,20 @@ const clearTermsButtonLabel = i18n.translate(
   'xpack.infra.logs.highlights.clearHighlightTermsButtonLabel',
   {
     defaultMessage: 'Clear terms to highlight',
+  }
+);
+
+const goToPreviousHighlightLabel = i18n.translate(
+  'xpack.infra.logs.highlights.goToPreviousHighlightLabel',
+  {
+    defaultMessage: 'Jump to previous highlight',
+  }
+);
+
+const goToNextHighlightLabel = i18n.translate(
+  'xpack.infra.logs.highlights.goToNextHighlightLabel',
+  {
+    defaultMessage: 'Jump to next highlight',
   }
 );
 
