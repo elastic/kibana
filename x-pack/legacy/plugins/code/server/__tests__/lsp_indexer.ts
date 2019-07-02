@@ -312,6 +312,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     // Apply a checkpoint in here.
     await indexer.start(undefined, {
       repoUri: '',
+      workspaceOpened: true,
       filePath: 'src/public/js/main.ts',
       revision: 'HEAD',
       localRepoPath: '',
