@@ -58,6 +58,15 @@ export const populateSeriesWithTSVBData = (
   // Get TSVB results using the model, timerange and filters
   const tsvbResults = await framework.makeTSVBRequest(req, model, timerange, filters);
 
+  // If there is no data `custom` will not exist.
+  if (!tsvbResults.custom) {
+    return {
+      ...series,
+      columns: [],
+      rows: [],
+    };
+  }
+
   // Setup the dynamic columns and row attributes depending on if the user is doing a group by
   // and multiple metrics
   const attributeColumns =

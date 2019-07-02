@@ -121,6 +121,7 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                   />
                 </EuiButton>
               }
+              data-test-subj="mlDataVisualizerCardImportData"
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -149,6 +150,7 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                   />
                 </EuiButton>
               }
+              data-test-subj="mlDataVisualizerCardIndexData"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
