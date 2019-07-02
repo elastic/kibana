@@ -42,15 +42,6 @@ export function lspRoute(
   const log = new Logger(server.server);
 
   server.route({
-    path: '/api/code/repo/{uri*3}/{ref}/lspstate',
-    method: 'GET',
-    async handler(req) {
-      const { uri, ref } = req.params;
-      return lspService.initializeState(uri, ref);
-    },
-  });
-
-  server.route({
     path: '/api/code/lsp/textDocument/{method}',
     async handler(req, h: hapi.ResponseToolkit) {
       if (typeof req.payload === 'object' && req.payload != null) {

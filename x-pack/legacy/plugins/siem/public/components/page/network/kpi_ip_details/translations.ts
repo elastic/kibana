@@ -18,12 +18,12 @@ export const OUT = i18n.translate('xpack.siem.kpiIpDetails.source.outTitle', {
   defaultMessage: 'Out',
 });
 
-export const SOURCE_IP = i18n.translate('xpack.siem.kpiIpDetails.source.sourceIpTitle', {
+export const SOURCE = i18n.translate('xpack.siem.kpiIpDetails.source.sourceTitle', {
   defaultMessage: 'Source',
 });
 
-export const DESTINATION_IP = i18n.translate('xpack.siem.kpiIpDetails.source.destinationIpTitle', {
-  defaultMessage: 'Dist.',
+export const DESTINATION = i18n.translate('xpack.siem.kpiIpDetails.source.destinationTitle', {
+  defaultMessage: 'Dest.',
 });
 
 export const TOP_SOURCE_IP = i18n.translate('xpack.siem.kpiIpDetails.source.topSourceIpTitle', {
@@ -31,20 +31,13 @@ export const TOP_SOURCE_IP = i18n.translate('xpack.siem.kpiIpDetails.source.topS
 });
 
 export const TOP_TRANSPORT_IP = i18n.translate('xpack.siem.kpiIpDetails.source.topSourceIpTitle', {
-  defaultMessage: 'Top transport IP',
+  defaultMessage: 'Top Transport IP',
 });
-
-export const TOP_DESTINATION_IP = i18n.translate(
-  'xpack.siem.kpiIpDetails.source.topDestinationIpTitle',
-  {
-    defaultMessage: 'Top Dist. IP',
-  }
-);
 
 export const TOP_DESTINATION_PORT = i18n.translate(
   'xpack.siem.kpiIpDetails.source.topDestinationPortTitle',
   {
-    defaultMessage: 'Top Dist. Port',
+    defaultMessage: 'Top Dest. Port',
   }
 );
 

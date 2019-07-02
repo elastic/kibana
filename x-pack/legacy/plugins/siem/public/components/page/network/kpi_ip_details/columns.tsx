@@ -10,7 +10,6 @@ import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 import { getEmptyTagValue } from '../../../empty_value';
 import { StatItems, KpiValue } from '../../../stat_items';
 
-// const euiColorVis1 = '#3185FC';
 const euiColorVis2 = '#DB1374';
 const euiColorVis3 = '#490092';
 
@@ -58,8 +57,8 @@ export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
       {
         key: 'topSourceIp',
         barchartKey: 'topSourceIpTransportBytes',
-        name: i18n.SOURCE_IP,
-        description: i18n.SOURCE_IP,
+        name: i18n.SOURCE,
+        description: i18n.SOURCE,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
         render: value => {
@@ -73,8 +72,8 @@ export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
       {
         key: 'topDestinationIp',
         barchartKey: 'topDestinationIpTransportBytes',
-        name: i18n.DESTINATION_IP,
-        description: i18n.DESTINATION_IP,
+        name: i18n.DESTINATION,
+        description: i18n.DESTINATION,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
         render: value => {

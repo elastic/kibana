@@ -35,7 +35,7 @@ import {
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
 import { RootState } from '../reducers';
-import { getPathOfTree } from '../reducers/file';
+import { getPathOfTree } from '../reducers/file_tree';
 import {
   fileSelector,
   getTree,
@@ -182,7 +182,7 @@ function* handleMainRouteChange(action: Action<Match>) {
       }
     }
     yield call(handleFile, repoUri, file, revision);
-    const commits = yield select((state: RootState) => state.file.treeCommits[file]);
+    const commits = yield select((state: RootState) => state.revision.treeCommits[file]);
     if (commits === undefined) {
       yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
     }

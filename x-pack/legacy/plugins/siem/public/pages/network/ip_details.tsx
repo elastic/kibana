@@ -12,6 +12,7 @@ import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import { Breadcrumb } from 'ui/chrome';
 
+import { ActionCreator } from 'typescript-fsa';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -32,12 +33,17 @@ import { UsersQuery } from '../../containers/users';
 import { FlowTarget, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
+import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { KpiIpDetailsQuery } from '../../containers/kpi_ip_details';
 import { KpiIpDetailsComponent } from '../../components/page/network/kpi_ip_details';
+import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
+import { networkToInfluencers } from '../../components/ml/influencers/network_to_influencers';
+import { InputsModelId } from '../../store/inputs/constants';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
@@ -47,9 +53,14 @@ const KpiIpDetailsManage = manageQuery(KpiIpDetailsComponent);
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
   flowTarget: FlowTarget;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
 }
 
-type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
+export type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
 export const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
@@ -58,6 +69,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
     },
     filterQuery,
     flowTarget,
+    setAbsoluteRangeDatePicker,
   }) => (
     <WithSource sourceId="default" data-test-subj="ip-details-page">
       {({ indicesExist, indexPattern }) =>
@@ -90,13 +102,33 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         ip={decodeIpv6(ip)}
                       >
                         {({ ipOverviewData, loading }) => (
-                          <IpOverview
-                            ip={decodeIpv6(ip)}
-                            data={ipOverviewData}
-                            loading={loading}
-                            type={networkModel.NetworkType.details}
-                            flowTarget={flowTarget}
-                          />
+                          <AnomalyTableProvider
+                            influencers={networkToInfluencers(ip)}
+                            startDate={from}
+                            endDate={to}
+                          >
+                            {({ isLoadingAnomaliesData, anomaliesData }) => (
+                              <IpOverview
+                                ip={decodeIpv6(ip)}
+                                data={ipOverviewData}
+                                anomaliesData={anomaliesData}
+                                loading={loading}
+                                isLoadingAnomaliesData={isLoadingAnomaliesData}
+                                type={networkModel.NetworkType.details}
+                                flowTarget={flowTarget}
+                                startDate={from}
+                                endDate={to}
+                                narrowDateRange={(score, interval) => {
+                                  const fromTo = scoreIntervalToDateTime(score, interval);
+                                  setAbsoluteRangeDatePicker({
+                                    id: 'global',
+                                    from: fromTo.from,
+                                    to: fromTo.to,
+                                  });
+                                }}
+                              />
+                            )}
+                          </AnomalyTableProvider>
                         )}
                       </IpOverviewQuery>
 
@@ -234,7 +266,12 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
+export const IPDetails = connect(
+  makeMapStateToProps,
+  {
+    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  }
+)(IPDetailsComponent);
 
 export const getBreadcrumbs = (ip: string): Breadcrumb[] => [
   {

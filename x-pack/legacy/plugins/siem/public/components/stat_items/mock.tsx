@@ -25,7 +25,7 @@ export const mockMappings: Readonly<Array<StatItems<KpiValue>>> = [
       {
         key: 'uniqueDestinationPrivateIps',
         value: null,
-        name: 'Dist.',
+        name: 'Dest.',
         description: 'Destination',
         color: '#490092',
         icon: 'visMapCoordinate',
@@ -84,7 +84,7 @@ export const mockEnableChartsData = {
     {
       key: 'uniqueDestinationPrivateIps',
       value: 18,
-      name: 'Dist.',
+      name: 'Dest.',
       description: 'Destination',
       color: '#490092',
       icon: 'visMapCoordinate',
@@ -116,7 +116,7 @@ export const mockEnableChartsData = {
         { x: new Date('2019-02-09T16:00:00.000Z').valueOf(), y: 8 },
         { x: new Date('2019-02-09T19:00:00.000Z').valueOf(), y: 0 },
       ],
-      name: 'Dist.',
+      name: 'Dest.',
       description: 'Destination',
       color: '#490092',
       icon: 'visMapCoordinate',
@@ -131,7 +131,7 @@ export const mockEnableChartsData = {
     {
       key: 'uniqueDestinationPrivateIps',
       color: '#490092',
-      value: [{ x: 'Dist.', y: 18, g: 'uniqueDestinationPrivateIps' }],
+      value: [{ x: 'Dest.', y: 18, g: 'uniqueDestinationPrivateIps' }],
     },
   ],
 };
@@ -151,7 +151,7 @@ const mockMappingItems: Readonly<StatItems<KpiValue>> = {
     {
       key: 'uniqueDestinationPrivateIps',
       value: null,
-      name: 'Dist.',
+      name: 'Dest.',
       description: 'Destination',
       color: '#490092',
       icon: 'visMapCoordinate',
