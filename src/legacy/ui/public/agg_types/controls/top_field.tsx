@@ -25,7 +25,7 @@ import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
 
 function TopFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
-  const compatibleAggs = getCompatibleAggs(props.agg, props.visName);
+  const compatibleAggs = getCompatibleAggs(props.agg);
   let customError;
 
   if (props.value && !compatibleAggs.length) {

@@ -1,7 +1,7 @@
 {
   "indices.get_mapping": {
     "url_params": {
-      "include_type_name": "",
+      "include_type_name": "__flag__",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [
@@ -10,6 +10,7 @@
         "none",
         "all"
       ],
+      "master_timeout": "",
       "local": "__flag__"
     },
     "methods": [
@@ -17,9 +18,7 @@
     ],
     "patterns": [
       "_mapping",
-      "{indices}/_mapping",
-      "_mapping/{type}",
-      "{indices}/_mapping/{type}"
+      "{indices}/_mapping"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-mapping.html"
   }
