@@ -5,7 +5,7 @@
  */
 
 export function getNextRunAt(currentRunAt: Date, interval: number) {
-  let nextRunAt = currentRunAt.getTime() + interval;
+  let nextRunAt = currentRunAt.getTime() + interval * 1000;
   if (nextRunAt < Date.now()) {
     // To prevent returning dates in the past, we'll return now instead
     nextRunAt = Date.now();
