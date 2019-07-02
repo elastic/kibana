@@ -216,10 +216,42 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
       Object {
         "content": <PreviewPane
           lastUpdate={12345678}
-          transformId="fq_date_histogram_1m_1441"
+          transformConfig={
+            Object {
+              "dest": Object {
+                "index": "fq_data_histogram_1m_1441",
+              },
+              "id": "fq_date_histogram_1m_1441",
+              "pivot": Object {
+                "aggregations": Object {
+                  "avg(response)": Object {
+                    "avg": Object {
+                      "field": "responsetime",
+                    },
+                  },
+                },
+                "group_by": Object {
+                  "date_histogram(@timestamp)": Object {
+                    "date_histogram": Object {
+                      "field": "@timestamp",
+                      "interval": "1m",
+                    },
+                  },
+                },
+              },
+              "source": Object {
+                "index": Array [
+                  "farequote-2019",
+                ],
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+            }
+          }
         />,
         "id": "job-preview",
-        "name": "Preview table",
+        "name": "Preview",
       },
     ]
   }

@@ -11,24 +11,7 @@ import { getFlattenedFields } from '../../../../components/source_index_preview/
 import { ml } from '../../../../../services/ml_api_service';
 
 import { DataFramePreviewRequest } from '../../../../common';
-
-interface Transform {
-  dest: { index: string };
-  id: string;
-  pivot: {
-    group_by: { [key: string]: any };
-    aggregations: { [key: string]: any };
-  };
-  source: {
-    index: string[];
-    query: { [key: string]: any };
-  };
-}
-
-interface TransformData {
-  count: number;
-  transforms: Transform[];
-}
+import { DataFrameTransformWithId } from '../../../../common/job';
 
 interface CompressedTableProps extends EuiInMemoryTableProps {
   compressed: boolean;
@@ -44,7 +27,7 @@ interface Column {
 
 interface Props {
   lastUpdate: number;
-  transformId: string;
+  transformConfig: DataFrameTransformWithId;
 }
 
 export function sortColumns(groupByArr: string[]) {
@@ -64,11 +47,10 @@ export function sortColumns(groupByArr: string[]) {
 }
 
 function getDataFromTransform(
-  transformData: TransformData
+  transformConfig: DataFrameTransformWithId
 ): { previewRequest: DataFramePreviewRequest; groupByArr: string[] | [] } {
-  const { transforms } = transformData;
-  const index = transforms[0].source.index[0];
-  const pivot = transforms[0].pivot;
+  const index = transformConfig.source.index[0];
+  const pivot = transformConfig.pivot;
   const groupByArr = [];
 
   const previewRequest: DataFramePreviewRequest = {
@@ -89,9 +71,8 @@ function getDataFromTransform(
   return { groupByArr, previewRequest };
 }
 
-export const PreviewPane: React.SFC<Props> = ({ transformId, lastUpdate }) => {
+export const PreviewPane: FC<Props> = ({ transformConfig, lastUpdate }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
-  const [groupByArray, setGroupByArray] = useState<string[] | []>([]);
   const [columns, setColumns] = useState<Column[] | []>([]);
   const [sort, setSort] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -99,11 +80,32 @@ export const PreviewPane: React.SFC<Props> = ({ transformId, lastUpdate }) => {
 
   async function getPreview() {
     try {
-      const transformData: any = await ml.dataFrame.getDataFrameTransforms(transformId);
-      const { previewRequest, groupByArr } = getDataFromTransform(transformData);
+      const { previewRequest, groupByArr } = getDataFromTransform(transformConfig);
       const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
-      setGroupByArray(groupByArr);
-      setDataFramePreviewData(resp.preview);
+
+      if (resp.preview.length > 0) {
+        const columnKeys = getFlattenedFields(resp.preview[0]);
+        columnKeys.sort(sortColumns(groupByArr));
+        const tableColumns = columnKeys.map(k => {
+          return {
+            field: k,
+            name: k,
+            sortable: false,
+            truncateText: true,
+          };
+        });
+        const sorting = {
+          sort: {
+            field: tableColumns[0].field,
+            direction: SortDirection.ASC,
+          },
+        };
+
+        setDataFramePreviewData(resp.preview);
+        setColumns(tableColumns);
+        setSort(sorting);
+        setIsLoading(false);
+      }
     } catch (error) {
       setIsLoading(false);
       setErrorMessage(
@@ -119,32 +121,6 @@ export const PreviewPane: React.SFC<Props> = ({ transformId, lastUpdate }) => {
       getPreview();
     },
     [lastUpdate]
-  );
-  useEffect(
-    () => {
-      if (dataFramePreviewData.length > 0) {
-        const columnKeys = getFlattenedFields(dataFramePreviewData[0]);
-        columnKeys.sort(sortColumns(groupByArray));
-        const tableColumns = columnKeys.map(k => {
-          return {
-            field: k,
-            name: k,
-            sortable: true,
-            truncateText: true,
-          };
-        });
-        const sorting = {
-          sort: {
-            field: tableColumns[0].field,
-            direction: SortDirection.ASC,
-          },
-        };
-        setIsLoading(false);
-        setColumns(tableColumns);
-        setSort(sorting);
-      }
-    },
-    [dataFramePreviewData]
   );
 
   const CompressedTable = (EuiInMemoryTable as any) as FC<CompressedTableProps>;
