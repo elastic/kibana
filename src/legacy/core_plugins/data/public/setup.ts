@@ -35,14 +35,13 @@
  */
 import { npSetup } from 'ui/new_platform';
 
-import { PluginInitializerContext, CoreSetup } from '../../../../../src/core/public';
-import { DataPublicPlugin } from './plugin';
+import { CoreSetup } from 'kibana/public';
+import { DataPublicPlugin, DataSetupPlugins } from './plugin';
 
 // core shims
-const initializerContext: PluginInitializerContext = {};
 const coreSetup: CoreSetup = npSetup.core;
 
 // plugin dependency shims
-const pluginsSetup = {};
+const pluginsSetup: DataSetupPlugins = {};
 
-export const data = new DataPublicPlugin(initializerContext).setup(coreSetup, pluginsSetup);
+export const data = new DataPublicPlugin().setup(coreSetup, pluginsSetup);

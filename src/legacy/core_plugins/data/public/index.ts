@@ -25,21 +25,30 @@
  * to the plugin and not considered stable.
  *
  * All stateful contracts will be injected by the platform at runtime, and are defined
- * in the PluginSetup/PluginStart interfaces. The remaining items exported here are
- * either types, or static code.
+ * in the setup/start interfaces. The remaining items exported here are either types,
+ * or static code.
  */
-import { PluginInitializer, PluginInitializerContext } from '../../../../../src/core/public';
-import { DataPublicPlugin, DataPluginSetup } from './plugin';
+import { PluginInitializer } from 'kibana/public';
+import {
+  DataPublicPlugin,
+  DataSetup,
+  DataSetupPlugins,
+  DataStart,
+  DataStartPlugins,
+} from './plugin';
 
 // This is what Core looks for when loading our plugin
-export const plugin: PluginInitializer<DataPluginSetup, {}> = (
-  initializerContext: PluginInitializerContext
-) => {
-  return new DataPublicPlugin(initializerContext);
+export const plugin: PluginInitializer<
+  DataSetup,
+  DataStart,
+  DataSetupPlugins,
+  DataStartPlugins
+> = initializerContext => {
+  return new DataPublicPlugin();
 };
 
 /** @public interfaces for stateful services */
-export { DataPluginSetup };
+export { DataSetup };
 
 /** @public types */
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';

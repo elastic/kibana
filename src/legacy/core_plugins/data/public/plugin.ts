@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '../../../../../src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 // Services
 import { ExpressionsService, ExpressionsSetup } from './expressions';
@@ -31,16 +26,13 @@ import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 import { QueryService, QuerySetup } from './query';
 import { SearchService, SearchSetup } from './search';
 
-/** @public */
-export interface DataPluginSetup {
-  expressions: ExpressionsSetup;
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  query: QuerySetup;
-  search: SearchSetup;
-}
-
-export class DataPublicPlugin implements Plugin<DataPluginSetup, {}> {
+/**
+ * Data Plugin - public
+ *
+ * Shared services for applications to access, query, and manipulate data in Kibana.
+ */
+export class DataPublicPlugin
+  implements Plugin<DataSetup, DataStart, DataSetupPlugins, DataStartPlugins> {
   // Exposed services, sorted alphabetically
   private readonly expressions = new ExpressionsService();
   private readonly filter = new FilterService();
@@ -48,9 +40,7 @@ export class DataPublicPlugin implements Plugin<DataPluginSetup, {}> {
   private readonly query = new QueryService();
   private readonly search = new SearchService();
 
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup, plugins: {}): DataPluginSetup {
+  public setup(core: CoreSetup, plugins: DataSetupPlugins): DataSetup {
     const indexPatternsSetup = this.indexPatterns.setup();
 
     return {
@@ -62,7 +52,7 @@ export class DataPublicPlugin implements Plugin<DataPluginSetup, {}> {
     };
   }
 
-  public start(core: CoreStart, plugins: {}) {
+  public start(core: CoreStart, plugins: DataStartPlugins): DataStart {
     return {};
   }
 
@@ -74,3 +64,40 @@ export class DataPublicPlugin implements Plugin<DataPluginSetup, {}> {
     this.query.stop();
   }
 }
+
+/**
+ * Interface for this plugin's returned `setup` contract.
+ *
+ * @public
+ */
+export interface DataSetup {
+  expressions: ExpressionsSetup;
+  indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
+  query: QuerySetup;
+  search: SearchSetup;
+}
+
+/**
+ * Interface for this plugin's returned `start` contract.
+ *
+ * @public
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataStart {}
+
+/**
+ * Interface for any dependencies on other plugins' `setup` contracts.
+ *
+ * @internal
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataSetupPlugins {}
+
+/**
+ * Interface for any dependencies on other plugins' `start` contracts.
+ *
+ * @internal
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataStartPlugins {}
