@@ -65,7 +65,7 @@ export class IndexPatterns {
 
   make = (id) => {
     return (new IndexPattern(id,
-      this.config,
+      cfg => this.config.get(cfg),
       this.savedObjectsClient,
       this.cache,
       this.fieldsFetcher,
