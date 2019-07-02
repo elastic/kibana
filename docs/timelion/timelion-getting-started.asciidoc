@@ -1,5 +1,5 @@
 [[timelion-getting-started]]
-== Getting Started
+=== Getting started
 
 Ready to experience all that is Timelion? This getting started tutorial shows
 you how to:
