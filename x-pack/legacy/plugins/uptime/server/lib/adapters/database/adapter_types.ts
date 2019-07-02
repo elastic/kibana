@@ -26,8 +26,18 @@ export interface UMESHistogramBucket {
   x0: number;
 }
 
+export interface CountResult {
+  count: number;
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+}
+
 export interface DatabaseAdapter {
-  count(request: any, params: any): Promise<any>;
+  count(request: any, params: any): Promise<CountResult>;
   search(request: any, params: any): Promise<any>;
   head(request: any, params: any): Promise<any>;
 }

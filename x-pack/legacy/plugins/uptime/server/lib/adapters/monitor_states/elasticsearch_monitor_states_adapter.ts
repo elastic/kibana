@@ -12,6 +12,7 @@ import {
   SummaryHistogram,
   Check,
   SnapshotCount,
+  StatesIndexStatus,
 } from '../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
@@ -496,8 +497,18 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     return count;
   }
 
-  public async statesIndexExists(request: any): Promise<boolean> {
+  public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
     // TODO: adapt this to the states index in future release
-    return await this.database.head(request, { index: INDEX_NAMES.HEARTBEAT });
+    const {
+      _shards: { total },
+      count,
+    } = await this.database.count(request, {});
+
+    return {
+      indexExists: total > 0,
+      docCount: {
+        count,
+      },
+    };
   }
 }
