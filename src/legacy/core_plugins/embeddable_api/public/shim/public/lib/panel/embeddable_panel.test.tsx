@@ -18,16 +18,6 @@
  */
 
 import React from 'react';
-
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  HelloWorldContainer,
-  EditModeAction,
-  ContactCardEmbeddableOutput,
-} from '../test_samples';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
@@ -39,6 +29,10 @@ import { Action } from '../actions';
 import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
+import { EditModeAction } from '../test_samples/actions/edit_mode_action';
+import { ContactCardEmbeddableFactory, CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
+import { ContactCardEmbeddable, ContactCardEmbeddableInput, ContactCardEmbeddableOutput } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 
 const __actionRegistry = new Map<string, Action>();
 const __triggerRegistry = new Map<string, Trigger>();

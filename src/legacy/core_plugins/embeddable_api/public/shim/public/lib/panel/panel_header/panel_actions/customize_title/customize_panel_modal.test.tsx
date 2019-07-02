@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import '../../../../ui_capabilities.test.mocks';
-
-import React from 'react';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  HelloWorldContainer,
-  ContactCardEmbeddableOutput,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-} from '../../../../test_samples/index';
-
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
+import * as React from 'react';
 import { CustomizePanelModal } from './customize_panel_modal';
 import { Container, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { EmbeddableFactoryRegistry } from '../../../../types';
+import { ContactCardEmbeddable, ContactCardEmbeddableInput, ContactCardEmbeddableOutput } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
+import { EmbeddableFactory } from '../../../../embeddables';
+import { GetEmbeddableFactory } from '../../../../types';
+import { CONTACT_CARD_EMBEDDABLE, ContactCardEmbeddableFactory } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 
 jest.mock('ui/new_platform');
 
@@ -42,9 +35,11 @@ let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  container = new HelloWorldContainer({ id: '123', panels: {} }, embeddableFactories);
+  const __embeddableFactories = new Map<string, EmbeddableFactory>();
+  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  
+  container = new HelloWorldContainer({ id: '123', panels: {} }, getFactory);
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,

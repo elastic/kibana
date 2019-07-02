@@ -17,25 +17,19 @@
  * under the License.
  */
 
-import '../../../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
-
-import {
-  FilterableContainer,
-  FilterableEmbeddable,
-  FilterableEmbeddableFactory,
-  ContactCardEmbeddable,
-  FilterableEmbeddableInput,
-  FILTERABLE_EMBEDDABLE,
-} from '../../../test_samples';
-
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
 import { EmbeddableFactory } from '../../../embeddables';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FILTERABLE_EMBEDDABLE, FilterableEmbeddable, FilterableEmbeddableInput } from '../../../test_samples/embeddables/filterable_embeddable';
+import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
+import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
+import { GetEmbeddableFactory } from '../../../types';
+import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const __embeddableFactories = new Map<string, EmbeddableFactory>();
+__embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
@@ -48,7 +42,7 @@ beforeEach(async () => {
   };
   container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },
-    embeddableFactories
+    getFactory
   );
 
   const filterableEmbeddable = await container.addNewEmbeddable<

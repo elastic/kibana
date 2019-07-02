@@ -17,30 +17,28 @@
  * under the License.
  */
 
-import '../../../../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
-
-import {
-  FilterableContainer,
-  FilterableEmbeddable,
-  FilterableEmbeddableFactory,
-  ContactCardEmbeddable,
-  FilterableEmbeddableInput,
-  FILTERABLE_EMBEDDABLE,
-} from '../../../../test_samples';
-
 import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
 import { AddPanelAction } from './add_panel_action';
 import { EmbeddableFactory } from '../../../../embeddables';
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FILTERABLE_EMBEDDABLE, FilterableEmbeddable, FilterableEmbeddableInput } from '../../../../test_samples/embeddables/filterable_embeddable';
+import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
+import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
+import { GetEmbeddableFactory } from '../../../../types';
+import { coreMock } from '../../../../../../../../../../../core/public/mocks';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const __embeddableFactories = new Map<string, EmbeddableFactory>();
+__embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
+let action: AddPanelAction;
 
 beforeEach(async () => {
+  const start = coreMock.createStart();
+  action = new AddPanelAction(() => undefined, () => [], start.overlays, start.notifications);
+
   const derivedFilter: Filter = {
     $state: { store: FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
@@ -48,7 +46,7 @@ beforeEach(async () => {
   };
   container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },
-    embeddableFactories
+    getFactory
   );
 
   const filterableEmbeddable = await container.addNewEmbeddable<
@@ -67,13 +65,13 @@ beforeEach(async () => {
 });
 
 test('Is not compatible when container is in view mode', async () => {
-  const action = new AddPanelAction();
+  const start = coreMock.createStart();
+  const action = new AddPanelAction(() => undefined, () => [], start.overlays, start.notifications);
   container.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable: container })).toBe(false);
 });
 
 test('Is not compatible when embeddable is not a container', async () => {
-  const action = new AddPanelAction();
   expect(
     await action.isCompatible({
       embeddable,
@@ -82,13 +80,11 @@ test('Is not compatible when embeddable is not a container', async () => {
 });
 
 test('Is compatible when embeddable is a parent and in edit mode', async () => {
-  const action = new AddPanelAction();
   container.updateInput({ viewMode: ViewMode.EDIT });
   expect(await action.isCompatible({ embeddable: container })).toBe(true);
 });
 
 test('Execute throws an error when called with an embeddable that is not a container', async () => {
-  const action = new AddPanelAction();
   async function check() {
     await action.execute({
       // @ts-ignore
@@ -102,7 +98,6 @@ test('Execute throws an error when called with an embeddable that is not a conta
   await expect(check()).rejects.toThrow(Error);
 });
 test('Execute does not throw an error when called with a compatible container', async () => {
-  const action = new AddPanelAction();
   container.updateInput({ viewMode: ViewMode.EDIT });
   await action.execute({
     embeddable: container,
@@ -110,11 +105,9 @@ test('Execute does not throw an error when called with a compatible container', 
 });
 
 test('Returns title', async () => {
-  const action = new AddPanelAction();
   expect(action.getDisplayName()).toBeDefined();
 });
 
 test('Returns an icon', async () => {
-  const action = new AddPanelAction();
   expect(action.getIcon()).toBeDefined();
 });

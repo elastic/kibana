@@ -21,16 +21,22 @@ import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '../../../../types';
+import { ViewMode, GetEmbeddableFactory, GetAllEmbeddableFactories } from '../../../../types';
 import { Action, ActionContext } from '../../../../actions';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
+import { OverlayStart, NotificationsStart } from '../../../../../../../../../../../core/public';
 
 export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
 
 export class AddPanelAction extends Action {
   public readonly type = ADD_PANEL_ACTION_ID;
 
-  constructor() {
+  constructor(
+    private readonly getFactory: GetEmbeddableFactory,
+    private readonly getAllFactories: GetAllEmbeddableFactories,
+    private readonly overlays: OverlayStart,
+    private readonly notifications: NotificationsStart,
+  ) {
     super(ADD_PANEL_ACTION_ID);
   }
 
@@ -53,6 +59,12 @@ export class AddPanelAction extends Action {
       throw new Error('Context is incompatible');
     }
 
-    openAddPanelFlyout(embeddable);
+    openAddPanelFlyout({
+      embeddable,
+      getFactory: this.getFactory,
+      getAllFactories: this.getAllFactories,
+      overlays: this.overlays,
+      notifications: this.notifications,
+    });
   }
 }

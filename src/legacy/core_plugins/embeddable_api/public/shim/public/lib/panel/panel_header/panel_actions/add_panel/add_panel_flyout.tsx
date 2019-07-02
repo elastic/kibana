@@ -41,14 +41,15 @@ import {
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
-
-import { SavedObjectAttributes } from 'src/core/server/saved_objects';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
+import { GetEmbeddableFactory, GetAllEmbeddableFactories } from '../../../../types';
 
 interface Props {
   onClose: () => void;
   container: IContainer;
+  getFactory: GetEmbeddableFactory;
+  getAllFactories: GetAllEmbeddableFactories;
   notifications: CoreSetup['notifications'];
 }
 
@@ -82,7 +83,7 @@ export class AddPanelFlyout extends React.Component<Props> {
 
   public createNewEmbeddable = async (type: string) => {
     this.props.onClose();
-    const factory = this.props.container.embeddableFactories.get(type);
+    const factory = this.props.getFactory(type);
 
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
@@ -114,7 +115,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           </EuiText>
         ),
       },
-      ...[...this.props.container.embeddableFactories.values()]
+      ...[...this.props.getAllFactories()]
         .filter(
           factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
         )

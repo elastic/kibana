@@ -17,32 +17,25 @@
  * under the License.
  */
 
-import '../../../../ui_capabilities.test.mocks';
-jest.mock('ui/new_platform');
-
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  HelloWorldContainer,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableOutput,
-  ContactCardEmbeddableInput,
-} from '../../../../test_samples/index';
-
 import { Container, isErrorEmbeddable } from '../../../..';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { CustomizePanelTitleAction } from './customize_panel_action';
-import { EmbeddableFactoryRegistry } from '../../../../types';
+import { ContactCardEmbeddable, ContactCardEmbeddableInput, ContactCardEmbeddableOutput } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
+import { CONTACT_CARD_EMBEDDABLE, ContactCardEmbeddableFactory } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
+import { GetEmbeddableFactory } from '../../../../types';
+import { EmbeddableFactory } from '../../../../embeddables';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  return new HelloWorldContainer(input, embeddableFactories);
+  const __embeddableFactories = new Map<string, EmbeddableFactory>();
+  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  return new HelloWorldContainer(input, getFactory);
 }
 
 beforeEach(async () => {

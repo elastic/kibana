@@ -17,12 +17,25 @@
  * under the License.
  */
 import React from 'react';
-import { npStart } from 'ui/new_platform';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
+import { GetEmbeddableFactory, GetAllEmbeddableFactories } from '../../../../types';
+import { OverlayStart, NotificationsStart } from '../../../../../../../../../../../core/public';
 
-export async function openAddPanelFlyout(embeddable: IContainer) {
-  const flyoutSession = npStart.core.overlays.openFlyout(
+export async function openAddPanelFlyout({
+  embeddable,
+  getFactory,
+  getAllFactories,
+  overlays,
+  notifications,
+}: {
+  embeddable: IContainer,
+  getFactory: GetEmbeddableFactory,
+  getAllFactories: GetAllEmbeddableFactories,
+  overlays: OverlayStart,
+  notifications: NotificationsStart,
+}) {
+  const flyoutSession = overlays.openFlyout(
     <AddPanelFlyout
       container={embeddable}
       onClose={() => {
@@ -30,6 +43,9 @@ export async function openAddPanelFlyout(embeddable: IContainer) {
           flyoutSession.close();
         }
       }}
+      getFactory={getFactory}
+      getAllFactories={getAllFactories}
+      notifications={notifications}
     />,
     {
       'data-test-subj': 'addPanelFlyout',
