@@ -211,7 +211,7 @@ export class JoinExpression extends Component {
           <EuiFormHelpText className="mapJoinExpressionHelpText">
             <FormattedMessage
               id="xpack.maps.layerPanel.joinExpression.helpText"
-              defaultMessage={`Configure the shared key.`}
+              defaultMessage="Configure the shared key."
             />
           </EuiFormHelpText>
           <EuiFormRow

@@ -76,7 +76,7 @@ export class WhereExpression extends Component {
           <EuiFormHelpText className="mapJoinExpressionHelpText">
             <FormattedMessage
               id="xpack.maps.layerPanel.whereExpression.helpText"
-              defaultMessage={'Use a query to narrow right source.'}
+              defaultMessage="Use a query to narrow right source."
             />
           </EuiFormHelpText>
           <QueryBar
