@@ -572,7 +572,7 @@ Object {
 `);
     });
 
-    it('extract savedSearchId as empty string from doc', () => {
+    it('delete savedSearchId when empty string in doc', () => {
       const doc = {
         id: '1',
         attributes: {
@@ -590,17 +590,10 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": "{}",
     },
-    "savedSearchRefName": "search_0",
     "visState": "{}",
   },
   "id": "1",
-  "references": Array [
-    Object {
-      "id": "",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
+  "references": Array [],
 }
 `);
     });

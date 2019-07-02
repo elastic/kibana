@@ -405,13 +405,15 @@ export const migrations = {
 
       // Migrate saved search
       const savedSearchId = get(doc, 'attributes.savedSearchId');
-      if (typeof savedSearchId === 'string') {
+      if (savedSearchId) {
         doc.references.push({
           type: 'search',
           name: 'search_0',
           id: savedSearchId,
         });
         doc.attributes.savedSearchRefName = 'search_0';
+        delete doc.attributes.savedSearchId;
+      } else if (savedSearchId === '') {
         delete doc.attributes.savedSearchId;
       }
 
