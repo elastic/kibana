@@ -409,12 +409,12 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
         defaultMessage: 'Batch concurrent searches in a single requests',
       }),
-      value: true,
+      value: false,
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:
           'Batch multiple concurrent searches in a single request. This may improve overall load' +
-          'times, but it also means that no search will complete until the last has completed.',
+          'times, but it also means that no single search request will complete until the last has completed.',
       }),
       category: ['search'],
     },
