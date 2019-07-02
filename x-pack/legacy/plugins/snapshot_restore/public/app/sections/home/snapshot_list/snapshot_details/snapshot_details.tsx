@@ -206,7 +206,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                                 'xpack.snapshotRestore.snapshotDetails.deleteManagedRepositorySnapshotButtonTitle',
                                 {
                                   defaultMessage:
-                                    'You cannot delete a managed repository snapshot.',
+                                    'You cannot delete a snapshot stored in a managed repository.',
                                 }
                               )
                             : null

@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Cloud has its own system for managing snapshots and we want to make
+// this clear when Snapshot and Restore is used in a Cloud deployment.
+// Retrieve the Cloud-managed repository name so that UI can switch
+// logical paths based on this information.
 export const getManagedRepositoryName = async (
   callWithInternalUser: any
 ): Promise<string | undefined> => {
@@ -20,7 +24,9 @@ export const getManagedRepositoryName = async (
     };
     return managedRepositoryName;
   } catch (e) {
-    // Silently swallow error and return undefined
+    // Silently swallow error and return undefined for managed repository name
+    // so that downstream calls are not blocked. In a healthy environment we do
+    // not expect to reach here.
     return;
   }
 };

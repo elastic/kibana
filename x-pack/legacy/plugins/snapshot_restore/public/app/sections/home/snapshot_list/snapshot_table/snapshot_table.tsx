@@ -200,7 +200,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                     : i18n.translate(
                         'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
                         {
-                          defaultMessage: 'You cannot delete a managed repository snapshot.',
+                          defaultMessage:
+                            'You cannot delete a snapshot stored in a managed repository.',
                         }
                       );
                   return (
@@ -262,7 +263,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         return i18n.translate(
           'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
           {
-            defaultMessage: 'You cannot delete a managed repository snapshot.',
+            defaultMessage: 'You cannot delete a snapshot stored in a managed repository.',
           }
         );
       }
