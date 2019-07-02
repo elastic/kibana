@@ -31,10 +31,15 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
+  type SnapshotCount {
+    up: Int!
+    down: Int!
+    mixed: Int!
+    total: Int!
+  }
+
   type Snapshot {
-    up: Int
-    down: Int
-    total: Int
+    counts: SnapshotCount!
   }
 
   type DataPoint {
