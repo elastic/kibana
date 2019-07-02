@@ -17,29 +17,14 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { tagcloud } from './tag_cloud_fn';
+import { coreMock } from '../../../../../core/public/mocks';
 
-jest.mock('ui/new_platform');
+export const coreSetupMock = coreMock.createSetup();
+export const coreStartMock = coreMock.createStart();
 
-describe('interpreter/functions#tagcloud', () => {
-  const fn = functionWrapper(tagcloud);
-  const context = {
-    type: 'kibana_datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
+jest.doMock('ui/new_platform', () => {
+  return {
+    npStart: { core: coreStartMock },
+    npSetup: { core: coreSetupMock },
   };
-  const visConfig = {
-    scale: 'linear',
-    orientation: 'single',
-    minFontSize: 18,
-    maxFontSize: 72,
-    showLabel: true,
-    metric: { accessor: 0, format: { id: 'number' } },
-  };
-
-  it('returns an object with the correct structure', () => {
-    const actual = fn(context, visConfig);
-    expect(actual).toMatchSnapshot();
-  });
 });
