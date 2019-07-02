@@ -33,7 +33,7 @@ export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
     }),
     sort: i18n.translate('xpack.canvas.functions.esdocs.args.sortHelpText', {
       defaultMessage:
-        'Sort directions as "{directions}". For example, "{example1}" or "{example2}"',
+        'The sort direction formatted as `"{directions}"`. For example, `"{example1}"` or `"{example2}"`.',
       values: {
         directions: ['field', 'direction'].join(', '),
         example1: ['@timestamp', 'desc'].join(', '),
@@ -41,10 +41,11 @@ export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
       },
     }),
     fields: i18n.translate('xpack.canvas.functions.esdocs.args.fieldsHelpText', {
-      defaultMessage: 'A comma-separated list of fields. Fewer fields will perform better',
+      defaultMessage: 'A comma-separated list of fields. For better performance, use fewer fields.',
     }),
     count: i18n.translate('xpack.canvas.functions.esdocs.args.countHelpText', {
-      defaultMessage: 'The number of docs to pull back. Smaller numbers perform better',
+      defaultMessage:
+        'The number of docs to retrieve. For better performance, use a smaller data set.',
     }),
   },
 };

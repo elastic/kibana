@@ -32,9 +32,10 @@ export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
     }),
     emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
       defaultMessage:
-        'Fill the difference between the _context_ and the `{max}` parameter with this image.' +
+        'Fills the difference between the `{context}` and `{max}` parameter for the element with this image' +
         'Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
       values: {
+        context: '_context',
         base64: 'base64',
         max: 'max',
         url: 'URL',

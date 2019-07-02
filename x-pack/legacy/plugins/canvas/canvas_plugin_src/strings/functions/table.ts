@@ -21,12 +21,10 @@ export const help: FunctionHelp<FunctionFactory<typeof table>> = {
       defaultMessage: 'Font style',
     }),
     paginate: i18n.translate('xpack.canvas.functions.table.args.paginateHelpText', {
-      defaultMessage:
-        'Show pagination controls. If set to false only the first page will be displayed',
+      defaultMessage: 'Show pagination controls. When `false`, only the first page is displayed.',
     }),
     perPage: i18n.translate('xpack.canvas.functions.table.args.perPageHelpText', {
-      defaultMessage:
-        'Show this many rows per page. You probably want to raise this is disabling pagination',
+      defaultMessage: 'The number of rows to display on each page.',
     }),
     showHeader: i18n.translate('xpack.canvas.functions.table.args.showHeaderHelpText', {
       defaultMessage: 'Show or hide the header row with titles for each column',

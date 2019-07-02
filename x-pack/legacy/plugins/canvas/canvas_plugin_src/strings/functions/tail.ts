@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof tail>> = {
   help: i18n.translate('xpack.canvas.functions.tailHelpText', {
-    defaultMessage: 'Get the last N rows from the end of a {datatable}. Also see `{head}`',
+    defaultMessage: 'Retrieves the last N rows from the end of a `{datatable}`. See also `{head}`',
     values: {
       datatable: 'datatable',
       head: 'head',

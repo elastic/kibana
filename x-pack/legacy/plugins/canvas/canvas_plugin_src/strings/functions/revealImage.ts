@@ -33,9 +33,9 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
       },
     }),
     origin: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {
-      defaultMessage: 'Where to start from. For example, {position}',
+      defaultMessage: 'The position to start the image fill. For example, {positions}',
       values: {
-        position: Object.values(Position)
+        positions: Object.values(Position)
           .map(position => `\`"${position}"\``)
           .join(', '),
       },

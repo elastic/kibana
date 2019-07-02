@@ -16,7 +16,6 @@ interface Arguments {
   query: string;
   sort: string;
   fields: string;
-  metaFields: string;
   count: number;
 }
 

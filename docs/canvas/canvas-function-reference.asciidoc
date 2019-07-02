@@ -466,7 +466,7 @@ Configures a dropdown filter control element.
 
 |`filterColumn` ***
 |`string`
-|The column or field to attach the filter to.
+|The column or field that you want to filter.
 
 |`valueColumn` ***
 |`string`
@@ -569,11 +569,11 @@ Default: `"_all"`
 
 |`fields`
 |`string`
-|A comma-separated list of fields. Fewer fields will perform better
+|A comma-separated list of fields. For better performance, use fewer fields.
 
 |`count`
 |`number`
-|The number of docs to retrieve. Smaller numbers perform better 
+|The number of docs to retrieve. For better performance, use a smaller data set.
 
 Default: `100`
 |===
@@ -619,7 +619,7 @@ Default: `UTC`
 [[exactly_fn]]
 === `exactly`
 
-Creates a filter that matches a given column for a perfectly exact value.
+Creates a filter that matches a given column to an exact value.
 
 *Accepts:* `filter`
 
@@ -631,7 +631,7 @@ Creates a filter that matches a given column for a perfectly exact value.
 
 Aliases: `field`, `c`
 |`string`
-|The column or field to attach the filter to
+|The column or field that you want to filter.
 
 |`value` ***
 
@@ -829,7 +829,7 @@ Fetches a single cell in a table.
 
 Aliases: `column`, `c`
 |`string`
-|The name of the column value to fetch, defaults to the first column
+|The name of the column to fetch the value from. If not provided, the value will be retrieved from the first column.
 
 |`row` 
 
@@ -1046,7 +1046,7 @@ Alias: `value`
 [[mapColumn_fn]]
 === `mapColumn`
 
-Adds a column calculated as the result of other columns, or not. See also <<alterColumn_fn>> and <<staticColumn_fn>>.
+Adds a column calculated as the result of other columns. Changes are made only when you provide arguments. See also <<alterColumn_fn>> and <<staticColumn_fn>>.
 
 *Accepts:* `datatable`
 
@@ -1550,7 +1550,7 @@ Default: `100`
 
 |`emptyImage`
 |`string`
-|Fill the difference between the _context_ and the `max` parameter with this image. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
+|Fills the difference between the _context_ and `max` parameter for the element with this image. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
 
 Default: `null`
 |===
@@ -1583,7 +1583,7 @@ Uses a regular expression to replace parts of a string.
 Alias: `pattern`, `regex`
 |`string`
 |The text or pattern of a JavaScript regular expression. For example, `"[aeiou]"`. 
-You can use capture groups here.
+You can use capturing groups here.
 
 |`flags` 
 
@@ -1597,7 +1597,7 @@ Default: `"g"`
 
 |`replacement`
 |`string`
-|The replacement for the matching parts of `string`. Capture groups can be accessed 
+|The replacement for the matching parts of `string`. Capturing groups can be accessed 
 by their index. For example, `$1` 
 
 Default: `""`
@@ -1628,7 +1628,7 @@ Configures an image reveal element.
 
 |`origin`
 |`string`
-|Where to start from. For example, `"top"`, `"left"`, `"bottom"`, or `"right"` 
+|The position to start the image fill. For example, `"top"`, `"left"`, `"bottom"`, or `"right"` 
 
 Default: `"bottom"`
 |===
@@ -1694,7 +1694,7 @@ Use <<seriesStyle_fn>> inside of a charting function, like <<plot_fn>> or <<pie_
 
 |`label`
 |`string`
-|The label of the line this style applies to, not the name you would like to give the line.
+|The name of the series to style.
 
 |`color`
 |`string`
@@ -1720,7 +1720,7 @@ Default: `false`
 
 |`stack`
 |`number`, `null`
-|Designates if the series should be stacked? This number is the stack "id". Series with the same stack id are stacked together.
+|Specifies if the series should be stacked. The number is the stack ID. Series with the same stack ID are stacked together.
 
 |`horizontalBars`
 |`boolean`
@@ -1798,12 +1798,11 @@ Sorts a `datatable on a column.`
 
 Alias: `column`
 |`string`
-|The column to sort on. If column is not specified, the `datatable` is sorted on 
-the first column.
+|The column to sort on. When unspecified, the `datatable` is sorted by the first column.
 
 |`reverse`
 |`boolean`
-|Reverse the sort order. If reverse is not specified, the `datatable` is sorted in ascending order. 
+|Reverses the sorting order. When unspecified, the `datatable` is sorted in ascending order. 
 
 Default: `false`
 |===
@@ -1831,7 +1830,7 @@ Alias: `column`, `name`
 
 |`value`
 |`string`, `number`, `boolean`, `null`
-|The value to insert in each column. Tip: Use a sub-expression to rollup other columns into a static value. 	 
+|The columns values. TIP: To roll up other columns into a static value, use a sub-expression.	 
 
 Default: `null`
 |===
@@ -1855,8 +1854,8 @@ sub-expressions that output a string, or something castable to `string`.
 |_Unnamed_ *** *†*
 
 Alias: `value`
-|`string`
-|One or more `strings` to join together, include spaces where needed
+|`string`, `number`, `boolean`
+|One or more values to join together into one `string`. Include spaces where needed.
 |===
 
 *Returns:* `string`
@@ -1885,7 +1884,7 @@ Alias: `case`
 
 Alias: `finally`
 |`any`
-|The default returned value, if no cases match
+|The value returned when no conditions are met
 |===
 
 *Returns:* Depends on your input and arguments
@@ -1913,20 +1912,19 @@ Default: `{<<font_fn>>}`
 
 |`paginate`
 |`boolean`
-|Show pagination controls. If set to `false` only the first 
-page is displayed.  
+|Show pagination controls. When `false`, only the first page is displayed.
 
 Default: `true`
 
 |`perPage`
 |`number`
-|Show this many rows per page 
+|The number of rows to display on each page.
 
 Default: `10`
 
 |`showHeader`
 |`boolean`
-|Show or hide the header row with titles for each column 
+|Show or hide the header row with titles for each column.
 
 Default: `true`
 |===
@@ -1938,7 +1936,7 @@ Default: `true`
 [[tail_fn]]
 === `tail`
 
-Gets the last N rows from the end of a `datatable`. See also <<head_fn>>
+Retrieves the last N rows from the end of a `datatable`. See also <<head_fn>>.
 
 *Accepts:* `datatable`
 
@@ -1972,7 +1970,7 @@ Creates a time filter for querying a source.
 
 Alias: `field`, `c`
 |`string`
-|The column or field to attach the filter to 
+|The column or field that you want to filter.
 
 Default: `"@timestamp"`
 
@@ -2012,13 +2010,13 @@ Configures a time filter control element.
 
 Alias: `field`, `c`
 |`string`
-|The column or field to attach the filter to 
+|The column or field that you want to filter.
 
 Default: `"@timestamp"`
 
 |`compact`
 |`boolean`
-|Show the time filter as a button that triggers a popover 
+|Shows the time filter as a button, which triggers a popover.
 
 Default: `true`
 
@@ -2107,7 +2105,7 @@ Alias: `type`
 [[urlparam_fn]]
 === `urlparam`
 
-Accesses URL parameters to use in expressions, (e.g. https://localhost:5601/app/canvas?myVar=20) and returns them as a string.
+Retrieves the URL parameters, then uses the parameters in expressions. The <<urlparam_fn>> function always returns a `string`. For example, you can retrieve the value of `"20"` from the parameter `myVar` in the URL `https://localhost:5601/app/canvas?myVar=20`. 
 
 *Accepts:* `null`
 

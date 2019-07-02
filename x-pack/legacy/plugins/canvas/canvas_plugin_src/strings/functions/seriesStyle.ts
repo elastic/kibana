@@ -22,9 +22,7 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
   }),
   args: {
     label: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelHelpText', {
-      defaultMessage:
-        'The label of the line this style applies to, not the name you would like to ' +
-        'give the line',
+      defaultMessage: 'The name of the series to style.',
     }),
     color: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorHelpText', {
       defaultMessage: 'The line',
@@ -43,7 +41,8 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
     }),
     stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
       defaultMessage:
-        'The stack ID, which specifies if the series is stacked. ' +
+        'Specifies if the series should be stacked. ' +
+        'The number is the stack ID. ' +
         'Series with the same stack ID are stacked together.',
     }),
     horizontalBars: i18n.translate(

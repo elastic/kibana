@@ -15,7 +15,9 @@ export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.getCell.args.columnHelpText', {
-      defaultMessage: 'The name of the column value to fetch',
+      defaultMessage:
+        'The name of the column to fetch the value from. ' +
+        'If not provided, the value is retrieved from the first column.',
     }),
     row: i18n.translate('xpack.canvas.functions.getCell.args.rowHelpText', {
       defaultMessage: 'The row number, starting at 0',

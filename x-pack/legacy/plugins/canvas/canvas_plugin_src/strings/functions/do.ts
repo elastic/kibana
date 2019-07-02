@@ -13,7 +13,7 @@ export const help: FunctionHelp<FunctionFactory<typeof doFn>> = {
   help: i18n.translate('xpack.canvas.functions.doHelpText', {
     defaultMessage:
       'Runs multiple sub-expressions and returns the original _context_ after executing the sub-expressions. ' +
-      'Use for running functions that produce an action or a side-effect without changing the original _context_.',
+      'Use for running functions that produce an action or a side effect without changing the original _context_.',
   }),
   args: {
     fn: i18n.translate('xpack.canvas.functions.do.args.fnHelpText', {

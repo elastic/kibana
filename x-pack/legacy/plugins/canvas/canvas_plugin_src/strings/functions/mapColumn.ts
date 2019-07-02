@@ -11,7 +11,9 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
   help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
-    defaultMessage: 'Add a column calculated as the result of other columns, or not',
+    defaultMessage:
+      'Adds a column calculated as the result of other columns. ' +
+      'Changes are made only when you provide arguments.',
   }),
   args: {
     name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {

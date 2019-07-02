@@ -11,11 +11,11 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof exactly>> = {
   help: i18n.translate('xpack.canvas.functions.exactlyHelpText', {
-    defaultMessage: 'Create a filter that matches a given column for a perfectly exact value',
+    defaultMessage: 'Creates a filter that matches a given column to an exact value',
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.exactly.args.columnHelpText', {
-      defaultMessage: 'The column or field to attach the filter to',
+      defaultMessage: 'The column or field that you want to filter.',
     }),
     value: i18n.translate('xpack.canvas.functions.exactly.args.valueHelpText', {
       defaultMessage: 'The value to match exactly, including white space and capitalization',

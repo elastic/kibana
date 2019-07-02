@@ -18,10 +18,10 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilterControl>> = {
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.timefilterControl.args.columnHelpText', {
-      defaultMessage: 'The column or field to attach the filter to',
+      defaultMessage: 'The column or field that you want to filter.',
     }),
     compact: i18n.translate('xpack.canvas.functions.timefilterControl.args.compactHelpText', {
-      defaultMessage: 'Show the time filter as a button that triggers a popover',
+      defaultMessage: 'Shows the time filter as a button, which triggers a popover.',
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
       defaultMessage: 'The group name for the filter',

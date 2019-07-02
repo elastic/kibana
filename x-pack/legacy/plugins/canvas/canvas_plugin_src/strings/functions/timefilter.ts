@@ -18,7 +18,7 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.timefilter.args.columnHelpText', {
-      defaultMessage: 'The column or field to attach the filter to',
+      defaultMessage: 'The column or field that you want to filter.',
     }),
     from: i18n.translate('xpack.canvas.functions.timefilter.args.fromHelpText', {
       defaultMessage: 'Beginning of the range, in {iso} or {es} {dm} format',

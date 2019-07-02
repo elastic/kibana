@@ -17,7 +17,7 @@ export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
     filterColumn: i18n.translate(
       'xpack.canvas.functions.dropdownControl.args.filterColumnHelpText',
       {
-        defaultMessage: 'The column or field to attach to the filter.',
+        defaultMessage: 'The column or field that you want to filter.',
       }
     ),
     valueColumn: i18n.translate('xpack.canvas.functions.dropdownControl.args.valueColumnHelpText', {
