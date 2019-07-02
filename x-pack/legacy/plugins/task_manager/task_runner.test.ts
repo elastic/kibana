@@ -69,7 +69,6 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
 
     expect(instance.id).toEqual(id);
-    expect(instance.attempts).toEqual(initialAttempts);
     expect(instance.runAt.getTime()).toBeGreaterThan(Date.now());
     expect(instance.params).toEqual({ a: 'b' });
     expect(instance.state).toEqual({ hey: 'there' });
