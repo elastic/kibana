@@ -30,7 +30,7 @@ export function SourceSelect({
       : null;
 
     const sourceTitle = BETA_SOURCES.includes(Source)
-      ? <div><span>{Source.title}</span>{generateBetaBadge()}</div>
+      ? <div><span>{Source.title}</span>{generateBetaBadge(Source.title)}</div>
       : Source.title;
 
     return (
@@ -66,14 +66,17 @@ export function SourceSelect({
   );
 }
 
-function generateBetaBadge() {
+function generateBetaBadge(appTitle) {
   return (
     <EuiBetaBadge
       label="Beta"
-      tooltipContent={i18n.translate('xpack.maps.sourceSelect.betaMessageBadge', {
-        defaultMessage:
-          'Maps GeoJSON Upload is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
-      })}
+      tooltipContent={
+        i18n.translate('xpack.maps.sourceSelect.betaMessageBadge', {
+          defaultMessage:
+            `"{appTitle}" is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.`,
+          values: { appTitle }
+        })
+      }
     />
   );
 }
