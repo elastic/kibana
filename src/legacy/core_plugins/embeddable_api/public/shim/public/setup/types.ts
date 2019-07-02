@@ -18,12 +18,12 @@
 */
 
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from '../types';
-import { Trigger, Action, EmbeddableFactory, TriggerContext, ActionContext } from '../lib';
+import { Trigger, Action, EmbeddableFactory, TriggerContext, ExecuteTriggerActions } from '../lib';
 
 export interface EmbeddableSetupApi {
   attachAction: (triggerId: string, actionId: string) => void;
   detachAction: (triggerId: string, actionId: string) => void;
-  executeTriggerActions: (triggerId: string, actionContext: ActionContext) => Promise<void>;
+  executeTriggerActions: ExecuteTriggerActions;
   getTrigger: (id: string) => Trigger;
   getTriggerActions: (id: string) => Action[];
   getTriggerCompatibleActions: (triggerId: string, context: TriggerContext) => Promise<Action[]>;

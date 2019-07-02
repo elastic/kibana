@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Action } from './actions';
+import { Action, ActionContext } from './actions';
 import { IEmbeddable } from './embeddables';
 import { IContainer } from './containers';
 import { EmbeddableFactory } from './embeddables/embeddable_factory';
@@ -65,5 +65,6 @@ export interface TriggerContext {
   container?: IContainer;
 }
 
+export type ExecuteTriggerActions = (triggerId: string, actionContext: ActionContext) => Promise<void>;
 export type GetActionsCompatibleWithTrigger = (triggerId: string, context: TriggerContext) => Promise<Action[]>;
 export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;

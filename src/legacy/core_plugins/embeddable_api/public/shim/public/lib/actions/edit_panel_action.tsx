@@ -20,15 +20,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
-import { Action, ActionContext } from '../../../actions';
-import { ViewMode, GetEmbeddableFactory } from '../../../types';
-import { EmbeddableFactoryNotFoundError } from '../../../embeddables';
+import { Action, ActionContext } from './action';
+import { GetEmbeddableFactory, ViewMode } from '../types';
+import { EmbeddableFactoryNotFoundError } from '../errors';
 
 export const EDIT_PANEL_ACTION_ID = 'editPanel';
 
 export class EditPanelAction extends Action {
   public readonly type = EDIT_PANEL_ACTION_ID;
-  constructor(private getEmbeddableFactory: GetEmbeddableFactory) {
+  constructor(private readonly getEmbeddableFactory: GetEmbeddableFactory) {
     super(EDIT_PANEL_ACTION_ID);
     this.order = 15;
   }
