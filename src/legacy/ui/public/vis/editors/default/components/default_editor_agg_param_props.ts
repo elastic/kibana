@@ -38,7 +38,6 @@ export interface AggParamCommonProps<T> {
   state: VisState;
   value: T;
   responseValueAggs: AggConfig[] | null;
-  visName: string;
   subAggParams: SubAggParamsProp;
   setValidity(isValid: boolean): void;
   setTouched(): void;
