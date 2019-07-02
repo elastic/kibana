@@ -107,8 +107,12 @@ function DefaultEditorAggParams({
   const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, valid: true });
 
   const isFormValid =
-    aggType.valid && Object.entries(paramsState).every(([, paramState]) => paramState.valid);
-  const isAllInvalidParamsTouched = isInvalidParamsTouched(agg.type, aggType, paramsState);
+    !errors.length &&
+    aggType.valid &&
+    Object.entries(paramsState).every(([, paramState]) => paramState.valid);
+
+  const isAllInvalidParamsTouched =
+    !!errors.length || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
