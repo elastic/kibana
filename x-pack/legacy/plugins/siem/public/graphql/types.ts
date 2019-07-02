@@ -1194,8 +1194,6 @@ export interface NetworkDnsItem {
 
   queryCount?: number | null;
 
-  timestamp?: Date | null;
-
   uniqueDomains?: number | null;
 }
 

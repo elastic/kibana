@@ -108,7 +108,6 @@ const formatTopNFlowEdges = (
   buckets.map((bucket: NetworkTopNFlowBuckets) => ({
     node: {
       _id: bucket.key,
-      timestamp: bucket.timestamp.value_as_string,
       [flowTarget]: {
         count: getOrNumber('ip_count.value', bucket),
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
@@ -130,7 +129,6 @@ const formatDnsEdges = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
   buckets.map((bucket: NetworkDnsBuckets) => ({
     node: {
       _id: bucket.key,
-      timestamp: bucket.timestamp.value_as_string,
       dnsBytesIn: getOrNumber('dns_bytes_in.value', bucket),
       dnsBytesOut: getOrNumber('dns_bytes_out.value', bucket),
       dnsName: bucket.key,

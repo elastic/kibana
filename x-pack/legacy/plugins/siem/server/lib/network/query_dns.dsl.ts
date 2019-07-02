@@ -46,9 +46,9 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
     : {
         must_not: [
           {
-            match_phrase: {
+            term: {
               'dns.question.type': {
-                query: 'PTR',
+                value: 'PTR',
               },
             },
           },
@@ -56,19 +56,14 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
       };
 
 const getDnsFilter = () => ({
-  must: [
-    {
-      match_phrase: {
-        'network.protocol': {
-          query: 'dns',
-        },
-      },
+  term: {
+    'network.protocol': {
+      value: 'dns',
     },
-  ],
+  },
 });
 
 export const buildDnsQuery = ({
-  fields,
   filterQuery,
   isPtrIncluded,
   networkDnsSortField,
@@ -88,6 +83,7 @@ export const buildDnsQuery = ({
           lte: to,
         },
       },
+      ...getDnsFilter(),
     },
   ];
 
@@ -122,18 +118,12 @@ export const buildDnsQuery = ({
                 field: 'destination.bytes',
               },
             },
-            timestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
           },
         },
       },
       query: {
         bool: {
           filter,
-          ...getDnsFilter(),
           ...createIncludePTRFilter(isPtrIncluded),
         },
       },
@@ -141,5 +131,6 @@ export const buildDnsQuery = ({
     size: 0,
     track_total_hits: false,
   };
+  console.log(JSON.stringify(dslQuery.body));
   return dslQuery;
 };

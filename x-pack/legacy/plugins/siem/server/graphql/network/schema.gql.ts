@@ -82,7 +82,6 @@ export const networkSchema = gql`
     dnsBytesOut: Float
     dnsName: String
     queryCount: Float
-    timestamp: Date
     uniqueDomains: Float
   }
 

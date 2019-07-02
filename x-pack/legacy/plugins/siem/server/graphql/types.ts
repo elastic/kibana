@@ -1223,8 +1223,6 @@ export interface NetworkDnsItem {
 
   queryCount?: number | null;
 
-  timestamp?: Date | null;
-
   uniqueDomains?: number | null;
 }
 
@@ -6337,8 +6335,6 @@ export namespace NetworkDnsItemResolvers {
 
     queryCount?: QueryCountResolver<number | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
-
     uniqueDomains?: UniqueDomainsResolver<number | null, TypeParent, Context>;
   }
 
@@ -6364,11 +6360,6 @@ export namespace NetworkDnsItemResolvers {
   > = Resolver<R, Parent, Context>;
   export type QueryCountResolver<
     R = number | null,
-    Parent = NetworkDnsItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = Date | null,
     Parent = NetworkDnsItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
