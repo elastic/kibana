@@ -52,7 +52,6 @@ export class IndexPattern {
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.formatField = this.formatHit.formatField;
 
-    //const getConfig = cfg => config.get(cfg);
     function serializeFieldFormatMap(flat, format, field) {
       if (format) {
         flat[field] = format;
