@@ -94,7 +94,8 @@ export const IpOverview = pure<IpOverviewProps>(
     ];
 
     const firstColumn: DescriptionList[] = userPermissions
-      ? column.concat([
+      ? [
+          ...column,
           {
             title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
             description: (
@@ -107,7 +108,7 @@ export const IpOverview = pure<IpOverviewProps>(
               />
             ),
           },
-        ])
+        ]
       : column;
 
     const descriptionLists: Readonly<DescriptionList[][]> = [

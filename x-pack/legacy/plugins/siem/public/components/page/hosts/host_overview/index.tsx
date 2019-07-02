@@ -101,18 +101,21 @@ export const HostOverview = React.memo<HostSummaryProps>(
       },
     ];
     const firstColumn = userPermissions
-      ? column.concat({
-          title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
-          description: (
-            <AnomalyScores
-              anomalies={anomaliesData}
-              startDate={startDate}
-              endDate={endDate}
-              isLoading={isLoadingAnomaliesData}
-              narrowDateRange={narrowDateRange}
-            />
-          ),
-        })
+      ? [
+          ...column,
+          {
+            title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
+            description: (
+              <AnomalyScores
+                anomalies={anomaliesData}
+                startDate={startDate}
+                endDate={endDate}
+                isLoading={isLoadingAnomaliesData}
+                narrowDateRange={narrowDateRange}
+              />
+            ),
+          },
+        ]
       : column;
 
     const descriptionLists: Readonly<DescriptionList[][]> = [

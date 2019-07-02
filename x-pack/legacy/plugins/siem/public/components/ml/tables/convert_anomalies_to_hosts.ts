@@ -13,11 +13,11 @@ export const convertAnomaliesToHosts = (anomalies: Anomalies | null): AnomaliesB
   } else {
     return anomalies.anomalies.reduce<AnomaliesByHost[]>((accum, item) => {
       if (item.entityName === 'host.name') {
-        return accum.concat({ hostName: item.entityValue, anomaly: item });
+        return [...accum, { hostName: item.entityValue, anomaly: item }];
       } else {
         const hostName = getHostNameFromInfluencers(item.influencers);
         if (hostName != null) {
-          return accum.concat({ hostName, anomaly: item });
+          return [...accum, { hostName, anomaly: item }];
         } else {
           return accum;
         }
