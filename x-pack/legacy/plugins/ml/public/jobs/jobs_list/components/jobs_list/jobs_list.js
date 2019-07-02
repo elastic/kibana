@@ -107,7 +107,12 @@ class JobsListUI extends Component {
         (selectable === false)
           ? i18n.translate(
             'xpack.ml.jobsList.cannotSelectRowForJobMessage',
-            { defaultMessage: 'Cannot select job' }
+            {
+              defaultMessage: 'Cannot select job ID {jobId}',
+              values: {
+                jobId: rowItem.id,
+              }
+            }
           )
           : i18n.translate(
             'xpack.ml.jobsList.selectRowForJobMessage',
