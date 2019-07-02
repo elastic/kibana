@@ -13,12 +13,12 @@ import {
   MINIMUM_REFRESH_INTERVAL_MS,
 } from '../../../../../../common/constants/jobs_list';
 
-import { useRefreshTransFormList } from '../../../../common';
+import { useRefreshTransformList } from '../../../../common';
 
 export const useRefreshInterval = (
   setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  const { refresh } = useRefreshTransFormList();
+  const { refresh } = useRefreshTransformList();
   useEffect(() => {
     let jobsRefreshInterval: null | number = null;
 

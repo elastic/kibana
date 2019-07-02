@@ -15,7 +15,7 @@ import { ml } from '../../../../../services/ml_api_service';
 // @ts-ignore
 import { JobIcon } from '../../../../../components/job_message_icon';
 import { TransformMessage } from '../../../../../../common/types/audit_message';
-import { useRefreshTransFormList } from '../../../../common';
+import { useRefreshTransformList } from '../../../../common';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -27,7 +27,7 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const { isRefresh } = useRefreshTransFormList();
+  const { isRefresh } = useRefreshTransformList();
 
   async function getMessages() {
     try {

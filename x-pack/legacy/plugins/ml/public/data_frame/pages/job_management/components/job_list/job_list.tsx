@@ -8,7 +8,7 @@ import React, { SFC, useEffect, useState } from 'react';
 
 import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
-import { JobId, moveToDataFrameWizard, useRefreshTransFormList } from '../../../../common';
+import { JobId, moveToDataFrameWizard, useRefreshTransformList } from '../../../../common';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
@@ -44,7 +44,7 @@ export const DataFrameJobList: SFC = () => {
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
   // Subscribe to the refresh observable to trigger reloading the jobs list.
-  const { isRefresh } = useRefreshTransFormList();
+  const { isRefresh } = useRefreshTransformList();
   useEffect(() => {
     if (isRefresh) {
       getJobs(true);

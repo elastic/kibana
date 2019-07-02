@@ -10,7 +10,7 @@ import { EuiInMemoryTable, EuiInMemoryTableProps, SortDirection } from '@elastic
 import { getFlattenedFields } from '../../../../components/source_index_preview/common';
 import { ml } from '../../../../../services/ml_api_service';
 
-import { DataFramePreviewRequest, useRefreshTransFormList } from '../../../../common';
+import { DataFramePreviewRequest, useRefreshTransformList } from '../../../../common';
 import { DataFrameTransformWithId } from '../../../../common/job';
 
 interface CompressedTableProps extends EuiInMemoryTableProps {
@@ -76,7 +76,7 @@ export const PreviewPane: FC<Props> = ({ transformConfig }) => {
   const [sort, setSort] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const { isRefresh } = useRefreshTransFormList();
+  const { isRefresh } = useRefreshTransformList();
 
   async function getPreview() {
     try {

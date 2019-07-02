@@ -53,7 +53,7 @@ export const refreshTransformList$ = new BehaviorSubject<REFRESH_TRANSFORM_LIST_
   REFRESH_TRANSFORM_LIST_STATE.IDLE
 );
 
-export const useRefreshTransFormList = () => {
+export const useRefreshTransformList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefresh, setIsRefresh] = useState(false);
 

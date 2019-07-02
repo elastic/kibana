@@ -23,13 +23,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { useRefreshTransFormList } from '../../common';
+import { useRefreshTransformList } from '../../common';
 import { CreateJobButton } from './components/create_job_button';
 import { DataFrameJobList } from './components/job_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
 
 export const Page: SFC = () => {
-  const { isLoading, refresh } = useRefreshTransFormList();
+  const { isLoading, refresh } = useRefreshTransformList();
 
   return (
     <EuiPage data-test-subj="mlPageDataFrame">
