@@ -47,6 +47,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     });
     const actionsClient = new ActionsClient({
@@ -93,6 +94,7 @@ Array [
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       validate: {
         config: Joi.object()
           .keys({
@@ -279,6 +281,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     });
     const actionsClient = new ActionsClient({
@@ -335,6 +338,7 @@ Array [
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       validate: {
         config: Joi.object()
           .keys({

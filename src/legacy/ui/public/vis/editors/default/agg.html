@@ -28,8 +28,13 @@
     </span>
 
     <!-- error -->
-    <span ng-if="!editorOpen && aggForm.softErrorCount() > 0" class="visEditorSidebar__collapsibleTitleDescription visEditorSidebar__collapsibleTitleDescription--danger" title="{{aggForm.describeErrors()}}">
-      {{ aggForm.describeErrors() }}
+    <span
+      ng-if="!editorOpen && aggForm.softErrorCount() > 0"
+      class="visEditorSidebar__collapsibleTitleDescription visEditorSidebar__collapsibleTitleDescription--danger"
+      title="{{::'common.ui.vis.editors.agg.errorsText' | i18n: { defaultMessage: 'Errors' } }}"
+      i18n-id="common.ui.vis.editors.agg.errorsText"
+      i18n-default-message="Errors"
+    >
     </span>
 
     <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
@@ -94,12 +99,35 @@
 
   </div>
 
-  <vis-editor-agg-params
-    id="visAggEditorParams{{agg.id}}"
-    agg="agg"
-    group-name="groupName"
+  <vis-agg-control-react-wrapper
+    ng-if="agg.schema.editorComponent"
     ng-show="editorOpen"
-    index-pattern="vis.indexPattern">
+    agg-params="agg.params"
+    component="agg.schema.editorComponent"
+    editor-state-params="state.params"
+    set-value="onAggParamsChange"
+  />
+
+  <!-- should be rendered after link function run, i.e. 'onAggTypeChange' is defined  -->
+  <vis-editor-agg-params
+    ng-if="onAggTypeChange"
+    ng-show="editorOpen"
+    agg="agg"
+    agg-index="$index"
+    agg-is-too-low="aggIsTooLow"
+    agg-params="agg.params"
+    agg-error="agg.error"
+    editor-config="editorConfig"
+    form-is-touched="formIsTouched"
+    group-name="groupName"
+    index-pattern="vis.indexPattern"
+    response-value-aggs="responseValueAggs"
+    state="state"
+    on-agg-type-change="onAggTypeChange"
+    on-agg-params-change="onAggParamsChange"
+    set-touched="setTouched"
+    set-validity="setValidity"
+    on-agg-error-changed="onAggErrorChanged">
   </vis-editor-agg-params>
 </div>
 
