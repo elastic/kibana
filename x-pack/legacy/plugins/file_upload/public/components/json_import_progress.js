@@ -84,7 +84,7 @@ export class JsonImportProgress extends Component {
                     />
                   </h4>
                 </EuiTitle>
-                <EuiCodeBlock language="json" paddingSize="s" overflowHeight={200}>
+                <EuiCodeBlock data-test-subj="indexRespCodeBlock" language="json" paddingSize="s" overflowHeight={200}>
                   {indexDataJson}
                 </EuiCodeBlock>
                 <EuiSpacer size="m" />
@@ -100,7 +100,7 @@ export class JsonImportProgress extends Component {
                     />
                   </h4>
                 </EuiTitle>
-                <EuiCodeBlock language="json" paddingSize="s" overflowHeight={200}>
+                <EuiCodeBlock data-test-subj="indexPatternRespCodeBlock" language="json" paddingSize="s" overflowHeight={200}>
                   {indexPatternJson}
                 </EuiCodeBlock>
                 <EuiSpacer size="m" />
@@ -112,6 +112,7 @@ export class JsonImportProgress extends Component {
                   defaultMessage: 'Further index modifications can be made using\n',
                 })}
                 <a
+                  data-test-subj="indexManagementNewIndexLink"
                   target="_blank"
                   href={`${chrome.getBasePath()}/app/kibana#/
                       management/elasticsearch/index_management/indices/

@@ -140,7 +140,6 @@ export class JsonIndexFilePicker extends Component {
     return (
       <Fragment>
         {fileParsingProgress ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
-
         <EuiFormRow
           label={
             <FormattedMessage
