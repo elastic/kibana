@@ -61,6 +61,7 @@ const LegendContainer = styled.div`
 const LegendGray = styled(Legend)`
   color: ${theme.euiColorMediumShade};
   padding-bottom: 0;
+  padding-right: ${px(units.half)};
 `;
 
 const Value = styled.div`

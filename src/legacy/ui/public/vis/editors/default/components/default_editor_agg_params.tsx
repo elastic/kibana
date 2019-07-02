@@ -22,7 +22,7 @@ import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { aggTypes, AggType, AggParam } from 'ui/agg_types';
-import { AggConfig, Vis, VisState, AggParams } from 'ui/vis';
+import { AggConfig, VisState, AggParams } from 'ui/vis';
 import { IndexPattern } from 'ui/index_patterns';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 import { DefaultEditorAggParam } from './default_editor_agg_param';
@@ -54,7 +54,6 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 export interface SubAggParamsProp {
   formIsTouched: boolean;
-  vis: Vis;
   onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   onAggErrorChanged: (agg: AggConfig, error?: string) => void;
@@ -82,7 +81,6 @@ function DefaultEditorAggParams({
   indexPattern,
   responseValueAggs,
   state = {} as VisState,
-  vis,
   onAggParamsChange,
   onAggTypeChange,
   setTouched,
@@ -97,7 +95,7 @@ function DefaultEditorAggParams({
     indexPattern,
     agg
   );
-  const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state }, vis);
+  const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(
     aggParamsReducer,
@@ -198,7 +196,6 @@ function DefaultEditorAggParams({
           onAggTypeChange,
           onAggErrorChanged,
           formIsTouched,
-          vis,
         }}
         {...paramInstance}
       />
