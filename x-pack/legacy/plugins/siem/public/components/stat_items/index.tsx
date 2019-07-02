@@ -52,6 +52,7 @@ export interface StatItems {
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
+  index: number;
   areachartConfigs?: ChartSeriesConfigs;
   barchartConfigs?: ChartSeriesConfigs;
 }
@@ -61,7 +62,7 @@ export interface StatItemsProps extends StatItems {
   barChart?: ChartConfigsData[];
   from: number;
   id: string;
-  index: number;
+
   to: number;
 }
 
@@ -143,14 +144,13 @@ export const useKpiMatrixStatus = (
   useEffect(
     () => {
       setStatItemsProps(
-        mappings.map((stat, index) => {
+        mappings.map(stat => {
           return {
             ...stat,
             areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
             barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
             fields: addValueToFields(stat.fields, data),
             id,
-            index,
             key: `kpi-summary-${stat.key}`,
             from,
             to,

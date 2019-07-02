@@ -33,7 +33,7 @@ describe('Modal Inspect', () => {
           .find('.euiModalHeader__title')
           .first()
           .text()
-      ).toBe('Inspect - My title');
+      ).toBe('Inspect My title');
     });
 
     test('when isShowing is negative and request and response are not null', () => {

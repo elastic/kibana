@@ -24,7 +24,7 @@ const Header = styled.header<{ border?: boolean }>`
 `;
 
 const MyEuiFlexItemIcon = styled(EuiFlexItem)`
-  padding-left: 5px;
+  padding-right: 5px;
 `;
 
 export interface HeaderPanelProps {
@@ -40,32 +40,27 @@ export interface HeaderPanelProps {
 export const HeaderPanel = pure<HeaderPanelProps>(
   ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false} component="span">
+            <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h2 data-test-subj="page_headline_title">{title}</h2>
               </EuiTitle>
             </EuiFlexItem>
             {tooltip && (
-              <MyEuiFlexItemIcon grow={false} component="span">
+              <MyEuiFlexItemIcon grow={false}>
                 <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />
               </MyEuiFlexItemIcon>
             )}
-            <MyEuiFlexItemIcon grow={false} component="span">
-              {id && (
-                <>
-                  <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
-                </>
-              )}
-            </MyEuiFlexItemIcon>
           </EuiFlexGroup>
           <EuiText color="subdued" size="s">
             {subtitle}
           </EuiText>
         </EuiFlexItem>
-
+        <EuiFlexItem grow={false}>
+          {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
+        </EuiFlexItem>
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
       </EuiFlexGroup>
     </Header>

@@ -119,10 +119,10 @@ export const MoreRowItems = styled(EuiIcon)`
 
 export const OverviewWrapper = styled(EuiFlexGroup)`
   position: relative;
-  .euiButtonEmpty {
+  .euiButtonIcon {
     position: absolute;
     top: -10px;
-    right: 5px;
+    right: 10px;
   }
 `;
 

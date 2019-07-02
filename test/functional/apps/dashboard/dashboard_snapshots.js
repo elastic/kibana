@@ -61,7 +61,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       expect(percentDifference).to.be.lessThan(0.05);
     });
 
-    it('compare area chart snapshot', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/40173
+    it.skip('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();

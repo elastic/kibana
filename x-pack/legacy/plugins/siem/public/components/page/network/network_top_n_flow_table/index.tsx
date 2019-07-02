@@ -126,7 +126,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerSupplement={
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <SelectTypeItem
                 grow={false}

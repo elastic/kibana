@@ -30,12 +30,11 @@ interface ModalInspectProps {
 }
 
 const MyEuiModal = styled(EuiModal)`
-  height: 75vh;
   .euiModal__flex {
     width: 60vw;
   }
   .euiCodeBlock {
-    height: 52vh !important;
+    height: auto !important;
     max-width: 718px;
   }
 `;
@@ -97,7 +96,7 @@ export const ModalInspectQuery = ({
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.TITLE}
-            {` - `}
+            {` `}
             {title}
           </EuiModalHeaderTitle>
         </EuiModalHeader>

@@ -20,6 +20,7 @@ import { SectionError, SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
+import { useAppState } from '../../../services/state';
 import { uiMetricService } from '../../../services/ui_metric';
 import { RestoreTable } from './restore_table';
 
@@ -41,6 +42,40 @@ export const RestoreList: React.FunctionComponent = () => {
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
+
+  // Check that we have all index privileges needed to view recovery information
+  const [appState] = useAppState();
+  const { permissions: { missingIndexPrivileges } = { missingIndexPrivileges: [] } } = appState;
+
+  // Render permission missing screen
+  if (missingIndexPrivileges.length) {
+    return (
+      <EuiEmptyPrompt
+        iconType="securityApp"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreList.deniedPermissionTitle"
+              defaultMessage="You're missing index privileges"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreList.deniedPermissionDescription"
+              defaultMessage="To view snapshot restore status, you must have {indexPrivilegesCount,
+                plural, one {this index privilege} other {these index privileges}} for one or more indices: {indexPrivileges}."
+              values={{
+                indexPrivileges: missingIndexPrivileges.join(', '),
+                indexPrivilegesCount: missingIndexPrivileges.length,
+              }}
+            />
+          </p>
+        }
+      />
+    );
+  }
 
   // State for tracking interval picker
   const [isIntervalMenuOpen, setIsIntervalMenuOpen] = useState<boolean>(false);

@@ -39,11 +39,12 @@ interface KpiNetworkProps {
 export const fieldTitleChartMapping: Readonly<StatItems[]> = [
   {
     key: 'UniqueIps',
+    index: 4,
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
         value: null,
-        name: i18n.SRC,
+        name: i18n.SOURCE_NAME,
         description: i18n.SOURCE,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
@@ -51,7 +52,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueDestinationPrivateIps',
         value: null,
-        name: i18n.DIST,
+        name: i18n.DESTINATION_NAME,
         description: i18n.DESTINATION,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
@@ -67,6 +68,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
 const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   {
     key: 'networkEvents',
+    index: 0,
     fields: [
       {
         key: 'networkEvents',
@@ -79,6 +81,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'dnsQueries',
+    index: 1,
     fields: [
       {
         key: 'dnsQueries',
@@ -89,6 +92,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'uniqueFlowId',
+    index: 2,
     fields: [
       {
         key: 'uniqueFlowId',
@@ -99,6 +103,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'tlsHandshakes',
+    index: 3,
     fields: [
       {
         key: 'tlsHandshakes',
@@ -130,7 +135,7 @@ export const KpiNetworkBaseComponent = ({
 
   return (
     <EuiFlexGroup wrap>
-      {statItemsProps.map(mappedStatItemProps => {
+      {statItemsProps.map((mappedStatItemProps, idx) => {
         return <StatItemsComponent {...mappedStatItemProps} />;
       })}
     </EuiFlexGroup>

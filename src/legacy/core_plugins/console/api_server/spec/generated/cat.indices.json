@@ -19,7 +19,8 @@
       "help": "__flag__",
       "pri": "__flag__",
       "s": [],
-      "v": "__flag__"
+      "v": "__flag__",
+      "include_unloaded_segments": "__flag__"
     },
     "methods": [
       "GET"
