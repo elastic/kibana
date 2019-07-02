@@ -32,17 +32,20 @@ describe('HistoryTabs', () => {
 
     testTabs = [
       {
-        name: 'One',
+        name: 'one',
+        title: 'One',
         path: '/one',
         render: props => <Content {...props} name="one" />
       },
       {
-        name: 'Two',
+        name: 'two',
+        title: 'Two',
         path: '/two',
         render: () => <Content name="two" />
       },
       {
-        name: 'Three',
+        name: 'three',
+        title: 'Three',
         path: '/three',
         render: () => <Content name="three" />
       }

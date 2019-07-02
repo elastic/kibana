@@ -29,4 +29,5 @@ export interface UMESHistogramBucket {
 export interface DatabaseAdapter {
   count(request: any, params: any): Promise<any>;
   search(request: any, params: any): Promise<any>;
+  head(request: any, params: any): Promise<any>;
 }

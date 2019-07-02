@@ -183,6 +183,7 @@ export interface JobDocOutputExecuted {
   content: string | null; // defaultOutput is null
   max_size_reached: boolean;
   size: number;
+  csv_contains_formulas?: string[];
 }
 
 export interface ESQueueWorker {
