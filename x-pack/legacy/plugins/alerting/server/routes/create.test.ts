@@ -12,7 +12,7 @@ createAlertRoute(server);
 
 const mockedAlert = {
   alertTypeId: '1',
-  interval: 10,
+  interval: 10000,
   alertTypeParams: {
     bar: true,
   },
@@ -59,7 +59,7 @@ Object {
     "bar": true,
   },
   "id": "123",
-  "interval": 10,
+  "interval": 10000,
 }
 `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
@@ -80,7 +80,7 @@ Array [
       "alertTypeParams": Object {
         "bar": true,
       },
-      "interval": 10,
+      "interval": 10000,
     },
   },
 ]
