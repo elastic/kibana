@@ -22,6 +22,7 @@ export interface JobDetailsExposedState {
   createIndexPattern: boolean;
   isContinuousModeEnabled: boolean;
   jobId: JobId;
+  jobDescription: string;
   destinationIndex: EsIndexName;
   touched: boolean;
   valid: boolean;
@@ -34,6 +35,7 @@ export function getDefaultJobDetailsState(): JobDetailsExposedState {
     createIndexPattern: true,
     isContinuousModeEnabled: false,
     jobId: '',
+    jobDescription: '',
     destinationIndex: '',
     touched: false,
     valid: false,
@@ -55,6 +57,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const defaults = { ...getDefaultJobDetailsState(), ...overrides };
 
   const [jobId, setJobId] = useState<JobId>(defaults.jobId);
+  const [jobDescription, setJobDescription] = useState<string>(defaults.jobDescription);
   const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(defaults.destinationIndex);
   const [jobIds, setJobIds] = useState<JobId[]>([]);
   const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
@@ -139,6 +142,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
         createIndexPattern,
         isContinuousModeEnabled,
         jobId,
+        jobDescription,
         destinationIndex,
         touched: true,
         valid,
@@ -150,6 +154,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       createIndexPattern,
       isContinuousModeEnabled,
       jobId,
+      jobDescription,
       destinationIndex,
       valid,
     ]
@@ -177,6 +182,24 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           aria-label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdInputAriaLabel', {
             defaultMessage: 'Choose a unique job id.',
           })}
+          isInvalid={jobIdExists}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobDescriptionLabel', {
+          defaultMessage: 'Job description',
+        })}
+      >
+        <EuiFieldText
+          placeholder="job description"
+          value={jobDescription}
+          onChange={e => setJobDescription(e.target.value)}
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.jobDetailsForm.jobDescriptionInputAriaLabel',
+            {
+              defaultMessage: 'Choose an optional job description.',
+            }
+          )}
           isInvalid={jobIdExists}
         />
       </EuiFormRow>

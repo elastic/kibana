@@ -12,6 +12,7 @@ export type IndexPattern = string;
 export type JobId = string;
 
 export interface DataFrameJob {
+  description?: string;
   dest: {
     index: IndexName;
   };
