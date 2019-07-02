@@ -5,6 +5,7 @@
  */
 
 import fs from 'fs';
+import { Server } from 'hapi';
 import mkdirp from 'mkdirp';
 import * as os from 'os';
 import path from 'path';
