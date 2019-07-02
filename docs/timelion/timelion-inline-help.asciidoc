@@ -1,5 +1,5 @@
 [[timelion-inline-help]]
-== Inline Help and Documentation
+=== Inline help and documentation
 
 Can't remember a function or searching for a new one? You can always reference the inline help and documentation in Timelion.
 
