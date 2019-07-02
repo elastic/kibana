@@ -6,10 +6,14 @@
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapEsError } from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails } from '../../../common/types';
-import { deserializeSnapshotDetails } from '../../lib';
+import { Plugins } from '../../../shim';
+import { deserializeSnapshotDetails, getManagedRepositoryName } from '../../lib';
 import { SnapshotDetailsEs } from '../../types';
 
-export function registerSnapshotsRoutes(router: Router) {
+let callWithInternalUser: any;
+
+export function registerSnapshotsRoutes(router: Router, plugins: Plugins) {
+  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('snapshots', getAllHandler);
   router.get('snapshots/{repository}/{snapshot}', getOneHandler);
   router.delete('snapshots/{ids}', deleteHandler);
@@ -22,7 +26,9 @@ export const getAllHandler: RouterRouteHandler = async (
   snapshots: SnapshotDetails[];
   errors: any[];
   repositories: string[];
+  managedRepository?: string;
 }> => {
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -50,7 +56,7 @@ export const getAllHandler: RouterRouteHandler = async (
 
       // Decorate each snapshot with the repository with which it's associated.
       fetchedSnapshots.forEach((snapshot: SnapshotDetailsEs) => {
-        snapshots.push(deserializeSnapshotDetails(repository, snapshot));
+        snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
       });
 
       repositories.push(repository);
@@ -75,13 +81,14 @@ export const getOneHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<SnapshotDetails> => {
   const { repository, snapshot } = req.params;
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
   const { snapshots }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest('snapshot.get', {
     repository,
     snapshot,
   });
 
   // If the snapshot is missing the endpoint will return a 404, so we'll never get to this point.
-  return deserializeSnapshotDetails(repository, snapshots[0]);
+  return deserializeSnapshotDetails(repository, snapshots[0], managedRepository);
 };
 
 export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
