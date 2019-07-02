@@ -443,28 +443,6 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
               >
                 <EuiEmptyPrompt
                   body={
-<<<<<<< HEAD
-                    <React.Fragment>
-                      <p>
-                        <FormattedMessage
-                          defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
-                          id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                          values={
-                            Object {
-                              "configureHeartbeatLink": <EuiLink
-                                color="primary"
-                                href="foo/app/kibana#/home/tutorial/uptimeMonitors"
-                                target="_blank"
-                                type="button"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Configure Heartbeat"
-                                  id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                  values={Object {}}
-                                />
-                              </EuiLink>,
-                            }
-=======
                     <p>
                       <FormattedMessage
                         defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
@@ -483,7 +461,6 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 values={Object {}}
                               />
                             </EuiLink>,
->>>>>>> 48f5d4ceff... [Uptime] Add monitor summaries (#38895)
                           }
                         }
                       />
