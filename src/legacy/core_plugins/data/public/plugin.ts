@@ -46,7 +46,9 @@ export class DataPublicPlugin
     return {
       expressions: this.expressions.setup(),
       indexPatterns: indexPatternsSetup,
-      filter: this.filter.setup({ indexPatterns: indexPatternsSetup }),
+      filter: this.filter.setup({
+        indexPatterns: indexPatternsSetup.indexPatterns,
+      }),
       search: this.search.setup(),
       query: this.query.setup(),
     };
