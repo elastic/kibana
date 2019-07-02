@@ -24,7 +24,10 @@ import { kibanaMarkdown } from './markdown_fn';
 
 // @ts-ignore
 import { functionsRegistry } from '../../interpreter/public/registries';
-import { visualizations as visualizationsService, VisualizationsSetup } from '../../visualizations/public';
+import {
+  visualizations as visualizationsService,
+  VisualizationsSetup,
+} from '../../visualizations/public';
 
 export interface SetupDeps {
   visualizations: VisualizationsSetup;

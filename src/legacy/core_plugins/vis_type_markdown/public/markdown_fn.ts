@@ -78,7 +78,7 @@ export const kibanaMarkdown = (): ExpressionFunction<
         visConfig: {
           markdown: args.markdown,
           openLinksInNewTab: args.openLinksInNewTab,
-          fontSize: args.font.spec.fontSize ? parseInt(args.font.spec.fontSize) : 12,
+          fontSize: parseInt(args.font.spec.fontSize || '12', 10),
         },
       },
     };
