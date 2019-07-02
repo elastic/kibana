@@ -30,6 +30,13 @@ const setupModeState = {
 
 export const getSetupModeState = () => setupModeState;
 
+export const setNewlyDiscoveredClusterUuid = clusterUuid => {
+  const globalState = angularState.injector.get('globalState');
+  globalState.cluster_uuid = clusterUuid;
+  globalState.save();
+  angularState.scope.$apply();
+};
+
 export const fetchCollectionData = async () => {
   checkAngularState();
 

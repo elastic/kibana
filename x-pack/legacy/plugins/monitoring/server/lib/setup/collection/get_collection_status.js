@@ -234,6 +234,17 @@ async function getLiveKibanaInstance(req) {
   return collectorSet.toApiFieldNames(await kibanaStatsCollector.fetch());
 }
 
+async function getLiveElasticsearchClusterUuid(req) {
+  const params = {
+    path: '/_cluster/state/cluster_uuid',
+    method: 'GET',
+  };
+
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  const { cluster_uuid: clusterUuid } = await callWithRequest(req, 'transport.request', params);
+  return clusterUuid;
+}
+
 /**
  * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
  * and determine which products fall into one of four states:
@@ -278,6 +289,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     await detectProducts(req)
   ]);
 
+  const liveClusterUuid = await getLiveElasticsearchClusterUuid(req);
   const liveEsNodes = await getLivesNodes(req);
   const liveKibanaInstance = await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
@@ -457,6 +469,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
 
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
+    clusterUuid: liveClusterUuid,
   };
 
   return status;
