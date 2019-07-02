@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_finder';
-import { SavedObjectAttributes } from 'target/types/server';
+import { SavedObjectAttributes } from 'src/core/server';
 import {
   ContainerOutput,
   embeddableFactories,

@@ -31,7 +31,7 @@ import {
 import {
   keysToCamelCaseShallow,
   keysToSnakeCaseShallow,
-} from '../../../legacy/ui/public/utils/case_conversion';
+} from '../../../legacy/utils/case_conversion';
 import {
   isAutoCreateIndexError,
   showAutoCreateIndexErrorPage,
@@ -105,8 +105,9 @@ const API_BASE_URL = '/api/saved_objects/';
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
 /**
- * The SavedObjectsClient class acts as a generic data fetcher
- * and data saver for saved objects regardless of type.
+ * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * use Elasticsearch for storing plugin state. The SavedObjectsClient is a thin
+ * "repository" for client-side plugins to interact with Saved Objects.
  *
  * @public
  */

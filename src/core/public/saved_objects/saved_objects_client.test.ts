@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import * as sinon from 'sinon';
 import { SavedObjectsFindOptions } from 'src/core/server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';

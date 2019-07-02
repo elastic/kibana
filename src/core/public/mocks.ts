@@ -26,6 +26,7 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { savedObjectsMock } from './saved_objects/saved_objects_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -59,6 +60,7 @@ function createCoreStartMock() {
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    savedObjects: savedObjectsMock.createStartContract(),
   };
 
   return mock;
