@@ -5,10 +5,17 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router';
 import { RedirectWrapper } from './redirect_wrapper';
+
+export type TimelineComponentProps = RouteComponentProps<{
+  search: string;
+}>;
 
 export const TIMELINES_PAGE_NAME = 'timelines';
 
-export const RedirectToTimelinesPage = () => <RedirectWrapper to={`/${TIMELINES_PAGE_NAME}`} />;
+export const RedirectToTimelinesPage = ({ location: { search } }: TimelineComponentProps) => (
+  <RedirectWrapper to={`/${TIMELINES_PAGE_NAME}${search}`} />
+);
 
 export const getTimelinesUrl = () => `#/link-to/${TIMELINES_PAGE_NAME}`;

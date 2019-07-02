@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 
@@ -12,6 +12,7 @@ import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import { RepositoryAdd, RepositoryEdit, RestoreSnapshot, SnapshotRestoreHome } from './sections';
 import { useLoadPermissions } from './services/http';
+import { useAppState } from './services/state';
 import { useAppDependencies } from './index';
 
 export const App: React.FunctionComponent = () => {
@@ -21,15 +22,36 @@ export const App: React.FunctionComponent = () => {
     },
   } = useAppDependencies();
 
+  // Get app state to set permissions data
+  const [, dispatch] = useAppState();
+
+  // Use ref for default permission data so that re-rendering doesn't
+  // cause dispatch to be called over and over
+  const defaultPermissionsData = useRef({
+    hasPermission: true,
+    missingClusterPrivileges: [],
+    missingIndexPrivileges: [],
+  });
+
   // Load permissions
   const {
     error: permissionsError,
     loading: loadingPermissions,
-    data: { hasPermission, missingClusterPrivileges } = {
-      hasPermission: true,
-      missingClusterPrivileges: [],
-    },
+    data: permissionsData = defaultPermissionsData.current,
   } = useLoadPermissions();
+
+  const { hasPermission, missingClusterPrivileges } = permissionsData;
+
+  // Update app state with permissions data
+  useEffect(
+    () => {
+      dispatch({
+        type: 'updatePermissions',
+        permissions: permissionsData,
+      });
+    },
+    [permissionsData]
+  );
 
   if (loadingPermissions) {
     return (

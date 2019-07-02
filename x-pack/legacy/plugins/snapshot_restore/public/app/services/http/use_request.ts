@@ -103,7 +103,7 @@ export const useRequest = ({
       return;
     }
 
-    // Only set data if we are doing polling
+    // Set just data if we are doing polling
     if (isPollRequest) {
       setPolling(false);
       if (response.data) {
