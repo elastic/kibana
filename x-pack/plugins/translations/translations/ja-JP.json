@@ -10763,8 +10763,6 @@
     "xpack.uptime.monitorCharts.loadingMessage": "読み込み中…",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "ミリ秒単位の監視時間",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "ダウン",
-    "xpack.uptime.monitorList.geoName": "場所",
-    "xpack.uptime.monitorList.idColumnLabel": "ID",
     "xpack.uptime.monitorList.infraIntegrationAction.container.message": "コンテナーメトリックを表示",
     "xpack.uptime.monitorList.infraIntegrationAction.docker.description": "このモニターのコンテナー ID のインフラストラクチャ UI を確認します",
     "xpack.uptime.monitorList.infraIntegrationAction.docker.tooltip": "コンテナー ID「{containerId}」のインフラストラクチャ UI を確認します",

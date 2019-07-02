@@ -10763,8 +10763,6 @@
     "xpack.uptime.monitorCharts.loadingMessage": "正在加载……",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "监测持续时间（毫秒）",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "关闭",
-    "xpack.uptime.monitorList.geoName": "位置",
-    "xpack.uptime.monitorList.idColumnLabel": "ID",
     "xpack.uptime.monitorList.infraIntegrationAction.container.message": "显示容器指标",
     "xpack.uptime.monitorList.infraIntegrationAction.docker.description": "在 Infrastructure UI 上查找此监测的容器 ID",
     "xpack.uptime.monitorList.infraIntegrationAction.docker.tooltip": "在 Infrastructure UI 上查找容器 ID“{containerId}”",
