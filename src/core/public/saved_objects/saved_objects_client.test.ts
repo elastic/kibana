@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { SavedObjectsFindOptions } from 'src/core/server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -55,13 +54,11 @@ describe('SavedObjectsClient', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: requires type and id]`);
     });
 
-    test('resolves with SimpleSavedObject instance', async () => {
-      const response = savedObjectsClient.get(doc.type, doc.id);
-      await expect(response).resolves.toBeInstanceOf(SimpleSavedObject);
-
-      const result = await response;
-      expect(result.type).toBe('config');
-      expect(result.get('title')).toBe('Example title');
+    test('rejects when HTTP call fails', () => {
+      http.fetch.mockRejectedValue(new Error('Request failed'));
+      return expect(savedObjectsClient.get(doc.type, doc.id)).rejects.toMatchInlineSnapshot(
+        `[Error: Request failed]`
+      );
     });
 
     test('makes HTTP call', async () => {
@@ -78,11 +75,35 @@ Array [
 `);
     });
 
-    test('rejects when HTTP call fails', () => {
-      http.fetch.mockRejectedValue(new Error('Request failed'));
-      return expect(savedObjectsClient.get(doc.type, doc.id)).rejects.toMatchInlineSnapshot(
-        `[Error: Request failed]`
-      );
+    test('batches several #get calls into a single HTTP call', async () => {
+      // Await #get call to ensure batchQueue is empty and throttle has reset
+      await savedObjectsClient.get('type2', doc.id);
+      http.fetch.mockClear();
+
+      // Make two #get calls right after one another
+      savedObjectsClient.get('type1', doc.id);
+      await savedObjectsClient.get('type0', doc.id);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/_bulk_get",
+    Object {
+      "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type1\\"},{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type0\\"}]",
+      "method": "POST",
+      "query": undefined,
+    },
+  ],
+]
+`);
+    });
+
+    test('resolves with SimpleSavedObject instance', async () => {
+      const response = savedObjectsClient.get(doc.type, doc.id);
+      await expect(response).resolves.toBeInstanceOf(SimpleSavedObject);
+
+      const result = await response;
+      expect(result.type).toBe('config');
+      expect(result.get('title')).toBe('Example title');
     });
   });
 
@@ -273,7 +294,9 @@ Array [
     Object {
       "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
       "method": "POST",
-      "query": Object {},
+      "query": Object {
+        "overwrite": false,
+      },
     },
   ],
 ]
@@ -303,12 +326,12 @@ Array [
     const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
 
     beforeEach(() => {
-      http.fetch.mockResolvedValue({ saved_objects: [object], page: 0, perPage: 1, total: 1 });
+      http.fetch.mockResolvedValue({ saved_objects: [object], page: 0, per_page: 1, total: 1 });
     });
 
     test('resolves with instances of SimpleSavedObjects', async () => {
-      const body = { type: 'index-pattern' };
-      const resultP = savedObjectsClient.find(body);
+      const options = { type: 'index-pattern' };
+      const resultP = savedObjectsClient.find(options);
       await expect(resultP).resolves.toHaveProperty('savedObjects');
 
       const result = await resultP;
@@ -319,52 +342,16 @@ Array [
       expect(result.total).toBe(1);
     });
 
-    test('accepts type', () => {
-      const body = { type: 'index-pattern', invalid: true };
-
-      savedObjectsClient.find(body);
-      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/_find",
-    Object {
-      "body": undefined,
-      "method": "GET",
-      "query": Object {
-        "invalid": true,
-        "type": "index-pattern",
-      },
-    },
-  ],
-]
-`);
-    });
-
-    test('accepts fields', () => {
-      const body = { fields: ['title', 'description'] };
-
-      savedObjectsClient.find(body);
-      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/_find",
-    Object {
-      "body": undefined,
-      "method": "GET",
-      "query": Object {
-        "fields": Array [
-          "title",
-          "description",
-        ],
-      },
-    },
-  ],
-]
-`);
-    });
-
-    test('accepts pagination params', () => {
-      const options: SavedObjectsFindOptions = { perPage: 10, page: 6 };
+    test('makes HTTP call translating options into snake case query parameters', () => {
+      const options = {
+        type: 'index-pattern',
+        search: 'what is the meaning of life?|life',
+        searchFields: ['title^5', 'body'],
+        page: 10,
+        perPage: 100,
+        fields: ['title'],
+        hasReference: { id: '1', type: 'reference' },
+      };
 
       savedObjectsClient.find(options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
@@ -375,9 +362,43 @@ Array [
       "body": undefined,
       "method": "GET",
       "query": Object {
-        "page": 6,
-        "per_page": 10,
+        "fields": Array [
+          "title",
+        ],
+        "has_reference": Object {
+          "id": "1",
+          "type": "reference",
+        },
+        "page": 10,
+        "per_page": 100,
+        "search": "what is the meaning of life?|life",
+        "search_fields": Array [
+          "title^5",
+          "body",
+        ],
+        "type": "index-pattern",
       },
+    },
+  ],
+]
+`);
+    });
+
+    test('ignores invalid options', () => {
+      const options = {
+        invalid: true,
+      };
+
+      // @ts-ignore
+      savedObjectsClient.find(options);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "/api/saved_objects/_find",
+    Object {
+      "body": undefined,
+      "method": "GET",
+      "query": Object {},
     },
   ],
 ]

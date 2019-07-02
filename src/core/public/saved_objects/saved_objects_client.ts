@@ -29,10 +29,6 @@ import {
   SavedObjectsMigrationVersion,
 } from 'src/core/server';
 import {
-  keysToCamelCaseShallow,
-  keysToSnakeCaseShallow,
-} from '../../../legacy/utils/case_conversion';
-import {
   isAutoCreateIndexError,
   showAutoCreateIndexErrorPage,
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
@@ -220,7 +216,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as BatchResponse;
+      return renameKeys({ saved_objects: 'savedObjects' }, resp) as BatchResponse;
     });
   };
 
@@ -257,7 +253,18 @@ export class SavedObjectsClient {
     options: SavedObjectsFindOptions = {}
   ): Promise<FindResults<T>> => {
     const path = this.getPath(['_find']);
-    const query = keysToSnakeCaseShallow(options);
+    const query = renameKeys(
+      {
+        type: 'type',
+        search: 'search',
+        searchFields: 'search_fields',
+        page: 'page',
+        perPage: 'per_page',
+        fields: 'fields',
+        hasReference: 'has_reference',
+      },
+      options
+    );
 
     const request: ReturnType<SavedObjectsApi['find']> = this.request({
       method: 'GET',
@@ -266,7 +273,15 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as FindResults<T>;
+      return renameKeys(
+        {
+          saved_objects: 'savedObjects',
+          total: 'total',
+          per_page: 'perPage',
+          page: 'page',
+        },
+        resp
+      ) as FindResults<T>;
     });
   };
 
@@ -314,7 +329,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as BatchResponse;
+      return renameKeys({ saved_objects: 'savedObjects' }, resp) as BatchResponse;
     });
   };
 
@@ -374,3 +389,22 @@ export class SavedObjectsClient {
     return this.http.fetch(path, { method, query, body: JSON.stringify(body) });
   }
 }
+
+/**
+ * Returns a new object with the own properties of `obj`, but the
+ * keys renamed according to the `keysMap`.
+ *
+ * If a key is not found in `keysMap` it is omitted from the result.
+ *
+ * @param keysMap - a map of the form `{oldKey: newKey}`
+ * @param obj - the object whose own properties will be renamed
+ */
+const renameKeys = (keysMap: Record<string, string>, obj: Record<string, any>) =>
+  Object.keys(obj).reduce((acc, key) => {
+    return typeof keysMap[key] === 'undefined'
+      ? acc
+      : {
+          ...acc,
+          ...{ [keysMap[key]]: obj[key] },
+        };
+  }, {});
