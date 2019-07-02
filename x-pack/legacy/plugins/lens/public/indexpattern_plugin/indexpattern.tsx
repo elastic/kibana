@@ -11,6 +11,7 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import uuid from 'uuid';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -33,7 +34,8 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | MinIndexPatternColumn
   | MaxIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | FilterRatioIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {
   // Public
@@ -74,6 +76,14 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   };
 }
 
+export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
+  operationType: 'filter_ratio';
+  params: {
+    numerator: { language: string; query: string };
+    denominator: { language: string; query: string };
+  };
+}
+
 export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
   'count',
   BaseIndexPatternColumn
@@ -96,6 +106,7 @@ export interface IndexPatternField {
   esTypes?: string[];
   aggregatable: boolean;
   searchable: boolean;
+  filterable: boolean;
   aggregationRestrictions?: Partial<
     Record<
       string,
@@ -269,11 +280,13 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
-            <IndexPatternDimensionPanel
-              state={state}
-              setState={newState => setState(newState)}
-              {...props}
-            />,
+            <I18nProvider>
+              <IndexPatternDimensionPanel
+                state={state}
+                setState={newState => setState(newState)}
+                {...props}
+              />
+            </I18nProvider>,
             domElement
           );
         },

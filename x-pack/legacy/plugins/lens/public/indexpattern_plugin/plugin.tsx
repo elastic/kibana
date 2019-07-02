@@ -10,12 +10,11 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { getIndexPatternDatasource } from './indexpattern';
 
-import {
-  functionsRegistry,
-  // @ts-ignore untyped dependency
-} from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
+// @ts-ignore untyped dependency
+import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { renameColumns } from './rename_columns';
+import { calculateFilterRatio } from './filter_ratio';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they
@@ -37,6 +36,7 @@ class IndexPatternDatasourcePlugin {
 
   setup(_core: CoreSetup | null, { interpreter }: IndexPatternDatasourcePluginPlugins) {
     interpreter.functionsRegistry.register(() => renameColumns);
+    interpreter.functionsRegistry.register(() => calculateFilterRatio);
     return getIndexPatternDatasource(chrome, toastNotifications);
   }
 

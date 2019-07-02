@@ -54,7 +54,9 @@ export function FieldSelect({
   }
 
   const fieldOptions = [];
-  const fieldLessColumn = filteredColumns.find(column => !hasField(column));
+  const fieldLessColumn = filteredColumns.find(
+    column => !hasField(column) && isCompatibleWithCurrentOperation(column)
+  );
   if (fieldLessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {

@@ -16,8 +16,6 @@ import {
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { createMockedDragDropContext } from './mocks';
 
-jest.mock('./loader');
-
 const expectedIndexPatterns = {
   1: {
     id: '1',

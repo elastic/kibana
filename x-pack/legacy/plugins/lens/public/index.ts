@@ -7,6 +7,8 @@
 export * from './types';
 
 import 'ui/autoload/all';
+// Used for kuery autocomplete
+import 'uiExports/autocompleteProviders';
 // Used to run esaggs queries
 import 'uiExports/fieldFormats';
 import 'uiExports/search';

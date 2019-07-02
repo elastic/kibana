@@ -57,7 +57,7 @@ export const filtersBucketAgg = new BucketAggType({
         const outFilters = _.transform(inFilters, function (filters, filter) {
           let input = _.cloneDeep(filter.input);
 
-          if (!input || !input.query) {
+          if (!input || typeof input.query !== 'string') {
             console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
             return;
           }

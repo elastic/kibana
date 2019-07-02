@@ -21,6 +21,7 @@ import {
 } from './operation_definitions/metrics';
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
+import { filterRatioOperation } from './operation_definitions/filter_ratio';
 import { sortByField } from './state_helpers';
 
 type PossibleOperationDefinitions<
@@ -46,6 +47,7 @@ export const operationDefinitionMap: AllOperationDefinitions = {
   avg: averageOperation,
   sum: sumOperation,
   count: countOperation,
+  filter_ratio: filterRatioOperation,
 };
 const operationDefinitions: PossibleOperationDefinitions[] = Object.values(operationDefinitionMap);
 
