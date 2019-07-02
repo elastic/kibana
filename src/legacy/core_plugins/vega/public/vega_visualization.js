@@ -69,7 +69,6 @@ export class VegaVisualization {
     // todo: work in progress.
     const $injector = await chrome.dangerouslyGetActiveInjector();
     this.savedObjectsClient = chrome.getSavedObjectsClient();
-    this.vegaConfig = {}; // needs somehow to get  enableExternalUrls from \vega\index.ts;
     this.serviceSettings = $injector.get('serviceSettings');
     //
 
@@ -107,7 +106,6 @@ export class VegaVisualization {
       }
 
       const vegaViewParams = {
-        vegaConfig: this.vegaConfig,
         parentEl: this._el,
         vegaParser,
         serviceSettings: this.serviceSettings,

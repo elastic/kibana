@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './get_es_shard_timeout';
+export * from './vega_config_provider';

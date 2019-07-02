@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -28,7 +29,7 @@ import { i18n }  from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { buildQueryFilter } from '@kbn/es-query';
 
-import chrome from 'ui/chrome';
+import { getEnableExternalUrls } from '../helpers/vega_config_provider';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
 
@@ -63,7 +64,6 @@ export function bypassExternalUrlCheck(url) {
 
 export class VegaBaseView {
   constructor(opts) {
-    this._vegaConfig = opts.vegaConfig;
     this._$parentEl = $(opts.parentEl);
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
@@ -75,6 +75,7 @@ export class VegaBaseView {
     this._$messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
+    this._enableExternalUrls = getEnableExternalUrls();
   }
 
   async init() {
@@ -145,7 +146,9 @@ export class VegaBaseView {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
-      } else if (!this._vegaConfig.enableExternalUrls) {
+
+        //todoL
+      } else if (!this._enableExternalUrls) {
         throw new Error(i18n.translate('vega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
           defaultMessage: 'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
           values: {
@@ -277,8 +280,8 @@ export class VegaBaseView {
 
     // This is a workaround for the https://github.com/elastic/kibana/issues/18863
     // Once fixed, replace with a direct call (no await is needed because its not async)
-    //    this._queryfilter.removeFilter(filter);
-    return $injector.get('$rootScope').$evalAsync(() => {
+    //  this._queryfilter.removeFilter(filter);
+    $injector.get('$rootScope').$evalAsync(() => {
       try {
         this._queryfilter.removeFilter(filter);
       } catch (err) {

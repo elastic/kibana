@@ -28,7 +28,9 @@ const vegaPluginInitializer = (kibana: any) =>
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/setup')],
-      injectDefaultVars: () => ({}),
+      injectDefaultVars: server => ({
+        enableExternalUrls: server.config().get('vega.enableExternalUrls'),
+      }),
     },
     init: (server: Legacy.Server) => ({}),
     config(Joi: any) {

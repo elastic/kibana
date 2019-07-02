@@ -24,7 +24,9 @@ import { VegaVisualizationType } from './vega_type';
 
 export class Plugin {
   public setup(core: any, plugins: any) {
-    plugins.data.expressions.functionsRegistry.register(kibanaVegaFn);
+    plugins.vega.loadLegacyDirectives();
+
+    plugins.data.expressions.registerFunction(kibanaVegaFn);
     plugins.visualizations.types.VisTypesRegistryProvider.register(() => VegaVisualizationType);
   }
   public start() {}

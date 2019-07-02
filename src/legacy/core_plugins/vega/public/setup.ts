@@ -18,11 +18,15 @@
  */
 
 // @ts-ignore
+import { once } from 'lodash';
 import { npSetup } from 'ui/new_platform';
 import { functionsRegistry } from 'plugins/interpreter/registries';
 import { visualizations } from '../../visualizations/public';
 import { Plugin } from './plugin';
 import { data } from '../../data/public/setup';
+
+// @ts-ignore
+import { setupModule as setupVegaLegacyModule } from './vega_legacy_module';
 
 const core = {
   ...npSetup.core,
@@ -31,8 +35,11 @@ const plugins = {
   data: {
     ...data,
     expressions: {
-      functionsRegistry,
+      registerFunction: (fn: any) => functionsRegistry.register(fn),
     },
+  },
+  vega: {
+    loadLegacyDirectives: once(setupVegaLegacyModule),
   },
   visualizations,
 };

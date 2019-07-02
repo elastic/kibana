@@ -17,20 +17,29 @@
  * under the License.
  */
 
-
 import 'ngreact';
+import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
+import 'brace/mode/hjson';
+import 'brace/ext/searchbox';
 
-import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-const module = uiModules.get('kibana/vega', ['react']);
+import { wrapInI18nContext } from 'ui/i18n';
 
-import { VegaHelpMenu } from './vega_help_menu';
-import { VegaActionsMenu } from './vega_action_menu';
+// @ts-ignore
+import { VegaEditorController } from './vega_editor_controller';
+// @ts-ignore
+import { VegaHelpMenu } from './help_menus/vega_help_menu';
+// @ts-ignore
+import { VegaActionsMenu } from './help_menus/vega_action_menu';
 
-module.directive('vegaActionsMenu', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(VegaActionsMenu));
-});
-
-module.directive('vegaHelpMenu', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(VegaHelpMenu));
-});
+export const setupModule = () => {
+  uiModules
+    .get('kibana/vega', ['react'])
+    .controller('VegaEditorController', ($scope: any) => new VegaEditorController($scope))
+    .directive('vegaActionsMenu', (reactDirective: any) =>
+      reactDirective(wrapInI18nContext(VegaActionsMenu))
+    )
+    .directive('vegaHelpMenu', (reactDirective: any) =>
+      reactDirective(wrapInI18nContext(VegaHelpMenu))
+    );
+};

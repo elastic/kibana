@@ -20,3 +20,4 @@
 import chrome from 'ui/chrome';
 
 export const getEsShardTimeout = () => chrome.getInjected('esShardTimeout');
+export const getEnableExternalUrls = () => chrome.getInjected('enableExternalUrls');
