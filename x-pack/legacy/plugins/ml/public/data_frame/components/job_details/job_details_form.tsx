@@ -200,7 +200,6 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               defaultMessage: 'Choose an optional job description.',
             }
           )}
-          isInvalid={jobIdExists}
         />
       </EuiFormRow>
       <EuiFormRow
