@@ -32,10 +32,12 @@ export async function createCmIndex(server: Server) {
             service: {
               properties: {
                 name: {
-                  type: 'keyword'
+                  type: 'keyword',
+                  ignore_above: 1024
                 },
                 environment: {
-                  type: 'keyword'
+                  type: 'keyword',
+                  ignore_above: 1024
                 }
               }
             }

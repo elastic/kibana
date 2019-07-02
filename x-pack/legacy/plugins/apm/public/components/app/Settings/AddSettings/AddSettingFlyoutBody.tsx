@@ -183,13 +183,13 @@ export function AddSettingFlyoutBody({
             'xpack.apm.settings.cm.flyOut.sampleRateConfigurationInputHelpText',
             {
               defaultMessage:
-                'Choose a rate between 0.00 and 1.0. Default configuration is 1.0 (100% of traces).'
+                'Choose a rate between 0.000 and 1.0. Default configuration is 1.0 (100% of traces).'
             }
           )}
           error={i18n.translate(
             'xpack.apm.settings.cm.flyOut.sampleRateConfigurationInputErrorText',
             {
-              defaultMessage: 'Sample rate must be between 0.00 and 1'
+              defaultMessage: 'Sample rate must be between 0.000 and 1'
             }
           )}
           isInvalid={

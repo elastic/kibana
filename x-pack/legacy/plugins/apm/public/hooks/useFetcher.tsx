@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 
@@ -79,11 +79,14 @@ export function useFetcher<Response>(
     [...effectKey, counter]
   );
 
-  return {
-    ...result,
-    refresh: () => {
-      // this will invalidate the effectKey and will result in a new request
-      setCounter(counter + 1);
-    }
-  };
+  return useMemo(
+    () => ({
+      ...result,
+      refresh: () => {
+        // this will invalidate the effectKey and will result in a new request
+        setCounter(counter + 1);
+      }
+    }),
+    [result]
+  );
 }

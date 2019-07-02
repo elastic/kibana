@@ -16,7 +16,7 @@ export async function deleteConfiguration({
   const { client, config } = setup;
 
   const params = {
-    refresh: true,
+    refresh: 'wait_for',
     index: config.get<string>('apm_oss.cmIndex'),
     id: configurationId
   };

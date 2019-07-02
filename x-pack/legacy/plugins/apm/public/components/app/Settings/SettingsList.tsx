@@ -21,6 +21,7 @@ import {
   EuiButton,
   EuiLink
 } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import { loadCMList } from '../../../services/rest/apm/settings';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
@@ -81,7 +82,7 @@ export function SettingsList() {
       render: (value: string) => value
     },
     {
-      field: 'timestamp.us',
+      field: '@timestamp',
       name: i18n.translate(
         'xpack.apm.settings.cm.configTable.lastUpdatedColumnLabel',
         {
@@ -89,7 +90,7 @@ export function SettingsList() {
         }
       ),
       sortable: true,
-      render: (value: number) => (value ? moment(value / 1000).fromNow() : null)
+      render: (value: number) => (value ? moment(value).fromNow() : null)
     },
     {
       name: '',
@@ -126,7 +127,41 @@ export function SettingsList() {
     }
   );
 
-  const hasConfigurations = data.length !== 0;
+  const hasConfigurations = !isEmpty(data);
+
+  const emptyState = (
+    <EuiEmptyPrompt
+      iconType="controlsHorizontal"
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.apm.settings.cm.configTable.emptyPromptTitle',
+            { defaultMessage: 'No configurations found.' }
+          )}
+        </h2>
+      }
+      body={
+        <>
+          <p>
+            {i18n.translate(
+              'xpack.apm.settings.cm.configTable.emptyPromptText',
+              {
+                defaultMessage:
+                  "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration."
+              }
+            )}
+          </p>
+        </>
+      }
+      actions={
+        <EuiButton color="primary" fill onClick={() => setIsFlyoutOpen(true)}>
+          {i18n.translate('xpack.apm.settings.cm.createConfigButtonLabel', {
+            defaultMessage: 'Create configuration'
+          })}
+        </EuiButton>
+      }
+    />
+  );
 
   return (
     <>
@@ -252,44 +287,7 @@ export function SettingsList() {
             initialPageSize={50}
           />
         ) : (
-          <EuiEmptyPrompt
-            iconType="controlsHorizontal"
-            title={
-              <h2>
-                {i18n.translate(
-                  'xpack.apm.settings.cm.configTable.emptyPromptTitle',
-                  { defaultMessage: 'No configurations found.' }
-                )}
-              </h2>
-            }
-            body={
-              <>
-                <p>
-                  {i18n.translate(
-                    'xpack.apm.settings.cm.configTable.emptyPromptText',
-                    {
-                      defaultMessage:
-                        "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration."
-                    }
-                  )}
-                </p>
-              </>
-            }
-            actions={
-              <EuiButton
-                color="primary"
-                fill
-                onClick={() => setIsFlyoutOpen(true)}
-              >
-                {i18n.translate(
-                  'xpack.apm.settings.cm.createConfigButtonLabel',
-                  {
-                    defaultMessage: 'Create configuration'
-                  }
-                )}
-              </EuiButton>
-            }
-          />
+          emptyState
         )}
       </EuiPanel>
     </>

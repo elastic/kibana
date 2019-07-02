@@ -25,9 +25,7 @@ export async function createConfiguration({
     refresh: true,
     index: config.get<string>('apm_oss.cmIndex'),
     body: {
-      timestamp: {
-        us: Date.now() * 1000
-      },
+      '@timestamp': Date.now(),
       ...configuration
     }
   };
