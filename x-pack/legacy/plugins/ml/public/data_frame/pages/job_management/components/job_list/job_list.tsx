@@ -119,6 +119,7 @@ export const DataFrameJobList: SFC = () => {
       onChange={onTableChange}
       pagination={pagination}
       sorting={sorting}
+      data-test-subj="mlDataFramesTableJobs"
     />
   );
 };

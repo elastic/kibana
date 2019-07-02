@@ -16,14 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
 
-export const safeMakeLabel = function (agg) {
-  try {
-    return agg.makeLabel();
-  } catch (e) {
-    return i18n.translate('common.ui.aggTypes.metrics.aggNotValidErrorMessage', {
-      defaultMessage: '- agg not valid -'
-    });
-  }
-};
+import { useEffect } from 'react';
+
+export function useUnmount(fn: () => void): void {
+  useEffect(() => fn, []);
+}
