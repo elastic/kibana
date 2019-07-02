@@ -26,6 +26,7 @@ import { TopNavMenuItem } from './top_nav_menu_item';
 interface Props {
   config: TopNavMenuData[];
   name: string;
+  showBorder?: boolean;
   searchBarOptions?: any;
   activeItem: string;
 }
@@ -39,6 +40,11 @@ export function TopNavMenu(props: Props) {
     ));
   }
 
+  function getBorder() {
+    if (!props.showBorder) return;
+    return <EuiHorizontalRule margin="none" />;
+  }
+
   function menuItemClickHandler(key: string, action: TopNavMenuAction, target?: any) {
     action(null, null, target);
   }
@@ -48,7 +54,7 @@ export function TopNavMenu(props: Props) {
       <EuiFlexGroup data-test-subj="top-nav" justifyContent="flexStart" gutterSize="xs">
         {renderItems()}
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="none" />
+      {getBorder()}
     </div>
   );
 }
