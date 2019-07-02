@@ -572,6 +572,39 @@ Object {
 `);
     });
 
+    it('extract savedSearchId as empty string from doc', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}',
+          },
+          savedSearchId: '',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+}
+`);
+    });
+
     it('should return a new object if vis is table and has multiple split aggs', () => {
       const aggs = [
         {
