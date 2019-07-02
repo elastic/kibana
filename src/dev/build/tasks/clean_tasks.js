@@ -125,7 +125,7 @@ export const CleanExtraFilesFromModulesTask = {
       // scripts
       '**/*.sh',
       '**/*.bat',
-      '**/[!ctags-win32]*.exe',
+      '**/*.exe',
       '**/Gruntfile.js',
       '**/gulpfile.js',
       '**/Makefile',

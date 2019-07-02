@@ -62,7 +62,7 @@ export async function scanDelete(options: Options) {
   // and recursively iterating through all children, unless a child matches
   // one of the supplied regular expressions
   const getPathsToDelete$ = (path: string): Rx.Observable<string> => {
-    if (excludePaths && excludePaths.some(excluded => path === excluded)) {
+    if (excludePaths && excludePaths.includes(path)) {
       return Rx.EMPTY;
     }
 
