@@ -68,4 +68,4 @@ export interface TriggerContext {
 export type ExecuteTriggerActions = (triggerId: string, actionContext: ActionContext) => Promise<void>;
 export type GetActionsCompatibleWithTrigger = (triggerId: string, context: TriggerContext) => Promise<Action[]>;
 export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;
-export type GetAllEmbeddableFactories = () => EmbeddableFactory[];
+export type GetEmbeddableFactories = () => IterableIterator<EmbeddableFactory>;

@@ -21,7 +21,7 @@ import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode, GetEmbeddableFactory, GetAllEmbeddableFactories } from '../../../../types';
+import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { Action, ActionContext } from '../../../../actions';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { OverlayStart, NotificationsStart } from '../../../../../../../../../../../core/public';
@@ -33,7 +33,7 @@ export class AddPanelAction extends Action {
 
   constructor(
     private readonly getFactory: GetEmbeddableFactory,
-    private readonly getAllFactories: GetAllEmbeddableFactories,
+    private readonly getAllFactories: GetEmbeddableFactories,
     private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
   ) {

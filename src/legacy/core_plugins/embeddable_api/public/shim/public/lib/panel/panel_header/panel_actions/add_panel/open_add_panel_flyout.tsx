@@ -19,7 +19,7 @@
 import React from 'react';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { GetEmbeddableFactory, GetAllEmbeddableFactories } from '../../../../types';
+import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { OverlayStart, NotificationsStart } from '../../../../../../../../../../../core/public';
 
 export async function openAddPanelFlyout({
@@ -31,7 +31,7 @@ export async function openAddPanelFlyout({
 }: {
   embeddable: IContainer,
   getFactory: GetEmbeddableFactory,
-  getAllFactories: GetAllEmbeddableFactories,
+  getAllFactories: GetEmbeddableFactories,
   overlays: OverlayStart,
   notifications: NotificationsStart,
 }) {

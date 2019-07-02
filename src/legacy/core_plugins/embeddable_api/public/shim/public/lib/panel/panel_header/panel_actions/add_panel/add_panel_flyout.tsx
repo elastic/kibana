@@ -43,13 +43,13 @@ import {
 } from '@elastic/eui';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
-import { GetEmbeddableFactory, GetAllEmbeddableFactories } from '../../../../types';
+import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 
 interface Props {
   onClose: () => void;
   container: IContainer;
   getFactory: GetEmbeddableFactory;
-  getAllFactories: GetAllEmbeddableFactories;
+  getAllFactories: GetEmbeddableFactories;
   notifications: CoreSetup['notifications'];
 }
 
