@@ -5,7 +5,7 @@
         "type": "keyword"
       },
       "interval": {
-        "type": "long"
+        "type": "integer"
       },
       "actions": {
         "type": "nested",

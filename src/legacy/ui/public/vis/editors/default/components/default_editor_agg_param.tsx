@@ -19,14 +19,15 @@
 
 import React, { useEffect } from 'react';
 
-import { AggParamEditorProps, AggParamCommonProps } from './agg_param_editor_props';
+import { AggParams } from '../agg_params';
+import { AggParamEditorProps, AggParamCommonProps } from './default_editor_agg_param_props';
 
-interface AggParamReactWrapperProps<T> extends AggParamCommonProps<T> {
-  paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
-  onChange(value?: T): void;
+interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
+  paramEditor: React.ComponentType<AggParamEditorProps<T>>;
+  onChange(aggParams: AggParams, paramName: string, value?: T): void;
 }
 
-function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
+function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
   const { agg, aggParam, paramEditor: ParamEditor, onChange, setValidity, ...rest } = props;
 
   useEffect(
@@ -47,10 +48,10 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
       agg={agg}
       aggParam={aggParam}
       setValidity={setValidity}
-      setValue={onChange}
+      setValue={(value: T) => onChange(agg.params, aggParam.name, value)}
       {...rest}
     />
   );
 }
 
-export { AggParamReactWrapper };
+export { DefaultEditorAggParam };
