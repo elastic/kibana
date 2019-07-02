@@ -5,7 +5,15 @@
  */
 
 import _ from 'lodash';
-import { assertValidInterval, intervalFromNow, minutesFromNow, secondsFromNow } from './intervals';
+import {
+  assertValidInterval,
+  intervalFromNow,
+  intervalFromDate,
+  minutesFromNow,
+  minutesFromDate,
+  secondsFromNow,
+  secondsFromDate,
+} from './intervals';
 
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {
@@ -52,6 +60,34 @@ describe('taskIntervals', () => {
     });
   });
 
+  describe('intervalFromDate', () => {
+    test('it returns the given date plus n minutes', () => {
+      const originalDate = new Date(2019, 1, 1);
+      const mins = _.random(1, 100);
+      const expected = originalDate.valueOf() + mins * 60 * 1000;
+      const nextRun = intervalFromDate(originalDate, `${mins}m`)!.getTime();
+      expect(expected).toEqual(nextRun);
+    });
+
+    test('it returns the current date plus n seconds', () => {
+      const originalDate = new Date(2019, 1, 1);
+      const secs = _.random(1, 100);
+      const expected = originalDate.valueOf() + secs * 1000;
+      const nextRun = intervalFromDate(originalDate, `${secs}s`)!.getTime();
+      expect(expected).toEqual(nextRun);
+    });
+
+    test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
+      const date = new Date();
+      expect(() => intervalFromDate(date, `5m 2s`)).toThrow(
+        /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+      expect(() => intervalFromDate(date, `hello`)).toThrow(
+        /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
+  });
+
   describe('minutesFromNow', () => {
     test('it returns the current date plus a number of minutes', () => {
       const mins = _.random(1, 100);
@@ -61,12 +97,32 @@ describe('taskIntervals', () => {
     });
   });
 
+  describe('minutesFromDate', () => {
+    test('it returns the given date plus a number of minutes', () => {
+      const originalDate = new Date(2019, 1, 1);
+      const mins = _.random(1, 100);
+      const expected = originalDate.valueOf() + mins * 60 * 1000;
+      const nextRun = minutesFromDate(originalDate, mins).getTime();
+      expect(expected).toEqual(nextRun);
+    });
+  });
+
   describe('secondsFromNow', () => {
     test('it returns the current date plus a number of seconds', () => {
       const secs = _.random(1, 100);
       const expected = Date.now() + secs * 1000;
       const nextRun = secondsFromNow(secs).getTime();
       expect(Math.abs(nextRun - expected)).toBeLessThan(100);
+    });
+  });
+
+  describe('secondsFromDate', () => {
+    test('it returns the given date plus a number of seconds', () => {
+      const originalDate = new Date(2019, 1, 1);
+      const secs = _.random(1, 100);
+      const expected = originalDate.valueOf() + secs * 1000;
+      const nextRun = secondsFromDate(originalDate, secs).getTime();
+      expect(expected).toEqual(nextRun);
     });
   });
 });
