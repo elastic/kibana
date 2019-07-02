@@ -318,63 +318,65 @@ export class IndexActionsContextMenu extends Component {
             )
           }
         >
-          <div>
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
+              defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index} other {these indices} }:"
+              values={{ selectedIndexCount }}
+            />
+          </p>
+
+          <ul>
+            {indexNames.map(indexName => (
+              <li key={indexName}>{indexName}</li>
+            ))}
+          </ul>
+
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
+              {
+                defaultMessage: 'Proceed with caution!'
+              }
+            )}
+            color="warning"
+            iconType="help"
+          >
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
-                defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index} other {these indices} }:"
-                values={{ selectedIndexCount }}
+                id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
+                defaultMessage="
+                  Force merging a large index or an index that is not read-only can
+                  potentially cause performance and stability issues in the cluster
+                  if it is not run properly (run against non-read-only indices) or run during peak hours.
+                "
               />
             </p>
-            <ul>
-              {indexNames.map(indexName => (
-                <li key={indexName}>{indexName}</li>
-              ))}
-            </ul>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+
+          <EuiForm
+            isInvalid={this.forcemergeSegmentsError()}
+            error={this.forcemergeSegmentsError()}
+          >
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
                 {
-                  defaultMessage: 'Proceed with caution!'
+                  defaultMessage: 'Maximum number of segments per shard'
                 }
               )}
-              color="warning"
-              iconType="help"
+              helpText={helpText}
             >
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
-                  defaultMessage="
-                    Force merging a large index or an index that is not read-only can
-                    potentially cause performance and stability issues in the cluster
-                    if it is not run properly (run against non-read-only indices) or run during peak hours.
-                  "
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-            <EuiForm
-              isInvalid={this.forcemergeSegmentsError()}
-              error={this.forcemergeSegmentsError()}
-            >
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
-                  {
-                    defaultMessage: 'Maximum number of segments per shard'
-                  }
-                )}
-                helpText={helpText}
-              >
-                <EuiFieldText
-                  onChange={event => {
-                    this.setState({ forcemergeSegments: event.target.value });
-                  }}
-                  name="maxNumberSegments"
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </div>
+              <EuiFieldText
+                onChange={event => {
+                  this.setState({ forcemergeSegments: event.target.value });
+                }}
+                name="maxNumberSegments"
+              />
+            </EuiFormRow>
+          </EuiForm>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
@@ -386,7 +388,7 @@ export class IndexActionsContextMenu extends Component {
     const selectedIndexCount = indexNames.length;
 
     const standardIndexModalBody = (
-      <div>
+      <Fragment>
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
@@ -394,6 +396,7 @@ export class IndexActionsContextMenu extends Component {
             values={{ selectedIndexCount }}
           />
         </p>
+
         <ul>
           {indexNames.map(indexName => (
             <li key={indexName}>
@@ -401,18 +404,18 @@ export class IndexActionsContextMenu extends Component {
             </li>
           ))}
         </ul>
+
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
             defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups."
           />
         </p>
-      </div>
+      </Fragment>
     );
 
     const systemIndexModalBody = (
-      <div>
-        <EuiSpacer size="l" />
+      <Fragment>
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
@@ -420,6 +423,7 @@ export class IndexActionsContextMenu extends Component {
             values={{ selectedIndexCount }}
           />
         </p>
+
         <ul>
           {indexNames.map(indexName => (
             <li key={indexName}>
@@ -436,6 +440,7 @@ export class IndexActionsContextMenu extends Component {
             </li>
           ))}
         </ul>
+
         <EuiCallOut
           title={
             i18n.translate(
@@ -467,7 +472,7 @@ export class IndexActionsContextMenu extends Component {
             onChange={e => this.confirmAction(e.target.checked)}
           />
         </EuiCallOut>
-      </div>
+      </Fragment>
     );
 
     return (
@@ -547,63 +552,62 @@ export class IndexActionsContextMenu extends Component {
             )
           }
         >
-          <div>
-            <EuiSpacer size="l" />
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
+              defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
+              values={{ selectedIndexCount }}
+            />
+          </p>
+
+          <ul>
+            {indexNames.map(indexName => (
+              <li key={indexName}>
+                {indexName}
+                {isSystemIndexByName[indexName] ? (
+                  <Fragment>
+                    {' '}
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
+                      defaultMessage="(System index)"
+                    />
+                  </Fragment>
+                ) : ''}
+              </li>
+            ))}
+          </ul>
+
+          <EuiCallOut
+            title={
+              i18n.translate(
+                'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
+                {
+                  defaultMessage: 'Closing a system index can break Kibana'
+                }
+              )
+            }
+            color="danger"
+            iconType="alert"
+          >
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
-                defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
-                values={{ selectedIndexCount }}
+                id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
+                defaultMessage="System indices are critical for internal operations.
+                  You can reopen the index using the Open Index API."
               />
             </p>
-            <ul>
-              {indexNames.map(indexName => (
-                <li key={indexName}>
-                  {indexName}
-                  {isSystemIndexByName[indexName] ? (
-                    <Fragment>
-                      {' '}
-                      <FormattedMessage
-                        id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
-                        defaultMessage="(System index)"
-                      />
-                    </Fragment>
-                  ) : ''}
-                </li>
-              ))}
-            </ul>
-            <EuiCallOut
-              title={
-                i18n.translate(
-                  'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
-                  {
-                    defaultMessage: 'Closing a system index can break Kibana'
-                  }
-                )
-              }
-              color="danger"
-              iconType="alert"
-            >
-              <p>
+            <EuiCheckbox
+              id="confirmCloseIndicesCheckbox"
+              label={
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
-                  defaultMessage="System indices are critical for internal operations.
-                    You can reopen the index using the Open Index API."
+                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
+                  defaultMessage="I understand the consequences of closing a system index"
                 />
-              </p>
-              <EuiCheckbox
-                id="confirmCloseIndicesCheckbox"
-                label={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
-                    defaultMessage="I understand the consequences of closing a system index"
-                  />
-                }
-                checked={isActionConfirmed}
-                onChange={e => this.confirmAction(e.target.checked)}
-              />
-            </EuiCallOut>
-          </div>
+              }
+              checked={isActionConfirmed}
+              onChange={e => this.confirmAction(e.target.checked)}
+            />
+          </EuiCallOut>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
@@ -645,44 +649,42 @@ export class IndexActionsContextMenu extends Component {
             )
           }
         >
-          <Fragment>
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
+              defaultMessage="You are about to freeze {count, plural, one {this index} other {these indices}}:"
+              values={{ count: indexNames.length, }}
+            />
+          </p>
+
+          <ul>
+            {indexNames.map(indexName => (
+              <li key={indexName}>{indexName}</li>
+            ))}
+          </ul>
+
+          <EuiCallOut
+            title={
+              i18n.translate(
+                'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
+                {
+                  defaultMessage: 'Proceed with caution'
+                }
+              )
+            }
+            color="warning"
+            iconType="help"
+          >
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
-                defaultMessage="You are about to freeze {count, plural, one {this index} other {these indices}}:"
-                values={{ count: indexNames.length, }}
+                id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription"
+                defaultMessage="
+                  A frozen index has little overhead on the cluster and is blocked for write operations.
+                  You can search a frozen index, but expect queries to be slower.
+                "
               />
             </p>
-
-            <ul>
-              {indexNames.map(indexName => (
-                <li key={indexName}>{indexName}</li>
-              ))}
-            </ul>
-
-            <EuiCallOut
-              title={
-                i18n.translate(
-                  'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
-                  {
-                    defaultMessage: 'Proceed with caution'
-                  }
-                )
-              }
-              color="warning"
-              iconType="help"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription"
-                  defaultMessage="
-                    A frozen index has little overhead on the cluster and is blocked for write operations.
-                    You can search a frozen index, but expect queries to be slower.
-                  "
-                />
-              </p>
-            </EuiCallOut>
-          </Fragment>
+          </EuiCallOut>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
