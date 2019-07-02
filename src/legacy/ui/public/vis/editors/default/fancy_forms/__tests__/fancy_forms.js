@@ -58,22 +58,5 @@ describe('fancy forms', function () {
       $scope.$apply();
       expect(ngForm.errorCount()).to.be(0);
     });
-
-    it('describes 0 errors', function () {
-      $scope.val = 'something';
-      $scope.$apply();
-      expect(ngForm.describeErrors()).to.be('0 Errors');
-    });
-
-    it('describes 0 error when the model is invalid but untouched', function () {
-      $scope.$apply();
-      expect(ngForm.describeErrors()).to.be('0 Errors');
-    });
-
-    it('describes 1 error when the model is touched', function () {
-      $el.find('input').blur();
-      $scope.$apply();
-      expect(ngForm.describeErrors()).to.be('1 Error');
-    });
   });
 });

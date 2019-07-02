@@ -57,7 +57,7 @@ interface IPDetailsComponentReduxProps {
   }>;
 }
 
-type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
+export type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
 export const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({

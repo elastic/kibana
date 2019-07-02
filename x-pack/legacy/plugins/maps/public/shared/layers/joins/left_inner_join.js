@@ -10,10 +10,6 @@ import { VectorStyle } from '../styles/vector_style';
 
 export class LeftInnerJoin {
 
-  static toHash(descriptor) {
-    return JSON.stringify(descriptor);
-  }
-
   constructor(joinDescriptor, inspectorAdapters) {
     this._descriptor = joinDescriptor;
     this._rightSource = new ESJoinSource(joinDescriptor.right, inspectorAdapters);
@@ -37,8 +33,11 @@ export class LeftInnerJoin {
     });
   }
 
+  // Source request id must be static and unique because the re-fetch logic uses the id to locate the previous request.
+  // Elasticsearch sources have a static and unique id so that requests can be modified in the inspector.
+  // Using the right source id as the source request id because it meets the above criteria.
   getSourceId() {
-    return LeftInnerJoin.toHash(this._descriptor);
+    return `join_source_${this._rightSource.getId()}`;
   }
 
   getLeftFieldName() {
@@ -64,10 +63,6 @@ export class LeftInnerJoin {
 
   getRightJoinSource() {
     return this._rightSource;
-  }
-
-  getId() {
-    return this._descriptor.id;
   }
 
   toDescriptor() {
