@@ -12,7 +12,6 @@ import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import assert from 'assert';
-import { Server } from 'hapi';
 
 import { GitOperations } from '../git_operations';
 import { RepositoryConfigReservedField, RepositoryGitStatusReservedField } from '../indexer/schema';
