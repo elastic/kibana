@@ -214,29 +214,23 @@ export class TaskManagerRunner implements TaskRunner {
     // recurring task: update the task instance
     const startedAt = this.instance.startedAt!;
     const state = result.state || this.instance.state || {};
-    const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
-    const status = this.instance.interval
-      ? 'idle'
-      : this.instance.attempts < maxAttempts
-      ? 'idle'
-      : 'failed';
+    const status = this.getInstanceStatus();
 
     let runAt;
     if (status === 'failed') {
       // task run errored, keep the same runAt
       runAt = this.instance.runAt;
+    } else if (result.runAt) {
+      runAt = result.runAt;
+    } else if (result.error) {
+      // when result.error is truthy, then we're retrying because it failed
+      runAt = this.definition.getBackpressureDelay
+        ? new Date(
+            Date.now() + this.definition.getBackpressureDelay(this.instance.attempts, result.error)
+          )
+        : minutesFromNow(this.instance.attempts * 5); // incrementally backs off an extra 5m per failure
     } else {
-      runAt =
-        result.runAt ||
-        // when result.error is truthy, then we're retrying because it failed
-        (result.error &&
-          (this.definition.getBackpressureDelay
-            ? new Date(
-                Date.now() +
-                  this.definition.getBackpressureDelay(this.instance.attempts, result.error)
-              )
-            : minutesFromNow(this.instance.attempts * 5))) || // incrementally backs off an extra 5m per failure
-        intervalFromDate(startedAt, this.instance.interval)!;
+      runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
 
     await this.store.update({
@@ -275,6 +269,15 @@ export class TaskManagerRunner implements TaskRunner {
       await this.processResultWhenDone(result);
     }
     return result;
+  }
+
+  private getInstanceStatus() {
+    if (this.instance.interval) {
+      return 'idle';
+    }
+
+    const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
+    return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
   }
 }
 
