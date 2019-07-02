@@ -48,16 +48,20 @@ import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  MAP_SAVED_OBJECT_TYPE,
+  MAP_APP_PATH
+} from '../../common/constants';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 
-const app = uiModules.get('app/maps', []);
+const app = uiModules.get(MAP_APP_PATH, []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $route.current.locals.map;
+
   let unsubscribe;
 
   const store = createMapStore();
@@ -124,7 +128,42 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
+  function hashChangeListener(event) {
+
+    if (window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`)) {
+      return;
+    }
+
+    if (!event.newURL.endsWith(`${MAP_APP_PATH}#`)) {
+      return;
+    }
+
+    const state = store.getState();
+    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state);
+    if (hasChanged) {
+      event.preventDefault();
+      showSaveDialog();
+    }
+  }
+
+  function beforeUnload(event) {
+    if (!window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`)) {
+      return;
+    }
+    const state = store.getState();
+    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state);
+    if (hasChanged) {
+      event.preventDefault();
+      event.returnValue = 'foobar';//this is required for Chrome
+    }
+  }
+  window.removeEventListener('beforeunload', beforeUnload);
+  window.addEventListener('beforeunload', beforeUnload);
+  window.removeEventListener('hashchange', hashChangeListener);
+  window.addEventListener('hashchange', hashChangeListener);
+
   function renderMap() {
+
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -240,9 +279,41 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   addHelpMenuToAppChrome(chrome);
 
+  function showSaveDialog() {
+    const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+      const currentTitle = savedMap.title;
+      savedMap.title = newTitle;
+      savedMap.copyOnSave = newCopyOnSave;
+      const saveOptions = {
+        confirmOverwrite: false,
+        isTitleDuplicateConfirmed,
+        onTitleDuplicate,
+      };
+      return doSave(saveOptions).then(({ id, error }) => {
+        // If the save wasn't successful, put the original values back.
+        if (!id || error) {
+          savedMap.title = currentTitle;
+        }
+        return { id, error };
+      });
+    };
+
+    const saveModal = (
+      <SavedObjectSaveModal
+        onSave={onSave}
+        onClose={() => {}}
+        title={savedMap.title}
+        showCopyOnSave={savedMap.id ? true : false}
+        objectType={MAP_SAVED_OBJECT_TYPE}
+      />);
+    showSaveModal(saveModal);
+  }
+
   async function doSave(saveOptions) {
+
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
-    savedMap.syncWithStore(store.getState());
+    const state = store.getState();
+    savedMap.syncWithStore(state);
     let id;
 
     try {
@@ -326,33 +397,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }
     },
     run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-        const currentTitle = savedMap.title;
-        savedMap.title = newTitle;
-        savedMap.copyOnSave = newCopyOnSave;
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-        return doSave(saveOptions).then(({ id, error }) => {
-          // If the save wasn't successful, put the original values back.
-          if (!id || error) {
-            savedMap.title = currentTitle;
-          }
-          return { id, error };
-        });
-      };
-
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={savedMap.title}
-          showCopyOnSave={savedMap.id ? true : false}
-          objectType={MAP_SAVED_OBJECT_TYPE}
-        />);
-      showSaveModal(saveModal);
+      showSaveDialog();
     }
   }] : [])
   ];
