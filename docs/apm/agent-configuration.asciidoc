@@ -16,6 +16,12 @@ IMPORTANT: As this feature is in Beta, a limited number of configuration setting
 We will extend support in future releases.
 If you have feedback, please reach out in our https://discuss.elastic.co/c/apm[Discuss forum].
 
+[float]
+==== APM Server setup
+
+This feature requires a {apm-server-ref}setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
+
+[float]
 ==== Supported configurations
 
 ===== `TRANSACTION_SAMPLE_RATE`
