@@ -62,11 +62,12 @@ export function updateRoute(server: Hapi.Server) {
       const { attributes, version, references } = request.payload;
       const options = { version, references };
       const actionsClient = request.getActionsClient!();
-      return await actionsClient.update({
+      await actionsClient.update({
         id,
         attributes,
         options,
       });
+      return { id };
     },
   });
 }
