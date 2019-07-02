@@ -17,9 +17,12 @@ query Snapshot(
     dateRangeEnd: $dateRangeEnd
     filters: $filters
   ) {
-    up
-    down
-    total
+    counts {
+      down
+      mixed
+      up
+      total
+    }
   }
 }
 `;
