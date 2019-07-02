@@ -8,12 +8,7 @@ import React, { SFC, useEffect, useState } from 'react';
 
 import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
-import {
-  JobId,
-  moveToDataFrameWizard,
-  REFRESH_TRANSFORM_LIST_STATE,
-  useRefreshTransFormList,
-} from '../../../../common';
+import { JobId, moveToDataFrameWizard, useRefreshTransFormList } from '../../../../common';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';

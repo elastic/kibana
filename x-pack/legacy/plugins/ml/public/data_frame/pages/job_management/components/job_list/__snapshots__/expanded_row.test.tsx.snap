@@ -242,7 +242,6 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
       },
       Object {
         "content": <PreviewPane
-          lastUpdate={12345678}
           transformConfig={
             Object {
               "dest": Object {
