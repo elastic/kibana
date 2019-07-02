@@ -1,6 +1,6 @@
 <kbn-top-nav name="console" config="topNavMenu"></kbn-top-nav>
-<kbn-dev-tools-app data-test-subj="console" top-nav-config="topNavController">
-  <sense-history ng-show="showHistory" is-shown="showHistory" history-dirty="lastRequestTimestamp"></sense-history>
+<kbn-dev-tools-app data-test-subj="console">
+  <sense-history ng-show="showHistory" is-shown="showHistory" close="closeHistory()" history-dirty="lastRequestTimestamp"></sense-history>
   <div class="conApp">
     <div class="conApp__editor">
       <ul class="conApp__autoComplete" id="autocomplete"></ul>

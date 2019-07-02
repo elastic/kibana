@@ -30,6 +30,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
   public dateFormat?: string;
   public dateFormatTz?: string;
   public darkMode?: boolean;
+  public indexPattern?: string;
   public kbnVersion?: string;
   public scaledDateFormat?: string;
   public timezone?: string;
@@ -142,6 +143,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       } catch (e) {
         this.darkMode = false;
       }
+      this.indexPattern = config.get('siem:defaultIndex');
       this.scaledDateFormat = config.get('dateFormat:scaled');
     });
 

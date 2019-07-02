@@ -20,6 +20,8 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaPie } from './pie_fn';
 
+jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
+
 const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
   hits: 1,
   names: ['Count'],

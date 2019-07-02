@@ -19,7 +19,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import '../np_core.test.mocks';
+import '../ui_capabilities.test.mocks';
+import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import { skip } from 'rxjs/operators';
 import { ContactCardEmbeddable, FilterableEmbeddable } from '../test_samples/index';
