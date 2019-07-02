@@ -2,7 +2,7 @@
 [[canvas-workpad]]
 === Create a workpad
 
-When you create a workpad, you'll start with a blank page, or you can use a workpad that is already started for you. 
+When you create a workpad, you'll start with a blank page, or you can choose a workpad that is already started for you. 
 
 . Open *Canvas*.
 
@@ -33,7 +33,7 @@ For example, click *720p* for a traditional presentation layout.
 
 . Click the *Background color* picker, then select the background color for your workpad.
 
-image::images/canvas-background-picker.gif[]
+image::images/canvas-background-color-picker.gif[]
 
 TIP: To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
 
@@ -64,9 +64,5 @@ To import your workpads to another author, create JSON files of your workpads.
 
 . Choose one of the following options:
 .. To export a single workpad, click the *Export* icon next to the template you want to export.
-+
-To create a JSON file from your workpad, click the *Share workpad* icon in the upper left corner, then click *Download as JSON*.
 
 .. To export multiple workpads, select the workpads you want to export, then click *Export*.
-
-//TODO ask Catherine for cool video image, then insert here
