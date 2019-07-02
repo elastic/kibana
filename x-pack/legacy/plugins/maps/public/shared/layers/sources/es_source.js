@@ -117,7 +117,7 @@ export class AbstractESSource extends AbstractVectorSource {
       }
 
       const tooltipProperty  = new ESAggMetricTooltipProperty(
-        metricField.propertyLabel,
+        metricField.propertyKey,
         metricField.propertyLabel,
         value,
         indexPattern,
