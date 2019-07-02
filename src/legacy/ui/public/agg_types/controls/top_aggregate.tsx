@@ -98,7 +98,7 @@ function TopAggregateParamEditor({
         setValue(aggParam.options.byValue[filteredOptions[0].value]);
       }
     },
-    [filteredOptions]
+    [fieldType]
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
