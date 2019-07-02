@@ -93,7 +93,7 @@ export const ModalInspectQuery = ({
 
   return (
     <EuiOverlayMask>
-      <MyEuiModal onClose={closeModal}>
+      <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.TITLE}

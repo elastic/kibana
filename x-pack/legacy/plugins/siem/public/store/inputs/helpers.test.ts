@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, noop } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 
 import { mockGlobalState } from '../../mock';
 
 import {
   toggleLockTimeline,
   updateInputTimerange,
-  updateQuery,
+  upsertQuery,
   UpdateQueryParams,
+  SetIsInspectedParams,
+  setIsInspected,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
@@ -98,35 +100,108 @@ describe('Inputs', () => {
     });
   });
 
-  // describe('#updateQuery', () => {
-  //   test('make sure you can add a query', () => {
-  //     const newQuery: UpdateQueryParams = {
-  //       inputId: 'global',
-  //       id: 'myQuery',
-  //       inspect: null,
-  //       loading: false,
-  //       refetch: noop,
-  //       state,
-  //     };
-  //     const newState: InputsModel = updateQuery(newQuery);
-  //     expect(newState.global.query[0]).toEqual(newQuery);
-  //   });
+  describe('#upsertQuery', () => {
+    test('make sure you can add a query', () => {
+      const refetch = jest.fn();
+      const newQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        inspect: null,
+        loading: false,
+        refetch,
+        state,
+      };
+      const newState: InputsModel = upsertQuery(newQuery);
 
-  //   test('make sure you can update a query', () => {
-  //     const newQuery: UpdateQueryParams = {
-  //       inputId: 'global',
-  //       id: 'myQuery',
-  //       inspect: null,
-  //       loading: false,
-  //       refetch: noop,
-  //       state,
-  //     };
-  //     updateQuery(newQuery);
+      expect(newState.global.query[0]).toEqual({
+        id: 'myQuery',
+        inspect: null,
+        isInspected: false,
+        loading: false,
+        refetch,
+        selectedInspectIndex: 0,
+      });
+    });
 
-  //     newQuery.loading = true;
-  //     const newState: InputsModel = updateQuery(newQuery);
+    test('make sure you can update a query', () => {
+      const refetch = jest.fn();
+      const newQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        inspect: null,
+        loading: false,
+        refetch,
+        state,
+      };
+      let newState: InputsModel = upsertQuery(newQuery);
 
-  //     expect(newState.global.query[0]).toEqual(newQuery);
-  //   });
-  // });
+      newQuery.loading = true;
+      newQuery.state = newState;
+      newState = upsertQuery(newQuery);
+
+      expect(newState.global.query[0]).toEqual({
+        id: 'myQuery',
+        inspect: null,
+        isInspected: false,
+        loading: true,
+        refetch,
+        selectedInspectIndex: 0,
+      });
+    });
+  });
+
+  describe('#setIsInspected', () => {
+    const refetch = jest.fn();
+    beforeEach(() => {
+      state = cloneDeep(mockGlobalState.inputs);
+      const newQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        inspect: null,
+        loading: false,
+        refetch,
+        state,
+      };
+      state = upsertQuery(newQuery);
+    });
+    test('make sure you can set isInspected with a positive value', () => {
+      const newQuery: SetIsInspectedParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        isInspected: true,
+        selectedInspectIndex: 0,
+        state,
+      };
+      const newState: InputsModel = setIsInspected(newQuery);
+
+      expect(newState.global.query[0]).toEqual({
+        id: 'myQuery',
+        inspect: null,
+        isInspected: true,
+        loading: false,
+        refetch,
+        selectedInspectIndex: 0,
+      });
+    });
+
+    test('make sure you can set isInspected with a negative value', () => {
+      const newQuery: SetIsInspectedParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        isInspected: false,
+        selectedInspectIndex: 0,
+        state,
+      };
+      const newState: InputsModel = setIsInspected(newQuery);
+
+      expect(newState.global.query[0]).toEqual({
+        id: 'myQuery',
+        inspect: null,
+        isInspected: false,
+        loading: false,
+        refetch,
+        selectedInspectIndex: 0,
+      });
+    });
+  });
 });

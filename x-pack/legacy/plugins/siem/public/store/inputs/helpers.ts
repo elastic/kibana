@@ -115,6 +115,7 @@ export const setIsInspected = ({
 }: SetIsInspectedParams): InputsModel => {
   const myQueryIndex = state[inputId].query.findIndex(q => q.id === id);
   const myQuery = myQueryIndex > -1 ? state[inputId].query[myQueryIndex] : null;
+
   return {
     ...state,
     [inputId]: {

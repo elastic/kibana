@@ -5,7 +5,8 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import React, { useEffect, useState, useRef, memo } from 'react';
+import { getOr } from 'lodash/fp';
+import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled from 'styled-components';
@@ -21,15 +22,15 @@ import * as i18n from './translations';
 const InspectContainer = styled.div<{ showInspect: boolean }>`
   .euiButtonIcon {
     ${props => (props.showInspect ? 'opacity: 1;' : 'opacity: 0')}
-    transition: opacity ${props => props.theme.eui.euiAnimSpeedNormal} ease;
+    transition: opacity ${props => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
   }
 `;
 
 interface OwnProps {
   queryId: string;
   inputId?: InputsModelId;
-  inspectIndex: number;
-  isDisabled: boolean;
+  inspectIndex?: number;
+  isDisabled?: boolean;
   onCloseInspect?: () => void;
   show: boolean;
   title: string | React.ReactElement | React.ReactNode;
@@ -54,7 +55,7 @@ interface InspectButtonDispatch {
 
 type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
 
-export const InspectButtonComponent = pure<InspectButtonProps>(
+const InspectButtonComponent = pure<InspectButtonProps>(
   ({
     inputId = 'global',
     inspect,
@@ -73,7 +74,7 @@ export const InspectButtonComponent = pure<InspectButtonProps>(
       {inputId === 'timeline' && (
         <EuiButtonEmpty
           aria-label={i18n.TOOLTIP_CONTENT}
-          data-test-subj="inspect-timeline"
+          data-test-subj="inspect-empty-button"
           color="text"
           iconSide="left"
           iconType="inspect"
@@ -95,6 +96,7 @@ export const InspectButtonComponent = pure<InspectButtonProps>(
         <EuiButtonIcon
           aria-label={i18n.TOOLTIP_CONTENT}
           className={show ? '' : ''}
+          data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
           isDisabled={loading || isDisabled}
@@ -107,7 +109,6 @@ export const InspectButtonComponent = pure<InspectButtonProps>(
               selectedInspectIndex: inspectIndex,
             });
           }}
-          data-test-subj="inspect-open-modal"
         />
       )}
       <ModalInspectQuery

@@ -71,8 +71,8 @@ const HiddenFlexItem = styled(EuiFlexItem)`
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
-  isDatepickerLocked: boolean;
   isDataInTimeline: boolean;
+  isDatepickerLocked: boolean;
   isFavorite: boolean;
   title: string;
   description: string;
