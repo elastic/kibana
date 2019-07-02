@@ -197,7 +197,7 @@ export class ESJoinSource extends AbstractESSource {
       if (!indexPattern) {
         return null;
       }
-      return new ESTooltipProperty(propertyName, rawValue, indexPattern);
+      return new ESTooltipProperty(propertyName, propertyName, rawValue, indexPattern);
     } catch (e) {
       return null;
     }
