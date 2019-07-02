@@ -5021,7 +5021,6 @@
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText": "キャンセル",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText": "{entity} を凍結",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle": "{entity} の凍結の確認",
-    "xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription": "{oneIndexSelected, plural, one {これ} other {これら}}を凍結しようとしています",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription": " 凍結されたインデックスはクラスターにほとんどオーバーヘッドがなく、書き込みオペレーションがブロックされます。凍結されたインデックスは検索できますが、クエリが遅くなります。",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle": "十分ご注意ください",
     "xpack.idxMgmt.indexActionsMenu.freezeIndexLabel": "{selectedIndexCount, plural, one {インデックス} other {インデックス} }を凍結",

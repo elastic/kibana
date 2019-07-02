@@ -5021,7 +5021,6 @@
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText": "取消",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText": "冻结{entity}",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle": "确认冻结{entity}",
-    "xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription": "您将要冻结{oneIndexSelected, plural, one {此} other {这些}}",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription": " 冻结的索引在集群上有很少的开销，已被阻止进行写操作。您可以搜索冻结的索引，但查询应会较慢。",
     "xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle": "谨慎操作",
     "xpack.idxMgmt.indexActionsMenu.freezeIndexLabel": "冻结 {selectedIndexCount, plural, one { 个索引} other {} }",
