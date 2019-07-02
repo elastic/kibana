@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x # Enable pre-print commands before execution
 
 function checkout_sibling {
   project=$1
@@ -87,6 +88,8 @@ function checkout_sibling {
   fi
 }
 
+
+
 checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
 export TEST_ES_FROM=${TEST_ES_FROM:-snapshot}
 
@@ -114,3 +117,5 @@ fi
 
 echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
 export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
+
+set +x # Disable pre-print commands before execution
