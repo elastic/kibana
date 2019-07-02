@@ -60,7 +60,7 @@ export const Page: SFC = () => {
           <EuiPageContentHeaderSection>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
-                <RefreshTransformListButton onClick={() => refresh()} isLoading={isLoading} />
+                <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <CreateJobButton />
