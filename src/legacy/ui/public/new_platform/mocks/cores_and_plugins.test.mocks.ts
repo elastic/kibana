@@ -19,4 +19,6 @@
 
 import { createUiNewPlatformMock } from './helpers';
 
-jest.doMock('ui/new_platform', () => createUiNewPlatformMock());
+export const mock = createUiNewPlatformMock();
+
+jest.doMock('ui/new_platform', () => mock);
