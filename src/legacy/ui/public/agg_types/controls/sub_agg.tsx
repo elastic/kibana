@@ -21,7 +21,7 @@ import React, { useEffect, useState } from 'react';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
 
-function OrderAggParamEditor({
+function SubAggParamEditor({
   agg,
   value,
   responseValueAggs,
@@ -33,30 +33,25 @@ function OrderAggParamEditor({
 }: AggParamEditorProps<AggConfig>) {
   useEffect(
     () => {
-      if (responseValueAggs) {
-        const orderBy = agg.params.orderBy;
-
-        // we aren't creating a custom aggConfig
-        if (!orderBy || orderBy !== 'custom') {
-          setValue(null);
-        } else {
-          const paramDef = agg.type.params.byName.orderAgg;
-          setValue(value || paramDef.makeOrderAgg(agg));
-        }
+      // we aren't creating a custom aggConfig
+      if (agg.params.metricAgg !== 'custom') {
+        setValue(null);
+      } else if (!agg.params.customMetric) {
+        setValue(agg.type.params.byName.customMetric.makeAgg(agg));
       }
     },
-    [agg.params.orderBy, responseValueAggs]
+    [value, responseValueAggs]
   );
 
   const [innerState, setInnerState] = useState(true);
 
-  if (!agg.params.orderAgg) {
+  if (agg.params.metricAgg !== 'custom' || !agg.params.customMetric) {
     return null;
   }
 
   return (
     <DefaultEditorAggParams
-      agg={value}
+      agg={agg.params.customMetric}
       groupName="metrics"
       className="visEditorAgg__subAgg"
       formIsTouched={subAggParams.formIsTouched}
@@ -77,4 +72,4 @@ function OrderAggParamEditor({
   );
 }
 
-export { OrderAggParamEditor };
+export { SubAggParamEditor };
