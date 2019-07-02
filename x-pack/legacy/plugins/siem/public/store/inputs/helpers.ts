@@ -63,7 +63,7 @@ export interface UpdateQueryParams {
   state: InputsModel;
 }
 
-export const updateQuery = ({
+export const upsertQuery = ({
   inputId,
   id,
   inspect,
@@ -98,7 +98,7 @@ export const updateQuery = ({
   };
 };
 
-interface SetIsInspectedParams {
+export interface SetIsInspectedParams {
   id: string;
   inputId: InputsModelId;
   isInspected: boolean;

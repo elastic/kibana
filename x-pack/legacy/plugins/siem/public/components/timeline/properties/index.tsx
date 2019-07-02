@@ -72,6 +72,7 @@ interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
   isDatepickerLocked: boolean;
+  isDataInTimeline: boolean;
   isFavorite: boolean;
   title: string;
   description: string;
@@ -137,6 +138,7 @@ export class Properties extends React.PureComponent<Props, State> {
       description,
       getNotesByIds,
       isFavorite,
+      isDataInTimeline,
       isDatepickerLocked,
       title,
       noteIds,
@@ -275,6 +277,8 @@ export class Properties extends React.PureComponent<Props, State> {
                     queryId={timelineId}
                     inputId="timeline"
                     inspectIndex={0}
+                    isDisabled={!isDataInTimeline}
+                    onCloseInspect={this.onClosePopover}
                     show={true}
                     title={i18n.INSPECT_TIMELINE_TITLE}
                   />

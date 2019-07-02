@@ -20,7 +20,7 @@ import {
   stopAutoReload,
   toggleTimelineLinkTo,
 } from './actions';
-import { toggleLockTimeline, updateInputTimerange, updateQuery, setIsInspected } from './helpers';
+import { setIsInspected, toggleLockTimeline, updateInputTimerange, upsertQuery } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
@@ -107,7 +107,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     },
   }))
   .case(setQuery, (state, { inputId, id, inspect, loading, refetch }) =>
-    updateQuery({ inputId, id, inspect, loading, refetch, state })
+    upsertQuery({ inputId, id, inspect, loading, refetch, state })
   )
   .case(setDuration, (state, { id, duration }) => ({
     ...state,

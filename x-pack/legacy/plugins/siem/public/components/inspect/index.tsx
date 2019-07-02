@@ -5,11 +5,12 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState, useRef, memo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled from 'styled-components';
 
+import { pure } from 'recompose';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
@@ -28,6 +29,8 @@ interface OwnProps {
   queryId: string;
   inputId?: InputsModelId;
   inspectIndex: number;
+  isDisabled: boolean;
+  onCloseInspect?: () => void;
   show: boolean;
   title: string | React.ReactElement | React.ReactNode;
 }
@@ -51,74 +54,84 @@ interface InspectButtonDispatch {
 
 type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
 
-export const InspectButtonComponent = ({
-  inputId = 'global',
-  inspect,
-  isInspected,
-  loading,
-  inspectIndex = 0,
-  queryId = '',
-  selectedInspectIndex,
-  setIsInspected,
-  show,
-  title = '',
-}: InspectButtonProps) => (
-  <InspectContainer showInspect={show}>
-    {inputId === 'timeline' && (
-      <EuiButtonEmpty
-        data-test-subj="inspect-timeline"
-        color="text"
-        iconSide="left"
-        iconType="inspect"
-        onClick={() => {
+export const InspectButtonComponent = pure<InspectButtonProps>(
+  ({
+    inputId = 'global',
+    inspect,
+    isDisabled,
+    isInspected,
+    loading,
+    inspectIndex = 0,
+    onCloseInspect,
+    queryId = '',
+    selectedInspectIndex,
+    setIsInspected,
+    show,
+    title = '',
+  }: InspectButtonProps) => (
+    <InspectContainer showInspect={show}>
+      {inputId === 'timeline' && (
+        <EuiButtonEmpty
+          aria-label={i18n.TOOLTIP_CONTENT}
+          data-test-subj="inspect-timeline"
+          color="text"
+          iconSide="left"
+          iconType="inspect"
+          isDisabled={loading || isDisabled}
+          isLoading={loading}
+          onClick={() => {
+            setIsInspected({
+              id: queryId,
+              inputId,
+              isInspected: true,
+              selectedInspectIndex: inspectIndex,
+            });
+          }}
+        >
+          {i18n.TITLE}
+        </EuiButtonEmpty>
+      )}
+      {inputId === 'global' && (
+        <EuiButtonIcon
+          aria-label={i18n.TOOLTIP_CONTENT}
+          className={show ? '' : ''}
+          iconSize="m"
+          iconType="inspect"
+          isDisabled={loading || isDisabled}
+          title={i18n.TOOLTIP_CONTENT}
+          onClick={() => {
+            setIsInspected({
+              id: queryId,
+              inputId,
+              isInspected: true,
+              selectedInspectIndex: inspectIndex,
+            });
+          }}
+          data-test-subj="inspect-open-modal"
+        />
+      )}
+      <ModalInspectQuery
+        closeModal={() => {
+          if (onCloseInspect != null) {
+            onCloseInspect();
+          }
           setIsInspected({
             id: queryId,
             inputId,
-            isInspected: true,
+            isInspected: false,
             selectedInspectIndex: inspectIndex,
           });
         }}
-      >
-        {i18n.TITLE}
-      </EuiButtonEmpty>
-    )}
-    {inputId === 'global' && (
-      <EuiButtonIcon
-        aria-label={i18n.TOOLTIP_CONTENT}
-        className={show ? '' : ''}
-        iconSize="m"
-        iconType="inspect"
-        isDisabled={loading}
-        title={i18n.TOOLTIP_CONTENT}
-        onClick={() => {
-          setIsInspected({
-            id: queryId,
-            inputId,
-            isInspected: true,
-            selectedInspectIndex: inspectIndex,
-          });
-        }}
-        data-test-subj="inspect-open-modal"
+        isShowing={!loading && selectedInspectIndex === inspectIndex && isInspected}
+        request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
+        response={
+          inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
+        }
+        title={title}
+        data-test-subj="inspect-modal"
       />
-    )}
-    <ModalInspectQuery
-      closeModal={() => {
-        setIsInspected({
-          id: queryId,
-          inputId,
-          isInspected: false,
-          selectedInspectIndex: inspectIndex,
-        });
-      }}
-      isShowing={!loading && selectedInspectIndex === inspectIndex && isInspected}
-      request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
-      response={
-        inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
-      }
-      title={title}
-      data-test-subj="inspect-modal"
-    />
-  </InspectContainer>
+    </InspectContainer>
+  )
 );
 
 const makeMapStateToProps = () => {
