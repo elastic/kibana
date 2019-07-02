@@ -58,7 +58,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       .atPath<HttpConfigType>('server')
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
 
-    this.httpServer = new HttpServer(coreContext.logger.get('http', 'server'));
+    this.httpServer = new HttpServer(coreContext.logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(
       coreContext.logger.get('http', 'redirect', 'server')
     );
@@ -148,9 +148,8 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     const baseConfig = await this.config$.pipe(first()).toPromise();
     const finalConfig = { ...baseConfig, ...cfg };
-    const log = this.logger.get('http', `server:${port}`);
 
-    const httpServer = new HttpServer(log);
+    const httpServer = new HttpServer(this.logger, `secondary server:${port}`);
     const httpSetup = await httpServer.setup(finalConfig);
     this.secondaryServers.set(port, httpServer);
     return httpSetup;
@@ -175,7 +174,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
   private async runNotReadyServer(config: HttpConfig) {
     this.log.debug('starting NotReady server');
-    const httpServer = new HttpServer(this.log);
+    const httpServer = new HttpServer(this.logger, 'NotReady');
     const { server } = await httpServer.setup(config);
     this.notReadyServer = server;
     // use hapi server while Kibana ResponseFactory doesn't allow specifying custom headers

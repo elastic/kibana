@@ -14,7 +14,7 @@ import { SearchSource } from '../../../../kibana_services';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE, DEFAULT_ES_DOC_LIMIT } from '../../../../../common/constants';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
@@ -162,7 +162,7 @@ export class ESSearchSource extends AbstractESSource {
       entitySplit: {
         terms: {
           field: topHitsSplitField,
-          size: 10000
+          size: ES_SIZE_LIMIT
         },
         aggs: {
           entityHits: {
@@ -210,7 +210,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async _getSearchHits(layerName, searchFilters) {
-    const searchSource = await this._makeSearchSource(searchFilters, DEFAULT_ES_DOC_LIMIT);
+    const searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
     // 1) all scripted fields
@@ -313,7 +313,7 @@ export class ESSearchSource extends AbstractESSource {
     const propertyValues = await this._loadTooltipProperties(properties._id, indexPattern);
 
     return this._descriptor.tooltipProperties.map(propertyName => {
-      return new ESTooltipProperty(propertyName, propertyValues[propertyName], indexPattern);
+      return new ESTooltipProperty(propertyName, propertyName, propertyValues[propertyName], indexPattern);
     });
   }
 

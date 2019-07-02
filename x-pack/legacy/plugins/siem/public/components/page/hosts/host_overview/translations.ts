@@ -18,6 +18,13 @@ export const LAST_SEEN = i18n.translate('xpack.siem.host.details.lastSeenTitle',
   defaultMessage: 'Last Seen',
 });
 
+export const MAX_ANOMALY_SCORE_BY_JOB = i18n.translate(
+  'xpack.siem.host.details.overview.maxAnomalyScoreByJobTitle',
+  {
+    defaultMessage: 'Max Anomaly Score By Job',
+  }
+);
+
 export const IP_ADDRESSES = i18n.translate('xpack.siem.host.details.overview.ipAddressesTitle', {
   defaultMessage: 'IP Addresses',
 });

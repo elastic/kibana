@@ -26,13 +26,13 @@ execa.sync('node', ['storybook_dll.js'], {
 
 // Ensure SASS has been built completely before starting Storybook
 execa.sync(process.execPath, ['scripts/build_sass'], {
-  cwd: path.resolve(__dirname, '../../../..'),
+  cwd: path.resolve(__dirname, '../../../../..'),
   ...options,
 });
 
 // Now watch the SASS sheets for changes
 execa(process.execPath, ['scripts/build_sass', '--watch'], {
-  cwd: path.resolve(__dirname, '../../../..'),
+  cwd: path.resolve(__dirname, '../../../../..'),
   ...options,
 });
 

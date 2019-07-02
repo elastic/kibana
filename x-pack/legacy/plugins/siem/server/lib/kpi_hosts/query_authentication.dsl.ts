@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
-
 import { KpiHostsESMSearchBody } from './types';
-
+import { RequestBasicOptions } from '../framework';
 const getAuthQueryFilter = () => [
   {
     bool: {

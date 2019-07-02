@@ -90,7 +90,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    describe('custom field formatter', () => {
+    describe.skip('custom field formatter', () => {
       beforeEach(() => {
         init({
           responseValueAggs: [
@@ -127,7 +127,7 @@ describe('Terms Agg', function () {
     it('saves the "custom metric" to state and refreshes from it');
     it('invalidates the form if the metric agg form is not complete');
 
-    describe('convert include/exclude from old format', function () {
+    describe.skip('convert include/exclude from old format', function () {
 
       it('it doesnt do anything with string type', function () {
         init({
