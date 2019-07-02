@@ -41,7 +41,7 @@ import { Browsers } from './browsers';
 const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
-const NO_QUEUE_COMMANDS = ['getStatus', 'newSession', 'quit'];
+const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -119,6 +119,11 @@ export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
   logger.addHandler((entry: { message: string }) => {
+    if (entry.message.match(/\/session\/\w+\/log\b/)) {
+      // ignore polling requests for logs
+      return;
+    }
+
     log.verbose(entry.message);
   });
 

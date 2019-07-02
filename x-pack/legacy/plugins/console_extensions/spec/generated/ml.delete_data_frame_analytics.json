@@ -1,0 +1,10 @@
+{
+  "ml.delete_data_frame_analytics": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/{id}"
+    ]
+  }
+}

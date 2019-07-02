@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Snapshot as SnapshotType } from '../../../common/graphql/types';
-import { UptimeAppColors } from '../../uptime_app';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { snapshotQuery } from '../../queries';
 import { SnapshotLoading } from './snapshot_loading';
@@ -19,34 +18,12 @@ interface SnapshotQueryResult {
   snapshot?: SnapshotType;
 }
 
-interface SnapshotProps {
-  /**
-   * The date/time for the start of the timespan.
-   */
-  absoluteStartDate: number;
-  /**
-   * The date/time for the end of the timespan.
-   */
-  absoluteEndDate: number;
-  /**
-   * Valid colors to be used by the component and its children.
-   */
-  colors: UptimeAppColors;
-}
-
-type Props = UptimeGraphQLQueryProps<SnapshotQueryResult> & SnapshotProps;
-
 /**
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent = ({
-  absoluteStartDate,
-  absoluteEndDate,
-  colors: { danger, success },
-  data,
-}: Props) =>
+export const SnapshotComponent = ({ data }: UptimeGraphQLQueryProps<SnapshotQueryResult>) =>
   data && data.snapshot ? (
     <React.Fragment>
       <EuiTitle size="xs">
@@ -70,7 +47,7 @@ export const SnapshotComponent = ({
                     defaultMessage: 'Up',
                   })}
                   textAlign="center"
-                  title={data.snapshot.up}
+                  title={data.snapshot.counts.up}
                   titleColor="secondary"
                 />
               </EuiFlexItem>
@@ -80,17 +57,29 @@ export const SnapshotComponent = ({
                     defaultMessage: 'Down',
                   })}
                   textAlign="center"
-                  title={data.snapshot.down}
+                  title={data.snapshot.counts.down}
                   titleColor="danger"
                 />
               </EuiFlexItem>
+              {data.snapshot.counts.mixed > 0 ? (
+                <EuiFlexItem>
+                  <EuiStat
+                    description={i18n.translate('xpack.uptime.snapshot.stats.mixedDescription', {
+                      defaultMessage: 'Mixed',
+                    })}
+                    textAlign="center"
+                    title={data.snapshot.counts.mixed}
+                    titleColor="subdued"
+                  />
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem>
                 <EuiStat
                   description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
                     defaultMessage: 'Total',
                   })}
                   textAlign="center"
-                  title={data.snapshot.total}
+                  title={data.snapshot.counts.total}
                   titleColor="subdued"
                 />
               </EuiFlexItem>
@@ -107,7 +96,4 @@ export const SnapshotComponent = ({
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  */
-export const Snapshot = withUptimeGraphQL<SnapshotQueryResult, SnapshotProps>(
-  SnapshotComponent,
-  snapshotQuery
-);
+export const Snapshot = withUptimeGraphQL<SnapshotQueryResult>(SnapshotComponent, snapshotQuery);

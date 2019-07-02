@@ -142,9 +142,9 @@ test('Repository url parsing with port', () => {
 });
 
 test('Normalize repository index name', () => {
+  // index name with repository URI should be case sensitive by attaching a hash at the end.
   const indexName1 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/Kibana');
   const indexName2 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/kibana');
-
   expect(indexName1 === indexName2).toBeFalsy();
   expect(indexName1).toEqual('github.com-elastic-kibana-e2b881a9');
   expect(indexName2).toEqual('github.com-elastic-kibana-7bf00473');
@@ -152,6 +152,17 @@ test('Normalize repository index name', () => {
   const indexName3 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic-kibana/code');
   const indexName4 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/kibana-code');
   expect(indexName3 === indexName4).toBeFalsy();
+
+  // illegal characters should be replaced
+  const indexName5 = RepositoryUtils.normalizeRepoUriToIndexName(
+    'github.com:1234/elastic-kibana/code'
+  );
+  const indexName6 = RepositoryUtils.normalizeRepoUriToIndexName(
+    'github.com/1234?elastic/kibana-code'
+  );
+  expect(indexName5 === indexName6).toBeFalsy();
+  expect(indexName5).toEqual('github.com-1234-elastic-kibana-code-2a9788f8');
+  expect(indexName6).toEqual('github.com-1234-elastic-kibana-code-2b342309');
 });
 
 test('Parse repository uri', () => {
