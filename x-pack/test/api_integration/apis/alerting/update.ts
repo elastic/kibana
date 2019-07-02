@@ -44,7 +44,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           alertTypeParams: {
             foo: true,
           },
-          interval: 12000,
+          interval: '12s',
           actions: [
             {
               group: 'default',
@@ -63,7 +63,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
             alertTypeParams: {
               foo: true,
             },
-            interval: 12000,
+            interval: '12s',
             actions: [
               {
                 group: 'default',
@@ -87,7 +87,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           alertTypeParams: {
             foo: true,
           },
-          interval: 12000,
+          interval: '12s',
           actions: [
             {
               group: 'default',
@@ -150,7 +150,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         .put(`/api/alert/${customAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          interval: 10000,
+          interval: '10s',
           alertTypeParams: {},
           actions: [],
         })

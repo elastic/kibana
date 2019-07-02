@@ -60,7 +60,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
             ],
             alertTypeId: 'test.noop',
             alertTypeParams: {},
-            interval: 10000,
+            interval: '10s',
             scheduledTaskId: resp.body.scheduledTaskId,
           });
           expect(typeof resp.body.scheduledTaskId).to.be('string');
