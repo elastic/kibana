@@ -43,9 +43,9 @@ export const startApp = async (libs: AppFrontendLibs) => {
               })}
             >
               <KibanaConfigContext.Provider value={libs.framework}>
-              <MlCapabilitiesProvider>
-                <PageRouter history={history} />
-              </MlCapabilitiesProvider>
+                <MlCapabilitiesProvider>
+                  <PageRouter history={history} />
+                </MlCapabilitiesProvider>
               </KibanaConfigContext.Provider>
             </ThemeProvider>
             <ErrorToast />
