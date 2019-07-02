@@ -15,8 +15,8 @@ node scripts/es snapshot --license=oss --download-only;
 (cd "x-pack" && yarn gulp prepare);
 
 # cache the chromedriver archive
-chromedriverDistVersion="$(node -e "console.log(require('chromedriver').version)")"
-chromedriverPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
+chromedriverDistVersion="76.0.3809.25"
+chromedriverPkgVersion="^76.0.0"
 if [ -z "$chromedriverDistVersion" ] || [ -z "$chromedriverPkgVersion" ]; then
   echo "UNABLE TO DETERMINE CHROMEDRIVER VERSIONS"
   exit 1
