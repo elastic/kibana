@@ -2,15 +2,15 @@
   "scroll": {
     "url_params": {
       "scroll": "",
-      "scroll_id": ""
+      "scroll_id": "",
+      "rest_total_hits_as_int": "__flag__"
     },
     "methods": [
       "GET",
       "POST"
     ],
     "patterns": [
-      "_search/scroll",
-      "_search/scroll/{scroll_id}"
+      "_search/scroll"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-scroll.html"
   }
