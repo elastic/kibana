@@ -64,7 +64,7 @@ export const createIndexPatternMock = (params: Record<string, any>): StaticIndex
     ...params,
     id: params.id || 'testIndexPattern',
     title: params.title || 'testIndexPattern',
-    type: params.type || '',
+    type: params.type,
     fields: params.fields || [],
   };
 };
@@ -74,7 +74,7 @@ export class IndexPattern implements StaticIndexPattern {
 
   public id?: string;
   public title: string = '';
-  public type: string = '';
+  public type?: string;
   public fieldFormatMap: any;
   public typeMeta: any;
   public fields: FieldList;
@@ -87,7 +87,7 @@ export class IndexPattern implements StaticIndexPattern {
   private savedObjectsClient: SavedObjectsClient;
   private patternCache: any;
   private getConfig: any;
-  private sourceFilters: [] = [];
+  private sourceFilters?: [];
   private originalBody: { [key: string]: any } = {};
   private fieldsFetcher: any;
   private shortDotsEnable: boolean = false;
