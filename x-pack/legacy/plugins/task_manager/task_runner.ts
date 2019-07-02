@@ -231,7 +231,10 @@ export class TaskManagerRunner implements TaskRunner {
         // when result.error is truthy, then we're retrying because it failed
         (result.error &&
           (this.definition.getBackpressureDelay
-            ? new Date(Date.now() + this.definition.getBackpressureDelay(this.instance.attempts))
+            ? new Date(
+                Date.now() +
+                  this.definition.getBackpressureDelay(this.instance.attempts, result.error)
+              )
             : minutesFromNow(this.instance.attempts * 5))) || // incrementally backs off an extra 5m per failure
         intervalFromDate(startedAt, this.instance.interval)!;
     }

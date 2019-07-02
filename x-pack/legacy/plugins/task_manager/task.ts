@@ -110,7 +110,7 @@ export interface TaskDefinition {
    * Function that returns the delay in miliseconds to wait before attempting the
    * failed task again.
    */
-  getBackpressureDelay?: (attempts: number) => number;
+  getBackpressureDelay?: (attempts: number, error?: object) => number;
 
   /**
    * The numer of workers / slots a running instance of this task occupies.
