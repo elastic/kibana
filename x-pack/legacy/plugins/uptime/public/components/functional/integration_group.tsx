@@ -176,7 +176,7 @@ export const IntegrationGroup = ({
                   description: 'This value is shown as the aria label for screen readers.',
                 }
               )}
-              href={getLoggingIpHref(monitor, basePath)}
+              href={getLoggingIpHref(summary, basePath)}
               iconType="loggingApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.ip.message',
