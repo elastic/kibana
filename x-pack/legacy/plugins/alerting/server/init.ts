@@ -16,6 +16,7 @@ import {
 import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClient } from './alerts_client';
+import { registerBuiltInAlertTypes } from './builtin_alert_types';
 
 export function init(server: Legacy.Server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
@@ -69,4 +70,6 @@ export function init(server: Legacy.Server) {
     listTypes: alertTypeRegistry.list.bind(alertTypeRegistry),
   };
   server.expose(exposedFunctions);
+
+  registerBuiltInAlertTypes(alertTypeRegistry);
 }
