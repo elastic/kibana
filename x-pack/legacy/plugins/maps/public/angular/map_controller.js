@@ -272,7 +272,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
           defaultMessage: 'Maps'
         }),
-        // href: '#'
         onClick: () => {
           if (isOnMapNow() && hasUnsavedChanges()) {
             const navigateAway = window.confirm(i18n.translate('xpack.maps.mapController.unsavedChangesWarning', {
