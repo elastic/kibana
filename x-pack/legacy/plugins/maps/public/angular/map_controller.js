@@ -162,9 +162,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   window.addEventListener('beforeunload', beforeUnload);
 
   function renderMap() {
-
     // clear old UI state
-
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
     store.dispatch(setReadOnly(!capabilities.get().maps.save));
@@ -194,8 +192,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
     initialLayerListConfig = copyPersistentState(layerList);
     store.dispatch(replaceLayerList(layerList));
-
-
     store.dispatch(setRefreshConfig($scope.refreshConfig));
     store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
 
@@ -293,7 +289,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   addHelpMenuToAppChrome(chrome);
 
   async function doSave(saveOptions) {
-
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
     savedMap.syncWithStore(store.getState());
     let id;
@@ -360,7 +355,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
-  }, ...(!capabilities.get().maps.save ? [] : [{
+  }, ...(capabilities.get().maps.save ? [{
     key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
@@ -400,15 +395,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const saveModal = (
         <SavedObjectSaveModal
           onSave={onSave}
-          onClose={() => {
-          }}
+          onClose={() => {}}
           title={savedMap.title}
           showCopyOnSave={savedMap.id ? true : false}
           objectType={MAP_SAVED_OBJECT_TYPE}
         />);
       showSaveModal(saveModal);
     }
-  }])
+  }] : [])
   ];
 });
 
