@@ -27,6 +27,7 @@ import { breadcrumbService } from '../../services/navigation';
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
 import { RestoreList } from './restore_list';
+import { PolicyList } from './policy_list';
 import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
@@ -73,6 +74,15 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         <FormattedMessage
           id="xpack.snapshotRestore.home.restoreTabTitle"
           defaultMessage="Restore Status"
+        />
+      ),
+    },
+    {
+      id: 'policies',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.policiesTabTitle"
+          defaultMessage="Policies"
         />
       ),
     },
@@ -158,6 +168,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             component={SnapshotList}
           />
           <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
+          <Route exact path={`${BASE_PATH}/policies`} component={PolicyList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

@@ -43,12 +43,15 @@ export const App: React.FunctionComponent = () => {
   const { hasPermission, missingClusterPrivileges } = permissionsData;
 
   // Update app state with permissions data
-  useEffect(() => {
-    dispatch({
-      type: 'updatePermissions',
-      permissions: permissionsData,
-    });
-  }, [permissionsData]);
+  useEffect(
+    () => {
+      dispatch({
+        type: 'updatePermissions',
+        permissions: permissionsData,
+      });
+    },
+    [permissionsData]
+  );
 
   if (loadingPermissions) {
     return (
@@ -106,7 +109,7 @@ export const App: React.FunctionComponent = () => {
     );
   }
 
-  const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
+  const sections: Section[] = ['repositories', 'snapshots', 'restore_status', 'policies'];
   const sectionsRegex = sections.join('|');
 
   return (
