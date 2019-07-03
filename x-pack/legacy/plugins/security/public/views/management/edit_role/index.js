@@ -87,8 +87,11 @@ const routeDefinition = (action) => ({
       }
       return [];
     },
-    privileges() {
+    kibanaPrivileges() {
       return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+    },
+    builtinESPrivileges() {
+      return kfetch({ method: 'get', pathname: '/api/security/v1/privileges/builtin' });
     },
     features() {
       return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
@@ -132,7 +135,8 @@ const routeDefinition = (action) => ({
       users,
       indexPatterns,
       spaces,
-      privileges,
+      kibanaPrivileges,
+      builtinESPrivileges,
       features,
     } = $route.current.locals;
 
@@ -153,7 +157,8 @@ const routeDefinition = (action) => ({
             spacesEnabled={enableSpaceAwarePrivileges}
             uiCapabilities={capabilities.get()}
             features={features}
-            privileges={privileges}
+            kibanaPrivileges={kibanaPrivileges}
+            builtinESPrivileges={builtinESPrivileges}
           />
         </I18nContext>, domNode);
 
