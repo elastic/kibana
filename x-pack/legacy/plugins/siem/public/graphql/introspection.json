@@ -1289,73 +1289,6 @@
             "deprecationReason": null
           },
           {
-            "name": "DomainFirstLastSeen",
-            "description": "",
-            "args": [
-              {
-                "name": "id",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
-              },
-              {
-                "name": "ip",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "domainName",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "flowTarget",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowTarget", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "defaultIndex",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                    }
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "FirstLastSeenDomain", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "Tls",
             "description": "",
             "args": [
@@ -3090,22 +3023,6 @@
         "description": "",
         "fields": [
           {
-            "name": "kpiEventType",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "OBJECT", "name": "KpiItem", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "edges",
             "description": "",
             "args": [],
@@ -3145,37 +3062,6 @@
               "kind": "NON_NULL",
               "name": null,
               "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "KpiItem",
-        "description": "",
-        "fields": [
-          {
-            "name": "value",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "count",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6396,33 +6282,6 @@
           },
           { "name": "unknown", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "FirstLastSeenDomain",
-        "description": "",
-        "fields": [
-          {
-            "name": "firstSeen",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "lastSeen",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
         "possibleTypes": null
       },
       {

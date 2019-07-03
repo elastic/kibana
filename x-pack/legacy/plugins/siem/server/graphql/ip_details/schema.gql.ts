@@ -102,23 +102,6 @@ const domainsSchema = gql`
   }
 `;
 
-const firstLastSeenSchema = gql`
-  type FirstLastSeenDomain {
-    firstSeen: Date
-    lastSeen: Date
-  }
-
-  extend type Source {
-    DomainFirstLastSeen(
-      id: String
-      ip: String!
-      domainName: String!
-      flowTarget: FlowTarget!
-      defaultIndex: [String!]!
-    ): FirstLastSeenDomain!
-  }
-`;
-
 const tlsSchema = gql`
   enum TlsFields {
     _id
@@ -209,10 +192,4 @@ const usersSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [
-  ipOverviewSchema,
-  domainsSchema,
-  firstLastSeenSchema,
-  tlsSchema,
-  usersSchema,
-];
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, tlsSchema, usersSchema];

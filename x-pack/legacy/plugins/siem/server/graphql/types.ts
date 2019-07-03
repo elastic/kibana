@@ -155,8 +155,6 @@ export interface Source {
 
   Domains: DomainsData;
 
-  DomainFirstLastSeen: FirstLastSeenDomain;
-
   Tls: TlsData;
 
   Users: UsersData;
@@ -355,19 +353,11 @@ export interface PageInfo {
 }
 
 export interface EventsData {
-  kpiEventType?: KpiItem[] | null;
-
   edges: EcsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
-}
-
-export interface KpiItem {
-  value?: string | null;
-
-  count: number;
 }
 
 export interface EcsEdges {
@@ -1008,12 +998,6 @@ export interface DomainsNetworkField {
   transport?: string | null;
 
   direction?: NetworkDirectionEcs[] | null;
-}
-
-export interface FirstLastSeenDomain {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
 }
 
 export interface TlsData {
@@ -1857,17 +1841,6 @@ export interface DomainsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainFirstLastSeenSourceArgs {
-  id?: string | null;
-
-  ip: string;
-
-  domainName: string;
-
-  flowTarget: FlowTarget;
-
-  defaultIndex: string[];
-}
 export interface TlsSourceArgs {
   filterQuery?: string | null;
 
@@ -2438,8 +2411,6 @@ export namespace SourceResolvers {
 
     Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
 
-    DomainFirstLastSeen?: DomainFirstLastSeenResolver<FirstLastSeenDomain, TypeParent, Context>;
-
     Tls?: TlsResolver<TlsData, TypeParent, Context>;
 
     Users?: UsersResolver<UsersData, TypeParent, Context>;
@@ -2645,23 +2616,6 @@ export namespace SourceResolvers {
     flowTarget: FlowTarget;
 
     timerange: TimerangeInput;
-
-    defaultIndex: string[];
-  }
-
-  export type DomainFirstLastSeenResolver<
-    R = FirstLastSeenDomain,
-    Parent = Source,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context, DomainFirstLastSeenArgs>;
-  export interface DomainFirstLastSeenArgs {
-    id?: string | null;
-
-    ip: string;
-
-    domainName: string;
-
-    flowTarget: FlowTarget;
 
     defaultIndex: string[];
   }
@@ -3432,8 +3386,6 @@ export namespace PageInfoResolvers {
 
 export namespace EventsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventsData> {
-    kpiEventType?: KpiEventTypeResolver<KpiItem[] | null, TypeParent, Context>;
-
     edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
@@ -3441,11 +3393,6 @@ export namespace EventsDataResolvers {
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
   }
 
-  export type KpiEventTypeResolver<
-    R = KpiItem[] | null,
-    Parent = EventsData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type EdgesResolver<R = EcsEdges[], Parent = EventsData, Context = SiemContext> = Resolver<
     R,
     Parent,
@@ -3457,25 +3404,6 @@ export namespace EventsDataResolvers {
     Context
   >;
   export type PageInfoResolver<R = PageInfo, Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-}
-
-export namespace KpiItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = KpiItem> {
-    value?: ValueResolver<string | null, TypeParent, Context>;
-
-    count?: CountResolver<number, TypeParent, Context>;
-  }
-
-  export type ValueResolver<R = string | null, Parent = KpiItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type CountResolver<R = number, Parent = KpiItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
@@ -5606,25 +5534,6 @@ export namespace DomainsNetworkFieldResolvers {
   export type DirectionResolver<
     R = NetworkDirectionEcs[] | null,
     Parent = DomainsNetworkField,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace FirstLastSeenDomainResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = FirstLastSeenDomain> {
-    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
-
-    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
-  }
-
-  export type FirstSeenResolver<
-    R = Date | null,
-    Parent = FirstLastSeenDomain,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type LastSeenResolver<
-    R = Date | null,
-    Parent = FirstLastSeenDomain,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

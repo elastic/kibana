@@ -34,20 +34,6 @@ export const buildQuery = (options: RequestOptions) => {
     return [];
   };
 
-  const agg = options.fields.includes('kpiEventType')
-    ? {
-        count_event_type: {
-          terms: {
-            field: 'event.action',
-            size: 5,
-            order: {
-              _count: 'desc',
-            },
-          },
-        },
-      }
-    : {};
-
   const filter = [...filterClause, ...getTimerangeFilter(options.timerange), { match_all: {} }];
 
   const getSortField = (sortField: SortField) => {
@@ -70,7 +56,6 @@ export const buildQuery = (options: RequestOptions) => {
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      aggregations: agg,
       query: {
         bool: {
           filter,

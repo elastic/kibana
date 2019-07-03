@@ -22,7 +22,6 @@ import {
   DetailItem,
   EcsEdges,
   EventsData,
-  KpiItem,
   LastEventTimeData,
   TimelineData,
   TimelineDetailsData,
@@ -64,13 +63,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       buildQuery(queryOptions)
     );
 
-    const kpiEventType: KpiItem[] =
-      response.aggregations && response.aggregations.count_event_type
-        ? response.aggregations.count_event_type.buckets.map(item => ({
-            value: item.key,
-            count: item.doc_count,
-          }))
-        : [];
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
@@ -80,7 +72,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     const hasNextPage = eventsEdges.length === limit + 1;
     const edges = hasNextPage ? eventsEdges.splice(0, limit) : eventsEdges;
     const lastCursor = get('cursor', last(edges));
-    return { kpiEventType, edges, totalCount, pageInfo: { hasNextPage, endCursor: lastCursor } };
+    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: lastCursor } };
   }
 
   public async getTimelineData(
