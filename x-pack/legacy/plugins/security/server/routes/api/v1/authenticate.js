@@ -6,9 +6,11 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { canRedirectRequest, wrapError } from '../../../../../../../plugins/security/server';
+import { KibanaRequest } from '../../../../../../../../src/core/server';
 
-export function initAuthenticateApi(server) {
+export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
 
   server.route({
     method: 'POST',
@@ -29,8 +31,14 @@ export function initAuthenticateApi(server) {
       const { username, password } = request.payload;
 
       try {
-        request.loginAttempt().setCredentials(username, password);
-        const authenticationResult = await server.plugins.security.authenticate(request);
+        // We should prefer `token` over `basic` if possible.
+        const providerToLoginWith = config.authc.providers.includes('token')
+          ? 'token'
+          : 'basic';
+        const authenticationResult = await login(KibanaRequest.from(request), {
+          provider: providerToLoginWith,
+          value: { username, password }
+        });
 
         if (!authenticationResult.succeeded()) {
           throw Boom.unauthorized(authenticationResult.error);
@@ -58,7 +66,11 @@ export function initAuthenticateApi(server) {
     async handler(request, h) {
       try {
         // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-        const authenticationResult = await server.plugins.security.authenticate(request);
+        const authenticationResult = await login(KibanaRequest.from(request), {
+          provider: 'saml',
+          value: { samlResponse: request.payload.SAMLResponse }
+        });
+
         if (authenticationResult.redirected()) {
           return h.redirect(authenticationResult.redirectURL);
         }
@@ -93,7 +105,24 @@ export function initAuthenticateApi(server) {
       try {
         // We handle the fact that the user might get redirected to Kibana while already having an session
         // Return an error notifying the user they are already logged in.
-        const authenticationResult = await server.plugins.security.authenticate(request);
+        const authenticationResult = await login(KibanaRequest.from(request), {
+          provider: 'oidc',
+          // Checks if the request object represents an HTTP request regarding authentication with OpenID Connect.
+          // This can be
+          //  - An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication
+          //  - An HTTP POST request with a parameter named `iss` as part of a 3rd party initiated authentication
+          //  - An HTTP GET request with a query parameter named `code` as the response to a successful authentication from
+          //    an OpenID Connect Provider
+          //  - An HTTP GET request with a query parameter named `error` as the response to a failed authentication from
+          //    an OpenID Connect Provider
+          value: {
+            code: request.query && request.query.code,
+            iss: (request.query && request.query.iss) || (request.payload && request.payload.iss),
+            loginHint:
+              (request.query && request.query.login_hint) ||
+              (request.payload && request.payload.login_hint),
+          },
+        });
         if (authenticationResult.succeeded()) {
           return Boom.forbidden(
             'Sorry, you already have an active Kibana session. ' +
@@ -119,12 +148,18 @@ export function initAuthenticateApi(server) {
       auth: false
     },
     async handler(request, h) {
-      if (!canRedirectRequest(request)) {
+      if (!canRedirectRequest(KibanaRequest.from(request))) {
         throw Boom.badRequest('Client should be able to process redirect response.');
       }
 
       try {
-        const deauthenticationResult = await server.plugins.security.deauthenticate(request);
+        const deauthenticationResult = await logout(
+          // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
+          // set of query string parameters (e.g. SAML/OIDC logout request parameters).
+          KibanaRequest.from(request, {
+            query: schema.object({}, { allowUnknowns: true }),
+          })
+        );
         if (deauthenticationResult.failed()) {
           throw wrapError(deauthenticationResult.error);
         }

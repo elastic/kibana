@@ -6,11 +6,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Legacy } from 'kibana';
-import { canRedirectRequest } from '../../can_redirect_request';
+import { FakeRequest, KibanaRequest } from '../../../../../../src/core/server';
+import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Utility class that knows how to decorate request with proper Basic authentication headers.
@@ -23,7 +23,7 @@ export class BasicCredentials {
    * @param username User name.
    * @param password User password.
    */
-  public static decorateRequest<T extends RequestWithLoginAttempt>(
+  public static decorateRequest<T extends KibanaRequest | FakeRequest>(
     request: T,
     username: string,
     password: string
@@ -48,6 +48,14 @@ export class BasicCredentials {
 }
 
 /**
+ * Describes the parameters that are required by the provider to process the initial login request.
+ */
+interface ProviderLoginAttempt {
+  username: string;
+  password: string;
+}
+
+/**
  * The state supported by the provider.
  */
 interface ProviderState {
@@ -64,35 +72,62 @@ interface ProviderState {
  */
 export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
+   * Performs initial login request using username and password.
+   * @param request Request instance.
+   * @param attempt User credentials.
+   * @param [state] Optional state object associated with the provider.
+   */
+  public async login(
+    request: KibanaRequest,
+    { username, password }: ProviderLoginAttempt,
+    state?: ProviderState | null
+  ) {
+    this.logger.debug('Trying to perform a login.');
+
+    try {
+      const { headers: authHeaders } = BasicCredentials.decorateRequest(
+        { headers: {} },
+        username,
+        password
+      );
+
+      const user = await this.getUser(request, authHeaders);
+
+      this.logger.debug('Login has been successfully performed.');
+      return AuthenticationResult.succeeded(user, { authHeaders, state: authHeaders });
+    } catch (err) {
+      this.logger.debug(`Failed to perform a login: ${err.message}`);
+      return AuthenticationResult.failed(err);
+    }
+  }
+
+  /**
    * Performs request authentication using Basic HTTP Authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
-    this.debug(`Trying to authenticate user request to ${request.url.path}.`);
+  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    // first try from login payload
-    let authenticationResult = await this.authenticateViaLoginAttempt(request);
-
-    // if there isn't a payload, try header-based auth
-    if (authenticationResult.notHandled()) {
-      const {
-        authenticationResult: headerAuthResult,
-        headerNotRecognized,
-      } = await this.authenticateViaHeader(request);
-      if (headerNotRecognized) {
-        return headerAuthResult;
-      }
-      authenticationResult = headerAuthResult;
+    // try header-based auth
+    const {
+      authenticationResult: headerAuthResult,
+      headerNotRecognized,
+    } = await this.authenticateViaHeader(request);
+    if (headerNotRecognized) {
+      return headerAuthResult;
     }
 
+    let authenticationResult = headerAuthResult;
     if (authenticationResult.notHandled() && state) {
       authenticationResult = await this.authenticateViaState(request, state);
     } else if (authenticationResult.notHandled() && canRedirectRequest(request)) {
       // If we couldn't handle authentication let's redirect user to the login page.
-      const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
+      const nextURL = encodeURIComponent(
+        `${this.options.basePath.get(request)}${request.url.path}`
+      );
       authenticationResult = AuthenticationResult.redirectTo(
-        `${this.options.basePath}/login?next=${nextURL}`
+        `${this.options.basePath.get(request)}/login?next=${nextURL}`
       );
     }
 
@@ -103,43 +138,13 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
    */
-  public async deauthenticate(request: Legacy.Request) {
+  public async logout(request: KibanaRequest) {
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     const queryString = request.url.search || `?msg=LOGGED_OUT`;
-    return DeauthenticationResult.redirectTo(`${this.options.basePath}/login${queryString}`);
-  }
-
-  /**
-   * Validates whether request contains a login payload and authenticates the
-   * user if necessary.
-   * @param request Request instance.
-   */
-  private async authenticateViaLoginAttempt(request: RequestWithLoginAttempt) {
-    this.debug('Trying to authenticate via login attempt.');
-
-    const credentials = request.loginAttempt().getCredentials();
-    if (!credentials) {
-      this.debug('Username and password not found in payload.');
-      return AuthenticationResult.notHandled();
-    }
-
-    try {
-      const { username, password } = credentials;
-      BasicCredentials.decorateRequest(request, username, password);
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
-      this.debug('Request has been authenticated via login attempt.');
-      return AuthenticationResult.succeeded(user, { authorization: request.headers.authorization });
-    } catch (err) {
-      this.debug(`Failed to authenticate request via login attempt: ${err.message}`);
-      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
-      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
-      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
-      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
-      // it's called with this request once again down the line (e.g. in the next authentication provider).
-      delete request.headers.authorization;
-      return AuthenticationResult.failed(err);
-    }
+    return DeauthenticationResult.redirectTo(
+      `${this.options.basePath.get(request)}/login${queryString}`
+    );
   }
 
   /**
@@ -147,18 +152,18 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * forward to Elasticsearch backend.
    * @param request Request instance.
    */
-  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
-    this.debug('Trying to authenticate via header.');
+  private async authenticateViaHeader(request: KibanaRequest) {
+    this.logger.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
-    if (!authorization) {
-      this.debug('Authorization header is not presented.');
+    if (!authorization || typeof authorization !== 'string') {
+      this.logger.debug('Authorization header is not presented.');
       return { authenticationResult: AuthenticationResult.notHandled() };
     }
 
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'basic') {
-      this.debug(`Unsupported authentication schema: ${authenticationSchema}`);
+      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
       return {
         authenticationResult: AuthenticationResult.notHandled(),
         headerNotRecognized: true,
@@ -166,13 +171,12 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.getUser(request);
 
-      this.debug('Request has been authenticated via header.');
-
+      this.logger.debug('Request has been authenticated via header.');
       return { authenticationResult: AuthenticationResult.succeeded(user) };
     } catch (err) {
-      this.debug(`Failed to authenticate request via header: ${err.message}`);
+      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
       return { authenticationResult: AuthenticationResult.failed(err) };
     }
   }
@@ -183,44 +187,23 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(
-    request: RequestWithLoginAttempt,
-    { authorization }: ProviderState
-  ) {
-    this.debug('Trying to authenticate via state.');
+  private async authenticateViaState(request: KibanaRequest, { authorization }: ProviderState) {
+    this.logger.debug('Trying to authenticate via state.');
 
     if (!authorization) {
-      this.debug('Access token is not found in state.');
+      this.logger.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    request.headers.authorization = authorization;
-
     try {
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      const authHeaders = { authorization };
+      const user = await this.getUser(request, authHeaders);
 
-      this.debug('Request has been authenticated via state.');
-
-      return AuthenticationResult.succeeded(user);
+      this.logger.debug('Request has been authenticated via state.');
+      return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.debug(`Failed to authenticate request via state: ${err.message}`);
-
-      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
-      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
-      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
-      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to crash if
-      // it's called with this request once again down the line (e.g. in the next authentication provider).
-      delete request.headers.authorization;
-
+      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
-  }
-
-  /**
-   * Logs message with `debug` level and saml/security related tags.
-   * @param message Message to log.
-   */
-  private debug(message: string) {
-    this.options.log(['debug', 'security', 'basic'], message);
   }
 }

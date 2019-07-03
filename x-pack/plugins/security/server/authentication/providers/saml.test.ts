@@ -6,29 +6,27 @@
 
 import Boom from 'boom';
 import sinon from 'sinon';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 
-import { requestFixture } from '../../__tests__/__fixtures__/request';
-import { LoginAttempt } from '../login_attempt';
-import { mockAuthenticationProviderOptions } from './base.mock';
+import { requestFixture } from '../../__fixtures__';
+import {
+  MockAuthenticationProviderOptions,
+  mockAuthenticationProviderOptions,
+  mockScopedClusterClient,
+} from './base.mock';
 
 import { SAMLAuthenticationProvider } from './saml';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
-  let callWithRequest: sinon.SinonStub;
-  let callWithInternalUser: sinon.SinonStub;
-  let tokens: ReturnType<typeof mockAuthenticationProviderOptions>['tokens'];
+  let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
-    callWithRequest = providerOptions.client.callWithRequest;
-    callWithInternalUser = providerOptions.client.callWithInternalUser;
-    tokens = providerOptions.tokens;
-
-    provider = new SAMLAuthenticationProvider(providerOptions, { realm: 'test-realm' });
+    mockOptions = mockAuthenticationProviderOptions();
+    provider = new SAMLAuthenticationProvider(mockOptions, { realm: 'test-realm' });
   });
 
   it('throws if `realm` option is not specified', () => {
-    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+    const providerOptions = mockAuthenticationProviderOptions();
 
     expect(() => new SAMLAuthenticationProvider(providerOptions)).toThrowError(
       'Realm name must be specified'
@@ -39,6 +37,363 @@ describe('SAMLAuthenticationProvider', () => {
     expect(() => new SAMLAuthenticationProvider(providerOptions, { realm: '' })).toThrowError(
       'Realm name must be specified'
     );
+  });
+
+  describe('`login` method', () => {
+    it('gets token and redirects user to requested URL if SAML Response is valid.', async () => {
+      const request = requestFixture();
+
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlAuthenticate')
+        .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
+
+      const authenticationResult = await provider.login(
+        request,
+        { samlResponse: 'saml-response-xml' },
+        { requestId: 'some-request-id', nextURL: '/test-base-path/some-path' }
+      );
+
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlAuthenticate',
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml' } }
+      );
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe('/test-base-path/some-path');
+      expect(authenticationResult.state).toEqual({
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+      });
+    });
+
+    it('fails if SAML Response payload is presented but state does not contain SAML Request token.', async () => {
+      const request = requestFixture();
+
+      const authenticationResult = await provider.login(
+        request,
+        { samlResponse: 'saml-response-xml' },
+        { nextURL: '/test-base-path/some-path' }
+      );
+
+      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toEqual(
+        Boom.badRequest(
+          'SAML response state does not have corresponding request id or redirect URL.'
+        )
+      );
+    });
+
+    it('fails if SAML Response payload is presented but state does not contain redirect URL.', async () => {
+      const request = requestFixture();
+
+      const authenticationResult = await provider.login(
+        request,
+        { samlResponse: 'saml-response-xml' },
+        { requestId: 'some-request-id' }
+      );
+
+      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toEqual(
+        Boom.badRequest(
+          'SAML response state does not have corresponding request id or redirect URL.'
+        )
+      );
+    });
+
+    it('redirects to the default location if state is not presented.', async () => {
+      const request = requestFixture();
+
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+        access_token: 'idp-initiated-login-token',
+        refresh_token: 'idp-initiated-login-refresh-token',
+      });
+
+      const authenticationResult = await provider.login(request, {
+        samlResponse: 'saml-response-xml',
+      });
+
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlAuthenticate',
+        { body: { ids: [], content: 'saml-response-xml' } }
+      );
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe('/base-path/');
+      expect(authenticationResult.state).toEqual({
+        accessToken: 'idp-initiated-login-token',
+        refreshToken: 'idp-initiated-login-refresh-token',
+      });
+    });
+
+    it('fails if SAML Response is rejected.', async () => {
+      const request = requestFixture();
+
+      const failureReason = new Error('SAML response is stale!');
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlAuthenticate')
+        .rejects(failureReason);
+
+      const authenticationResult = await provider.login(
+        request,
+        { samlResponse: 'saml-response-xml' },
+        { requestId: 'some-request-id', nextURL: '/test-base-path/some-path' }
+      );
+
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlAuthenticate',
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml' } }
+      );
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toBe(failureReason);
+    });
+
+    describe('IdP initiated login with existing session', () => {
+      it('fails if new SAML Response is rejected.', async () => {
+        const request = requestFixture();
+
+        const user = mockAuthenticatedUser();
+        mockScopedClusterClient(mockOptions.client)
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(user);
+
+        const failureReason = new Error('SAML response is invalid!');
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.samlAuthenticate')
+          .rejects(failureReason);
+
+        const authenticationResult = await provider.login(
+          request,
+          { samlResponse: 'saml-response-xml' },
+          { accessToken: 'some-valid-token', refreshToken: 'some-valid-refresh-token' }
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toBe(failureReason);
+      });
+
+      it('fails if token received in exchange to new SAML Response is rejected.', async () => {
+        const request = requestFixture();
+
+        // Call to `authenticate` using existing valid session.
+        const user = mockAuthenticatedUser();
+        mockScopedClusterClient(
+          mockOptions.client,
+          sinon.match({ headers: { authorization: 'Bearer existing-valid-token' } })
+        )
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(user);
+
+        // Call to `authenticate` with token received in exchange to new SAML payload.
+        const failureReason = new Error('Access token is invalid!');
+        mockScopedClusterClient(
+          mockOptions.client,
+          sinon.match({ headers: { authorization: 'Bearer new-invalid-token' } })
+        )
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .rejects(failureReason);
+
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.samlAuthenticate')
+          .resolves({ access_token: 'new-invalid-token', refresh_token: 'new-invalid-token' });
+
+        const authenticationResult = await provider.login(
+          request,
+          { samlResponse: 'saml-response-xml' },
+          { accessToken: 'existing-valid-token', refreshToken: 'existing-valid-refresh-token' }
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toBe(failureReason);
+      });
+
+      it('fails if fails to invalidate existing access/refresh tokens.', async () => {
+        const request = requestFixture();
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
+        const user = mockAuthenticatedUser();
+        mockScopedClusterClient(mockOptions.client)
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(user);
+
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.samlAuthenticate')
+          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
+
+        const failureReason = new Error('Failed to invalidate token!');
+        mockOptions.tokens.invalidate.withArgs(tokenPair).rejects(failureReason);
+
+        const authenticationResult = await provider.login(
+          request,
+          { samlResponse: 'saml-response-xml' },
+          tokenPair
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toBe(failureReason);
+      });
+
+      it('redirects to the home page if new SAML Response is for the same user.', async () => {
+        const request = requestFixture();
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
+        const user = { username: 'user', authentication_realm: { name: 'saml1' } };
+        mockScopedClusterClient(mockOptions.client)
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(user);
+
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.samlAuthenticate')
+          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
+
+        mockOptions.tokens.invalidate.withArgs(tokenPair).resolves();
+
+        const authenticationResult = await provider.login(
+          request,
+          { samlResponse: 'saml-response-xml' },
+          tokenPair
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        sinon.assert.calledOnce(mockOptions.tokens.invalidate);
+        sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe('/base-path/');
+      });
+
+      it('redirects to `overwritten_session` if new SAML Response is for the another user.', async () => {
+        const request = requestFixture();
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
+        const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
+        mockScopedClusterClient(
+          mockOptions.client,
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+        )
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(existingUser);
+
+        const newUser = { username: 'new-user', authentication_realm: { name: 'saml1' } };
+        mockScopedClusterClient(
+          mockOptions.client,
+          sinon.match({ headers: { authorization: 'Bearer new-valid-token' } })
+        )
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(newUser);
+
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.samlAuthenticate')
+          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
+
+        mockOptions.tokens.invalidate.withArgs(tokenPair).resolves();
+
+        const authenticationResult = await provider.login(
+          request,
+          { samlResponse: 'saml-response-xml' },
+          tokenPair
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        sinon.assert.calledOnce(mockOptions.tokens.invalidate);
+        sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe('/base-path/overwritten_session');
+      });
+
+      it('redirects to `overwritten_session` if new SAML Response is for another realm.', async () => {
+        const request = requestFixture();
+        const tokenPair = {
+          accessToken: 'existing-valid-token',
+          refreshToken: 'existing-valid-refresh-token',
+        };
+
+        const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
+        mockScopedClusterClient(
+          mockOptions.client,
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+        )
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(existingUser);
+
+        const newUser = { username: 'user', authentication_realm: { name: 'saml2' } };
+        mockScopedClusterClient(
+          mockOptions.client,
+          sinon.match({ headers: { authorization: 'Bearer new-valid-token' } })
+        )
+          .callAsCurrentUser.withArgs('shield.authenticate')
+          .resolves(newUser);
+
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.samlAuthenticate')
+          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
+
+        mockOptions.tokens.invalidate.withArgs(tokenPair).resolves();
+
+        const authenticationResult = await provider.login(
+          request,
+          { samlResponse: 'saml-response-xml' },
+          tokenPair
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlAuthenticate',
+          { body: { ids: [], content: 'saml-response-xml' } }
+        );
+
+        sinon.assert.calledOnce(mockOptions.tokens.invalidate);
+        sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe('/base-path/overwritten_session');
+      });
+    });
   });
 
   describe('`authenticate` method', () => {
@@ -58,38 +413,22 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken: 'some-valid-refresh-token',
       });
 
-      sinon.assert.notCalled(callWithRequest);
+      sinon.assert.notCalled(mockOptions.client.asScoped);
       expect(request.headers.authorization).toBe('Basic some:credentials');
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
-    it('does not handle requests with non-empty `loginAttempt`.', async () => {
-      const request = requestFixture();
-
-      const loginAttempt = new LoginAttempt();
-      loginAttempt.setCredentials('user', 'password');
-      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
-
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token',
-      });
-
-      sinon.assert.notCalled(callWithRequest);
-      expect(authenticationResult.notHandled()).toBe(true);
-    });
-
     it('redirects non-AJAX request that can not be authenticated to the IdP.', async () => {
-      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
+      const request = requestFixture({ path: '/s/foo/some-path' });
 
-      callWithInternalUser.withArgs('shield.samlPrepare').resolves({
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
@@ -99,7 +438,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
       expect(authenticationResult.state).toEqual({
         requestId: 'some-request-id',
-        nextURL: `/s/foo/some-path`,
+        nextURL: `/base-path/s/foo/some-path`,
       });
     });
 
@@ -107,11 +446,11 @@ describe('SAMLAuthenticationProvider', () => {
       const request = requestFixture({ path: '/some-path' });
 
       const failureReason = new Error('Realm is misconfigured!');
-      callWithInternalUser.withArgs('shield.samlPrepare').rejects(failureReason);
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').rejects(failureReason);
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
@@ -119,166 +458,80 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.error).toBe(failureReason);
     });
 
-    it('gets token and redirects user to requested URL if SAML Response is valid.', async () => {
-      const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-
-      callWithInternalUser
-        .withArgs('shield.samlAuthenticate')
-        .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
-
-      const authenticationResult = await provider.authenticate(request, {
-        requestId: 'some-request-id',
-        nextURL: '/test-base-path/some-path',
-      });
-
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-        body: { ids: ['some-request-id'], content: 'saml-response-xml' },
-      });
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/test-base-path/some-path');
-      expect(authenticationResult.state).toEqual({
-        accessToken: 'some-token',
-        refreshToken: 'some-refresh-token',
-      });
-    });
-
-    it('fails if SAML Response payload is presented but state does not contain SAML Request token.', async () => {
-      const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-
-      const authenticationResult = await provider.authenticate(request, {
-        nextURL: '/test-base-path/some-path',
-      } as any);
-
-      sinon.assert.notCalled(callWithInternalUser);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(
-        Boom.badRequest(
-          'SAML response state does not have corresponding request id or redirect URL.'
-        )
-      );
-    });
-
-    it('fails if SAML Response payload is presented but state does not contain redirect URL.', async () => {
-      const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-
-      const authenticationResult = await provider.authenticate(request, {
-        requestId: 'some-request-id',
-      } as any);
-
-      sinon.assert.notCalled(callWithInternalUser);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(
-        Boom.badRequest(
-          'SAML response state does not have corresponding request id or redirect URL.'
-        )
-      );
-    });
-
-    it('redirects to the default location if state is not presented.', async () => {
-      const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-
-      callWithInternalUser.withArgs('shield.samlAuthenticate').resolves({
-        access_token: 'idp-initiated-login-token',
-        refresh_token: 'idp-initiated-login-refresh-token',
-      });
-
-      const authenticationResult = await provider.authenticate(request);
-
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-        body: { ids: [], content: 'saml-response-xml' },
-      });
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/test-base-path/');
-      expect(authenticationResult.state).toEqual({
-        accessToken: 'idp-initiated-login-token',
-        refreshToken: 'idp-initiated-login-refresh-token',
-      });
-    });
-
-    it('fails if SAML Response is rejected.', async () => {
-      const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-
-      const failureReason = new Error('SAML response is stale!');
-      callWithInternalUser.withArgs('shield.samlAuthenticate').rejects(failureReason);
-
-      const authenticationResult = await provider.authenticate(request, {
-        requestId: 'some-request-id',
-        nextURL: '/test-base-path/some-path',
-      });
-
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-        body: { ids: ['some-request-id'], content: 'saml-response-xml' },
-      });
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
-    });
-
     it('succeeds if state contains a valid token.', async () => {
-      const user = { username: 'user' };
+      const user = mockAuthenticatedUser();
       const request = requestFixture();
-
-      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
-
-      const authenticationResult = await provider.authenticate(request, {
+      const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
-      });
+      };
+      const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      expect(request.headers.authorization).toBe('Bearer some-valid-token');
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .resolves(user);
+
+      const authenticationResult = await provider.authenticate(request, tokenPair);
+
+      expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.authHeaders).toEqual({ authorization });
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBeUndefined();
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
       const request = requestFixture();
+      const tokenPair = {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      };
 
       const failureReason = { statusCode: 500, message: 'Token is not valid!' };
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .rejects(failureReason);
 
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-invalid-token',
-        refreshToken: 'some-invalid-refresh-token',
-      });
+      const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
-      sinon.assert.neverCalledWith(callWithRequest, 'shield.getAccessToken');
     });
 
     it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
-      const user = { username: 'user' };
+      const user = mockAuthenticatedUser();
       const request = requestFixture();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'valid-refresh-token' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer new-access-token' } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: 'Bearer new-access-token' } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves(user);
 
-      tokens.refresh
+      mockOptions.tokens.refresh
         .withArgs(tokenPair.refreshToken)
         .resolves({ accessToken: 'new-access-token', refreshToken: 'new-refresh-token' });
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      expect(request.headers.authorization).toBe('Bearer new-access-token');
+      expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.authHeaders).toEqual({
+        authorization: 'Bearer new-access-token',
+      });
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toEqual({
         accessToken: 'new-access-token',
@@ -290,18 +543,18 @@ describe('SAMLAuthenticationProvider', () => {
       const request = requestFixture();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'invalid-refresh-token' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
       const refreshFailureReason = {
         statusCode: 500,
         message: 'Something is wrong with refresh token.',
       };
-      tokens.refresh.withArgs(tokenPair.refreshToken).rejects(refreshFailureReason);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).rejects(refreshFailureReason);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
@@ -314,14 +567,14 @@ describe('SAMLAuthenticationProvider', () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
@@ -333,29 +586,29 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('initiates SAML handshake for non-AJAX requests if access token document is missing.', async () => {
-      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
+      const request = requestFixture({ path: '/s/foo/some-path' });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
-      callWithInternalUser.withArgs('shield.samlPrepare').resolves({
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({
           statusCode: 500,
           body: { error: { reason: 'token document is missing and must be present' } },
         });
 
-      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
@@ -365,31 +618,31 @@ describe('SAMLAuthenticationProvider', () => {
       );
       expect(authenticationResult.state).toEqual({
         requestId: 'some-request-id',
-        nextURL: `/s/foo/some-path`,
+        nextURL: `/base-path/s/foo/some-path`,
       });
     });
 
     it('initiates SAML handshake for non-AJAX requests if refresh token is expired.', async () => {
-      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
+      const request = requestFixture({ path: '/s/foo/some-path' });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
-      callWithInternalUser.withArgs('shield.samlPrepare').resolves({
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
@@ -399,29 +652,36 @@ describe('SAMLAuthenticationProvider', () => {
       );
       expect(authenticationResult.state).toEqual({
         requestId: 'some-request-id',
-        nextURL: `/s/foo/some-path`,
+        nextURL: `/base-path/s/foo/some-path`,
       });
     });
 
     it('succeeds if `authorization` contains a valid token.', async () => {
-      const user = { username: 'user' };
-      const request = requestFixture({ headers: { authorization: 'Bearer some-valid-token' } });
+      const user = mockAuthenticatedUser();
+      const authorization = 'Bearer some-valid-token';
+      const request = requestFixture({ headers: { authorization } });
 
-      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
 
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
       expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBeUndefined();
     });
 
     it('fails if token from `authorization` header is rejected.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
+      const authorization = 'Bearer some-invalid-token';
+      const request = requestFixture({ headers: { authorization } });
 
       const failureReason = { statusCode: 401 };
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .rejects(failureReason);
 
       const authenticationResult = await provider.authenticate(request);
 
@@ -430,14 +690,20 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('fails if token from `authorization` header is rejected even if state contains a valid one.', async () => {
-      const user = { username: 'user' };
-      const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
+      const user = mockAuthenticatedUser();
+      const authorization = 'Bearer some-invalid-token';
+      const request = requestFixture({ headers: { authorization } });
 
       const failureReason = { statusCode: 401 };
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .rejects(failureReason);
 
-      callWithRequest
-        .withArgs(sinon.match({ headers: { authorization: 'Bearer some-valid-token' } }))
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: 'Bearer some-valid-token' } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, {
@@ -448,227 +714,22 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
     });
-
-    describe('IdP initiated login with existing session', () => {
-      it('fails if new SAML Response is rejected.', async () => {
-        const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-
-        const user = { username: 'user' };
-        callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
-
-        const failureReason = new Error('SAML response is invalid!');
-        callWithInternalUser.withArgs('shield.samlAuthenticate').rejects(failureReason);
-
-        const authenticationResult = await provider.authenticate(request, {
-          accessToken: 'some-valid-token',
-          refreshToken: 'some-valid-refresh-token',
-        });
-
-        sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-          body: { ids: [], content: 'saml-response-xml' },
-        });
-
-        expect(authenticationResult.failed()).toBe(true);
-        expect(authenticationResult.error).toBe(failureReason);
-      });
-
-      it('fails if token received in exchange to new SAML Response is rejected.', async () => {
-        const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-
-        // Call to `authenticate` using existing valid session.
-        const user = { username: 'user' };
-        callWithRequest
-          .withArgs(
-            sinon.match({ headers: { authorization: 'Bearer existing-valid-token' } }),
-            'shield.authenticate'
-          )
-          .resolves(user);
-
-        // Call to `authenticate` with token received in exchange to new SAML payload.
-        const failureReason = new Error('Access token is invalid!');
-        callWithRequest
-          .withArgs(
-            sinon.match({ headers: { authorization: 'Bearer new-invalid-token' } }),
-            'shield.authenticate'
-          )
-          .rejects(failureReason);
-
-        callWithInternalUser
-          .withArgs('shield.samlAuthenticate')
-          .resolves({ access_token: 'new-invalid-token', refresh_token: 'new-invalid-token' });
-
-        const authenticationResult = await provider.authenticate(request, {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        });
-
-        sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-          body: { ids: [], content: 'saml-response-xml' },
-        });
-
-        expect(authenticationResult.failed()).toBe(true);
-        expect(authenticationResult.error).toBe(failureReason);
-      });
-
-      it('fails if fails to invalidate existing access/refresh tokens.', async () => {
-        const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-        const tokenPair = {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        };
-
-        const user = { username: 'user' };
-        callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
-
-        callWithInternalUser
-          .withArgs('shield.samlAuthenticate')
-          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
-
-        const failureReason = new Error('Failed to invalidate token!');
-        tokens.invalidate.withArgs(tokenPair).rejects(failureReason);
-
-        const authenticationResult = await provider.authenticate(request, tokenPair);
-
-        sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-          body: { ids: [], content: 'saml-response-xml' },
-        });
-
-        expect(authenticationResult.failed()).toBe(true);
-        expect(authenticationResult.error).toBe(failureReason);
-      });
-
-      it('redirects to the home page if new SAML Response is for the same user.', async () => {
-        const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-        const tokenPair = {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        };
-
-        const user = { username: 'user', authentication_realm: { name: 'saml1' } };
-        callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
-
-        callWithInternalUser
-          .withArgs('shield.samlAuthenticate')
-          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
-
-        tokens.invalidate.withArgs(tokenPair).resolves();
-
-        const authenticationResult = await provider.authenticate(request, {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        });
-
-        sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-          body: { ids: [], content: 'saml-response-xml' },
-        });
-
-        sinon.assert.calledOnce(tokens.invalidate);
-        sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
-
-        expect(authenticationResult.redirected()).toBe(true);
-        expect(authenticationResult.redirectURL).toBe('/test-base-path/');
-      });
-
-      it('redirects to `overwritten_session` if new SAML Response is for the another user.', async () => {
-        const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-        const tokenPair = {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        };
-
-        const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
-        callWithRequest
-          .withArgs(
-            sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-            'shield.authenticate'
-          )
-          .resolves(existingUser);
-
-        const newUser = { username: 'new-user', authentication_realm: { name: 'saml1' } };
-        callWithRequest
-          .withArgs(
-            sinon.match({ headers: { authorization: 'Bearer new-valid-token' } }),
-            'shield.authenticate'
-          )
-          .resolves(newUser);
-
-        callWithInternalUser
-          .withArgs('shield.samlAuthenticate')
-          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
-
-        tokens.invalidate.withArgs(tokenPair).resolves();
-
-        const authenticationResult = await provider.authenticate(request, tokenPair);
-
-        sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-          body: { ids: [], content: 'saml-response-xml' },
-        });
-
-        sinon.assert.calledOnce(tokens.invalidate);
-        sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
-
-        expect(authenticationResult.redirected()).toBe(true);
-        expect(authenticationResult.redirectURL).toBe('/test-base-path/overwritten_session');
-      });
-
-      it('redirects to `overwritten_session` if new SAML Response is for another realm.', async () => {
-        const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
-        const tokenPair = {
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-        };
-
-        const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
-        callWithRequest
-          .withArgs(
-            sinon.match({ headers: { authorization: 'Bearer existing-valid-token' } }),
-            'shield.authenticate'
-          )
-          .resolves(existingUser);
-
-        const newUser = { username: 'user', authentication_realm: { name: 'saml2' } };
-        callWithRequest
-          .withArgs(
-            sinon.match({ headers: { authorization: 'Bearer new-valid-token' } }),
-            'shield.authenticate'
-          )
-          .resolves(newUser);
-
-        callWithInternalUser
-          .withArgs('shield.samlAuthenticate')
-          .resolves({ access_token: 'new-valid-token', refresh_token: 'new-valid-refresh-token' });
-
-        tokens.invalidate.withArgs(tokenPair).resolves();
-
-        const authenticationResult = await provider.authenticate(request, tokenPair);
-
-        sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlAuthenticate', {
-          body: { ids: [], content: 'saml-response-xml' },
-        });
-
-        sinon.assert.calledOnce(tokens.invalidate);
-        sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
-
-        expect(authenticationResult.redirected()).toBe(true);
-        expect(authenticationResult.redirectURL).toBe('/test-base-path/overwritten_session');
-      });
-    });
   });
 
-  describe('`deauthenticate` method', () => {
+  describe('`logout` method', () => {
     it('returns `notHandled` if state is not presented or does not include access token.', async () => {
       const request = requestFixture();
 
-      let deauthenticateResult = await provider.deauthenticate(request);
+      let deauthenticateResult = await provider.logout(request);
       expect(deauthenticateResult.notHandled()).toBe(true);
 
-      deauthenticateResult = await provider.deauthenticate(request, {} as any);
+      deauthenticateResult = await provider.logout(request, {} as any);
       expect(deauthenticateResult.notHandled()).toBe(true);
 
-      deauthenticateResult = await provider.deauthenticate(request, { somethingElse: 'x' } as any);
+      deauthenticateResult = await provider.logout(request, { somethingElse: 'x' } as any);
       expect(deauthenticateResult.notHandled()).toBe(true);
 
-      sinon.assert.notCalled(callWithInternalUser);
+      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
     });
 
     it('fails if SAML logout call fails.', async () => {
@@ -677,15 +738,15 @@ describe('SAMLAuthenticationProvider', () => {
       const refreshToken = 'x-saml-refresh-token';
 
       const failureReason = new Error('Realm is misconfigured!');
-      callWithInternalUser.withArgs('shield.samlLogout').rejects(failureReason);
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlLogout').rejects(failureReason);
 
-      const authenticationResult = await provider.deauthenticate(request, {
+      const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlLogout', {
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -697,17 +758,18 @@ describe('SAMLAuthenticationProvider', () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
       const failureReason = new Error('Realm is misconfigured!');
-      callWithInternalUser.withArgs('shield.samlInvalidate').rejects(failureReason);
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlInvalidate')
+        .rejects(failureReason);
 
-      const authenticationResult = await provider.deauthenticate(request);
+      const authenticationResult = await provider.logout(request);
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
-        body: {
-          queryString: 'SAMLRequest=xxx%20yyy',
-          realm: 'test-realm',
-        },
-      });
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlInvalidate',
+        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
+      );
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
@@ -718,15 +780,17 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      callWithInternalUser.withArgs('shield.samlLogout').resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlLogout')
+        .resolves({ redirect: null });
 
-      const authenticationResult = await provider.deauthenticate(request, {
+      const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlLogout', {
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -739,15 +803,17 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      callWithInternalUser.withArgs('shield.samlLogout').resolves({ redirect: undefined });
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlLogout')
+        .resolves({ redirect: undefined });
 
-      const authenticationResult = await provider.deauthenticate(request, {
+      const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlLogout', {
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -760,15 +826,17 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      callWithInternalUser.withArgs('shield.samlLogout').resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlLogout')
+        .resolves({ redirect: null });
 
-      const authenticationResult = await provider.deauthenticate(request, {
+      const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlLogout', {
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -779,20 +847,21 @@ describe('SAMLAuthenticationProvider', () => {
     it('relies on SAML invalidate call even if access token is presented.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
-      callWithInternalUser.withArgs('shield.samlInvalidate').resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlInvalidate')
+        .resolves({ redirect: null });
 
-      const authenticationResult = await provider.deauthenticate(request, {
+      const authenticationResult = await provider.logout(request, {
         accessToken: 'x-saml-token',
         refreshToken: 'x-saml-refresh-token',
       });
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
-        body: {
-          queryString: 'SAMLRequest=xxx%20yyy',
-          realm: 'test-realm',
-        },
-      });
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlInvalidate',
+        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
+      );
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/logged_out');
@@ -801,17 +870,18 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is null.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
-      callWithInternalUser.withArgs('shield.samlInvalidate').resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlInvalidate')
+        .resolves({ redirect: null });
 
-      const authenticationResult = await provider.deauthenticate(request);
+      const authenticationResult = await provider.logout(request);
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
-        body: {
-          queryString: 'SAMLRequest=xxx%20yyy',
-          realm: 'test-realm',
-        },
-      });
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlInvalidate',
+        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
+      );
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/logged_out');
@@ -820,17 +890,18 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
-      callWithInternalUser.withArgs('shield.samlInvalidate').resolves({ redirect: undefined });
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.samlInvalidate')
+        .resolves({ redirect: undefined });
 
-      const authenticationResult = await provider.deauthenticate(request);
+      const authenticationResult = await provider.logout(request);
 
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
-        body: {
-          queryString: 'SAMLRequest=xxx%20yyy',
-          realm: 'test-realm',
-        },
-      });
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlInvalidate',
+        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
+      );
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/logged_out');
@@ -841,16 +912,16 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      callWithInternalUser
+      mockOptions.client.callAsInternalUser
         .withArgs('shield.samlLogout')
         .resolves({ redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H' });
 
-      const authenticationResult = await provider.deauthenticate(request, {
+      const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(callWithInternalUser);
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('http://fake-idp/SLO?SAMLRequest=7zlH37H');
     });
@@ -858,16 +929,16 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects user to the IdP if SLO is supported by IdP in case of IdP initiated logout.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
-      callWithInternalUser
+      mockOptions.client.callAsInternalUser
         .withArgs('shield.samlInvalidate')
         .resolves({ redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H' });
 
-      const authenticationResult = await provider.deauthenticate(request, {
+      const authenticationResult = await provider.logout(request, {
         accessToken: 'x-saml-token',
         refreshToken: 'x-saml-refresh-token',
       });
 
-      sinon.assert.calledOnce(callWithInternalUser);
+      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('http://fake-idp/SLO?SAMLRequest=7zlH37H');
     });

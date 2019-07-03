@@ -7,23 +7,99 @@
 import Boom from 'boom';
 import { errors } from 'elasticsearch';
 import sinon from 'sinon';
-import { requestFixture } from '../../__tests__/__fixtures__/request';
-import { LoginAttempt } from '../login_attempt';
-import { mockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { requestFixture } from '../../__fixtures__';
+import {
+  MockAuthenticationProviderOptions,
+  mockAuthenticationProviderOptions,
+  mockScopedClusterClient,
+} from './base.mock';
 import { TokenAuthenticationProvider } from './token';
 
 describe('TokenAuthenticationProvider', () => {
   let provider: TokenAuthenticationProvider;
-  let callWithRequest: sinon.SinonStub;
-  let callWithInternalUser: sinon.SinonStub;
-  let tokens: ReturnType<typeof mockAuthenticationProviderOptions>['tokens'];
+  let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    const providerOptions = mockAuthenticationProviderOptions();
-    callWithRequest = providerOptions.client.callWithRequest;
-    callWithInternalUser = providerOptions.client.callWithInternalUser;
-    tokens = providerOptions.tokens;
+    mockOptions = mockAuthenticationProviderOptions();
+    provider = new TokenAuthenticationProvider(mockOptions);
+  });
 
-    provider = new TokenAuthenticationProvider(providerOptions);
+  describe('`login` method', () => {
+    it('succeeds with valid login attempt, creates session and authHeaders', async () => {
+      const request = requestFixture();
+      const user = mockAuthenticatedUser();
+
+      const credentials = { username: 'user', password: 'password' };
+      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
+      const authorization = `Bearer ${tokenPair.accessToken}`;
+
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.getAccessToken', {
+          body: { grant_type: 'password', ...credentials },
+        })
+        .resolves({ access_token: tokenPair.accessToken, refresh_token: tokenPair.refreshToken });
+
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .resolves(user);
+
+      const authenticationResult = await provider.login(request, credentials);
+
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.state).toEqual(tokenPair);
+      expect(authenticationResult.authHeaders).toEqual({ authorization });
+    });
+
+    it('fails if token cannot be generated during login attempt', async () => {
+      const request = requestFixture();
+      const credentials = { username: 'user', password: 'password' };
+
+      const authenticationError = new Error('Invalid credentials');
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.getAccessToken', {
+          body: { grant_type: 'password', ...credentials },
+        })
+        .rejects(authenticationError);
+
+      const authenticationResult = await provider.login(request, credentials);
+
+      sinon.assert.notCalled(mockOptions.client.asScoped);
+
+      expect(request.headers).not.toHaveProperty('authorization');
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.error).toEqual(authenticationError);
+    });
+
+    it('fails if user cannot be retrieved during login attempt', async () => {
+      const request = requestFixture();
+      const credentials = { username: 'user', password: 'password' };
+      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
+
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.getAccessToken', {
+          body: { grant_type: 'password', ...credentials },
+        })
+        .resolves({ access_token: tokenPair.accessToken, refresh_token: tokenPair.refreshToken });
+
+      const authenticationError = new Error('Some error');
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .rejects(authenticationError);
+
+      const authenticationResult = await provider.login(request, credentials);
+
+      expect(request.headers).not.toHaveProperty('authorization');
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.error).toEqual(authenticationError);
+    });
   });
 
   describe('`authenticate` method', () => {
@@ -40,78 +116,41 @@ describe('TokenAuthenticationProvider', () => {
 
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       const authenticationResult = await provider.authenticate(
-        requestFixture({ path: '/some-path # that needs to be encoded', basePath: '/s/foo' }),
+        requestFixture({ path: '/s/foo/some-path # that needs to be encoded' }),
         null
       );
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+        '/base-path/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
       );
     });
 
-    it('succeeds with valid login attempt and stores in session', async () => {
-      const user = { username: 'user' };
-      const request = requestFixture();
-      const loginAttempt = new LoginAttempt();
-      loginAttempt.setCredentials('user', 'password');
-      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
-
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'password', username: 'user', password: 'password' },
-        })
-        .resolves({ access_token: 'foo', refresh_token: 'bar' });
-
-      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
-
-      const authenticationResult = await provider.authenticate(request);
-
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
-      expect(authenticationResult.state).toEqual({ accessToken: 'foo', refreshToken: 'bar' });
-      expect(request.headers.authorization).toEqual(`Bearer foo`);
-      sinon.assert.calledOnce(callWithRequest);
-    });
-
-    it('succeeds if only `authorization` header is available.', async () => {
+    it('succeeds if only `authorization` header is available and returns neither state nor authHeaders.', async () => {
       const authorization = 'Bearer foo';
       const request = requestFixture({ headers: { authorization } });
-      const user = { username: 'user' };
+      const user = mockAuthenticatedUser();
 
-      callWithRequest
-        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
-      sinon.assert.calledOnce(callWithRequest);
-    });
-
-    it('does not return session state for header-based auth', async () => {
-      const authorization = 'Bearer foo';
-      const request = requestFixture({ headers: { authorization } });
-      const user = { username: 'user' };
-
-      callWithRequest
-        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
-        .resolves(user);
-
-      const authenticationResult = await provider.authenticate(request);
-
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
     });
 
     it('succeeds if only state is available.', async () => {
       const request = requestFixture();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-      const user = { username: 'user' };
+      const user = mockAuthenticatedUser();
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      callWithRequest
-        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -119,56 +158,57 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
       expect(authenticationResult.state).toBeUndefined();
-      sinon.assert.calledOnce(callWithRequest);
+      expect(authenticationResult.authHeaders).toEqual({ authorization });
+      expect(request.headers).not.toHaveProperty('authorization');
     });
 
     it('succeeds with valid session even if requiring a token refresh', async () => {
-      const user = { username: 'user' };
+      const user = mockAuthenticatedUser();
       const request = requestFixture();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      tokens.refresh
+      mockOptions.tokens.refresh
         .withArgs(tokenPair.refreshToken)
         .resolves({ accessToken: 'newfoo', refreshToken: 'newbar' });
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer newfoo' } }),
-          'shield.authenticate'
-        )
-        .returns(user);
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: 'Bearer newfoo' } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledTwice(callWithRequest);
-      sinon.assert.calledOnce(tokens.refresh);
+      sinon.assert.calledOnce(mockOptions.tokens.refresh);
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
       expect(authenticationResult.state).toEqual({ accessToken: 'newfoo', refreshToken: 'newbar' });
-      expect(request.headers.authorization).toEqual('Bearer newfoo');
+      expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer newfoo' });
+      expect(request.headers).not.toHaveProperty('authorization');
     });
 
     it('does not handle `authorization` header with unsupported schema even if state contains valid credentials.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-      const user = { username: 'user' };
+      const user = mockAuthenticatedUser();
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      callWithRequest
-        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.notCalled(callWithRequest);
+      sinon.assert.notCalled(mockOptions.client.asScoped);
       expect(request.headers.authorization).toBe('Basic ***');
       expect(authenticationResult.notHandled()).toBe(true);
     });
@@ -177,70 +217,20 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer foo-from-header`;
       const request = requestFixture({ headers: { authorization } });
-      const user = { username: 'user' };
+      const user = mockAuthenticatedUser();
 
       // GetUser will be called with request's `authorization` header.
-      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
       expect(authenticationResult.state).toBeUndefined();
-      sinon.assert.calledOnce(callWithRequest);
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(request.headers.authorization).toEqual('Bearer foo-from-header');
-    });
-
-    it('fails if token cannot be generated during login attempt', async () => {
-      const request = requestFixture();
-      const loginAttempt = new LoginAttempt();
-      loginAttempt.setCredentials('user', 'password');
-      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
-
-      const authenticationError = new Error('Invalid credentials');
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'password', username: 'user', password: 'password' },
-        })
-        .rejects(authenticationError);
-
-      const authenticationResult = await provider.authenticate(request);
-
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.notCalled(callWithRequest);
-
-      expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.error).toEqual(authenticationError);
-    });
-
-    it('fails if user cannot be retrieved during login attempt', async () => {
-      const request = requestFixture();
-      const loginAttempt = new LoginAttempt();
-      loginAttempt.setCredentials('user', 'password');
-      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
-
-      callWithInternalUser
-        .withArgs('shield.getAccessToken', {
-          body: { grant_type: 'password', username: 'user', password: 'password' },
-        })
-        .resolves({ access_token: 'foo', refresh_token: 'bar' });
-
-      const authenticationError = new Error('Some error');
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(authenticationError);
-
-      const authenticationResult = await provider.authenticate(request);
-
-      sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledOnce(callWithRequest);
-
-      expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.error).toEqual(authenticationError);
     });
 
     it('fails if authentication with token from header fails with unknown error', async () => {
@@ -248,11 +238,11 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture({ headers: { authorization } });
 
       const authenticationError = new errors.InternalServerError('something went wrong');
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(authenticationError);
+      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request);
-
-      sinon.assert.calledOnce(callWithRequest);
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.user).toBeUndefined();
@@ -265,16 +255,14 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture();
 
       const authenticationError = new errors.InternalServerError('something went wrong');
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
-
-      sinon.assert.calledOnce(callWithRequest);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -287,20 +275,19 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
       const refreshError = new errors.InternalServerError('failed to refresh token');
-      tokens.refresh.withArgs(tokenPair.refreshToken).rejects(refreshError);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).rejects(refreshError);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledOnce(callWithRequest);
-      sinon.assert.calledOnce(tokens.refresh);
+      sinon.assert.calledOnce(mockOptions.tokens.refresh);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -313,26 +300,27 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture({ path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({
           statusCode: 500,
           body: { error: { reason: 'token document is missing and must be present' } },
         });
 
-      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledOnce(callWithRequest);
-      sinon.assert.calledOnce(tokens.refresh);
+      sinon.assert.calledOnce(mockOptions.tokens.refresh);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/login?next=%2Fsome-path');
+      expect(authenticationResult.redirectURL).toBe(
+        '/base-path/login?next=%2Fbase-path%2Fsome-path'
+      );
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toEqual(null);
       expect(authenticationResult.error).toBeUndefined();
@@ -342,23 +330,24 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture({ path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledOnce(callWithRequest);
-      sinon.assert.calledOnce(tokens.refresh);
+      sinon.assert.calledOnce(mockOptions.tokens.refresh);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/login?next=%2Fsome-path');
+      expect(authenticationResult.redirectURL).toBe(
+        '/base-path/login?next=%2Fbase-path%2Fsome-path'
+      );
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toEqual(null);
       expect(authenticationResult.error).toBeUndefined();
@@ -368,19 +357,18 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' }, path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledOnce(callWithRequest);
-      sinon.assert.calledOnce(tokens.refresh);
+      sinon.assert.calledOnce(mockOptions.tokens.refresh);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -395,29 +383,28 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      tokens.refresh
+      mockOptions.tokens.refresh
         .withArgs(tokenPair.refreshToken)
         .resolves({ accessToken: 'newfoo', refreshToken: 'newbar' });
 
       const authenticationError = new errors.AuthenticationException('Some error');
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer newfoo' } }),
-          'shield.authenticate'
-        )
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: 'Bearer newfoo' } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledTwice(callWithRequest);
-      sinon.assert.calledOnce(tokens.refresh);
+      sinon.assert.calledOnce(mockOptions.tokens.refresh);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -427,20 +414,20 @@ describe('TokenAuthenticationProvider', () => {
     });
   });
 
-  describe('`deauthenticate` method', () => {
+  describe('`logout` method', () => {
     it('returns `notHandled` if state is not presented.', async () => {
       const request = requestFixture();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      let deauthenticateResult = await provider.deauthenticate(request);
+      let deauthenticateResult = await provider.logout(request);
       expect(deauthenticateResult.notHandled()).toBe(true);
 
-      deauthenticateResult = await provider.deauthenticate(request, null);
+      deauthenticateResult = await provider.logout(request, null);
       expect(deauthenticateResult.notHandled()).toBe(true);
 
-      sinon.assert.notCalled(tokens.invalidate);
+      sinon.assert.notCalled(mockOptions.tokens.invalidate);
 
-      deauthenticateResult = await provider.deauthenticate(request, tokenPair);
+      deauthenticateResult = await provider.logout(request, tokenPair);
       expect(deauthenticateResult.notHandled()).toBe(false);
     });
 
@@ -449,12 +436,12 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       const failureReason = new Error('failed to delete token');
-      tokens.invalidate.withArgs(tokenPair).rejects(failureReason);
+      mockOptions.tokens.invalidate.withArgs(tokenPair).rejects(failureReason);
 
-      const authenticationResult = await provider.deauthenticate(request, tokenPair);
+      const authenticationResult = await provider.logout(request, tokenPair);
 
-      sinon.assert.calledOnce(tokens.invalidate);
-      sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
+      sinon.assert.calledOnce(mockOptions.tokens.invalidate);
+      sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
@@ -464,12 +451,12 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      tokens.invalidate.withArgs(tokenPair).resolves();
+      mockOptions.tokens.invalidate.withArgs(tokenPair).resolves();
 
-      const authenticationResult = await provider.deauthenticate(request, tokenPair);
+      const authenticationResult = await provider.logout(request, tokenPair);
 
-      sinon.assert.calledOnce(tokens.invalidate);
-      sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
+      sinon.assert.calledOnce(mockOptions.tokens.invalidate);
+      sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/base-path/login?msg=LOGGED_OUT');
@@ -479,12 +466,12 @@ describe('TokenAuthenticationProvider', () => {
       const request = requestFixture({ search: '?yep' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      tokens.invalidate.withArgs(tokenPair).resolves();
+      mockOptions.tokens.invalidate.withArgs(tokenPair).resolves();
 
-      const authenticationResult = await provider.deauthenticate(request, tokenPair);
+      const authenticationResult = await provider.logout(request, tokenPair);
 
-      sinon.assert.calledOnce(tokens.invalidate);
-      sinon.assert.calledWithExactly(tokens.invalidate, tokenPair);
+      sinon.assert.calledOnce(mockOptions.tokens.invalidate);
+      sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/base-path/login?yep');

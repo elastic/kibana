@@ -4,29 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import { getClient } from '../../../../legacy/server/lib/get_client_shield';
+import {
+  SessionStorageFactory,
+  SessionStorage,
+  KibanaRequest,
+  LoggerFactory,
+  Logger,
+  HttpServiceSetup,
+  ClusterClient,
+} from '../../../../../src/core/server';
+import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
+
 import {
   AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
   BasicAuthenticationProvider,
   KerberosAuthenticationProvider,
-  RequestWithLoginAttempt,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
+  isSAMLRequestQuery,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
-import { Session } from './session';
-import { LoginAttempt } from './login_attempt';
-import { AuthenticationProviderSpecificOptions } from './providers/base';
 import { Tokens } from './tokens';
 
-interface ProviderSession {
+/**
+ * The shape of the session that is actually stored in the cookie.
+ */
+export interface ProviderSession {
+  /**
+   * Name/type of the provider this session belongs to.
+   */
   provider: string;
+
+  /**
+   * The Unix time in ms when the session should be considered expired. If `null`, session will stay
+   * active until the browser is closed.
+   */
+  expires: number | null;
+
+  /**
+   * Session value that is fed to the authentication provider. The shape is unknown upfront and
+   * entirely determined by the authentication provider that owns the current session.
+   */
   state: unknown;
+}
+
+/**
+ * The shape of the login attempt.
+ */
+export interface ProviderLoginAttempt {
+  /**
+   * Name/type of the provider this login attempt is targeted for.
+   */
+  provider: string;
+
+  /**
+   * Login attempt can have any form and defined by the specific provider.
+   */
+  value: unknown;
+}
+
+export interface AuthenticatorOptions {
+  config: Pick<ConfigType, 'sessionTimeout' | 'authc'>;
+  basePath: HttpServiceSetup['basePath'];
+  loggers: LoggerFactory;
+  clusterClient: PublicMethodsOf<ClusterClient>;
+  sessionStorageFactory: SessionStorageFactory<ProviderSession>;
+  isSystemAPIRequest: (request: KibanaRequest) => boolean;
 }
 
 // Mapping between provider key defined in the config and authentication
@@ -45,43 +93,15 @@ const providerMap = new Map<
   ['oidc', OIDCAuthenticationProvider],
 ]);
 
-function assertRequest(request: Legacy.Request) {
-  if (!request || typeof request !== 'object') {
-    throw new Error(`Request should be a valid object, was [${typeof request}].`);
+function assertRequest(request: KibanaRequest) {
+  if (!request || !(request instanceof KibanaRequest)) {
+    throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
   }
 }
 
-/**
- * Prepares options object that is shared among all authentication providers.
- * @param server Server instance.
- */
-function getProviderOptions(server: Legacy.Server) {
-  const config = server.config();
-  const client = getClient(server);
-  const log = server.log.bind(server);
-
-  return {
-    client,
-    log,
-    basePath: config.get<string>('server.basePath'),
-    tokens: new Tokens({ client, log }),
-  };
-}
-
-/**
- * Prepares options object that is specific only to an authentication provider.
- * @param server Server instance.
- * @param providerType the type of the provider to get the options for.
- */
-function getProviderSpecificOptions(
-  server: Legacy.Server,
-  providerType: string
-): AuthenticationProviderSpecificOptions | undefined {
-  const config = server.config();
-
-  const providerOptionsConfigKey = `xpack.security.authc.${providerType}`;
-  if (config.has(providerOptionsConfigKey)) {
-    return config.get<AuthenticationProviderSpecificOptions>(providerOptionsConfigKey);
+function assertLoginAttempt(attempt: ProviderLoginAttempt) {
+  if (!attempt || !attempt.provider || typeof attempt.provider !== 'string') {
+    throw new Error('Login attempt should be an object with non-empty "provider" property.');
   }
 }
 
@@ -117,50 +137,125 @@ function instantiateProvider(
  * the authentication is then considered to be unsuccessful and an authentication error
  * will be returned.
  */
-class Authenticator {
+export class Authenticator {
   /**
    * List of configured and instantiated authentication providers.
    */
   private readonly providers: Map<string, BaseAuthenticationProvider>;
 
   /**
-   * Instantiates Authenticator and bootstrap configured providers.
-   * @param server Server instance.
-   * @param session Session instance.
+   * Session duration in ms. If `null` session will stay active until the browser is closed.
    */
-  constructor(private readonly server: Legacy.Server, private readonly session: Session) {
-    const config = this.server.config();
-    const authProviders = config.get<string[]>('xpack.security.authc.providers');
+  private readonly ttl: number | null = null;
+
+  /**
+   * Internal authenticator logger.
+   */
+  private readonly logger: Logger;
+
+  /**
+   * Instantiates Authenticator and bootstrap configured providers.
+   * @param options Authenticator options.
+   */
+  constructor(private readonly options: Readonly<AuthenticatorOptions>) {
+    this.logger = options.loggers.get('authenticator');
+
+    const providerCommonOptions = {
+      client: this.options.clusterClient,
+      basePath: this.options.basePath,
+      tokens: new Tokens({
+        client: this.options.clusterClient,
+        logger: this.options.loggers.get('tokens'),
+      }),
+    };
+
+    const authProviders = this.options.config.authc.providers;
     if (authProviders.length === 0) {
       throw new Error(
         'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
       );
     }
 
-    const providerOptions = Object.freeze(getProviderOptions(server));
-
     this.providers = new Map(
       authProviders.map(providerType => {
-        const providerSpecificOptions = getProviderSpecificOptions(server, providerType);
+        const providerSpecificOptions = this.options.config.authc.hasOwnProperty(providerType)
+          ? (this.options.config.authc as Record<string, any>)[providerType]
+          : undefined;
+
         return [
           providerType,
-          instantiateProvider(providerType, providerOptions, providerSpecificOptions),
+          instantiateProvider(
+            providerType,
+            Object.freeze({ ...providerCommonOptions, logger: options.loggers.get(providerType) }),
+            providerSpecificOptions
+          ),
         ] as [string, BaseAuthenticationProvider];
       })
     );
+
+    this.ttl = this.options.config.sessionTimeout;
+  }
+
+  /**
+   * Performs the initial login request using the provider login attempt description.
+   * @param request Request instance.
+   * @param attempt Login attempt description.
+   */
+  async login(request: KibanaRequest, attempt: ProviderLoginAttempt) {
+    assertRequest(request);
+    assertLoginAttempt(attempt);
+
+    // If there is an attempt to login with a provider that isn't enabled, we should fail.
+    const provider = this.providers.get(attempt.provider);
+    if (provider === undefined) {
+      this.logger.debug(
+        `Login attempt for provider "${attempt.provider}" is detected, but it isn't enabled.`
+      );
+      return AuthenticationResult.notHandled();
+    }
+
+    this.logger.debug(`Performing login using "${attempt.provider}" provider.`);
+
+    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
+
+    // If we detect an existing session that belongs to a different provider than the one request to
+    // perform a login we should clear such session.
+    let existingSession = await this.getSessionValue(sessionStorage);
+    if (existingSession && existingSession.provider !== attempt.provider) {
+      this.logger.debug(
+        `Clearing existing session of another ("${existingSession.provider}") provider.`
+      );
+      sessionStorage.clear();
+      existingSession = null;
+    }
+
+    const authenticationResult = await provider.login(
+      request,
+      attempt.value,
+      existingSession ? existingSession.state : null
+    );
+
+    this.updateSessionValue(sessionStorage, {
+      providerType: attempt.provider,
+      isSystemAPIRequest: this.options.isSystemAPIRequest(request),
+      authenticationResult,
+      existingSession,
+    });
+
+    return authenticationResult;
   }
 
   /**
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: RequestWithLoginAttempt) {
+  async authenticate(request: KibanaRequest) {
     assertRequest(request);
 
-    const isSystemApiRequest = this.server.plugins.kibana.systemApi.isSystemApiRequest(request);
-    const existingSession = await this.getSessionValue(request);
+    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
+    const existingSession = await this.getSessionValue(sessionStorage);
 
-    let authenticationResult;
+    let authenticationResult = AuthenticationResult.notHandled();
     for (const [providerType, provider] of this.providerIterator(existingSession)) {
       // Check if current session has been set by this provider.
       const ownsSession = existingSession && existingSession.provider === providerType;
@@ -170,39 +265,19 @@ class Authenticator {
         ownsSession ? existingSession!.state : null
       );
 
-      if (ownsSession || authenticationResult.shouldUpdateState()) {
-        // If authentication succeeds or requires redirect we should automatically extend existing user session,
-        // unless authentication has been triggered by a system API request. In case provider explicitly returns new
-        // state we should store it in the session regardless of whether it's a system API request or not.
-        const sessionCanBeUpdated =
-          (authenticationResult.succeeded() || authenticationResult.redirected()) &&
-          (authenticationResult.shouldUpdateState() || !isSystemApiRequest);
+      this.updateSessionValue(sessionStorage, {
+        providerType,
+        isSystemAPIRequest: this.options.isSystemAPIRequest(request),
+        authenticationResult,
+        existingSession:
+          existingSession && existingSession.provider === providerType ? existingSession : null,
+      });
 
-        // If provider owned the session, but failed to authenticate anyway, that likely means that
-        // session is not valid and we should clear it. Also provider can specifically ask to clear
-        // session by setting it to `null` even if authentication attempt didn't fail.
-        if (
-          authenticationResult.shouldClearState() ||
-          (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
-        ) {
-          await this.session.clear(request);
-        } else if (sessionCanBeUpdated) {
-          await this.session.set(
-            request,
-            authenticationResult.shouldUpdateState()
-              ? { state: authenticationResult.state, provider: providerType }
-              : existingSession
-          );
-        }
-      }
-
-      if (authenticationResult.failed()) {
-        return authenticationResult;
-      }
-
-      if (authenticationResult.succeeded()) {
-        return AuthenticationResult.succeeded(authenticationResult.user!);
-      } else if (authenticationResult.redirected()) {
+      if (
+        authenticationResult.failed() ||
+        authenticationResult.succeeded() ||
+        authenticationResult.redirected()
+      ) {
         return authenticationResult;
       }
     }
@@ -214,24 +289,25 @@ class Authenticator {
    * Deauthenticates current request.
    * @param request Request instance.
    */
-  async deauthenticate(request: RequestWithLoginAttempt) {
+  async logout(request: KibanaRequest) {
     assertRequest(request);
 
-    const sessionValue = await this.getSessionValue(request);
+    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
+    const sessionValue = await this.getSessionValue(sessionStorage);
     if (sessionValue) {
-      await this.session.clear(request);
+      sessionStorage.clear();
 
-      return this.providers.get(sessionValue.provider)!.deauthenticate(request, sessionValue.state);
+      return this.providers.get(sessionValue.provider)!.logout(request, sessionValue.state);
     }
 
-    // Normally when there is no active session in Kibana, `deauthenticate` method shouldn't do anything
+    // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
     // and user will eventually be redirected to the home page to log in. But if SAML is supported there
     // is a special case when logout is initiated by the IdP or another SP, then IdP will request _every_
     // SP associated with the current user session to do the logout. So if Kibana (without active session)
     // receives such a request it shouldn't redirect user to the home page, but rather redirect back to IdP
     // with correct logout response and only Elasticsearch knows how to do that.
-    if ((request.query as Record<string, string>).SAMLRequest && this.providers.has('saml')) {
-      return this.providers.get('saml')!.deauthenticate(request);
+    if (isSAMLRequestQuery(request.query) && this.providers.has('saml')) {
+      return this.providers.get('saml')!.logout(request);
     }
 
     return DeauthenticationResult.notHandled();
@@ -240,20 +316,25 @@ class Authenticator {
   /**
    * Returns provider iterator where providers are sorted in the order of priority (based on the session ownership).
    * @param sessionValue Current session value.
+   * @param [loginAttempt] Optional provider login attempt. If present, login attempt always has a higher
+   * priority comparing to the existing session.
    */
-  *providerIterator(
-    sessionValue: ProviderSession | null
+  private *providerIterator(
+    sessionValue: ProviderSession | null,
+    loginAttempt?: ProviderLoginAttempt
   ): IterableIterator<[string, BaseAuthenticationProvider]> {
-    // If there is no session to predict which provider to use first, let's use the order
-    // providers are configured in. Otherwise return provider that owns session first, and only then the rest
-    // of providers.
-    if (!sessionValue) {
+    // If there is no session or login attempt to predict which provider to use first, let's use the order
+    // providers are configured in. Otherwise return provider that owns login attempt/session first, and
+    // only then the rest of providers. Login attempt always takes precedence over session.
+    const preferredProvider =
+      (loginAttempt && loginAttempt.provider) || (sessionValue && sessionValue.provider);
+    if (!preferredProvider) {
       yield* this.providers;
     } else {
-      yield [sessionValue.provider, this.providers.get(sessionValue.provider)!];
+      yield [preferredProvider, this.providers.get(preferredProvider)!];
 
-      for (const [providerType, provider] of this.providers) {
-        if (providerType !== sessionValue.provider) {
+      for (const [providerType, provider] of this.providers.entries()) {
+        if (providerType !== preferredProvider) {
           yield [providerType, provider];
         }
       }
@@ -263,54 +344,63 @@ class Authenticator {
   /**
    * Extracts session value for the specified request. Under the hood it can
    * clear session if it belongs to the provider that is not available.
-   * @param request Request to extract session value for.
+   * @param sessionStorage Session storage instance.
    */
-  private async getSessionValue(request: Legacy.Request) {
-    let sessionValue = await this.session.get<ProviderSession>(request);
+  private async getSessionValue(sessionStorage: SessionStorage<ProviderSession>) {
+    let sessionValue = await sessionStorage.get();
 
     // If for some reason we have a session stored for the provider that is not available
     // (e.g. when user was logged in with one provider, but then configuration has changed
     // and that provider is no longer available), then we should clear session entirely.
     if (sessionValue && !this.providers.has(sessionValue.provider)) {
-      await this.session.clear(request);
+      sessionStorage.clear();
       sessionValue = null;
     }
 
     return sessionValue;
   }
-}
 
-export async function initAuthenticator(server: Legacy.Server) {
-  const session = await Session.create(server);
-  const authenticator = new Authenticator(server, session);
-
-  const loginAttempts = new WeakMap();
-  server.decorate('request', 'loginAttempt', function(this: Legacy.Request) {
-    const request = this;
-    if (!loginAttempts.has(request)) {
-      loginAttempts.set(request, new LoginAttempt());
+  private updateSessionValue(
+    sessionStorage: SessionStorage<ProviderSession>,
+    {
+      providerType,
+      authenticationResult,
+      existingSession,
+      isSystemAPIRequest,
+    }: {
+      providerType: string;
+      authenticationResult: AuthenticationResult;
+      existingSession: ProviderSession | null;
+      isSystemAPIRequest: boolean;
     }
-    return loginAttempts.get(request);
-  });
-
-  server.expose('authenticate', (request: RequestWithLoginAttempt) =>
-    authenticator.authenticate(request)
-  );
-  server.expose('deauthenticate', (request: RequestWithLoginAttempt) =>
-    authenticator.deauthenticate(request)
-  );
-
-  server.expose('isAuthenticated', async (request: Legacy.Request) => {
-    try {
-      await server.plugins.security!.getUser(request);
-      return true;
-    } catch (err) {
-      // Don't swallow server errors.
-      if (!err.isBoom || err.output.statusCode !== 401) {
-        throw err;
-      }
+  ) {
+    if (!existingSession && !authenticationResult.shouldUpdateState()) {
+      return;
     }
 
-    return false;
-  });
+    // If authentication succeeds or requires redirect we should automatically extend existing user session,
+    // unless authentication has been triggered by a system API request. In case provider explicitly returns new
+    // state we should store it in the session regardless of whether it's a system API request or not.
+    const sessionCanBeUpdated =
+      (authenticationResult.succeeded() || authenticationResult.redirected()) &&
+      (authenticationResult.shouldUpdateState() || !isSystemAPIRequest);
+
+    // If provider owned the session, but failed to authenticate anyway, that likely means that
+    // session is not valid and we should clear it. Also provider can specifically ask to clear
+    // session by setting it to `null` even if authentication attempt didn't fail.
+    if (
+      authenticationResult.shouldClearState() ||
+      (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
+    ) {
+      sessionStorage.clear();
+    } else if (sessionCanBeUpdated) {
+      sessionStorage.set({
+        state: authenticationResult.shouldUpdateState()
+          ? authenticationResult.state
+          : existingSession!.state,
+        provider: providerType,
+        expires: this.ttl && Date.now() + this.ttl,
+      });
+    }
+  }
 }

@@ -6,7 +6,6 @@
 
 import { Legacy } from 'kibana';
 import { AuthenticatedUser } from './common/model';
-import { AuthenticationResult, DeauthenticationResult } from './server/lib/authentication';
 import { AuthorizationService } from './server/lib/authorization/service';
 
 /**
@@ -14,8 +13,5 @@ import { AuthorizationService } from './server/lib/authorization/service';
  */
 export interface SecurityPlugin {
   authorization: Readonly<AuthorizationService>;
-  authenticate: (request: Legacy.Request) => Promise<AuthenticationResult>;
-  deauthenticate: (request: Legacy.Request) => Promise<DeauthenticationResult>;
   getUser: (request: Legacy.Request) => Promise<AuthenticatedUser>;
-  isAuthenticated: (request: Legacy.Request) => Promise<boolean>;
 }

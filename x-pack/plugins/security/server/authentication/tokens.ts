@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { ClusterClient, Logger } from '../../../../../src/core/server';
 import { getErrorStatusCode } from '../errors';
 
 /**
@@ -29,12 +29,16 @@ export interface TokenPair {
  * various authentication providers.
  */
 export class Tokens {
+  /**
+   * Logger instance bound to `tokens` context.
+   */
+  private readonly logger: Logger;
+
   constructor(
-    private readonly options: Readonly<{
-      client: Legacy.Plugins.elasticsearch.Cluster;
-      log: (tags: string[], message: string) => void;
-    }>
-  ) {}
+    private readonly options: Readonly<{ client: PublicMethodsOf<ClusterClient>; logger: Logger }>
+  ) {
+    this.logger = options.logger;
+  }
 
   /**
    * Tries to exchange provided refresh token to a new pair of access and refresh tokens.
@@ -46,15 +50,15 @@ export class Tokens {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this.options.client.callWithInternalUser('shield.getAccessToken', {
+      } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
         body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken },
       });
 
-      this.debug('Access token has been successfully refreshed.');
+      this.logger.debug('Access token has been successfully refreshed.');
 
       return { accessToken, refreshToken };
     } catch (err) {
-      this.debug(`Failed to refresh access token: ${err.message}`);
+      this.logger.debug(`Failed to refresh access token: ${err.message}`);
 
       // There are at least two common cases when refresh token request can fail:
       // 1. Refresh token is valid only for 24 hours and if it hasn't been used it expires.
@@ -73,7 +77,7 @@ export class Tokens {
       // same refresh token multiple times yielding the same refreshed access/refresh token pair it's still possible
       // to hit the case when refresh token is no longer valid.
       if (getErrorStatusCode(err) === 400) {
-        this.debug('Refresh token is either expired or already used.');
+        this.logger.debug('Refresh token is either expired or already used.');
         return null;
       }
 
@@ -88,28 +92,28 @@ export class Tokens {
    * @param [refreshToken] Optional refresh token to invalidate.
    */
   public async invalidate({ accessToken, refreshToken }: Partial<TokenPair>) {
-    this.debug('Invalidating access/refresh token pair.');
+    this.logger.debug('Invalidating access/refresh token pair.');
 
     let invalidationError;
     if (refreshToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callWithInternalUser(
+        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
           'shield.deleteAccessToken',
           { body: { refresh_token: refreshToken } }
         )).invalidated_tokens;
       } catch (err) {
-        this.debug(`Failed to invalidate refresh token: ${err.message}`);
+        this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
         // We don't re-throw the error here to have a chance to invalidate access token if it's provided.
         invalidationError = err;
       }
 
       if (invalidatedTokensCount === 0) {
-        this.debug('Refresh token was already invalidated.');
+        this.logger.debug('Refresh token was already invalidated.');
       } else if (invalidatedTokensCount === 1) {
-        this.debug('Refresh token has been successfully invalidated.');
+        this.logger.debug('Refresh token has been successfully invalidated.');
       } else if (invalidatedTokensCount > 1) {
-        this.debug(
+        this.logger.debug(
           `${invalidatedTokensCount} refresh tokens were invalidated, this is unexpected.`
         );
       }
@@ -118,21 +122,23 @@ export class Tokens {
     if (accessToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callWithInternalUser(
+        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
           'shield.deleteAccessToken',
           { body: { token: accessToken } }
         )).invalidated_tokens;
       } catch (err) {
-        this.debug(`Failed to invalidate access token: ${err.message}`);
+        this.logger.debug(`Failed to invalidate access token: ${err.message}`);
         invalidationError = err;
       }
 
       if (invalidatedTokensCount === 0) {
-        this.debug('Access token was already invalidated.');
+        this.logger.debug('Access token was already invalidated.');
       } else if (invalidatedTokensCount === 1) {
-        this.debug('Access token has been successfully invalidated.');
+        this.logger.debug('Access token has been successfully invalidated.');
       } else if (invalidatedTokensCount > 1) {
-        this.debug(`${invalidatedTokensCount} access tokens were invalidated, this is unexpected.`);
+        this.logger.debug(
+          `${invalidatedTokensCount} access tokens were invalidated, this is unexpected.`
+        );
       }
     }
 
@@ -160,13 +166,5 @@ export class Tokens {
           err.body.error.reason === 'token document is missing and must be present'
         ))
     );
-  }
-
-  /**
-   * Logs message with `debug` level and tokens/security related tags.
-   * @param message Message to log.
-   */
-  private debug(message: string) {
-    this.options.log(['debug', 'security', 'tokens'], message);
   }
 }

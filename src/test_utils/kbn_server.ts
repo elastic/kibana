@@ -75,7 +75,7 @@ export function createRootWithSettings(
       repl: false,
       basePath: false,
       optimize: false,
-      oss: false,
+      oss: true,
       ...cliArgs,
     },
     isDevClusterMaster: false,

@@ -6,12 +6,12 @@
 
 import Boom from 'boom';
 import { get } from 'lodash';
-import { Legacy } from 'kibana';
+import { KibanaRequest } from '../../../../../../src/core/server';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { BaseAuthenticationProvider } from './base';
 import { Tokens, TokenPair } from '../tokens';
-import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
 
 /**
  * The state supported by the provider.
@@ -22,9 +22,9 @@ type ProviderState = TokenPair;
  * Parses request's `Authorization` HTTP header if present and extracts authentication scheme.
  * @param request Request instance to extract authentication scheme for.
  */
-function getRequestAuthenticationScheme(request: RequestWithLoginAttempt) {
+function getRequestAuthenticationScheme(request: KibanaRequest) {
   const authorization = request.headers.authorization;
-  if (!authorization) {
+  if (!authorization || typeof authorization !== 'string') {
     return '';
   }
 
@@ -40,20 +40,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
-    this.debug(`Trying to authenticate user request to ${request.url.path}.`);
+  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     const authenticationScheme = getRequestAuthenticationScheme(request);
     if (
       authenticationScheme &&
       (authenticationScheme !== 'negotiate' && authenticationScheme !== 'bearer')
     ) {
-      this.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
-      return AuthenticationResult.notHandled();
-    }
-
-    if (request.loginAttempt().getCredentials() != null) {
-      this.debug('Login attempt is detected, but it is not supported by the provider');
+      this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
       return AuthenticationResult.notHandled();
     }
 
@@ -88,18 +83,18 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: Legacy.Request, state?: ProviderState | null) {
-    this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
+  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
     if (!state) {
-      this.debug('There is no access token invalidate.');
+      this.logger.debug('There is no access token invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
     try {
       await this.options.tokens.invalidate(state);
     } catch (err) {
-      this.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
+      this.logger.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
       return DeauthenticationResult.failed(err);
     }
 
@@ -111,46 +106,36 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * get an access token in exchange.
    * @param request Request instance.
    */
-  private async authenticateWithNegotiateScheme(request: RequestWithLoginAttempt) {
-    this.debug('Trying to authenticate request using "Negotiate" authentication scheme.');
+  private async authenticateWithNegotiateScheme(request: KibanaRequest) {
+    this.logger.debug('Trying to authenticate request using "Negotiate" authentication scheme.');
 
-    const [, kerberosTicket] = request.headers.authorization.split(/\s+/);
+    const [, kerberosTicket] = (request.headers.authorization as string).split(/\s+/);
 
     // First attempt to exchange SPNEGO token for an access token.
     let tokens: { access_token: string; refresh_token: string };
     try {
-      tokens = await this.options.client.callWithInternalUser('shield.getAccessToken', {
+      tokens = await this.options.client.callAsInternalUser('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: kerberosTicket },
       });
     } catch (err) {
-      this.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
+      this.logger.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
 
-    this.debug('Get token API request to Elasticsearch successful');
-
-    // Then attempt to query for the user details using the new token
-    const originalAuthorizationHeader = request.headers.authorization;
-    request.headers.authorization = `Bearer ${tokens.access_token}`;
+    this.logger.debug('Get token API request to Elasticsearch successful');
 
     try {
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      // Then attempt to query for the user details using the new token
+      const authHeaders = { authorization: `Bearer ${tokens.access_token}` };
+      const user = await this.getUser(request, authHeaders);
 
-      this.debug('User has been authenticated with new access token');
-
+      this.logger.debug('User has been authenticated with new access token');
       return AuthenticationResult.succeeded(user, {
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
+        authHeaders,
+        state: { accessToken: tokens.access_token, refreshToken: tokens.refresh_token },
       });
     } catch (err) {
-      this.debug(`Failed to authenticate request via access token: ${err.message}`);
-
-      // Restore `Authorization` header we've just set. We can end up here only if newly generated
-      // access token was rejected by Elasticsearch for some reason and it doesn't make any sense to
-      // keep it in the request object since it can confuse other consumers of the request down the
-      // line (e.g. in the next authentication provider).
-      request.headers.authorization = originalAuthorizationHeader;
-
+      this.logger.debug(`Failed to authenticate request via access token: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -159,20 +144,18 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to authenticate request with `Bearer ***` Authorization header by passing it to the Elasticsearch backend.
    * @param request Request instance.
    */
-  private async authenticateWithBearerScheme(request: RequestWithLoginAttempt) {
-    this.debug('Trying to authenticate request using "Bearer" authentication scheme.');
+  private async authenticateWithBearerScheme(request: KibanaRequest) {
+    this.logger.debug('Trying to authenticate request using "Bearer" authentication scheme.');
 
     try {
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.getUser(request);
 
-      this.debug('Request has been authenticated using "Bearer" authentication scheme.');
-
+      this.logger.debug('Request has been authenticated using "Bearer" authentication scheme.');
       return AuthenticationResult.succeeded(user);
     } catch (err) {
-      this.debug(
+      this.logger.debug(
         `Failed to authenticate request using "Bearer" authentication scheme: ${err.message}`
       );
-
       return AuthenticationResult.failed(err);
     }
   }
@@ -183,34 +166,22 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(
-    request: RequestWithLoginAttempt,
-    { accessToken }: ProviderState
-  ) {
-    this.debug('Trying to authenticate via state.');
+  private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
+    this.logger.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
-      this.debug('Access token is not found in state.');
+      this.logger.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    request.headers.authorization = `Bearer ${accessToken}`;
-
     try {
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const user = await this.getUser(request, authHeaders);
 
-      this.debug('Request has been authenticated via state.');
-      return AuthenticationResult.succeeded(user);
+      this.logger.debug('Request has been authenticated via state.');
+      return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.debug(`Failed to authenticate request via state: ${err.message}`);
-
-      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
-      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
-      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
-      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
-      // it's called with this request once again down the line (e.g. in the next authentication provider).
-      delete request.headers.authorization;
-
+      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -222,11 +193,8 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(
-    request: RequestWithLoginAttempt,
-    state: ProviderState
-  ) {
-    this.debug('Trying to refresh access token.');
+  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
+    this.logger.debug('Trying to refresh access token.');
 
     let refreshedTokenPair: TokenPair | null;
     try {
@@ -237,27 +205,22 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
     if (refreshedTokenPair === null) {
-      this.debug('Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.');
+      this.logger.debug(
+        'Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.'
+      );
       return this.authenticateViaSPNEGO(request, state);
     }
 
     try {
-      request.headers.authorization = `Bearer ${refreshedTokenPair.accessToken}`;
+      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const user = await this.getUser(request, authHeaders);
 
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
-
-      this.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, refreshedTokenPair);
+      this.logger.debug('Request has been authenticated via refreshed token.');
+      return AuthenticationResult.succeeded(user, { authHeaders, state: refreshedTokenPair });
     } catch (err) {
-      this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
-
-      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
-      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
-      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
-      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
-      // it's called with this request once again down the line (e.g. in the next authentication provider).
-      delete request.headers.authorization;
-
+      this.logger.debug(
+        `Failed to authenticate user using newly refreshed access token: ${err.message}`
+      );
       return AuthenticationResult.failed(err);
     }
   }
@@ -267,17 +230,14 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  private async authenticateViaSPNEGO(
-    request: RequestWithLoginAttempt,
-    state?: ProviderState | null
-  ) {
-    this.debug('Trying to authenticate request via SPNEGO.');
+  private async authenticateViaSPNEGO(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
     let authenticationError: Error;
     try {
-      await this.options.client.callWithRequest(request, 'shield.authenticate');
-      this.debug('Request was not supposed to be authenticated, ignoring result.');
+      await this.getUser(request);
+      this.logger.debug('Request was not supposed to be authenticated, ignoring result.');
       return AuthenticationResult.notHandled();
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch
@@ -294,11 +254,11 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     );
 
     if (challenges.some(challenge => challenge.toLowerCase() === 'negotiate')) {
-      this.debug(`SPNEGO is supported by the backend, challenges are: [${challenges}].`);
+      this.logger.debug(`SPNEGO is supported by the backend, challenges are: [${challenges}].`);
       return AuthenticationResult.failed(Boom.unauthorized(), ['Negotiate']);
     }
 
-    this.debug(`SPNEGO is not supported by the backend, challenges are: [${challenges}].`);
+    this.logger.debug(`SPNEGO is not supported by the backend, challenges are: [${challenges}].`);
 
     // If we failed to do SPNEGO and have a session with expired token that belongs to Kerberos
     // authentication provider then it means Elasticsearch isn't configured to use Kerberos anymore.
@@ -307,13 +267,5 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     return state
       ? AuthenticationResult.failed(Boom.unauthorized())
       : AuthenticationResult.notHandled();
-  }
-
-  /**
-   * Logs message with `debug` level and kerberos/security related tags.
-   * @param message Message to log.
-   */
-  private debug(message: string) {
-    this.options.log(['debug', 'security', 'kerberos'], message);
   }
 }

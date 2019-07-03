@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * Represents status that `AuthenticationResult` can be in.
- */
+import { AuthHeaders } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { getErrorStatusCode } from '../errors';
 
+/**
+ * Represents status that `AuthenticationResult` can be in.
+ */
 enum AuthenticationResultStatus {
   /**
    * Authentication of the user can't be handled (e.g. supported credentials
@@ -45,6 +46,7 @@ interface AuthenticationOptions {
   redirectURL?: string;
   state?: unknown;
   user?: AuthenticatedUser;
+  authHeaders?: AuthHeaders;
 }
 
 /**
@@ -62,14 +64,22 @@ export class AuthenticationResult {
   /**
    * Produces `AuthenticationResult` for the case when authentication succeeds.
    * @param user User information retrieved as a result of successful authentication attempt.
+   * @param [authHeaders] Optional dictionary of the HTTP headers with authentication information.
    * @param [state] Optional state to be stored and reused for the next request.
    */
-  public static succeeded(user: AuthenticatedUser, state?: unknown) {
+  public static succeeded(
+    user: AuthenticatedUser,
+    { authHeaders, state }: { authHeaders?: AuthHeaders; state?: unknown } = {}
+  ) {
     if (!user) {
       throw new Error('User should be specified.');
     }
 
-    return new AuthenticationResult(AuthenticationResultStatus.Succeeded, { user, state });
+    return new AuthenticationResult(AuthenticationResultStatus.Succeeded, {
+      user,
+      authHeaders,
+      state,
+    });
   }
 
   /**
@@ -110,6 +120,14 @@ export class AuthenticationResult {
    */
   public get user() {
     return this.options.user;
+  }
+
+  /**
+   * Headers that include authentication information that should be used to authenticate user for any
+   * future requests (only available for `succeeded` result).
+   */
+  public get authHeaders() {
+    return this.options.authHeaders;
   }
 
   /**

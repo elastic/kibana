@@ -4,75 +4,254 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-import { validateConfig } from './config';
+jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
 
-describe('Validate config', function () {
-  let config;
-  const log = sinon.stub();
-  const validKey = 'd624dce49dafa1401be7f3e1182b756a';
+import { first } from 'rxjs/operators';
+import { loggingServiceMock, coreMock } from '../../../../src/core/server/mocks';
+import { createConfig$, ConfigSchema } from './config';
 
-  beforeEach(() => {
-    config = {
-      get: sinon.stub(),
-      getDefault: sinon.stub(),
-      set: sinon.stub(),
-    };
-    log.resetHistory();
+describe('config schema', () => {
+  it('generates proper defaults', () => {
+    expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
+Object {
+  "authc": Object {
+    "providers": Array [
+      "basic",
+    ],
+  },
+  "cookieName": "sid",
+  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "secureCookies": false,
+  "sessionTimeout": null,
+}
+`);
+
+    expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
+Object {
+  "authc": Object {
+    "providers": Array [
+      "basic",
+    ],
+  },
+  "cookieName": "sid",
+  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "secureCookies": false,
+  "sessionTimeout": null,
+}
+`);
+
+    expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
+Object {
+  "authc": Object {
+    "providers": Array [
+      "basic",
+    ],
+  },
+  "cookieName": "sid",
+  "secureCookies": false,
+  "sessionTimeout": null,
+}
+`);
   });
 
-  it('should log a warning and set xpack.security.encryptionKey if not set', function () {
-    config.get.withArgs('server.ssl.key').returns('foo');
-    config.get.withArgs('server.ssl.certificate').returns('bar');
-    config.get.withArgs('xpack.security.secureCookies').returns(false);
+  it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {
+    expect(() =>
+      ConfigSchema.validate({ encryptionKey: 'foo' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[encryptionKey]: value is [foo] but it must have a minimum length of [32]."`
+    );
 
-    expect(() => validateConfig(config, log)).not.to.throwError();
-
-    sinon.assert.calledWith(config.set, 'xpack.security.encryptionKey');
-    sinon.assert.calledWith(config.set, 'xpack.security.secureCookies', true);
-    sinon.assert.calledWithMatch(log, /Generating a random key/);
-    sinon.assert.calledWithMatch(log, /please set xpack.security.encryptionKey/);
+    expect(() =>
+      ConfigSchema.validate({ encryptionKey: 'foo' }, { dist: true })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[encryptionKey]: value is [foo] but it must have a minimum length of [32]."`
+    );
   });
 
-  it('should throw error if xpack.security.encryptionKey is less than 32 characters', function () {
-    config.get.withArgs('xpack.security.encryptionKey').returns('foo');
+  describe('authc.oidc', () => {
+    it(`returns a validation error when authc.providers is "['oidc']" and realm is unspecified`, async () => {
+      expect(() =>
+        ConfigSchema.validate({ authc: { providers: ['oidc'] } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
+      );
 
-    const validateConfigFn = () => validateConfig(config);
-    expect(validateConfigFn).to.throwException(/xpack.security.encryptionKey must be at least 32 characters/);
+      expect(() =>
+        ConfigSchema.validate({ authc: { providers: ['oidc'], oidc: {} } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
+      );
+    });
+
+    it(`is valid when authc.providers is "['oidc']" and realm is specified`, async () => {
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['oidc'], oidc: { realm: 'realm-1' } },
+        }).authc
+      ).toMatchInlineSnapshot(`
+Object {
+  "oidc": Object {
+    "realm": "realm-1",
+  },
+  "providers": Array [
+    "oidc",
+  ],
+}
+`);
+    });
+
+    it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
+      expect(() =>
+        ConfigSchema.validate({ authc: { providers: ['oidc', 'basic'] } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.oidc.realm]: expected value of type [string] but got [undefined]"`
+      );
+    });
+
+    it(`is valid when authc.providers is "['oidc', 'basic']" and realm is specified`, async () => {
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['oidc', 'basic'], oidc: { realm: 'realm-1' } },
+        }).authc
+      ).toMatchInlineSnapshot(`
+Object {
+  "oidc": Object {
+    "realm": "realm-1",
+  },
+  "providers": Array [
+    "oidc",
+    "basic",
+  ],
+}
+`);
+    });
+
+    it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
+      expect(() =>
+        ConfigSchema.validate({ authc: { providers: ['basic'], oidc: { realm: 'realm-1' } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.oidc]: [authc.providers] should include \\"oidc\\"."`
+      );
+    });
   });
 
-  it('should log a warning if SSL is not configured', function () {
-    config.get.withArgs('xpack.security.encryptionKey').returns(validKey);
-    config.get.withArgs('xpack.security.secureCookies').returns(false);
+  describe('authc.saml', () => {
+    it('fails if authc.providers includes `saml`, but `saml.realm` is not specified', async () => {
+      expect(() =>
+        ConfigSchema.validate({ authc: { providers: ['saml'] } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.saml.realm]: expected value of type [string] but got [undefined]"`
+      );
 
-    expect(() => validateConfig(config, log)).not.to.throwError();
+      expect(() =>
+        ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.saml.realm]: expected value of type [string] but got [undefined]"`
+      );
 
-    sinon.assert.neverCalledWith(config.set, 'xpack.security.encryptionKey');
-    sinon.assert.neverCalledWith(config.set, 'xpack.security.secureCookies');
-    sinon.assert.calledWithMatch(log, /Session cookies will be transmitted over insecure connections/);
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
+        }).authc
+      ).toMatchInlineSnapshot(`
+Object {
+  "providers": Array [
+    "saml",
+  ],
+  "saml": Object {
+    "realm": "realm-1",
+  },
+}
+`);
+    });
+
+    it('`realm` is not allowed if saml provider is not enabled', async () => {
+      expect(() =>
+        ConfigSchema.validate({ authc: { providers: ['basic'], saml: { realm: 'realm-1' } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.saml]: [authc.providers] should include \\"saml\\"."`
+      );
+    });
+  });
+});
+
+describe('createConfig$()', () => {
+  const collectLogs = (contextMock: ReturnType<typeof coreMock.createPluginInitializerContext>) => {
+    return loggingServiceMock.collect(contextMock.logger as ReturnType<
+      typeof loggingServiceMock['create']
+    >);
+  };
+
+  it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
+    const mockRandomBytes = jest.requireMock('crypto').randomBytes;
+    mockRandomBytes.mockReturnValue('ab'.repeat(16));
+
+    const contextMock = coreMock.createPluginInitializerContext({});
+    const config = await createConfig$(contextMock, true)
+      .pipe(first())
+      .toPromise();
+    expect(config).toEqual({ encryptionKey: 'ab'.repeat(16), secureCookies: true });
+
+    expect(collectLogs(contextMock).warn).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
+  ],
+]
+`);
   });
 
-  it('should log a warning if SSL is not configured yet secure cookies are being used', function () {
-    config.get.withArgs('xpack.security.encryptionKey').returns(validKey);
-    config.get.withArgs('xpack.security.secureCookies').returns(true);
+  it('should log a warning if SSL is not configured', async () => {
+    const contextMock = coreMock.createPluginInitializerContext({
+      encryptionKey: 'a'.repeat(32),
+      secureCookies: false,
+    });
 
-    expect(() => validateConfig(config, log)).not.to.throwError();
+    const config = await createConfig$(contextMock, false)
+      .pipe(first())
+      .toPromise();
+    expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: false });
 
-    sinon.assert.neverCalledWith(config.set, 'xpack.security.encryptionKey');
-    sinon.assert.neverCalledWith(config.set, 'xpack.security.secureCookies');
-    sinon.assert.calledWithMatch(log, /SSL must be configured outside of Kibana/);
+    expect(collectLogs(contextMock).warn).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Session cookies will be transmitted over insecure connections. This is not recommended.",
+  ],
+]
+`);
   });
 
-  it('should set xpack.security.secureCookies if SSL is configured', function () {
-    config.get.withArgs('server.ssl.key').returns('foo');
-    config.get.withArgs('server.ssl.certificate').returns('bar');
-    config.get.withArgs('xpack.security.encryptionKey').returns(validKey);
+  it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
+    const contextMock = coreMock.createPluginInitializerContext({
+      encryptionKey: 'a'.repeat(32),
+      secureCookies: true,
+    });
 
-    expect(() => validateConfig(config, log)).not.to.throwError();
+    const config = await createConfig$(contextMock, false)
+      .pipe(first())
+      .toPromise();
+    expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: true });
 
-    sinon.assert.neverCalledWith(config.set, 'xpack.security.encryptionKey');
-    sinon.assert.calledWith(config.set, 'xpack.security.secureCookies', true);
-    sinon.assert.notCalled(log);
+    expect(collectLogs(contextMock).warn).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
+  ],
+]
+`);
+  });
+
+  it('should set xpack.security.secureCookies if SSL is configured', async () => {
+    const contextMock = coreMock.createPluginInitializerContext({
+      encryptionKey: 'a'.repeat(32),
+      secureCookies: false,
+    });
+
+    const config = await createConfig$(contextMock, true)
+      .pipe(first())
+      .toPromise();
+    expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: true });
+
+    expect(collectLogs(contextMock).warn).toEqual([]);
   });
 });

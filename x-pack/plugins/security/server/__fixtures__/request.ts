@@ -4,36 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import url from 'url';
+import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from '../../../../../src/core/server';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
-  auth?: string;
   params?: Record<string, unknown>;
   path?: string;
-  basePath?: string;
   search?: string;
   payload?: unknown;
 }
 
 export function requestFixture({
   headers = { accept: 'something/html' },
-  auth,
   params,
   path = '/wat',
   search = '',
   payload,
 }: RequestFixtureOptions = {}) {
-  return ({
-    raw: { req: { headers } },
-    auth,
-    headers,
-    params,
-    url: { path, search },
-    query: search ? url.parse(search, true /* parseQueryString */).query : {},
-    payload,
-    state: { user: 'these are the contents of the user client cookie' },
-    route: { settings: {} },
-  } as any) as Request;
+  return KibanaRequest.from(
+    {
+      headers,
+      params,
+      url: { path, search },
+      query: search ? url.parse(search, true /* parseQueryString */).query : {},
+      payload,
+      route: { settings: {} },
+    } as any,
+    { query: schema.object({}, { allowUnknowns: true }) }
+  );
 }

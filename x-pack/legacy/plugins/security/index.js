@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
 import { initExternalRolesApi } from './server/routes/api/external/roles';
@@ -15,10 +14,7 @@ import { initOverwrittenSessionView } from './server/routes/views/overwritten_se
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
 import { initLoggedOutView } from './server/routes/views/logged_out';
-import { validateConfig } from './server/lib/validate_config';
-import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
-import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import {
@@ -33,7 +29,9 @@ import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
+import { KibanaRequest } from '../../../../src/core/server';
 
+let defaultVars;
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
   configPrefix: 'xpack.security',
@@ -41,23 +39,12 @@ export const security = (kibana) => new kibana.Plugin({
   require: ['kibana', 'elasticsearch', 'xpack_main'],
 
   config(Joi) {
-    const providerOptionsSchema = (providerName, schema) => Joi.any()
-      .when('providers', {
-        is: Joi.array().items(Joi.string().valid(providerName).required(), Joi.string()),
-        then: schema,
-        otherwise: Joi.any().forbidden(),
-      });
-
     return Joi.object({
       enabled: Joi.boolean().default(true),
-      cookieName: Joi.string().default('sid'),
-      encryptionKey: Joi.when(Joi.ref('$dist'), {
-        is: true,
-        then: Joi.string(),
-        otherwise: Joi.string().default('a'.repeat(32)),
-      }),
-      sessionTimeout: Joi.number().allow(null).default(null),
-      secureCookies: Joi.boolean().default(false),
+      cookieName: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      encryptionKey: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      sessionTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -66,11 +53,7 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
-      authc: Joi.object({
-        providers: Joi.array().items(Joi.string()).default(['basic']),
-        oidc: providerOptionsSchema('oidc', Joi.object({ realm: Joi.string().required() }).required()),
-        saml: providerOptionsSchema('saml', Joi.object({ realm: Joi.string().required() }).required()),
-      }).default()
+      authc: Joi.any().description('This key is handled in the new platform security plugin ONLY')
     }).default();
   },
 
@@ -111,15 +94,7 @@ export const security = (kibana) => new kibana.Plugin({
       'plugins/security/hacks/on_unauthorized_response'
     ],
     home: ['plugins/security/register_feature'],
-    injectDefaultVars: function (server) {
-      const config = server.config();
-
-      return {
-        secureCookies: config.get('xpack.security.secureCookies'),
-        sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
-      };
-    }
+    injectDefaultVars: () => defaultVars,
   },
 
   async postInit(server) {
@@ -137,28 +112,37 @@ export const security = (kibana) => new kibana.Plugin({
   },
 
   async init(server) {
-    const plugin = this;
+    const securityPlugin = this.kbnServer.newPlatform.setup.plugins.security;
+    if (!securityPlugin) {
+      throw new Error('New Platform XPack Security plugin is not available.');
+    }
 
-    const config = server.config();
     const xpackMainPlugin = server.plugins.xpack_main;
     const xpackInfo = xpackMainPlugin.info;
+    securityPlugin.registerLegacyAPI({
+      xpackInfo,
+      isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
+        server.plugins.kibana.systemApi
+      ),
+    });
 
+    const plugin = this;
+    const config = server.config();
     const xpackInfoFeature = xpackInfo.feature(plugin.id);
+
+    // Config required for default injected vars is coming from new platform plugin and hence we can
+    // initialize these only within `init` function of the legacy plugin.
+    defaultVars = {
+      secureCookies: securityPlugin.config.secureCookies,
+      sessionTimeout: securityPlugin.config.sessionTimeout,
+      enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
+    };
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
     xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
 
-    validateConfig(config, message => server.log(['security', 'warning'], message));
-
-    // Create a Hapi auth scheme that should be applied to each request.
-    server.auth.scheme('login', () => ({ authenticate: authenticateFactory(server) }));
-
-    server.auth.strategy('session', 'login');
-
-    // The default means that the `session` strategy that is based on `login` schema defined above will be
-    // automatically assigned to all routes that don't contain an auth config.
-    server.auth.default('session');
+    server.expose({ getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)) });
 
     const { savedObjects } = server;
 
@@ -202,19 +186,16 @@ export const security = (kibana) => new kibana.Plugin({
       return client;
     });
 
-    getUserProvider(server);
-
-    await initAuthenticator(server);
-    initAuthenticateApi(server);
+    initAuthenticateApi(securityPlugin, server);
     initAPIAuthorization(server, authorization);
     initAppAuthorization(server, xpackMainPlugin, authorization);
-    initUsersApi(server);
+    initUsersApi(securityPlugin, server);
     initExternalRolesApi(server);
     initIndicesApi(server);
     initPrivilegesApi(server);
-    initLoginView(server, xpackMainPlugin);
+    initLoginView(securityPlugin, server, xpackMainPlugin);
     initLogoutView(server);
-    initLoggedOutView(server);
+    initLoggedOutView(securityPlugin, server);
     initOverwrittenSessionView(server);
 
     server.injectUiAppVars('login', () => {

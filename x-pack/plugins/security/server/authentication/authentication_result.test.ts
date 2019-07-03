@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { AuthenticatedUser } from '../../common/model';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from './authentication_result';
 
 describe('AuthenticationResult', () => {
@@ -21,6 +21,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
   });
@@ -44,6 +45,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.error).toBe(failureReason);
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
 
@@ -60,6 +62,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.error).toBe(failureReason);
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
 
@@ -77,8 +80,8 @@ describe('AuthenticationResult', () => {
       );
     });
 
-    it('correctly produces `succeeded` authentication result without state.', () => {
-      const user = { username: 'user' } as AuthenticatedUser;
+    it('correctly produces `succeeded` authentication result without state and authHeaders.', () => {
+      const user = mockAuthenticatedUser();
       const authenticationResult = AuthenticationResult.succeeded(user);
 
       expect(authenticationResult.succeeded()).toBe(true);
@@ -88,14 +91,15 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
 
-    it('correctly produces `succeeded` authentication result with state.', () => {
-      const user = { username: 'user' } as AuthenticatedUser;
+    it('correctly produces `succeeded` authentication result with state, but without authHeaders.', () => {
+      const user = mockAuthenticatedUser();
       const state = { some: 'state' };
-      const authenticationResult = AuthenticationResult.succeeded(user, state);
+      const authenticationResult = AuthenticationResult.succeeded(user, { state });
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.failed()).toBe(false);
@@ -104,6 +108,42 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.authHeaders).toBeUndefined();
+      expect(authenticationResult.error).toBeUndefined();
+      expect(authenticationResult.redirectURL).toBeUndefined();
+    });
+
+    it('correctly produces `succeeded` authentication result with authHeaders, but without state.', () => {
+      const user = mockAuthenticatedUser();
+      const authHeaders = { authorization: 'some-token' };
+      const authenticationResult = AuthenticationResult.succeeded(user, { authHeaders });
+
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.failed()).toBe(false);
+      expect(authenticationResult.notHandled()).toBe(false);
+      expect(authenticationResult.redirected()).toBe(false);
+
+      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.authHeaders).toBe(authHeaders);
+      expect(authenticationResult.error).toBeUndefined();
+      expect(authenticationResult.redirectURL).toBeUndefined();
+    });
+
+    it('correctly produces `succeeded` authentication result with both authHeaders and state.', () => {
+      const user = mockAuthenticatedUser();
+      const authHeaders = { authorization: 'some-token' };
+      const state = { some: 'state' };
+      const authenticationResult = AuthenticationResult.succeeded(user, { authHeaders, state });
+
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.failed()).toBe(false);
+      expect(authenticationResult.notHandled()).toBe(false);
+      expect(authenticationResult.redirected()).toBe(false);
+
+      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.authHeaders).toBe(authHeaders);
       expect(authenticationResult.error).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
@@ -128,6 +168,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.redirectURL).toBe(redirectURL);
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
     });
 
@@ -143,6 +184,7 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.redirectURL).toBe(redirectURL);
       expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
     });
@@ -176,21 +218,31 @@ describe('AuthenticationResult', () => {
     });
 
     it('depends on `state` for `succeeded`.', () => {
-      const mockUser = { username: 'u' } as AuthenticatedUser;
-      expect(AuthenticationResult.succeeded(mockUser, 'string').shouldUpdateState()).toBe(true);
-      expect(AuthenticationResult.succeeded(mockUser, 0).shouldUpdateState()).toBe(true);
-      expect(AuthenticationResult.succeeded(mockUser, true).shouldUpdateState()).toBe(true);
-      expect(AuthenticationResult.succeeded(mockUser, false).shouldUpdateState()).toBe(true);
-      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldUpdateState()).toBe(
+      const mockUser = mockAuthenticatedUser();
+      expect(
+        AuthenticationResult.succeeded(mockUser, { state: 'string' }).shouldUpdateState()
+      ).toBe(true);
+      expect(AuthenticationResult.succeeded(mockUser, { state: 0 }).shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.succeeded(mockUser, { state: true }).shouldUpdateState()).toBe(
         true
       );
-      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldUpdateState()).toBe(
+      expect(AuthenticationResult.succeeded(mockUser, { state: false }).shouldUpdateState()).toBe(
         true
       );
+      expect(
+        AuthenticationResult.succeeded(mockUser, { state: { prop: 'object' } }).shouldUpdateState()
+      ).toBe(true);
+      expect(
+        AuthenticationResult.succeeded(mockUser, { state: { prop: 'object' } }).shouldUpdateState()
+      ).toBe(true);
 
       expect(AuthenticationResult.succeeded(mockUser).shouldUpdateState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, undefined).shouldUpdateState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, null).shouldUpdateState()).toBe(false);
+      expect(
+        AuthenticationResult.succeeded(mockUser, { state: undefined }).shouldUpdateState()
+      ).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, { state: null }).shouldUpdateState()).toBe(
+        false
+      );
     });
   });
 
@@ -222,21 +274,31 @@ describe('AuthenticationResult', () => {
     });
 
     it('depends on `state` for `succeeded`.', () => {
-      const mockUser = { username: 'u' } as AuthenticatedUser;
-      expect(AuthenticationResult.succeeded(mockUser, null).shouldClearState()).toBe(true);
+      const mockUser = mockAuthenticatedUser();
+      expect(AuthenticationResult.succeeded(mockUser, { state: null }).shouldClearState()).toBe(
+        true
+      );
 
       expect(AuthenticationResult.succeeded(mockUser).shouldClearState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, undefined).shouldClearState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, 'string').shouldClearState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, 0).shouldClearState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, true).shouldClearState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, false).shouldClearState()).toBe(false);
-      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldClearState()).toBe(
+      expect(
+        AuthenticationResult.succeeded(mockUser, { state: undefined }).shouldClearState()
+      ).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, { state: 'string' }).shouldClearState()).toBe(
         false
       );
-      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldClearState()).toBe(
+      expect(AuthenticationResult.succeeded(mockUser, { state: 0 }).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, { state: true }).shouldClearState()).toBe(
         false
       );
+      expect(AuthenticationResult.succeeded(mockUser, { state: false }).shouldClearState()).toBe(
+        false
+      );
+      expect(
+        AuthenticationResult.succeeded(mockUser, { state: { prop: 'object' } }).shouldClearState()
+      ).toBe(false);
+      expect(
+        AuthenticationResult.succeeded(mockUser, { state: { prop: 'object' } }).shouldClearState()
+      ).toBe(false);
     });
   });
 });

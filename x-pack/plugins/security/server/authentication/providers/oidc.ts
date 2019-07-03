@@ -6,8 +6,8 @@
 
 import Boom from 'boom';
 import type from 'type-detect';
-import { Legacy } from 'kibana';
-import { canRedirectRequest } from '../can_redirect_request';
+import { canRedirectRequest } from '../';
+import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens, TokenPair } from '../tokens';
@@ -15,8 +15,16 @@ import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
   AuthenticationProviderSpecificOptions,
-  RequestWithLoginAttempt,
 } from './base';
+
+/**
+ * Describes the parameters that are required by the provider to process the initial login request.
+ */
+interface ProviderLoginAttempt {
+  code?: string;
+  iss?: string;
+  loginHint?: string;
+}
 
 /**
  * The state supported by the provider (for the OpenID Connect handshake or established session).
@@ -41,48 +49,12 @@ interface ProviderState extends Partial<TokenPair> {
 }
 
 /**
- * Defines the shape of an incoming OpenID Connect Request
- */
-type OIDCIncomingRequest = RequestWithLoginAttempt & {
-  payload: {
-    iss?: string;
-    login_hint?: string;
-  };
-  query: {
-    iss?: string;
-    code?: string;
-    state?: string;
-    login_hint?: string;
-    error?: string;
-    error_description?: string;
-  };
-};
-
-/**
- * Checks if the Request object represents an HTTP request regarding authentication with OpenID
- * Connect. This can be
- * - An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication
- * - An HTTP POST request with a parameter named `iss` as part of a 3rd party initiated authentication
- * - An HTTP GET request with a query parameter named `code` as the response to a successful authentication from
- *   an OpenID Connect Provider
- * - An HTTP GET request with a query parameter named `error` as the response to a failed authentication from
- *   an OpenID Connect Provider
- * @param request Request instance.
- */
-function isOIDCIncomingRequest(request: RequestWithLoginAttempt): request is OIDCIncomingRequest {
-  return (
-    (request.payload != null && !!(request.payload as Record<string, unknown>).iss) ||
-    (request.query != null &&
-      (!!(request.query as any).iss ||
-        !!(request.query as any).code ||
-        !!(request.query as any).error))
-  );
-}
-
-/**
  * Provider that supports authentication using an OpenID Connect realm in Elasticsearch.
  */
 export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
+  /**
+   * Specifies Elasticsearch OIDC realm name that Kibana should use.
+   */
   private readonly realm: string;
 
   constructor(
@@ -104,10 +76,28 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs OpenID Connect request authentication.
    * @param request Request instance.
+   * @param attempt Login attempt description.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
-    this.debug(`Trying to authenticate user request to ${request.url.path}.`);
+  public async login(
+    request: KibanaRequest,
+    attempt: ProviderLoginAttempt,
+    state?: ProviderState | null
+  ) {
+    this.logger.debug('Trying to perform a login.');
+
+    // This might be the OpenID Connect Provider redirecting the user to `redirect_uri` after authentication or
+    // a third party initiating an authentication
+    return await this.loginWithOIDCPayload(request, attempt, state);
+  }
+
+  /**
+   * Performs OpenID Connect request authentication.
+   * @param request Request instance.
+   * @param [state] Optional state object associated with the provider.
+   */
+  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
     let {
@@ -118,11 +108,6 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       return authenticationResult;
     }
 
-    if (request.loginAttempt().getCredentials() != null) {
-      this.debug('Login attempt is detected, but it is not supported by the provider');
-      return AuthenticationResult.notHandled();
-    }
-
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (
@@ -131,12 +116,6 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       ) {
         authenticationResult = await this.authenticateViaRefreshToken(request, state);
       }
-    }
-
-    if (isOIDCIncomingRequest(request) && authenticationResult.notHandled()) {
-      // This might be the OpenID Connect Provider redirecting the user to `redirect_uri` after authentication or
-      // a third party initiating an authentication
-      authenticationResult = await this.authenticateViaResponseUrl(request, state);
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to
@@ -161,30 +140,31 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * to the URL that was requested before authentication flow started or to default Kibana location in case of a third
    * party initiated login
    * @param request Request instance.
+   * @param attempt Login attempt description.
    * @param [sessionState] Optional state object associated with the provider.
    */
-  private async authenticateViaResponseUrl(
-    request: OIDCIncomingRequest,
+  private async loginWithOIDCPayload(
+    request: KibanaRequest,
+    { iss, loginHint, code }: ProviderLoginAttempt,
     sessionState?: ProviderState | null
   ) {
-    this.debug('Trying to authenticate via OpenID Connect response query.');
-    // First check to see if this is a Third Party initiated authentication (which can happen via POST or GET)
-    const iss = (request.query && request.query.iss) || (request.payload && request.payload.iss);
-    const loginHint =
-      (request.query && request.query.login_hint) ||
-      (request.payload && request.payload.login_hint);
+    this.logger.debug('Trying to authenticate via OpenID Connect response query.');
+
+    // First check to see if this is a Third Party initiated authentication.
     if (iss) {
-      this.debug('Authentication has been initiated by a Third Party.');
+      this.logger.debug('Authentication has been initiated by a Third Party.');
+
       // We might already have a state and nonce generated by Elasticsearch (from an unfinished authentication in
       // another tab)
       const oidcPrepareParams = loginHint ? { iss, login_hint: loginHint } : { iss };
       return this.initiateOIDCAuthentication(request, oidcPrepareParams);
     }
 
-    if (!request.query || !request.query.code) {
-      this.debug('OpenID Connect Authentication response is not found.');
+    if (!code) {
+      this.logger.debug('OpenID Connect Authentication response is not found.');
       return AuthenticationResult.notHandled();
     }
+
     // If it is an authentication response and the users' session state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail because Elasticsearch won't be able to validate the
     // response.
@@ -193,7 +173,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     if (!stateNonce || !stateOIDCState || !stateRedirectURL) {
       const message =
         'Response session state does not have corresponding state or nonce parameters or redirect URL.';
-      this.debug(message);
+      this.logger.debug(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
@@ -204,7 +184,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this.options.client.callWithInternalUser('shield.oidcAuthenticate', {
+      } = await this.options.client.callAsInternalUser('shield.oidcAuthenticate', {
         body: {
           state: stateOIDCState,
           nonce: stateNonce,
@@ -215,14 +195,14 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         },
       });
 
-      this.debug('Request has been authenticated via OpenID Connect.');
+      this.logger.debug('Request has been authenticated via OpenID Connect.');
 
       return AuthenticationResult.redirectTo(stateRedirectURL, {
         accessToken,
         refreshToken,
       });
     } catch (err) {
-      this.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
+      this.logger.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -235,15 +215,15 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [sessionState] Optional state object associated with the provider.
    */
   private async initiateOIDCAuthentication(
-    request: RequestWithLoginAttempt,
+    request: KibanaRequest,
     params: { realm: string } | { iss: string; login_hint?: string },
     sessionState?: ProviderState | null
   ) {
-    this.debug('Trying to initiate OpenID Connect authentication.');
+    this.logger.debug('Trying to initiate OpenID Connect authentication.');
 
     // If client can't handle redirect response, we shouldn't initiate OpenID Connect authentication.
     if (!canRedirectRequest(request)) {
-      this.debug('OpenID Connect authentication can not be initiated by AJAX requests.');
+      this.logger.debug('OpenID Connect authentication can not be initiated by AJAX requests.');
       return AuthenticationResult.notHandled();
     }
 
@@ -259,16 +239,14 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
           : params;
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
-      const { state, nonce, redirect } = await this.options.client.callWithInternalUser(
+      const { state, nonce, redirect } = await this.options.client.callAsInternalUser(
         'shield.oidcPrepare',
-        {
-          body: oidcPrepareParams,
-        }
+        { body: oidcPrepareParams }
       );
 
-      this.debug('Redirecting to OpenID Connect Provider with authentication request.');
+      this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
       // If this is a third party initiated login, redirect to the base path
-      const redirectAfterLogin = `${request.getBasePath()}${
+      const redirectAfterLogin = `${this.options.basePath.get(request)}${
         'iss' in params ? '/' : request.url.path
       }`;
       return AuthenticationResult.redirectTo(
@@ -277,7 +255,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         { state, nonce, nextURL: redirectAfterLogin }
       );
     } catch (err) {
-      this.debug(`Failed to initiate OpenID Connect authentication: ${err.message}`);
+      this.logger.debug(`Failed to initiate OpenID Connect authentication: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -287,12 +265,12 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * forward to Elasticsearch backend.
    * @param request Request instance.
    */
-  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
-    this.debug('Trying to authenticate via header.');
+  private async authenticateViaHeader(request: KibanaRequest) {
+    this.logger.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
-    if (!authorization) {
-      this.debug('Authorization header is not presented.');
+    if (!authorization || typeof authorization !== 'string') {
+      this.logger.debug('Authorization header is not presented.');
       return {
         authenticationResult: AuthenticationResult.notHandled(),
       };
@@ -300,7 +278,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'bearer') {
-      this.debug(`Unsupported authentication schema: ${authenticationSchema}`);
+      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
       return {
         authenticationResult: AuthenticationResult.notHandled(),
         headerNotRecognized: true,
@@ -308,15 +286,14 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.getUser(request);
 
-      this.debug('Request has been authenticated via header.');
-
+      this.logger.debug('Request has been authenticated via header.');
       return {
         authenticationResult: AuthenticationResult.succeeded(user),
       };
     } catch (err) {
-      this.debug(`Failed to authenticate request via header: ${err.message}`);
+      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
       return {
         authenticationResult: AuthenticationResult.failed(err),
       };
@@ -329,35 +306,22 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(
-    request: RequestWithLoginAttempt,
-    { accessToken }: ProviderState
-  ) {
-    this.debug('Trying to authenticate via state.');
+  private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
+    this.logger.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
-      this.debug('Elasticsearch access token is not found in state.');
+      this.logger.debug('Elasticsearch access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    request.headers.authorization = `Bearer ${accessToken}`;
-
     try {
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const user = await this.getUser(request, authHeaders);
 
-      this.debug('Request has been authenticated via state.');
-
-      return AuthenticationResult.succeeded(user);
+      this.logger.debug('Request has been authenticated via state.');
+      return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
-      this.debug(`Failed to authenticate request via state: ${err.message}`);
-
-      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
-      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
-      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
-      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
-      // it's called with this request once again down the line (e.g. in the next authentication provider).
-      delete request.headers.authorization;
-
+      this.logger.debug(`Failed to authenticate request via state: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -370,13 +334,13 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   private async authenticateViaRefreshToken(
-    request: RequestWithLoginAttempt,
+    request: KibanaRequest,
     { refreshToken }: ProviderState
   ) {
-    this.debug('Trying to refresh elasticsearch access token.');
+    this.logger.debug('Trying to refresh elasticsearch access token.');
 
     if (!refreshToken) {
-      this.debug('Refresh token is not found in state.');
+      this.logger.debug('Refresh token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
@@ -395,7 +359,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     // supported.
     if (refreshedTokenPair === null) {
       if (canRedirectRequest(request)) {
-        this.debug(
+        this.logger.debug(
           'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
         );
         return this.initiateOIDCAuthentication(request, { realm: this.realm });
@@ -407,22 +371,13 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      request.headers.authorization = `Bearer ${refreshedTokenPair.accessToken}`;
+      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const user = await this.getUser(request, authHeaders);
 
-      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
-
-      this.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, refreshedTokenPair);
+      this.logger.debug('Request has been authenticated via refreshed token.');
+      return AuthenticationResult.succeeded(user, { authHeaders, state: refreshedTokenPair });
     } catch (err) {
-      this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
-
-      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
-      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
-      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
-      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
-      // it's called with this request once again down the line (e.g. in the next authentication provider).
-      delete request.headers.authorization;
-
+      this.logger.debug(`Failed to refresh elasticsearch access token: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -433,11 +388,11 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: Legacy.Request, state: ProviderState) {
-    this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
+  public async logout(request: KibanaRequest, state: ProviderState) {
+    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
     if (!state || !state.accessToken) {
-      this.debug('There is no elasticsearch access token to invalidate.');
+      this.logger.debug('There is no elasticsearch access token to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
@@ -450,33 +405,25 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       };
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
-      const { redirect } = await this.options.client.callWithInternalUser(
+      const { redirect } = await this.options.client.callAsInternalUser(
         'shield.oidcLogout',
         logoutBody
       );
 
-      this.debug('User session has been successfully invalidated.');
+      this.logger.debug('User session has been successfully invalidated.');
 
       // Having non-null `redirect` field within logout response means that the OpenID Connect realm configuration
       // supports RP initiated Single Logout and we should redirect user to the specified location in the OpenID Connect
       // Provider to properly complete logout.
       if (redirect != null) {
-        this.debug('Redirecting user to the OpenID Connect Provider to complete logout.');
+        this.logger.debug('Redirecting user to the OpenID Connect Provider to complete logout.');
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo(`${this.options.basePath}/logged_out`);
+      return DeauthenticationResult.redirectTo(`${this.options.basePath.get(request)}/logged_out`);
     } catch (err) {
-      this.debug(`Failed to deauthenticate user: ${err.message}`);
+      this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
     }
-  }
-
-  /**
-   * Logs message with `debug` level and oidc/security related tags.
-   * @param message Message to log.
-   */
-  private debug(message: string) {
-    this.options.log(['debug', 'security', 'oidc'], message);
   }
 }

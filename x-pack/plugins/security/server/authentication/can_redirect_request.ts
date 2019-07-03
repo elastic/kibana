@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { contains, get, has } from 'lodash';
+import { KibanaRequest } from '../../../../../src/core/server';
 
 const ROUTE_TAG_API = 'api';
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';
@@ -16,11 +15,12 @@ const KIBANA_VERSION_HEADER = 'kbn-version';
  * only for non-AJAX and non-API requests.
  * @param request HapiJS request instance to check redirection possibility for.
  */
-export function canRedirectRequest(request: Request) {
-  const hasVersionHeader = has(request.raw.req.headers, KIBANA_VERSION_HEADER);
-  const hasXsrfHeader = has(request.raw.req.headers, KIBANA_XSRF_HEADER);
+export function canRedirectRequest(request: KibanaRequest) {
+  const headers = request.headers;
+  const hasVersionHeader = headers.hasOwnProperty(KIBANA_VERSION_HEADER);
+  const hasXsrfHeader = headers.hasOwnProperty(KIBANA_XSRF_HEADER);
 
-  const isApiRoute = contains(get(request, 'route.settings.tags'), ROUTE_TAG_API);
+  const isApiRoute = request.route.options.tags.includes(ROUTE_TAG_API);
   const isAjaxRequest = hasVersionHeader || hasXsrfHeader;
 
   return !isApiRoute && !isAjaxRequest;
