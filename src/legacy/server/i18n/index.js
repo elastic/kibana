@@ -17,62 +17,33 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import globby from 'globby';
 import { i18n, i18nLoader } from '@kbn/i18n';
-import { readFile } from 'fs';
+import { basename } from 'path';
 import { fromRoot } from '../../utils';
-import { promisify } from 'util';
-
-const readFileAsync = promisify(readFile);
-
-export async function getTranslationPaths({ cwd, glob }) {
-  const entries = await globby(glob, { cwd });
-
-  const configFiles = await Promise.all(
-    entries
-      .map(entry => resolve(cwd, entry))
-      .map(async configFilePath => ({
-        path: configFilePath,
-        content: await readFileAsync(configFilePath, 'utf8')
-      }))
-  );
-
-  return configFiles
-    .map(({ content, path }) => {
-      try {
-        return JSON.parse(content);
-      } catch (err) {
-        throw new Error(`Failed to parse .i18nrc.json file at ${path}`);
-      }
-    })
-    .reduce((acc, configFile) => acc.concat(...configFile.translations), [])
-    .map(translationPath => resolve(cwd, translationPath));
-}
+import { getTranslationPaths } from './get_translations_path';
+import { I18N_RC } from './constants';
 
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
-  const localeRegExp = new RegExp(`${locale}.json$`);
   const pluginPaths = config.get('plugins.paths');
 
   const translationPaths = await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),
-      glob: `.i18nrc.json`,
+      glob: I18N_RC,
     }),
-    ...pluginPaths.map(cwd => getTranslationPaths({ glob: `.i18nrc.json`, cwd })),
+    ...pluginPaths.map(cwd => getTranslationPaths({ glob: I18N_RC, cwd })),
     getTranslationPaths({
       cwd: fromRoot('plugins'),
-      glob: `*/.i18nrc.json`,
+      glob: `*/${I18N_RC}`,
     }),
     getTranslationPaths({
       cwd: fromRoot('../kibana-extra'),
-      glob: `*/.i18nrc.json`,
+      glob: `*/${I18N_RC}`,
     }),
   ]);
 
-  const currentTranslationPaths = [].concat(...translationPaths)
-    .filter(translationPath => localeRegExp.test(translationPath));
+  const currentTranslationPaths = translationPaths.filter(translationPath => basename(translationPath, '.json') === locale);
 
   i18nLoader.registerTranslationFiles(currentTranslationPaths);
   const translations = await i18nLoader.getTranslationsByLocale(locale);

@@ -30,6 +30,8 @@ import {
 } from './i18n/tasks';
 import { createFailError, run } from './run';
 
+const skipNoTranslations = ({ config }) => !config.translations.length;
+
 run(
   async ({
     flags: {
@@ -79,19 +81,19 @@ run(
         },
         {
           title: 'Checking For Untracked Messages based on .i18nrc.json',
-          skip: ({ config }) => !config.translations.length,
+          skip: skipNoTranslations,
           task: ({ config }) =>
             new Listr(extractUntrackedMessages(srcPaths), { exitOnError: true }),
         },
         {
           title: 'Validating Default Messages',
-          skip: ({ config }) => !config.translations.length,
+          skip: skipNoTranslations,
           task: ({ config }) =>
             new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
         },
         {
           title: 'Compatibility Checks',
-          skip: ({ config }) => !config.translations.length,
+          skip: skipNoTranslations,
           task: ({ config }) =>
             new Listr(
               checkCompatibility(

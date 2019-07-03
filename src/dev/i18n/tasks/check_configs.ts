@@ -18,12 +18,13 @@
  */
 
 import { resolve, join } from 'path';
+import { I18N_RC } from '../constants';
 import { ErrorReporter, checkConfigNamespacePrefix, arrayify } from '..';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
-  const kibanaRC = resolve(root, '.i18nrc.json');
-  const xpackRC = resolve(root, 'x-pack/.i18nrc.json');
+  const kibanaRC = resolve(root, I18N_RC);
+  const xpackRC = resolve(root, `x-pack/${I18N_RC}`);
 
   const configPaths = [kibanaRC, xpackRC, ...arrayify(additionalConfigPaths)];
 
