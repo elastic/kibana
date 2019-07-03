@@ -37,7 +37,7 @@ pipeline {
           sh "${CI_DIR}/run_pipeline.sh"
           script {
             dumpEnv()
-            dumpWorkspaceSize() // dump size to screen AFTER checking out es
+            dumpWorkspaceSize()
             tarWorkspace()
           }
           step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
@@ -77,7 +77,7 @@ pipeline {
 }
 def tarWorkspace(){
   script {
-    sh "tar -czf ${WORKSPACE_CACHE_NAME} ${WORKSPACE}"
+    sh "tar -czf ${WORKSPACE_CACHE_NAME} ${BASE_DIR}"
   }
 }
 def dumpWorkspaceSize(){
