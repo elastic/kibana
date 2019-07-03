@@ -1,22 +1,27 @@
 [[role-management-api-get]]
-=== Get Role
-
-experimental["This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental."]
+=== Get role API
+++++
+<titleabbrev>Get role</titleabbrev>
+++++
 
 Retrieves all {kib} roles, or a specific role.
 
-NOTE: You cannot access this endpoint via the Console in Kibana.
+experimental["This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental."]
 
-==== Authorization
+NOTE: You cannot access the endpoint via the Console in Kibana.
 
-To use this API, you must have at least the `manage_security` cluster privilege.
+[[role-management-api-get-prereqs]]
+==== Prerequisite 
 
+To use the get role API, you must have the `manage_security` cluster privilege.
+
+[[role-management-api-retrieve-all]]
 ==== Get all {kib} roles
 
-===== Request
+Retrieve all {kib} roles.
 
-To retrieve all roles, issue a GET request to the
-/api/security/role endpoint.
+[[role-management-api-retrieve-all-request-body]]
+===== Request
 
 [source,js]
 --------------------------------------------------
@@ -24,6 +29,7 @@ GET /api/security/role
 --------------------------------------------------
 // KIBANA
 
+[[role-management-api-retrieve-all-response-body]]
 ===== Response
 
 A successful call returns a response code of `200` and a response body containing a JSON

@@ -9,6 +9,7 @@ Note: You cannot access this endpoint via the Console in {kib}.
 
 ==== Get all {kib} features
 
+[[features-api-get-request]]
 ===== Request
 
 To retrieve all features, issue a GET request to the
@@ -20,7 +21,8 @@ GET /api/features/v1
 --------------------------------------------------
 // KIBANA
 
-===== Response
+[[features-api-get-response]]
+===== Response body
 
 A successful call returns a response code of `200` and a response body containing a JSON 
 representation of the features.
