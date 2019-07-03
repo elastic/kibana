@@ -20,6 +20,8 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { tagcloud } from './tag_cloud_fn';
 
+jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
+
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(tagcloud);
   const context = {

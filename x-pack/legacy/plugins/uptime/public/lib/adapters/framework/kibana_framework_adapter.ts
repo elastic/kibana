@@ -12,6 +12,7 @@ import { UMBreadcrumb } from '../../../breadcrumbs';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
+import { getTelemetryMonitorPageLogger, getTelemetryOverviewPageLogger } from '../telemetry';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
@@ -100,16 +101,18 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           ReactDOM.render(
             renderComponent({
               basePath,
-              darkMode,
-              setBreadcrumbs: chrome.breadcrumbs.set,
-              kibanaBreadcrumbs,
-              setBadge: chrome.badge.set,
-              routerBasename,
               client: graphQLClient,
-              renderGlobalHelpControls,
+              darkMode,
               isApmAvailable,
               isInfraAvailable,
               isLogsAvailable,
+              kibanaBreadcrumbs,
+              logMonitorPageLoad: getTelemetryMonitorPageLogger(this.xsrfHeader, basePath),
+              logOverviewPageLoad: getTelemetryOverviewPageLogger(this.xsrfHeader, basePath),
+              renderGlobalHelpControls,
+              routerBasename,
+              setBadge: chrome.badge.set,
+              setBreadcrumbs: chrome.breadcrumbs.set,
             }),
             elem
           );

@@ -15,8 +15,6 @@ import { Dictionary } from '../../../../common/types/common';
 import {
   DataFramePreviewRequest,
   getDataFramePreviewRequest,
-  isGroupByDateHistogram,
-  isGroupByHistogram,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotQuery,
@@ -75,19 +73,7 @@ export const usePivotPreviewData = (
     () => {
       getDataFramePreviewData();
     },
-    [
-      indexPattern.title,
-      aggsArr.map(a => `${a.agg} ${a.field} ${a.aggName}`).join(' '),
-      groupByArr
-        .map(
-          g =>
-            `${g.agg} ${g.field} ${g.aggName} ${
-              isGroupByDateHistogram(g) ? g.calendar_interval : ''
-            } ${isGroupByHistogram(g) ? g.interval : ''}`
-        )
-        .join(' '),
-      JSON.stringify(query),
-    ]
+    [indexPattern.title, JSON.stringify(aggsArr), JSON.stringify(groupByArr), JSON.stringify(query)]
   );
   return { errorMessage, status, dataFramePreviewData, previewRequest };
 };

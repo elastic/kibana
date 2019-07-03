@@ -15,6 +15,8 @@ import 'ui/persisted_log';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
 
+import 'plugins/ml/components/transition/transition';
+import 'plugins/ml/components/modal/modal';
 import 'plugins/ml/access_denied';
 import 'plugins/ml/jobs';
 import 'plugins/ml/services/calendar_service';

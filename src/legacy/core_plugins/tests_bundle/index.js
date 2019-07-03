@@ -21,6 +21,7 @@ import { createReadStream } from 'fs';
 
 import globby from 'globby';
 import MultiStream from 'multistream';
+import webpackMerge from 'webpack-merge';
 
 import { fromRoot } from '../../../legacy/utils';
 import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
@@ -94,7 +95,7 @@ export default (kibana) => {
           uiBundles.addPostLoader({
             test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
-            loader: 'istanbul-instrumenter-loader'
+            loader: 'istanbul-instrumenter-loader',
           });
         }
 
@@ -102,6 +103,13 @@ export default (kibana) => {
           id: 'tests',
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
+          extendConfig(webpackConfig) {
+            return webpackMerge({
+              resolve: {
+                extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
+              }
+            }, webpackConfig);
+          }
         });
 
         kbnServer.server.route({

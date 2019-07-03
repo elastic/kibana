@@ -20,6 +20,23 @@ exports[`Home component should render 1`] = `
       <EuiFlexItem
         grow={false}
       >
+        <APMLink
+          path="/settings"
+        >
+          <EuiButtonEmpty
+            color="primary"
+            iconSide="left"
+            iconType="gear"
+            size="s"
+            type="button"
+          >
+            Settings
+          </EuiButtonEmpty>
+        </APMLink>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
         <SetupInstructionsLink />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -28,14 +45,16 @@ exports[`Home component should render 1`] = `
     tabs={
       Array [
         Object {
-          "name": "Services",
+          "name": "services",
           "path": "/services",
           "render": [Function],
+          "title": "Services",
         },
         Object {
-          "name": "Traces",
+          "name": "traces",
           "path": "/traces",
           "render": [Function],
+          "title": "Traces",
         },
       ]
     }

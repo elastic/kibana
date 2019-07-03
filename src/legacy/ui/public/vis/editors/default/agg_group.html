@@ -6,7 +6,9 @@
   <div ng-class="groupName" draggable-container="group">
     <div ng-repeat="agg in group track by agg.id" data-test-subj="aggregationEditor{{agg.id}}" draggable-item="agg">
       <!-- agg.html - controls for aggregation -->
-      <ng-form vis-editor-agg name="aggForm"></ng-form>
+      <ng-form name="aggForm">
+        <div vis-editor-agg ng-model="_internalNgModelState"></div>
+      </ng-form>
     </div>
 
     <vis-editor-agg-add
