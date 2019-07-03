@@ -39,9 +39,9 @@ export async function i18nMixin(kbnServer, server, config) {
     }),
   ]);
 
-  const currentTranslationPaths = translationPaths.filter(translationPath => basename(translationPath, '.json') === locale);
-
+  const currentTranslationPaths = [].concat(...translationPaths).filter(translationPath => basename(translationPath, '.json') === locale);
   i18nLoader.registerTranslationFiles(currentTranslationPaths);
+
   const translations = await i18nLoader.getTranslationsByLocale(locale);
   i18n.init(Object.freeze({
     locale,
