@@ -6,9 +6,6 @@ Elasticsearch aggregation framework. With TSVB, you can combine an infinite
 number of aggregations and pipeline aggregations to display complex data in a 
 meaningful way.
 
-//TODO replace the following image with new screenshot.
-image:images/tsvb-screenshot.png["TSVB Interface"]
-
 NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to simply as TSVB instead of Time Series Visual Builder.
 
 TSVB comes with 6 visualizations:
@@ -63,8 +60,7 @@ metric and choose the previous "max" metric as the source; this will create a ra
 
 . To add annotations that are loaded from a separate index based on a query, select *Annotations*.
 
-//TODO replace the following image with new screenshot.
-image:images/tsvb-timeseries.png["Time Series Visualization"]
+image:images/tsvb-screenshot.png["Time series visualization"]
 
 [[metric-visualization]]
 ==== Create a Metric visualization
@@ -89,8 +85,7 @@ metric and choose the previous "max" metric as the source; this will create a ra
 
 . To configure the panel, select *Panel options*.
 
-//TODO replace the following image with a new screenshot
-image:images/tsvb-metric.png["Metric Visualization"]
+image:images/tsvb-metric.png["Metric visualization"]
 
 [[top-n-visualization]]
 ==== Create a Top N visualization
@@ -99,8 +94,7 @@ The values are displayed in descending order, and you can customize the color of
 
 . Select *Top N*.
 
-//TODO replace the following image with a new screenshot
-image:images/tsvb-top-n.png["Top N Visualization"]
+image:images/tsvb-top-n.png["Top N visualization"]
 
 [[gauge-visualization]]
 ==== Create a Gauge visualization
@@ -109,8 +103,7 @@ The face of the gauge displays as a half-circle or full-circle. You can customiz
  
 . Select *Gauge*.
 
-//TODO replace the following image a new screenshot
-image:images/tsvb-gauge.png["Gauge Visualization"]
+image:images/tsvb-gauge.png["Gauge visualization"]
 
 [[markdown-visualization]]
 ==== Create a Markdown visualization
@@ -119,8 +112,7 @@ customize the Markdown with data based on a set of series
 
 . Select *Markdown*.
 
-//TODO replace the following image with a new screenshot
-image:images/tsvb-markdown.png["Markdown Visualization"]
+image:images/tsvb-markdown.png["Markdown visualization"]
 
 [[table-visualization]]
 ==== Create a Table visualization
@@ -129,5 +121,4 @@ Display data from multiple time series
 
 . Select *Table*.
 
-//TODO replace the following image with a new screenshot
-image:images/tsvb-table.png["Table Visualization"]
+image:images/tsvb-table.png["Table visualization"]
