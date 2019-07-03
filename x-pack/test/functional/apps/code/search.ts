@@ -16,6 +16,7 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
   describe('Search', function() {
+    this.tags('smoke');
     const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
     const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
     const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
