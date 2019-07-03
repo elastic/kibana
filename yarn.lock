@@ -10612,10 +10612,10 @@ ejs@^2.6.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.1.tgz#498ec0d495655abc6f23cd61868d926464071aa0"
   integrity sha512-0xy4A/twfrRCnkhfk8ErDi5DqdAsAqeGxht4xkCUrsvhhbQNs7E+4jV0CN7+NKIY0aHE72+XvqtBIXzD31ZbXQ==
 
-elasticsearch-browser@^15.5.0:
-  version "15.5.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-15.5.0.tgz#84c0b441063635edad089dadf01966d93f5be46c"
-  integrity sha512-BqnbbUs2sO+2X6ePgUUJxDUy+CK4Xx9t9VlxptMbieaP4I0K8tpoKb3o6rY1j8idZi6chWrlYQiif/g+GN6B4g==
+elasticsearch-browser@^16.2.0:
+  version "16.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.2.0.tgz#f107907bad31c7be994215530a8996664cddc3b0"
+  integrity sha512-hJ1lBa+GUfwcIp7gvh0EaTVUOcfrhiVAYjVUpFanhp8Fc2HagpBRCYbZnzBzBPyi8FeT9M/kuFUKqVnfMeU6kg==
 
 elasticsearch@^15.2.0:
   version "15.2.0"
@@ -10626,10 +10626,10 @@ elasticsearch@^15.2.0:
     chalk "^1.0.0"
     lodash "^4.17.10"
 
-elasticsearch@^15.5.0:
-  version "15.5.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.5.0.tgz#62d9f238cf9e10b81c50a2303aa470c1f7da6b37"
-  integrity sha512-ZGKKaDkOFAap61ObBNkAxhYXCcAbRfkI4NVoSeLGnTD6/cItvY2j9LII/VV8/zclGe1x5m6DsVp47E4ze4aAeQ==
+elasticsearch@^16.2.0:
+  version "16.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.2.0.tgz#c1f5dd41b5c5a0d65794888d042e3e240074a0fc"
+  integrity sha512-wOaz8HjpRiZ08d33+5rKaJkHsS/nkjD80Mh0s77Bs3DdKjB4ZfrJS8P4FfNKMGP/Gx658eVBlifcLqFnREbPhA==
   dependencies:
     agentkeepalive "^3.4.1"
     chalk "^1.0.0"
