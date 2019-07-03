@@ -70,11 +70,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
         id="xpack.infra.logs.highlights.highlightsPopoverButtonLabel"
         defaultMessage="Highlights"
       />
-      {activeHighlights ? (
-        <IconWrapper>
-          <EuiIcon type="checkInCircleFilled" size="s" color="secondary" />
-        </IconWrapper>
-      ) : null}
+      {activeHighlights ? <ActiveHighlightsIndicator /> : null}
     </EuiButtonEmpty>
   );
 
@@ -156,7 +152,11 @@ const goToNextHighlightLabel = i18n.translate(
   }
 );
 
-const IconWrapper = euiStyled.span`
+const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs({
+  type: 'checkInCircleFilled',
+  size: 'm',
+  color: props => props.theme.eui.euiColorAccent,
+})`
   padding-left: ${props => props.theme.eui.paddingSizes.xs};
 `;
 

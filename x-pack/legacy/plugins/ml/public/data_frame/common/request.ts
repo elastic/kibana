@@ -145,6 +145,10 @@ export function getDataFrameRequest(
       dictionaryToArray(pivotState.groupByList),
       dictionaryToArray(pivotState.aggList)
     ),
+    // conditionally add optional description
+    ...(jobDetailsState.jobDescription !== ''
+      ? { description: jobDetailsState.jobDescription }
+      : {}),
     dest: {
       index: jobDetailsState.destinationIndex,
     },

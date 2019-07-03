@@ -7,14 +7,15 @@
 import createContainer from 'constate-latest';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 
-import { TimeKey } from '../../../../common/time';
-import { LogEntryHighlightsQuery } from '../../../graphql/types';
-import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
 import {
   LogEntryHighlightsMap,
   getLogEntryIndexBeforeTime,
   getLogEntryIndexAtTime,
 } from '../../../utils/log_entry';
+
+import { TimeKey, getPreviousTimeKey, getNextTimeKey } from '../../../../common/time';
+import { LogEntryHighlightsQuery } from '../../../graphql/types';
+import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { logEntryHighlightsQuery } from './log_highlights.gql_query';
 
@@ -128,11 +129,8 @@ export const useLogHighlightsState = ({
           query: logEntryHighlightsQuery,
           variables: {
             sourceId,
-            startKey,
-            endKey: {
-              time: endKey.time,
-              tiebreaker: endKey.tiebreaker + 1, // we want to perform an inclusive search
-            },
+            startKey: getPreviousTimeKey(startKey), // interval boundaries are exclusive
+            endKey: getNextTimeKey(endKey), // interval boundaries are exclusive
             filterQuery,
             highlights: [
               {

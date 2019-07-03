@@ -7,11 +7,11 @@
 import React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
+import { tintOrShade } from '../../../utils/styles';
 
-export const HighlightMarker = euiStyled.span`
-  color: ${props =>
-    props.theme.darkMode ? props.theme.eui.euiTextColor : props.theme.eui.euiColorGhost}
-  background-color: ${props => props.theme.eui.euiColorSecondary}
+export const HighlightMarker = euiStyled.mark`
+  background-color: ${props =>
+    tintOrShade(props.theme.eui.euiTextColor, props.theme.eui.euiColorAccent, 0.7, 0.5)};
 `;
 
 export const highlightFieldValue = (
