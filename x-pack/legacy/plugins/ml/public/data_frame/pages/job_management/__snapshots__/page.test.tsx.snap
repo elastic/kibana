@@ -15,7 +15,7 @@ exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
         <EuiTitle>
           <h1>
             <FormattedMessage
-              defaultMessage="Data frame jobs"
+              defaultMessage="Data frame transforms"
               id="xpack.ml.dataframe.jobsList.dataFrameTitle"
               values={Object {}}
             />

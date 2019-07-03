@@ -92,7 +92,8 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       } catch (e) {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.jobDetailsForm.errorGettingDataFrameJobsList', {
-            defaultMessage: 'An error occurred getting the existing data frame job Ids: {error}',
+            defaultMessage:
+              'An error occurred getting the existing data frame transform Ids: {error}',
             values: { error: JSON.stringify(e) },
           })
         );
@@ -164,40 +165,40 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiForm>
       <EuiFormRow
         label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdLabel', {
-          defaultMessage: 'Job id',
+          defaultMessage: 'Transform id',
         })}
         isInvalid={jobIdExists}
         error={
           jobIdExists && [
             i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdError', {
-              defaultMessage: 'A job with this id already exists.',
+              defaultMessage: 'A transform with this id already exists.',
             }),
           ]
         }
       >
         <EuiFieldText
-          placeholder="job id"
+          placeholder="transform id"
           value={jobId}
           onChange={e => setJobId(e.target.value)}
           aria-label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdInputAriaLabel', {
-            defaultMessage: 'Choose a unique job id.',
+            defaultMessage: 'Choose a unique transform id.',
           })}
           isInvalid={jobIdExists}
         />
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobDescriptionLabel', {
-          defaultMessage: 'Job description',
+          defaultMessage: 'Transform description',
         })}
       >
         <EuiFieldText
-          placeholder="job description"
+          placeholder="transform description"
           value={jobDescription}
           onChange={e => setJobDescription(e.target.value)}
           aria-label={i18n.translate(
             'xpack.ml.dataframe.jobDetailsForm.jobDescriptionInputAriaLabel',
             {
-              defaultMessage: 'Choose an optional job description.',
+              defaultMessage: 'Choose an optional transform description.',
             }
           )}
         />
