@@ -102,8 +102,8 @@ export const CTAGS: LanguageServerDefinition = {
     'yacc',
   ],
   launcher: CtagsLauncher,
-  installationType: InstallationType.Plugin,
-  installationPluginName: 'ctagsLanguageServer',
+  installationType: InstallationType.Embed,
+  embedPath: require.resolve('@elastic/ctags-langserver/lib/cli.js'),
 };
 export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
 export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO, CTAGS];
