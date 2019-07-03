@@ -7,19 +7,12 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { Storage } from 'ui/storage';
 import { EuiButton, EuiFormRow } from '@elastic/eui';
 import { Query } from '../../../../../../../src/legacy/core_plugins/data/public/query';
-import { data as dataSetup } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
 import { FilterRatioIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
-
-const localStorage = new Storage(window.localStorage);
-
-const { QueryBarInput } = dataSetup.query.ui;
 
 export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternColumn> = {
   type: 'filter_ratio',
@@ -42,8 +35,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       suggestedOrder,
       isBucketed: false,
       params: {
-        // numerator: { language: 'kuery', query: '' },
-        numerator: { language: 'kuery', query: 'geo.src : "CN"' },
+        numerator: { language: 'kuery', query: '' },
         denominator: { language: 'kuery', query: '*' },
       },
     };
@@ -66,8 +58,16 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       ],
     },
   }),
-  paramEditor: ({ state, setState, columnId: currentColumnId }) => {
+  paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage }) => {
     const [hasDenominator, setDenominator] = useState(false);
+
+    // const localStorage = new Storage(window.localStorage);
+
+    if (!dataPlugin || !storage) {
+      return null;
+    }
+
+    const { QueryBarInput } = dataPlugin.query.ui;
 
     return (
       <div>
@@ -83,7 +83,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               (state.columns[currentColumnId] as FilterRatioIndexPatternColumn).params.numerator
             }
             screenTitle={''}
-            store={localStorage}
+            store={storage}
             onChange={(newQuery: Query) => {
               setState(
                 updateColumnParam(
@@ -110,7 +110,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
                 (state.columns[currentColumnId] as FilterRatioIndexPatternColumn).params.denominator
               }
               screenTitle={''}
-              store={localStorage}
+              store={storage}
               onChange={(newQuery: Query) => {
                 setState(
                   updateColumnParam(
