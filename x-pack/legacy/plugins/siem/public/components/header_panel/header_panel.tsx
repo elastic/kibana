@@ -23,10 +23,6 @@ const Header = styled.header<{ border?: boolean }>`
   `}
 `;
 
-const MyEuiFlexItemIcon = styled(EuiFlexItem)`
-  padding-right: 5px;
-`;
-
 export interface HeaderPanelProps {
   border?: boolean;
   children?: React.ReactNode;
@@ -49,9 +45,9 @@ export const HeaderPanel = pure<HeaderPanelProps>(
               </EuiTitle>
             </EuiFlexItem>
             {tooltip && (
-              <MyEuiFlexItemIcon grow={false}>
+              <EuiFlexItem grow={false}>
                 <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />
-              </MyEuiFlexItemIcon>
+              </EuiFlexItem>
             )}
           </EuiFlexGroup>
           <EuiText color="subdued" size="s">
