@@ -191,7 +191,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         body: {
           sort: [{ 'task.runAt': 'asc' }, { _id: 'desc' }],
-          query: { term: { type: 'task' } },
+          query: {
+            bool: {
+              filter: { term: { type: 'task' } },
+            },
+          },
         },
       });
     });
@@ -207,7 +211,11 @@ describe('TaskStore', () => {
         body: {
           query: {
             bool: {
-              must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
+              filter: {
+                bool: {
+                  must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
+                },
+              },
             },
           },
         },
@@ -385,19 +393,23 @@ describe('TaskStore', () => {
         body: {
           query: {
             bool: {
-              must: [
-                { term: { type: 'task' } },
-                {
-                  bool: {
-                    must: [
-                      { terms: { 'task.taskType': ['foo', 'bar'] } },
-                      { range: { 'task.attempts': { lte: maxAttempts } } },
-                      { range: { 'task.runAt': { lte: 'now' } } },
-                      { range: { 'kibana.apiVersion': { lte: 1 } } },
-                    ],
-                  },
+              filter: {
+                bool: {
+                  must: [
+                    { term: { type: 'task' } },
+                    {
+                      bool: {
+                        must: [
+                          { terms: { 'task.taskType': ['foo', 'bar'] } },
+                          { range: { 'task.attempts': { lte: maxAttempts } } },
+                          { range: { 'task.runAt': { lte: 'now' } } },
+                          { range: { 'kibana.apiVersion': { lte: 1 } } },
+                        ],
+                      },
+                    },
+                  ],
                 },
-              ],
+              },
             },
           },
           size: 10,

@@ -370,7 +370,11 @@ export class TaskStore {
       ignoreUnavailable: true,
       body: {
         ...opts,
-        query,
+        query: {
+          bool: {
+            filter: query,
+          },
+        },
       },
     });
 
