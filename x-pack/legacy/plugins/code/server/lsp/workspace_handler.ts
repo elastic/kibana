@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DetailSymbolInformation, Full } from '@elastic/lsp-extension';
 import {
   Commit,
   Error as GitError,
@@ -21,9 +22,6 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
-
-import { DetailSymbolInformation, Full } from '@elastic/lsp-extension';
-
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
 import { LspRequest, WorkerReservedProgress } from '../../model';
@@ -31,6 +29,7 @@ import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
+import { detectLanguage } from '../utils/detect_language';
 import { LoggerFactory } from '../utils/log_factory';
 
 export const MAX_RESULT_COUNT = 20;
@@ -315,18 +314,43 @@ export class WorkspaceHandler {
   private async resolveUri(uri: string) {
     if (uri.startsWith('git://')) {
       const { repoUri, file, revision } = parseLspUrl(uri)!;
-      const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, revision);
+      let wRepo: Repository;
+      let wRevision: string;
+      try {
+        const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, revision);
+        wRepo = workspaceRepo;
+        wRevision = workspaceRevision;
+      } catch (e) {
+        // If the language server return non head commit, like go langserver, swallow it.
+        // TODO(henrywong) Once kibana code support multiple revision, we should remove this catch statement.
+        let lang = '';
+        if (file) {
+          lang = await detectLanguage(file);
+        }
+        if (
+          Boom.isBoom(e) &&
+          (e as Error).message === 'revision must be master.' &&
+          lang === 'go'
+        ) {
+          const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, 'master');
+          wRepo = workspaceRepo;
+          wRevision = workspaceRevision;
+        } else {
+          throw e;
+        }
+      }
+
       if (file) {
-        const isValidPath = await this.checkFile(workspaceRepo, file);
+        const isValidPath = await this.checkFile(wRepo, file);
         if (!isValidPath) {
           throw new Error('invalid file path in requests.');
         }
       }
       return {
-        workspacePath: workspaceRepo.workdir(),
-        filePath: this.fileUrl(path.resolve(workspaceRepo.workdir(), file || '/')),
+        workspacePath: wRepo.workdir(),
+        filePath: this.fileUrl(path.resolve(wRepo.workdir(), file || '/')),
         uri,
-        workspaceRevision,
+        wRevision,
       };
     } else {
       return {
