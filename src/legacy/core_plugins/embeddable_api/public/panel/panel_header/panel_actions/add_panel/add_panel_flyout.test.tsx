@@ -19,7 +19,9 @@
 import '../../../../ui_capabilities.test.mocks';
 import { npStart } from 'ui/new_platform';
 
-jest.mock('ui/new_platform', () => require('ui/new_platform/__mocks__/helpers').createUiNewPlatformMock());
+jest.mock('ui/new_platform', () =>
+  require('ui/new_platform/__mocks__/helpers').createUiNewPlatformMock()
+);
 
 import React from 'react';
 import {
