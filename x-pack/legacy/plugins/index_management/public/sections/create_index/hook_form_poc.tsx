@@ -38,7 +38,7 @@ export const HookFormPOC = () => {
         <Form3
           title="4. Same form but with initilal values"
           defaultValues={{
-            name: 'hello world',
+            name: 'hello12',
             elastic: {
               coWorkers: [
                 { firstName: 'Sébastien', lastName: 'Loix' },
@@ -49,7 +49,16 @@ export const HookFormPOC = () => {
               prop: 'Some value',
             },
             indexName: 'good',
-            selectedIndices: ['index_3'],
+            title: 'minimum5Chars',
+            selectedIndices: ['index_1', 'index_3'],
+            field: {
+              not: {
+                on: {
+                  schema: 'hello',
+                },
+              },
+            },
+            comboBoxFieldWithValidation: ['some', 'value', 'forTheCombo'],
           }}
         />
         <EuiSpacer size="xl" />

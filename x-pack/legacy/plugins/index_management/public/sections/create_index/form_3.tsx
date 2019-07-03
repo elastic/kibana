@@ -55,6 +55,7 @@ export const Form3 = ({
   };
 
   const { form } = useForm<MyForm>({ onSubmit, schema: formSchema, defaultValues });
+  const isEditing = typeof defaultValues !== 'undefined';
 
   return (
     <form noValidate>
@@ -69,7 +70,7 @@ export const Form3 = ({
             title="Name"
             description="This name field can completely be customized with any DOM element"
           >
-            <Field field={field} />
+            <Field field={field} fieldProps={{ disabled: isEditing }} />
           </FormRow>
         )}
       </UseField>
@@ -153,7 +154,13 @@ export const Form3 = ({
           </EuiFlexGroup>
         </div>
         <EuiFlexItem>
-          <UseField path="field.not.on.schema" config={inlineConfig} render={Field} form={form} />
+          <UseField
+            path="field.not.on.schema"
+            config={inlineConfig}
+            renderProps={{ fieldProps: { disabled: isEditing } }}
+            render={Field}
+            form={form}
+          />
         </EuiFlexItem>
       </FormRow>
 

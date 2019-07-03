@@ -125,7 +125,6 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
             isInvalid={isInvalid}
             value={field.value as string}
             onChange={field.onChange}
-            // disabled={disabled === true}
             isLoading={field.isValidating}
             fullWidth
             {...fieldProps}
