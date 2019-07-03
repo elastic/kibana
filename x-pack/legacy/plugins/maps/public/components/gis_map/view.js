@@ -16,19 +16,30 @@ import { i18n } from '@kbn/i18n';
 
 export class GisMap extends Component {
 
+  state = {
+    isInitialLoadRenderTimeoutComplete: false,
+  }
+
   componentDidMount() {
-    this.setRefreshTimer();
+    this._isMounted = true;
+    this._isInitalLoadRenderTimerStarted = false;
+    this._setRefreshTimer();
   }
 
   componentDidUpdate() {
-    this.setRefreshTimer();
+    this._setRefreshTimer();
+    if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
+      this._isInitalLoadRenderTimerStarted = true;
+      this._startInitialLoadRenderTimer();
+    }
   }
 
   componentWillUnmount() {
-    this.clearRefreshTimer();
+    this._isMounted = false;
+    this._clearRefreshTimer();
   }
 
-  setRefreshTimer = () => {
+  _setRefreshTimer = () => {
     const { isPaused, interval } = this.props.refreshConfig;
 
     if (this.isPaused === isPaused && this.interval === interval) {
@@ -39,7 +50,7 @@ export class GisMap extends Component {
     this.isPaused = isPaused;
     this.interval = interval;
 
-    this.clearRefreshTimer();
+    this._clearRefreshTimer();
 
     if (!isPaused && interval > 0) {
       this.refreshTimerId = setInterval(
@@ -51,11 +62,24 @@ export class GisMap extends Component {
     }
   };
 
-  clearRefreshTimer = () => {
+  _clearRefreshTimer = () => {
     if (this.refreshTimerId) {
       clearInterval(this.refreshTimerId);
     }
   };
+
+  // Mapbox does not provide any feedback when rendering is complete.
+  // Temporary solution is just to wait set period of time after data has loaded.
+  _startInitialLoadRenderTimer = () => {
+    setTimeout(
+      () => {
+        if (this._isMounted) {
+          this.setState({ isInitialLoadRenderTimeoutComplete: true });
+        }
+      },
+      1000
+    );
+  }
 
   render() {
     const {
@@ -108,7 +132,12 @@ export class GisMap extends Component {
       );
     }
     return (
-      <EuiFlexGroup gutterSize="none" responsive={false}>
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+        data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
+        data-shared-item
+      >
         <EuiFlexItem className="mapMapWrapper">
           <MBMapContainer/>
           <ToolbarOverlay />
