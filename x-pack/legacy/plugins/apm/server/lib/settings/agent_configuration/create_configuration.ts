@@ -8,7 +8,7 @@ import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../typings/common';
 import { AgentConfigurationIntake } from './configuration_types';
 
-export type CMCreateConfigurationAPIResponse = PromiseReturnType<
+export type CreateAgentConfigurationAPIResponse = PromiseReturnType<
   typeof createConfiguration
 >;
 export async function createConfiguration({

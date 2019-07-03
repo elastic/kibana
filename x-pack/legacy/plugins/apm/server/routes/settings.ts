@@ -32,7 +32,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
   // get list of configurations
   server.route({
     method: 'GET',
-    path: `/api/apm/settings/cm`,
+    path: '/api/apm/settings/agent-configuration',
     options: {
       validate: {
         query: {
@@ -52,7 +52,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
   // delete configuration
   server.route({
     method: 'DELETE',
-    path: `/api/apm/settings/cm/{configurationId}`,
+    path: `/api/apm/settings/agent-configuration/{configurationId}`,
     options: {
       validate: {
         query: {
@@ -74,7 +74,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
   // get list of services
   server.route({
     method: 'GET',
-    path: `/api/apm/settings/cm/services`,
+    path: `/api/apm/settings/agent-configuration/services`,
     options: {
       validate: {
         query: {
@@ -94,7 +94,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
   // get environments for service
   server.route({
     method: 'GET',
-    path: `/api/apm/settings/cm/services/{serviceName}/environments`,
+    path: `/api/apm/settings/agent-configuration/services/{serviceName}/environments`,
     options: {
       validate: {
         query: {
@@ -116,7 +116,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
   // create configuration
   server.route({
     method: 'POST',
-    path: `/api/apm/settings/cm/new`,
+    path: `/api/apm/settings/agent-configuration/new`,
     options: {
       validate: {
         query: {
@@ -138,7 +138,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
   // update configuration
   server.route({
     method: 'PUT',
-    path: `/api/apm/settings/cm/{configurationId}`,
+    path: `/api/apm/settings/agent-configuration/{configurationId}`,
     options: {
       validate: {
         query: {
@@ -160,40 +160,45 @@ export function initSettingsApi(core: InternalCoreSetup) {
   });
 
   // Lookup single configuration
-  server.route({
-    method: 'POST',
-    path: `/api/apm/settings/cm/search`,
-    options: {
-      validate: {
-        query: {
-          _debug: Joi.bool()
-        }
+  [
+    '/api/apm/settings/agent-configuration/search',
+    '/api/apm/settings/cm/search' // backward compatible api route for apm-server
+  ].forEach(path => {
+    server.route({
+      method: 'POST',
+      path,
+      options: {
+        validate: {
+          query: {
+            _debug: Joi.bool()
+          }
+        },
+        tags: ['access:apm']
       },
-      tags: ['access:apm']
-    },
-    handler: async (req, h) => {
-      interface Payload {
-        service: {
-          name: string;
-          environment?: string;
-        };
+      handler: async (req, h) => {
+        interface Payload {
+          service: {
+            name: string;
+            environment?: string;
+          };
+        }
+
+        const setup = setupRequest(req);
+        const payload = req.payload as Payload;
+        const serviceName = payload.service.name;
+        const environment = payload.service.environment;
+        const config = await searchConfigurations({
+          serviceName,
+          environment,
+          setup
+        });
+
+        if (!config) {
+          return h.response().code(404);
+        }
+
+        return config;
       }
-
-      const setup = setupRequest(req);
-      const payload = req.payload as Payload;
-      const serviceName = payload.service.name;
-      const environment = payload.service.environment;
-      const config = await searchConfigurations({
-        serviceName,
-        environment,
-        setup
-      });
-
-      if (!config) {
-        return h.response().code(404);
-      }
-
-      return config;
-    }
+    });
   });
 }

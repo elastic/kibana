@@ -8,7 +8,9 @@ import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
 
-export type CMListAPIResponse = PromiseReturnType<typeof listConfigurations>;
+export type AgentConfigurationListAPIResponse = PromiseReturnType<
+  typeof listConfigurations
+>;
 export async function listConfigurations({ setup }: { setup: Setup }) {
   const { client, config } = setup;
 

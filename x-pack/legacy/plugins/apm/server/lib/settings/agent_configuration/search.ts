@@ -13,7 +13,7 @@ import {
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
 
-export type CMSearchAPIResponse = PromiseReturnType<
+export type SearchAgentConfigurationsAPIResponse = PromiseReturnType<
   typeof searchConfigurations
 >;
 export async function searchConfigurations({
