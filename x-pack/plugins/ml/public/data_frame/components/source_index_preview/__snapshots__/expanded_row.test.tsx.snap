@@ -5,7 +5,10 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
   <span
     key="arrayObject"
   >
-    <EuiBadge>
+    <EuiBadge
+      color="default"
+      iconSide="left"
+    >
       arrayObject
       :
     </EuiBadge>
@@ -18,7 +21,10 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
   <span
     key="arrayString"
   >
-    <EuiBadge>
+    <EuiBadge
+      color="default"
+      iconSide="left"
+    >
       arrayString
       :
     </EuiBadge>
@@ -31,7 +37,10 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
   <span
     key="name"
   >
-    <EuiBadge>
+    <EuiBadge
+      color="default"
+      iconSide="left"
+    >
       name
       :
     </EuiBadge>
@@ -44,7 +53,10 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
   <span
     key="nested.inner1"
   >
-    <EuiBadge>
+    <EuiBadge
+      color="default"
+      iconSide="left"
+    >
       nested.inner1
       :
     </EuiBadge>
@@ -57,7 +69,10 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
   <span
     key="nested.inner2"
   >
-    <EuiBadge>
+    <EuiBadge
+      color="default"
+      iconSide="left"
+    >
       nested.inner2
       :
     </EuiBadge>
