@@ -26,22 +26,11 @@ pipeline {
 
 
     CREDENTIALS_ID ='kibana-ci-gcs-plugin'
-    BUCKET = 'gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER'
+    BUCKET = "gs://kibana-ci-artifacts/jobs/${JOB_NAME}/${BUILD_NUMBER}"
     PATTERN = "${WORKSPACE_CACHE_NAME}"
   }
   stages {
-    stage('Extract Boot Cache') {
-      agent { label 'linux || immutable' }
-      steps {
-        dir("${env.BASE_DIR}"){
-          script {
-            dumpEnv()
-          }
-          sh "${TEMP_PIPELINE_SETUP_DIR}/extract_bootstrap_cache.sh"
-        }
-      }
-    }
-    stage('Install Binaries, Install Dependencies, Build kbn-pm distributable, Rebuild Renovate Config, Checkout Sibling Version of Elastic Search') {
+    stage('Install All-The-Things') {
       agent { label 'linux || immutable' }
       steps {
         dir("${env.BASE_DIR}"){
@@ -50,7 +39,7 @@ pipeline {
             dumpWorkspaceSize() // dump size to screen AFTER checking out es
             tarWorkspace()
           }
-          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: "gs://${env.BUCKET}", pattern: env.PATTERN])
+          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         }
       }
     }
@@ -59,7 +48,6 @@ pipeline {
       options { skipDefaultCheckout() }
       steps {
         deleteDir()
-        sh 'echo "Download workspace cache"'
         // sh './test/scripts/jenkins_unit.sh'
       }
     }
