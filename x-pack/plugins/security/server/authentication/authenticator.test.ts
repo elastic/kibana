@@ -15,7 +15,7 @@ import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
 import { LoginAttempt } from './login_attempt';
 import { initAuthenticator } from './authenticator';
-import * as ClientShield from '../../../../../server/lib/get_client_shield';
+import * as ClientShield from '../../../../legacy/server/lib/get_client_shield';
 
 describe('Authenticator', () => {
   const sandbox = sinon.createSandbox();

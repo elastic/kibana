@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { wrapError } from './errors';
+import { wrapError } from '../errors';
 
 /**
  * Creates a hapi authenticate function that conditionally redirects

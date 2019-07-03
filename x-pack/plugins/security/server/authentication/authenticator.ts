@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { getClient } from '../../../../../server/lib/get_client_shield';
+import { getClient } from '../../../../legacy/server/lib/get_client_shield';
 import { getErrorStatusCode } from '../errors';
 import {
   AuthenticationProviderOptions,

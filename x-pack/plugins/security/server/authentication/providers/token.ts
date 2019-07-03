@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
-import { canRedirectRequest } from '../../can_redirect_request';
+import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens, TokenPair } from '../tokens';

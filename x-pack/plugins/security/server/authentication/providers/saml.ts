@@ -6,8 +6,8 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
-import { canRedirectRequest } from '../../can_redirect_request';
-import { AuthenticatedUser } from '../../../../common/model';
+import { canRedirectRequest } from '../can_redirect_request';
+import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens, TokenPair } from '../tokens';

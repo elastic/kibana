@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { wrapError } from '../../../../lib/errors';
+import { wrapError } from '../../../../../../../../plugins/security/server';
 
 export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({

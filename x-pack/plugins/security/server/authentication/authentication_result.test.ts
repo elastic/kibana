@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { AuthenticatedUser } from '../../../common/model';
+import { AuthenticatedUser } from '../../common/model';
 import { AuthenticationResult } from './authentication_result';
 
 describe('AuthenticationResult', () => {

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { validateConfig } from '../validate_config';
+import { validateConfig } from './config';
 
 describe('Validate config', function () {
   let config;

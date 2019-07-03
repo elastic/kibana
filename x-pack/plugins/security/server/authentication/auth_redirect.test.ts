@@ -12,8 +12,8 @@ import { hFixture } from './__fixtures__/h';
 import { requestFixture } from './__fixtures__/request';
 import { serverFixture } from './__fixtures__/server';
 
-import { AuthenticationResult } from '../authentication/authentication_result';
-import { authenticateFactory } from '../auth_redirect';
+import { AuthenticationResult } from './authentication_result';
+import { authenticateFactory } from './auth_redirect';
 
 describe('lib/auth_redirect', function () {
   let authenticate;

@@ -7,7 +7,7 @@
 /**
  * Represents status that `AuthenticationResult` can be in.
  */
-import { AuthenticatedUser } from '../../../common/model';
+import { AuthenticatedUser } from '../../common/model';
 import { getErrorStatusCode } from '../errors';
 
 enum AuthenticationResultStatus {

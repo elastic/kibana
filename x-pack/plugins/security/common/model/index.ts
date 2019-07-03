@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { canRedirectRequest } from './can_redirect_request';
-export { AuthenticationResult } from './authentication_result';
-export { DeauthenticationResult } from './deauthentication_result';
-export { BasicCredentials } from './providers';
+export { User, EditUser, getUserDisplayName } from './user';
+export { AuthenticatedUser, canUserChangePassword } from './authenticated_user';

@@ -6,8 +6,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { wrapError } from '../../../lib/errors';
-import { canRedirectRequest } from '../../../lib/can_redirect_request';
+import { canRedirectRequest, wrapError } from '../../../../../../../plugins/security/server';
 
 export function initAuthenticateApi(server) {
 
