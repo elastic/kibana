@@ -23,11 +23,12 @@ import {
   UnsupportedTypeError,
   MissingReferencesError,
   UnknownError,
+  ImportError,
 } from 'src/core/server/saved_objects/import/types';
 
 export interface ProcessedImportResponse {
   failedImports: Array<{
-    obj: Record<string, any>;
+    obj: Pick<ImportError, 'id' | 'type' | 'title'>;
     error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
   }>;
   unmatchedReferences: Array<{

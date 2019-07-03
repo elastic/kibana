@@ -26,7 +26,10 @@ import {
   processImportResponse,
   ProcessedImportResponse,
 } from 'ui/management/saved_objects_management';
-import { ImportResponse } from 'src/core/server/saved_objects/import/types';
+import {
+  ImportResponse,
+  SavedObjectsImportRetry,
+} from 'src/core/server/saved_objects/import/types';
 import { useKibanaSpaces } from '../../../../lib/hooks';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
@@ -47,6 +50,7 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
 
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [copyResult, setCopyResult] = useState<Record<string, ProcessedImportResponse>>({});
+  const [retries, setRetries] = useState<Record<string, SavedObjectsImportRetry[]>>({});
 
   useEffect(
     () => {
@@ -174,6 +178,8 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
             copyResult={copyResult}
             spaces={spaces}
             selectedSpaceIds={selectedSpaceIds}
+            retries={retries}
+            onRetriesChange={setRetries}
           />
         )}
         {!copyInProgress && form}

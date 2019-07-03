@@ -66,3 +66,14 @@ export interface ImportResponse {
   successCount: number;
   errors?: ImportError[];
 }
+
+export interface SavedObjectsImportRetry {
+  type: string;
+  id: string;
+  overwrite: boolean;
+  replaceReferences: Array<{
+    type: string;
+    from: string;
+    to: string;
+  }>;
+}

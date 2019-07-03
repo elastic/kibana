@@ -8,15 +8,15 @@ import React from 'react';
 import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { summarizeCopyResult } from '../../../../lib/copy_to_space';
 
 interface Props {
-  copyInProgress: boolean;
   copyResult: ProcessedImportResponse | undefined;
 }
 
 export const CopyStatusIndicator = (props: Props) => {
-  const { copyInProgress, copyResult } = props;
-  if (copyInProgress) {
+  const { copyResult } = props;
+  if (!copyResult) {
     return (
       <span>
         <EuiLoadingSpinner />{' '}
@@ -28,11 +28,7 @@ export const CopyStatusIndicator = (props: Props) => {
     );
   }
 
-  const successful = copyResult && copyResult.failedImports.length === 0;
-  const hasConflicts =
-    copyResult && copyResult.failedImports.some(failed => failed.error.type === 'conflict');
-  const hasUnresolvableErrors =
-    copyResult && copyResult.failedImports.some(failed => failed.error.type !== 'conflict');
+  const { successful, hasConflicts, hasUnresolvableErrors } = summarizeCopyResult(copyResult);
 
   if (successful) {
     return (
