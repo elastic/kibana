@@ -75,6 +75,7 @@ export interface HttpServerSetup {
     isAuthenticated: AuthStateStorage['isAuthenticated'];
     getAuthHeaders: AuthHeadersStorage['get'];
   };
+  isTLSEnabled: boolean;
 }
 
 export class HttpServer {
@@ -131,6 +132,7 @@ export class HttpServer {
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.
       server: this.server,
+      isTLSEnabled: config.ssl.enabled,
     };
   }
 

@@ -35,8 +35,7 @@
  * @packageDocumentation
  */
 
-import { Observable } from 'rxjs';
-import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
+import { ElasticsearchServiceSetup } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -104,7 +103,7 @@ export {
   SavedObjectsUpdateResponse,
 } from './saved_objects';
 
-export { RecursiveReadonly } from '../utils';
+export { RecursiveReadonly, deepFreeze } from '../utils';
 
 /**
  * Context passed to the plugins `setup` method.
@@ -112,16 +111,14 @@ export { RecursiveReadonly } from '../utils';
  * @public
  */
 export interface CoreSetup {
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-  };
+  elasticsearch: ElasticsearchServiceSetup;
   http: {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
+    isTLSEnabled: HttpServiceSetup['isTLSEnabled'];
   };
 }
 

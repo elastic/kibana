@@ -86,10 +86,7 @@ export class ConfigService {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-    };
+    elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: {
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -97,12 +94,19 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         createNewServer: HttpServiceSetup['createNewServer'];
+        isTLSEnabled: HttpServiceSetup['isTLSEnabled'];
     };
 }
 
 // @public
 export interface CoreStart {
 }
+
+// Warning: (ae-forgotten-export) The symbol "Freezable" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "deepFreeze" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
 
 // @public
 export interface DiscoveredPlugin {
