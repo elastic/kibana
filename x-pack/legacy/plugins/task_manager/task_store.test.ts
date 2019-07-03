@@ -491,7 +491,16 @@ describe('TaskStore', () => {
             },
           },
           size: 10,
-          sort: { 'task.runAt': { order: 'asc' } },
+          sort: {
+            _script: {
+              type: 'number',
+              order: 'asc',
+              script: {
+                lang: 'expression',
+                source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+              },
+            },
+          },
           seq_no_primary_term: true,
         },
         index,
