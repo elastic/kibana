@@ -2,8 +2,8 @@
 
 set -e
 
-dir="${WORKSPACE}"
-cacheDir="${MAIN_CACHE_DIR}"
+dir="${WORKSPACE}" # /var/lib/jenkins/workspace/kibana-automation-pipeline
+cacheDir="${MAIN_CACHE_DIR}"  # /var/lib/jenkins/.kibana
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color

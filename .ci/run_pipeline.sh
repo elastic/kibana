@@ -5,7 +5,7 @@ set -e
 # move to Kibana root
 cd "$(dirname "$0")/.."
 
-source src/dev/temp_pipeline_setup/extract_bootstrap_cache.sh
+# source src/dev/temp_pipeline_setup/extract_bootstrap_cache.sh
 source src/dev/temp_pipeline_setup/setup.sh
 source src/dev/temp_pipeline_setup/checkout_sibling_es.sh
 

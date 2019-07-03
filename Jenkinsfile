@@ -40,11 +40,7 @@ pipeline {
       agent { label 'linux || immutable' }
       steps {
         dir("${env.BASE_DIR}"){
-          sh "${TEMP_PIPELINE_SETUP_DIR}/setup.sh"
-          script {
-            dumpWorkspaceSize() // dump size to screen BEFORE checking out es
-          }
-          sh "${TEMP_PIPELINE_SETUP_DIR}/checkout_sibling_es.sh"
+          sh "${TEMP_PIPELINE_SETUP_DIR}/run_pipeline.sh"
           script {
             dumpWorkspaceSize() // dump size to screen AFTER checking out es
             tarWorkspace()
