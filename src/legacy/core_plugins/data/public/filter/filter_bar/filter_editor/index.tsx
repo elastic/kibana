@@ -92,7 +92,7 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <div>
         <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="baseline">
+          <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
               <FormattedMessage
                 id="data.filter.filterEditor.editFilterPopupTitle"
@@ -154,7 +154,7 @@ class FilterEditorUI extends Component<Props, State> {
 
             <EuiSpacer size="m" />
 
-            <EuiFlexGroup direction="rowReverse" alignItems="center">
+            <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
@@ -224,11 +224,11 @@ class FilterEditorUI extends Component<Props, State> {
   private renderRegularEditor() {
     return (
       <div>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderFieldInput()}</EuiFlexItem>
           <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderOperatorInput()}</EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
       </div>
     );

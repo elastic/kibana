@@ -8,11 +8,13 @@ import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import React, { Component } from 'react';
 import { idx } from '@kbn/elastic-idx';
+import { StringMap } from '../../../../typings/common';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
-  field: string;
   name: string;
+  actions?: StringMap[];
+  field?: string;
   dataType?: string;
   align?: string;
   width?: string;
@@ -35,7 +37,7 @@ interface Props<T> {
   initialPageSize?: number;
   hidePerPageOptions?: boolean;
   initialSort?: {
-    field: Extract<keyof T, string>;
+    field: Required<ITableColumn<T>>['field'];
     direction: string;
   };
   noItemsMessage?: React.ReactNode;

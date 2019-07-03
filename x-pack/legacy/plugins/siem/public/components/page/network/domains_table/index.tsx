@@ -31,6 +31,7 @@ interface OwnProps {
   flowTarget: FlowTarget;
   loading: boolean;
   hasNextPage: boolean;
+  id: string;
   indexPattern: StaticIndexPattern;
   ip: string;
   nextCursor: string;
@@ -89,6 +90,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       data,
       domainsSortField,
       hasNextPage,
+      id,
       indexPattern,
       ip,
       limit,
@@ -122,6 +124,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         }
         headerTitle={i18n.DOMAINS}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

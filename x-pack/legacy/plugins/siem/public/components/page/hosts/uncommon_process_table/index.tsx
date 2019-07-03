@@ -23,6 +23,7 @@ interface OwnProps {
   data: UncommonProcessesEdges[];
   loading: boolean;
   hasNextPage: boolean;
+  id: string;
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
@@ -72,6 +73,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   ({
     data,
     hasNextPage,
+    id,
     limit,
     loading,
     loadMore,
@@ -86,6 +88,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
       headerUnit={i18n.UNIT(totalCount)}
+      id={id}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
