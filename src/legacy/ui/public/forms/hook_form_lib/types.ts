@@ -74,7 +74,7 @@ export interface Field {
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
   validate: (
     validateData?: { formData?: any; value?: unknown }
-  ) => Promise<{ isValid: boolean; errors: ValidationError[] }>;
+  ) => FieldValidateResponse | Promise<FieldValidateResponse>;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
   getOutputValue: () => unknown;
@@ -117,6 +117,11 @@ export type ValidationFunc<T = any> = (
     errors: ReadonlyArray<ValidationError>;
   }
 ) => ValidationError | void | undefined | Promise<ValidationError | void | undefined>;
+
+export interface FieldValidateResponse {
+  isValid: boolean;
+  errors: ValidationError[];
+}
 
 type FormData = Record<string, string>;
 

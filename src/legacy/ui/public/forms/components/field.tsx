@@ -29,7 +29,12 @@ import {
   EuiPanel,
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
-import { Field as FieldType } from 'ui/forms/hook_form_lib';
+import {
+  Field as FieldType,
+  FIELD_TYPES,
+  ERROR_TYPES,
+  FieldValidateResponse,
+} from 'ui/forms/hook_form_lib';
 
 interface Props {
   field: FieldType;
@@ -37,25 +42,64 @@ interface Props {
 }
 
 export const Field = ({ field, fieldProps = {} }: Props) => {
-  const isInvalid = !field.isUpdating && field.form.isSubmitted && field.errors.length > 0;
+  let isInvalid: boolean;
+  let errorMessage: string | null;
 
-  const onAddValueToCombo = (value: string) => {
+  if (field.type === FIELD_TYPES.COMBO_BOX) {
+    // Errors for the comboBox value (the "array")
+    const errorMessageField = field.form.isSubmitted ? field.getErrorsMessages() : '';
+
+    // Errors for comboBox option added (the array "item")
+    const errorMessageArrayItem = field.getErrorsMessages(ERROR_TYPES.ARRAY_ITEM);
+
+    isInvalid = field.errors.length
+      ? field.form.isSubmitted || errorMessageArrayItem !== null
+      : false;
+
+    // Concatenate error messages.
+    errorMessage =
+      errorMessageField && errorMessageArrayItem
+        ? `${errorMessageField}, ${errorMessageArrayItem}`
+        : errorMessageField
+        ? errorMessageField
+        : errorMessageArrayItem;
+  } else {
+    isInvalid = !field.isUpdating && field.form.isSubmitted && field.errors.length > 0;
+    errorMessage =
+      !field.isUpdating && field.errors.length ? (field.errors[0].message as string) : null;
+  }
+
+  /**
+   * There is a strange behaviour in the EUI Combobox component:
+   * If the value to be added is immediately set (without any timeout)
+   * by hitting the keyboard "ENTER" key, the event bubbles and the pill that is added
+   * receive the same keyDown ENTER event. This triggers immediately the close icon button on the pill
+   * that triggers the "remove item" callback.
+   * The behaviour does not occur with the "onBlur" as no Key is pressed.
+   *
+   * This needs to be investigated.
+   */
+  const onCreateComboOption = async (value: string) => {
+    // Note: for now, we assume that all validations for a comboBox are synchronous
+    // This could change in the future, but not before we fix the current issue with the ENTER key
+    // Asynchronous validation adds another place to look to understand the event change problem,
+    // so I prefer to limit places to look at to fix the issue.
+    // Once we get the comboBox to work as expected with synchronous validations,
+    // we can see if asynchronous validation can also work (and if it would make sense to allow it).
+    const { isValid } = field.validate({ value }) as FieldValidateResponse;
+
+    if (!isValid) {
+      setTimeout(() => {
+        field.setValue(field.value as string[]);
+      });
+      return;
+    }
+
     const newValue = [...(field.value as string[]), value];
 
-    /**
-     * There is a strange behaviour in the EUI Combobox component
-     * If the value to be added is immediately set (no timeout) with the keyboard ENTER
-     * key, then the event bubbles and the pill that is added receive the ENTER event
-     * "on" the close icon (the cross) that triggers the "remove item" callback.
-     * The behaviour does not occur with the "onBlur" as no key is pressed.
-     *
-     * I played around and added 1000ms to better see the issue. We can see clearly the
-     * difference between the keydown "ENTER" and the "onBlur" triggers.
-     * This needs to be investigated.
-     */
     setTimeout(() => {
       field.setValue(newValue);
-    }, 1000);
+    });
 
     // The following line should be the correct way to update the value
     // but it does not currently work when hitting the "ENTER" key
@@ -63,13 +107,19 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
     // field.setValue(newValue);
   };
 
-  const onComboUpdate = (options: EuiComboBoxOptionProps[]) => {
+  const onComboChange = (options: EuiComboBoxOptionProps[]) => {
     field.setValue(options.map(option => option.label));
+  };
+
+  const onSearchComboChange = (value: string) => {
+    if (value) {
+      field.clearErrors(ERROR_TYPES.ARRAY_ITEM);
+    }
   };
 
   const renderField = () => {
     switch (field.type) {
-      case 'number':
+      case FIELD_TYPES.NUMBER:
         return (
           <EuiFieldNumber
             isInvalid={isInvalid}
@@ -81,7 +131,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
             {...fieldProps}
           />
         );
-      case 'select':
+      case FIELD_TYPES.SELECT:
         return (
           <EuiSelect
             fullWidth
@@ -94,19 +144,20 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
             {...fieldProps as { options: any; [key: string]: any }}
           />
         );
-      case 'comboBox':
+      case FIELD_TYPES.COMBO_BOX:
         return (
           <EuiComboBox
             noSuggestions
             placeholder="Type and then hit ENTER"
             selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
-            onCreateOption={onAddValueToCombo}
-            onChange={onComboUpdate}
+            onCreateOption={onCreateComboOption}
+            onChange={onComboChange}
+            onSearchChange={onSearchComboChange}
             fullWidth
             {...fieldProps}
           />
         );
-      case 'toggle':
+      case FIELD_TYPES.TOGGLE:
         return (
           <EuiSwitch
             label={field.label}
@@ -115,7 +166,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
             {...fieldProps}
           />
         );
-      case 'multiSelect':
+      case FIELD_TYPES.MULTI_SELECT:
         return (
           <EuiSelectable
             allowExclusions={false}
@@ -152,7 +203,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
     <EuiFormRow
       label={field.label}
       helpText={field.helpText}
-      error={!field.isUpdating && field.errors.length && field.errors[0].message}
+      error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
     >

@@ -16,17 +16,8 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBox,
-  EuiComboBoxOptionProps,
 } from '@elastic/eui';
-import {
-  useForm,
-  FormConfig,
-  FieldConfig,
-  Field as FieldType,
-  UseField,
-  UseArray,
-} from 'ui/forms/hook_form_lib';
+import { useForm, FormConfig, FieldConfig, UseField, UseArray } from 'ui/forms/hook_form_lib';
 import { FormRow, Field } from 'ui/forms/components';
 
 import { MyForm } from './types';
@@ -58,35 +49,6 @@ export const Form3 = () => {
   };
 
   const { form } = useForm<MyForm>({ onSubmit, schema: formSchema });
-
-  const onAddValueToCombo = (field: FieldType) => async (value: string) => {
-    const { isValid } = await field.validate({ value });
-
-    if (!isValid) {
-      // There is an issue with the ComboBox, and we need to wrap the update inside a setTimeout
-      // see comment in "Field" component.
-      setTimeout(() => {
-        field.setValue(field.value as string[]);
-      });
-      return;
-    }
-
-    const newValue = [...(field.value as string[]), value];
-
-    setTimeout(() => {
-      field.setValue(newValue);
-    });
-  };
-
-  const onComboUpdate = (field: FieldType) => (options: EuiComboBoxOptionProps[]) => {
-    field.setValue(options.map(option => option.label));
-  };
-
-  const onSearchComboUpdate = (field: FieldType) => (value: string) => {
-    if (value) {
-      field.clearErrors('arrayItem');
-    }
-  };
 
   return (
     <form noValidate>
@@ -189,52 +151,16 @@ export const Form3 = () => {
         </EuiFlexItem>
       </FormRow>
 
-      <FormRow
-        title="Combobox with validation"
-        description="Here we have validation _before_ adding a value to the comboBox array"
-      >
-        <UseField path="comboBoxFieldWithValidation" form={form}>
-          {field => {
-            // Errors for the field
-            const errorsField = form.isSubmitted ? field.getErrorsMessages() : '';
-
-            // Errors of an invalid array item that the user tries to add
-            const errorsArrayItem = field.getErrorsMessages('arrayItem');
-
-            const isInvalid = field.errors.length
-              ? form.isSubmitted || errorsArrayItem !== null
-              : false;
-
-            // Concatenate error messages.
-            const error =
-              errorsField && errorsArrayItem
-                ? `${errorsField}, ${errorsArrayItem}`
-                : errorsField
-                ? errorsField
-                : errorsArrayItem;
-
-            return (
-              <EuiFormRow
-                label={field.label}
-                helpText={field.helpText}
-                error={error}
-                isInvalid={isInvalid}
-                fullWidth
-              >
-                <EuiComboBox
-                  noSuggestions
-                  placeholder="Type and then hit ENTER"
-                  selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
-                  onCreateOption={onAddValueToCombo(field)}
-                  onChange={onComboUpdate(field)}
-                  onSearchChange={onSearchComboUpdate(field)}
-                  fullWidth
-                />
-              </EuiFormRow>
-            );
-          }}
-        </UseField>
-      </FormRow>
+      <UseField
+        path="comboBoxFieldWithValidation"
+        form={form}
+        render={FormRow}
+        renderProps={{
+          title: 'Combobox with validation',
+          description:
+            'We can see here how we have the validation _before_ adding an item to the comboBox array',
+        }}
+      />
 
       <FormRow title="Dynamic fields" description="Or how to dynamically add values to an array">
         <UseArray path="elastic.coWorkers" form={form}>

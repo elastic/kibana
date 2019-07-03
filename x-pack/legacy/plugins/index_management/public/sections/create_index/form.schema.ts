@@ -112,6 +112,7 @@ export const formSchema: FormSchema<MyForm> = {
     label: 'ComboBox field with validation',
     helpText: 'Try to add a item starting with the letter "a" to see the validation.',
     defaultValue: [],
+    type: FIELD_TYPES.COMBO_BOX,
     validations: [
       { validator: emptyField, exitOnFail: true },
       { validator: minLengthField(3), message: 'Please add at least 3 items' },
@@ -121,7 +122,7 @@ export const formSchema: FormSchema<MyForm> = {
             return {
               code: 'ERR_WRONG_FIRST_CHAR',
               message: 'The value cannot start witht the letter "a"',
-              type: 'arrayItem',
+              type: ERROR_TYPES.ARRAY_ITEM,
             };
           }
         },
