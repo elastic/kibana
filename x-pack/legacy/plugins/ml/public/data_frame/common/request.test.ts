@@ -74,7 +74,7 @@ describe('Data Frame: Common', () => {
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
-        index: 'the-index-pattern-title',
+        index: ['the-index-pattern-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
       },
     });
@@ -159,7 +159,7 @@ describe('Data Frame: Common', () => {
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
-        index: 'the-index-pattern-title',
+        index: ['the-index-pattern-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
       },
     });

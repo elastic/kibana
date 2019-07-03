@@ -32,7 +32,7 @@ export interface DataFramePreviewRequest {
     aggregations: PivotAggDict;
   };
   source: {
-    index: string | string[];
+    index: string[];
     query?: any;
   };
 }
@@ -83,11 +83,7 @@ export function getDataFramePreviewRequest(
   groupBy: PivotGroupByConfig[],
   aggs: PivotAggsConfig[]
 ): DataFramePreviewRequest {
-  let index: string | string[] = indexPatternTitle;
-
-  if (index.indexOf(',') !== -1) {
-    index = indexPatternTitle.split(',').map((name: string) => name.trim());
-  }
+  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 
   const request: DataFramePreviewRequest = {
     source: {
