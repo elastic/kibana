@@ -66,6 +66,9 @@ export const useNextAndPrevious = (visibleMidpoint, logEntryHighlights) => {
     [visibleMidpoint, logEntryHighlights]
   );
 
+  /* TODO: Handle being at the extreme boundaries. I.e. the very top or very bottom of the scrollable area,
+  in these scenarios the visibleMidpoint will stay the same, even though we want to move through the highlights.
+  Otherwise, at the extreme boundaries, it's not possible to cycle from first to last, or last to first */
   const goToPreviousHighlight = useCallback(
     () => {
       if (isNumber(previousHighlightLogEntryIndex)) {
