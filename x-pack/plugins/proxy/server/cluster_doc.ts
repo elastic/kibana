@@ -9,12 +9,7 @@ import { v4 } from 'uuid';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import {
-  PluginInitializerContext,
-  Logger,
-  ClusterClient,
-  ElasticsearchServiceSetup,
-} from '../../../../src/core/server';
+import { PluginInitializerContext, Logger, ClusterClient } from '../../../../src/core/server';
 
 import { ProxyPluginType } from './proxy';
 import {
@@ -78,8 +73,8 @@ export class ClusterDocClient {
     this.log = initializerContext.logger.get('proxy');
   }
 
-  public async setup(esClient: Partial<ElasticsearchServiceSetup>) {
-    this.elasticsearch$ = esClient.dataClient$;
+  public async setup(esClient: Observable<ClusterClient>) {
+    this.elasticsearch$ = esClient;
     const config = await this.config$.pipe(first()).toPromise();
     this.setConfig(config);
   }
@@ -92,7 +87,7 @@ export class ClusterDocClient {
     if (this.updateTimer) {
       clearTimeout(this.updateTimer);
     }
-    await this.updateHeartbeat(true);
+    await this.removeHeartbeat();
   }
 
   public async getNodeForResource(resource: string) {
@@ -190,28 +185,36 @@ export class ClusterDocClient {
     return reply._source as NodeList;
   }
 
+  public async removeHeartbeat() {
+    const client = await this.getESClient();
+    const body = {
+      script: removeHeartbeat,
+      params: {
+        resource: this.nodeName,
+      },
+    };
+    const params = {
+      id: this.heartbeatDoc,
+      type: this.docType,
+      index: this.proxyIndex,
+      body,
+      retryOnConflict: this.maxRetry,
+    };
+    await client.callAsInternalUser('update', params);
+  }
+
   /**
    * Node heartbeats are monotonically increasing integers
    * @param remove [boolean] should this node be deleted
    */
   public async updateHeartbeat(remove: boolean = false) {
     const client = await this.getESClient();
-    let body = {};
-    if (remove) {
-      body = {
-        script: removeHeartbeat,
-        params: {
-          resource: this.nodeName,
-        },
-      };
-    } else {
-      body = {
-        script: updateHeartbeat,
-        params: {
-          resource: this.nodeName,
-        },
-      };
-    }
+    const body = {
+      script: updateHeartbeat,
+      params: {
+        resource: this.nodeName,
+      },
+    };
     const params = {
       id: this.heartbeatDoc,
       type: this.docType,
@@ -228,7 +231,7 @@ export class ClusterDocClient {
    * eventually, and update the correctly
    * @param nodes
    */
-  public async cullDeadResources(nodes: string[]) {
+  private async cullDeadResources(nodes: string[]) {
     const client = await this.getESClient();
     const body = {
       script: cullDeadResources,
@@ -254,7 +257,7 @@ export class ClusterDocClient {
    * remove nodes that are past their timeout. since each node runs this in the
    * same way, we ignore conflicts here -- one of them will win eventually
    */
-  public async cullDeadNodes() {
+  private async cullDeadNodes() {
     const client = await this.getESClient();
     const body = {
       script: cullDeadNodes,
@@ -293,6 +296,7 @@ export class ClusterDocClient {
    *
    */
   private async mainLoop() {
+    this.updateTimer = null;
     try {
       await this.updateHeartbeat();
       // we only want to run the cull every other pass so we'll fiddle with

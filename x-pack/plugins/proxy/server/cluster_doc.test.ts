@@ -88,7 +88,7 @@ test('initial run of main loop works', async () => {
   const clusterDoc = new ClusterDocClient({ config, env, logger });
 
   try {
-    await clusterDoc.setup(elasticClient);
+    await clusterDoc.setup(elasticClient.dataClient$);
     await clusterDoc.start();
     await clusterDoc.stop();
   } catch (err) {
@@ -196,7 +196,7 @@ test('removes stale nodes, keeps good nodes', async () => {
   clusterDoc.nodeName = nodeName;
 
   try {
-    await clusterDoc.setup(elasticClient);
+    await clusterDoc.setup(elasticClient.dataClient$);
   } catch (err) {
     expect(err).toBeFalsy();
   }
@@ -205,7 +205,7 @@ test('removes stale nodes, keeps good nodes', async () => {
   await clusterDoc.updateHeartbeat();
   (clusterDoc as any).nodeCache = await clusterDoc.getHeartbeats();
   await clusterDoc.updateHeartbeat();
-  await clusterDoc.cullDeadNodes();
+  await (clusterDoc as any).cullDeadNodes();
   expect(esClients.dataClient.callAsInternalUser).toHaveBeenCalledTimes(6);
   expect(Object.keys(mockHeartbeatReply._source).length).toBe(1);
   expect(Object.keys(mockResourceReply._source).length).toBe(2);
@@ -217,7 +217,7 @@ test('removes stale nodes, keeps good nodes', async () => {
   (clusterDoc as any).nodeCache = await clusterDoc.getHeartbeats();
   await clusterDoc.updateHeartbeat();
   mockHeartbeatReply._source[nodeName2] = 4;
-  await clusterDoc.cullDeadNodes();
+  await (clusterDoc as any).cullDeadNodes();
   expect(Object.keys(mockHeartbeatReply._source).length).toBe(2);
   expect(Object.keys(mockResourceReply._source).length).toBe(2);
   expect(mockResourceReply._source['git@github.com:elastic/kibana'].state).toBe(RouteState.Started);
@@ -228,7 +228,7 @@ test('removes stale nodes, keeps good nodes', async () => {
   await clusterDoc.updateHeartbeat();
   mockHeartbeatReply._source[nodeName2] = (clusterDoc as any).nodeCache[nodeName2];
   mockResourceReply._source['git@github.com:elastic/kibana'].state = RouteState.Closing;
-  await clusterDoc.cullDeadNodes();
+  await (clusterDoc as any).cullDeadNodes();
   expect(Object.keys(mockResourceReply._source).length).toBe(1);
   expect(mockResourceReply._source['git@github.com:elastic/kibana']).toBeFalsy();
 
@@ -266,7 +266,7 @@ test('it continues on errors', async () => {
   const clusterDoc = new ClusterDocClient({ config, env, logger });
 
   try {
-    await clusterDoc.setup(elasticClient);
+    await clusterDoc.setup(elasticClient.dataClient$);
     await clusterDoc.start();
   } catch (err) {
     expect(err).toBeFalsy();
