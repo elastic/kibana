@@ -24,9 +24,6 @@ export async function getArchiveInfo(
   key: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
-  const archiveBuffer = await getOrFetchArchiveBuffer(key);
-  const extract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
-
   const paths: string[] = [];
   const onEntry = (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
@@ -35,9 +32,20 @@ export async function getArchiveInfo(
     if (buffer) cacheSet(path, buffer);
   };
 
-  await extract(archiveBuffer, filter, onEntry);
+  await extract(key, filter, onEntry);
 
   return paths;
+}
+
+async function extract(
+  key: string,
+  filter = (entry: ArchiveEntry): boolean => true,
+  onEntry: (entry: ArchiveEntry) => void
+) {
+  const libExtract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
+  const archiveBuffer = await getOrFetchArchiveBuffer(key);
+
+  return libExtract(archiveBuffer, filter, onEntry);
 }
 
 async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
