@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaMarkdown } from './markdown_fn';
 
@@ -28,8 +29,8 @@ describe('interpreter/functions#markdown', () => {
     markdown: '## hello _markdown_',
   };
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(undefined, args);
+  it('returns an object with the correct structure', async () => {
+    const actual = await fn(undefined, args);
     expect(actual).toMatchSnapshot();
   });
 });
