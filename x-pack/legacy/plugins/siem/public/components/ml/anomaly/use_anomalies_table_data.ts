@@ -86,13 +86,10 @@ export const useAnomaliesTableData = ({
     }
   };
 
-  useEffect(
-    () => {
-      setLoading(true);
-      fetchFunc(influencers, startDate, endDate);
-    },
-    [influencersToString(influencers), startDate, endDate, skip]
-  );
+  useEffect(() => {
+    setLoading(true);
+    fetchFunc(influencers, startDate, endDate);
+  }, [influencersToString(influencers), startDate, endDate, skip]);
 
   return [loading, tableData];
 };

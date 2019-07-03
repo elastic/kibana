@@ -140,12 +140,9 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [source]
   );
 
-  useEffect(
-    () => {
-      loadSource();
-    },
-    [loadSource, sourceId]
-  );
+  useEffect(() => {
+    loadSource();
+  }, [loadSource, sourceId]);
 
   return {
     createSourceConfiguration,

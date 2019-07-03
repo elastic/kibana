@@ -15,20 +15,17 @@ export function useTransactionOverviewCharts(urlParams: IUrlParams) {
   const { serviceName, start, end, transactionType } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
-  const { data, error, status } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadTransactionCharts({
-          serviceName,
-          start,
-          end,
-          transactionType,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, transactionType, uiFilters]
-  );
+  const { data, error, status } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadTransactionCharts({
+        serviceName,
+        start,
+        end,
+        transactionType,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, transactionType, uiFilters]);
 
   const memoizedData = useMemo(() => getTransactionCharts(urlParams, data), [
     data
