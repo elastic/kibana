@@ -99,7 +99,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               iconType="arrowUp"
               onClick={goToPreviousHighlight}
               title={goToPreviousHighlightLabel}
-              isDisabled={!_.isNumber(previousHighlightLogEntryIndex)}
+              isDisabled={!isNumber(previousHighlightLogEntryIndex)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -108,7 +108,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               iconType="arrowDown"
               onClick={goToNextHighlight}
               title={goToNextHighlightLabel}
-              isDisabled={!_.isNumber(nextHighlightLogEntryIndex)}
+              isDisabled={!isNumber(nextHighlightLogEntryIndex)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

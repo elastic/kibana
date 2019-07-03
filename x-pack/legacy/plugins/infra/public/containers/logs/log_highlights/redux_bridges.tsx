@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 
 import { TimeKey } from '../../../../common/time';
 import { withLogFilter } from '../with_log_filter';
