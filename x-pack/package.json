@@ -169,6 +169,7 @@
     "@babel/polyfill": "7.4.4",
     "@babel/register": "7.4.4",
     "@babel/runtime": "7.4.5",
+    "@elastic/ctags-langserver": "^0.0.5",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "12.2.0",
     "@elastic/javascript-typescript-langserver": "^0.2.0",
