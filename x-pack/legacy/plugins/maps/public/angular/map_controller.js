@@ -129,31 +129,22 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   };
 
   let lastStoreChangeSinceSave;
-  function hashChangeListener(event) {
-
-    if (window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`)) {
-      return;
-    }
-
-    if (!event.newURL.endsWith(`${MAP_APP_PATH}#`)) {
-      return;
-    }
-
+  function hasUnsavedChanges() {
     const state = store.getState();
-    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state, lastStoreChangeSinceSave);
-    if (hasChanged) {
-      console.log('has chaned');
-      event.preventDefault();
-      showSaveDialog();
-    }
+    return savedMap.hasLayerListChangedSinceLastSync(state, lastStoreChangeSinceSave);
+  }
+
+  function isNavigatingAwayFromMap() {
+    return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`);
+
   }
 
   function beforeUnload(event) {
-    if (!window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`)) {
+    if (!isNavigatingAwayFromMap()) {
       return;
     }
-    const state = store.getState();
-    const hasChanged = savedMap.hasLayerListChangedSinceLastSync(state, lastStoreChangeSinceSave);
+
+    const hasChanged = hasUnsavedChanges();
     if (hasChanged) {
       event.preventDefault();
       event.returnValue = 'foobar';//this is required for Chrome
@@ -161,9 +152,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
   window.removeEventListener('beforeunload', beforeUnload);
   window.addEventListener('beforeunload', beforeUnload);
-  window.removeEventListener('hashchange', hashChangeListener);
-  window.addEventListener('hashchange', hashChangeListener);
-
 
   function renderMap() {
 
@@ -275,7 +263,17 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
           defaultMessage: 'Maps'
         }),
-        href: '#'
+        // href: '#'
+        onClick: () => {
+          if (isNavigatingAwayFromMap() && hasUnsavedChanges()) {
+            const navigateAway = window.confirm('Changes you made may not be saved.');
+            if (navigateAway) {
+              window.location.hash = '#';
+            }
+          } else {
+            window.location.hash = '#';
+          }
+        }
       },
       { text: savedMap.title }
     ]);
@@ -283,36 +281,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   updateBreadcrumbs();
 
   addHelpMenuToAppChrome(chrome);
-
-  function showSaveDialog() {
-    const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-      const currentTitle = savedMap.title;
-      savedMap.title = newTitle;
-      savedMap.copyOnSave = newCopyOnSave;
-      const saveOptions = {
-        confirmOverwrite: false,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
-      };
-      return doSave(saveOptions).then(({ id, error }) => {
-        // If the save wasn't successful, put the original values back.
-        if (!id || error) {
-          savedMap.title = currentTitle;
-        }
-        return { id, error };
-      });
-    };
-
-    const saveModal = (
-      <SavedObjectSaveModal
-        onSave={onSave}
-        onClose={() => {}}
-        title={savedMap.title}
-        showCopyOnSave={savedMap.id ? true : false}
-        objectType={MAP_SAVED_OBJECT_TYPE}
-      />);
-    showSaveModal(saveModal);
-  }
 
   async function doSave(saveOptions) {
 
@@ -383,7 +351,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
-  }, ...(capabilities.get().maps.save ? [{
+  }, ...(!capabilities.get().maps.save ? [] : [{
     key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
@@ -402,9 +370,36 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }
     },
     run: async () => {
-      showSaveDialog();
+      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+        const currentTitle = savedMap.title;
+        savedMap.title = newTitle;
+        savedMap.copyOnSave = newCopyOnSave;
+        const saveOptions = {
+          confirmOverwrite: false,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        };
+        return doSave(saveOptions).then(({ id, error }) => {
+          // If the save wasn't successful, put the original values back.
+          if (!id || error) {
+            savedMap.title = currentTitle;
+          }
+          return { id, error };
+        });
+      };
+
+      const saveModal = (
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => {
+          }}
+          title={savedMap.title}
+          showCopyOnSave={savedMap.id ? true : false}
+          objectType={MAP_SAVED_OBJECT_TYPE}
+        />);
+      showSaveModal(saveModal);
     }
-  }] : [])
+  }])
   ];
 });
 
