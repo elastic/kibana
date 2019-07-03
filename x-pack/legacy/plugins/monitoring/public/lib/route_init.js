@@ -29,7 +29,7 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
         const inSetupMode = getSetupModeState().enabled;
         const cluster = getClusterFromClusters(clusters, globalState);
         if (!cluster && !inSetupMode) {
-          return kbnUrl.redirect('/loading');
+          return kbnUrl.redirect('/no-data');
         }
 
         if (cluster) {

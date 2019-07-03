@@ -5,6 +5,7 @@
  */
 
 import './loading';
+import './no_data';
 import './access_denied';
 import './alerts';
 import './license';

@@ -10,7 +10,7 @@ import { PageLoading } from 'plugins/monitoring/components';
 import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import template from './index.html';
-import { setAngularState, toggleSetupMode } from '../../lib/setup_mode';
+import { setAngularState, toggleSetupMode, getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 
 const REACT_DOM_ID = 'monitoringLoadingReactApp';
 
@@ -21,6 +21,18 @@ uiRoutes
       constructor($injector, $scope) {
         const monitoringClusters = $injector.get('monitoringClusters');
         const kbnUrl = $injector.get('kbnUrl');
+
+        setAngularState($scope, $injector);
+        initSetupModeState();
+
+        const setupMode = getSetupModeState();
+        // For phase 3, this is not an valid route unless
+        // setup mode is currently enabled. For phase 4,
+        // we will remove this check.
+        if (!setupMode.enabled) {
+          kbnUrl.changePath('/no-data');
+          return;
+        }
 
         $scope.$on('$destroy', () => {
           unmountComponentAtNode(document.getElementById(REACT_DOM_ID));
