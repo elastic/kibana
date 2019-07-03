@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }) {
     describe('symbolize as icon', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('vector styling icon demo');
+        await PageObjects.maps.enterFullScreen();
       });
 
       it('should symbolize points as icons with expected color, size, and orientation', async () => {
