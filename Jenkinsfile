@@ -36,6 +36,7 @@ pipeline {
         dir("${env.BASE_DIR}"){
           sh "${CI_DIR}/run_pipeline.sh"
           script {
+            dumpEnv()
             dumpWorkspaceSize() // dump size to screen AFTER checking out es
             tarWorkspace()
           }
