@@ -30,6 +30,25 @@ export const HookFormPOC = () => {
 
         <EuiSpacer size="xl" />
         <Form3 />
+        <hr />
+
+        <EuiSpacer size="xl" />
+        <Form3
+          title="4. Advanced usage with initilal values"
+          defaultValues={{
+            name: 'hello world',
+            elastic: {
+              coWorkers: [
+                { firstName: 'Sébastien', lastName: 'Loix' },
+                { firstName: 'CJ', lastName: 'Cenizal' },
+              ],
+            },
+            nested: {
+              prop: 'Some value',
+            },
+            indexName: 'good',
+          }}
+        />
         <EuiSpacer size="xl" />
       </EuiPageContent>
     </EuiPageBody>

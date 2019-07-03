@@ -41,19 +41,25 @@ const inlineConfig: FieldConfig<MyForm> = {
   ],
 };
 
-export const Form3 = () => {
+export const Form3 = ({
+  defaultValues,
+  title,
+}: {
+  title?: string;
+  defaultValues?: Record<string, any>;
+}) => {
   const onSubmit: FormConfig<MyForm>['onSubmit'] = (formData, isValid) => {
     console.log('Submitting form...');
     console.log('Form data:', formData);
     console.log('Is form valid:', isValid);
   };
 
-  const { form } = useForm<MyForm>({ onSubmit, schema: formSchema });
+  const { form } = useForm<MyForm>({ onSubmit, schema: formSchema, defaultValues });
 
   return (
     <form noValidate>
       <EuiTitle size="m">
-        <h2>3. Advanced usage</h2>
+        <h2>{title ? title : '3. Advanced usage'}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
 
@@ -167,12 +173,13 @@ export const Form3 = () => {
           {({ rows, addRow, removeRow }) => (
             <React.Fragment>
               <div>
-                {rows.map(({ id, rowPath }, i) => (
+                {rows.map(({ id, rowPath, isNew }, i) => (
                   <EuiFlexGroup gutterSize="s" key={id}>
                     <EuiFlexItem>
                       <UseField
                         path={rowPath + '.firstName'}
                         config={{ label: 'First name' }}
+                        defaultValue={isNew ? '' : undefined}
                         render={Field}
                         form={form}
                       />
@@ -181,6 +188,7 @@ export const Form3 = () => {
                       <UseField
                         path={rowPath + '.lastName'}
                         config={{ label: 'Last name' }}
+                        defaultValue={isNew ? '' : undefined}
                         render={Field}
                         form={form}
                       />

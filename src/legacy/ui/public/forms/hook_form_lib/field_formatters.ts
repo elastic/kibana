@@ -31,7 +31,7 @@
  *   formatters: [toUppercase, replaceChar(/A/g, '*')];
  * };
  *
- * // Whenever the field value is set, it will be formatted with the above
+ * // Whenever the field value is set, it will be formatted with the 2 formatters
  * // 'abc' => '*BC';
  * ````
  */
