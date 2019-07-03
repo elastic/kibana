@@ -101,6 +101,10 @@ export class AutocompleteField extends React.Component<
       this.updateSuggestions();
     }
 
+    if (hasNewValue && this.props.value === '') {
+      this.submit();
+    }
+
     if (hasNewSuggestions && this.state.isFocused) {
       this.showSuggestions();
     }
@@ -156,12 +160,6 @@ export class AutocompleteField extends React.Component<
       case 'Home':
       case 'End':
         this.updateSuggestions();
-        break;
-      case 'Backspace':
-        // if the user has just deleted everything, submit to reset
-        if (this.props.value === '') {
-          this.submit();
-        }
         break;
     }
   };
