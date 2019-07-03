@@ -242,7 +242,7 @@ export class TaskStore {
       id,
       body,
       index: this.index,
-      refresh: true,
+      refresh: !true,
     });
 
     const { task } = body;
@@ -324,7 +324,9 @@ export class TaskStore {
       if_primary_term: doc.primaryTerm,
       // The refresh is important so that if we immediately look for work,
       // we don't pick up this task.
-      refresh: true,
+      // However, it also appears to be a performance killer, so shutting it
+      // off for the moment
+      refresh: !true,
     });
 
     return {
@@ -346,7 +348,9 @@ export class TaskStore {
       index: this.index,
       // The refresh is important so that if we immediately look for work,
       // we don't pick up this task.
-      refresh: true,
+      // However, it also appears to be a performance killer, so shutting it
+      // off for the moment
+      refresh: !true,
     });
 
     return {
