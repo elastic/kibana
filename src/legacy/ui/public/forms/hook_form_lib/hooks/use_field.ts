@@ -19,7 +19,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-import { Form, Field, FieldConfig, ValidationConfig, ValidationError } from '../types';
+import {
+  Form,
+  Field,
+  FieldConfig,
+  FieldValidateResponse,
+  ValidationConfig,
+  ValidationError,
+} from '../types';
 import { toInt } from '../field_formatters';
 import { FIELD_TYPES, ERROR_TYPES } from '../constants';
 
@@ -130,55 +137,17 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     }, errorDisplayDelay);
   };
 
-  // -- API
-  // ----------------------------------
-  const clearErrors: Field['clearErrors'] = (errorType = ERROR_TYPES.FIELD) => {
-    setErrors(previousErrors => filterErrors(previousErrors, errorType));
-  };
-
-  const validate: Field['validate'] = async (validationData = {}) => {
-    let { formData, value: valueToValidate } = validationData;
-    formData = formData || form.getFormData({ unflatten: false });
-    valueToValidate = valueToValidate || value;
-
-    setValidating(true);
-
-    // By the time our validate function has reached completion, it’s possible
-    // that validate() will have been called again. If this is the case, we need
-    // to ignore the results of this invocation and only use the results of
-    // the most recent invocation to update the error state for a field
-    const validateIteration = ++validateCounter.current;
-
+  const validateSync = ({
+    formData,
+    value: valueToValidate,
+  }: {
+    formData: any;
+    value: unknown;
+  }): ValidationError[] => {
     const validationErrors: ValidationError[] = [];
     let skip = false;
 
-    const validateFieldAsync = async ({ validator, exitOnFail }: ValidationConfig) => {
-      if (skip) {
-        return;
-      }
-      let validationResult;
-
-      try {
-        validationResult = await validator({
-          value: (valueToValidate as unknown) as string,
-          errors: validationErrors,
-          formData,
-          path,
-        });
-
-        if (validationResult && exitOnFail === true) {
-          throw validationResult;
-        }
-      } catch (error) {
-        // If an error is thrown, skip the rest of the validations
-        skip = true;
-        validationResult = error;
-      }
-
-      return validationResult;
-    };
-
-    const validateFieldSync = ({ validator, exitOnFail }: ValidationConfig) => {
+    const doValidate = ({ validator, exitOnFail }: ValidationConfig) => {
       if (skip) {
         return;
       }
@@ -204,48 +173,118 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       return validationResult;
     };
 
-    // Sequencially execute all the validations for the field
-    if (isValidationAsync) {
-      clearErrors([ERROR_TYPES.FIELD, ERROR_TYPES.ASYNC]);
+    // Execute each validations for the field sequencially
+    validations.forEach(validation => {
+      const validationResult = doValidate(validation);
 
-      await validations.reduce(
-        (promise, validation) =>
-          promise.then(async () => {
-            const validationResult = await validateFieldAsync(validation);
+      if (validationResult) {
+        const error = getValidationErrorWithMessage(validation, validationResult);
+        validationErrors.push(error);
+      }
+    });
 
-            if (validationResult) {
-              const error = getValidationErrorWithMessage(validation, validationResult);
-              validationErrors.push(error);
-            }
-          }),
-        Promise.resolve()
-      );
-    } else {
-      validations.forEach(validation => {
-        const validationResult = validateFieldSync(validation);
+    return validationErrors;
+  };
 
-        if (validationResult) {
-          const error = getValidationErrorWithMessage(validation, validationResult);
-          validationErrors.push(error);
+  const validateAsync = async ({
+    formData,
+    value: valueToValidate,
+  }: {
+    formData: any;
+    value: unknown;
+  }): Promise<ValidationError[]> => {
+    const validationErrors: ValidationError[] = [];
+    let skip = false;
+
+    // By default, for fields that have an asynchronous validation
+    // we will clear the errors as soon as the field value changes.
+    clearErrors([ERROR_TYPES.FIELD, ERROR_TYPES.ASYNC]);
+
+    const doValidate = async ({ validator, exitOnFail }: ValidationConfig) => {
+      if (skip) {
+        return;
+      }
+      let validationResult;
+
+      try {
+        validationResult = await validator({
+          value: (valueToValidate as unknown) as string,
+          errors: validationErrors,
+          formData,
+          path,
+        });
+
+        if (validationResult && exitOnFail === true) {
+          throw validationResult;
         }
-      });
-    }
+      } catch (error) {
+        // If an error is thrown, skip the rest of the validations
+        skip = true;
+        validationResult = error;
+      }
 
-    if (validateIteration === validateCounter.current) {
-      // This is the most recent invocation
-      setValidating(false);
-      setErrors(previousErrors => {
-        // We first filter out the "field" errors
-        // Other custom type of error will have to be manually cleared out from inside the application
-        const filteredErrors = filterErrors(previousErrors);
-        return [...filteredErrors, ...validationErrors];
-      });
-    }
-
-    return {
-      isValid: validationErrors.length === 0,
-      errors: validationErrors,
+      return validationResult;
     };
+
+    // Sequencially execute all the validations for the field
+    await validations.reduce(
+      (promise, validation) =>
+        promise.then(async () => {
+          const validationResult = await doValidate(validation);
+
+          if (validationResult) {
+            const error = getValidationErrorWithMessage(validation, validationResult);
+            validationErrors.push(error);
+          }
+        }),
+      Promise.resolve()
+    );
+
+    return validationErrors;
+  };
+
+  // -- API
+  // ----------------------------------
+  const clearErrors: Field['clearErrors'] = (errorType = ERROR_TYPES.FIELD) => {
+    setErrors(previousErrors => filterErrors(previousErrors, errorType));
+  };
+
+  const validate: Field['validate'] = (validationData = {}) => {
+    let { formData, value: valueToValidate } = validationData;
+    formData = formData || form.getFormData({ unflatten: false });
+    valueToValidate = valueToValidate || value;
+
+    setValidating(true);
+
+    // By the time our validate function has reached completion, it’s possible
+    // that validate() will have been called again. If this is the case, we need
+    // to ignore the results of this invocation and only use the results of
+    // the most recent invocation to update the error state for a field
+    const validateIteration = ++validateCounter.current;
+
+    const onValidationResult = (validationErrors: ValidationError[]): FieldValidateResponse => {
+      if (validateIteration === validateCounter.current) {
+        // This is the most recent invocation
+        setValidating(false);
+        setErrors(previousErrors => {
+          // We first filter out the "field" errors
+          // Other custom type of error will have to be manually cleared out from inside the application
+          const filteredErrors = filterErrors(previousErrors);
+          return [...filteredErrors, ...validationErrors];
+        });
+      }
+      return {
+        isValid: validationErrors.length === 0,
+        errors: validationErrors,
+      };
+    };
+
+    if (isValidationAsync) {
+      return validateAsync({ formData, value: valueToValidate }).then(onValidationResult);
+    } else {
+      const validationErrors = validateSync({ formData, value: valueToValidate });
+      return onValidationResult(validationErrors);
+    }
   };
 
   /**

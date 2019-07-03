@@ -78,7 +78,9 @@ export const useForm = <T = FormData>({
 
     await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
 
-    const isFormValid = fieldsToArray().every(field => !field.errors.length && !field.isValidating);
+    const isFormValid = fieldsToArray().every(
+      field => field.getErrorsMessages() === null && !field.isValidating
+    );
     setIsValid(isFormValid);
 
     return isFormValid;
