@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiTitle,
   EuiButton,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +20,7 @@ import {
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { useForm, FormConfig, FieldConfig, Field as FieldType } from 'ui/forms/use_form';
-import { FormRow, UseField, Field } from 'ui/forms/components';
+import { FormRow, UseField, UseArray, Field } from 'ui/forms/components';
 
 import { MyForm } from './types';
 import { formSchema } from './form.schema';
@@ -226,6 +227,53 @@ export const Form3 = () => {
             );
           }}
         </UseField>
+      </FormRow>
+
+      <FormRow title="Dynamic fields" description="Or how to dynamically add values to an array">
+        <UseArray path="elastic.coWorkers" form={form}>
+          {({ rows, addRow, removeRow }) => (
+            <React.Fragment>
+              <div>
+                {rows.map(({ id, rowPath }, i) => (
+                  <EuiFlexGroup gutterSize="s" key={id}>
+                    <EuiFlexItem>
+                      <UseField
+                        path={rowPath + '.firstName'}
+                        config={{ label: 'First name' }}
+                        render={Field}
+                        form={form}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <UseField
+                        path={rowPath + '.lastName'}
+                        config={{ label: 'Last name' }}
+                        render={Field}
+                        form={form}
+                      />
+                    </EuiFlexItem>
+                    {i > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          color="danger"
+                          onClick={() => removeRow(id)}
+                          iconType="cross"
+                          aria-label="Remove co-worker"
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                ))}
+              </div>
+              <EuiSpacer size="m" />
+              <div>
+                <EuiButton color="secondary" iconType="check" onClick={addRow}>
+                  Add co-worker
+                </EuiButton>
+              </div>
+            </React.Fragment>
+          )}
+        </UseArray>
       </FormRow>
 
       <EuiSpacer size="m" />
