@@ -24,6 +24,8 @@ import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
 
+const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
+
 export interface ItemsPerRow {
   text: string;
   numberOfRow: number;
@@ -71,11 +73,13 @@ export interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA
         Columns<AA>,
         Columns<AB>
       ];
+  dataTestSubj?: string;
   headerCount: number;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
   headerUnit: string | React.ReactElement;
+  id?: string;
   itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
@@ -107,11 +111,13 @@ export interface Columns<T> {
 export const PaginatedTable = memo<BasicTableProps<any>>(
   ({
     columns,
+    dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
     headerCount,
     headerSupplement,
     headerTitle,
     headerTooltip,
     headerUnit,
+    id,
     itemsPerRow,
     limit,
     loading,
@@ -126,6 +132,7 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
     updateProps,
   }) => {
     const [activePage, setActivePage] = useState(0);
+    const [showInspect, setShowInspect] = useState(false);
     const [isEmptyTable, setEmptyTable] = useState(pageOfItems.length === 0);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
@@ -194,7 +201,11 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
         </EuiContextMenuItem>
       ));
     return (
-      <EuiPanel>
+      <EuiPanel
+        data-test-subj={dataTestSubj}
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
         <BasicTableContainer>
           {loading && (
             <>
@@ -211,6 +222,8 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
           )}
 
           <HeaderPanel
+            id={id}
+            showInspect={showInspect}
             subtitle={`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}
             title={headerTitle}
             tooltip={headerTooltip}
@@ -257,8 +270,8 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
               <EuiFlexItem>
                 <EuiFlexGroup
                   gutterSize="none"
-                  alignItems="flexStart"
-                  justifyContent="center"
+                  alignItems="flexEnd"
+                  justifyContent="flexEnd"
                   direction="row"
                 >
                   <EuiFlexItem grow={false}>
