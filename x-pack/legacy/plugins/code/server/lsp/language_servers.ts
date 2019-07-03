@@ -105,8 +105,8 @@ export const CTAGS: LanguageServerDefinition = {
   installationType: InstallationType.Embed,
   embedPath: require.resolve('@elastic/ctags-langserver/lib/cli.js'),
 };
-export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
-export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO, CTAGS];
+export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA, CTAGS];
+export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO];
 
 export function enabledLanguageServers(server: Hapi.Server) {
   const devMode: boolean = server.config().get('env.dev');
