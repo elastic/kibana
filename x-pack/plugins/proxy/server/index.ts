@@ -5,9 +5,10 @@
  */
 
 import { PluginInitializer } from 'src/core/server';
-import { ProxyService, ProxyServiceSetup, ProxyServiceStart } from './proxy';
+import { ProxyConfig, ProxyService, ProxyServiceSetup, ProxyServiceStart } from './proxy';
 export { ProxyPluginType } from './proxy';
 export { RouteState } from './cluster_doc';
 
+export const config = ProxyConfig;
 export const plugin: PluginInitializer<ProxyServiceSetup, ProxyServiceStart> = initializerContext =>
   new ProxyService(initializerContext);

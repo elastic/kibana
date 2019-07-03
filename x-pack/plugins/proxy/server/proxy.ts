@@ -17,8 +17,7 @@ const cryptoConstants = (crypto as any).constants;
 
 const readFileAsync = promisify(readFile);
 
-import Boom from 'boom';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import Wreck from 'wreck';
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -32,7 +31,7 @@ import {
   HttpServiceSetup,
 } from '../../../../src/core/server';
 
-import { RouteState, RoutingNode, RoutingTable, ClusterDocClient } from './cluster_doc';
+import { RouteState, RoutingTable, ClusterDocClient } from './cluster_doc';
 
 export interface ProxyServiceSetup {
   httpSetup: Omit<HttpServiceSetup, 'createNewServer'>;
@@ -54,10 +53,8 @@ export interface ProxyServiceStart {
 export const ProxyConfig = {
   schema: schema.object({
     updateInterval: schema.number(),
-    timeoutThreshold: schema.number(),
     port: schema.number(),
     maxRetry: schema.number(),
-    requestBackoff: schema.number(),
     cert: schema.string(),
     key: schema.string(),
     ca: schema.string(),
@@ -76,8 +73,6 @@ export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart> {
   public nodeName: string;
   private clusterDocClient: ClusterDocClient;
-  private maxRetry = 0;
-  private requestBackoff = 0;
   private port = 0;
 
   private httpsAgent: HTTPSAgent = new HTTPSAgent({ keepAlive: true });
@@ -156,8 +151,6 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
 
   private setConfig(config: ProxyPluginType) {
     this.port = config.port;
-    this.maxRetry = config.maxRetry;
-    this.requestBackoff = config.requestBackoff;
   }
 
   public async start() {

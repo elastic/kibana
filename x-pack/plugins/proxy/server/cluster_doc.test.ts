@@ -6,7 +6,7 @@
 import Boom from 'boom';
 import { Observable, BehaviorSubject } from 'rxjs';
 
-import { ClusterDocClient, RouteState } from './cluster_doc';
+import { ClusterDocClient, RouteState, RoutingNode } from './cluster_doc';
 import {
   Config,
   ConfigService,
@@ -24,7 +24,6 @@ import {
   cullDeadResources,
   cullDeadNodes,
 } from './painless_queries';
-import { JsonLayout } from '../../../../src/core/server/logging/layouts/json_layout';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
@@ -33,10 +32,8 @@ const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
   const conf = Object.assign(
     {
       updateInterval: 0,
-      timeoutThreshold: 0,
       port: 0,
       maxRetry: 0,
-      requestBackoff: 0,
       cert: '',
       key: '',
       ca: '',
@@ -87,7 +84,6 @@ test('initial run of main loop works', async () => {
   const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
   const config = configService({
     updateInterval: 100,
-    timeoutThreshold: 100,
   });
   const clusterDoc = new ClusterDocClient({ config, env, logger });
 
@@ -114,14 +110,14 @@ test('initial run of main loop works', async () => {
 test('removes stale nodes, keeps good nodes', async () => {
   const nodeName = 'd4fa4018-8510-420c-aa99-d6d722792b3c';
   const nodeName2 = '073fb287-161c-49f3-976d-1e507575e354';
-  const mockHeartbeatReply = {
+  const mockHeartbeatReply: { _source: { [key: string]: number } } = {
     _source: {
       [nodeName2]: 1, // this node will be culled
       [nodeName]: 2,
     },
   };
 
-  const mockResourceReply = {
+  const mockResourceReply: { _source: { [key: string]: RoutingNode } } = {
     _source: {
       'git@github.com:elastic/kibana': {
         state: RouteState.Started,
@@ -147,7 +143,6 @@ test('removes stale nodes, keeps good nodes', async () => {
             return JSON.parse(JSON.stringify(mockHeartbeatReply));
           } else {
             if (params.body.script === updateHeartbeat) {
-              const resource = params.body.params.resource;
               mockHeartbeatReply._source[params.body.params.resource]++;
             } else if (params.body.script === cullDeadNodes) {
               const nodes = params.body.params.nodeList;
@@ -165,7 +160,9 @@ test('removes stale nodes, keeps good nodes', async () => {
                 const key = Object.entries(mockResourceReply._source).find(
                   entry => entry[1].node === params.body.params.resource
                 );
-                delete mockResourceReply._source[key[0]];
+                if (Array.isArray(key)) {
+                  delete mockResourceReply._source[key[0]];
+                }
               } else if (params.body.script === cullDeadResources) {
                 const nodeList = params.body.params.nodes;
                 for (const [key, val] of Object.entries(mockResourceReply._source)) {
@@ -194,7 +191,6 @@ test('removes stale nodes, keeps good nodes', async () => {
   const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
   const config = configService({
     updateInterval: 100,
-    timeoutThreshold: 100,
   });
   const clusterDoc = new ClusterDocClient({ config, env, logger });
   clusterDoc.nodeName = nodeName;
@@ -266,7 +262,6 @@ test('it continues on errors', async () => {
   const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
   const config = configService({
     updateInterval: 100,
-    timeoutThreshold: 100,
   });
   const clusterDoc = new ClusterDocClient({ config, env, logger });
 

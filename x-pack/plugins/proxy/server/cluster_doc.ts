@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { v4 } from 'uuid';
-import { Observable, Subscription, pairs } from 'rxjs';
+import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
@@ -58,7 +58,6 @@ export class ClusterDocClient {
   public nodeName: string;
   private elasticsearch$?: Observable<ClusterClient>;
   private updateInterval? = 15 * 1000;
-  private timeoutThreshold = 15 * 1000;
   private updateTimer: null | NodeJS.Timer = null;
   private maxRetry: number = 0;
   private runCull: boolean = false;
@@ -166,10 +165,7 @@ export class ClusterDocClient {
 
   private setConfig(config: ProxyPluginType) {
     const update = config.updateInterval + randomInt(this.minUpdateShuffle, this.maxUpdateShuffle);
-    const timeout =
-      config.timeoutThreshold + randomInt(this.minUpdateShuffle, this.maxUpdateShuffle);
     this.updateInterval = update;
-    this.timeoutThreshold = timeout;
     this.maxRetry = config.maxRetry;
   }
 
@@ -260,7 +256,6 @@ export class ClusterDocClient {
    */
   public async cullDeadNodes() {
     const client = await this.getESClient();
-    const threshold = new Date().getTime() - this.timeoutThreshold;
     const body = {
       script: cullDeadNodes,
       params: {
