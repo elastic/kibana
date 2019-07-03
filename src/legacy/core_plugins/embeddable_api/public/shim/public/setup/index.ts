@@ -21,6 +21,7 @@ import { EmbeddableSetupApiPure } from './types';
 import { attachAction } from './attach_action';
 import { detachAction } from './detach_action';
 import { executeTriggerActions } from './execute_trigger_actions';
+import { getEmbeddableFactories } from './get_embeddable_factories';
 import { getTrigger } from './get_trigger';
 import { getTriggerActions } from './get_trigger_actions';
 import { getTriggerCompatibleActions } from './get_trigger_compatible_actions';
@@ -33,6 +34,7 @@ export const pureSetupApi: EmbeddableSetupApiPure = {
   attachAction,
   detachAction,
   executeTriggerActions,
+  getEmbeddableFactories,
   getTrigger,
   getTriggerActions,
   getTriggerCompatibleActions,

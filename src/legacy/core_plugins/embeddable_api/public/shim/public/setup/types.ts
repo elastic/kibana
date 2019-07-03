@@ -29,6 +29,7 @@ export interface EmbeddableSetupApi {
   getTriggerActions: (id: string) => Action[];
   getTriggerCompatibleActions: (triggerId: string, context: TriggerContext) => Promise<Action[]>;
   registerAction: (action: Action) => void;
+  // TODO: Make `registerEmbeddableFactory` receive only `factory` argument.
   registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
   registerTrigger: (trigger: Trigger) => void;
 }

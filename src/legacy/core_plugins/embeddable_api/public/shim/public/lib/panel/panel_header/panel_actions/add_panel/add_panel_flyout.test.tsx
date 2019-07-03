@@ -52,7 +52,7 @@ xtest('create new calls factory.adds a panel to the container', async done => {
       container={container}
       onClose={onClose}
       getFactory={() => undefined}
-      getAllFactories={() => []}
+      getAllFactories={() => [] as any}
       notifications={{} as any}
     />
     );
