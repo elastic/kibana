@@ -33,6 +33,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             sampleOfExpectedIndexPrivileges.forEach(privilege =>
               expect(payload.index).to.contain(privilege)
             );
+
+            expect(payload.cluster).not.to.contain('none');
+            expect(payload.index).not.to.contain('none');
           });
       });
     });

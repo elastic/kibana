@@ -19,6 +19,10 @@ export function initGetBuiltinPrivilegesApi(server: Legacy.Server) {
         'shield.getBuiltinPrivileges'
       );
 
+      // Exclude the `none` privilege, as it doesn't make sense as an option within the Kibana UI
+      privileges.cluster = privileges.cluster.filter(privilege => privilege !== 'none');
+      privileges.index = privileges.index.filter(privilege => privilege !== 'none');
+
       return privileges;
     },
   });
