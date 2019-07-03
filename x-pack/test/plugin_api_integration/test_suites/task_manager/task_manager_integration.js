@@ -110,6 +110,22 @@ export default function ({ getService }) {
       });
     });
 
+    it('should fail task if maxAttempts reached', async () => {
+      const task = await scheduleTask({
+        maxAttempts: 1,
+        taskType: 'sampleTask',
+        params: { failWith: 'Dangit!!!!!' },
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.attempts).to.eql(1);
+        expect(scheduledTask.status).to.eql('failed');
+        expect(Date.parse(scheduledTask.runAt)).to.eql(Date.parse(task.runAt));
+      });
+    });
+
     it('should reschedule if task returns runAt', async () => {
       const nextRunMilliseconds = _.random(60000, 200000);
       const count = _.random(1, 20);
