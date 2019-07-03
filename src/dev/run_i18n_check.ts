@@ -20,7 +20,7 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { ErrorReporter } from './i18n';
+import { ErrorReporter, I18nConfig } from './i18n';
 import {
   extractDefaultMessages,
   extractUntrackedMessages,
@@ -30,7 +30,7 @@ import {
 } from './i18n/tasks';
 import { createFailError, run } from './run';
 
-const skipNoTranslations = ({ config }) => !config.translations.length;
+const skipNoTranslations = ({ config }: { config: I18nConfig }) => !config.translations.length;
 
 run(
   async ({
