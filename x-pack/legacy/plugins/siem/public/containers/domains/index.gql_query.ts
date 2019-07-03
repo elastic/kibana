@@ -17,6 +17,7 @@ export const domainsQuery = gql`
     $sort: DomainsSortField!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -60,6 +61,10 @@ export const domainsQuery = gql`
             value
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }
