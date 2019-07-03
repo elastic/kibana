@@ -24,7 +24,6 @@ import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { CoreSetup, CoreStart } from '../';
-import { EmptyPluginContracts } from '../../types/plugins';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -60,10 +59,10 @@ export function createPluginInitializerContext(
  * @internal
  */
 export function createPluginSetupContext<
-  TSetup,
-  TStart,
-  TPluginsSetup extends EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
@@ -88,10 +87,10 @@ export function createPluginSetupContext<
  * @internal
  */
 export function createPluginStartContext<
-  TSetup,
-  TStart,
-  TPluginsSetup extends EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,

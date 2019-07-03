@@ -18,16 +18,12 @@
  */
 
 import { PluginName } from 'src/core/server';
-import { LoadPluginBundle, UnknownPluginInitializer } from './plugin_loader';
+import { PluginInitializer } from '..';
 
 /**
  * @param initializerProvider A function provided by the test to resolve initializers.
  */
-const createLoadPluginBundleMock = (
-  initializerProvider: (name: PluginName) => UnknownPluginInitializer
-): jest.Mock<ReturnType<LoadPluginBundle>, Parameters<LoadPluginBundle>> =>
-  jest.fn((addBasePath, pluginName) => {
-    return Promise.resolve(initializerProvider(pluginName)) as any;
-  });
+const createLoadPluginBundleMock = (initializerProvider: (name: PluginName) => PluginInitializer) =>
+  jest.fn(async (addBasePath, pluginName) => initializerProvider(pluginName));
 
 export const loadPluginBundleMock = { create: createLoadPluginBundleMock };

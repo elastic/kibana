@@ -34,7 +34,7 @@ function createManifest(
   } as DiscoveredPlugin;
 }
 
-let plugin: PluginWrapper<unknown, Record<string, unknown>>;
+let plugin: PluginWrapper;
 const initializerContext = {};
 const addBasePath = (path: string) => path;
 

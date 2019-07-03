@@ -106,10 +106,10 @@ export function createPluginInitializerContext(
  * @param deps Dependencies that Plugins services gets during setup.
  * @internal
  */
-export function createPluginSetupContext<TPlugin, TPluginDependencies>(
+export function createPluginSetupContext(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
-  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+  plugin: PluginWrapper
 ): CoreSetup {
   return {
     elasticsearch: {
@@ -138,10 +138,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
  * @param deps Dependencies that Plugins services gets during start.
  * @internal
  */
-export function createPluginStartContext<TPlugin, TPluginDependencies>(
+export function createPluginStartContext(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
-  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+  plugin: PluginWrapper
 ): CoreStart {
   return {};
 }

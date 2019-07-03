@@ -20,7 +20,6 @@
 import { DiscoveredPlugin } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
-import { EmptyPluginContracts } from '../../types/plugins';
 import { CoreStart, CoreSetup } from '..';
 
 /**
@@ -29,10 +28,10 @@ import { CoreStart, CoreSetup } from '..';
  * @public
  */
 export interface Plugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -46,10 +45,10 @@ export interface Plugin<
  * @public
  */
 export type PluginInitializer<
-  TSetup,
-  TStart,
-  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -59,10 +58,10 @@ export type PluginInitializer<
  * @internal
  */
 export class PluginWrapper<
-  TSetup = unknown,
-  TStart = unknown,
-  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];

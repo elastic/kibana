@@ -20,7 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsService } from './expressions/expressions_service';
 
-export class DataPublicPlugin implements Plugin<{}> {
+export class DataPublicPlugin implements Plugin<ReturnType<DataPublicPlugin['setup']>, void> {
   expressions = new ExpressionsService();
 
   constructor(initializerContext: PluginInitializerContext) {}

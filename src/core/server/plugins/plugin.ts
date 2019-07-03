@@ -25,7 +25,6 @@ import { Type } from '@kbn/config-schema';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
 import { PluginInitializerContext } from './plugin_context';
-import { EmptyPluginContracts } from '../../types/plugins';
 import { CoreSetup, CoreStart } from '..';
 
 export type PluginConfigSchema = Type<unknown> | null;
@@ -137,10 +136,10 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
  * @public
  */
 export interface Plugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -154,10 +153,10 @@ export interface Plugin<
  * @public
  */
 export type PluginInitializer<
-  TSetup,
-  TStart,
-  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -167,10 +166,10 @@ export type PluginInitializer<
  * @internal
  */
 export class PluginWrapper<
-  TSetup = unknown,
-  TStart = unknown,
-  TPluginsSetup extends EmptyPluginContracts = EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts = EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];

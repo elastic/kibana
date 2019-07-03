@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 
-export class DataServerPlugin implements Plugin {
+export class DataServerPlugin implements Plugin<void, void> {
   constructor(initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup) {}
   public start(core: CoreStart) {}

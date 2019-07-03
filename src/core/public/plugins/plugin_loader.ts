@@ -19,13 +19,6 @@
 
 import { PluginName } from '../../server';
 import { PluginInitializer } from './plugin';
-import { EmptyPluginContracts } from '../../types/plugins';
-
-/**
- * Unknown variant for internal use only for when plugins are not known.
- * @internal
- */
-export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string, unknown>>;
 
 /**
  * Custom window type for loading bundles. Do not extend global Window to avoid leaking these types.
@@ -34,7 +27,7 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string,
 export interface CoreWindow {
   __kbnNonce__: string;
   __kbnBundles__: {
-    [pluginBundleName: string]: UnknownPluginInitializer | undefined;
+    [pluginBundleName: string]: object | undefined;
   };
 }
 
@@ -61,10 +54,10 @@ export const LOAD_TIMEOUT = 120 * 1000; // 2 minutes
  * @internal
  */
 export const loadPluginBundle: LoadPluginBundle = <
-  TSetup,
-  TStart,
-  TPluginsSetup extends EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
@@ -124,10 +117,10 @@ export const loadPluginBundle: LoadPluginBundle = <
  * @internal
  */
 export type LoadPluginBundle = <
-  TSetup,
-  TStart,
-  TPluginsSetup extends EmptyPluginContracts,
-  TPluginsStart extends EmptyPluginContracts
+  TSetup extends object | void = object,
+  TStart extends object | void = object,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
