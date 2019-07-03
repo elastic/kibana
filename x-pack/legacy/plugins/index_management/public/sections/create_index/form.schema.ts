@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormSchema } from 'ui/forms/use_form';
-import { FIELD_TYPES, ERROR_TYPES } from 'ui/forms/constants';
+import { FormSchema, FIELD_TYPES, ERROR_TYPES } from 'ui/forms/hook_form_lib';
 import { emptyField, minLengthField, minSelectionField } from 'ui/forms/field_validators';
+import { multiSelectOptionsToSelectedValue } from 'ui/forms/output_transforms';
 import { MyForm } from './types';
 
 export const formSchema: FormSchema<MyForm> = {
@@ -53,6 +53,7 @@ export const formSchema: FormSchema<MyForm> = {
     helpText: 'Chose a unique index name',
     isValidationAsync: true,
     validations: [
+      { validator: emptyField, exitOnFail: true },
       {
         validator: async ({ value }) => {
           const wait = () => {
@@ -133,5 +134,6 @@ export const formSchema: FormSchema<MyForm> = {
     type: FIELD_TYPES.MULTI_SELECT,
     errorDisplayDelay: 0,
     validations: [{ validator: minSelectionField(2) }],
+    outputTransform: multiSelectOptionsToSelectedValue,
   },
 };

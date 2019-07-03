@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { EuiDescribedFormGroup, EuiTitle } from '@elastic/eui';
-import { Field as FieldType } from 'ui/forms/use_form';
+import { Field as FieldType } from 'ui/forms/hook_form_lib';
 import { Field } from './field';
 
 interface Props {

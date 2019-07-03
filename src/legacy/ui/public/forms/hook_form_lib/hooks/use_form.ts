@@ -19,8 +19,8 @@
 
 import { useState, useRef } from 'react';
 
-import { Form, FieldConfig, FieldsMap, FormConfig } from './types';
-import { getAt, mapFormFields, unflattenObject } from './utils';
+import { Form, FieldConfig, FieldsMap, FormConfig } from '../types';
+import { getAt, mapFormFields, unflattenObject } from '../utils';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 

@@ -17,30 +17,7 @@
  * under the License.
  */
 
-/**
- * Field formatters are function that are executed each time the field value is set
- * We can specify as many formatters per field.
- *
- * Example
- * ```ts
- * const toUppercase = (value: string) => value.toUppercase();
- * const replaceChar = (regEx: RegExp, newValue: string) => (value: string) => value.replace(regEx, newValue);
- *
- * const fieldConfig = {
- *   formatters: [toUppercase, replaceChar(/A/g, '*')];
- * };
- *
- * // Whenever the field value is set, it will be formatted with the above
- * // 'abc' => '*BC';
- * ````
- */
-
-/**
- * NOTE: this does _not_ play well if we enter the "e" letter in a "number" input
- * as it does not trigger an "onChange" event.
- * I searched if it was a bug and found this thread (https://github.com/facebook/react/pull/7359#event-1017024857)
- * We will need to investigate this a little further.
- *
- * @param value The string value to convert to number
- */
-export const toInt = (value: string): number => parseFloat(value);
+// -------------------------  NOTE  --------------------------------------
+// Add here any custom field formatters that
+// are not common enough to go in the "hook_form_lib" field_formatters.ts
+// -----------------------------------------------------------------------

@@ -19,9 +19,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-import { Form, Field, FieldConfig, ValidationConfig, ValidationError } from './types';
+import { Form, Field, FieldConfig, ValidationConfig, ValidationError } from '../types';
 import { toInt } from '../field_formatters';
-import { multiSelectOptionsToSelectedValue } from '../output_transforms';
 import { FIELD_TYPES, ERROR_TYPES } from '../constants';
 
 /**
@@ -60,7 +59,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     errorDisplayDelay = form.options.errorDisplayDelay,
   } = config;
 
-  let { outputTransform } = config;
+  const { outputTransform } = config;
 
   const [value, setStateValue] = useState(
     typeof defaultValue === 'function' ? defaultValue() : defaultValue
@@ -82,20 +81,9 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     }
   };
 
-  const setDefaultOutputTransform = () => {
-    if (outputTransform) {
-      return;
-    }
-
-    if (type === FIELD_TYPES.MULTI_SELECT) {
-      outputTransform = multiSelectOptionsToSelectedValue;
-    }
-  };
-
   // -- INIT
   // ----------------------------------
   setDefaultFormatter();
-  setDefaultOutputTransform();
 
   // -- HELPERS
   // ----------------------------------

@@ -26,7 +26,7 @@ import {
   Field as FieldType,
   UseField,
   UseArray,
-} from 'ui/forms/use_form';
+} from 'ui/forms/hook_form_lib';
 import { FormRow, Field } from 'ui/forms/components';
 
 import { MyForm } from './types';

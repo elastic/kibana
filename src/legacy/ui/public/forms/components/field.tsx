@@ -29,7 +29,7 @@ import {
   EuiPanel,
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
-import { Field as FieldType } from 'ui/forms/use_form';
+import { Field as FieldType } from 'ui/forms/hook_form_lib';
 
 interface Props {
   field: FieldType;

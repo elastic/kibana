@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle, EuiButton } from '@elastic/eui';
-import { useForm, FormConfig, UseField } from 'ui/forms/use_form';
+import { useForm, FormConfig, UseField } from 'ui/forms/hook_form_lib';
 
 import { MyForm } from './types';
 import { formSchema } from './form.schema';

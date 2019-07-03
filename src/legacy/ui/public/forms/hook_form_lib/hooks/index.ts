@@ -17,8 +17,5 @@
  * under the License.
  */
 
+export { useField } from './use_field';
 export { useForm } from './use_form';
-
-export * from './components';
-
-export * from './types';

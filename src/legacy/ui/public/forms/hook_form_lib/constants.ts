@@ -17,8 +17,19 @@
  * under the License.
  */
 
-// Error codes
-export const ERR_FIELD_MISSING = 'ERR_FIELD_MISSING';
-export const ERR_MIN_LENGTH = 'ERR_MIN_LENGTH';
-export const ERR_MIN_SELECTION = 'ERR_MIN_SELECTION';
-export const ERR_FIELD_FORMAT = 'ERR_FIELD_FORMAT';
+// Field types
+export const FIELD_TYPES = {
+  TEXT: 'text',
+  NUMBER: 'number',
+  TOGGLE: 'toggle',
+  COMBO_BOX: 'comboBox',
+  SELECT: 'select',
+  MULTI_SELECT: 'multiSelect',
+};
+
+// Error types
+export const ERROR_TYPES = {
+  FIELD: 'field', // Default validation error (on the field value)
+  ASYNC: 'async', // Throw from asynchronous validations
+  ARRAY_ITEM: 'arrayItem', // If the field value is an Array, this error would be thrown if an _item_ of the array is invalid
+};
