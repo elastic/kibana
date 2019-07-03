@@ -24,8 +24,11 @@ import { fieldMissingError } from '../errors';
 export const emptyField = (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
   const [{ value, path }] = args;
 
+  if (typeof value === 'string') {
+    return isEmptyString(value) ? fieldMissingError(path) : undefined;
+  }
+
   if (Array.isArray(value)) {
     return isEmptyArray(value) ? fieldMissingError(path) : undefined;
   }
-  return isEmptyString(value) ? fieldMissingError(path) : undefined;
 };

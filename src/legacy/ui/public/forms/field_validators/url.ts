@@ -18,7 +18,7 @@
  */
 
 import { ValidationFunc } from '../use_form';
-import { isEmpty, isUrl } from '../../validators';
+import { isEmptyString, isUrl } from '../../validators';
 import { formatError } from '../errors';
 
 export const urlField = (allowEmpty = false) => (
@@ -26,7 +26,11 @@ export const urlField = (allowEmpty = false) => (
 ): ReturnType<ValidationFunc> => {
   const [{ value }] = args;
 
-  if (allowEmpty && isEmpty(value)) {
+  if (typeof value !== 'string') {
+    return formatError('URL');
+  }
+
+  if (allowEmpty && isEmptyString(value)) {
     return;
   }
 
