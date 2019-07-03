@@ -39,7 +39,7 @@ interface DateRange {
  * NgReact lib requires that changes to the props need to be made in the directive config as well
  * See [search_bar\directive\index.js] file
  */
-interface Props {
+export interface SearchBarProps {
   query: Query;
   onQuerySubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
@@ -65,7 +65,7 @@ interface State {
   isFiltersVisible: boolean;
 }
 
-class SearchBarUI extends Component<Props, State> {
+class SearchBarUI extends Component<SearchBarProps, State> {
   public static defaultProps = {
     showQueryBar: true,
     showFilterBar: true,

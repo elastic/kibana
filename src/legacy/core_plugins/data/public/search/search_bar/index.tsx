@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { SearchBar } from './components';
+export * from './components';
 
 // @ts-ignore
 export { setupDirective } from './directive';

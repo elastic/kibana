@@ -20,15 +20,20 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
 import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
+import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 
-interface Props {
+const localStorage = new Storage(window.localStorage);
+
+interface Props extends SearchBarProps {
   config: TopNavMenuData[];
   name: string;
   showBorder?: boolean;
-  searchBarOptions?: any;
   activeItem: string;
+  showSearchBar: boolean;
 }
 
 export function TopNavMenu(props: Props) {
@@ -49,12 +54,38 @@ export function TopNavMenu(props: Props) {
     action(null, null, target);
   }
 
+  function getSearchBar() {
+    if (!props.showSearchBar) return;
+    return (
+      <SearchBar
+        query={props.query}
+        filters={props.filters}
+        showQueryBar={props.showQueryBar}
+        appName={props.appName}
+        screenTitle={props.screenTitle}
+        onQuerySubmit={props.onQuerySubmit}
+        onFiltersUpdated={props.onFiltersUpdated}
+        showFilterBar={props.showFilterBar}
+        dateRangeFrom={props.dateRangeFrom}
+        dateRangeTo={props.dateRangeTo}
+        showDatePicker={props.showDatePicker}
+        isRefreshPaused={props.isRefreshPaused}
+        refreshInterval={props.refreshInterval}
+        indexPatterns={props.indexPatterns}
+        store={localStorage}
+      />
+    );
+  }
+
   return (
-    <div>
-      <EuiFlexGroup data-test-subj="top-nav" justifyContent="flexStart" gutterSize="xs">
-        {renderItems()}
-      </EuiFlexGroup>
-      {getBorder()}
-    </div>
+    <I18nProvider>
+      <div>
+        <EuiFlexGroup data-test-subj="top-nav" justifyContent="flexStart" gutterSize="xs">
+          {renderItems()}
+        </EuiFlexGroup>
+        {getBorder()}
+        {getSearchBar()}
+      </div>
+    </I18nProvider>
   );
 }

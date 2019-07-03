@@ -27,8 +27,33 @@ const module = uiModules.get('kibana');
 module.directive('kbnTopNav2', (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
-    undefined,
-    {},
-    {}
+    [
+      ['name', { watchDepth: 'reference' }],
+      ['config', { watchDepth: 'reference' }],
+
+      ['query', { watchDepth: 'reference' }],
+      ['store', { watchDepth: 'reference' }],
+      ['intl', { watchDepth: 'reference' }],
+
+      ['onQuerySubmit', { watchDepth: 'reference' }],
+      ['onFiltersUpdated', { watchDepth: 'reference' }],
+      ['onRefreshChange', { watchDepth: 'reference' }],
+
+      ['indexPatterns', { watchDepth: 'collection' }],
+      ['filters', { watchDepth: 'collection' }],
+
+      'showSearchBar',
+      'appName',
+      'screenTitle',
+      'showFilterBar',
+      'showQueryBar',
+      'showDatePicker',
+      'dateRangeFrom',
+      'dateRangeTo',
+      'isRefreshPaused',
+      'refreshInterval',
+      'disableAutoFocus',
+      'showAutoRefreshOnly',
+    ],
   );
 });
