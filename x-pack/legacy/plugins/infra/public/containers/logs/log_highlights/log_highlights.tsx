@@ -70,7 +70,7 @@ export const useLogHighlightsState = ({
           previousIndex =
             insertionIndex - 1 > 0 ? insertionIndex - 1 : logEntryHighlights[0].entries.length - 1;
           nextIndex =
-            insertionIndex + 1 < logEntryHighlights[0].entries.length - 1 ? insertionIndex + 1 : 0;
+            insertionIndex < logEntryHighlights[0].entries.length - 1 ? insertionIndex : 0;
         }
 
         if (previousIndex) {
@@ -84,8 +84,6 @@ export const useLogHighlightsState = ({
         } else {
           setNextHighlightLogEntryIndex(null);
         }
-
-        // console.log(previousIndex, nextIndex, getLogEntryIndexAtTime(logEntryHighlights[0].entries, visibleMidpoint))
       } else {
         setPreviousHighlightLogEntryIndex(null);
         setNextHighlightLogEntryIndex(null);
