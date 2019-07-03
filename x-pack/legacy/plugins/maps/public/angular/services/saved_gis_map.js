@@ -88,24 +88,14 @@ module.factory('SavedGisMap', function (Private) {
   };
 
 
-  SavedGisMap.prototype.hasLayerListChangedSinceLastSync = function (state, unregisteredState) {
-    const layerList = getLayerListRaw(state);
-    const layerListConfigOnly = copyPersistentState(layerList);
-
-    let currentLayerListJson;
-    if (this.layerListJSON) {
-      currentLayerListJson = JSON.parse(this.layerListJSON);
-    } else {
-      const currentLayerList = getLayerListRaw(unregisteredState);
-      currentLayerListJson = copyPersistentState(currentLayerList);
-    }
-
-    return !_.isEqual(layerListConfigOnly, currentLayerListJson);
+  SavedGisMap.prototype.getLayerListJSON = function () {
+    return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
   };
 
   SavedGisMap.prototype.syncWithStore = function (state) {
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
+
     this.layerListJSON = JSON.stringify(layerListConfigOnly);
 
     this.mapStateJSON = JSON.stringify({

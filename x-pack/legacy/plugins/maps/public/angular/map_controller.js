@@ -36,7 +36,8 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../store/ui';
-import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../selectors/map_selectors';
+import { copyPersistentState } from '../store/util';
+import { getQueryableUniqueIndexPatternIds, hasDirtyState, getLayerListRaw } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { docTitle } from 'ui/doc_title';
@@ -63,6 +64,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   const savedMap = $route.current.locals.map;
 
   let unsubscribe;
+  let initialLayerListConfig;
 
   const store = createMapStore();
 
@@ -128,10 +130,21 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
-  let lastStoreChangeSinceSave;
+
   function hasUnsavedChanges() {
+
     const state = store.getState();
-    return savedMap.hasLayerListChangedSinceLastSync(state, lastStoreChangeSinceSave);
+    const layerList = getLayerListRaw(state);
+    const layerListConfigOnly = copyPersistentState(layerList);
+
+    let hasChanged;
+    const savedLayerList  = savedMap.getLayerListJSON();
+    if (savedLayerList) {
+      hasChanged = !_.isEqual(layerListConfigOnly, savedLayerList);
+    } else {
+      hasChanged = !_.isEqual(layerListConfigOnly, initialLayerListConfig);
+    }
+    return hasChanged;
   }
 
   function isNavigatingAwayFromMap() {
@@ -162,7 +175,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     store.dispatch(setReadOnly(!capabilities.get().maps.save));
 
     handleStoreChanges(store);
-    lastStoreChangeSinceSave = store.getState();
     unsubscribe = store.subscribe(() => {
       handleStoreChanges(store);
     });
@@ -185,7 +197,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     const isDarkMode = config.get('theme:darkMode', false);
     const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
+    initialLayerListConfig = layerList;
     store.dispatch(replaceLayerList(layerList));
+
 
     store.dispatch(setRefreshConfig($scope.refreshConfig));
     store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
@@ -285,7 +299,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   async function doSave(saveOptions) {
 
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
-    lastStoreChangeSinceSave = store.getState();
     savedMap.syncWithStore(store.getState());
     let id;
 
