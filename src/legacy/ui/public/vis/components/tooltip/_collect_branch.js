@@ -17,26 +17,28 @@
  * under the License.
  */
 
-// eslint-disable-next-line import/no-default-export
-export default function (leaf) {
+export function collectBranch(leaf) {
   // walk up the branch for each parent
   function walk(item, memo) {
     // record the the depth
     const depth = item.depth - 1;
 
-    // Using the aggConfig determine what the field name is. If the aggConfig
-    // doesn't exist (which means it's an _all agg) then use the level for
-    // the field name
-    const { aggConfig } = item;
-    const field = (aggConfig && aggConfig.makeLabel())
-      || (aggConfig && aggConfig.label)
-      || ('level ' + item.depth);
+    // For buckets, we use the column name to determine what the field name is.
+    // If item.rawData doesn't exist, it is a metric in which case we use the
+    // value of item.name. If neither exists, we fall back to the leve for the
+    // field name.
+    function getFieldName(i) {
+      if (i.rawData && i.rawData.column > -1) {
+        const { column, table } = i.rawData;
+        return table.columns[column].name;
+      }
+      return i.name || `level ${i.depth}`;
+    }
 
     // Add the row to the tooltipScope.rows
     memo.unshift({
-      aggConfig,
       depth: depth,
-      field: field,
+      field: getFieldName(item),
       bucket: item.name,
       metric: item.size,
       item: item
