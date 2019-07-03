@@ -30,8 +30,8 @@ export async function getTranslationPaths({ cwd, glob }) {
 
   for (const entry of entries) {
     const entyFullPath = resolve(cwd, entry);
-    const content = await readFileAsync(entyFullPath, 'utf8');
     try {
+      const content = await readFileAsync(entyFullPath, 'utf8');
       const { translations } = JSON.parse(content);
       translations.forEach(translation => {
         const translationFullPath = resolve(cwd, translation);
