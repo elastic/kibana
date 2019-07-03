@@ -54,17 +54,17 @@ export interface MissingReferencesError {
   }>;
 }
 
-export interface ImportError {
+export interface SavedObjectsImportError {
   id: string;
   type: string;
   title?: string;
   error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
 }
 
-export interface ImportResponse {
+export interface SavedObjectsImportResponse {
   success: boolean;
   successCount: number;
-  errors?: ImportError[];
+  errors?: SavedObjectsImportError[];
 }
 
 export interface SavedObjectsImportRetry {

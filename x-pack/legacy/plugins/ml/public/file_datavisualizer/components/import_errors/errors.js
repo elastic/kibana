@@ -24,7 +24,7 @@ export function ImportErrors({ errors, statuses }) {
     >
       {
         errors.map((e, i) => (
-          <ImportError error={e} key={i} />
+          <SavedObjectsImportError error={e} key={i} />
         ))
       }
 
@@ -93,7 +93,7 @@ function title(statuses) {
   }
 }
 
-function ImportError(error, key) {
+function SavedObjectsImportError(error, key) {
   const errorObj = toString(error);
   return (
     <React.Fragment>

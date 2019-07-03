@@ -18,17 +18,17 @@
  */
 
 import {
-  ImportResponse,
+  SavedObjectsImportResponse,
   ConflictError,
   UnsupportedTypeError,
   MissingReferencesError,
   UnknownError,
-  ImportError,
+  SavedObjectsImportError,
 } from 'src/core/server/saved_objects/import/types';
 
 export interface ProcessedImportResponse {
   failedImports: Array<{
-    obj: Pick<ImportError, 'id' | 'type' | 'title'>;
+    obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
     error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
   }>;
   unmatchedReferences: Array<{
@@ -42,7 +42,9 @@ export interface ProcessedImportResponse {
   conflictedSearchDocs: undefined;
 }
 
-export function processImportResponse(response: ImportResponse): ProcessedImportResponse {
+export function processImportResponse(
+  response: SavedObjectsImportResponse
+): ProcessedImportResponse {
   // Go through the failures and split between unmatchedReferences and failedImports
   const failedImports = [];
   const unmatchedReferences = new Map();

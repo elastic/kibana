@@ -612,6 +612,55 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
     total: number;
 }
 
+// Warning: (ae-missing-release-tag) "SavedObjectsImportError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportError {
+    // Warning: (ae-forgotten-export) The symbol "ConflictError" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "UnsupportedTypeError" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "MissingReferencesError" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "UnknownError" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    type: string;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportResponse {
+    // (undocumented)
+    errors?: SavedObjectsImportError[];
+    // (undocumented)
+    success: boolean;
+    // (undocumented)
+    successCount: number;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportRetry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportRetry {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    overwrite: boolean;
+    // (undocumented)
+    replaceReferences: Array<{
+        type: string;
+        from: string;
+        to: string;
+    }>;
+    // (undocumented)
+    type: string;
+}
+
 // @public
 export interface SavedObjectsMigrationVersion {
     // (undocumented)

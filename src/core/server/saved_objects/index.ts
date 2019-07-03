@@ -22,3 +22,5 @@ export * from './service';
 export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
+
+export * from './import/types';

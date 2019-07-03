@@ -27,7 +27,7 @@ import {
   ProcessedImportResponse,
 } from 'ui/management/saved_objects_management';
 import {
-  ImportResponse,
+  SavedObjectsImportResponse,
   SavedObjectsImportRetry,
 } from 'src/core/server/saved_objects/import/types';
 import { useKibanaSpaces } from '../../../../lib/hooks';
@@ -57,7 +57,7 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
       if (copyInProgress) {
         // simulating copy operation
         setTimeout(() => {
-          const dummyResponse = selectedSpaceIds.reduce<Record<string, ImportResponse>>(
+          const dummyResponse = selectedSpaceIds.reduce<Record<string, SavedObjectsImportResponse>>(
             (acc, id) => {
               const successCount = Math.floor(Math.random() * 10);
               const hasErrors = successCount % 2 === 0;
@@ -78,7 +78,7 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
                         },
                       ]
                     : undefined,
-                } as ImportResponse,
+                } as SavedObjectsImportResponse,
               };
             },
             {}

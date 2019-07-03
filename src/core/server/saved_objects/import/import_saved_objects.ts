@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
-import { ImportError, ImportResponse } from './types';
+import { SavedObjectsImportError, SavedObjectsImportResponse } from './types';
 import { validateReferences } from './validate_references';
 import { SavedObjectsClientContract } from '../';
 
@@ -38,8 +38,8 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
   supportedTypes,
-}: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  let errorAccumulator: ImportError[] = [];
+}: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
+  let errorAccumulator: SavedObjectsImportError[] = [];
 
   // Get the objects to import
   const {

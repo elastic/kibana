@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import { SavedObject, SavedObjectsClientContract } from '../';
-import { ImportError } from './types';
+import { SavedObjectsImportError } from './types';
 
 const REF_TYPES_TO_VLIDATE = ['index-pattern', 'search'];
 
@@ -79,7 +79,7 @@ export async function validateReferences(
   savedObjects: SavedObject[],
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  const errorMap: { [key: string]: ImportError } = {};
+  const errorMap: { [key: string]: SavedObjectsImportError } = {};
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
     savedObjects,
     savedObjectsClient
