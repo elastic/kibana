@@ -34,6 +34,15 @@ exports[`Should render default props 1`] = `
         values={Object {}}
       />
     </EuiPopoverTitle>
+    <EuiFormHelpText
+      className="mapJoinExpressionHelpText"
+    >
+      <FormattedMessage
+        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+        id="xpack.maps.layerPanel.metricsExpression.helpText"
+        values={Object {}}
+      />
+    </EuiFormHelpText>
     <EuiFormErrorText>
       <FormattedMessage
         defaultMessage="JOIN must be set"
@@ -79,6 +88,15 @@ exports[`Should render metrics expression for metrics 1`] = `
         values={Object {}}
       />
     </EuiPopoverTitle>
+    <EuiFormHelpText
+      className="mapJoinExpressionHelpText"
+    >
+      <FormattedMessage
+        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+        id="xpack.maps.layerPanel.metricsExpression.helpText"
+        values={Object {}}
+      />
+    </EuiFormHelpText>
     <EuiFormErrorText>
       <FormattedMessage
         defaultMessage="JOIN must be set"

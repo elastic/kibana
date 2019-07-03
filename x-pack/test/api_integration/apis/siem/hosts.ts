@@ -55,6 +55,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               limit: 1,
               cursor: null,
             },
+            inspect: false,
           },
         })
         .then(resp => {
@@ -85,6 +86,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               limit: 2,
               cursor: '1',
             },
+            inspect: false,
           },
         })
         .then(resp => {
@@ -143,6 +145,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {

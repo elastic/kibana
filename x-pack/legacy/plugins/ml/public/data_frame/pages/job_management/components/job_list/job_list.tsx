@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState } from 'react';
+import React, { SFC, useEffect, useState } from 'react';
 
 import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
-import { JobId, moveToDataFrameWizard } from '../../../../common';
+import { JobId, moveToDataFrameWizard, useRefreshTransformList } from '../../../../common';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
@@ -19,14 +19,13 @@ import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
   itemIds: JobId[],
-  dataFrameJobs: DataFrameJobListRow[],
-  lastUpdate: number
+  dataFrameJobs: DataFrameJobListRow[]
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce(
     (m: ItemIdToExpandedRowMap, jobId: JobId) => {
       const item = dataFrameJobs.find(job => job.config.id === jobId);
       if (item !== undefined) {
-        m[jobId] = <ExpandedRow item={item} lastUpdate={lastUpdate} />;
+        m[jobId] = <ExpandedRow item={item} />;
       }
       return m;
     },
@@ -38,14 +37,21 @@ export const DataFrameJobList: SFC = () => {
   const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<JobId[]>([]);
-  const [lastUpdate, setlastUpdate] = useState(Date.now());
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>(DataFrameJobListColumn.id);
   const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
-  useRefreshInterval(getJobs, setBlockRefresh, setlastUpdate);
+  // Subscribe to the refresh observable to trigger reloading the jobs list.
+  const { isRefresh } = useRefreshTransformList();
+  useEffect(() => {
+    if (isRefresh) {
+      getJobs(true);
+    }
+  });
+  // Call useRefreshInterval() after the subscription above is set up.
+  useRefreshInterval(setBlockRefresh);
 
   if (dataFrameJobs.length === 0) {
     return (
@@ -70,11 +76,7 @@ export const DataFrameJobList: SFC = () => {
     },
   };
 
-  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(
-    expandedRowItemIds,
-    dataFrameJobs,
-    lastUpdate
-  );
+  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, dataFrameJobs);
 
   const pagination = {
     initialPageIndex: pageIndex,

@@ -137,6 +137,7 @@ exports[`Load More Events Table Component rendering it renders the events table 
     ]
   }
   hasNextPage={true}
+  id="events"
   loadMore={[MockFunction]}
   loading={false}
   nextCursor="1546878704036"
