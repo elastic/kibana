@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { Form, Field as FieldType, FieldConfig } from '../use_form';
-import { useField } from '../use_form/use_form';
+import { useField } from '../use_form/use_field';
 
 interface Props {
   path: string;

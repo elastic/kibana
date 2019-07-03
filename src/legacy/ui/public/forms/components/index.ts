@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './field';
-export * from './form_row';
 export * from './use_field';
 export * from './use_array';
+export * from './field';
+export * from './form_row';
