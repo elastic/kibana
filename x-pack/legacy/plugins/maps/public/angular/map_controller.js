@@ -137,23 +137,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
 
-    let hasChanged;
     const savedLayerList  = savedMap.getLayerListJSON();
-    if (savedLayerList) {
-      hasChanged = !_.isEqual(layerListConfigOnly, savedLayerList);
-    } else {
-      hasChanged = !_.isEqual(layerListConfigOnly, initialLayerListConfig);
-    }
-    return hasChanged;
+    const oldConfig = savedLayerList ? savedLayerList : initialLayerListConfig;
+
+    return !_.isEqual(layerListConfigOnly, oldConfig);
   }
 
-  function isNavigatingAwayFromMap() {
+  function isOnMapNow() {
     return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`);
-
   }
 
   function beforeUnload(event) {
-    if (!isNavigatingAwayFromMap()) {
+    if (!isOnMapNow()) {
       return;
     }
 
@@ -197,7 +192,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     const isDarkMode = config.get('theme:darkMode', false);
     const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
-    initialLayerListConfig = layerList;
+    initialLayerListConfig = copyPersistentState(layerList);
     store.dispatch(replaceLayerList(layerList));
 
 
@@ -279,7 +274,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         }),
         // href: '#'
         onClick: () => {
-          if (isNavigatingAwayFromMap() && hasUnsavedChanges()) {
+          if (isOnMapNow() && hasUnsavedChanges()) {
             const navigateAway = window.confirm('Changes you made may not be saved.');
             if (navigateAway) {
               window.location.hash = '#';
