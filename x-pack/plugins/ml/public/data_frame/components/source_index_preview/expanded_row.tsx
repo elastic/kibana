@@ -25,7 +25,7 @@ export const ExpandedRow: React.SFC<ExpandedRowProps> = ({ item }) => {
     return (
       <span key={k}>
         <EuiBadge>{k}:</EuiBadge>
-        <small> {value}&nbsp;&nbsp;</small>
+        <small> {typeof value === 'string' ? value : JSON.stringify(value)}&nbsp;&nbsp;</small>
       </span>
     );
   });
