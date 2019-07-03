@@ -23,6 +23,11 @@ pipeline {
     // PR_SOURCE_BRANCH = "${ghprbSourceBranch}"
     // PR_TARGET_BRANCH = "${ghprbTargetBranch}"
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
+
+
+    CREDENTIALS_ID ='kibana-ci-gcs-plugin'
+    BUCKET = 'gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER'
+    PATTERN = "${WORKSPACE_CACHE_NAME}"
   }
   stages {
     stage('Extract Boot Cache') {
@@ -45,7 +50,7 @@ pipeline {
             dumpWorkspaceSize() // dump size to screen AFTER checking out es
             tarWorkspace()
           }
-          sh 'echo "\n\t### [TODO] create and upload workspace cache to  gcs"'
+          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: "gs://${env.BUCKET}", pattern: env.PATTERN])
         }
       }
     }
