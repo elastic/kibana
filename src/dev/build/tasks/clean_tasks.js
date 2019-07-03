@@ -173,7 +173,7 @@ export const CleanExtraFilesFromModulesTask = {
       directory: build.resolvePath('node_modules'),
       regularExpressions,
       excludePaths: [
-        build.resolvePath(RELATIVE_CTAGS_BUILD_DIR)
+        build.resolvePath('node_modules/@elastic/ctags-langserver/vendor')
       ]
     }));
 
