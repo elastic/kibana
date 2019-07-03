@@ -95,7 +95,9 @@ export const useLogHighlightsState = ({
   const goToPreviousHighlight = useCallback(
     () => {
       const entry = logEntryHighlights[0].entries[previousHighlightLogEntryIndex];
-      setTargetHighlightPosition(entry.key);
+      if (entry) {
+        setTargetHighlightPosition(entry.key);
+      }
     },
     [previousHighlightLogEntryIndex, logEntryHighlights, setTargetHighlightPosition]
   );
@@ -103,7 +105,9 @@ export const useLogHighlightsState = ({
   const goToNextHighlight = useCallback(
     () => {
       const entry = logEntryHighlights[0].entries[nextHighlightLogEntryIndex];
-      setTargetHighlightPosition(entry.key);
+      if (entry) {
+        setTargetHighlightPosition(entry.key);
+      }
     },
     [nextHighlightLogEntryIndex, logEntryHighlights, setTargetHighlightPosition]
   );
