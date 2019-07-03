@@ -30,7 +30,11 @@ const zoomOutBtn = (zoomInfo) => {
           size="s"
           onClick={zoomInfo.zoomOutHandler}
         >
-          <i className="fa fa-search-minus" /> Zoom out
+          <i className="fa fa-search-minus" /> {' '}
+          <FormattedMessage
+            id="xpack.monitoring.chart.timeSeries.zoomOut"
+            defaultMessage="Zoom out"
+          />
         </EuiButtonEmpty>
       </EuiTextAlign>
     </EuiFlexItem>
