@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 
 // Services
 import { ExpressionsService, ExpressionsSetup } from './expressions';

@@ -35,7 +35,7 @@
  */
 import { npSetup } from 'ui/new_platform';
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '../../../../core/public';
 import { DataPublicPlugin, DataSetupPlugins } from './plugin';
 
 // core shims

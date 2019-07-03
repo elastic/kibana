@@ -28,7 +28,7 @@
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from '../../../../core/public';
 import {
   DataPublicPlugin,
   DataSetup,
@@ -38,12 +38,9 @@ import {
 } from './plugin';
 
 // This is what Core looks for when loading our plugin
-export const plugin: PluginInitializer<
-  DataSetup,
-  DataStart,
-  DataSetupPlugins,
-  DataStartPlugins
-> = initializerContext => {
+export const plugin: PluginInitializer<DataSetup, DataStart, DataSetupPlugins, DataStartPlugins> = (
+  initializerContext: PluginInitializerContext
+) => {
   return new DataPublicPlugin();
 };
 
