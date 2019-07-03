@@ -22,6 +22,7 @@ export interface JobDetailsExposedState {
   createIndexPattern: boolean;
   isContinuousModeEnabled: boolean;
   jobId: JobId;
+  jobDescription: string;
   destinationIndex: EsIndexName;
   touched: boolean;
   valid: boolean;
@@ -34,6 +35,7 @@ export function getDefaultJobDetailsState(): JobDetailsExposedState {
     createIndexPattern: true,
     isContinuousModeEnabled: false,
     jobId: '',
+    jobDescription: '',
     destinationIndex: '',
     touched: false,
     valid: false,
@@ -55,6 +57,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const defaults = { ...getDefaultJobDetailsState(), ...overrides };
 
   const [jobId, setJobId] = useState<JobId>(defaults.jobId);
+  const [jobDescription, setJobDescription] = useState<string>(defaults.jobDescription);
   const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(defaults.destinationIndex);
   const [jobIds, setJobIds] = useState<JobId[]>([]);
   const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
@@ -89,7 +92,8 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       } catch (e) {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.jobDetailsForm.errorGettingDataFrameJobsList', {
-            defaultMessage: 'An error occurred getting the existing data frame job Ids: {error}',
+            defaultMessage:
+              'An error occurred getting the existing data frame transform Ids: {error}',
             values: { error: JSON.stringify(e) },
           })
         );
@@ -139,6 +143,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
         createIndexPattern,
         isContinuousModeEnabled,
         jobId,
+        jobDescription,
         destinationIndex,
         touched: true,
         valid,
@@ -150,6 +155,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       createIndexPattern,
       isContinuousModeEnabled,
       jobId,
+      jobDescription,
       destinationIndex,
       valid,
     ]
@@ -159,25 +165,42 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiForm>
       <EuiFormRow
         label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdLabel', {
-          defaultMessage: 'Job id',
+          defaultMessage: 'Transform id',
         })}
         isInvalid={jobIdExists}
         error={
           jobIdExists && [
             i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdError', {
-              defaultMessage: 'A job with this id already exists.',
+              defaultMessage: 'A transform with this id already exists.',
             }),
           ]
         }
       >
         <EuiFieldText
-          placeholder="job id"
+          placeholder="transform id"
           value={jobId}
           onChange={e => setJobId(e.target.value)}
           aria-label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdInputAriaLabel', {
-            defaultMessage: 'Choose a unique job id.',
+            defaultMessage: 'Choose a unique transform id.',
           })}
           isInvalid={jobIdExists}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobDescriptionLabel', {
+          defaultMessage: 'Transform description',
+        })}
+      >
+        <EuiFieldText
+          placeholder="transform description"
+          value={jobDescription}
+          onChange={e => setJobDescription(e.target.value)}
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.jobDetailsForm.jobDescriptionInputAriaLabel',
+            {
+              defaultMessage: 'Choose an optional transform description.',
+            }
+          )}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -257,8 +280,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
             helpText={i18n.translate(
               'xpack.ml.dataframe.jobDetailsForm.continuousModeDateFieldHelpText',
               {
-                defaultMessage:
-                  'Pick a date field for the time based continuous data frame transform that reflects ingestion time.',
+                defaultMessage: 'Select the date field that can be used to identify new documents.',
               }
             )}
           >

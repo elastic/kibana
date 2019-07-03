@@ -188,14 +188,22 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           },
         },
         {
-          render: ({ snapshot, repository }: SnapshotDetails) => {
+          render: ({ snapshot, repository, isManagedRepository }: SnapshotDetails) => {
             return (
               <SnapshotDeleteProvider>
                 {deleteSnapshotPrompt => {
-                  const label = i18n.translate(
-                    'xpack.snapshotRestore.snapshotList.table.actionDeleteTooltip',
-                    { defaultMessage: 'Delete' }
-                  );
+                  const label = !isManagedRepository
+                    ? i18n.translate(
+                        'xpack.snapshotRestore.snapshotList.table.actionDeleteTooltip',
+                        { defaultMessage: 'Delete' }
+                      )
+                    : i18n.translate(
+                        'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
+                        {
+                          defaultMessage:
+                            'You cannot delete a snapshot stored in a managed repository.',
+                        }
+                      );
                   return (
                     <EuiToolTip content={label}>
                       <EuiButtonIcon
@@ -212,6 +220,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                         onClick={() =>
                           deleteSnapshotPrompt([{ snapshot, repository }], onSnapshotDeleted)
                         }
+                        isDisabled={isManagedRepository}
                       />
                     </EuiToolTip>
                   );
@@ -248,6 +257,17 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: SnapshotDetails[]) => setSelectedItems(newSelectedItems),
+    selectable: ({ isManagedRepository }: SnapshotDetails) => !isManagedRepository,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
+          {
+            defaultMessage: 'You cannot delete a snapshot stored in a managed repository.',
+          }
+        );
+      }
+    },
   };
 
   const search = {

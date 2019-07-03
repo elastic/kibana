@@ -13,6 +13,7 @@ import { pure } from 'recompose';
 import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { ActionCreator } from 'typescript-fsa';
 import { ESTermQuery } from '../../../common/typed_json';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
@@ -36,6 +37,11 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
+import { hostToInfluencers } from '../../components/ml/influencers/host_to_influencers';
+import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 
 const type = hostsModel.HostsType.details;
@@ -48,6 +54,11 @@ const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
 }
 
 type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
@@ -58,6 +69,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
       params: { hostName },
     },
     filterQueryExpression,
+    setAbsoluteRangeDatePicker,
   }) => (
     <WithSource sourceId="default">
       {({ indicesExist, indexPattern }) =>
@@ -86,14 +98,35 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ hostOverview, loading, id, refetch }) => (
-                          <HostOverviewManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            data={hostOverview}
-                            loading={loading}
-                          />
+                        {({ hostOverview, loading, id, inspect, refetch }) => (
+                          <AnomalyTableProvider
+                            influencers={hostToInfluencers(hostOverview)}
+                            startDate={from}
+                            endDate={to}
+                          >
+                            {({ isLoadingAnomaliesData, anomaliesData }) => (
+                              <HostOverviewManage
+                                id={id}
+                                inspect={inspect}
+                                refetch={refetch}
+                                setQuery={setQuery}
+                                data={hostOverview}
+                                anomaliesData={anomaliesData}
+                                isLoadingAnomaliesData={isLoadingAnomaliesData}
+                                loading={loading}
+                                startDate={from}
+                                endDate={to}
+                                narrowDateRange={(score, interval) => {
+                                  const fromTo = scoreIntervalToDateTime(score, interval);
+                                  setAbsoluteRangeDatePicker({
+                                    id: 'global',
+                                    from: fromTo.from,
+                                    to: fromTo.to,
+                                  });
+                                }}
+                              />
+                            )}
+                          </AnomalyTableProvider>
                         )}
                       </HostOverviewByNameQuery>
 
@@ -106,13 +139,16 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ kpiHostDetails, loading, id, refetch }) => (
+                        {({ kpiHostDetails, id, inspect, loading, refetch }) => (
                           <KpiHostDetailsManage
+                            data={kpiHostDetails}
+                            from={from}
                             id={id}
+                            inspect={inspect}
+                            loading={loading}
                             refetch={refetch}
                             setQuery={setQuery}
-                            data={kpiHostDetails}
-                            loading={loading}
+                            to={to}
                           />
                         )}
                       </KpiHostDetailsQuery>
@@ -134,12 +170,14 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           pageInfo,
                           loadPage,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <AuthenticationTableManage
                             data={authentications}
                             fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
+                            inspect={inspect}
                             loading={loading}
                             loadPage={loadPage}
                             refetch={refetch}
@@ -167,10 +205,12 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           pageInfo,
                           loadMore,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <UncommonProcessTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             loading={loading}
@@ -194,9 +234,19 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         type={type}
                       >
-                        {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                        {({
+                          events,
+                          loading,
+                          id,
+                          inspect,
+                          refetch,
+                          totalCount,
+                          pageInfo,
+                          loadMore,
+                        }) => (
                           <EventsTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             data={events!}
@@ -235,7 +285,12 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
+export const HostDetails = connect(
+  makeMapStateToProps,
+  {
+    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  }
+)(HostDetailsComponent);
 
 export const getBreadcrumbs = (hostId: string): Breadcrumb[] => [
   {

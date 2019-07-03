@@ -28,6 +28,8 @@ import { useSiemJobs } from './hooks/use_siem_jobs';
 import * as i18n from './translations';
 import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { ConfigTemplate, DisplayJob, Job } from './types';
+import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
+import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
 
 const FilterJobsEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: -20px;
@@ -101,6 +103,8 @@ export const MlPopover = React.memo(() => {
     isPopoverOpen ? !refetchSummaryData : refetchSummaryData
   );
   const config = useContext(KibanaConfigContext);
+  const capabilities = useContext(MlCapabilitiesContext);
+  const headers = { 'kbn-version': config.kbnVersion };
 
   // All jobs from embedded configTemplates that should be installed
   const embeddedJobIds = getJobsToInstall(configTemplates);
@@ -112,93 +116,97 @@ export const MlPopover = React.memo(() => {
   const configTemplatesToInstall = getConfigTemplatesToInstall(
     configTemplates,
     installedJobIds,
-    config.indexPattern ? config.indexPattern : ''
+    config.indexPattern || ''
   );
 
   // Filter installed job to show all 'siem' group jobs or just embedded
   const jobsToDisplay = getJobsToDisplay(siemJobSummaryData, embeddedJobIds, showAllJobs);
-
-  return (
-    <EuiPopover
-      id="popover"
-      button={
-        <EuiButton
-          data-test-subj="integrations-button"
-          iconType="arrowDown"
-          iconSide="right"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        >
-          {i18n.INTEGRATIONS}
-        </EuiButton>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
-    >
-      <PopoverContentsDiv data-test-subj="ml-popover-contents">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiDescriptionList
-              listItems={[
-                {
-                  title: <MlPopoverTitle />,
-                  description: i18n.ML_DESCRIPTION,
-                },
-              ]}
-            />
-          </EuiFlexItem>
-          {configTemplatesToInstall.length > 0 && (
-            <EuiFlexItem>
-              <EuiButton
-                isLoading={isCreatingJobs}
-                iconType="plusInCircle"
-                onClick={async () => {
-                  setIsCreatingJobs(true);
-                  await Promise.all(
-                    configTemplatesToInstall.map(configTemplate => {
-                      return setupMlJob({
-                        configTemplate: configTemplate.name,
-                        indexPatternName: configTemplate.defaultIndexPattern,
-                        groups: ['siem'],
-                        prefix: siemJobPrefix,
-                      });
-                    })
-                  );
-                  setRefetchSummaryData(!refetchSummaryData);
-                  setIsCreatingJobs(false);
-                }}
-              >
-                {isCreatingJobs ? i18n.CREATING_JOBS : i18n.CREATE_JOBS}
-              </EuiButton>
+  if (!hasMlAdminPermissions(capabilities)) {
+    return null;
+  } else {
+    return (
+      <EuiPopover
+        id="integrations-popover"
+        button={
+          <EuiButton
+            data-test-subj="integrations-button"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          >
+            {i18n.INTEGRATIONS}
+          </EuiButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+      >
+        <PopoverContentsDiv data-test-subj="ml-popover-contents">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionList
+                listItems={[
+                  {
+                    title: <MlPopoverTitle />,
+                    description: i18n.ML_DESCRIPTION,
+                  },
+                ]}
+              />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+            {configTemplatesToInstall.length > 0 && (
+              <EuiFlexItem>
+                <EuiButton
+                  isLoading={isCreatingJobs}
+                  iconType="plusInCircle"
+                  onClick={async () => {
+                    setIsCreatingJobs(true);
+                    await Promise.all(
+                      configTemplatesToInstall.map(configTemplate => {
+                        return setupMlJob({
+                          configTemplate: configTemplate.name,
+                          indexPatternName: configTemplate.defaultIndexPattern,
+                          groups: ['siem'],
+                          prefix: siemJobPrefix,
+                          headers,
+                        });
+                      })
+                    );
+                    setRefetchSummaryData(!refetchSummaryData);
+                    setIsCreatingJobs(false);
+                  }}
+                >
+                  {isCreatingJobs ? i18n.CREATING_JOBS : i18n.CREATE_JOBS}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
 
-        <EuiSpacer size="xs" />
+          <EuiSpacer size="xs" />
 
-        <JobDetailsHeader />
+          <JobDetailsHeader />
 
-        <FilterJobsEuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="xs" onClick={() => setShowAllJobs(!showAllJobs)}>
-              {showAllJobs ? i18n.SHOW_SIEM_JOBS : i18n.SHOW_ALL_JOBS}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </FilterJobsEuiFlexGroup>
+          <FilterJobsEuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" onClick={() => setShowAllJobs(!showAllJobs)}>
+                {showAllJobs ? i18n.SHOW_SIEM_JOBS : i18n.SHOW_ALL_JOBS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </FilterJobsEuiFlexGroup>
 
-        <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-        {jobsToDisplay.map(job => (
-          <JobDetail
-            key={job.title}
-            jobName={job.title}
-            jobDescription={job.description}
-            isChecked={job.isChecked}
-            onJobStateChange={() => setRefetchSummaryData(!refetchSummaryData)}
-          />
-        ))}
-      </PopoverContentsDiv>
-    </EuiPopover>
-  );
+          {jobsToDisplay.map(job => (
+            <JobDetail
+              key={job.title}
+              jobName={job.title}
+              jobDescription={job.description}
+              isChecked={job.isChecked}
+              onJobStateChange={() => setRefetchSummaryData(!refetchSummaryData)}
+            />
+          ))}
+        </PopoverContentsDiv>
+      </EuiPopover>
+    );
+  }
 });
 
 export const JobDetail = React.memo<{
@@ -208,12 +216,14 @@ export const JobDetail = React.memo<{
   onJobStateChange: Function;
 }>(({ jobName, jobDescription, isChecked, onJobStateChange }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const config = useContext(KibanaConfigContext);
+  const headers = { 'kbn-version': config.kbnVersion };
 
   const startDatafeed = async (enable: boolean) => {
     if (enable) {
-      await startDatafeeds([`datafeed-${jobName}`]);
+      await startDatafeeds([`datafeed-${jobName}`], headers);
     } else {
-      await stopDatafeeds([`datafeed-${jobName}`]);
+      await stopDatafeeds([`datafeed-${jobName}`], headers);
     }
     onJobStateChange();
     setIsLoading(false);

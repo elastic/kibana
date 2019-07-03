@@ -10,6 +10,7 @@ import { Sidebar } from '../../../components/sidebar';
 import { Toolbar } from '../../../components/toolbar';
 import { Workpad } from '../../../components/workpad';
 import { WorkpadHeader } from '../../../components/workpad_header';
+import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../../common/lib/constants';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 
@@ -45,7 +46,11 @@ export class WorkpadApp extends React.PureComponent {
                 <WorkpadHeader />
               </div>
 
-              <div className="canvasLayout__stageContent" onMouseDown={deselectElement}>
+              <div
+                id={CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}
+                className={CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}
+                onMouseDown={deselectElement}
+              >
                 {/* NOTE: canvasWorkpadContainer is used for exporting */}
                 <div
                   id={WORKPAD_CONTAINER_ID}

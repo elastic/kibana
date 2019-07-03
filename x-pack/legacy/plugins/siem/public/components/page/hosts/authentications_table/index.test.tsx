@@ -36,6 +36,7 @@ describe('Authentication Table Component', () => {
           <AuthenticationTable
             data={mockData.Authentications.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Authentications.pageInfo)!}
+            id="authentication"
             loading={false}
             loadPage={loadPage}
             totalCount={mockData.Authentications.totalCount}

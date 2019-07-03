@@ -68,6 +68,11 @@ export const sharedSchema = gql`
     hasNextPage: Boolean
   }
 
+  type Inspect {
+    dsl: [String!]!
+    response: [String!]!
+  }
+
   type PageInfoPaginated {
     activePage: Float!
     fakeTotalCount: Float!

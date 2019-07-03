@@ -33,6 +33,7 @@ interface OwnProps {
   fakeTotalCount: number;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  id: string;
   totalCount: number;
   type: hostsModel.HostsType;
 }
@@ -74,6 +75,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
     fakeTotalCount,
     data,
+    id,
     limit,
     loading,
     loadPage,
@@ -87,6 +89,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
       headerUnit={i18n.UNIT(totalCount)}
+      id={id}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}

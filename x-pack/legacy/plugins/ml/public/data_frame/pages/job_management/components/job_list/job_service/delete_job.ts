@@ -18,14 +18,14 @@ export const deleteJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobList
     getJobs(true);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.jobsList.deleteJobSuccessMessage', {
-        defaultMessage: 'Data frame job {jobId} deleted successfully.',
+        defaultMessage: 'Data frame transform {jobId} deleted successfully.',
         values: { jobId: d.config.id },
       })
     );
   } catch (e) {
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.jobsList.deleteJobErrorMessage', {
-        defaultMessage: 'An error occurred deleting the data frame job {jobId}: {error}',
+        defaultMessage: 'An error occurred deleting the data frame transform {jobId}: {error}',
         values: { jobId: d.config.id, error: JSON.stringify(e) },
       })
     );

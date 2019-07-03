@@ -441,7 +441,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
 
@@ -486,10 +487,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // select our agg
       const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
+        .byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+          vis-editor-agg-params:not(.ng-hide) [data-test-subj="defaultEditorAggSelect"]`);
       await comboBox.setElement(aggSelect, agg);
 
-      const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
+      const fieldSelect = await find.byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+        vis-editor-agg-params:not(.ng-hide) [data-test-subj="visDefaultEditorField"]`);
       // select our field
       await comboBox.setElement(fieldSelect, field);
       // enter custom label
@@ -541,7 +544,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
       `;
       const fieldEl = await find.byCssSelector(selector);
@@ -1223,8 +1227,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async selectCustomSortMetric(agg, metric, field) {
       await this.selectOrderByMetric(agg, 'custom');
-      await this.selectAggregation(metric, 'groupName');
-      await this.selectField(field, 'groupName');
+      await this.selectAggregation(metric, 'buckets', true);
+      await this.selectField(field, 'buckets', true);
     }
 
     async clickSplitDirection(direction) {

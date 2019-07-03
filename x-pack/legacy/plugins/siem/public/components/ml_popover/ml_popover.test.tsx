@@ -23,6 +23,10 @@ import {
   mockJobsSummaryResponse,
 } from './__mocks__/api';
 
+jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
+  hasMlAdminPermissions: () => true,
+}));
+
 describe('MlPopover', () => {
   describe('MlPopover', () => {
     test('showing a popover on a mouse click', () => {
@@ -56,9 +60,9 @@ describe('MlPopover', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <JobDetail
-          key={'job.title'}
-          jobName={'job.title'}
-          jobDescription={'job.description'}
+          key="job.title"
+          jobName="job.title"
+          jobDescription="job.description"
           isChecked={false}
           onJobStateChange={onJobStateChangeMock}
         />
@@ -69,9 +73,9 @@ describe('MlPopover', () => {
     test('showing a popover on a mouse click', () => {
       const wrapper = shallow(
         <JobDetail
-          key={'job.title'}
-          jobName={'job.title'}
-          jobDescription={'job.description'}
+          key="job.title"
+          jobName="job.title"
+          jobDescription="job.description"
           isChecked={true}
           onJobStateChange={onJobStateChangeMock}
         />

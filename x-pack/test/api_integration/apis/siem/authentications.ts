@@ -44,6 +44,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               querySize: 1,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {
@@ -72,6 +73,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               querySize: 2,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {

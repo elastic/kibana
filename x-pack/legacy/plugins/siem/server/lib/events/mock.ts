@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { cloneDeep } from 'lodash/fp';
 import { RequestDetailsOptions } from './types';
 
 export const mockResponseSearchTimelineDetails = {
@@ -2865,7 +2866,22 @@ export const mockResponseMap = {
   },
 };
 
+export const mockDetailsQueryDsl = {
+  mockDetailsQueryDsl: 'mockDetailsQueryDsl',
+};
+
+export const mockQueryDsl = {
+  mockQueryDsl: 'mockQueryDsl',
+};
+
+const mockTimelineDetailsInspectResponse = cloneDeep(mockResponseSearchTimelineDetails);
+delete mockTimelineDetailsInspectResponse.hits.hits[0]._source;
+
 export const mockTimelineDetailsResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockDetailsQueryDsl, null, 2)],
+    response: [JSON.stringify(mockTimelineDetailsInspectResponse, null, 2)],
+  },
   data: [
     {
       category: '_id',

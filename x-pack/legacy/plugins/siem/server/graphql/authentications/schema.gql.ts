@@ -31,6 +31,7 @@ export const authenticationsSchema = gql`
     edges: [AuthenticationsEdges!]!
     totalCount: Float!
     pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   extend type Source {

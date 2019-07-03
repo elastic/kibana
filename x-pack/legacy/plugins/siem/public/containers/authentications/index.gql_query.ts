@@ -13,6 +13,7 @@ export const authenticationsQuery = gql`
     $pagination: PaginationInputPaginated!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -59,6 +60,10 @@ export const authenticationsQuery = gql`
         pageInfo {
           activePage
           fakeTotalCount
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

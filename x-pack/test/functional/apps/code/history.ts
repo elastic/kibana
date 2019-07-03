@@ -23,7 +23,6 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/37859
   describe('History', function() {
     this.tags('skipFirefox');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
@@ -131,7 +130,8 @@ export default function manageRepositoriesFunctionalTests({
         });
       });
 
-      it('in search page, change language filters can go back and forward', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/39163
+      it.skip('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
         const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
         await browser.get(url);
@@ -168,7 +168,8 @@ export default function manageRepositoriesFunctionalTests({
         expect(filter.indexOf('javascript')).to.equal(0);
       });
 
-      it('in source view page file line number changed can go back and forward', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/39958
+      it.skip('in source view page file line number changed can go back and forward', async () => {
         log.debug('it goes back after line number changed');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter`;
         await browser.get(url);
