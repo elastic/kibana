@@ -61,6 +61,7 @@ export const networkSchema = gql`
     edges: [NetworkTopNFlowEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   enum NetworkDnsFields {
@@ -95,6 +96,7 @@ export const networkSchema = gql`
     edges: [NetworkDnsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   extend type Source {
