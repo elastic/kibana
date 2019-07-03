@@ -7,12 +7,18 @@
 import { DestinationOrSource } from '../types';
 
 export const getNetworkFromInfluencers = (
-  influencers: Array<Record<string, string>>
+  influencers: Array<Record<string, string>>,
+  ip?: string
 ): { ip: string; type: DestinationOrSource } | null => {
   const recordFound = influencers.find(influencer => {
     const influencerName = Object.keys(influencer)[0];
+    const influencerValue = Object.values(influencer)[0];
     if (influencerName === 'destination.ip' || influencerName === 'source.ip') {
-      return true;
+      if (ip == null) {
+        return true;
+      } else {
+        return influencerValue === ip;
+      }
     } else {
       return false;
     }

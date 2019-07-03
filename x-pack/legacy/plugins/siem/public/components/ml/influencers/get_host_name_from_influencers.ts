@@ -5,12 +5,18 @@
  */
 
 export const getHostNameFromInfluencers = (
-  influencers: Array<Record<string, string>>
+  influencers: Array<Record<string, string>>,
+  hostName?: string
 ): string | null => {
   const recordFound = influencers.find(influencer => {
     const influencerName = Object.keys(influencer)[0];
+    const influencerValue = Object.values(influencer)[0];
     if (influencerName === 'host.name') {
-      return true;
+      if (hostName == null) {
+        return true;
+      } else {
+        return influencerValue === hostName;
+      }
     } else {
       return false;
     }

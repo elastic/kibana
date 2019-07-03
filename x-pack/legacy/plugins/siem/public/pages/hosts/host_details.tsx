@@ -43,6 +43,7 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
+import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
 
 const type = hostsModel.HostsType.details;
 
@@ -216,6 +217,23 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           />
                         )}
                       </UncommonProcessesQuery>
+
+                      <EuiSpacer />
+
+                      <AnomaliesHostTable
+                        startDate={from}
+                        endDate={to}
+                        skip={isInitializing}
+                        hostName={hostName}
+                        narrowDateRange={(score, interval) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        }}
+                      />
 
                       <EuiSpacer />
 

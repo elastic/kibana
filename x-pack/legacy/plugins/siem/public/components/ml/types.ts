@@ -78,6 +78,7 @@ export interface AnomaliesTableProps {
   endDate: number;
   narrowDateRange: NarrowDateRange;
   skip: boolean;
+  hostName?: string;
 }
 
 export interface MlCapabilities {
