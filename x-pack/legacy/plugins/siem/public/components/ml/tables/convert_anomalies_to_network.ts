@@ -13,11 +13,11 @@ export const convertAnomaliesToNetwork = (anomalies: Anomalies | null): Anomalie
   } else {
     return anomalies.anomalies.reduce<AnomaliesByNetwork[]>((accum, item) => {
       if (item.entityName === 'source.ip' || item.entityName === 'destination.ip') {
-        return accum.concat({ ip: item.entityValue, type: item.entityName, anomaly: item });
+        return [...accum, { ip: item.entityValue, type: item.entityName, anomaly: item }];
       } else {
         const network = getNetworkFromInfluencers(item.influencers);
         if (network != null) {
-          return accum.concat({ ip: network.ip, type: network.type, anomaly: item });
+          return [...accum, { ip: network.ip, type: network.type, anomaly: item }];
         } else {
           return accum;
         }
