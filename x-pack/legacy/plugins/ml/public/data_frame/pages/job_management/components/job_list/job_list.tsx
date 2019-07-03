@@ -6,6 +6,8 @@
 
 import React, { SFC, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
 import { JobId, moveToDataFrameWizard, useRefreshTransformList } from '../../../../common';
@@ -56,10 +58,18 @@ export const DataFrameJobList: SFC = () => {
   if (dataFrameJobs.length === 0) {
     return (
       <EuiEmptyPrompt
-        title={<h2>No data frame jobs found</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptTitle', {
+              defaultMessage: 'No data frame transforms found',
+            })}
+          </h2>
+        }
         actions={[
           <EuiButtonEmpty onClick={moveToDataFrameWizard}>
-            Create your first data frame job
+            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
+              defaultMessage: 'Create your first data frame transform',
+            })}
           </EuiButtonEmpty>,
         ]}
         data-test-subj="mlNoDataFrameJobsFound"
