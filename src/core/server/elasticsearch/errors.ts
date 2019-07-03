@@ -54,7 +54,7 @@ function decorate(
 }
 
 /**
- * Helpers provided to simplify future migration away from Boom as internal Error.
+ * Helpers for working with errors returned from the Elasticsearch service. Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as `body.error.header[WWW-Authenticate]`
  * @public
  *
  * @example
