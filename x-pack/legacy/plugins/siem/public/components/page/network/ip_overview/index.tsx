@@ -5,7 +5,7 @@
  */
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -30,10 +30,12 @@ import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
+import { InspectButton } from '../../../inspect';
 
 interface OwnProps {
   data: IpOverviewData;
   flowTarget: FlowTarget;
+  id: string;
   ip: string;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -64,6 +66,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 
 export const IpOverview = pure<IpOverviewProps>(
   ({
+    id,
     ip,
     data,
     loading,
@@ -74,6 +77,7 @@ export const IpOverview = pure<IpOverviewProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
+    const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
     const typeData: Overview = data[flowTarget]!;
@@ -135,7 +139,10 @@ export const IpOverview = pure<IpOverviewProps>(
       ],
     ];
     return (
-      <OverviewWrapper>
+      <OverviewWrapper
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
         {loading && (
           <>
             <LoadingOverlay />
@@ -149,6 +156,12 @@ export const IpOverview = pure<IpOverviewProps>(
             />
           </>
         )}
+        <InspectButton
+          queryId={id}
+          show={showInspect}
+          title={i18n.INSPECT_TITLE}
+          inspectIndex={0}
+        />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}

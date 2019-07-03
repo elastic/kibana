@@ -150,6 +150,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
     }
     endDate={1560837600000}
     flowTarget="source"
+    id="ipOverview"
     ip="10.10.10.10"
     isLoadingAnomaliesData={false}
     loading={false}

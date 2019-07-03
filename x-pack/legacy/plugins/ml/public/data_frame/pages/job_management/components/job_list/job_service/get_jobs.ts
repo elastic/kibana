@@ -7,7 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../../services/ml_api_service';
-import { DataFrameTransformWithId, JobId } from '../../../../../common';
+import {
+  DataFrameTransformWithId,
+  JobId,
+  refreshTransformList$,
+  REFRESH_TRANSFORM_LIST_STATE,
+} from '../../../../../common';
+
 import { DataFrameJobListRow, DataFrameJobState, DataFrameJobStats } from '../common';
 
 interface DataFrameJobStateStats {
@@ -35,6 +41,7 @@ export const getJobsFactory = (
 ): GetJobs => async (forceRefresh = false) => {
   if (forceRefresh === true || blockRefresh === false) {
     try {
+      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.LOADING);
       const jobConfigs: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransforms();
       const jobStats: GetDataFrameTransformsStatsResponse = await ml.dataFrame.getDataFrameTransformsStats();
 
@@ -61,7 +68,9 @@ export const getJobsFactory = (
       );
 
       setDataFrameJobs(tableRows);
+      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
     } catch (e) {
+      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.ERROR);
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.jobsList.errorGettingDataFrameJobsList', {
           defaultMessage: 'An error occurred getting the data frame jobs list: {error}',
