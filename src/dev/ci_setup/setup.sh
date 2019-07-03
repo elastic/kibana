@@ -5,6 +5,9 @@ set -e
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
+# force 7.3 snapshots until 7.4 snapshots are available
+export TEST_ES_BRANCH=7.3.0
+
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
