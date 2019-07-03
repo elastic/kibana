@@ -6,9 +6,12 @@
 
 import React, { SFC, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
 import { JobId, moveToDataFrameWizard, useRefreshTransformList } from '../../../../common';
+import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
@@ -41,6 +44,10 @@ export const DataFrameJobList: SFC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>(DataFrameJobListColumn.id);
   const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const disabled =
+    !checkPermission('canCreateDataFrameJob') ||
+    !checkPermission('canPreviewDataFrameJob') ||
+    !checkPermission('canStartStopDataFrameJob');
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
   // Subscribe to the refresh observable to trigger reloading the jobs list.
@@ -56,10 +63,18 @@ export const DataFrameJobList: SFC = () => {
   if (dataFrameJobs.length === 0) {
     return (
       <EuiEmptyPrompt
-        title={<h2>No data frame jobs found</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptTitle', {
+              defaultMessage: 'No data frame transforms found',
+            })}
+          </h2>
+        }
         actions={[
-          <EuiButtonEmpty onClick={moveToDataFrameWizard}>
-            Create your first data frame job
+          <EuiButtonEmpty onClick={moveToDataFrameWizard} isDisabled={disabled}>
+            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
+              defaultMessage: 'Create your first data frame transform',
+            })}
           </EuiButtonEmpty>,
         ]}
         data-test-subj="mlNoDataFrameJobsFound"

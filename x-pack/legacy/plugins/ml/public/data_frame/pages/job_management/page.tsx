@@ -40,7 +40,7 @@ export const Page: SFC = () => {
               <h1>
                 <FormattedMessage
                   id="xpack.ml.dataframe.jobsList.dataFrameTitle"
-                  defaultMessage="Data frame jobs"
+                  defaultMessage="Data frame transforms"
                 />
                 <span>&nbsp;</span>
                 <EuiBetaBadge
