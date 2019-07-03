@@ -66,6 +66,8 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       host: configValue.host,
       maxPayload: configValue.maxPayloadBytes,
       port: configValue.port,
+      keepaliveTimeout: configValue.keepaliveTimeout,
+      socketTimeout: configValue.socketTimeout,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl && LegacyObjectToConfigAdapter.transformSSL(configValue.ssl),
     };

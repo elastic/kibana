@@ -209,6 +209,9 @@ Specify the position of the subdomain the URL with the token `{s}`.
 
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the back end server.
 
+`server.keepaliveTimeout:`:: *Default: "120000"* The number of milliseconds to wait for additional data before restarting
+the `server.socketTimeout` counter.
+
 `server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes for incoming server requests.
 
 `server.name:`:: *Default: "your-hostname"* A human-readable display name that identifies this Kibana instance.
@@ -216,6 +219,9 @@ Specify the position of the subdomain the URL with the token `{s}`.
 `server.port:`:: *Default: 5601* Kibana is served by a back end server. This setting specifies the port to use.
 
 `server.ssl.enabled:`:: *Default: "false"* Enables SSL for outgoing requests from the Kibana server to the browser. When set to `true`, `server.ssl.certificate` and `server.ssl.key` are required
+
+`server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
+inactive socket.
 
 `server.ssl.cert:`:: Path to the PEM-format SSL certificate. This file enables
 SSL for outgoing requests from the Kibana server to the browser.

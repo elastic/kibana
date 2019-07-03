@@ -22,7 +22,7 @@ import { Server, ServerOptions } from 'hapi';
 import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getServerOptions } from './http_tools';
+import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { Router } from './router';
 
 export interface HttpServerInfo {
@@ -52,7 +52,8 @@ export class HttpServer {
     this.log.debug('starting http server');
 
     const serverOptions = getServerOptions(config);
-    this.server = createServer(serverOptions);
+    const listenerOptions = getListenerOptions(config);
+    this.server = createServer(serverOptions, listenerOptions);
 
     this.setupBasePathRewrite(this.server, config);
 
