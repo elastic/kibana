@@ -34,6 +34,7 @@ import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
+import { get } from 'lodash';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
