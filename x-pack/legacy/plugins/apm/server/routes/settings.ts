@@ -8,15 +8,15 @@ import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
 import Joi from 'joi';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getServiceNames } from '../lib/settings/cm/get_service_names';
-import { createConfiguration } from '../lib/settings/cm/create_configuration';
-import { updateConfiguration } from '../lib/settings/cm/update_configuration';
-import { CentralConfigurationIntake } from '../lib/settings/cm/configuration';
-import { searchConfigurations } from '../lib/settings/cm/search';
-import { listConfigurations } from '../lib/settings/cm/list_configurations';
-import { getEnvironments } from '../lib/settings/cm/get_environments';
-import { deleteConfiguration } from '../lib/settings/cm/delete_configuration';
-import { createCmIndex } from '../lib/settings/cm/create_cm_index';
+import { getServiceNames } from '../lib/settings/agent_configuration/get_service_names';
+import { createConfiguration } from '../lib/settings/agent_configuration/create_configuration';
+import { updateConfiguration } from '../lib/settings/agent_configuration/update_configuration';
+import { AgentConfigurationIntake } from '../lib/settings/agent_configuration/configuration_types';
+import { searchConfigurations } from '../lib/settings/agent_configuration/search';
+import { listConfigurations } from '../lib/settings/agent_configuration/list_configurations';
+import { getEnvironments } from '../lib/settings/agent_configuration/get_environments';
+import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
+import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
@@ -27,7 +27,7 @@ const defaultErrorHandler = (err: Error) => {
 export function initSettingsApi(core: InternalCoreSetup) {
   const { server } = core.http;
 
-  createCmIndex(server);
+  createApmAgentConfigurationIndex(server);
 
   // get list of configurations
   server.route({
@@ -127,7 +127,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
     },
     handler: async req => {
       const setup = setupRequest(req);
-      const configuration = req.payload as CentralConfigurationIntake;
+      const configuration = req.payload as AgentConfigurationIntake;
       return await createConfiguration({
         configuration,
         setup
@@ -150,7 +150,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
     handler: async req => {
       const setup = setupRequest(req);
       const { configurationId } = req.params;
-      const configuration = req.payload as CentralConfigurationIntake;
+      const configuration = req.payload as AgentConfigurationIntake;
       return await updateConfiguration({
         configurationId,
         configuration,

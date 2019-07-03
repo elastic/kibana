@@ -6,7 +6,7 @@
 
 import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../typings/common';
-import { CentralConfigurationIntake } from './configuration';
+import { AgentConfigurationIntake } from './configuration_types';
 
 export type CMUpdateConfigurationAPIResponse = PromiseReturnType<
   typeof updateConfiguration
@@ -17,7 +17,7 @@ export async function updateConfiguration({
   setup
 }: {
   configurationId: string;
-  configuration: CentralConfigurationIntake;
+  configuration: AgentConfigurationIntake;
   setup: Setup;
 }) {
   const { client, config } = setup;
@@ -26,7 +26,7 @@ export async function updateConfiguration({
     type: '_doc',
     id: configurationId,
     refresh: true,
-    index: config.get<string>('apm_oss.cmIndex'),
+    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
       '@timestamp': Date.now(),
       ...configuration

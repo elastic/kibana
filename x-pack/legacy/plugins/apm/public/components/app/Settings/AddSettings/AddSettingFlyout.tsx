@@ -123,7 +123,7 @@ export function AddSettingsFlyout({
           >
             {i18n.translate('xpack.apm.settings.cm.flyOut.betaCallOutText', {
               defaultMessage:
-                'Please note only sample rate configuration is supported in this first version. We will extend support for central configuration in future releases. Please be aware of bugs.'
+                'Please note only sample rate configuration is supported in this first version. We will extend support for agent configuration in future releases. Please be aware of bugs.'
             })}
           </EuiCallOut>
           <EuiHorizontalRule margin="m" />

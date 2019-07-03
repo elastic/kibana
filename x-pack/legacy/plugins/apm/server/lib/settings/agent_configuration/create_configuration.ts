@@ -6,7 +6,7 @@
 
 import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../typings/common';
-import { CentralConfigurationIntake } from './configuration';
+import { AgentConfigurationIntake } from './configuration_types';
 
 export type CMCreateConfigurationAPIResponse = PromiseReturnType<
   typeof createConfiguration
@@ -15,7 +15,7 @@ export async function createConfiguration({
   configuration,
   setup
 }: {
-  configuration: CentralConfigurationIntake;
+  configuration: AgentConfigurationIntake;
   setup: Setup;
 }) {
   const { client, config } = setup;
@@ -23,7 +23,7 @@ export async function createConfiguration({
   const params = {
     type: '_doc',
     refresh: true,
-    index: config.get<string>('apm_oss.cmIndex'),
+    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
       '@timestamp': Date.now(),
       ...configuration

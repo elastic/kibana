@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMUpdateConfigurationAPIResponse } from '../../../../server/lib/settings/cm/update_configuration';
+import { CMUpdateConfigurationAPIResponse } from '../../../../server/lib/settings/agent_configuration/update_configuration';
 import { callApi } from '../callApi';
-import { CentralConfigurationIntake } from '../../../../server/lib/settings/cm/configuration';
-import { CMServicesAPIResponse } from '../../../../server/lib/settings/cm/get_service_names';
-import { CMCreateConfigurationAPIResponse } from '../../../../server/lib/settings/cm/create_configuration';
-import { CMListAPIResponse } from '../../../../server/lib/settings/cm/list_configurations';
-import { CMEnvironmentsAPIResponse } from '../../../../server/lib/settings/cm/get_environments';
+import { AgentConfigurationIntake } from '../../../../server/lib/settings/agent_configuration/configuration_types';
+import { CMServicesAPIResponse } from '../../../../server/lib/settings/agent_configuration/get_service_names';
+import { CMCreateConfigurationAPIResponse } from '../../../../server/lib/settings/agent_configuration/create_configuration';
+import { CMListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
+import { CMEnvironmentsAPIResponse } from '../../../../server/lib/settings/agent_configuration/get_environments';
 
 export async function loadCMServices() {
   return callApi<CMServicesAPIResponse>({
@@ -29,7 +29,7 @@ export async function loadCMEnvironments({
 }
 
 export async function createCMConfiguration(
-  configuration: CentralConfigurationIntake
+  configuration: AgentConfigurationIntake
 ) {
   return callApi<CMCreateConfigurationAPIResponse>({
     pathname: `/api/apm/settings/cm/new`,
@@ -40,7 +40,7 @@ export async function createCMConfiguration(
 
 export async function updateCMConfiguration(
   configurationId: string,
-  configuration: CentralConfigurationIntake
+  configuration: AgentConfigurationIntake
 ) {
   return callApi<CMUpdateConfigurationAPIResponse>({
     pathname: `/api/apm/settings/cm/${configurationId}`,

@@ -25,7 +25,7 @@ import { isEmpty } from 'lodash';
 import { loadCMList } from '../../../services/rest/apm/settings';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-import { CMListAPIResponse } from '../../../../server/lib/settings/cm/list_configurations';
+import { CMListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
 import { APMLink } from '../../shared/Links/APMLink';
 
