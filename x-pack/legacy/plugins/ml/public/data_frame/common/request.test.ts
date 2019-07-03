@@ -115,6 +115,7 @@ describe('Data Frame: Common', () => {
     const request = getDataFrameRequest('the-index-pattern-title', pivotState, jobDetailsState);
 
     expect(request).toEqual({
+      description: 'the-job-description',
       dest: { index: 'the-destination-index' },
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
