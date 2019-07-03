@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 
 import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
-import { mergeFieldsWithHit } from '../../utils/build_query';
+import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
 
@@ -26,10 +26,11 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
     request: FrameworkRequest,
     options: RequestOptions
   ): Promise<AuthenticationsData> {
+    const dsl = buildQuery(options);
     const response = await this.framework.callWithRequest<AuthenticationData, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      dsl
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
@@ -56,7 +57,12 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
     const hasNextPage = authenticationEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
     const edges = authenticationEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
     return {
+      inspect,
       edges,
       totalCount,
       pageInfo: {
