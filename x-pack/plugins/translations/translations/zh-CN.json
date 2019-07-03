@@ -6672,7 +6672,6 @@
     "xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage": "{successesJobsCount, plural, one{{successJob}} other{# 个作业}}{actionTextPT}已成功",
     "xpack.ml.jobsList.actionFailedNotificationMessage": "{failureId} 未能{actionText}",
     "xpack.ml.jobsList.actionsLabel": "操作",
-    "xpack.ml.jobsList.cannotSelectJobTooltip": "无法选择作业",
     "xpack.ml.jobsList.cloneJobErrorMessage": "无法克隆 {jobId}。找不到作业",
     "xpack.ml.jobsList.closeActionStatusText": "关闭",
     "xpack.ml.jobsList.closedActionStatusText": "已关闭",
