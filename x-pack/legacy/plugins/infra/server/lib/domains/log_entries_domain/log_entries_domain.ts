@@ -161,7 +161,9 @@ export class InfraLogEntriesDomain {
             requiredFields,
             startKey,
             'desc',
-            highlight.countBefore
+            highlight.countBefore,
+            query,
+            highlight.query
           ),
           this.adapter.getContainedLogEntryDocuments(
             request,
@@ -178,7 +180,9 @@ export class InfraLogEntriesDomain {
             requiredFields,
             endKey,
             'asc',
-            highlight.countAfter
+            highlight.countAfter,
+            query,
+            highlight.query
           ),
         ]);
         const entries = [...documentsBefore, ...documents, ...documentsAfter].map(

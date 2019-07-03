@@ -47,7 +47,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     start: TimeKey,
     direction: 'asc' | 'desc',
     maxCount: number,
-    filterQuery: LogEntryQuery,
+    filterQuery?: LogEntryQuery,
     highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]> {
     if (maxCount <= 0) {
@@ -86,7 +86,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     fields: string[],
     start: TimeKey,
     end: TimeKey,
-    filterQuery: LogEntryQuery,
+    filterQuery?: LogEntryQuery,
     highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]> {
     const documents = await this.getLogEntryDocumentsBetween(
@@ -110,7 +110,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     start: number,
     end: number,
     bucketSize: number,
-    filterQuery: LogEntryQuery
+    filterQuery?: LogEntryQuery
   ): Promise<InfraDateRangeAggregationBucket[]> {
     const bucketIntervalStarts = timeMilliseconds(new Date(start), new Date(end), bucketSize);
 
