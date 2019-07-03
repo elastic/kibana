@@ -89,7 +89,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
         await ml.dataFrame.createDataFrameTransformsJob(jobId, jobConfig);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.jobCreateForm.createJobSuccessMessage', {
-            defaultMessage: 'Data frame job {jobId} created successfully.',
+            defaultMessage: 'Data frame transform {jobId} created successfully.',
             values: { jobId },
           })
         );
@@ -97,7 +97,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
         setCreated(false);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.jobCreateForm.createJobErrorMessage', {
-            defaultMessage: 'An error occurred creating the data frame job {jobId}: {error}',
+            defaultMessage: 'An error occurred creating the data frame transform {jobId}: {error}',
             values: { jobId, error: JSON.stringify(e) },
           })
         );
@@ -118,7 +118,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
         await ml.dataFrame.startDataFrameTransformsJob(jobId);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.jobCreateForm.startJobSuccessMessage', {
-            defaultMessage: 'Data frame job {jobId} started successfully.',
+            defaultMessage: 'Data frame transform {jobId} started successfully.',
             values: { jobId },
           })
         );
@@ -126,7 +126,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
         setStarted(false);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.jobCreateForm.startJobErrorMessage', {
-            defaultMessage: 'An error occurred starting the data frame job {jobId}: {error}',
+            defaultMessage: 'An error occurred starting the data frame transform {jobId}: {error}',
             values: { jobId, error: JSON.stringify(e) },
           })
         );
@@ -180,16 +180,20 @@ export const JobCreateForm: SFC<Props> = React.memo(
       }
     };
 
-    if (started === true && progressPercentComplete === undefined) {
+    const isBatchTransform = typeof jobConfig.sync === 'undefined';
+
+    if (started === true && progressPercentComplete === undefined && isBatchTransform) {
       // wrapping in function so we can keep the interval id in local scope
       function startProgressBar() {
         const interval = setInterval(async () => {
           try {
             const stats = await ml.dataFrame.getDataFrameTransformsStats(jobId);
-            const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
-            setProgressPercentComplete(percent);
-            if (percent >= 100) {
-              clearInterval(interval);
+            if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
+              const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
+              setProgressPercentComplete(percent);
+              if (percent >= 100) {
+                clearInterval(interval);
+              }
             }
           } catch (e) {
             toastNotifications.addDanger(
@@ -233,7 +237,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
                   'xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameDescription',
                   {
                     defaultMessage:
-                      'Creates and starts the data frame job. A data frame job will increase search and indexing load in your cluster. Please stop the job if excessive load is experienced. After the job is started, you will be offered options to continue exploring the data frame job.',
+                      'Creates and starts the data frame transform. A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the data frame transform.',
                   }
                 )}
               </EuiText>
@@ -253,7 +257,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameDescription', {
                   defaultMessage:
-                    'Starts the data frame job. A data frame job will increase search and indexing load in your cluster. Please stop the job if excessive load is experienced. After the job is started, you will be offered options to continue exploring the data frame job.',
+                    'Starts the data frame transform. A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the data frame transform.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -271,7 +275,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
             <EuiText color="subdued" size="s">
               {i18n.translate('xpack.ml.dataframe.jobCreateForm.createDataFrameDescription', {
                 defaultMessage:
-                  'Create the data frame job without starting it. You will be able to start the job later by returning to the data frame jobs list.',
+                  'Create the data frame transform without starting it. You will be able to start the transform later by returning to the data frame transforms list.',
               })}
             </EuiText>
           </EuiFlexItem>
@@ -297,13 +301,13 @@ export const JobCreateForm: SFC<Props> = React.memo(
                 'xpack.ml.dataframe.jobCreateForm.copyJobConfigToClipBoardDescription',
                 {
                   defaultMessage:
-                    'Copies to the clipboard the Kibana Dev Console command for creating the job.',
+                    'Copies to the clipboard the Kibana Dev Console command for creating the transform.',
                 }
               )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {progressPercentComplete !== undefined && (
+        {progressPercentComplete !== undefined && isBatchTransform && (
           <Fragment>
             <EuiSpacer size="m" />
             <EuiText size="xs">
@@ -331,12 +335,12 @@ export const JobCreateForm: SFC<Props> = React.memo(
                 <EuiCard
                   icon={<EuiIcon size="xxl" type="list" />}
                   title={i18n.translate('xpack.ml.dataframe.jobCreateForm.jobsListCardTitle', {
-                    defaultMessage: 'Data frame jobs',
+                    defaultMessage: 'Data frame transforms',
                   })}
                   description={i18n.translate(
                     'xpack.ml.dataframe.jobCreateForm.jobManagementCardDescription',
                     {
-                      defaultMessage: 'Return to the data frame job management page.',
+                      defaultMessage: 'Return to the data frame transform management page.',
                     }
                   )}
                   onClick={moveToDataFrameJobsList}

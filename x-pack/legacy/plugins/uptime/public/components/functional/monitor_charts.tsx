@@ -6,46 +6,62 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
+import DateMath from '@elastic/datemath';
+import { Moment } from 'moment';
 import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
-import { ChecksChart } from './charts/checks_chart';
+import { UptimeSettingsContext } from '../../contexts';
+import { SnapshotHistogram } from './charts/snapshot_histogram';
 
 interface MonitorChartsQueryResult {
   monitorChartsData?: MonitorChart;
 }
 
 interface MonitorChartsProps {
+  monitorId: string;
   danger: string;
   mean: string;
   range: string;
   success: string;
+  dateRangeStart: string;
+  dateRangeEnd: string;
 }
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
 export const MonitorChartsComponent = (props: Props) => {
-  const { danger, data, mean, range, success } = props;
+  const { data, mean, range, monitorId, dateRangeStart, dateRangeEnd } = props;
   if (data && data.monitorChartsData) {
     const {
-      monitorChartsData: { durationArea, durationLine, status },
+      monitorChartsData: { locationDurationLines },
     } = data;
 
+    const { colors } = useContext(UptimeSettingsContext);
+    const parseDateRange = (r: string): number => {
+      const parsed: Moment | undefined = DateMath.parse(r);
+      return parsed ? parsed.valueOf() : 0;
+    };
     return (
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem style={{ height: 400 }}>
             <DurationChart
-              durationArea={durationArea}
-              durationLine={durationLine}
+              locationDurationLines={locationDurationLines}
               meanColor={mean}
               rangeColor={range}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <ChecksChart dangerColor={danger} status={status} successColor={success} />
+            <SnapshotHistogram
+              absoluteStartDate={parseDateRange(dateRangeStart)}
+              absoluteEndDate={parseDateRange(dateRangeEnd)}
+              successColor={colors.success}
+              dangerColor={colors.danger}
+              variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

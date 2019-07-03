@@ -221,3 +221,22 @@ export const hasDirtyState = createSelector(
     });
   }
 );
+
+export const areLayersLoaded = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  getMapZoom,
+  (layerList, waitingForMapReadyLayerList, zoom) => {
+    if (waitingForMapReadyLayerList.length) {
+      return false;
+    }
+
+    for (let i = 0; i < layerList.length; i++) {
+      const layer = layerList[i];
+      if (layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.isDataLoaded()) {
+        return false;
+      }
+    }
+    return true;
+  }
+);

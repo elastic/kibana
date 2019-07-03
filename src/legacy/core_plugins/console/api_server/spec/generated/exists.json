@@ -2,14 +2,13 @@
   "exists": {
     "url_params": {
       "stored_fields": [],
-      "parent": "",
       "preference": "random",
       "realtime": "__flag__",
       "refresh": "__flag__",
       "routing": "",
       "_source": [],
-      "_source_exclude": [],
-      "_source_include": [],
+      "_source_excludes": [],
+      "_source_includes": [],
       "version": "",
       "version_type": [
         "internal",
@@ -22,7 +21,7 @@
       "HEAD"
     ],
     "patterns": [
-      "{indices}/{type}/{id}"
+      "{indices}/_doc/{id}"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
   }

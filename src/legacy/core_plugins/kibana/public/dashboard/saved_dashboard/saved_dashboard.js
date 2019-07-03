@@ -84,10 +84,6 @@ module.factory('SavedDashboard', function (Private) {
     description: 'text',
     panelsJSON: 'text',
     optionsJSON: 'text',
-    // Note: this field is no longer used for dashboards created or saved in version 6.2 onward.  We keep it around
-    // due to BWC, until we can ensure a migration step for all old dashboards saved in an index, as well as
-    // migration steps for importing.  See https://github.com/elastic/kibana/issues/15204 for more info.
-    uiStateJSON: 'text',
     version: 'integer',
     timeRestore: 'boolean',
     timeTo: 'keyword',

@@ -16,7 +16,17 @@ interface GlobalTimeArgs {
   from: number;
   to: number;
   setQuery: (
-    { id, loading, refetch }: { id: string; loading: boolean; refetch: inputsModel.Refetch }
+    {
+      id,
+      inspect,
+      loading,
+      refetch,
+    }: {
+      id: string;
+      inspect: inputsModel.InspectQuery | null;
+      loading: boolean;
+      refetch: inputsModel.Refetch;
+    }
   ) => void;
 }
 
@@ -28,6 +38,7 @@ interface GlobalTimeDispatch {
   setGlobalQuery: ActionCreator<{
     inputId: InputsModelId;
     id: string;
+    inspect: inputsModel.InspectQuery | null;
     loading: boolean;
     refetch: inputsModel.Refetch;
   }>;
@@ -42,7 +53,7 @@ interface GlobalTimeReduxState {
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
 class GlobalTimeComponent extends React.PureComponent<GlobalTimeProps> {
-  public componentDidMount() {
+  public componentWillUnmount() {
     this.props.deleteAllQuery({ id: 'global' });
   }
 
@@ -53,8 +64,8 @@ class GlobalTimeComponent extends React.PureComponent<GlobalTimeProps> {
         {children({
           from,
           to,
-          setQuery: ({ id, loading, refetch }) =>
-            setGlobalQuery({ inputId: 'global', id, loading, refetch }),
+          setQuery: ({ id, inspect, loading, refetch }) =>
+            setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
         })}
       </>
     );

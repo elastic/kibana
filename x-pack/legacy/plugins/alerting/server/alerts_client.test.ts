@@ -60,7 +60,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
-      async execute() {},
+      async executor() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -224,7 +224,7 @@ Object {
           })
           .required(),
       },
-      async execute() {},
+      async executor() {},
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
@@ -237,7 +237,7 @@ Object {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
-      async execute() {},
+      async executor() {},
     });
     savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -252,7 +252,7 @@ Object {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
-      async execute() {},
+      async executor() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -301,7 +301,7 @@ Array [
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
-      async execute() {},
+      async executor() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -586,7 +586,7 @@ describe('update()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
-      async execute() {},
+      async executor() {},
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -708,7 +708,7 @@ Object {
           })
           .required(),
       },
-      async execute() {},
+      async executor() {},
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
