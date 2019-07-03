@@ -79,6 +79,7 @@ export interface AnomaliesTableProps {
   narrowDateRange: NarrowDateRange;
   skip: boolean;
   hostName?: string;
+  ip?: string;
 }
 
 export interface MlCapabilities {
