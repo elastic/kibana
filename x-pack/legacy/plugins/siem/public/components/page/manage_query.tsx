@@ -13,20 +13,28 @@ interface OwnProps {
   id: string;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void;
+  setQuery: (
+    params: {
+      id: string;
+      inspect: inputsModel.InspectQuery | null;
+      loading: boolean;
+      refetch: inputsModel.Refetch;
+    }
+  ) => void;
+  inspect?: inputsModel.InspectQuery;
 }
 
 export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>) {
   class ManageQuery extends React.PureComponent<OwnProps & T> {
     public componentDidUpdate(prevProps: OwnProps) {
-      const { loading, id, refetch, setQuery } = this.props;
+      const { loading, id, refetch, setQuery, inspect = null } = this.props;
       if (prevProps.loading !== loading) {
-        setQuery({ id, loading, refetch });
+        setQuery({ id, inspect, loading, refetch });
       }
     }
 
     public render() {
-      const otherProps = omit(['id', 'refetch', 'setQuery'], this.props);
+      const otherProps = omit(['refetch', 'setQuery'], this.props);
       return <WrappedComponent {...otherProps} />;
     }
   }
