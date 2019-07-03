@@ -6,20 +6,23 @@ beta[] APM Agent configuration allows you to fine-tune your agent configuration 
 Best of all, changes are automatically propagated to your APM agents so there's no need to redeploy.
 
 To get started, simply choose the service and environment you wish to configure.
-Agents will periodically poll APM Server and apply any configuration changes.
 APM Agent configuration takes precedence over any settings set locally in each agent.
 
 [role="screenshot"]
 image::apm/images/apm-agent-configuration.png[APM Agent configuration in Kibana]
 
 IMPORTANT: As this feature is in Beta, a limited number of configuration settings are supported.
-We will extend support in future releases.
+We recommend you watch your agent logs to confirm that configuration has been applied.
 If you have feedback, please reach out in our https://discuss.elastic.co/c/apm[Discuss forum].
 
 [float]
 ==== APM Server setup
 
-This feature requires a {apm-server-ref}setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
+This feature requires {apm-server-ref}setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
+
+Why is additional configuration needed in APM Server?
+That's because APM Server acts as a proxy between the agents and Kibana.
+Kibana communicates any changed settings to APM Server so that your agents only need to poll APM Server to determine which settings have changed.
 
 [float]
 ==== Supported configurations
