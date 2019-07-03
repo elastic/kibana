@@ -1,18 +1,22 @@
 [[role-management-api-delete]]
-=== Delete role
+=== Delete role API
+++++
+<titleabbrev>Delete role</titleabbrev>
+++++
+
+Deletes a {kib} role.
 
 experimental["This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental."]
 
-NOTE: You cannot access this endpoint via the Console in Kibana.
+NOTE: You cannot access the endpoint via the Console in Kibana.
 
-==== Authorization
+[[role-management-api-delete-prereqs]]
+==== Prerequisite 
 
-To use this API, you must have at least the `manage_security` cluster privilege.
+To use the delete role API, you must have the `manage_security` cluster privilege.
 
+[[role-management-api-delete-request-body]]
 ==== Request
-
-To delete a role, submit a DELETE request to the `/api/security/role/<rolename>`
-endpoint:
 
 [source,js]
 --------------------------------------------------
@@ -20,7 +24,7 @@ DELETE /api/security/role/my_admin_role
 --------------------------------------------------
 // KIBANA
 
+[[role-management-api-delete-response-body]]
 ==== Response
 
-If the role is successfully deleted, the response code is `204`; otherwise, the response
-code is 404.
+A successful call returns an HTTP `204` response. An unsuccessful call returns a `404` response.

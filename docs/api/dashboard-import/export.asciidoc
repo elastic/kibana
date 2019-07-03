@@ -10,28 +10,25 @@ experimental[This functionality is *experimental* and may be changed or removed 
 
 NOTE: You cannot access the endpoint via the Console in Kibana.
 
-[float]
-[[dashboard-import-api-export-request]]
+[[dashboard-api-export-request]]
 ==== Request
 
 `GET /api/kibana/dashboards/export`
 
-[float]
-[[dashboard-import-api-export-params]]
+[[dashboard-api-export-params]]
 ==== Query parameters
 
 `dashboard` (Required)::
   (array|string) The IDs of the dashboards that you want to export.
 
-[float]
-[[dashboard-import-api-export-response-body]]
+[[dashboard-api-export-response-body]]
 ==== Response body
 
 The response body includes a top level `objects` property that contains an array of saved objects. The order of the objects is not guaranteed. Use the exact response body as the request body for the corresponding <<dashboard-import-api-import, Import Dashboard API>>.
 
 [float]
-[[dashboard-import-api-export-example]]
-==== Example
+[[dashboard-api-export-example]]
+==== Examples
 
 [source,js]
 --------------------------------------------------
