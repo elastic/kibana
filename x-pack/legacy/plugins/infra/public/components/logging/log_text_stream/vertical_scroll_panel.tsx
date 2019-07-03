@@ -174,12 +174,19 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   public getSnapshotBeforeUpdate(
     prevProps: VerticalScrollPanelProps<Child>
   ): VerticalScrollPanelSnapshot<Child> {
-    if (prevProps.target !== this.props.target && this.props.target) {
+    /** Center the target if:
+     *  1. This component has just finished calculating its height after being first mounted
+     *  2. The target prop changes
+     */
+    if (
+      (prevProps.height === 0 && this.props.height > 0) ||
+      (prevProps.target !== this.props.target && this.props.target)
+    ) {
       return {
         scrollOffset: undefined,
         scrollTarget: this.props.target,
       };
-    } else {
+    } else if (this.props.height > 0) {
       const visibleChildren = this.getVisibleChildren();
 
       if (visibleChildren) {
