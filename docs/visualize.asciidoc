@@ -158,7 +158,7 @@ include::visualize/tilemap.asciidoc[]
 
 include::visualize/regionmap.asciidoc[]
 
-include::visualize/time-series-visual-builder.asciidoc[]
+include::visualize/tsvb.asciidoc[]
 
 include::visualize/tagcloud.asciidoc[]
 
