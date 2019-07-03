@@ -55,6 +55,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   queryFilter: any;
   autoFetch?: boolean;
   pipelineDataLoader?: boolean;
+  abortSignal?: AbortSignal;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -122,6 +123,7 @@ export class EmbeddedVisualizeHandler {
       autoFetch = true,
       pipelineDataLoader = false,
       Private,
+      abortSignal,
     } = params;
 
     this.dataLoaderParams = {
@@ -133,6 +135,7 @@ export class EmbeddedVisualizeHandler {
       uiState,
       aggs: vis.getAggConfig(),
       forceFetch: false,
+      abortSignal,
     };
 
     this.pipelineDataLoader = pipelineDataLoader;

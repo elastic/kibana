@@ -40,6 +40,7 @@ export interface RequestHandlerParams {
   inspectorAdapters?: Adapters;
   metricsAtAllLevels?: boolean;
   visParams?: any;
+  abortSignal?: AbortSignal;
 }
 
 export type RequestHandler = <T>(params: RequestHandlerParams) => T;

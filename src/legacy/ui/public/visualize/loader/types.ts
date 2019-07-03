@@ -98,6 +98,11 @@ export interface VisualizeLoaderParams {
    * cycle happens. Default value: `true`
    */
   autoFetch?: boolean;
+
+  /**
+   * AbortSignal can be provided which allows canceling ongoing process
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**
