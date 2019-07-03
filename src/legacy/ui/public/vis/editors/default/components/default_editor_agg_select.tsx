@@ -102,21 +102,15 @@ function DefaultEditorAggSelect({
 
   const isValid = !!value && !errors.length;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (errors.length) {
-        setTouched();
-      }
-    },
-    [errors.length]
-  );
+  useEffect(() => {
+    if (errors.length) {
+      setTouched();
+    }
+  }, [errors.length]);
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption = get(options, '0.value');
