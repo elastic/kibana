@@ -73,9 +73,3 @@ test('works for conditional types', () => {
     )
   ).toThrowErrorMatchingSnapshot();
 });
-
-test('allows customizing error message', () => {
-  const type = schema.never({ message: 'a rule was deprecated and removed, use [a] instead' });
-
-  expect(() => type.validate(1)).toThrowErrorMatchingSnapshot();
-});

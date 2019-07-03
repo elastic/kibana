@@ -36,7 +36,6 @@ import {
   MapOfOptions,
   MapOfType,
   MaybeType,
-  NeverOptions,
   NeverType,
   NumberOptions,
   NumberType,
@@ -90,8 +89,8 @@ function duration(options?: DurationOptions): Type<Duration> {
   return new DurationType(options);
 }
 
-function never(options?: NeverOptions): Type<never> {
-  return new NeverType(options);
+function never(): Type<never> {
+  return new NeverType();
 }
 
 /**

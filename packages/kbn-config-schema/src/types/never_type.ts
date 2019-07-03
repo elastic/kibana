@@ -18,24 +18,17 @@
  */
 
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
-
-export type NeverOptions = TypeOptions<never> & {
-  message?: string;
-};
+import { Type } from './type';
 
 export class NeverType extends Type<never> {
-  private readonly message?: string;
-  constructor(options: NeverOptions = {}) {
-    const { message, ...typeOptions } = options;
-    super(internals.any().forbidden(), typeOptions);
-    this.message = message;
+  constructor() {
+    super(internals.any().forbidden());
   }
 
   protected handleError(type: string) {
     switch (type) {
       case 'any.unknown':
-        return this.message ? this.message : "a value wasn't expected to be present";
+        return "a value wasn't expected to be present";
     }
   }
 }

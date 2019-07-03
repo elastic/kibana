@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`allows customizing error message 1`] = `"a rule was deprecated and removed, use [a] instead"`;
-
 exports[`throws on any value set 1`] = `"a value wasn't expected to be present"`;
 
 exports[`throws on any value set 2`] = `"a value wasn't expected to be present"`;
