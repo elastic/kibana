@@ -13,7 +13,7 @@ import {
   UpdateSourceInput,
   UpdateSourceMutation,
 } from '../../graphql/types';
-import { useApolloClient } from '../../utils/apollo_context';
+import { DependencyError, useApolloClient } from '../../utils/apollo_context';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { createSourceMutation } from './create_source.gql_query';
 import { sourceQuery } from './query_source.gql_query';
@@ -167,10 +167,3 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 };
 
 export const Source = createContainer(useSource);
-
-class DependencyError extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}

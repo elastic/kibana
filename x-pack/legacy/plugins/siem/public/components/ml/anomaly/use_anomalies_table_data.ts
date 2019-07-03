@@ -12,6 +12,8 @@ import {
   KibanaConfigContext,
   AppKibanaFrameworkAdapter,
 } from '../../../lib/adapters/framework/kibana_framework_adapter';
+import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 
 interface Args {
   influencers: InfluencerInput[] | null;
@@ -48,13 +50,15 @@ export const useAnomaliesTableData = ({
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
+  const capabilities = useContext(MlCapabilitiesContext);
 
   const fetchFunc = async (
     influencersInput: InfluencerInput[] | null,
     earliestMs: number,
     latestMs: number
   ) => {
-    if (influencersInput != null && !skip) {
+    const userPermissions = hasMlUserPermissions(capabilities);
+    if (userPermissions && influencersInput != null && !skip) {
       const data = await anomaliesTableData(
         {
           jobIds: [],
@@ -73,6 +77,8 @@ export const useAnomaliesTableData = ({
         }
       );
       setTableData(data);
+      setLoading(false);
+    } else if (!userPermissions) {
       setLoading(false);
     } else {
       setTableData(null);

@@ -6,17 +6,13 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiInMemoryTableProps, SortDirection } from '@elastic/eui';
+import { SortDirection } from '@elastic/eui';
 import { getFlattenedFields } from '../../../../components/source_index_preview/common';
 import { ml } from '../../../../../services/ml_api_service';
 
-import { DataFramePreviewRequest } from '../../../../common';
+import { DataFramePreviewRequest, useRefreshTransformList } from '../../../../common';
 import { DataFrameTransformWithId } from '../../../../common/job';
-
-interface CompressedTableProps extends EuiInMemoryTableProps {
-  compressed: boolean;
-  error: any;
-}
+import { TransformTable } from './transform_table';
 
 interface Column {
   field: string;
@@ -26,7 +22,6 @@ interface Column {
 }
 
 interface Props {
-  lastUpdate: number;
   transformConfig: DataFrameTransformWithId;
 }
 
@@ -71,12 +66,16 @@ function getDataFromTransform(
   return { groupByArr, previewRequest };
 }
 
-export const PreviewPane: FC<Props> = ({ transformConfig, lastUpdate }) => {
+export const PreviewPane: FC<Props> = ({ transformConfig }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
   const [columns, setColumns] = useState<Column[] | []>([]);
-  const [sort, setSort] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const { isRefresh } = useRefreshTransformList();
 
   async function getPreview() {
     try {
@@ -90,20 +89,15 @@ export const PreviewPane: FC<Props> = ({ transformConfig, lastUpdate }) => {
           return {
             field: k,
             name: k,
-            sortable: false,
+            sortable: true,
             truncateText: true,
           };
         });
-        const sorting = {
-          sort: {
-            field: tableColumns[0].field,
-            direction: SortDirection.ASC,
-          },
-        };
 
         setDataFramePreviewData(resp.preview);
         setColumns(tableColumns);
-        setSort(sorting);
+        setSortField(sortField);
+        setSortDirection(sortDirection);
         setIsLoading(false);
       }
     } catch (error) {
@@ -116,26 +110,59 @@ export const PreviewPane: FC<Props> = ({ transformConfig, lastUpdate }) => {
     }
   }
 
-  useEffect(
-    () => {
+  // Initial load
+  useEffect(() => {
+    getPreview();
+    setIsLoading(true);
+  }, []);
+  // Check for isRefresh on every render. Avoiding setIsLoading(true) because
+  // it causes some weird table flickering.
+  useEffect(() => {
+    if (isRefresh) {
       getPreview();
-    },
-    [lastUpdate]
-  );
+    }
+  });
 
-  const CompressedTable = (EuiInMemoryTable as any) as FC<CompressedTableProps>;
+  const pagination = {
+    initialPageIndex: pageIndex,
+    initialPageSize: pageSize,
+    totalItemCount: dataFramePreviewData.length,
+    pageSizeOptions: [10, 20],
+    hidePerPageOptions: false,
+  };
+
+  const sorting = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
+  };
+
+  const onTableChange = ({
+    page = { index: 0, size: 10 },
+    sort = { field: columns[0].field, direction: SortDirection.ASC },
+  }: {
+    page: { index: number; size: number };
+    sort: { field: string; direction: string };
+  }) => {
+    const { index, size } = page;
+    setPageIndex(index);
+    setPageSize(size);
+
+    const { field, direction } = sort;
+    setSortField(field);
+    setSortDirection(direction);
+  };
 
   return (
-    <CompressedTable
+    <TransformTable
       loading={dataFramePreviewData.length === 0 && isLoading === true}
       compressed
       items={dataFramePreviewData}
       columns={columns}
-      pagination={{
-        initialPageSize: 5,
-        pageSizeOptions: [5, 10, 25],
-      }}
-      sorting={sort}
+      onChange={onTableChange}
+      pagination={pagination}
+      sorting={sorting}
       error={errorMessage}
     />
   );

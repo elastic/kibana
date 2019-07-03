@@ -55,6 +55,7 @@ export interface DataFrameJobListRow {
 export enum DataFrameJobListColumn {
   configDestIndex = 'config.dest.index',
   configSourceIndex = 'config.source.index',
+  description = 'config.description',
   id = 'id',
 }
 
