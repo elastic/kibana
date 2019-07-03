@@ -158,9 +158,13 @@ include::visualize/tilemap.asciidoc[]
 
 include::visualize/regionmap.asciidoc[]
 
+<<<<<<< HEAD
 include::visualize/timelion.asciidoc[]
 
 include::visualize/time-series-visual-builder.asciidoc[]
+=======
+include::visualize/tsvb.asciidoc[]
+>>>>>>> 07e6958c2f... Added task content
 
 include::visualize/tagcloud.asciidoc[]
 
