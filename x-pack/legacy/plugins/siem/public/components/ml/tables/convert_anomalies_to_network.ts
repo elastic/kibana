@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Anomalies, AnomaliesByNetwork, Anomaly } from '../types';
+import { Anomalies, AnomaliesByNetwork, Anomaly, isDestinationOrSource } from '../types';
 import { getNetworkFromInfluencers } from '../influencers/get_network_from_influencers';
 
 export const convertAnomaliesToNetwork = (
@@ -15,10 +15,7 @@ export const convertAnomaliesToNetwork = (
     return [];
   } else {
     return anomalies.anomalies.reduce<AnomaliesByNetwork[]>((accum, item) => {
-      if (
-        (item.entityName === 'source.ip' || item.entityName === 'destination.ip') &&
-        getNetworkFromEntity(item, ip)
-      ) {
+      if (isDestinationOrSource(item.entityName) && getNetworkFromEntity(item, ip)) {
         return [...accum, { ip: item.entityValue, type: item.entityName, anomaly: item }];
       } else {
         const network = getNetworkFromInfluencers(item.influencers, ip);
@@ -33,7 +30,7 @@ export const convertAnomaliesToNetwork = (
 };
 
 export const getNetworkFromEntity = (anomaly: Anomaly, ip?: string): boolean => {
-  if (anomaly.entityName === 'source.ip' || anomaly.entityName === 'destination.ip') {
+  if (isDestinationOrSource(anomaly.entityName)) {
     if (ip == null) {
       return true;
     } else {

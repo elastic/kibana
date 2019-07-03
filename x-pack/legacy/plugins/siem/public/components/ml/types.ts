@@ -112,3 +112,8 @@ export interface MlCapabilities {
   mlFeatureEnabledInSpace: boolean;
   upgradeInProgress: boolean;
 }
+
+const sourceOrDestination = ['source.ip', 'destination.ip'];
+
+export const isDestinationOrSource = (value: string | null): value is DestinationOrSource =>
+  value != null && sourceOrDestination.includes(value);

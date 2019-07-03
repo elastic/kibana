@@ -30,13 +30,11 @@ export const convertAnomaliesToHosts = (
 };
 
 export const getHostNameFromEntity = (anomaly: Anomaly, hostName?: string): boolean => {
-  if (anomaly.entityName === 'host.name') {
-    if (hostName == null) {
-      return true;
-    } else {
-      return anomaly.entityValue === hostName;
-    }
-  } else {
+  if (anomaly.entityName !== 'host.name') {
     return false;
+  } else if (hostName == null) {
+    return true;
+  } else {
+    return anomaly.entityValue === hostName;
   }
 };

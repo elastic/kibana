@@ -10,7 +10,7 @@ import { shallow, mount } from 'enzyme';
 import { EntityDraggable } from './entity_draggable';
 import { TestProviders } from '../../mock/test_providers';
 
-describe('create_influencers', () => {
+describe('entity_draggable', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <EntityDraggable idPrefix="id-prefix" entityName="entity-name" entityValue="entity-value" />
