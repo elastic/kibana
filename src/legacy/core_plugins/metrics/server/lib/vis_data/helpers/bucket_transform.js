@@ -78,11 +78,12 @@ export const bucketTransform = {
   },
   static: bucket => {
     checkMetric(bucket, ['value']);
+    const isDecimalValue = !Number.isInteger(Number(bucket.value));
     return {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          source: bucket.value,
+          source: isDecimalValue ? bucket.value : `${bucket.value}L`,
           lang: 'painless',
         },
         gap_policy: 'skip',
