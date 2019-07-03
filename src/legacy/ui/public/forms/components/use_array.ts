@@ -22,7 +22,7 @@ import { Form } from '../use_form';
 
 interface Props {
   path: string;
-  form: Form;
+  form: Form<any>;
   children: (
     args: {
       rows: Row[];

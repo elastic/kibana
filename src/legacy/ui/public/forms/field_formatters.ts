@@ -17,7 +17,23 @@
  * under the License.
  */
 
-import { Option } from '@elastic/eui/src/components/selectable/types';
+/**
+ * Field formatters are function that are executed each time the field value is set
+ * We can specify as many formatters per field.
+ *
+ * Example
+ * ```ts
+ * const toUppercase = (value: string) => value.toUppercase();
+ * const replaceChar = (regEx: RegExp, newValue: string) => (value: string) => value.replace(regEx, newValue);
+ *
+ * const fieldConfig = {
+ *   formatters: [toUppercase, replaceChar(/A/g, '*')];
+ * };
+ *
+ * // Whenever the field value is set, it will be formatted with the above
+ * // 'abc' => '*BC';
+ * ````
+ */
 
 /**
  * NOTE: this does _not_ play well if we enter the "e" letter in a "number" input
@@ -28,14 +44,3 @@ import { Option } from '@elastic/eui/src/components/selectable/types';
  * @param value The string value to convert to number
  */
 export const toInt = (value: string): number => parseFloat(value);
-
-export const multiSelectOptionsToArrayValue = (value: Option[]) =>
-  value.reduce(
-    (selectedValues, option) => {
-      if (option.checked === 'on') {
-        selectedValues.push(option.label);
-      }
-      return selectedValues;
-    },
-    [] as string[]
-  );

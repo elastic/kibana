@@ -29,7 +29,8 @@ import {
   ValidationError,
 } from './types';
 import { getAt, mapFormFields, unflattenObject } from './utils';
-import { toInt, multiSelectOptionsToArrayValue } from '../field_formatters';
+import { toInt } from '../field_formatters';
+import { multiSelectOptionsToSelectedValue } from '../output_transforms';
 import { FIELD_TYPES, ERROR_TYPES } from '../constants';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
@@ -72,13 +73,11 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const validateCounter = useRef(0);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // If no formatter are provided for certain fields,
-  // we set the default ones.
   const setDefaultFormatter = () => {
     if (formatters.length > 0) {
       return;
     }
-    // Automatically add the "toInt" formatter for numeric fields
+
     if (type === FIELD_TYPES.NUMBER) {
       formatters.push(toInt);
     }
@@ -90,13 +89,17 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     }
 
     if (type === FIELD_TYPES.MULTI_SELECT) {
-      outputTransform = multiSelectOptionsToArrayValue;
+      outputTransform = multiSelectOptionsToSelectedValue;
     }
   };
 
+  // -- INIT
+  // ----------------------------------
   setDefaultFormatter();
   setDefaultOutputTransform();
 
+  // -- HELPERS
+  // ----------------------------------
   const filterErrors = (
     _errors: ValidationError[],
     errorType: string | string[] = ERROR_TYPES.FIELD
@@ -116,6 +119,32 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     });
   };
 
+  const runFormatters = (input: unknown): unknown => {
+    const isEmptyString = typeof input === 'string' && input.trim() === '';
+
+    if (isEmptyString) {
+      return input;
+    }
+    return formatters.reduce((output, formatter) => formatter(output), input);
+  };
+
+  const onValueChange = () => {
+    if (isPristine) {
+      setPristine(false);
+    }
+    setIsUpdating(true);
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(() => {
+      setIsUpdating(false);
+    }, errorDisplayDelay);
+  };
+
+  // -- API
+  // ----------------------------------
   const clearErrors: Field['clearErrors'] = (errorType = ERROR_TYPES.FIELD) => {
     setErrors(previousErrors => filterErrors(previousErrors, errorType));
   };
@@ -232,54 +261,31 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     };
   };
 
-  const runFormatters = (input: unknown): unknown => {
-    const isEmptyString = typeof input === 'string' && input.trim() === '';
-    const isMultiSelect = type === FIELD_TYPES.MULTI_SELECT;
-
-    if (isEmptyString || isMultiSelect) {
-      return input;
-    }
-    return formatters.reduce((output, formatter) => formatter(output), input);
-  };
-
-  const onValueChange = () => {
-    if (isPristine) {
-      setPristine(false);
-    }
-    setIsUpdating(true);
-
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
-
-    debounceTimeout.current = setTimeout(() => {
-      setIsUpdating(false);
-    }, errorDisplayDelay);
-  };
-
   /**
-   * Handler for the form input events change
+   * Handler to change the field value
    *
-   * @param event Form input change event
+   * @param newValue The new value to assign to the field
    */
-  const onChange: Field['onChange'] = event => {
-    onValueChange();
-
-    const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
-      ? event.target.checked
-      : event.target.value;
-
-    setStateValue(runFormatters(newValue));
-  };
-
   const setValue: Field['setValue'] = newValue => {
     onValueChange();
     setStateValue(runFormatters(newValue));
   };
 
-  const getOutputValue: Field['getOutputValue'] = () => {
-    return outputTransform ? outputTransform(value) : value;
+  /**
+   * Form <input /> "onChange" event handler
+   *
+   * @param event Form input change event
+   */
+  const onChange: Field['onChange'] = event => {
+    const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
+      ? event.target.checked
+      : event.target.value;
+
+    setValue(newValue);
   };
+
+  const getOutputValue: Field['getOutputValue'] = () =>
+    outputTransform ? outputTransform(value) : value;
 
   const getErrorsMessages: Field['getErrorsMessages'] = (errorType = ERROR_TYPES.FIELD) => {
     const errorMessages = errors.reduce((messages, error) => {
@@ -295,6 +301,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     return errorMessages ? errorMessages : null;
   };
 
+  // -- EFFECTS
+  // ----------------------------------
   useEffect(
     () => {
       if (isPristine) {
@@ -342,6 +350,8 @@ export const useForm = <T = FormData>({
   const [isValid, setIsValid] = useState(true);
   const fieldsRefs = useRef<FieldsMap>({});
 
+  // -- HELPERS
+  // ----------------------------------
   const fieldsToArray = () => Object.values(fieldsRefs.current);
 
   const stripEmptyFields = (fields: FieldsMap): FieldsMap => {
@@ -359,6 +369,8 @@ export const useForm = <T = FormData>({
     return fields;
   };
 
+  // -- API
+  // ----------------------------------
   const getFormData: Form['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
@@ -403,10 +415,10 @@ export const useForm = <T = FormData>({
   };
 
   /**
-   * Helper to remove all fields whose path starts with
-   * the pattern provided.
+   * Remove all fields whose path starts with the pattern provided.
    * Usefull for removing all the elements of an Array
    * for example (e.g pattern = "colors." => "colors.0, colors.1" would be removed.)
+   *
    * @param pattern The path pattern to match
    */
   const removeFieldsStartingWith: Form['removeFieldsStartingWith'] = pattern => {
@@ -416,14 +428,14 @@ export const useForm = <T = FormData>({
       }
     });
 
-    // Wait next tick to make sure all the fields have their
-    // values updated after the DOM has been updated
+    // As removing a field implies that it is also removed from the DOM
+    // we need to first wait for the the DOM to be updated _before_ validating the form fields.
     setTimeout(() => {
       validateFields();
     });
   };
 
-  const getFields = () => fieldsRefs.current;
+  const getFields: Form['getFields'] = () => fieldsRefs.current;
 
   const setFieldValue: Form['setFieldValue'] = (fieldName, value) => {
     fieldsRefs.current[fieldName].setValue(value);
