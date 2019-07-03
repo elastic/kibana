@@ -25,18 +25,14 @@ import { I18N_RC } from './constants';
 
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
-  const pluginPaths = config.get('plugins.paths');
 
   const translationPaths = await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),
       glob: I18N_RC,
     }),
-    ...pluginPaths.map(cwd => getTranslationPaths({ glob: I18N_RC, cwd })),
-    getTranslationPaths({
-      cwd: fromRoot('plugins'),
-      glob: `*/${I18N_RC}`,
-    }),
+    ...config.get('plugins.paths').map(cwd => getTranslationPaths({ cwd, glob: I18N_RC })),
+    ...config.get('plugins.scanDirs').map(cwd => getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })),
     getTranslationPaths({
       cwd: fromRoot('../kibana-extra'),
       glob: `*/${I18N_RC}`,
