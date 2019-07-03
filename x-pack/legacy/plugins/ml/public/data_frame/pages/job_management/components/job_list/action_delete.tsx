@@ -64,7 +64,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, item }) => {
         content={
           disabled
             ? i18n.translate('xpack.ml.dataframe.jobsList.deleteActionDisabledToolTipContent', {
-                defaultMessage: 'Stop the data frame job in order to delete it.',
+                defaultMessage: 'Stop the data frame transform in order to delete it.',
               })
             : createPermissionFailureMessage('canStartStopDataFrameJob')
         }
@@ -103,7 +103,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, item }) => {
           >
             <p>
               {i18n.translate('xpack.ml.dataframe.jobsList.deleteModalBody', {
-                defaultMessage: `Are you sure you want to delete this job? The job's destination index and optional Kibana index pattern will not be deleted.`,
+                defaultMessage: `Are you sure you want to delete this transform? The transform's destination index and optional Kibana index pattern will not be deleted.`,
               })}
             </p>
           </EuiConfirmModal>

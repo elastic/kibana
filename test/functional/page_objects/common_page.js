@@ -136,20 +136,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         return retry.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           return kibanaServer.uiSettings.getDefaultIndex()
-            .then(function (defaultIndex) {
-              if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
-                if (!defaultIndex) {
-                  // https://github.com/elastic/kibana/issues/7496
-                  // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
-                  // that change.  If we got here, fix it.
-                  log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
-                  log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
-                  return kibanaServer.uiSettings.update({
-                    'defaultIndex': 'logstash-*',
-                  });
-                }
-              }
-            })
             .then(function () {
               log.debug('navigate to: ' + url);
               return browser.get(url);

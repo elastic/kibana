@@ -79,3 +79,34 @@ export interface AnomaliesTableProps {
   narrowDateRange: NarrowDateRange;
   skip: boolean;
 }
+
+export interface MlCapabilities {
+  capabilities: {
+    canGetJobs: boolean;
+    canCreateJob: boolean;
+    canDeleteJob: boolean;
+    canOpenJob: boolean;
+    canCloseJob: boolean;
+    canForecastJob: boolean;
+    canGetDatafeeds: boolean;
+    canStartStopDatafeed: boolean;
+    canUpdateJob: boolean;
+    canUpdateDatafeed: boolean;
+    canPreviewDatafeed: boolean;
+    canGetCalendars: boolean;
+    canCreateCalendar: boolean;
+    canDeleteCalendar: boolean;
+    canGetFilters: boolean;
+    canCreateFilter: boolean;
+    canDeleteFilter: boolean;
+    canFindFileStructure: boolean;
+    canGetDataFrameJobs: boolean;
+    canDeleteDataFrameJob: boolean;
+    canPreviewDataFrameJob: boolean;
+    canCreateDataFrameJob: boolean;
+    canStartStopDataFrameJob: boolean;
+  };
+  isPlatinumOrTrialLicense: boolean;
+  mlFeatureEnabledInSpace: boolean;
+  upgradeInProgress: boolean;
+}

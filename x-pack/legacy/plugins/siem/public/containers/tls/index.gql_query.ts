@@ -16,6 +16,7 @@ export const tlsQuery = gql`
     $sort: TlsSortField!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -47,6 +48,10 @@ export const tlsQuery = gql`
             value
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }
