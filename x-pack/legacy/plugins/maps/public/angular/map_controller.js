@@ -62,7 +62,6 @@ const app = uiModules.get(MAP_APP_PATH, []);
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $route.current.locals.map;
-
   let unsubscribe;
   let initialLayerListConfig;
 
