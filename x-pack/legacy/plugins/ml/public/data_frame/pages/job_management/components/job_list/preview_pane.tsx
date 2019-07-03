@@ -96,8 +96,8 @@ export const PreviewPane: FC<Props> = ({ transformConfig }) => {
 
         setDataFramePreviewData(resp.preview);
         setColumns(tableColumns);
-        setSortField(tableColumns[0].field);
-        setSortDirection(SortDirection.ASC);
+        setSortField(sortField);
+        setSortDirection(sortDirection);
         setIsLoading(false);
       }
     } catch (error) {
