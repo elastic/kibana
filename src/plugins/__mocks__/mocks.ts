@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { createUiNewPlatformMock } from './helpers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { dataPluginMock } from '../data/public/mocks';
 
-export const mock = createUiNewPlatformMock();
-
-jest.doMock('ui/new_platform', () => mock);
+export const pluginsMock = {
+  createSetup: () => ({
+    data: dataPluginMock.createSetupContract(),
+  }),
+  createStart: () => ({
+    data: dataPluginMock.createStartContract(),
+  }),
+};

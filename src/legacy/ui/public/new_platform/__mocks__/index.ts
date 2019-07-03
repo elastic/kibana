@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { createUiNewPlatformMock } from '../mocks/helpers';
+import { createUiNewPlatformMock } from './helpers';
 
 const { npSetup, npStart } = createUiNewPlatformMock();
-
 export { npSetup, npStart };

@@ -18,7 +18,7 @@
  */
 
 import '../../../ui_capabilities.test.mocks';
-import 'ui/new_platform/mocks/cores.test.mocks';
+jest.mock('ui/new_platform');
 
 import { EmbeddableInput } from '../../../embeddables/i_embeddable';
 import { Embeddable } from '../../../embeddables/embeddable';

@@ -18,7 +18,7 @@
  */
 
 import '../ui_capabilities.test.mocks';
-import 'ui/new_platform/mocks/cores.test.mocks';
+jest.mock('ui/new_platform');
 
 import { HelloWorldAction, SayHelloAction, EmptyEmbeddable } from '../test_samples/index';
 
