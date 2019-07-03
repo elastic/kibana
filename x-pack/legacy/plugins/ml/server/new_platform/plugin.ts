@@ -159,14 +159,14 @@ export class Plugin {
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['show'],
         },
         read: {
           savedObject: {
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['show'],
         },
       },
       reserved: {

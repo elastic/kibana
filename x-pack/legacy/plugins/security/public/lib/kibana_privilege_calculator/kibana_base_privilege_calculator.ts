@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { KibanaPrivileges, RoleKibanaPrivilege } from '../../../common/model';
-import { compareActions } from '../../../common/privilege_calculator_utils';
+import { areActionsFullyCovered } from '../../../common/privilege_calculator_utils';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import { PRIVILEGE_SOURCE, PrivilegeExplanation } from './kibana_privilege_calculator_types';
@@ -45,9 +45,20 @@ export class KibanaBasePrivilegeCalculator {
       ...this.kibanaPrivileges.getSpacesPrivileges().getActions(assignedPrivilege),
     ];
 
+    const allFeatureActions: string[] = [];
+    for (const [featureId, featurePrivileges] of Object.entries(privilegeSpec.feature)) {
+      for (const featurePrivilege of featurePrivileges) {
+        const actions = this.kibanaPrivileges
+          .getFeaturePrivileges()
+          .getActions(featureId, featurePrivilege);
+        allFeatureActions.push(...actions)
+      }
+    }
+
     const globalSupercedes =
       this.hasAssignedGlobalBasePrivilege() &&
-      (compareActions(this.assignedGlobalBaseActions, baseActions) < 0 || ignoreAssigned);
+      (areActionsFullyCovered(this.assignedGlobalBaseActions, baseActions)|| ignoreAssigned) &&
+      (areActionsFullyCovered(this.assignedGlobalBaseActions, allFeatureActions) || ignoreAssigned);
 
     if (globalSupercedes) {
       const wasDirectlyAssigned = !ignoreAssigned && baseActions.length > 0;
