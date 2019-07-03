@@ -67,10 +67,14 @@ export class TaskPool {
   };
 
   private async attemptToRun(tasks: TaskRunner[]) {
+    let numWorkersToBeUsed = 0;
+
     const promises = tasks.map(async task => {
-      if (this.availableWorkers < task.numWorkers) {
+      if (this.availableWorkers - numWorkersToBeUsed < task.numWorkers) {
         return false;
       }
+
+      numWorkersToBeUsed += task.numWorkers;
 
       if (await task.claimOwnership()) {
         this.running.add(task);
