@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButtonEmpty
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -12,6 +17,7 @@ import { HistoryTabs, IHistoryTab } from '../../shared/HistoryTabs';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
+import { APMLink } from '../../shared/Links/APMLink';
 
 const homeTabs: IHistoryTab[] = [
   {
@@ -32,6 +38,10 @@ const homeTabs: IHistoryTab[] = [
   }
 ];
 
+const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
+  defaultMessage: 'Settings'
+});
+
 export function Home() {
   return (
     <div>
@@ -41,6 +51,13 @@ export function Home() {
             <EuiTitle size="l">
               <h1>APM</h1>
             </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <APMLink path="/settings">
+              <EuiButtonEmpty size="s" color="primary" iconType="gear">
+                {SETTINGS_LINK_LABEL}
+              </EuiButtonEmpty>
+            </APMLink>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SetupInstructionsLink />

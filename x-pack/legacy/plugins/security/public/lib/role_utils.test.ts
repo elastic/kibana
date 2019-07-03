@@ -5,7 +5,13 @@
  */
 
 import { Role } from '../../common/model';
-import { copyRole, isReadOnlyRole, isReservedRole, isRoleEnabled } from './role_utils';
+import {
+  copyRole,
+  isReadOnlyRole,
+  isReservedRole,
+  isRoleEnabled,
+  prepareRoleClone,
+} from './role_utils';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {
@@ -124,6 +130,52 @@ describe('role', () => {
       role.elasticsearch.indices[0].names = ['something else'];
 
       expect(result).not.toEqual(role);
+    });
+  });
+
+  describe('prepareRoleClone', () => {
+    it('should return a copy of the role, with a blank role name', () => {
+      const role: Role = {
+        name: 'my_role',
+        elasticsearch: {
+          cluster: ['all'],
+          indices: [{ names: ['index*'], privileges: ['all'] }],
+          run_as: ['user'],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['default'],
+            base: ['foo'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            base: ['read'],
+            feature: {},
+          },
+        ],
+        metadata: {
+          _reserved: true,
+        },
+        transient_metadata: {
+          enabled: false,
+        },
+      };
+
+      const { name: originalName, ...originalRest } = role;
+
+      const result = prepareRoleClone(role);
+      const { name, ...rest } = result;
+
+      expect(originalName).toEqual('my_role');
+      expect(name).toEqual('');
+
+      expect(rest).toEqual(originalRest);
     });
   });
 });
