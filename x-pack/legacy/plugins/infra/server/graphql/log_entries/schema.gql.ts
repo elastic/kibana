@@ -72,8 +72,14 @@ export const logEntriesSchema = gql`
     columns: [InfraLogEntryColumn!]!
   }
 
+  "A highlighting definition"
   input InfraLogEntryHighlightInput {
+    "The query to highlight by"
     query: String!
+    "The number of highlighted documents to include beyond the beginning of the interval"
+    countBefore: Int!
+    "The number of highlighted documents to include beyond the end of the interval"
+    countAfter: Int!
   }
 
   "A log summary bucket"

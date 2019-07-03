@@ -220,7 +220,7 @@ const isFieldSegment = (segment: InfraLogMessageSegment): segment is InfraLogMes
 
 const parseHighlightInputs = (highlightInputs: InfraLogEntryHighlightInput[]) =>
   highlightInputs
-    ? highlightInputs.reduce<Array<{ query: JsonObject }>>(
+    ? highlightInputs.reduce<Array<{ query: JsonObject; countBefore: number; countAfter: number }>>(
         (parsedHighlightInputs, highlightInput) => {
           const parsedQuery = parseFilterQuery(highlightInput.query);
           if (parsedQuery) {
