@@ -19,6 +19,7 @@ import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
@@ -26,6 +27,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
+import { ChartsTimeContextProvider } from '../../../context/ChartsTimeContext';
 
 interface Props {
   urlParams: IUrlParams;
@@ -113,12 +115,18 @@ export function TransactionOverview({
         </EuiFormRow>
       ) : null}
 
-      <TransactionCharts
-        hasMLJob={hasMLJob}
-        charts={transactionOverviewCharts}
-        location={location}
-        urlParams={urlParams}
-      />
+      <ChartsTimeContextProvider>
+        <TransactionBreakdown initialIsOpen={true} />
+
+        <EuiSpacer size="s" />
+
+        <TransactionCharts
+          hasMLJob={hasMLJob}
+          charts={transactionOverviewCharts}
+          location={location}
+          urlParams={urlParams}
+        />
+      </ChartsTimeContextProvider>
 
       <EuiSpacer size="s" />
 

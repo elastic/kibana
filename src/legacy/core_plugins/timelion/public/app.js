@@ -44,9 +44,6 @@ import 'ui/kbn_top_nav';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 
 import rootTemplate from 'plugins/timelion/index.html';
-import saveTemplate from 'plugins/timelion/partials/save_sheet.html';
-import loadTemplate from 'plugins/timelion/partials/load_sheet.html';
-import sheetTemplate from 'plugins/timelion/partials/sheet_options.html';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -54,6 +51,9 @@ require('plugins/timelion/directives/fullscreen/fullscreen');
 require('plugins/timelion/directives/timelion_expression_input');
 require('plugins/timelion/directives/timelion_help/timelion_help');
 require('plugins/timelion/directives/timelion_interval/timelion_interval');
+require('plugins/timelion/directives/timelion_save_sheet');
+require('plugins/timelion/directives/timelion_load_sheet');
+require('plugins/timelion/directives/timelion_options_sheet');
 
 document.title = 'Timelion - Kibana';
 
@@ -196,7 +196,11 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.saveSheetButtonAriaLabel', {
         defaultMessage: 'Save Sheet',
       }),
-      template: saveTemplate,
+      run: () => {
+        const curState = $scope.menus.showSave;
+        $scope.closeMenus();
+        $scope.menus.showSave = !curState;
+      },
       testId: 'timelionSaveButton',
     };
 
@@ -255,7 +259,11 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.openSheetButtonAriaLabel', {
         defaultMessage: 'Open Sheet',
       }),
-      template: loadTemplate,
+      run: () => {
+        const curState = $scope.menus.showLoad;
+        $scope.closeMenus();
+        $scope.menus.showLoad = !curState;
+      },
       testId: 'timelionOpenButton',
     };
 
@@ -267,7 +275,11 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.optionsButtonAriaLabel', {
         defaultMessage: 'Options',
       }),
-      template: sheetTemplate,
+      run: () => {
+        const curState = $scope.menus.showOptions;
+        $scope.closeMenus();
+        $scope.menus.showOptions = !curState;
+      },
       testId: 'timelionOptionsButton',
     };
 
@@ -279,7 +291,11 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.helpButtonAriaLabel', {
         defaultMessage: 'Help',
       }),
-      template: '<timelion-help></timelion-help>',
+      run: () => {
+        const curState = $scope.menus.showHelp;
+        $scope.closeMenus();
+        $scope.menus.showHelp = !curState;
+      },
       testId: 'timelionDocsButton',
     };
 
@@ -307,6 +323,19 @@ app.controller('timelion', function (
         $scope.setPage(0);
         $scope.kbnTopNav.close('help');
       }
+    };
+
+    $scope.menus = {
+      showHelp: false,
+      showSave: false,
+      showLoad: false,
+      showOptions: false,
+    };
+
+    $scope.closeMenus = () => {
+      _.forOwn($scope.menus, function (value, key) {
+        $scope.menus[key] = false;
+      });
     };
   };
 

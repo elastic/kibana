@@ -20,18 +20,20 @@ const initialState: BlameState = {
   loading: false,
 };
 
-export const blame = handleActions<BlameState, any>(
+type BlameStatePayload = GitBlame[] & Error;
+
+export const blame = handleActions<BlameState, BlameStatePayload>(
   {
-    [String(loadBlame)]: (state: BlameState) =>
+    [String(loadBlame)]: state =>
       produce<BlameState>(state, draft => {
         draft.loading = true;
       }),
-    [String(loadBlameSuccess)]: (state: BlameState, action: Action<GitBlame[]>) =>
-      produce<BlameState>(state, (draft: BlameState) => {
+    [String(loadBlameSuccess)]: (state, action: Action<GitBlame[]>) =>
+      produce<BlameState>(state, draft => {
         draft.blames = action.payload!;
         draft.loading = false;
       }),
-    [String(loadBlameFailed)]: (state: BlameState, action: Action<Error>) =>
+    [String(loadBlameFailed)]: (state, action: Action<Error>) =>
       produce<BlameState>(state, draft => {
         draft.loading = false;
         draft.error = action.payload;

@@ -23,6 +23,7 @@ import { InstallManager } from './install_manager';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { enabledLanguageServers, LanguageServerDefinition } from './language_servers';
 import { ILanguageServerHandler } from './proxy';
+import { WorkspaceStatus } from './request_expander';
 
 export interface LanguageServerHandlerMap {
   [workspaceUri: string]: Promise<ILanguageServerHandler>;
@@ -186,8 +187,12 @@ export class LanguageServerController implements ILanguageServerHandler {
     return status;
   }
 
-  public supportLanguage(lang: string) {
-    return this.languageServerMap[lang] !== undefined;
+  public getLanguageServerDef(lang: string): LanguageServerDefinition | null {
+    const data = this.languageServerMap[lang];
+    if (data) {
+      return data.definition;
+    }
+    return null;
   }
 
   private async findOrCreateHandler(
@@ -253,5 +258,31 @@ export class LanguageServerController implements ILanguageServerHandler {
     } else {
       throw new ResponseError(UnknownFileLanguage, `unsupported language ${lang}`);
     }
+  }
+
+  public async initializeState(workspacePath: string) {
+    const result: { [lang: string]: WorkspaceStatus } = {};
+    for (const languageServer of this.languageServers) {
+      if (languageServer.languageServerHandlers) {
+        if (languageServer.builtinWorkspaceFolders) {
+          const handler = await (languageServer.languageServerHandlers as Promise<
+            ILanguageServerHandler
+          >);
+          result[languageServer.definition.name] = (await handler.initializeState!(
+            workspacePath
+          )) as WorkspaceStatus;
+        } else {
+          const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
+          const realPath = fs.realpathSync(workspacePath);
+          const handler = handlers[realPath];
+          if (handler) {
+            result[languageServer.definition.name] = (await handler).initializeState!(
+              workspacePath
+            ) as WorkspaceStatus;
+          }
+        }
+      }
+    }
+    return result;
   }
 }

@@ -16,7 +16,7 @@ import {
   WorkerProgress,
   WorkerReservedProgress,
 } from '../../model';
-import { GitOperations } from '../git_operations';
+import { GitOperations, HEAD } from '../git_operations';
 import { IndexerFactory } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -130,10 +130,22 @@ export class IndexWorker extends AbstractWorker {
       // Skip updating job progress if the job is done because of cancellation.
       return;
     }
+
     this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     await super.onJobCompleted(job, res);
     const { uri, revision } = job.payload;
     try {
+      // Double check if the current revision is different from the origin reivsion.
+      // If so, kick off another index job to catch up the data descrepency.
+      const gitStatus = await this.objectClient.getRepositoryGitStatus(uri);
+      if (gitStatus.revision !== revision) {
+        const payload = {
+          uri,
+          revision: gitStatus.revision,
+        };
+        await this.enqueueJob(payload, {});
+      }
+
       return await this.objectClient.updateRepository(uri, { indexedRevision: revision });
     } catch (error) {
       this.log.error(`Update indexed revision in repository object error.`);
@@ -171,7 +183,7 @@ export class IndexWorker extends AbstractWorker {
 
   protected async getTimeoutMs(payload: any) {
     try {
-      const totalCount = await this.gitOps.countRepoFiles(payload.uri, 'head');
+      const totalCount = await this.gitOps.countRepoFiles(payload.uri, HEAD);
       let timeout = moment.duration(1, 'hour').asMilliseconds();
       if (totalCount > 0) {
         // timeout = ln(file_count) in hour

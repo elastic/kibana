@@ -329,11 +329,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('layerAddForm');
     }
 
-    async cancelLayerAdd() {
+    async cancelLayerAdd(layerName) {
       log.debug(`Cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
+        if (layerName) {
+          await this.waitForLayerDeleted(layerName);
+        }
       }
     }
 
@@ -350,20 +353,32 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
+    async setJoinWhereQuery(layerName, query) {
+      await this.openLayerPanel(layerName);
+      await testSubjects.click('mapJoinWhereExpressionButton');
+      const filterEditorContainer = await testSubjects.find('mapJoinWhereFilterEditor');
+      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      await queryBarInFilterEditor.click();
+      const input = await find.activeElement();
+      await input.clearValue();
+      await input.type(query);
+      await testSubjects.click('mapWhereFilterEditorSubmitButton');
+      await this.waitForLayersToLoad();
+    }
+
     async selectVectorSource() {
       log.debug(`Select vector source`);
       await testSubjects.click('vectorShapes');
     }
 
     // Returns first layer by default
-    async selectVectorLayer(vectorLayerName = '') {
-      log.debug(`Select vector layer ${vectorLayerName}`);
-      const optionsStringList = await comboBox.getOptionsList('emsVectorComboBox');
-      const selectedVectorLayer = vectorLayerName
-        ? vectorLayerName
-        : optionsStringList.trim().split('\n')[0];
-      await comboBox.set('emsVectorComboBox', selectedVectorLayer);
-      return selectedVectorLayer;
+    async selectVectorLayer(vectorLayerName) {
+      log.debug(`Select EMS vector layer ${vectorLayerName}`);
+      if (!vectorLayerName) {
+        throw new Error(`You did not provide the EMS layer to select`);
+      }
+      await comboBox.set('emsVectorComboBox', vectorLayerName);
+      await this.waitForLayersToLoad();
     }
 
     async removeLayer(layerName) {

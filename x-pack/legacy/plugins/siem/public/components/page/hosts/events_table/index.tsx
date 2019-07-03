@@ -27,6 +27,7 @@ interface OwnProps {
   data: Ecs[];
   loading: boolean;
   hasNextPage: boolean;
+  id: string;
   nextCursor: string;
   tiebreaker: string;
   totalCount: number;
@@ -67,6 +68,7 @@ const EventsTableComponent = pure<EventsTableProps>(
   ({
     data,
     hasNextPage,
+    id,
     limit,
     loading,
     loadMore,
@@ -82,6 +84,7 @@ const EventsTableComponent = pure<EventsTableProps>(
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
       headerUnit={i18n.UNIT(totalCount)}
+      id={id}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
