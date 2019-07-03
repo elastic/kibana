@@ -106,6 +106,7 @@ describe('Data Frame: Common', () => {
       createIndexPattern: false,
       isContinuousModeEnabled: false,
       jobId: 'the-job-id',
+      jobDescription: 'the-job-description',
       destinationIndex: 'the-destination-index',
       touched: true,
       valid: true,
