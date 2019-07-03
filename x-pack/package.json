@@ -171,7 +171,7 @@
     "@elastic/javascript-typescript-langserver": "^0.1.28",
     "@elastic/lsp-extension": "^0.1.1",
     "@elastic/node-crypto": "^1.0.0",
-    "@elastic/nodegit": "0.25.0-alpha.20",
+    "@elastic/nodegit": "0.25.0-alpha.22",
     "@elastic/numeral": "2.3.3",
     "@elastic/request-crypto": "^1.0.2",
     "@kbn/babel-preset": "1.0.0",
