@@ -15,7 +15,7 @@ import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
 import { InstallManager } from './lsp/install_manager';
-import { LanguageServers, LanguageServersDeveloping } from './lsp/language_servers';
+import { JAVA } from './lsp/language_servers';
 import { LspService } from './lsp/lsp_service';
 import { CancellationSerivce, CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './queue';
 import { RepositoryConfigController } from './repository_config_controller';
@@ -34,6 +34,7 @@ import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
 import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
 import { checkCodeNode, checkRoute } from './routes/check';
+import { statusRoute } from './routes/status';
 
 async function retryUntilAvailable<T>(
   func: () => Promise<T>,
@@ -116,7 +117,7 @@ export function init(server: Server, options: any) {
       if (checkResult.me) {
         await initCodeNode(server, serverOptions, log);
       } else {
-        await initNonCodeNode(codeNodeUrl, server, serverOptions, log);
+        await initNonCodeNode(codeNodeUrl, server, log);
       }
     } else {
       // codeNodeUrl not set, single node mode
@@ -125,12 +126,7 @@ export function init(server: Server, options: any) {
   });
 }
 
-async function initNonCodeNode(
-  url: string,
-  server: Server,
-  serverOptions: ServerOptions,
-  log: Logger
-) {
+async function initNonCodeNode(url: string, server: Server, log: Logger) {
   log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
   redirectRoute(server, url, log);
 }
@@ -152,10 +148,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     enableLangserversDeveloping: devMode,
   }));
   // Enable the developing language servers in development mode.
-  if (devMode === true) {
-    LanguageServers.push(...LanguageServersDeveloping);
-    const JavaLanguageServer = LanguageServers.find(d => d.name === 'Java');
-    JavaLanguageServer!.downloadUrl = _.partialRight(JavaLanguageServer!.downloadUrl!, devMode);
+  if (devMode) {
+    JAVA.downloadUrl = _.partialRight(JAVA!.downloadUrl!, devMode);
   }
 
   // Initialize git operations
@@ -262,6 +256,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   installRoute(codeServerRouter, lspService);
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
+  statusRoute(codeServerRouter, gitOps, lspService);
 
   server.events.on('stop', () => {
     gitOps.cleanAllRepo();

@@ -11,6 +11,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
+import { UICapabilities } from 'ui/capabilities';
 import DateMath from '@elastic/datemath';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
@@ -29,6 +30,7 @@ interface Props {
   series: MetricsExplorerSeries;
   source?: SourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
+  uiCapabilities: UICapabilities;
 }
 
 const fieldToNodeType = (source: SourceConfiguration, field: string): InfraNodeType | undefined => {
@@ -64,7 +66,7 @@ export const createNodeDetailLink = (
 };
 
 export const MetricsExplorerChartContextMenu = injectI18n(
-  ({ intl, onFilter, options, series, source, timeRange }: Props) => {
+  ({ intl, onFilter, options, series, source, timeRange, uiCapabilities }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const supportFiltering = options.groupBy != null && onFilter != null;
     const handleFilter = useCallback(
@@ -114,12 +116,8 @@ export const MetricsExplorerChartContextMenu = injectI18n(
         ]
       : [];
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: 'Actions',
-        items: [
-          ...filterByItem,
+    const openInVisualize = uiCapabilities.visualize.show
+      ? [
           {
             name: intl.formatMessage({
               id: 'xpack.infra.metricsExplorer.openInTSVB',
@@ -130,10 +128,22 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             disabled: options.metrics.length === 0,
             'data-test-subj': 'metricsExplorerAction-OpenInTSVB',
           },
-          ...viewNodeDetail,
-        ],
+        ]
+      : [];
+
+    const itemPanels = [...filterByItem, ...openInVisualize, ...viewNodeDetail];
+
+    // If there are no itemPanels then there is no reason to show the actions button.
+    if (itemPanels.length === 0) return null;
+
+    const panels: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        title: 'Actions',
+        items: itemPanels,
       },
     ];
+
     const handleClose = () => setPopoverState(false);
     const handleOpen = () => setPopoverState(true);
     const actionAriaLabel = intl.formatMessage(

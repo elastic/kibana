@@ -18,12 +18,12 @@
  */
 
 import { Url } from 'url';
-import { IncomingMessage } from 'http';
-import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
+import { ObjectType, TypeOf } from '@kbn/config-schema';
+
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { filterHeaders, Headers } from './headers';
+import { Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
 const requestSymbol = Symbol('request');
@@ -38,15 +38,8 @@ export interface KibanaRequestRoute {
   options: Required<RouteConfigOptions>;
 }
 
-const secretHeaders = ['authorization'];
 /**
  * Kibana specific abstraction for an incoming request.
- *
- * @remarks
- * The `headers` property will be deprecated and removed in future versions
- * of this class. Please use the `getFilteredHeaders` method to acesss the
- * list of headers available
- *
  * @public
  * */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
@@ -105,8 +98,9 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   public readonly url: Url;
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
   /**
-   * This property will be removed in future version of this class, please
-   * use the `getFilteredHeaders` method instead
+   * Readonly copy of incoming request headers.
+   * @remarks
+   * This property will contain a `filtered` copy of request headers.
    */
   public readonly headers: Headers;
 
@@ -118,10 +112,12 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     readonly params: Params,
     readonly query: Query,
     readonly body: Body,
+    // @ts-ignore we will use this flag as soon as http request proxy is supported in the core
+    // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
     this.url = request.url;
-    this.headers = request.headers;
+    this.headers = deepFreeze({ ...request.headers });
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
@@ -130,14 +126,6 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     });
 
     this.route = deepFreeze(this.getRouteInfo());
-  }
-
-  public getFilteredHeaders(headersToKeep: string[]) {
-    return filterHeaders(
-      this[requestSymbol].headers,
-      headersToKeep,
-      this.withoutSecretHeaders ? secretHeaders : []
-    );
   }
 
   private getRouteInfo() {
@@ -159,16 +147,6 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
  */
 export const ensureRawRequest = (request: KibanaRequest | Request) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
-
-/**
- * Returns http.IncomingMessage that is used an identifier for New Platform KibanaRequest
- * and Legacy platform Hapi Request.
- * Exposed while New platform supports Legacy Platform.
- * @internal
- */
-export const getIncomingMessage = (request: KibanaRequest | Request): IncomingMessage => {
-  return ensureRawRequest(request).raw.req;
-};
 
 function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;

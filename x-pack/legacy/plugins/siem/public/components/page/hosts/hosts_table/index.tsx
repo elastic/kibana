@@ -9,24 +9,23 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
+  HostFields,
+  HostItem,
   HostsEdges,
   HostsFields,
   HostsSortField,
-  HostItem,
-  HostFields,
   OsFields,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import {
+  Columns,
   Criteria,
   ItemsPerRow,
   LoadMoreTable,
-  Columns,
   SortingBasicTable,
 } from '../../../load_more_table';
 
@@ -36,6 +35,7 @@ import * as i18n from './translations';
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
+  id: string;
   indexPattern: StaticIndexPattern;
   hasNextPage: boolean;
   nextCursor: string;
@@ -106,6 +106,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       data,
       direction,
       hasNextPage,
+      id,
       indexPattern,
       limit,
       loading,
@@ -116,10 +117,12 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     return (
       <LoadMoreTable
         columns={this.memoizedColumns(type, indexPattern)}
+        dataTestSubj="all-hosts"
         hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

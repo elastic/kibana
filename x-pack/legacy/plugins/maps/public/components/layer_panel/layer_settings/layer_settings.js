@@ -162,13 +162,9 @@ export function LayerSettings(props) {
         </EuiFlexGroup>
 
         <EuiSpacer size="m"/>
-
         {renderLabel()}
-
         {renderZoomSliders()}
-
         {renderAlphaSlider()}
-
         {renderApplyGlobalQueryCheckbox()}
       </EuiPanel>
 

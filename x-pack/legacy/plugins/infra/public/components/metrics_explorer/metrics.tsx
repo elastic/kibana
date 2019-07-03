@@ -87,7 +87,7 @@ export const MetricsExplorerMetrics = injectI18n(
         options={comboOptions}
         selectedOptions={selectedOptions}
         onChange={handleChange}
-        isClearable={false}
+        isClearable={true}
         inputRef={handleInputRef}
       />
     );

@@ -146,8 +146,21 @@ export interface SavedObjectsMigrationVersion {
  *
  * @public
  */
+export type SavedObjectAttribute =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SavedObjectAttributes
+  | SavedObjectAttributes[];
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttributes | string | number | boolean | null;
+  [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }
 
 /**

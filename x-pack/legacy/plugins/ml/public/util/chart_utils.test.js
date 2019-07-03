@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './chart_utils.test.mocks';
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
 
 // A copy of these mocks for ui/chrome and ui/timefilter are also

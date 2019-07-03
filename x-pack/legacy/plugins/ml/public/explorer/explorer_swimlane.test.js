@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './explorer_swimlane.test.mocks';
 import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
 import moment from 'moment-timezone';

@@ -5,6 +5,7 @@
  */
 
 import { mapValues } from 'lodash';
+import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 export interface ShortcutMap {
   osx: string[];
@@ -39,23 +40,23 @@ const getShortcuts = (
     modifiers = [modifiers];
   }
 
-  let macShortcuts = shortcuts;
+  let macShortcuts = [...shortcuts];
 
   // handle shift modifier
   if (modifiers.includes('shift')) {
-    macShortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `shift+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
   }
 
   // handle alt modifier
   if (modifiers.includes('alt') || modifiers.includes('option')) {
-    macShortcuts = shortcuts.map(shortcut => `option+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `option+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `alt+${shortcut}`);
   }
 
   // handle ctrl modifier
   if (modifiers.includes('ctrl') || modifiers.includes('command')) {
-    macShortcuts = shortcuts.map(shortcut => `command+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `command+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `ctrl+${shortcut}`);
   }
 
@@ -86,6 +87,26 @@ export const keymap: KeyMap = {
     SEND_TO_BACK: getShortcuts('down', { modifiers: ['ctrl', 'shift'], help: 'Send to back' }),
     GROUP: getShortcuts('g', { help: 'Group' }),
     UNGROUP: getShortcuts('u', { help: 'Ungroup' }),
+    SHIFT_UP: getShortcuts('up', { help: `Shift up by ${ELEMENT_SHIFT_OFFSET}px` }),
+    SHIFT_DOWN: getShortcuts('down', { help: `Shift down by ${ELEMENT_SHIFT_OFFSET}px` }),
+    SHIFT_LEFT: getShortcuts('left', { help: `Shift left by ${ELEMENT_SHIFT_OFFSET}px` }),
+    SHIFT_RIGHT: getShortcuts('right', { help: `Shift right by ${ELEMENT_SHIFT_OFFSET}px` }),
+    NUDGE_UP: getShortcuts('up', {
+      modifiers: ['shift'],
+      help: `Shift up by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
+    NUDGE_DOWN: getShortcuts('down', {
+      modifiers: ['shift'],
+      help: `Shift down by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
+    NUDGE_LEFT: getShortcuts('left', {
+      modifiers: ['shift'],
+      help: `Shift left by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
+    NUDGE_RIGHT: getShortcuts('right', {
+      modifiers: ['shift'],
+      help: `Shift right by ${ELEMENT_NUDGE_OFFSET}px`,
+    }),
   },
   EXPRESSION: {
     displayName: 'Expression controls',
@@ -117,6 +138,9 @@ export const keymap: KeyMap = {
     EDITING: getShortcuts('e', { modifiers: 'alt', help: 'Toggle edit mode' }),
     GRID: getShortcuts('g', { modifiers: 'alt', help: 'Show grid' }),
     REFRESH: refreshShortcut,
+    ZOOM_IN: getShortcuts('plus', { modifiers: ['ctrl', 'alt'], help: 'Zoom in' }),
+    ZOOM_OUT: getShortcuts('minus', { modifiers: ['ctrl', 'alt'], help: 'Zoom out' }),
+    ZOOM_RESET: getShortcuts('[', { modifiers: ['ctrl', 'alt'], help: 'Reset zoom to 100%' }),
   },
   PRESENTATION: {
     displayName: 'Presentation controls',

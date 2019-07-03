@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import './job_list.test.mocks';
 import { DataFrameJobList } from './job_list';
 
 describe('Data Frame: Job List <DataFrameJobList />', () => {

@@ -6,6 +6,7 @@
 
 import './kibana_services';
 
+import { wrapInI18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 // import the uiExports that we want to "use"
@@ -20,6 +21,7 @@ import { capabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
+import 'ui/angular-bootstrap'; // required for kbn-top-nav button tooltips
 import { uiModules } from 'ui/modules';
 import { docTitle } from 'ui/doc_title';
 import 'ui/autoload/styles';
@@ -39,7 +41,7 @@ data.query.loadLegacyDirectives();
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
 app.directive('mapListing', function (reactDirective) {
-  return reactDirective(MapListing);
+  return reactDirective(wrapInI18nContext(MapListing));
 });
 
 routes.enable();
