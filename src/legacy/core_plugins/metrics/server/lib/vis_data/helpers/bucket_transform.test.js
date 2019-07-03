@@ -78,6 +78,13 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
           '1234567890123L'
         );
       });
+
+      test('should also work if the user specifies an integer with decimal 0s', () => {
+        expect(bucketTransform.static({ value: '1234567890123.0' })).toHaveProperty(
+          'bucket_script.script.source',
+          '1234567890123L'
+        );
+      });
     });
   });
 });

@@ -83,7 +83,7 @@ export const bucketTransform = {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          source: isDecimalValue ? bucket.value : `${bucket.value}L`,
+          source: isDecimalValue ? bucket.value : `${bucket.value.replace(/\.\d*$/, '')}L`,
           lang: 'painless',
         },
         gap_policy: 'skip',
