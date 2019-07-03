@@ -58,7 +58,6 @@ function SubAggParamEditor({
       indexPattern={agg.getIndexPattern()}
       responseValueAggs={responseValueAggs}
       state={state}
-      vis={subAggParams.vis}
       onAggParamsChange={(...rest) => {
         // to force update when sub-agg params are changed
         setInnerState(!innerState);

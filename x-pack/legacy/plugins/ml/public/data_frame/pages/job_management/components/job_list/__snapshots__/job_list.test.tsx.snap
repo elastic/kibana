@@ -10,7 +10,7 @@ exports[`Data Frame: Job List <DataFrameJobList /> Minimal initialization 1`] = 
         onClick={[Function]}
         type="button"
       >
-        Create your first data frame job
+        Create your first data frame transform
       </EuiButtonEmpty>,
     ]
   }
@@ -18,7 +18,7 @@ exports[`Data Frame: Job List <DataFrameJobList /> Minimal initialization 1`] = 
   iconColor="subdued"
   title={
     <h2>
-      No data frame jobs found
+      No data frame transforms found
     </h2>
   }
 />

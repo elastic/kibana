@@ -12,14 +12,13 @@ import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import assert from 'assert';
-import { Server } from 'hapi';
 
 import { GitOperations } from '../git_operations';
 import { RepositoryConfigReservedField, RepositoryGitStatusReservedField } from '../indexer/schema';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
-import { createTestServerOption } from '../test_utils';
+import { createTestHapiServer, createTestServerOption } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const filename = 'hello.ts';
@@ -82,7 +81,8 @@ describe('lsp_service tests', () => {
   }
 
   const serverOptions = createTestServerOption();
-  const installManager = new InstallManager(new Server(), serverOptions);
+  const server = createTestHapiServer();
+  const installManager = new InstallManager(server, serverOptions);
   const gitOps = new GitOperations(serverOptions.repoPath);
 
   function mockEsClient(): any {

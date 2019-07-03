@@ -28,7 +28,7 @@ const MainContainer = styled.div`
   padding: ${px(units.plus)};
 `;
 
-function App() {
+const App = () => {
   useUpdateBadgeEffect();
 
   return (
@@ -50,7 +50,7 @@ function App() {
       </UrlParamsProvider>
     </MatchedRouteProvider>
   );
-}
+};
 
 export class Plugin {
   public start(core: CoreStart) {

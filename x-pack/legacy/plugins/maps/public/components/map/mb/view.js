@@ -127,13 +127,31 @@ export class MBMapContainer extends React.Component {
   }, 256);
 
   _getIdsForFeatures(mbFeatures) {
-    return mbFeatures.map((mbFeature) => {
+    const uniqueFeatures = [];
+    //there may be duplicates in the results from mapbox
+    //this is because mapbox returns the results per tile
+    //for polygons or lines, it might return multiple features, one for each tile
+    for (let i = 0; i < mbFeatures.length; i++) {
+      const mbFeature = mbFeatures[i];
       const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
-      return {
-        id: mbFeature.properties[FEATURE_ID_PROPERTY_NAME],
-        layerId: layer.getId()
-      };
-    });
+      const featureId = mbFeature.properties[FEATURE_ID_PROPERTY_NAME];
+      const layerId = layer.getId();
+      let match = false;
+      for (let j = 0; j < uniqueFeatures.length; j++) {
+        const uniqueFeature = uniqueFeatures[j];
+        if (featureId === uniqueFeature.id && layerId === uniqueFeature.layerId) {
+          match = true;
+          break;
+        }
+      }
+      if (!match) {
+        uniqueFeatures.push({
+          id: featureId,
+          layerId: layerId
+        });
+      }
+    }
+    return uniqueFeatures;
   }
 
   _lockTooltip =  (e) => {

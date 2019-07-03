@@ -8,9 +8,14 @@ import _ from 'lodash';
 
 export class TooltipProperty {
 
-  constructor(propertyName, rawValue) {
+  constructor(propertyKey, propertyName, rawValue) {
+    this._propertyKey = propertyKey;
     this._propertyName = propertyName;
     this._rawValue = rawValue;
+  }
+
+  getPropertyKey() {
+    return this._propertyKey;
   }
 
   getPropertyName() {
