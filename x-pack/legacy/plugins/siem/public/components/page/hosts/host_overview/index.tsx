@@ -6,26 +6,28 @@
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import { DescriptionList } from '../../../../../common/utility_types';
-import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
-
-import * as i18n from './translations';
-import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
+import { InspectButton } from '../../../inspect';
+import { HostItem } from '../../../../graphql/types';
 import { LoadingPanel } from '../../../loading';
-import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
-import { AnomalyScores } from '../../../ml/score/anomaly_scores';
-import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
+import { AnomalyScores } from '../../../ml/score/anomaly_scores';
+import { Anomalies, NarrowDateRange } from '../../../ml/types';
+import { LoadingOverlay, OverviewWrapper } from '../../index';
+import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
+
+import * as i18n from './translations';
 
 interface HostSummaryProps {
   data: HostItem;
+  id: string;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
   anomaliesData: Anomalies | null;
@@ -52,14 +54,17 @@ export const HostOverview = React.memo<HostSummaryProps>(
   ({
     data,
     loading,
+    id,
     startDate,
     endDate,
     isLoadingAnomaliesData,
     anomaliesData,
     narrowDateRange,
   }) => {
+    const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
+
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
         rowItems={getOr([], fieldName, fieldData)}
@@ -165,7 +170,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
     ];
 
     return (
-      <OverviewWrapper>
+      <OverviewWrapper
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
         {loading && (
           <>
             <LoadingOverlay />
@@ -179,6 +187,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
             />
           </>
         )}
+        <InspectButton
+          queryId={id}
+          show={showInspect}
+          title={i18n.INSPECT_TITLE}
+          inspectIndex={0}
+        />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}
