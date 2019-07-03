@@ -7,9 +7,7 @@
       "POST"
     ],
     "patterns": [
-      "_reindex/{task_id}/_rethrottle",
-      "_update_by_query/{task_id}/_rethrottle",
-      "_delete_by_query/{task_id}/_rethrottle"
+      "_reindex/{task_id}/_rethrottle"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html"
   }

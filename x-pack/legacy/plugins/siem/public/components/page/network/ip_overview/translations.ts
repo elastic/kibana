@@ -83,3 +83,10 @@ export const AS_DESTINATION = i18n.translate(
     defaultMessage: 'As Destination',
   }
 );
+
+export const INSPECT_TITLE = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.inspectTitle',
+  {
+    defaultMessage: 'IP overview',
+  }
+);

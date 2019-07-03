@@ -9,7 +9,12 @@ import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
+import {
+  GEO_JSON_TYPE,
+  FEATURE_ID_PROPERTY_NAME,
+  SOURCE_DATA_ID_ORIGIN,
+  FEATURE_VISIBLE_PROPERTY_NAME
+} from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
@@ -21,28 +26,44 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
-const CLOSED_SHAPE_MB_FILTER = [
-  'any',
-  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
+const VISIBILITY_FILTER_CLAUSE = ['all',
+  [
+    '==',
+    ['get', FEATURE_VISIBLE_PROPERTY_NAME],
+    true
+  ]
 ];
 
-const ALL_SHAPE_MB_FILTER = [
-  'any',
-  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
+const FILL_LAYER_MB_FILTER = [
+  ...VISIBILITY_FILTER_CLAUSE,
+  [
+    'any',
+    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
+  ]
 ];
 
-const POINT_MB_FILTER = [
-  'any',
-  ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
+const LINE_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
+  [
+    'any',
+    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
+  ]
+];
+
+const POINT_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
+  [
+    'any',
+    ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
+  ]
 ];
 
 
 let idCounter = 0;
+
 function generateNumericalId() {
   const newId = idCounter < Number.MAX_SAFE_INTEGER ? idCounter : 0;
   idCounter = newId + 1;
@@ -68,7 +89,7 @@ export class VectorLayer extends AbstractLayer {
 
   constructor(options) {
     super(options);
-    this._joins =  [];
+    this._joins = [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
         this._joins.push(new LeftInnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
@@ -95,28 +116,59 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
+  isDataLoaded() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest || !sourceDataRequest.hasData()) {
+      return false;
+    }
+
+    const joins = this.getValidJoins();
+    for (let i = 0; i < joins.length; i++) {
+      const joinDataRequest = this.getDataRequest(joins[i].getSourceId());
+      if (!joinDataRequest || !joinDataRequest.hasData()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   getCustomIconAndTooltipContent() {
     const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+
+
+    const noResultsIcon = (
+      <EuiIcon
+        size="m"
+        color="subdued"
+        type="minusInCircle"
+      />
+    );
     if (!featureCollection || featureCollection.features.length === 0) {
       return {
-        icon: (
-          <EuiIcon
-            size="m"
-            color="subdued"
-            type="minusInCircle"
-          />
-        ),
+        icon: noResultsIcon,
         tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
           defaultMessage: `No results found.`
         })
       };
     }
 
+    if (this._joins.length &&
+      !featureCollection.features.some((feature) => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME])
+    ) {
+      return {
+        icon: noResultsIcon,
+        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundInJoinTooltip', {
+          defaultMessage: `No matching results found in term joins`
+        })
+      };
+    }
     return {
       icon: this._style.getIcon(),
       tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
     };
+
   }
 
   getLayerTypeIconName() {
@@ -136,7 +188,7 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection) {
       return null;
     }
-    const bbox =  turf.bbox(featureCollection);
+    const bbox = turf.bbox(featureCollection);
     return {
       min_lon: bbox[0],
       min_lat: bbox[1],
@@ -287,6 +339,7 @@ export class VectorLayer extends AbstractLayer {
 
     const searchFilters = {
       ...dataFilters,
+      fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
     };
@@ -313,7 +366,7 @@ export class VectorLayer extends AbstractLayer {
         join: join,
         propertiesMap: propertiesMap,
       };
-    } catch(e) {
+    } catch (e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
         dataHasChanged: false,
@@ -350,6 +403,43 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
+  async _performInnerJoins(sourceResult, joinStates, updateSourceData) {
+
+    //should update the store if
+    //-- source result was refreshed
+    //-- any of the join configurations changed (joinState changed)
+    //-- visibility of any of the features has changed
+
+    let shouldUpdateStore = sourceResult.refreshed || joinStates.some((joinState) => joinState.dataHasChanged);
+
+    if (!shouldUpdateStore) {
+      return;
+    }
+
+    for (let i = 0; i < sourceResult.featureCollection.features.length; i++) {
+      const feature = sourceResult.featureCollection.features[i];
+      const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
+      let isFeatureVisible = true;
+      for (let j = 0; j < joinStates.length; j++) {
+        const joinState = joinStates[j];
+        const leftInnerJoin = joinState.join;
+        const rightMetricFields = leftInnerJoin.getRightMetricFields();
+        const canJoinOnCurrent = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
+        isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
+      }
+
+      if (oldVisbility !== isFeatureVisible) {
+        shouldUpdateStore = true;
+      }
+
+      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = isFeatureVisible;
+    }
+
+    if (shouldUpdateStore) {
+      updateSourceData({ ...sourceResult.featureCollection });
+    }
+  }
+
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
@@ -376,7 +466,7 @@ export class VectorLayer extends AbstractLayer {
       };
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
-      return  {
+      return {
         refreshed: false
       };
     }
@@ -397,26 +487,13 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-
-    if (sourceResult.featureCollection && sourceResult.featureCollection.features.length) {
-      const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-      const activeJoinStates = joinStates.filter(joinState => {
-        // Perform join when
-        // - source data changed but join data has not
-        // - join data changed but source data has not
-        // - both source and join data changed
-        return sourceResult.refreshed || joinState.dataHasChanged;
-      });
-
-      if (activeJoinStates.length) {
-        activeJoinStates.forEach(joinState => {
-          joinState.join.joinPropertiesToFeatureCollection(
-            sourceResult.featureCollection,
-            joinState.propertiesMap);
-        });
-        updateSourceData(sourceResult.featureCollection);
-      }
+    if (!sourceResult.featureCollection || !sourceResult.featureCollection.features.length) {
+      return;
     }
+
+    const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+    await this._performInnerJoins(sourceResult, joinStates, updateSourceData);
+
   }
 
   _getSourceFeatureCollection() {
@@ -489,7 +566,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(pointLayerId, POINT_MB_FILTER);
+      mbMap.setFilter(pointLayerId, POINT_LAYER_MB_FILTER);
     }
 
     this._style.setMBPaintPropertiesForPoints({
@@ -510,7 +587,7 @@ export class VectorLayer extends AbstractLayer {
         type: 'symbol',
         source: sourceId,
       });
-      mbMap.setFilter(symbolLayerId, POINT_MB_FILTER);
+      mbMap.setFilter(symbolLayerId, POINT_LAYER_MB_FILTER);
     }
 
     this._style.setMBSymbolPropertiesForPoints({
@@ -531,7 +608,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(fillLayerId, CLOSED_SHAPE_MB_FILTER);
+      mbMap.setFilter(fillLayerId, FILL_LAYER_MB_FILTER);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       mbMap.addLayer({
@@ -540,7 +617,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(lineLayerId, ALL_SHAPE_MB_FILTER);
+      mbMap.setFilter(lineLayerId, LINE_LAYER_MB_FILTER);
     }
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -576,11 +653,11 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getMbPointLayerId() {
-    return this.getId() +  '_circle';
+    return this.getId() + '_circle';
   }
 
   _getMbSymbolLayerId() {
-    return this.getId() +  '_symbol';
+    return this.getId() + '_symbol';
   }
 
   _getMbLineLayerId() {
@@ -600,7 +677,7 @@ export class VectorLayer extends AbstractLayer {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
       for (let j = 0; j < this._joins.length; j++) {
-        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyName()) {
+        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyKey()) {
           matchingJoins.push(this._joins[j]);
         }
       }
@@ -612,9 +689,8 @@ export class VectorLayer extends AbstractLayer {
 
   async getPropertiesForTooltip(properties) {
 
-    let allTooltips =  await this._source.filterAndFormatPropertiesToHtml(properties);
+    let allTooltips = await this._source.filterAndFormatPropertiesToHtml(properties);
     this._addJoinsToSourceTooltips(allTooltips);
-
 
     for (let i = 0; i < this._joins.length; i++) {
       const propsFromJoin = await this._joins[i].filterAndFormatPropertiesForTooltip(properties);
