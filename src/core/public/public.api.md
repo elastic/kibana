@@ -73,7 +73,7 @@ export interface ChromeBreadcrumb {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
+export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 
 // @public (undocumented)
 export interface ChromeNavControl {
