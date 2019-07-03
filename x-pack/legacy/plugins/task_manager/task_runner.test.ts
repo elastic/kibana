@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { minutesFromNow } from './lib/intervals';
+import { minutesFromNow, secondsFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 
@@ -69,7 +69,9 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
 
     expect(instance.id).toEqual(id);
-    expect(instance.runAt.getTime()).toBeGreaterThan(Date.now());
+    expect(
+      Math.abs(minutesFromNow(initialAttempts * 5).getTime() - instance.runAt.getTime())
+    ).toBeLessThan(100);
     expect(instance.params).toEqual({ a: 'b' });
     expect(instance.state).toEqual({ hey: 'there' });
   });
@@ -210,6 +212,103 @@ describe('TaskManagerRunner', () => {
     await promise;
 
     sinon.assert.calledWithMatch(logger.warning, /not cancellable/);
+  });
+
+  test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(0, 2);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: undefined,
+      },
+      definitions: {
+        bar: {
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    await runner.claimOwnership();
+
+    sinon.assert.calledOnce(store.update);
+    const instance = store.update.args[0][0];
+
+    expect(instance.attempts).toEqual(initialAttempts + 1);
+    expect(instance.status).toBe('running');
+    expect(Math.abs(Date.now() - instance.startedAt.getTime())).toBeLessThan(100);
+    expect(
+      Math.abs(minutesFromNow((initialAttempts + 1) * 5).getTime() - instance.retryAt.getTime())
+    ).toBeLessThan(100);
+  });
+
+  test('uses getBackpressureDelay function on error when defined', async () => {
+    const initialAttempts = _.random(0, 2);
+    const backpressureDelay = _.random(15, 100);
+    const id = Date.now().toString();
+    const getBackpressureDelayStub = sinon.stub().returns(backpressureDelay);
+    const error = new Error('Dangit!');
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+      },
+      definitions: {
+        bar: {
+          getBackpressureDelay: getBackpressureDelayStub,
+          createTaskRunner: () => ({
+            async run() {
+              throw error;
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledWith(getBackpressureDelayStub, initialAttempts, error);
+    const instance = store.update.args[0][0];
+
+    expect(
+      Math.abs(secondsFromNow(backpressureDelay).getTime() - instance.runAt.getTime())
+    ).toBeLessThan(100);
+  });
+
+  test('uses getBackpressureDelay to set retryAt when defined', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(0, 2);
+    const backpressureDelay = _.random(15, 100);
+    const getBackpressureDelayStub = sinon.stub().returns(backpressureDelay);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: undefined,
+      },
+      definitions: {
+        bar: {
+          getBackpressureDelay: getBackpressureDelayStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    await runner.claimOwnership();
+
+    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledWith(getBackpressureDelayStub, initialAttempts + 1);
+    const instance = store.update.args[0][0];
+
+    expect(
+      Math.abs(secondsFromNow(backpressureDelay).getTime() - instance.retryAt.getTime())
+    ).toBeLessThan(100);
   });
 
   interface TestOpts {

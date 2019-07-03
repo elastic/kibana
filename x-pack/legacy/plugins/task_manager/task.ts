@@ -102,7 +102,8 @@ export interface TaskDefinition {
   timeout?: string;
 
   /**
-   * Up to how many times the task should retry when it fails to run.
+   * Up to how many times the task should retry when it fails to run. This will
+   * default to the global variable.
    */
   maxAttempts?: number;
 
