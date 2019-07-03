@@ -65,6 +65,7 @@ export class AutocompleteField extends React.Component<
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
             onSearch={this.submit}
+            onBlur={this.submit}
             placeholder={placeholder}
             value={value}
           />
@@ -155,6 +156,12 @@ export class AutocompleteField extends React.Component<
       case 'Home':
       case 'End':
         this.updateSuggestions();
+        break;
+      case 'Backspace':
+        // if the user has just deleted everything, submit to reset
+        if (this.props.value === '') {
+          this.submit();
+        }
         break;
     }
   };
