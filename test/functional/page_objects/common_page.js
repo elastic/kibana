@@ -52,7 +52,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async navigateToUrl(appName, subUrl, {
       basePath = '',
       ensureCurrentUrl = true,
-      shouldLoginIfPrompted = true
+      shouldLoginIfPrompted = true,
+      shouldAcceptAlert = true
     } = {}) {
       // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
@@ -63,7 +64,17 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
-        await browser.get(appUrl);
+        try {
+          await browser.get(appUrl);
+        } catch(e) {
+          //Accept dialog here so the error isn't trapped over and over again in the retry.try loop
+          if (shouldAcceptAlert) {
+            log.debug('accept alert');
+            await browser.acceptAlert();
+          } else {
+            throw e;
+          }
+        }
 
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 

@@ -83,6 +83,17 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Accept an alert or confirmation dialog. Equivalent to clicking OK.
+     * @return {Promise<void>}
+     */
+    public async acceptAlert() {
+      await driver
+        .switchTo()
+        .alert()
+        .accept();
+    }
+
+    /**
      * Retrieves the a rect describing the current top-level window's size and position.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
      *
