@@ -71,6 +71,11 @@ export function interpreterProvider(config: any) {
       // if something failed, just return the failure
       if (getType(newContext) === 'error') return newContext;
 
+      // if execution was aborted return error
+      if (handlers.abortSignal && handlers.abortSignal.aborted) {
+        return createError(`abort was requested`);
+      }
+
       // Continue re-invoking chain until it's empty
       return await invokeChain(chain, newContext);
     } catch (e) {
