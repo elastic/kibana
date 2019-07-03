@@ -677,7 +677,7 @@ export class VectorLayer extends AbstractLayer {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
       for (let j = 0; j < this._joins.length; j++) {
-        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyName()) {
+        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyKey()) {
           matchingJoins.push(this._joins[j]);
         }
       }
@@ -691,7 +691,6 @@ export class VectorLayer extends AbstractLayer {
 
     let allTooltips = await this._source.filterAndFormatPropertiesToHtml(properties);
     this._addJoinsToSourceTooltips(allTooltips);
-
 
     for (let i = 0; i < this._joins.length; i++) {
       const propsFromJoin = await this._joins[i].filterAndFormatPropertiesForTooltip(properties);
