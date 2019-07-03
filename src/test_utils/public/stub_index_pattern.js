@@ -41,7 +41,7 @@ export default function () {
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
-    this.getComputedFields = sinon.spy(IndexPattern.prototype.getComputedFields);
+    this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
     this.flattenHit = flattenHitWrapper(this, this.metaFields);
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.fieldsFetcher = { apiClient: { baseUrl: '' } };
