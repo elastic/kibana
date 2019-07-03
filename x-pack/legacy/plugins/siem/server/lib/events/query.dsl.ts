@@ -48,11 +48,7 @@ export const buildQuery = (options: RequestOptions) => {
       }
     : {};
 
-  const queryMust = options.fields.includes('kpiEventType')
-    ? [{ match_all: {} }, { exists: { field: 'event.action' } }]
-    : [{ match_all: {} }];
-
-  const filter = [...filterClause, ...getTimerangeFilter(options.timerange), ...queryMust];
+  const filter = [...filterClause, ...getTimerangeFilter(options.timerange), { match_all: {} }];
 
   const getSortField = (sortField: SortField) => {
     if (sortField.sortFieldId) {

@@ -7422,14 +7422,6 @@
             "deprecationReason": null
           },
           {
-            "name": "timestamp",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "source",
             "description": "",
             "args": [],

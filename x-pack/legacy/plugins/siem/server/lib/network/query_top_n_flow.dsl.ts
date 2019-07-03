@@ -144,9 +144,6 @@ const getUniDirectionAggs = (
             domain: {
               terms: {
                 field: `${flowTarget}.domain`,
-                order: {
-                  timestamp: 'desc',
-                },
               },
             },
             ip_count: {
@@ -196,9 +193,6 @@ const getBiDirectionAggs = (
             domain: {
               terms: {
                 field: `${flowTarget}.domain`,
-                order: {
-                  timestamp: 'desc',
-                },
               },
             },
             ip_count: {

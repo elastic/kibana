@@ -44,7 +44,6 @@ export const networkSchema = gql`
 
   type NetworkTopNFlowItem {
     _id: String
-    timestamp: Date
     source: TopNFlowItem
     destination: TopNFlowItem
     client: TopNFlowItem

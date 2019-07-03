@@ -1167,8 +1167,6 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  timestamp?: Date | null;
-
   source?: TopNFlowItem | null;
 
   destination?: TopNFlowItem | null;
@@ -6169,8 +6167,6 @@ export namespace NetworkTopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkTopNFlowItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
-
     source?: SourceResolver<TopNFlowItem | null, TypeParent, Context>;
 
     destination?: DestinationResolver<TopNFlowItem | null, TypeParent, Context>;
@@ -6184,11 +6180,6 @@ export namespace NetworkTopNFlowItemResolvers {
 
   export type IdResolver<
     R = string | null,
-    Parent = NetworkTopNFlowItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = Date | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

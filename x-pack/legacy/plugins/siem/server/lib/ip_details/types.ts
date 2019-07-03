@@ -68,25 +68,13 @@ export interface OverviewHit {
   };
 }
 
-export interface OverviewHostHit {
-  took?: number;
-  timed_out?: boolean;
-  _scroll_id?: string;
-  _shards?: ShardsResponse;
-  timeout?: number;
-  hits?: {
-    total: number;
-    hits: Hit[];
-  };
-  doc_count: number;
-  host: ResultHit<object>;
-}
+export type OverviewHostHit = ResultHit<object>;
 
 export interface IpOverviewHit {
   aggregations: {
     destination?: OverviewHit;
     source?: OverviewHit;
-    host: OverviewHostHit;
+    host: ResultHit<object>;
   };
   _shards: {
     total: number;

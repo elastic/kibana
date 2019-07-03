@@ -20,6 +20,11 @@ const getAuthQueryFilter = () => [
             'event.type': 'authentication_failure',
           },
         },
+        {
+          match: {
+            'event.category': 'authentication',
+          },
+        },
       ],
       minimum_should_match: 1,
     },
@@ -109,6 +114,5 @@ export const buildAuthQuery = ({
       track_total_hits: false,
     },
   ];
-
   return dslQuery;
 };

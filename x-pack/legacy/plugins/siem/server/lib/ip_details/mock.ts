@@ -128,44 +128,41 @@ export const responseAggs: IpOverviewHit = {
     },
     host: {
       doc_count: 1588091,
-      host: {
-        doc_count: 1588091,
-        results: {
-          hits: {
-            total: {
-              value: 1588091,
-              relation: 'eq',
-            },
-            max_score: null,
-            hits: [
-              {
-                _index: 'filebeat-8.0.0-2019.05.20-000004',
-                _type: '_doc',
-                _id: 'NU9dD2sB9v5HJNSHMMRc',
-                _score: null,
-                _source: {
-                  host: {
-                    hostname: 'suricata-iowa',
-                    os: {
-                      kernel: '4.15.0-1032-gcp',
-                      codename: 'bionic',
-                      name: 'Ubuntu',
-                      family: 'debian',
-                      version: '18.04.2 LTS (Bionic Beaver)',
-                      platform: 'ubuntu',
-                    },
-                    ip: ['10.128.0.4', 'fe80::4001:aff:fe80:4'],
-                    containerized: false,
-                    name: 'suricata-iowa',
-                    id: 'be1f3d767896212736b880e846876dcb',
-                    mac: ['42:01:0a:80:00:04'],
-                    architecture: 'x86_64',
-                  },
-                },
-                sort: [1559330892000],
-              },
-            ],
+      results: {
+        hits: {
+          total: {
+            value: 1588091,
+            relation: 'eq',
           },
+          max_score: null,
+          hits: [
+            {
+              _index: 'filebeat-8.0.0-2019.05.20-000004',
+              _type: '_doc',
+              _id: 'NU9dD2sB9v5HJNSHMMRc',
+              _score: null,
+              _source: {
+                host: {
+                  hostname: 'suricata-iowa',
+                  os: {
+                    kernel: '4.15.0-1032-gcp',
+                    codename: 'bionic',
+                    name: 'Ubuntu',
+                    family: 'debian',
+                    version: '18.04.2 LTS (Bionic Beaver)',
+                    platform: 'ubuntu',
+                  },
+                  ip: ['10.128.0.4', 'fe80::4001:aff:fe80:4'],
+                  containerized: false,
+                  name: 'suricata-iowa',
+                  id: 'be1f3d767896212736b880e846876dcb',
+                  mac: ['42:01:0a:80:00:04'],
+                  architecture: 'x86_64',
+                },
+              },
+              sort: [1559330892000],
+            },
+          ],
         },
       },
     },

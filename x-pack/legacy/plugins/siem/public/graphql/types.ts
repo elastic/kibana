@@ -1138,8 +1138,6 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  timestamp?: Date | null;
-
   source?: TopNFlowItem | null;
 
   destination?: TopNFlowItem | null;

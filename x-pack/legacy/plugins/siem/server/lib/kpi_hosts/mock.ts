@@ -520,6 +520,7 @@ const mockAuthFilter = {
     should: [
       { match: { 'event.type': 'authentication_success' } },
       { match: { 'event.type': 'authentication_failure' } },
+      { match: { 'event.category': 'authentication' } },
     ],
     minimum_should_match: 1,
   },
