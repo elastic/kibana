@@ -73,7 +73,7 @@ export const PreviewPane: FC<Props> = ({ transformConfig }) => {
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const { isRefresh } = useRefreshTransformList();
 
