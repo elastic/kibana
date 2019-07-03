@@ -64,9 +64,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
   }
 }
 
-export const getHits = (
-  buckets: ReadonlyArray<UncommonProcessBucket>
-): ReadonlyArray<UncommonProcessHit> =>
+export const getHits = (buckets: readonly UncommonProcessBucket[]): readonly UncommonProcessHit[] =>
   buckets.map((bucket: Readonly<UncommonProcessBucket>) => ({
     _id: bucket.process.hits.hits[0]._id,
     _index: bucket.process.hits.hits[0]._index,
@@ -89,7 +87,7 @@ export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>
   });
 
 export const formatUncommonProcessesData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: UncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
 ): UncommonProcessesEdges =>

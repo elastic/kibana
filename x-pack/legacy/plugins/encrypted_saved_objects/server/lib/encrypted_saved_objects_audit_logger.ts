@@ -33,7 +33,7 @@ export class EncryptedSavedObjectsAuditLogger {
   }
 
   public encryptAttributesSuccess(
-    attributesNames: ReadonlyArray<string>,
+    attributesNames: readonly string[],
     descriptor: SavedObjectDescriptor
   ) {
     this.auditLogger.log(
@@ -46,7 +46,7 @@ export class EncryptedSavedObjectsAuditLogger {
   }
 
   public decryptAttributesSuccess(
-    attributesNames: ReadonlyArray<string>,
+    attributesNames: readonly string[],
     descriptor: SavedObjectDescriptor
   ) {
     this.auditLogger.log(

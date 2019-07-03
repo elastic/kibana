@@ -68,7 +68,7 @@ export class EncryptedSavedObjectsService {
    */
   constructor(
     encryptionKey: string,
-    private readonly knownTypes: ReadonlyArray<string>,
+    private readonly knownTypes: readonly string[],
     private readonly log: Server.Logger,
     private readonly audit: EncryptedSavedObjectsAuditLogger
   ) {
