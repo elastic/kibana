@@ -67,7 +67,7 @@ export class TaskPool {
   };
 
   private async attemptToRun(tasks: TaskRunner[]) {
-    for (const task of tasks) {
+    const promises = tasks.map(async task => {
       if (this.availableWorkers < task.numWorkers) {
         return false;
       }
@@ -81,9 +81,9 @@ export class TaskPool {
           })
           .then(() => this.running.delete(task));
       }
-    }
+    });
 
-    return true;
+    return !(await Promise.all(promises)).includes(false);
   }
 
   private cancelExpiredTasks() {

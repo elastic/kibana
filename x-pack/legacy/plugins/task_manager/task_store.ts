@@ -284,7 +284,7 @@ export class TaskStore {
    * @prop {number} size - The number of task instances to retrieve
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
-  public async fetchAvailableTasks(): Promise<ConcreteTaskInstance[]> {
+  public async fetchAvailableTasks(size: number = 10): Promise<ConcreteTaskInstance[]> {
     const { docs } = await this.search({
       query: {
         bool: {
@@ -296,7 +296,7 @@ export class TaskStore {
           ],
         },
       },
-      size: 10,
+      size,
       sort: { 'task.runAt': { order: 'asc' } },
       seq_no_primary_term: true,
     });

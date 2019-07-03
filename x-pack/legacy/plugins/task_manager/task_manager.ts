@@ -47,7 +47,8 @@ export class TaskManager {
    * mechanism.
    */
   public constructor(kbnServer: any, server: any, config: any) {
-    this.maxWorkers = config.get('xpack.task_manager.max_workers');
+    const maxWorkers = config.get('xpack.task_manager.max_workers');
+    this.maxWorkers = maxWorkers;
     this.overrideNumWorkers = config.get('xpack.task_manager.override_num_workers');
     this.definitions = {};
 
@@ -65,7 +66,7 @@ export class TaskManager {
     });
     const pool = new TaskPool({
       logger,
-      maxWorkers: this.maxWorkers,
+      maxWorkers,
     });
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
@@ -81,7 +82,11 @@ export class TaskManager {
       pollInterval: config.get('xpack.task_manager.poll_interval'),
       store,
       work(): Promise<void> {
-        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
+        return fillPool(
+          pool.run,
+          () => store.fetchAvailableTasks(maxWorkers - pool.occupiedWorkers),
+          createRunner
+        );
       },
     });
 
