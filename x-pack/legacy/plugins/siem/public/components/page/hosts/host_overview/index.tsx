@@ -6,24 +6,28 @@
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import { DescriptionList } from '../../../../../common/utility_types';
-import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
-
-import * as i18n from './translations';
-import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
+import { InspectButton } from '../../../inspect';
+import { HostItem } from '../../../../graphql/types';
 import { LoadingPanel } from '../../../loading';
-import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
+import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
+import { LoadingOverlay, OverviewWrapper } from '../../index';
+import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
+
+import * as i18n from './translations';
 
 interface HostSummaryProps {
   data: HostItem;
+  id: string;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
   anomaliesData: Anomalies | null;
@@ -50,12 +54,17 @@ export const HostOverview = React.memo<HostSummaryProps>(
   ({
     data,
     loading,
+    id,
     startDate,
     endDate,
     isLoadingAnomaliesData,
     anomaliesData,
     narrowDateRange,
   }) => {
+    const [showInspect, setShowInspect] = useState(false);
+    const capabilities = useContext(MlCapabilitiesContext);
+    const userPermissions = hasMlUserPermissions(capabilities);
+
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
         rowItems={getOr([], fieldName, fieldData)}
@@ -64,51 +73,58 @@ export const HostOverview = React.memo<HostSummaryProps>(
       />
     );
 
-    const descriptionLists: Readonly<DescriptionList[][]> = [
-      [
-        {
-          title: i18n.HOST_ID,
-          description: data.host
-            ? hostIdRenderer({ host: data.host, noLink: true })
-            : getEmptyTagValue(),
-        },
-        {
-          title: i18n.FIRST_SEEN,
-          description:
-            data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeenHost
-                hostname={data.host.name[0]}
-                type={FirstLastSeenHostType.FIRST_SEEN}
-              />
-            ) : (
-              getEmptyTagValue()
-            ),
-        },
-        {
-          title: i18n.LAST_SEEN,
-          description:
-            data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeenHost
-                hostname={data.host.name[0]}
-                type={FirstLastSeenHostType.LAST_SEEN}
-              />
-            ) : (
-              getEmptyTagValue()
-            ),
-        },
-        {
-          title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
-          description: (
-            <AnomalyScores
-              anomalies={anomaliesData}
-              startDate={startDate}
-              endDate={endDate}
-              isLoading={isLoadingAnomaliesData}
-              narrowDateRange={narrowDateRange}
+    const column: DescriptionList[] = [
+      {
+        title: i18n.HOST_ID,
+        description: data.host
+          ? hostIdRenderer({ host: data.host, noLink: true })
+          : getEmptyTagValue(),
+      },
+      {
+        title: i18n.FIRST_SEEN,
+        description:
+          data.host != null && data.host.name && data.host.name.length ? (
+            <FirstLastSeenHost
+              hostname={data.host.name[0]}
+              type={FirstLastSeenHostType.FIRST_SEEN}
             />
+          ) : (
+            getEmptyTagValue()
           ),
-        },
-      ],
+      },
+      {
+        title: i18n.LAST_SEEN,
+        description:
+          data.host != null && data.host.name && data.host.name.length ? (
+            <FirstLastSeenHost
+              hostname={data.host.name[0]}
+              type={FirstLastSeenHostType.LAST_SEEN}
+            />
+          ) : (
+            getEmptyTagValue()
+          ),
+      },
+    ];
+    const firstColumn = userPermissions
+      ? [
+          ...column,
+          {
+            title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
+            description: (
+              <AnomalyScores
+                anomalies={anomaliesData}
+                startDate={startDate}
+                endDate={endDate}
+                isLoading={isLoadingAnomaliesData}
+                narrowDateRange={narrowDateRange}
+              />
+            ),
+          },
+        ]
+      : column;
+
+    const descriptionLists: Readonly<DescriptionList[][]> = [
+      firstColumn,
       [
         {
           title: i18n.IP_ADDRESSES,
@@ -154,7 +170,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
     ];
 
     return (
-      <OverviewWrapper>
+      <OverviewWrapper
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
         {loading && (
           <>
             <LoadingOverlay />
@@ -168,6 +187,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
             />
           </>
         )}
+        <InspectButton
+          queryId={id}
+          show={showInspect}
+          title={i18n.INSPECT_TITLE}
+          inspectIndex={0}
+        />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}

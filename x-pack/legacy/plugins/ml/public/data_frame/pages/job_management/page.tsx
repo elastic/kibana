@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
@@ -21,45 +23,58 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { useRefreshTransformList } from '../../common';
 import { CreateJobButton } from './components/create_job_button';
 import { DataFrameJobList } from './components/job_list';
+import { RefreshTransformListButton } from './components/refresh_transform_list_button';
 
-export const Page: SFC = () => (
-  <EuiPage data-test-subj="mlPageDataFrame">
-    <EuiPageBody>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                id="xpack.ml.dataframe.jobsList.dataFrameTitle"
-                defaultMessage="Data frame jobs"
-              />
-              <span>&nbsp;</span>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.ml.dataframe.jobsList.betaBadgeLabel', {
-                  defaultMessage: `Beta`,
-                })}
-                tooltipContent={i18n.translate(
-                  'xpack.ml.dataframe.jobsList.betaBadgeTooltipContent',
-                  {
-                    defaultMessage: `Data frames are a beta feature. We'd love to hear your feedback.`,
-                  }
-                )}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-        <EuiPageContentHeaderSection>
-          <CreateJobButton />
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
-        <EuiSpacer size="l" />
-        <EuiPanel>
-          <DataFrameJobList />
-        </EuiPanel>
-      </EuiPageContentBody>
-    </EuiPageBody>
-  </EuiPage>
-);
+export const Page: SFC = () => {
+  const { isLoading, refresh } = useRefreshTransformList();
+
+  return (
+    <EuiPage data-test-subj="mlPageDataFrame">
+      <EuiPageBody>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle>
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.dataframe.jobsList.dataFrameTitle"
+                  defaultMessage="Data frame transforms"
+                />
+                <span>&nbsp;</span>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.ml.dataframe.jobsList.betaBadgeLabel', {
+                    defaultMessage: `Beta`,
+                  })}
+                  tooltipContent={i18n.translate(
+                    'xpack.ml.dataframe.jobsList.betaBadgeTooltipContent',
+                    {
+                      defaultMessage: `Data frames are a beta feature. We'd love to hear your feedback.`,
+                    }
+                  )}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+          <EuiPageContentHeaderSection>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <CreateJobButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+        <EuiPageContentBody>
+          <EuiSpacer size="l" />
+          <EuiPanel>
+            <DataFrameJobList />
+          </EuiPanel>
+        </EuiPageContentBody>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};

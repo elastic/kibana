@@ -5,18 +5,7 @@
  */
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { MSearchHeader, SearchHit } from '../types';
-import { KpiHostHistogramData, KpiHostsData } from '../../graphql/types';
-
-export interface KpiHostDetailsData {
-  authSuccess?: number | null;
-  authSuccessHistogram?: KpiHostHistogramData[] | null;
-  authFailure?: number | null;
-  authFailureHistogram?: KpiHostHistogramData[] | null;
-  uniqueSourceIps?: number | null;
-  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
-  uniqueDestinationIps?: number | null;
-  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
-}
+import { KpiHostsData, KpiHostDetailsData } from '../../graphql/types';
 
 export interface KpiHostsAdapter {
   getKpiHosts(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiHostsData>;

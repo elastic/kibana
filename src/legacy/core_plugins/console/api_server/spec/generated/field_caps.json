@@ -9,7 +9,8 @@
         "closed",
         "none",
         "all"
-      ]
+      ],
+      "include_unmapped": "__flag__"
     },
     "methods": [
       "GET",
