@@ -6,6 +6,7 @@
 import React from 'react';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+
 import { Form1 } from './form_1';
 import { Form2 } from './form_2';
 import { Form3 } from './form_3';
@@ -30,11 +31,12 @@ export const HookFormPOC = () => {
 
         <EuiSpacer size="xl" />
         <Form3 />
+        <EuiSpacer size="xl" />
         <hr />
 
         <EuiSpacer size="xl" />
         <Form3
-          title="4. Advanced usage with initilal values"
+          title="4. Same form but with initilal values"
           defaultValues={{
             name: 'hello world',
             elastic: {
@@ -47,6 +49,7 @@ export const HookFormPOC = () => {
               prop: 'Some value',
             },
             indexName: 'good',
+            selectedIndices: ['index_3'],
           }}
         />
         <EuiSpacer size="xl" />

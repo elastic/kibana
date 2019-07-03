@@ -7,6 +7,7 @@
 import { FormSchema, FIELD_TYPES, ERROR_TYPES } from 'ui/forms/hook_form_lib';
 import { emptyField, minLengthField, minSelectionField } from 'ui/forms/field_validators';
 import { multiSelectOptionsToSelectedValue } from 'ui/forms/output_transforms';
+import { multiSelectSelectedValueToOptions } from 'ui/forms/input_transforms';
 import { MyForm } from './types';
 
 export const formSchema: FormSchema<MyForm> = {
@@ -135,6 +136,7 @@ export const formSchema: FormSchema<MyForm> = {
     type: FIELD_TYPES.MULTI_SELECT,
     errorDisplayDelay: 0,
     validations: [{ validator: minSelectionField(2) }],
+    inputTransform: multiSelectSelectedValueToOptions,
     outputTransform: multiSelectOptionsToSelectedValue,
   },
 };

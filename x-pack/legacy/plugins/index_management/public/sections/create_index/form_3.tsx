@@ -168,6 +168,21 @@ export const Form3 = ({
         }}
       />
 
+      <UseField
+        path="selectedIndices"
+        form={form}
+        render={FormRow}
+        defaultValue={[{ label: 'index_1' }, { label: 'index_2' }, { label: 'index_3' }]}
+        renderProps={{
+          title: 'Indices to backup',
+          description: 'Choose any indices than you want to include in your backup',
+          fieldProps: {
+            searchable: true,
+            height: 150,
+          },
+        }}
+      />
+
       <FormRow title="Dynamic fields" description="Or how to dynamically add values to an array">
         <UseArray path="elastic.coWorkers" form={form}>
           {({ rows, addRow, removeRow }) => (

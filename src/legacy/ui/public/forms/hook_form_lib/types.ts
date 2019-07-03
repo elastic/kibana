@@ -91,6 +91,7 @@ export interface FieldConfig<T = FormData> {
   readonly validationsArrayItems?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
   readonly outputTransform?: OutputTransformFunc;
+  readonly inputTransform?: InputTransformFunc;
   readonly fieldsToValidateOnChange?: string[];
   readonly isValidationAsync?: boolean;
   readonly errorDisplayDelay?: number;
@@ -123,11 +124,13 @@ export interface FieldValidateResponse {
   errors: ValidationError[];
 }
 
+export type OutputTransformFunc = (value: any) => unknown;
+
+export type InputTransformFunc = (defaultValue: unknown, formDataValue?: unknown) => unknown;
+
 type FormData = Record<string, string>;
 
 type FormatterFunc = (value: any) => unknown;
-
-type OutputTransformFunc = (value: any) => unknown;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...

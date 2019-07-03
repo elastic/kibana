@@ -55,20 +55,6 @@ export const Form2 = () => {
       />
       <UseField path="title" form={form} render={FormRow} renderProps={{ title: 'Title' }} />
       <UseField
-        path="selectedIndices"
-        form={form}
-        render={FormRow}
-        defaultValue={[{ label: 'index 1' }, { label: 'index 2' }, { label: 'index 3' }]}
-        renderProps={{
-          title: 'Indices to backup',
-          description: 'Choose any indices than you want to include in your backup',
-          fieldProps: {
-            searchable: true,
-            height: 150,
-          },
-        }}
-      />
-      <UseField
         path="nested.prop"
         form={form}
         render={FormRow}

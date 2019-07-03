@@ -45,8 +45,14 @@ export const UseField = ({
     config = form.readFieldConfigFromSchema(path);
   }
 
-  const _defaultValue =
-    typeof defaultValue !== 'undefined' ? defaultValue : form.getDefaultValueField(path);
+  const defaultValueOnForm = form.getDefaultValueField(path);
+  const defaultValueProvided = defaultValue;
+
+  const _defaultValue = config.inputTransform
+    ? config.inputTransform(defaultValueProvided, defaultValueOnForm)
+    : typeof defaultValueProvided !== 'undefined'
+    ? defaultValueProvided
+    : defaultValueOnForm;
 
   // Don't modify the config object
   const configCopy =
