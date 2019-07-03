@@ -30,7 +30,6 @@ uiModules
     ['indexPattern', { watchDepth: 'reference' }],
     ['responseValueAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
     ['state', { watchDepth: 'reference' }],
-    ['vis', { watchDepth: 'reference' }],
     ['onAggErrorChanged', { watchDepth: 'reference' }],
     ['onAggTypeChange', { watchDepth: 'reference' }],
     ['onAggParamsChange', { watchDepth: 'reference' }],
