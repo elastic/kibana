@@ -13,7 +13,7 @@ import { getEntries } from '../get_entries';
 export const createKeyAndValue = (influencer: Record<string, string>): string => {
   const [key, value] = getEntries(influencer);
   if (key != null && value != null) {
-    return `${key}: “${value}”`;
+    return `${key}: "${value}"`;
   } else {
     return '';
   }

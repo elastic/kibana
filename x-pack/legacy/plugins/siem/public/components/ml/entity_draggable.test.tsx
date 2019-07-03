@@ -24,6 +24,6 @@ describe('entity_draggable', () => {
         <EntityDraggable idPrefix="id-prefix" entityName="entity-name" entityValue="entity-value" />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('entity-name: “entity-value”');
+    expect(wrapper.text()).toEqual('entity-name: "entity-value"');
   });
 });
