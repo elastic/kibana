@@ -76,8 +76,8 @@ test(`invokes and uses wrappers in specified order`, () => {
   const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
   const request = Symbol();
 
-  clientProvider.addClientWrapperFactory(1, secondClientWrapperFactoryMock);
-  clientProvider.addClientWrapperFactory(0, firstClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
   const actualClient = clientProvider.getClient(request);
 
   expect(actualClient).toBe(firstWrappedClient);
