@@ -27,24 +27,18 @@ import { AggParam } from '../agg_param';
 import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
 
 interface AggregateValueProp extends SelectValueProp {
-  isCompatibleType(filedType: string): boolean;
-  isCompatibleVis(visName: string): boolean;
+  isCompatible(aggConfig: AggConfig): boolean;
 }
 
-function getCompatibleAggs(agg: AggConfig, visName: string): AggregateValueProp[] {
-  const fieldType = agg.params.field && agg.params.field.type;
+function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
   const { options = [] } = agg.getAggParams().find(({ name }: AggParam) => name === 'aggregate');
-  return options.filter(
-    (option: AggregateValueProp) =>
-      fieldType && option.isCompatibleType(fieldType) && option.isCompatibleVis(visName)
-  );
+  return options.filter((option: AggregateValueProp) => option.isCompatible(agg));
 }
 
 function TopAggregateParamEditor({
   agg,
   aggParam,
   value,
-  visName,
   showValidation,
   setValue,
   setValidity,
@@ -54,7 +48,7 @@ function TopAggregateParamEditor({
   const isFirstRun = useRef(true);
   const fieldType = agg.params.field && agg.params.field.type;
   const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
-  const filteredOptions = getCompatibleAggs(agg, visName)
+  const filteredOptions = getCompatibleAggs(agg)
     .map(({ text, value: val }) => ({ text, value: val }))
     .sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
   const options = [emptyValue, ...filteredOptions];
@@ -78,34 +72,28 @@ function TopAggregateParamEditor({
     </>
   );
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (isFirstRun.current) {
-        isFirstRun.current = false;
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
+    if (value) {
+      if (aggParam.options.byValue[value.value]) {
         return;
       }
 
-      if (value) {
-        if (aggParam.options.byValue[value.value]) {
-          return;
-        }
+      setValue();
+    }
 
-        setValue();
-      }
-
-      if (filteredOptions.length === 1) {
-        setValue(aggParam.options.byValue[filteredOptions[0].value]);
-      }
-    },
-    [fieldType, visName]
-  );
+    if (filteredOptions.length === 1) {
+      setValue(aggParam.options.byValue[filteredOptions[0].value]);
+    }
+  }, [fieldType]);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (event.target.value === emptyValue.value) {

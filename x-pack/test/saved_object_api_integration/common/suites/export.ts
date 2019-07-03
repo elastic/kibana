@@ -86,9 +86,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
-        tests.spaceAwareType.description
-      } when querying by type`, async () => {
+      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description} when querying by type`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
           .send({
@@ -99,9 +97,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.spaceAwareType.response);
       });
 
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
-        tests.spaceAwareType.description
-      } when querying by objects`, async () => {
+      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description} when querying by objects`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
           .send({
@@ -118,9 +114,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       });
 
       describe('no type or objects', () => {
-        it(`should return ${tests.noTypeOrObjects.statusCode} with ${
-          tests.noTypeOrObjects.description
-        }`, async () => {
+        it(`should return ${tests.noTypeOrObjects.statusCode} with ${tests.noTypeOrObjects.description}`, async () => {
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
             .auth(user.username, user.password)

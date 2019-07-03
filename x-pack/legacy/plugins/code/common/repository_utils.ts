@@ -78,15 +78,18 @@ export class RepositoryUtils {
   }
 
   public static normalizeRepoUriToIndexName(repoUri: RepositoryUri) {
+    // Following the unit test here in Elasticsearch repository:
+    // https://github.com/elastic/elasticsearch/blob/c75773745cd048cd81a58c7d8a74272b45a25cc6/server/src/test/java/org/elasticsearch/cluster/metadata/MetaDataCreateIndexServiceTests.java#L404
     const hash = crypto
       .createHash('md5')
       .update(repoUri)
       .digest('hex')
       .substring(0, 8);
-    const segs: string[] = repoUri.split('/');
-    segs.push(hash);
+    // Invalid chars in index can be found here:
+    // https://github.com/elastic/elasticsearch/blob/237650e9c054149fd08213b38a81a3666c1868e5/server/src/main/java/org/elasticsearch/common/Strings.java#L376
+    const normalizedUri = repoUri.replace(/[/\\?%*:|"<> ,]/g, '-');
     // Elasticsearch index name is case insensitive
-    return segs.join('-').toLowerCase();
+    return `${normalizedUri}-${hash}`.toLowerCase();
   }
 
   public static locationToUrl(loc: Location) {

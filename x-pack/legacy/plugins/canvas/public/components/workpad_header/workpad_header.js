@@ -110,6 +110,9 @@ export class WorkpadHeader extends React.PureComponent {
               <EuiFlexItem grow={false}>
                 <FullscreenControl>{this._fullscreenButton}</FullscreenControl>
               </EuiFlexItem>
+              <EuiFlexItem>
+                <WorkpadZoom />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <WorkpadExport />
               </EuiFlexItem>
@@ -131,9 +134,6 @@ export class WorkpadHeader extends React.PureComponent {
                     isDisabled={!canUserWrite}
                   />
                 </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <WorkpadZoom />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -7,6 +7,7 @@
 import { get, getOr, has, head, set } from 'lodash/fp';
 
 import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
@@ -33,10 +34,11 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     request: FrameworkRequest,
     options: HostsRequestOptions
   ): Promise<HostsData> {
+    const dsl = buildHostsQuery(options);
     const response = await this.framework.callWithRequest<HostEsData, TermAggregation>(
       request,
       'search',
-      buildHostsQuery(options)
+      dsl
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
@@ -45,34 +47,56 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     const hasNextPage = hostsEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = hostsEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
-    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: { value: String(limit) } } };
+    return {
+      inspect,
+      edges,
+      totalCount,
+      pageInfo: { hasNextPage, endCursor: { value: String(limit) } },
+    };
   }
 
   public async getHostOverview(
     request: FrameworkRequest,
     options: HostOverviewRequestOptions
   ): Promise<HostItem> {
+    const dsl = buildHostOverviewQuery(options);
     const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
       request,
       'search',
-      buildHostOverviewQuery(options)
+      dsl
     );
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
-    return { _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
+    return { inspect, _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
   }
 
   public async getHostFirstLastSeen(
     request: FrameworkRequest,
     options: HostLastFirstSeenRequestOptions
   ): Promise<FirstLastSeenHost> {
+    const dsl = buildLastFirstSeenHostQuery(options);
     const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
       request,
       'search',
-      buildLastFirstSeenHostQuery(options)
+      dsl
     );
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
     return {
+      inspect,
       firstSeen: get('firstSeen.value_as_string', aggregations),
       lastSeen: get('lastSeen.value_as_string', aggregations),
     };
