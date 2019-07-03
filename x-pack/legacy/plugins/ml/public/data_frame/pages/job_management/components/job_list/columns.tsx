@@ -70,6 +70,12 @@ export const getColumns = (
       truncateText: true,
     },
     {
+      field: DataFrameJobListColumn.description,
+      name: i18n.translate('xpack.ml.dataframe.description', { defaultMessage: 'Description' }),
+      sortable: true,
+      truncateText: true,
+    },
+    {
       field: DataFrameJobListColumn.configSourceIndex,
       name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
