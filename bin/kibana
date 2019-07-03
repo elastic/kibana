@@ -21,4 +21,7 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-NODE_ENV=production BROWSERSLIST_IGNORE_OLD_DATA=true exec "${NODE}" --no-warnings --max-http-header-size=65536 $NODE_OPTIONS "${DIR}/src/cli" ${@}
+BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
+PARSED_NODE_OPTIONS="${NODE_OPTIONS:+" $NODE_OPTIONS"}"
+
+NODE_OPTIONS="${BASE_NODE_OPTIONS}${PARSED_NODE_OPTIONS}" NODE_ENV=production BROWSERSLIST_IGNORE_OLD_DATA=true exec "${NODE}" "${DIR}/src/cli" ${@}

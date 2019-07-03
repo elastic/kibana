@@ -13,8 +13,18 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
+set "BASE_NODE_OPTIONS=--no-warnings"
+
+set "PARSED_NODE_OPTIONS= %NODE_OPTIONS%"
+
+if "%PARSED_NODE_OPTIONS: =%"=="" (
+  set PARSED_NODE_OPTIONS=
+)
+
+set "NODE_OPTIONS=%BASE_NODE_OPTIONS%%PARSED_NODE_OPTIONS%"
+
 TITLE Kibana Server
-"%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli_plugin" %*
+"%NODE%" "%DIR%\src\cli_plugin" %*
 
 :finally
 
