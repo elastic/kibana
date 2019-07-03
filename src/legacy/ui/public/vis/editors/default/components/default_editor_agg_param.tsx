@@ -30,14 +30,11 @@ interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
 function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
   const { agg, aggParam, paramEditor: ParamEditor, onChange, setValidity, ...rest } = props;
 
-  useEffect(
-    () => {
-      if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
-        setValidity(true);
-      }
-    },
-    [agg, agg.params.field]
-  );
+  useEffect(() => {
+    if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
+      setValidity(true);
+    }
+  }, [agg, agg.params.field]);
 
   if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
     return null;
