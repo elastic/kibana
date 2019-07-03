@@ -87,7 +87,7 @@ export function PieChartProvider({ getService }) {
     async getPieSliceCount() {
       log.debug('PieChart.getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', 2500);
         return slices.length;
       });
     }

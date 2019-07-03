@@ -13,12 +13,12 @@ import {
   MINIMUM_REFRESH_INTERVAL_MS,
 } from '../../../../../../common/constants/jobs_list';
 
-import { GetJobs } from './job_service/get_jobs';
+import { useRefreshTransformList } from '../../../../common';
 
 export const useRefreshInterval = (
-  getJobs: GetJobs,
   setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
+  const { refresh } = useRefreshTransformList();
   useEffect(() => {
     let jobsRefreshInterval: null | number = null;
 
@@ -56,7 +56,7 @@ export const useRefreshInterval = (
       } else {
         setRefreshInterval(value);
       }
-      getJobs(true);
+      refresh();
     }
 
     function setRefreshInterval(interval: number) {
@@ -64,7 +64,7 @@ export const useRefreshInterval = (
       if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
         setBlockRefresh(false);
         const intervalId = window.setInterval(() => {
-          getJobs();
+          refresh();
         }, interval);
         jobsRefreshInterval = intervalId;
       }

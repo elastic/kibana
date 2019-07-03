@@ -10,7 +10,7 @@ import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
 import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';
 import { flatten } from '../../../lib/aeroelastic/functional';
-import { canUserWrite, getFullscreen } from '../../../state/selectors/app';
+import { canUserWrite, getFullscreen, getZoomScale } from '../../../state/selectors/app';
 import {
   elementLayer,
   insertNodes,
@@ -29,6 +29,8 @@ const configuration = {
   atopZ: 1000,
   depthSelect: true,
   devColor: 'magenta',
+  dragBoxAnnotationName: 'dragBoxAnnotation',
+  dragBoxZ: 1050, // above alignment guides but below the upcoming hover tooltip
   groupName: 'group',
   groupResize: true,
   guideDistance: 3,
@@ -113,6 +115,7 @@ const mapStateToProps = (state, ownProps) => {
     selectedToplevelNodes,
     selectedNodes: selectedNodeIds.map(id => nodes.find(s => s.id === id)),
     pageStyle: getPageById(state, ownProps.pageId).style,
+    zoomScale: getZoomScale(state),
   };
 };
 

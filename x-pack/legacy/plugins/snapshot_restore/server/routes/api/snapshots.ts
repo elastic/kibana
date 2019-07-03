@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
+import {
+  wrapEsError,
+  wrapCustomError,
+} from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails } from '../../../common/types';
-import { deserializeSnapshotDetails } from '../../lib';
+import { Plugins } from '../../../shim';
+import { deserializeSnapshotDetails, getManagedRepositoryName } from '../../lib';
 import { SnapshotDetailsEs } from '../../types';
 
-export function registerSnapshotsRoutes(router: Router) {
+let callWithInternalUser: any;
+
+export function registerSnapshotsRoutes(router: Router, plugins: Plugins) {
+  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('snapshots', getAllHandler);
   router.get('snapshots/{repository}/{snapshot}', getOneHandler);
+  router.delete('snapshots/{ids}', deleteHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -21,7 +29,10 @@ export const getAllHandler: RouterRouteHandler = async (
   snapshots: SnapshotDetails[];
   errors: any[];
   repositories: string[];
+  managedRepository?: string;
 }> => {
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+
   /*
    * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`
    * when no repositories bug is fixed: https://github.com/elastic/elasticsearch/issues/43547
@@ -60,7 +71,7 @@ export const getAllHandler: RouterRouteHandler = async (
       // Decorate each snapshot with the repository with which it's associated.
       fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
         fetchedSnapshots.forEach(snapshot => {
-          snapshots.push(deserializeSnapshotDetails(repository, snapshot));
+          snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
         });
       });
 
@@ -86,6 +97,7 @@ export const getOneHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<SnapshotDetails> => {
   const { repository, snapshot } = req.params;
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
   const {
     responses: snapshotResponses,
   }: {
@@ -100,9 +112,47 @@ export const getOneHandler: RouterRouteHandler = async (
   });
 
   if (snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots) {
-    return deserializeSnapshotDetails(repository, snapshotResponses[0].snapshots[0]);
+    return deserializeSnapshotDetails(
+      repository,
+      snapshotResponses[0].snapshots[0],
+      managedRepository
+    );
   }
 
   // If snapshot doesn't exist, ES will return 200 with an error object, so manually throw 404 here
   throw wrapCustomError(new Error('Snapshot not found'), 404);
+};
+
+export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
+  const { ids } = req.params;
+  const snapshotIds = ids.split(',');
+  const response: {
+    itemsDeleted: Array<{ snapshot: string; repository: string }>;
+    errors: any[];
+  } = {
+    itemsDeleted: [],
+    errors: [],
+  };
+
+  // We intentially perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
+  // because there can only be one snapshot deletion task performed at a time (ES restriction).
+  for (let i = 0; i < snapshotIds.length; i++) {
+    // IDs come in the format of `repository-name/snapshot-name`
+    // Extract the two parts by splitting at last occurrence of `/` in case
+    // repository name contains '/` (from older versions)
+    const id = snapshotIds[i];
+    const indexOfDivider = id.lastIndexOf('/');
+    const snapshot = id.substring(indexOfDivider + 1);
+    const repository = id.substring(0, indexOfDivider);
+    await callWithRequest('snapshot.delete', { snapshot, repository })
+      .then(() => response.itemsDeleted.push({ snapshot, repository }))
+      .catch(e =>
+        response.errors.push({
+          id: { snapshot, repository },
+          error: wrapEsError(e),
+        })
+      );
+  }
+
+  return response;
 };

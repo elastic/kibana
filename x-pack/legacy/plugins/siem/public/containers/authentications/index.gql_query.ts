@@ -13,6 +13,7 @@ export const authenticationsQuery = gql`
     $pagination: PaginationInput!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -61,6 +62,10 @@ export const authenticationsQuery = gql`
             value
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

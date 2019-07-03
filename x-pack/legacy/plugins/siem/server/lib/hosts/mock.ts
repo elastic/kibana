@@ -224,7 +224,13 @@ export const mockGetHostsResponse = {
   },
 };
 
+export const mockGetHostsQueryDsl = { mockGetHostsQueryDsl: 'mockGetHostsQueryDsl' };
+
 export const mockGetHostsResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockGetHostsQueryDsl, null, 2)],
+    response: [JSON.stringify(mockGetHostsResponse, null, 2)],
+  },
   edges: [
     {
       node: {
@@ -452,7 +458,15 @@ export const mockGetHostOverviewResponse = {
   },
 };
 
+export const mockGetHostOverviewRequestDsl = {
+  mockGetHostOverviewRequestDsl: 'mockGetHostOverviewRequestDsl',
+};
+
 export const mockGetHostOverviewResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockGetHostOverviewRequestDsl, null, 2)],
+    response: [JSON.stringify(mockGetHostOverviewResponse, null, 2)],
+  },
   _id: 'siem-es',
   host: {
     architecture: 'x86_64',
@@ -532,4 +546,17 @@ export const mockGetHostLastFirstSeenResponse = {
       value_as_string: '2019-02-22T03:41:32.826Z',
     },
   },
+};
+
+export const mockGetHostLastFirstSeenDsl = {
+  mockGetHostLastFirstSeenDsl: 'mockGetHostLastFirstSeenDsl',
+};
+
+export const mockGetHostLastFirstSeenResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockGetHostLastFirstSeenDsl, null, 2)],
+    response: [JSON.stringify(mockGetHostLastFirstSeenResponse, null, 2)],
+  },
+  firstSeen: '2019-02-22T03:41:32.826Z',
+  lastSeen: '2019-04-09T16:18:12.178Z',
 };

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { OrderAggParamEditor } from './order_agg';
+import { OrderByParamEditor } from './order_by';
 
 describe('OrderAggParamEditor component', () => {
   let setValue: jest.Mock;
@@ -64,7 +64,7 @@ describe('OrderAggParamEditor component', () => {
     ];
     const props = { ...defaultProps, responseValueAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('agg1');
   });
@@ -104,7 +104,7 @@ describe('OrderAggParamEditor component', () => {
     ];
     const props = { ...defaultProps, responseValueAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('agg5');
   });
@@ -120,7 +120,7 @@ describe('OrderAggParamEditor component', () => {
     ];
     const props = { ...defaultProps, responseValueAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('_key');
   });
@@ -137,7 +137,7 @@ describe('OrderAggParamEditor component', () => {
     ];
     const props = { ...defaultProps, responseValueAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('agg1');
   });
@@ -154,13 +154,13 @@ describe('OrderAggParamEditor component', () => {
     ];
     const props = { ...defaultProps, responseValueAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('_key');
   });
 
   it('selects _key if there are no metric aggs', () => {
-    mount(<OrderAggParamEditor {...defaultProps} />);
+    mount(<OrderByParamEditor {...defaultProps} />);
 
     expect(setValue).toHaveBeenCalledWith('_key');
   });

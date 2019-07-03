@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { httpService } from './index';
 import { uiMetricService } from '../ui_metric';
 
@@ -52,7 +52,6 @@ export const sendRequest = async ({
 interface UseRequest extends SendRequest {
   interval?: number;
   initialData?: any;
-  timeout?: number;
 }
 
 export const useRequest = ({
@@ -61,20 +60,34 @@ export const useRequest = ({
   body,
   interval,
   initialData,
-  timeout,
   uimActionType,
 }: UseRequest) => {
+  // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<any>(initialData);
+
+  // States for tracking polling
+  const [polling, setPolling] = useState<boolean>(false);
+  const [currentInterval, setCurrentInterval] = useState<UseRequest['interval']>(interval);
+  const intervalRequest = useRef<any>(null);
+  const isFirstRequest = useRef<boolean>(true);
 
   // Tied to every render and bound to each request.
   let isOutdatedRequest = false;
 
   const request = async () => {
-    setError(null);
-    setData(initialData);
-    setLoading(true);
+    const isPollRequest = currentInterval && !isFirstRequest.current;
+
+    // Don't reset main error/loading states if we are doing polling
+    if (isPollRequest) {
+      setPolling(true);
+    } else {
+      setError(null);
+      setData(initialData);
+      setLoading(true);
+      setPolling(false);
+    }
 
     const requestBody = {
       path,
@@ -90,31 +103,49 @@ export const useRequest = ({
       return;
     }
 
-    setError(response.error);
-    setData(response.data);
-    setLoading(false);
+    // Set just data if we are doing polling
+    if (isPollRequest) {
+      setPolling(false);
+      if (response.data) {
+        setData(response.data);
+      }
+    } else {
+      setError(response.error);
+      setData(response.data);
+      setLoading(false);
+    }
+
+    isFirstRequest.current = false;
+  };
+
+  const cancelOutdatedRequest = () => {
+    isOutdatedRequest = true;
   };
 
   useEffect(
     () => {
-      function cancelOutdatedRequest() {
-        isOutdatedRequest = true;
-      }
-
+      // Perform request
       request();
 
-      if (interval) {
-        const intervalRequest = setInterval(request, interval);
-        return () => {
-          cancelOutdatedRequest();
-          clearInterval(intervalRequest);
-        };
+      // Clear current interval
+      if (intervalRequest.current) {
+        clearInterval(intervalRequest.current);
       }
 
-      // Called when a new render will trigger this effect.
-      return cancelOutdatedRequest;
+      // Set new interval
+      if (currentInterval) {
+        intervalRequest.current = setInterval(request, currentInterval);
+      }
+
+      // Cleanup intervals and inflight requests and corresponding state changes
+      return () => {
+        cancelOutdatedRequest();
+        if (intervalRequest.current) {
+          clearInterval(intervalRequest.current);
+        }
+      };
     },
-    [path]
+    [path, currentInterval]
   );
 
   return {
@@ -122,5 +153,13 @@ export const useRequest = ({
     loading,
     data,
     request,
+    polling,
+    changeInterval: (newInterval: UseRequest['interval']) => {
+      // Allow changing polling interval if there was one set
+      if (!interval) {
+        return;
+      }
+      setCurrentInterval(newInterval);
+    },
   };
 };
