@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
+import React, { PureComponent, Fragment } from 'react';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiLink,
+  EuiCallOut,
+} from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
@@ -134,6 +142,7 @@ export class KibanaInstances extends PureComponent {
       onTableChange
     } = this.props;
 
+    let netNewUserMessage = null;
     // Merge the instances data with the setup data if enabled
     const instances = this.props.instances || [];
     if (setupMode.enabled && setupMode.data) {
@@ -157,6 +166,30 @@ export class KibanaInstances extends PureComponent {
           }
           return instances;
         }, []));
+
+      const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
+      if (!hasInstances) {
+        netNewUserMessage = (
+          <Fragment>
+            <EuiCallOut
+              title={i18n.translate('xpack.monitoring.kibana.nodes.metribeatMigration.netNewUserTitle', {
+                defaultMessage: 'No monitoring data detected',
+              })}
+              color="danger"
+              iconType="cross"
+            >
+              <p>
+                {i18n.translate('xpack.monitoring.kibana.nodes.metribeatMigration.netNewUserDescription', {
+                  defaultMessage: `We did not detect any monitoring data, but we did detect the following Kibana instance.
+                  This detected instance is listed below along with a Setup button. Clicking this button will guide you through
+                  the process of enabling monitoring for this instance.`
+                })}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m"/>
+          </Fragment>
+        );
+      }
     }
 
     const dataFlattened = instances.map(item => ({
@@ -165,6 +198,7 @@ export class KibanaInstances extends PureComponent {
       status: item.kibana.status,
     }));
 
+
     return (
       <EuiPage>
         <EuiPageBody>
@@ -172,6 +206,7 @@ export class KibanaInstances extends PureComponent {
             <ClusterStatus stats={clusterStatus} />
           </EuiPanel>
           <EuiSpacer size="m" />
+          {netNewUserMessage}
           <EuiPageContent>
             <EuiMonitoringTable
               className="kibanaInstancesTable"
