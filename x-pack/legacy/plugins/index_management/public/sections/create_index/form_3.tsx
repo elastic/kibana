@@ -19,8 +19,15 @@ import {
   EuiComboBox,
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
-import { useForm, FormConfig, FieldConfig, Field as FieldType } from 'ui/forms/use_form';
-import { FormRow, UseField, UseArray, Field } from 'ui/forms/components';
+import {
+  useForm,
+  FormConfig,
+  FieldConfig,
+  Field as FieldType,
+  UseField,
+  UseArray,
+} from 'ui/forms/use_form';
+import { FormRow, Field } from 'ui/forms/components';
 
 import { MyForm } from './types';
 import { formSchema } from './form.schema';

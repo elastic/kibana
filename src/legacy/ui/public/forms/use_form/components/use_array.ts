@@ -18,7 +18,7 @@
  */
 
 import { useState, useRef } from 'react';
-import { Form } from '../use_form';
+import { Form } from '../types';
 
 interface Props {
   path: string;
