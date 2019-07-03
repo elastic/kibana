@@ -6,6 +6,7 @@
 
 import createContainer from 'constate-latest';
 import { useCallback, useEffect, useState, useMemo } from 'react';
+import { isNumber } from 'lodash';
 
 import {
   LogEntryHighlightsMap,
@@ -52,7 +53,7 @@ export const useLogHighlightsState = ({
         );
         let previousIndex = null;
         let nextIndex = null;
-        if (currentHighlightIndexOfMidpoint) {
+        if (_.isNumber(currentHighlightIndexOfMidpoint)) {
           previousIndex =
             currentHighlightIndexOfMidpoint > 0
               ? currentHighlightIndexOfMidpoint - 1
@@ -73,13 +74,13 @@ export const useLogHighlightsState = ({
             insertionIndex < logEntryHighlights[0].entries.length - 1 ? insertionIndex : 0;
         }
 
-        if (previousIndex) {
+        if (_.isNumber(previousIndex)) {
           setPreviousHighlightLogEntryIndex(previousIndex);
         } else {
           setPreviousHighlightLogEntryIndex(null);
         }
 
-        if (nextIndex) {
+        if (_.isNumber(nextIndex)) {
           setNextHighlightLogEntryIndex(nextIndex);
         } else {
           setNextHighlightLogEntryIndex(null);

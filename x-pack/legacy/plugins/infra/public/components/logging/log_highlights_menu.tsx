@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { debounce } from 'lodash';
+import { debounce, isNumber } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
@@ -73,7 +73,6 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
       {activeHighlights ? <ActiveHighlightsIndicator /> : null}
     </EuiButtonEmpty>
   );
-
   return (
     <EuiPopover
       id="popover"
@@ -100,7 +99,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               iconType="arrowUp"
               onClick={goToPreviousHighlight}
               title={goToPreviousHighlightLabel}
-              isDisabled={!previousHighlightLogEntryIndex}
+              isDisabled={!_.isNumber(previousHighlightLogEntryIndex)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -109,7 +108,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               iconType="arrowDown"
               onClick={goToNextHighlight}
               title={goToNextHighlightLabel}
-              isDisabled={!nextHighlightLogEntryIndex}
+              isDisabled={!_.isNumber(nextHighlightLogEntryIndex)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
