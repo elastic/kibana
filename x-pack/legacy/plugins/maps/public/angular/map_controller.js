@@ -144,7 +144,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
 
   function isOnMapNow() {
-    return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}/`);
+    return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}`);
   }
 
   function beforeUnload(event) {
