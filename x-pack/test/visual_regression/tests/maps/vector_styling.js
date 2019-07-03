@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await PageObjects.maps.loadSavedMap('vector styling icon demo');
         await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.closeLegend();
       });
 
       it('should symbolize points as icons with expected color, size, and orientation', async () => {
