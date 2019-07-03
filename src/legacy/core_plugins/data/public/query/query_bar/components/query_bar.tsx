@@ -54,7 +54,7 @@ interface Props {
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
-  screenTitle: string;
+  screenTitle?: string;
   indexPatterns: Array<IndexPattern | string>;
   store: Storage;
   intl: InjectedIntl;

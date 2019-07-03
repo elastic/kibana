@@ -40,21 +40,25 @@ interface DateRange {
  * See [search_bar\directive\index.js] file
  */
 export interface SearchBarProps {
+  appName: string;
+  screenTitle?: string;
+  store: Storage;
+  intl: InjectedIntl;
+  indexPatterns: IndexPattern[];
+  disableAutoFocus?: boolean;
+  // Query bar
+  showQueryBar?: boolean;
   query: Query;
   onQuerySubmit: (payload: { dateRange: DateRange; query: Query }) => void;
-  disableAutoFocus?: boolean;
-  appName: string;
-  screenTitle: string;
-  indexPatterns: IndexPattern[];
-  store: Storage;
-  filters: Filter[];
-  onFiltersUpdated: (filters: Filter[]) => void;
-  showQueryBar: boolean;
-  showFilterBar: boolean;
-  intl: InjectedIntl;
+  // Filter bar
+  showFilterBar?: boolean;
+  filters?: Filter[];
+  onFiltersUpdated?: (filters: Filter[]) => void;
+  // Date picker
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  // Autorefresh
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
@@ -77,6 +81,19 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public state = {
     isFiltersVisible: true,
   };
+
+  private getFilterLength() {
+    if (this.props.showFilterBar && this.props.filters) {
+      return this.props.filters.length;
+    }
+  }
+
+  private getFilterUpdateFunction() {
+    if (this.props.showFilterBar && this.props.onFiltersUpdated) {
+      return this.props.onFiltersUpdated;
+    }
+    return (filters: Filter[]) => {};
+  }
 
   public setFilterBarHeight = () => {
     requestAnimationFrame(() => {
@@ -133,10 +150,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onClick={this.toggleFiltersVisible}
         isSelected={this.state.isFiltersVisible}
         hasActiveFilters={this.state.isFiltersVisible}
-        numFilters={this.props.filters.length > 0 ? this.props.filters.length : undefined}
+        numFilters={this.getFilterLength() ? this.getFilterLength() : undefined}
         aria-controls="GlobalFilterGroup"
         aria-expanded={!!this.state.isFiltersVisible}
-        title={`${this.props.filters.length} ${filtersAppliedText} ${clickToShowOrHideText}`}
+        title={`${this.getFilterLength()} ${filtersAppliedText} ${clickToShowOrHideText}`}
       >
         Filters
       </EuiFilterButton>
@@ -169,7 +186,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           ''
         )}
 
-        {this.props.showFilterBar ? (
+        {this.props.showFilterBar && this.props.filters ? (
           <div
             id="GlobalFilterGroup"
             ref={node => {
@@ -185,7 +202,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               <FilterBar
                 className="globalFilterGroup__filterBar"
                 filters={this.props.filters}
-                onFiltersUpdated={this.props.onFiltersUpdated}
+                onFiltersUpdated={this.getFilterUpdateFunction()}
                 indexPatterns={this.props.indexPatterns}
               />
             </div>

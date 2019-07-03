@@ -29,10 +29,10 @@
     </div>
   </div>
 
-  <kbn-top-nav2 name="discover" config="topNavMenu">
-  </kbn-top-nav2>
-  
-  <search-bar
+  <kbn-top-nav2 
+    name="discover" 
+    config="topNavMenu"
+    show-search-bar="true"
     query="state.query"
     screen-title="screenTitle"
     on-query-submit="updateQueryAndFetch"
@@ -46,8 +46,9 @@
     is-refresh-paused="refreshInterval.pause"
     refresh-interval="refreshInterval.value"
     on-refresh-change="onRefreshChange"
-  ></search-bar>
-
+  >
+  </kbn-top-nav2>
+  
   <main class="container-fluid">
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
