@@ -1735,10 +1735,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.0.0.tgz#4d325df333fe1319556bb4d54214098ada1171d4"
   integrity sha512-bbjbEyILPRTRt0xnda18OttLtlkJBPuXx3CjISUSn9jhWqHoFMzfOaZ73D5jxZE2SaFZUrJYfPpqXP6qqPufAQ==
 
-"@elastic/nodegit@0.25.0-alpha.21":
-  version "0.25.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.21.tgz#095b2d5cfa5543da5e0651e80eb251b33a042886"
-  integrity sha512-nqdmS66hpJE8vEaazQIvSuTtU1EUDttIZNwfoQgPMfoWkcnRpX0S1mKxwejyCMg6qff3MpOnjyyjbi8fJqGC4g==
+"@elastic/nodegit@0.25.0-alpha.22":
+  version "0.25.0-alpha.22"
+  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.22.tgz#71c112c7f5284eabef91fa3e1acf689ba9cdc875"
+  integrity sha512-V49tzdAO9geWqukc4Xe073kQw9VW5mCh+DYvkZRwJPS3/+o5eMY5R+PMLfkd1BasjnrWkp/PZFl8OQUk+qjByg==
   dependencies:
     fs-extra "^7.0.0"
     json5 "^2.1.0"
