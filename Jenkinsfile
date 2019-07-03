@@ -6,7 +6,7 @@ pipeline {
     // Global vars
     CI = true
     BASE_DIR = "."
-    CI_DIR = "./.ci/"
+    CI_DIR = "./.ci"
 
     HOME = "${JENKINS_HOME}"  // /var/lib/jenkins
     MAIN_CACHE_DIR = "${HOME}/.kibana" // /var/lib/jenkins/.kibana
@@ -48,7 +48,8 @@ pipeline {
       agent { label 'linux || immutable' }
       options { skipDefaultCheckout() }
       steps {
-        deleteDir()
+        // deleteDir()
+        step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         // sh './test/scripts/jenkins_unit.sh'
       }
     }
@@ -77,6 +78,7 @@ pipeline {
 }
 def tarWorkspace(){
   script {
+    sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
     sh "tar -czf ${WORKSPACE_CACHE_NAME} ${BASE_DIR}"
   }
 }
