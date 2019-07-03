@@ -41,6 +41,7 @@ export interface VisualizeEmbeddableConfiguration {
   editUrl?: string;
   editable: boolean;
   loader: VisualizeLoader;
+  abortSignal?: AbortSignal;
 }
 
 export class VisualizeEmbeddable extends Embeddable {
@@ -54,6 +55,7 @@ export class VisualizeEmbeddable extends Embeddable {
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  private abortSignal?: AbortSignal;
 
   constructor({
     onEmbeddableStateChanged,
@@ -62,6 +64,7 @@ export class VisualizeEmbeddable extends Embeddable {
     editUrl,
     editable,
     loader,
+    abortSignal,
   }: VisualizeEmbeddableConfiguration) {
     super({
       title: savedVisualization.title,
@@ -75,6 +78,7 @@ export class VisualizeEmbeddable extends Embeddable {
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedVisualization = savedVisualization;
     this.loader = loader;
+    this.abortSignal = abortSignal;
 
     const parsedUiState = savedVisualization.uiStateJSON
       ? JSON.parse(savedVisualization.uiStateJSON)
@@ -184,6 +188,7 @@ export class VisualizeEmbeddable extends Embeddable {
       filters: containerState.filters,
       cssClass: `embPanel__content embPanel__content--fullWidth`,
       dataAttrs,
+      abortSignal: this.abortSignal,
     };
 
     this.handler = this.loader.embedVisualizationWithSavedObject(

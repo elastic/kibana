@@ -96,7 +96,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
    */
   public async create(
     panelMetadata: EmbeddableInstanceConfiguration,
-    onEmbeddableStateChanged: OnEmbeddableStateChanged
+    onEmbeddableStateChanged: OnEmbeddableStateChanged,
+    abortSignal?: AbortSignal
   ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
@@ -119,6 +120,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
       editable,
       loader,
       indexPatterns,
+      abortSignal,
     });
   }
 }

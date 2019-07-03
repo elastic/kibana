@@ -128,6 +128,8 @@ export class DashboardAppController {
     const panelActionsRegistry = Private(ContextMenuActionsRegistryProvider);
     const getUnhashableStates = Private(getUnhashableStatesProvider);
     const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+    const abortController = new AbortController();
+    $scope.abortSignal = abortController.signal;
 
     // @ts-ignore This code is going away shortly.
     panelActionsStore.initializeFromRegistry(panelActionsRegistry);
@@ -567,6 +569,7 @@ export class DashboardAppController {
       updateSubscription.unsubscribe();
       fetchSubscription.unsubscribe();
       dashboardStateManager.destroy();
+      abortController.abort();
     });
 
     if (

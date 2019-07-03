@@ -31,6 +31,7 @@ export function DashboardViewport({
   useMargins,
   isFullScreenMode,
   onExitFullScreenMode,
+  abortSignal,
 }: {
   maximizedPanelId: string;
   getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
@@ -40,6 +41,7 @@ export function DashboardViewport({
   useMargins: boolean;
   isFullScreenMode: boolean;
   onExitFullScreenMode: () => void;
+  abortSignal?: AbortSignal;
 }) {
   return (
     <div
@@ -53,6 +55,7 @@ export function DashboardViewport({
       <DashboardGrid
         getEmbeddableFactory={getEmbeddableFactory}
         maximizedPanelId={maximizedPanelId}
+        abortSignal={abortSignal}
       />
     </div>
   );
