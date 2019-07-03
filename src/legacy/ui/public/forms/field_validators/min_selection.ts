@@ -19,7 +19,7 @@
 
 import { Option } from '@elastic/eui/src/components/selectable/types';
 
-import { ValidationFunc } from '../use_form';
+import { ValidationFunc } from '../hook_form_lib';
 import { minLengthArray } from '../../validators';
 import { minSelectionError } from '../errors';
 import { multiSelectOptionsToSelectedValue } from '../output_transforms';

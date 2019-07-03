@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ValidationFunc } from '../use_form';
+import { ValidationFunc } from '../hook_form_lib';
 import { isEmptyString, isUrl } from '../../validators';
 import { formatError } from '../errors';
 
