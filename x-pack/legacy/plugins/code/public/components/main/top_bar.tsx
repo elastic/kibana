@@ -13,6 +13,7 @@ import { encodeRevisionString, decodeRevisionString } from '../../../common/uri_
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from '../search_bar';
+import { StatusIndicator } from '../status_indicator/status_indicator';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -83,7 +84,7 @@ export class TopBar extends React.Component<Props, { value: string }> {
           className="codeTopBar__toolbar"
         >
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem className="codeContainer__select" grow={false}>
                 <EuiSelect
                   options={this.branchOptions}
@@ -93,6 +94,9 @@ export class TopBar extends React.Component<Props, { value: string }> {
                 />
               </EuiFlexItem>
               <Breadcrumb routeParams={this.props.routeParams} />
+              <EuiFlexItem grow={false}>
+                <StatusIndicator />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.props.buttons}</EuiFlexItem>

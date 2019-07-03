@@ -52,7 +52,6 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
   return (
     <EuiFormRow fullWidth={true} label={label}>
       {
-        // @ts-ignore: valueAppend does not exist in EuiRange prop types
         <EuiRange
           compressed
           fullWidth={true}

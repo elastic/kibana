@@ -12,6 +12,7 @@ import {
   EuiPopoverTitle,
   EuiExpression,
   EuiFormErrorText,
+  EuiFormHelpText,
 } from '@elastic/eui';
 import { MetricsEditor } from '../../../../shared/components/metrics_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -67,6 +68,7 @@ export class MetricsExpression extends Component {
         return false;
       })
       .map(({ type, field }) => {
+        // do not use metric label so field and aggregation are not obscured.
         if (type === 'count') {
           return 'count';
         }
@@ -104,6 +106,12 @@ export class MetricsExpression extends Component {
               defaultMessage="Metrics"
             />
           </EuiPopoverTitle>
+          <EuiFormHelpText className="mapJoinExpressionHelpText">
+            <FormattedMessage
+              id="xpack.maps.layerPanel.metricsExpression.helpText"
+              defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+            />
+          </EuiFormHelpText>
           {this._renderMetricsEditor()}
         </div>
       </EuiPopover>

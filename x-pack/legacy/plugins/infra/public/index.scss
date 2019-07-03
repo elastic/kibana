@@ -18,3 +18,10 @@
   flex: 1 0 0%;
   overflow: hidden;
 }
+
+// This is a temporary workaround for https://github.com/elastic/kibana/issues/39808
+// A real fix will most likely depend on changes in elastic-charts.
+
+.infMetricsExplorerChart .echTooltip {
+  max-width: 90vw;
+}

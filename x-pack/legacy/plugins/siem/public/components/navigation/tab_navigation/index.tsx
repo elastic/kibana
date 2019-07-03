@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import * as React from 'react';
+import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import { trackUiAction as track } from '../../../lib/track_usage';
@@ -20,6 +21,7 @@ interface NavTab {
 
 interface TabNavigationProps {
   location: string;
+  search: string;
 }
 
 const navTabs: NavTab[] = [
@@ -49,6 +51,17 @@ const navTabs: NavTab[] = [
   },
 ];
 
+const MyEuiTab = styled(EuiTab)`
+  .euiLink {
+    color: inherit !important;
+    background-color: inherit !important;
+  }
+  .euiLink.euiLink--primary:focus {
+    outline: none !important;
+    background: none !important;
+  }
+`;
+
 interface TabNavigationState {
   selectedTabId: string;
 }
@@ -58,9 +71,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     super(props);
     const pathname = props.location;
     const selectedTabId = this.mapLocationToTab(pathname);
-    this.state = {
-      selectedTabId,
-    };
+    this.state = { selectedTabId };
   }
   public componentWillReceiveProps(nextProps: TabNavigationProps): void {
     const pathname = nextProps.location;
@@ -85,26 +96,23 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       return res;
     }, '');
 
-  private handleTabClick = (href: string, id: string) => {
-    this.setState(prevState => ({
-      ...prevState,
-      selectedTabId: id,
-    }));
-    track(`tab_${id}`);
-    window.location.assign(href);
-  };
-
   private renderTabs = () =>
     navTabs.map((tab: NavTab) => (
-      <EuiTab
+      <MyEuiTab
         data-href={tab.href}
         data-test-subj={`navigation-${tab.id}`}
         disabled={tab.disabled}
         isSelected={this.state.selectedTabId === tab.id}
         key={`navigation-${tab.id}`}
-        onClick={() => this.handleTabClick(tab.href, tab.id)}
+        onClick={() => track(`tab_${tab.id}`)}
       >
-        {tab.name}
-      </EuiTab>
+        <EuiLink
+          className={'navigation-link'}
+          data-test-subj={`navigation-link-${tab.id}`}
+          href={tab.href + this.props.search}
+        >
+          {tab.name}
+        </EuiLink>
+      </MyEuiTab>
     ));
 }

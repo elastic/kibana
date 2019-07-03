@@ -86,9 +86,18 @@ export class FilterManager {
     // global filters should always be first
     newFilters.sort(
       (a: Filter, b: Filter): number => {
-        if (a.$state && a.$state.store === FilterStateStore.GLOBAL_STATE) {
+        // TypeScript, this shouldn't happen
+        if (!a.$state || !b.$state) return 0;
+
+        if (
+          a.$state.store === FilterStateStore.GLOBAL_STATE &&
+          b.$state.store !== FilterStateStore.GLOBAL_STATE
+        ) {
           return -1;
-        } else if (b.$state && b.$state.store === FilterStateStore.GLOBAL_STATE) {
+        } else if (
+          a.$state.store !== FilterStateStore.GLOBAL_STATE &&
+          b.$state.store === FilterStateStore.GLOBAL_STATE
+        ) {
           return 1;
         } else {
           return 0;

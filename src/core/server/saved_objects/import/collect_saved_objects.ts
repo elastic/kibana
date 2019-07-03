@@ -23,7 +23,6 @@ import {
   createFilterStream,
   createMapStream,
   createPromiseFromStreams,
-  createSplitStream,
 } from '../../../../legacy/utils/streams';
 import { SavedObject } from '../service';
 import { createLimitStream } from './create_limit_stream';
@@ -45,13 +44,6 @@ export async function collectSavedObjects({
   const errors: ImportError[] = [];
   const collectedObjects: SavedObject[] = await createPromiseFromStreams([
     readStream,
-    createSplitStream('\n'),
-    createMapStream((str: string) => {
-      if (str && str !== '') {
-        return JSON.parse(str);
-      }
-    }),
-    createFilterStream<SavedObject>(obj => !!obj),
     createLimitStream(objectLimit),
     createFilterStream<SavedObject>(obj => {
       if (supportedTypes.includes(obj.type)) {
