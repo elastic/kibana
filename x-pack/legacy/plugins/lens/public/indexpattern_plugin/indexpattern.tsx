@@ -7,8 +7,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
-import { Chrome } from 'ui/chrome';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import uuid from 'uuid';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -24,6 +22,7 @@ import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { buildColumnForOperationType, getOperationTypesForField } from './operations';
+import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
@@ -225,7 +224,12 @@ function addRestrictionsToFields(
   };
 }
 
-export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
+export function getIndexPatternDatasource({
+  chrome,
+  toastNotifications,
+  data,
+  storage,
+}: IndexPatternDatasourcePluginPlugins) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
@@ -287,6 +291,8 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
               <IndexPatternDimensionPanel
                 state={state}
                 setState={newState => setState(newState)}
+                dataPlugin={data}
+                storage={storage}
                 {...props}
               />
             </I18nProvider>,

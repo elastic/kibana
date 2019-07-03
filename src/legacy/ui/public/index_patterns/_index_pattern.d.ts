@@ -45,7 +45,6 @@ export interface StaticIndexPatternField {
   type: string;
   aggregatable: boolean;
   searchable: boolean;
-  filterable: boolean;
 }
 
 export interface StaticIndexPattern {

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Storage } from 'ui/storage';
+import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
 import { DimensionPriority } from '../types';
 import {
   IndexPatternColumn,
@@ -50,15 +52,8 @@ export const operationDefinitionMap: AllOperationDefinitions = {
   filter_ratio: filterRatioOperation,
 };
 const operationDefinitions: PossibleOperationDefinitions[] = Object.values(operationDefinitionMap);
-// const operationDefinitions: PossibleOperationDefinitions[] = (Object.entries(
-//   operationDefinitionMap
-// ) as Array<[string, PossibleOperationDefinitions]>)
-//   .sort(([a], [b]) => a.localeCompare(b))
-//   .sort(([a], [b]) => (a === 'count' ? -1 : 1))
-//   .map(([_, val]) => val);
 
 export function getOperations(): OperationType[] {
-  // return ['count', 'filter_ratio', 'date_histogram', 'terms', 'avg', 'max', 'min', 'sum'];
   return Object.keys(operationDefinitionMap) as OperationType[];
 }
 
@@ -66,6 +61,8 @@ export interface ParamEditorProps {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
+  dataPlugin?: DataSetup;
+  storage?: Storage;
 }
 
 export interface OperationDefinition<C extends BaseIndexPatternColumn> {

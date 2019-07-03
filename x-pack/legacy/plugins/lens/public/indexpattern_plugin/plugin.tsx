@@ -6,12 +6,16 @@
 
 import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
-import chrome from 'ui/chrome';
+// The following dependencies on ui/* and src/legacy/core_plugins must be mocked when testing
+import chrome, { Chrome } from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { getIndexPatternDatasource } from './indexpattern';
-
+import { Storage } from 'ui/storage';
+import { localStorage } from 'ui/storage/storage_service';
+import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
+import { data as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
+import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
 import { calculateFilterRatio } from './filter_ratio';
 
@@ -20,7 +24,11 @@ import { calculateFilterRatio } from './filter_ratio';
 // are available
 
 export interface IndexPatternDatasourcePluginPlugins {
+  chrome: Chrome;
   interpreter: InterpreterSetup;
+  data: DataSetup;
+  storage: Storage;
+  toastNotifications: typeof toastNotifications;
 }
 
 export interface InterpreterSetup {
@@ -33,10 +41,19 @@ export interface InterpreterSetup {
 class IndexPatternDatasourcePlugin {
   constructor() {}
 
-  setup(_core: CoreSetup | null, { interpreter }: IndexPatternDatasourcePluginPlugins) {
+  setup(
+    _core: CoreSetup | null,
+    { interpreter, data, storage, toastNotifications: toast }: IndexPatternDatasourcePluginPlugins
+  ) {
     interpreter.functionsRegistry.register(() => renameColumns);
     interpreter.functionsRegistry.register(() => calculateFilterRatio);
-    return getIndexPatternDatasource(chrome, toastNotifications);
+    return getIndexPatternDatasource({
+      chrome,
+      interpreter,
+      toastNotifications: toast,
+      data,
+      storage,
+    });
   }
 
   stop() {}
@@ -46,8 +63,12 @@ const plugin = new IndexPatternDatasourcePlugin();
 
 export const indexPatternDatasourceSetup = () =>
   plugin.setup(null, {
+    chrome,
     interpreter: {
       functionsRegistry,
     },
+    data: dataSetup,
+    storage: localStorage,
+    toastNotifications,
   });
 export const indexPatternDatasourceStop = () => plugin.stop();

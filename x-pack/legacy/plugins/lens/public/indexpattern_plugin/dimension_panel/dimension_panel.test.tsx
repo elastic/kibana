@@ -7,6 +7,8 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
+import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
+import { localStorage } from 'ui/storage/storage_service';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
 import { getPotentialColumns } from '../operations';
@@ -18,6 +20,7 @@ import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/e
 jest.mock('../loader');
 jest.mock('ui/new_platform');
 jest.mock('ui/chrome');
+jest.mock('ui/storage/storage_service');
 jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 jest.mock('../state_helpers');
@@ -107,6 +110,8 @@ describe('IndexPatternDimensionPanel', () => {
       setState,
       columnId: 'col1',
       filterOperations: () => true,
+      dataPlugin: data,
+      storage: localStorage,
     };
 
     jest.clearAllMocks();
