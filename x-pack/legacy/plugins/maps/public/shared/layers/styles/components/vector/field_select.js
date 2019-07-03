@@ -76,7 +76,6 @@ export function FieldSelect({ fields, selectedField, onChange }) {
 
 export const fieldShape = PropTypes.shape({
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
   origin: PropTypes.oneOf(['join', SOURCE_DATA_ID_ORIGIN]).isRequired
 });
 

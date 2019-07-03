@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
@@ -70,30 +70,74 @@ function renderHeaderWithIcons(icons) {
   );
 }
 
-export function StylePropertyLegendRow({ name, type, options, range }) {
-  if (type === VectorStyle.STYLE_TYPE.STATIC ||
-      !options.field || !options.field.name) {
-    return null;
+export class StylePropertyLegendRow extends Component {
+
+  state = {
+    label: '',
   }
 
-  let header;
-  if (options.color) {
-    header = <ColorGradient colorRampName={options.color}/>;
-  } else if (name === 'lineWidth') {
-    header = renderHeaderWithIcons(getLineWidthIcons());
-  } else if (name === 'iconSize') {
-    header = renderHeaderWithIcons(getSymbolSizeIcons());
+  componentDidMount() {
+    this._isMounted = true;
+    this._prevLabel = undefined;
+    this._loadLabel();
   }
 
-  return (
-    <StyleLegendRow
-      header={header}
-      minLabel={_.get(range, 'min', '')}
-      maxLabel={_.get(range, 'max', '')}
-      propertyLabel={getVectorStyleLabel(name)}
-      fieldLabel={options.field.label}
-    />
-  );
+  componentDidUpdate() {
+    this._loadLabel();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  _loadLabel = async () => {
+    if (this._isStatic()) {
+      return;
+    }
+
+    // have to load label and then check for changes since field name stays constant while label may change
+    const label = await this.props.getFieldLabel(this.props.options.field.name);
+    if (this._prevLabel === label) {
+      return;
+    }
+
+    this._prevLabel = label;
+    if (this._isMounted) {
+      this.setState({ label });
+    }
+  }
+
+  _isStatic() {
+    const { type, options } = this.props;
+    return type === VectorStyle.STYLE_TYPE.STATIC ||
+        !options.field || !options.field.name;
+  }
+
+  render() {
+    const { name, options, range } = this.props;
+    if (this._isStatic()) {
+      return null;
+    }
+
+    let header;
+    if (options.color) {
+      header = <ColorGradient colorRampName={options.color}/>;
+    } else if (name === 'lineWidth') {
+      header = renderHeaderWithIcons(getLineWidthIcons());
+    } else if (name === 'iconSize') {
+      header = renderHeaderWithIcons(getSymbolSizeIcons());
+    }
+
+    return (
+      <StyleLegendRow
+        header={header}
+        minLabel={_.get(range, 'min', '')}
+        maxLabel={_.get(range, 'max', '')}
+        propertyLabel={getVectorStyleLabel(name)}
+        fieldLabel={this.state.label}
+      />
+    );
+  }
 }
 
 StylePropertyLegendRow.propTypes = {
@@ -101,4 +145,5 @@ StylePropertyLegendRow.propTypes = {
   type: PropTypes.string.isRequired,
   options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
+  getFieldLabel: PropTypes.func.isRequired,
 };

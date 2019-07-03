@@ -180,7 +180,16 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getLegendDetails() {
-    return this._style.getLegendDetails();
+    const getFieldLabel = async fieldName => {
+      const oridinalFields = await this.getOrdinalFields();
+      const field = oridinalFields.find(({ name }) => {
+        return name === fieldName;
+      });
+
+      return field ? field.label : fieldName;
+    };
+
+    return this._style.getLegendDetails(getFieldLabel);
   }
 
   _getBoundsBasedOnData() {
