@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SortDirection } from '@elastic/eui';
 import { getFlattenedFields } from '../../../../components/source_index_preview/common';
@@ -75,12 +75,13 @@ export const PreviewPane: FC<Props> = ({ transformConfig }) => {
   const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const { isRefresh } = useRefreshTransformList();
 
   async function getPreview() {
     try {
       const { previewRequest, groupByArr } = getDataFromTransform(transformConfig);
+      setIsLoading(true);
       const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
+      setIsLoading(false);
 
       if (resp.preview.length > 0) {
         const columnKeys = getFlattenedFields(resp.preview[0]);
@@ -98,7 +99,6 @@ export const PreviewPane: FC<Props> = ({ transformConfig }) => {
         setColumns(tableColumns);
         setSortField(sortField);
         setSortDirection(sortDirection);
-        setIsLoading(false);
       }
     } catch (error) {
       setIsLoading(false);
@@ -110,18 +110,7 @@ export const PreviewPane: FC<Props> = ({ transformConfig }) => {
     }
   }
 
-  // Initial load
-  useEffect(() => {
-    getPreview();
-    setIsLoading(true);
-  }, []);
-  // Check for isRefresh on every render. Avoiding setIsLoading(true) because
-  // it causes some weird table flickering.
-  useEffect(() => {
-    if (isRefresh) {
-      getPreview();
-    }
-  });
+  useRefreshTransformList({ onRefresh: getPreview });
 
   const pagination = {
     initialPageIndex: pageIndex,

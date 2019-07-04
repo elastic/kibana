@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
@@ -27,13 +27,13 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const { isRefresh } = useRefreshTransformList();
 
   async function getMessages() {
     try {
+      setIsLoading(true);
       const messagesResp = await ml.dataFrame.getTransformAuditMessages(transformId);
-      setMessages(messagesResp);
       setIsLoading(false);
+      setMessages(messagesResp);
     } catch (error) {
       setIsLoading(false);
       setErrorMessage(
@@ -44,18 +44,7 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
     }
   }
 
-  // Initial load
-  useEffect(() => {
-    getMessages();
-    setIsLoading(true);
-  }, []);
-  // Check for isRefresh on every render. Avoiding setIsLoading(true) because
-  // it causes some weird table flickering.
-  useEffect(() => {
-    if (isRefresh) {
-      getMessages();
-    }
-  });
+  useRefreshTransformList({ onRefresh: getMessages });
 
   const columns = [
     {

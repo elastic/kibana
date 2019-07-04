@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useEffect, useState } from 'react';
+import React, { SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -51,12 +51,7 @@ export const DataFrameJobList: SFC = () => {
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
   // Subscribe to the refresh observable to trigger reloading the jobs list.
-  const { isRefresh } = useRefreshTransformList();
-  useEffect(() => {
-    if (isRefresh) {
-      getJobs(true);
-    }
-  });
+  useRefreshTransformList({ onRefresh: () => getJobs(true) });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
 
