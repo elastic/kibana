@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { SFC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +29,8 @@ import { DataFrameJobList } from './components/job_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
 
 export const Page: SFC = () => {
-  const { isLoading, refresh } = useRefreshTransformList();
+  const [isLoading, setIsLoading] = useState(false);
+  const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
   return (
     <EuiPage data-test-subj="mlPageDataFrame">
