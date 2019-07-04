@@ -8,6 +8,7 @@ export default function ({ loadTestFile }) {
   describe('InfraOps Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./log_entries'));
+    loadTestFile(require.resolve('./log_entry_highlights'));
     loadTestFile(require.resolve('./log_summary'));
     loadTestFile(require.resolve('./logs_without_millis'));
     loadTestFile(require.resolve('./metrics'));
