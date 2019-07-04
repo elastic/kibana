@@ -69,11 +69,13 @@ export const usePivotPreviewData = (
     }
   };
 
-  useEffect(
-    () => {
-      getDataFramePreviewData();
-    },
-    [indexPattern.title, JSON.stringify(aggsArr), JSON.stringify(groupByArr), JSON.stringify(query)]
-  );
+  useEffect(() => {
+    getDataFramePreviewData();
+  }, [
+    indexPattern.title,
+    JSON.stringify(aggsArr),
+    JSON.stringify(groupByArr),
+    JSON.stringify(query),
+  ]);
   return { errorMessage, status, dataFramePreviewData, previewRequest };
 };

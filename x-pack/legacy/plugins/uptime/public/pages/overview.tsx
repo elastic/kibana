@@ -34,9 +34,10 @@ interface OverviewPageProps {
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = (
-  queryChangedEvent: { query?: { text: string }; queryText?: string }
-) => void;
+export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
+  query?: { text: string };
+  queryText?: string;
+}) => void;
 
 export const OverviewPage = ({
   basePath,

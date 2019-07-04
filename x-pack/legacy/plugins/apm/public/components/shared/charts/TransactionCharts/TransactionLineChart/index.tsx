@@ -56,37 +56,34 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
   );
   const { time, setTime } = useChartsTime();
 
-  const hoverXHandlers = useMemo(
-    () => {
-      return {
-        onHover: (hoverX: number) => {
-          setTime(hoverX);
-        },
-        onMouseLeave: () => {
-          setTime(null);
-        },
-        onSelectionEnd: (range: { start: number; end: number }) => {
-          setTime(null);
+  const hoverXHandlers = useMemo(() => {
+    return {
+      onHover: (hoverX: number) => {
+        setTime(hoverX);
+      },
+      onMouseLeave: () => {
+        setTime(null);
+      },
+      onSelectionEnd: (range: { start: number; end: number }) => {
+        setTime(null);
 
-          const currentSearch = toQuery(history.location.search);
-          const nextSearch = {
-            rangeFrom: new Date(range.start).toISOString(),
-            rangeTo: new Date(range.end).toISOString()
-          };
+        const currentSearch = toQuery(history.location.search);
+        const nextSearch = {
+          rangeFrom: new Date(range.start).toISOString(),
+          rangeTo: new Date(range.end).toISOString()
+        };
 
-          history.push({
-            ...history.location,
-            search: fromQuery({
-              ...currentSearch,
-              ...nextSearch
-            })
-          });
-        },
-        hoverX: time
-      };
-    },
-    [time, setTime]
-  );
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...currentSearch,
+            ...nextSearch
+          })
+        });
+      },
+      hoverX: time
+    };
+  }, [time, setTime]);
 
   if (!start || !end) {
     return null;
