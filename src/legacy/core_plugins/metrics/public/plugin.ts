@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { DataSetup } from 'plugins/data';
-import { VisualizationsSetup } from 'plugins/visualizations';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from 'kibana/public';
+import { DataSetup } from '../../data/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 // @ts-ignore
 import { tsvb } from './tsvb_fn';
 // @ts-ignore
@@ -31,7 +31,7 @@ export interface TsvbSetupPlugins {
   visualizations: VisualizationsSetup;
 }
 
-class Plugin {
+export class Plugin {
   public setup(core: CoreSetup, plugins: TsvbSetupPlugins) {
     plugins.data.expressions.functionsRegistry.register(tsvb);
     // register the provider with the visTypes registry so that other know it exists
@@ -41,8 +41,4 @@ class Plugin {
   public start() {}
 
   public stop() {}
-}
-
-export function plugin() {
-  return new Plugin();
 }
