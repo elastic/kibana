@@ -11,9 +11,9 @@ import {
   SERVICE_ENVIRONMENT
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
-import { CentralConfiguration } from './configuration';
+import { AgentConfiguration } from './configuration_types';
 
-export type CMSearchAPIResponse = PromiseReturnType<
+export type SearchAgentConfigurationsAPIResponse = PromiseReturnType<
   typeof searchConfigurations
 >;
 export async function searchConfigurations({
@@ -38,7 +38,7 @@ export async function searchConfigurations({
   }
 
   const params = {
-    index: config.get<string>('apm_oss.cmIndex'),
+    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
       size: 1,
       query: {
@@ -47,6 +47,6 @@ export async function searchConfigurations({
     }
   };
 
-  const resp = await client.search<CentralConfiguration>(params);
+  const resp = await client.search<AgentConfiguration>(params);
   return resp.hits.hits[0];
 }
