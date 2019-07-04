@@ -17,5 +17,17 @@
  * under the License.
  */
 
-import './promises';
-export { createDefer } from './defer';
+interface Defer<T> {
+  promise: Promise<T>;
+  resolve(value: T): void;
+  reject(reason: Error): void;
+}
+
+export function createDefer<T = unknown>(Class: typeof Promise): Defer<T> {
+  const defer: Partial<Defer<T>> = {};
+  defer.promise = new Class<T>((resolve, reject) => {
+    defer.resolve = resolve;
+    defer.reject = reject;
+  });
+  return defer as Defer<T>;
+}
