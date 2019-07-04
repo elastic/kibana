@@ -49,10 +49,10 @@ pipeline {
       agent { label 'linux || immutable' }
       // options { skipDefaultCheckout() }
       steps {
-        // deleteDir()
         script {
           createWorkspaceCache()
         }
+//         deleteDir()
         step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         // sh './test/scripts/jenkins_unit.sh'
       }
@@ -88,6 +88,7 @@ def createWorkspaceCache(){
 def tarWorkspace(){
   script {
     sh "tar -czf ${WORKSPACE_CACHE_NAME} ${BASE_DIR}"
+    sh "du -hcs ${WORKSPACE_CACHE_NAME}"
   }
 }
 def dumpWorkspaceSize(){
