@@ -44,8 +44,8 @@ export const LogsToolbar = injectI18n(({ intl }) => {
     setHighlightTerms,
     loadLogEntryHighlightsRequest,
     highlightTerms,
-    previousHighlightLogEntryIndex,
-    nextHighlightLogEntryIndex,
+    hasPreviousHighlight,
+    hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
   } = useContext(LogHighlightsState.Context);
@@ -111,10 +111,10 @@ export const LogsToolbar = injectI18n(({ intl }) => {
             activeHighlights={
               highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
             }
-            previousHighlightLogEntryIndex={previousHighlightLogEntryIndex}
             goToPreviousHighlight={goToPreviousHighlight}
-            nextHighlightLogEntryIndex={nextHighlightLogEntryIndex}
             goToNextHighlight={goToNextHighlight}
+            hasPreviousHighlight={hasPreviousHighlight}
+            hasNextHighlight={hasNextHighlight}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

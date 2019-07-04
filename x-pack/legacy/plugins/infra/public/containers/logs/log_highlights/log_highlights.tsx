@@ -37,12 +37,12 @@ export const useLogHighlightsState = ({
   } = useHighlightsFetcher(sourceId, sourceVersion, startKey, endKey, filterQuery, highlightTerms);
 
   const {
-    previousHighlightLogEntryIndex,
-    nextHighlightLogEntryIndex,
+    hasPreviousHighlight,
+    hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
-    targetHighlightPosition,
-  } = useNextAndPrevious(visibleMidpoint, logEntryHighlights);
+    currentTimeKey,
+  } = useNextAndPrevious(visibleMidpoint, logEntryHighlights, highlightTerms);
 
   return {
     highlightTerms,
@@ -54,11 +54,11 @@ export const useLogHighlightsState = ({
     logEntryHighlightsById,
     loadLogEntryHighlightsRequest,
     setVisibleMidpoint,
-    previousHighlightLogEntryIndex,
-    nextHighlightLogEntryIndex,
+    hasPreviousHighlight,
+    hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
-    targetHighlightPosition,
+    currentTimeKey,
   };
 };
 

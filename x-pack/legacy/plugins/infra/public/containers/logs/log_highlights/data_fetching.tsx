@@ -68,6 +68,13 @@ export const useHighlightsFetcher = (
 
   useEffect(
     () => {
+      setLogEntryHighlights(undefined);
+    },
+    [highlightTerms]
+  );
+
+  useEffect(
+    () => {
       if (
         highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
         startKey &&

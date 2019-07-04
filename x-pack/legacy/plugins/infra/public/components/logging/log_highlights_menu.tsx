@@ -25,8 +25,8 @@ interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
   isLoading: boolean;
   activeHighlights: boolean;
-  previousHighlightLogEntryIndex: number | null;
-  nextHighlightLogEntryIndex: number | null;
+  hasPreviousHighlight: boolean;
+  hasNextHighlight: boolean;
   goToPreviousHighlight: () => void;
   goToNextHighlight: () => void;
 }
@@ -35,9 +35,9 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   onChange,
   isLoading,
   activeHighlights,
-  previousHighlightLogEntryIndex,
+  hasPreviousHighlight,
   goToPreviousHighlight,
-  nextHighlightLogEntryIndex,
+  hasNextHighlight,
   goToNextHighlight,
 }) => {
   const {
@@ -99,7 +99,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               iconType="arrowUp"
               onClick={goToPreviousHighlight}
               title={goToPreviousHighlightLabel}
-              isDisabled={!isNumber(previousHighlightLogEntryIndex)}
+              isDisabled={!hasPreviousHighlight}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -108,7 +108,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
               iconType="arrowDown"
               onClick={goToNextHighlight}
               title={goToNextHighlightLabel}
-              isDisabled={!isNumber(nextHighlightLogEntryIndex)}
+              isDisabled={!hasNextHighlight}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
