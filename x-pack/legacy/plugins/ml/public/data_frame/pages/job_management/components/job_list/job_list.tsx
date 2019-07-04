@@ -114,6 +114,7 @@ export const DataFrameJobList: SFC = () => {
 
   return (
     <TransformTable
+      className="mlTransformTable"
       columns={columns}
       hasActions={false}
       isExpandable={true}
