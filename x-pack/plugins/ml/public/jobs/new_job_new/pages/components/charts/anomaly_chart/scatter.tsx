@@ -13,13 +13,21 @@ interface Props {
   chartData: any[];
 }
 
-const SPEC_ID = 'line';
+const SPEC_ID = 'scatter';
 
-const lineSeriesStyle = {
+const scatterSeriesStyle = {
   ...seriesStyle,
+  line: {
+    ...seriesStyle.line,
+    visible: false,
+  },
+  point: {
+    ...seriesStyle.point,
+    visible: true,
+  },
 };
 
-export const Line: FC<Props> = ({ chartData }) => {
+export const Scatter: FC<Props> = ({ chartData }) => {
   return (
     <LineSeries
       id={getSpecId(SPEC_ID)}
@@ -30,7 +38,7 @@ export const Line: FC<Props> = ({ chartData }) => {
       data={chartData}
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
-      lineSeriesStyle={lineSeriesStyle}
+      lineSeriesStyle={scatterSeriesStyle}
       customSeriesColors={getCustomColor(SPEC_ID, LINE_COLOR)}
     />
   );

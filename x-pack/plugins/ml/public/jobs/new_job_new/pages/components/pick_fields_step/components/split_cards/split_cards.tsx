@@ -8,12 +8,14 @@ import React, { FC, ReactChild, memo, useState, useEffect, useContext, Fragment 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SplitField } from '../../../../../../../../common/types/fields';
+import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
 
 interface Props {
   fieldValues: string[];
   splitField: SplitField;
   numberOfDetectors: number;
   children: ReactChild;
+  jobType: JOB_TYPE;
 }
 
 interface Panel {
@@ -22,7 +24,7 @@ interface Panel {
 }
 
 export const SplitCards: FC<Props> = memo(
-  ({ fieldValues, splitField, children, numberOfDetectors }) => {
+  ({ fieldValues, splitField, children, numberOfDetectors, jobType }) => {
     const panels: Panel[] = [];
 
     function storePanels(panel: HTMLDivElement | null, marginBottom: number) {
@@ -75,9 +77,12 @@ export const SplitCards: FC<Props> = memo(
           {(fieldValues.length === 0 || numberOfDetectors === 0) && <Fragment>{children}</Fragment>}
           {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
             <Fragment>
-              <div style={{ fontSize: 'small' }}>Data split by {splitField.name}</div>
-
-              <EuiSpacer size="m" />
+              {jobType === JOB_TYPE.MULTI_METRIC && (
+                <Fragment>
+                  <div style={{ fontSize: 'small' }}>Data split by {splitField.name}</div>
+                  <EuiSpacer size="m" />
+                </Fragment>
+              )}
 
               {getBackPanels()}
               <EuiPanel paddingSize="m" style={{ paddingTop: '4px' }}>

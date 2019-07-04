@@ -5,9 +5,10 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+// import { timefilter } from 'ui/timefilter';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
@@ -18,15 +19,17 @@ import { defaultChartSettings, ChartSettings } from '../../../charts/common/sett
 import { MetricSelector } from './metric_selector';
 import { DetectorTitle } from '../detector_title';
 import { JobProgress } from '../job_progress';
-import { SplitCards } from '../split_cards';
+// import { SplitCards } from '../split_cards';
+import { SplitFieldSelector } from '../split_field';
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { MlTimeBuckets } from '../../../../../../../util/ml_time_buckets';
 
 interface Props {
   isActive: boolean;
   setIsValid: (na: boolean) => void;
 }
 
-export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
+export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,
@@ -36,14 +39,15 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     resultsLoader,
   } = useContext(JobCreatorContext);
 
-  if (isMultiMetricJobCreator(jc) === false) {
+  if (isPopulationJobCreator(jc) === false) {
     return <Fragment />;
   }
-  const jobCreator = jc as MultiMetricJobCreator;
+  const jobCreator = jc as PopulationJobCreator;
 
   const { fields } = newJobCapsService;
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>([]);
+  // const [byFieldList, setByFieldList] = useState<SplitField[]>([]);
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
@@ -62,18 +66,22 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     if (selectedOptionsIn !== null && selectedOptionsIn.length) {
       const option = selectedOptionsIn[0] as DropDownLabel;
       if (typeof option !== 'undefined') {
-        const newPair = { agg: option.agg, field: option.field };
+        const newPair = { agg: option.agg, field: option.field, by: { field: null, value: null } };
         setAggFieldPairList([...aggFieldPairList, newPair]);
         setSelectedOptions([{ label: '' }]);
+        // setByFieldList([...byFieldList, null]);
       } else {
         setAggFieldPairList([]);
+        // setByFieldList([]);
       }
     }
   }
 
   function deleteDetector(index: number) {
     aggFieldPairList.splice(index, 1);
+    // byFieldList.splice(index, 1);
     setAggFieldPairList([...aggFieldPairList]);
+    // setByFieldList([...byFieldList]);
   }
 
   function setResultsWrapper(results: Results) {
@@ -117,9 +125,13 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   );
 
   function getChartSettings(): ChartSettings {
+    const interval = new MlTimeBuckets();
+    interval.setInterval('auto');
+    interval.setBounds(chartInterval.getBounds());
+
     const cs = {
       ...defaultChartSettings,
-      intervalMs: chartInterval.getInterval().asMilliseconds(),
+      intervalMs: interval.getInterval().asMilliseconds(),
     };
     if (aggFieldPairList.length > 2) {
       cs.cols = 3;
@@ -138,12 +150,12 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     setChartSettings(cs);
 
     if (aggFieldPairList.length > 0) {
-      const resp: LineChartData = await chartLoader.loadLineCharts(
+      const resp: LineChartData = await chartLoader.loadPopulationCharts(
         jobCreator.start,
         jobCreator.end,
         aggFieldPairList,
         jobCreator.splitField,
-        fieldValues.length > 0 ? fieldValues[0] : null,
+        // fieldValues.length > 0 ? fieldValues[0] : null,
         cs.intervalMs
       );
 
@@ -174,28 +186,35 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   return (
     <Fragment>
-      {isActive && (
+      {isActive === true && (
         <Fragment>
-          {lineChartsData && (
-            <ChartGrid
-              aggFieldPairList={aggFieldPairList}
-              chartSettings={chartSettings}
-              splitField={splitField}
-              fieldValues={fieldValues}
-              lineChartsData={lineChartsData}
-              modelData={modelData}
-              anomalyData={anomalyData}
-              deleteDetector={deleteDetector}
-              jobType={jobCreator.type}
-            />
+          <SplitFieldSelector />
+          {splitField !== null && (
+            <Fragment>
+              <EuiHorizontalRule margin="l" />
+
+              {lineChartsData && (
+                <ChartGrid
+                  aggFieldPairList={aggFieldPairList}
+                  chartSettings={chartSettings}
+                  splitField={splitField}
+                  fieldValues={fieldValues}
+                  lineChartsData={lineChartsData}
+                  modelData={modelData}
+                  anomalyData={anomalyData}
+                  deleteDetector={deleteDetector}
+                  jobType={jobCreator.type}
+                />
+              )}
+              <MetricSelector
+                fields={fields}
+                detectorChangeHandler={detectorChangeHandler}
+                selectedOptions={selectedOptions}
+                maxWidth={560}
+                removeOptions={aggFieldPairList}
+              />
+            </Fragment>
           )}
-          <MetricSelector
-            fields={fields}
-            detectorChangeHandler={detectorChangeHandler}
-            selectedOptions={selectedOptions}
-            maxWidth={560}
-            removeOptions={aggFieldPairList}
-          />
         </Fragment>
       )}
       {isActive === false && (
@@ -245,37 +264,37 @@ const ChartGrid: FC<ChartGridProps> = ({
   jobType,
 }) => {
   return (
-    <SplitCards
-      fieldValues={fieldValues}
-      splitField={splitField}
-      numberOfDetectors={aggFieldPairList.length}
-      jobType={jobType}
-    >
-      <EuiFlexGrid columns={chartSettings.cols as any}>
-        {aggFieldPairList.map((af, i) => (
-          <EuiFlexItem key={i}>
-            {lineChartsData[i] !== undefined && (
-              <Fragment>
-                <DetectorTitle
-                  index={i}
-                  agg={aggFieldPairList[i].agg}
-                  field={aggFieldPairList[i].field}
-                  splitField={splitField}
-                  deleteDetector={deleteDetector}
-                />
-                <AnomalyChart
-                  chartType={CHART_TYPE.LINE}
-                  chartData={lineChartsData[i]}
-                  modelData={modelData[i]}
-                  anomalyData={anomalyData[i]}
-                  height={chartSettings.height}
-                  width={chartSettings.width}
-                />
-              </Fragment>
-            )}
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-    </SplitCards>
+    // <SplitCards
+    //   fieldValues={fieldValues}
+    //   splitField={splitField}
+    //   numberOfDetectors={aggFieldPairList.length}
+    //   jobType={jobType}
+    // >
+    <EuiFlexGrid columns={chartSettings.cols as any}>
+      {aggFieldPairList.map((af, i) => (
+        <EuiFlexItem key={i}>
+          {lineChartsData[i] !== undefined && (
+            <Fragment>
+              <DetectorTitle
+                index={i}
+                agg={aggFieldPairList[i].agg}
+                field={aggFieldPairList[i].field}
+                splitField={splitField}
+                deleteDetector={deleteDetector}
+              />
+              <AnomalyChart
+                chartType={CHART_TYPE.SCATTER}
+                chartData={lineChartsData[i]}
+                modelData={modelData[i]}
+                anomalyData={anomalyData[i]}
+                height={chartSettings.height}
+                width={chartSettings.width}
+              />
+            </Fragment>
+          )}
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
+    // </SplitCards>
   );
 };

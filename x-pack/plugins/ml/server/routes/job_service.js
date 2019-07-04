@@ -231,6 +231,38 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
   });
 
   route({
+    method: 'POST',
+    path: '/api/ml/jobs/new_job_population_chart',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+      } = request.payload;
+      const { newJobPopulationChart } = jobServiceProvider(callWithRequest, request);
+      return newJobPopulationChart(
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+      ).catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
     method: 'GET',
     path: '/api/ml/jobs/all_jobs_and_group_ids',
     handler(request) {

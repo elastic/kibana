@@ -12,6 +12,7 @@ import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
+import { PopulationView } from './components/population_view';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
@@ -33,6 +34,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
       )}
       {jobType === JOB_TYPE.MULTI_METRIC && (
         <MultiMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
+      )}
+      {jobType === JOB_TYPE.POPULATION && (
+        <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
       )}
 
       {isCurrentStep && (

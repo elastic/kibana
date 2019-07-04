@@ -9,14 +9,20 @@ import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { InfluencersSelect } from './influencers_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
+import {
+  MultiMetricJobCreator,
+  isMultiMetricJobCreator,
+  PopulationJobCreator,
+  isPopulationJobCreator,
+} from '../../../../../common/job_creator';
 
 export const Influencers: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  if (isMultiMetricJobCreator(jc) === false) {
+  if (isMultiMetricJobCreator(jc) === false && isPopulationJobCreator(jc) === false) {
     return <Fragment />;
   }
-  const jobCreator = jc as MultiMetricJobCreator;
+
+  const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
   const { fields } = newJobCapsService;
 
   const [influencers, setInfluencers] = useState(jobCreator.influencers);

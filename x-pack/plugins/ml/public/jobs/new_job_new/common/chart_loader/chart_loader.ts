@@ -67,6 +67,42 @@ export class ChartLoader {
     return {};
   }
 
+  async loadPopulationCharts(
+    start: number,
+    end: number,
+    aggFieldPairs: AggFieldPair[],
+    splitField: SplitField,
+    intervalMs: number
+  ): Promise<LineChartData> {
+    if (this._timeFieldName !== '') {
+      const splitFieldName = splitField !== null ? splitField.name : '';
+
+      const resp = await ml.jobs.newJobPopulationsChart(
+        this._indexPatternTitle,
+        this._timeFieldName,
+        start,
+        end,
+        intervalMs,
+        this._query,
+        aggFieldPairs.map(af => {
+          const by =
+            af.by !== undefined && af.by.field !== null && af.by.value !== null
+              ? { field: af.by.field.name, value: af.by.value }
+              : { field: null, value: null };
+
+          return {
+            agg: af.agg.dslName,
+            field: af.field.name,
+            by,
+          };
+        }),
+        splitFieldName
+      );
+      return resp.results;
+    }
+    return {};
+  }
+
   async loadEventRateChart(start: number, end: number, intervalMs: number): Promise<any> {
     // TODO change to proper interface for return type
     if (this._timeFieldName !== '') {

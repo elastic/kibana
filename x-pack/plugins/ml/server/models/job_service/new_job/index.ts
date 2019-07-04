@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { newJobChartsProvider } from './line_chart';
+export { newJobChartsProvider } from './charts';

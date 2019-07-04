@@ -8,20 +8,18 @@ import React, { FC } from 'react';
 import { getSpecId, ScaleType, AreaSeries, CurveType } from '@elastic/charts';
 import { ModelItem } from '../../../../common/results_loader';
 import { getCustomColor } from '../common/utils';
-import { seriesStyle } from '../common/settings';
+import { seriesStyle, MODEL_COLOR } from '../common/settings';
 
 interface Props {
   modelData?: ModelItem[];
 }
 
 const SPEC_ID = 'model';
-const COLOR = '#006BB4';
 
 const areaSeriesStyle = {
   ...seriesStyle,
   area: {
-    fill: '',
-    opacity: 0.25,
+    ...seriesStyle.area,
     visible: true,
   },
   line: {
@@ -46,7 +44,7 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       areaSeriesStyle={areaSeriesStyle}
-      customSeriesColors={getCustomColor(SPEC_ID, COLOR)}
+      customSeriesColors={getCustomColor(SPEC_ID, MODEL_COLOR)}
     />
   );
 };

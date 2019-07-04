@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
-import { SplitFieldSelector } from '../split_field';
 import { Influencers } from '../influencers';
 
 interface Props {
@@ -17,7 +16,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const MultiMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
+export const PopulationSettings: FC<Props> = ({ isActive, setIsValid }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
 
@@ -43,17 +42,11 @@ export const MultiMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
         <Fragment>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <SplitFieldSelector />
+              <BucketSpan />
             </EuiFlexItem>
             <EuiFlexItem>
               <Influencers />
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <BucketSpan />
-            </EuiFlexItem>
-            <EuiFlexItem />
           </EuiFlexGroup>
         </Fragment>
       )}

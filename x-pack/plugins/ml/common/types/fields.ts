@@ -43,9 +43,17 @@ export interface NewJobCaps {
 export interface AggFieldPair {
   agg: Aggregation;
   field: Field;
+  by?: {
+    field: SplitField;
+    value: string | null;
+  };
 }
 
 export interface AggFieldNamePair {
   agg: string;
   field: string;
+  by?: {
+    field: string | null;
+    value: string | null;
+  };
 }

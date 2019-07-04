@@ -9,20 +9,37 @@ import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
+import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import {
+  MultiMetricJobCreator,
+  isMultiMetricJobCreator,
+  PopulationJobCreator,
+  isPopulationJobCreator,
+} from '../../../../../common/job_creator';
 
-export const SplitField: FC = () => {
+interface Props {
+  detectorIndex?: number;
+}
+
+export const SplitFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  if (isMultiMetricJobCreator(jc) === false) {
+  if (isMultiMetricJobCreator(jc) === false && isPopulationJobCreator(jc) === false) {
     return <Fragment />;
   }
-  const jobCreator = jc as MultiMetricJobCreator;
+  const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
 
   const { categoryFields } = newJobCapsService;
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   useEffect(
     () => {
-      jobCreator.setSplitField(splitField);
+      if (
+        isMultiMetricJobCreator(jobCreator) ||
+        (isPopulationJobCreator(jobCreator) && detectorIndex === undefined)
+      ) {
+        jobCreator.setSplitField(splitField);
+      } else if (isPopulationJobCreator(jobCreator) && detectorIndex !== undefined) {
+        jobCreator.setByField(splitField, detectorIndex);
+      }
       jobCreatorUpdate();
     },
     [splitField]
@@ -40,6 +57,7 @@ export const SplitField: FC = () => {
       fields={categoryFields}
       changeHandler={setSplitField}
       selectedField={splitField}
+      jobType={jobCreator.type}
     />
   );
 };

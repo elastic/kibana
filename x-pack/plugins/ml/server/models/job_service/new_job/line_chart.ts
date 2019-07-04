@@ -11,7 +11,9 @@ import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 export type callWithRequestType = (action: string, params: any) => Promise<any>;
 
 const EVENT_RATE_COUNT_FIELD = '__ml_event_rate_count__';
+const OVER_FIELD_EXAMPLES_COUNT = 40;
 
+type DtrIndex = number;
 type TimeStamp = number;
 type Value = number | undefined | null;
 interface Result {
@@ -25,7 +27,7 @@ interface ProcessedResults {
   totalResults: number;
 }
 
-export function newJobChartsProvider(callWithRequest: callWithRequestType) {
+export function newJobLineChartProvider(callWithRequest: callWithRequestType) {
   async function newJobLineChart(
     indexPatternTitle: string,
     timeField: string,
@@ -52,6 +54,7 @@ export function newJobChartsProvider(callWithRequest: callWithRequestType) {
     const results = await callWithRequest('search', json);
     return processSearchResults(results, aggFieldNamePairs.map(af => af.field));
   }
+
   return {
     newJobLineChart,
   };
@@ -62,7 +65,7 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   // let highestValue: number;
   // let lowestValue: number;
 
-  const tempResults: Record<number, Result[]> = {};
+  const tempResults: Record<DtrIndex, Result[]> = {};
   fields.forEach((f, i) => (tempResults[i] = []));
 
   aggregationsByTime.forEach((dataForTime: any) => {
@@ -71,7 +74,7 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
 
     fields.forEach((field, i) => {
       let value;
-      if (fields[i] === EVENT_RATE_COUNT_FIELD) {
+      if (field === EVENT_RATE_COUNT_FIELD) {
         value = docCount;
       } else if (typeof dataForTime[i].value !== 'undefined') {
         value = dataForTime[i].value;

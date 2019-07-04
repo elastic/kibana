@@ -16,6 +16,7 @@ export class MlTimeBuckets {
   setMaxBars: (maxBars: number) => void;
   setInterval: (interval: string) => void;
   setBounds: (bounds: TimefilterBounds) => void;
+  getBounds: () => { min: any; max: any };
   getInterval: () => {
     asMilliseconds: () => number;
   };

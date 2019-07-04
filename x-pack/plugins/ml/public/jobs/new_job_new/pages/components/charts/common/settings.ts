@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const LINE_COLOR = '#006BB4';
+export const MODEL_COLOR = '#006BB4';
+
 export interface ChartSettings {
   width: string;
   height: string;
@@ -32,9 +35,14 @@ export const seriesStyle = {
   },
   point: {
     visible: false,
-    radius: 1,
+    radius: 2,
     stroke: '',
-    strokeWidth: 1,
-    opacity: 0,
+    strokeWidth: 4,
+    opacity: 0.5,
+  },
+  area: {
+    fill: '',
+    opacity: 0.25,
+    visible: false,
   },
 };

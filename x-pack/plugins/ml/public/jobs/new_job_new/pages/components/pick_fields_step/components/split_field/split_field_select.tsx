@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionProps,
-  EuiDescribedFormGroup,
-  EuiFormRow,
-} from '@elastic/eui';
+import React, { FC } from 'react';
+import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { Field, SplitField } from '../../../../../../../../common/types/fields';
+import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { Description } from './description';
 
 interface DropDownLabel {
   label: string;
@@ -23,9 +20,10 @@ interface Props {
   fields: Field[];
   changeHandler(f: SplitField): void;
   selectedField: SplitField;
+  jobType: JOB_TYPE;
 }
 
-export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField, jobType }) => {
   const options: EuiComboBoxOptionProps[] = fields.map(
     f =>
       ({
@@ -49,25 +47,14 @@ export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedFie
   }
 
   return (
-    <EuiDescribedFormGroup
-      idAria="single-example-aria"
-      title={<h3>Split field</h3>}
-      description={
-        <Fragment>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-        </Fragment>
-      }
-    >
-      <EuiFormRow label="Split field" describedByIds={['single-example-aria']}>
-        <EuiComboBox
-          singleSelection={{ asPlainText: true }}
-          options={options}
-          selectedOptions={selection}
-          onChange={onChange}
-          isClearable={true}
-        />
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
+    <Description jobType={jobType}>
+      <EuiComboBox
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={selection}
+        onChange={onChange}
+        isClearable={true}
+      />
+    </Description>
   );
 };

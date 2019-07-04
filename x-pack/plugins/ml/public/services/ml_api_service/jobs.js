@@ -163,6 +163,32 @@ export const jobs = {
     });
   },
 
+  newJobPopulationsChart(
+    indexPatternTitle,
+    timeField,
+    start,
+    end,
+    intervalMs,
+    query,
+    aggFieldNamePairs,
+    splitFieldName,
+  ) {
+    return http({
+      url: `${basePath}/jobs/new_job_population_chart`,
+      method: 'POST',
+      data: {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+      }
+    });
+  },
+
   getAllJobAndGroupIds() {
     return http({
       url: `${basePath}/jobs/all_jobs_and_group_ids`,

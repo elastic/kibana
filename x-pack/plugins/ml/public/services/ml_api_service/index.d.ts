@@ -62,6 +62,16 @@ declare interface Ml {
       splitFieldName: string | null,
       splitFieldValue: string | null
     ): Promise<any>;
+    newJobPopulationsChart(
+      indexPatternTitle: string,
+      timeField: string,
+      start: number,
+      end: number,
+      intervalMs: number,
+      query: object,
+      aggFieldNamePairs: AggFieldNamePair[],
+      splitFieldName: string
+    ): Promise<any>;
     getAllJobAndGroupIds(): Promise<any>;
     getLookBackProgress(
       jobId: string,

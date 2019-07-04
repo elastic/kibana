@@ -15,7 +15,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../common/types/fields';
-import { AnomalyChart } from '../../../charts/anomaly_chart';
+import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { JobProgress } from '../job_progress';
 
 interface Props {
@@ -134,7 +134,8 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           />
           {lineChartsData[DTR_IDX] !== undefined && (
             <AnomalyChart
-              lineChartData={lineChartsData[DTR_IDX]}
+              chartType={CHART_TYPE.LINE}
+              chartData={lineChartsData[DTR_IDX]}
               modelData={modelData}
               anomalyData={anomalyData}
               height="300px"
@@ -148,7 +149,8 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           {lineChartsData[DTR_IDX] !== undefined && (
             <Fragment>
               <AnomalyChart
-                lineChartData={lineChartsData[DTR_IDX]}
+                chartType={CHART_TYPE.LINE}
+                chartData={lineChartsData[DTR_IDX]}
                 modelData={modelData}
                 anomalyData={anomalyData}
                 height="300px"
