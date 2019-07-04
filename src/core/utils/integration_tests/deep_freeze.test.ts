@@ -17,28 +17,26 @@
  * under the License.
  */
 
-import { deepFreeze } from '../../../../../utils/deep_freeze';
+import { resolve } from 'path';
 
-deepFreeze({
-  foo: {
-    bar: {
-      baz: 1,
-    },
+import execa from 'execa';
+
+const MINUTE = 60 * 1000;
+
+it(
+  'types return values to prevent mutations in typescript',
+  async () => {
+    await expect(
+      execa.stdout('tsc', ['--noEmit'], {
+        cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+"Command failed: tsc --noEmit
+
+index.ts(28,12): error TS2540: Cannot assign to 'baz' because it is a read-only property.
+index.ts(36,11): error TS2540: Cannot assign to 'bar' because it is a read-only property.
+"
+`);
   },
-}).foo.bar.baz = 2;
-
-deepFreeze({
-  foo: [
-    {
-      bar: 1,
-    },
-  ],
-}).foo[0].bar = 2;
-
-deepFreeze({
-  foo: [1],
-}).foo[0] = 2;
-
-deepFreeze({
-  foo: [1],
-}).foo.push(2);
+  MINUTE
+);
