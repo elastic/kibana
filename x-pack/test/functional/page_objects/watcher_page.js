@@ -56,7 +56,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
         const name = await watch.findByCssSelector('td:nth-child(3)');
 
         return {
-          checkBox: (await checkBox.getProperty('innerHTML')).includes('input'),
+          checkBox: (await checkBox.getAttribute('innerHTML')).includes('input'),
           id: await id.getVisibleText(),
           name: (await name.getVisibleText()).split(',').map(role => role.trim()),
         };

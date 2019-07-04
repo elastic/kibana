@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       it ('defaults to false', async () => {
         await PageObjects.settings.clickKibanaSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(false);
+        expect(storeInSessionStorage).to.be('false');
       });
 
       it('when false, dashboard state is unhashed', async function () {
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(true);
+        expect(storeInSessionStorage).to.be('true');
       });
 
       it('when true, dashboard state is hashed', async function () {
