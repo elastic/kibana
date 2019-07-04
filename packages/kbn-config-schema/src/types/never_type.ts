@@ -17,29 +17,18 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
-import { tagcloud } from './tag_cloud_fn';
+import { internals } from '../internals';
+import { Type } from './type';
 
-jest.mock('ui/new_platform');
+export class NeverType extends Type<never> {
+  constructor() {
+    super(internals.any().forbidden());
+  }
 
-describe('interpreter/functions#tagcloud', () => {
-  const fn = functionWrapper(tagcloud);
-  const context = {
-    type: 'kibana_datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
-  const visConfig = {
-    scale: 'linear',
-    orientation: 'single',
-    minFontSize: 18,
-    maxFontSize: 72,
-    showLabel: true,
-    metric: { accessor: 0, format: { id: 'number' } },
-  };
-
-  it('returns an object with the correct structure', () => {
-    const actual = fn(context, visConfig);
-    expect(actual).toMatchSnapshot();
-  });
-});
+  protected handleError(type: string) {
+    switch (type) {
+      case 'any.unknown':
+        return "a value wasn't expected to be present";
+    }
+  }
+}
