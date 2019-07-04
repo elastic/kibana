@@ -5,7 +5,7 @@
  */
 
 
-import { capitalize, find, get, includes } from 'lodash';
+import { find, get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 export function decorateShards(shards, nodes) {
@@ -32,7 +32,11 @@ export function decorateShards(shards, nodes) {
         });
       }
     }
-    return capitalize(shard.state.toLowerCase());
+    let retMsg = 'Shard ' + shard.shard + ' ' + shard.state.toLowerCase();
+    if (shard.nodeName && shard.state.toLowerCase() !== 'relocating') {
+      retMsg = retMsg + ' on node ' + shard.nodeName;
+    }
+    return  retMsg;
   }
 
   return shards.map((shard) => {

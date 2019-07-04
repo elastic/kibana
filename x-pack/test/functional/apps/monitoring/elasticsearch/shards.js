@@ -54,25 +54,25 @@ export default function ({ getService, getPageObjects }) {
         expect(await shards.getNodeAllocation('.monitoring-es-6-2017.10.05')).to.eql({
           visibleText: '.monitoring-es-6-2017.10.05 | 0',
           shards: [
-            { classification: 'shard replica initializing 0', tooltip: 'Initializing' },
+            { classification: 'shard replica initializing 0', tooltip: 'Shard 0 initializing on node whatever-01' },
           ],
           status: 'yellow',
         });
         expect(await shards.getNodeAllocation('.monitoring-kibana-6-2017.10.05')).to.eql({
           visibleText: '.monitoring-kibana-6-2017.10.05 | 0',
           shards: [
-            { classification: 'shard replica initializing 0', tooltip: 'Initializing' },
+            { classification: 'shard replica initializing 0', tooltip: 'Shard 0 initializing on node whatever-01' },
           ],
           status: 'yellow',
         });
         expect(await shards.getNodeAllocation('avocado-tweets-2017.09.30')).to.eql({
           visibleText: 'avocado-tweets-2017.09.30 | 0 | 1 | 2 | 3 | 4',
           shards: [
-            { classification: 'shard replica started 0', tooltip: 'Started' },
-            { classification: 'shard primary started 1', tooltip: 'Started' },
-            { classification: 'shard replica started 2', tooltip: 'Started' },
-            { classification: 'shard primary started 3', tooltip: 'Started' },
-            { classification: 'shard primary started 4', tooltip: 'Started' },
+            { classification: 'shard replica started 0', tooltip: 'Shard 0 started on node whatever-01' },
+            { classification: 'shard primary started 1', tooltip: 'Shard 1 started on node whatever-01' },
+            { classification: 'shard replica started 2', tooltip: 'Shard 2 started on node whatever-01' },
+            { classification: 'shard primary started 3', tooltip: 'Shard 3 started on node whatever-01' },
+            { classification: 'shard primary started 4', tooltip: 'Shard 4 started on node whatever-01' },
           ],
           status: 'green',
         });
@@ -86,10 +86,10 @@ export default function ({ getService, getPageObjects }) {
         expect(await shards.getNodeAllocation('phone-home')).to.eql({
           visibleText: 'phone-home | 0 | 2 | 3 | 4',
           shards: [
-            { classification: 'shard primary started 0', tooltip: 'Started' },
-            { classification: 'shard primary started 2', tooltip: 'Started' },
-            { classification: 'shard primary started 3', tooltip: 'Started' },
-            { classification: 'shard primary started 4', tooltip: 'Started' },
+            { classification: 'shard primary started 0', tooltip: 'Shard 0 started on node whatever-01' },
+            { classification: 'shard primary started 2', tooltip: 'Shard 2 started on node whatever-01' },
+            { classification: 'shard primary started 3', tooltip: 'Shard 3 started on node whatever-01' },
+            { classification: 'shard primary started 4', tooltip: 'Shard 4 started on node whatever-01' },
           ],
           status: 'yellow',
         });
@@ -118,22 +118,22 @@ export default function ({ getService, getPageObjects }) {
         expect(await shards.getAssignedIndexAllocationByNode('jUT5KdxfRbORSCWkb5zjmA')).to.eql({
           visibleText: 'whatever-01 | 0 | 1 | 2 | 3 | 4',
           shards: [
-            { classification: 'shard primary started 0', tooltip: 'Started', },
-            { classification: 'shard replica started 1', tooltip: 'Started', },
-            { classification: 'shard replica started 2', tooltip: 'Started', },
-            { classification: 'shard primary started 3', tooltip: 'Started', },
-            { classification: 'shard primary started 4', tooltip: 'Started', },
+            { classification: 'shard primary started 0', tooltip: 'Shard 0 started on node whatever-01', },
+            { classification: 'shard replica started 1', tooltip: 'Shard 1 started on node whatever-01', },
+            { classification: 'shard replica started 2', tooltip: 'Shard 2 started on node whatever-01', },
+            { classification: 'shard primary started 3', tooltip: 'Shard 3 started on node whatever-01', },
+            { classification: 'shard primary started 4', tooltip: 'Shard 4 started on node whatever-01', },
           ]
         });
 
         expect(await shards.getAssignedIndexAllocationByNode('xcP6ue7eRCieNNitFTT0EA')).to.eql({
           visibleText: 'whatever-02 | 0 | 1 | 2 | 3 | 4',
           shards: [
-            { classification: 'shard replica started 0', tooltip: 'Started', },
-            { classification: 'shard primary started 1', tooltip: 'Started', },
-            { classification: 'shard primary started 2', tooltip: 'Started', },
-            { classification: 'shard replica started 3', tooltip: 'Started', },
-            { classification: 'shard replica started 4', tooltip: 'Started', },
+            { classification: 'shard replica started 0', tooltip: 'Shard 0 started on node whatever-02', },
+            { classification: 'shard primary started 1', tooltip: 'Shard 1 started on node whatever-02', },
+            { classification: 'shard primary started 2', tooltip: 'Shard 2 started on node whatever-02', },
+            { classification: 'shard replica started 3', tooltip: 'Shard 3 started on node whatever-02', },
+            { classification: 'shard replica started 4', tooltip: 'Shard 4 started on node whatever-02', },
           ]
         });
       });
@@ -156,33 +156,33 @@ export default function ({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           expect(await shards.getUnassignedIndexAllocation()).to.eql([
-            { classification: 'shard replica unassigned 1', tooltip: 'Unassigned', },
+            { classification: 'shard replica unassigned 1', tooltip: 'Shard 1 unassigned', },
           ]);
 
           expect(await shards.getAssignedIndexAllocationByNode('jUT5KdxfRbORSCWkb5zjmA')).to.eql({
             visibleText: 'whatever-01 | 0 | 2 | 3 | 4',
             shards: [
-              { classification: 'shard primary started 0', tooltip: 'Started', },
-              { classification: 'shard primary started 2', tooltip: 'Started', },
-              { classification: 'shard primary started 3', tooltip: 'Started', },
-              { classification: 'shard primary started 4', tooltip: 'Started', },
+              { classification: 'shard primary started 0', tooltip: 'Shard 0 started on node whatever-01', },
+              { classification: 'shard primary started 2', tooltip: 'Shard 2 started on node whatever-01', },
+              { classification: 'shard primary started 3', tooltip: 'Shard 3 started on node whatever-01', },
+              { classification: 'shard primary started 4', tooltip: 'Shard 4 started on node whatever-01', },
             ]
           });
 
           expect(await shards.getAssignedIndexAllocationByNode('xcP6ue7eRCieNNitFTT0EA')).to.eql({
             visibleText: 'whatever-02 | 1 | 2 | 3 | 4',
             shards: [
-              { classification: 'shard primary started 1', tooltip: 'Started', },
-              { classification: 'shard replica started 2', tooltip: 'Started', },
-              { classification: 'shard replica started 3', tooltip: 'Started', },
-              { classification: 'shard replica started 4', tooltip: 'Started', },
+              { classification: 'shard primary started 1', tooltip: 'Shard 1 started on node whatever-02', },
+              { classification: 'shard replica started 2', tooltip: 'Shard 2 started on node whatever-02', },
+              { classification: 'shard replica started 3', tooltip: 'Shard 3 started on node whatever-02', },
+              { classification: 'shard replica started 4', tooltip: 'Shard 4 started on node whatever-02', },
             ]
           });
 
           expect(await shards.getAssignedIndexAllocationByNode('bwQWH-7IQY-mFPpfoaoFXQ')).to.eql({
             visibleText: 'whatever-03 | 0',
             shards: [
-              { classification: 'shard replica started 0', tooltip: 'Started', },
+              { classification: 'shard replica started 0', tooltip: 'Shard 0 started on node whatever-03', },
             ]
           });
         });

@@ -70,7 +70,7 @@ describe('decorateShards', () => {
       relocating_node: 'ZRnQRUBBQHugqD-rqicFJw',
       shard: 0,
       state: 'RELOCATING',
-      tooltip_message: 'Relocating',
+      tooltip_message: 'Shard 0 relocating',
       type: 'shard'
     });
   });
@@ -93,7 +93,7 @@ describe('decorateShards', () => {
       relocating_node: null,
       shard: 3,
       state: 'STARTED',
-      tooltip_message: 'Started',
+      tooltip_message: 'Shard 3 started on node node02',
       type: 'shard'
     });
   });
@@ -116,7 +116,7 @@ describe('decorateShards', () => {
       relocating_node: null,
       shard: 3,
       state: 'INITIALIZING',
-      tooltip_message: 'Initializing',
+      tooltip_message: 'Shard 3 initializing on node node01',
       type: 'shard'
     });
   });
@@ -139,7 +139,7 @@ describe('decorateShards', () => {
       relocating_node: null,
       shard: 4,
       state: 'UNASSIGNED',
-      tooltip_message: 'Unassigned',
+      tooltip_message: 'Shard 4 unassigned',
       type: 'shard'
     });
   });
