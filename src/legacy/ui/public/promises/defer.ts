@@ -17,28 +17,17 @@
  * under the License.
  */
 
-import { deepFreeze } from '../../../../../utils/deep_freeze';
+interface Defer<T> {
+  promise: Promise<T>;
+  resolve(value: T): void;
+  reject(reason: Error): void;
+}
 
-deepFreeze({
-  foo: {
-    bar: {
-      baz: 1,
-    },
-  },
-}).foo.bar.baz = 2;
-
-deepFreeze({
-  foo: [
-    {
-      bar: 1,
-    },
-  ],
-}).foo[0].bar = 2;
-
-deepFreeze({
-  foo: [1],
-}).foo[0] = 2;
-
-deepFreeze({
-  foo: [1],
-}).foo.push(2);
+export function createDefer<T = unknown>(Class: typeof Promise): Defer<T> {
+  const defer: Partial<Defer<T>> = {};
+  defer.promise = new Class<T>((resolve, reject) => {
+    defer.resolve = resolve;
+    defer.reject = reject;
+  });
+  return defer as Defer<T>;
+}

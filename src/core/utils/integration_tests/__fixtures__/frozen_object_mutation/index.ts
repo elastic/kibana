@@ -17,5 +17,28 @@
  * under the License.
  */
 
-import './promises';
-export { createDefer } from './defer';
+import { deepFreeze } from '../../../../utils/deep_freeze';
+
+deepFreeze({
+  foo: {
+    bar: {
+      baz: 1,
+    },
+  },
+}).foo.bar.baz = 2;
+
+deepFreeze({
+  foo: [
+    {
+      bar: 1,
+    },
+  ],
+}).foo[0].bar = 2;
+
+deepFreeze({
+  foo: [1],
+}).foo[0] = 2;
+
+deepFreeze({
+  foo: [1],
+}).foo.push(2);
