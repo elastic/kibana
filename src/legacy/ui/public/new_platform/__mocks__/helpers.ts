@@ -18,7 +18,17 @@
  */
 
 import { coreMock } from '../../../../../core/public/mocks';
-import { pluginsMock } from '../../../../../plugins/__mocks__/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
+
+export const pluginsMock = {
+  createSetup: () => ({
+    data: dataPluginMock.createSetupContract(),
+  }),
+  createStart: () => ({
+    data: dataPluginMock.createStartContract(),
+  }),
+};
 
 export const createUiNewPlatformMock = () => {
   const mock = {
