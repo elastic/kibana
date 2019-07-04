@@ -71,20 +71,17 @@ export const useLogHighlightsState = ({
     [apolloClient, sourceId, startKey, endKey, filterQuery, highlightTerms]
   );
 
-  useEffect(
-    () => {
-      if (
-        highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
-        startKey &&
-        endKey
-      ) {
-        loadLogEntryHighlights();
-      } else {
-        setLogEntryHighlights(undefined);
-      }
-    },
-    [highlightTerms, startKey, endKey, filterQuery, sourceVersion]
-  );
+  useEffect(() => {
+    if (
+      highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
+      startKey &&
+      endKey
+    ) {
+      loadLogEntryHighlights();
+    } else {
+      setLogEntryHighlights(undefined);
+    }
+  }, [highlightTerms, startKey, endKey, filterQuery, sourceVersion]);
 
   const logEntryHighlightsById = useMemo(
     () =>
