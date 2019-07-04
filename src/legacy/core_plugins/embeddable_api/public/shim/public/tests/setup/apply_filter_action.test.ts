@@ -18,20 +18,12 @@
  */
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { createApi } from '..';
-import { EmbeddableSetupApi } from '../../setup';
+import { testPlugin } from '../test_plugin';
+import { EmbeddableApi } from '../../api';
 import { FILTERABLE_CONTAINER } from '../../lib/test_samples/embeddables/filterable_container';
 import { FILTERABLE_EMBEDDABLE } from '../../lib/test_samples/embeddables/filterable_embeddable';
 import { FilterableContainerFactory } from '../../lib/test_samples/embeddables/filterable_container_factory';
 import { FilterableEmbeddableFactory } from '../../lib/test_samples/embeddables/filterable_embeddable_factory';
-
-let setup: EmbeddableSetupApi;
-const reset = () => {
-  ({ setup } = createApi());
-  setup.registerEmbeddableFactory(FILTERABLE_CONTAINER, new FilterableContainerFactory());
-  setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-};
-beforeEach(reset);
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
   

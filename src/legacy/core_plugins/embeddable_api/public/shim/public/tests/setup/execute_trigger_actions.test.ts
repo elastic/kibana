@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { createApi } from '..';
+import { testPlugin, TestPluginReturn } from '../test_plugin';
 import { of } from '../helpers';
 import { ActionContext, Action, openContextMenu } from '../../lib';
-import { EmbeddableSetupApi } from '../../setup';
-import { CONTACT_USER_TRIGGER, ContactCardEmbeddable } from '../../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from '../../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import { SEND_MESSAGE_ACTION } from '../../lib/test_samples/actions/send_message_action';
-import { EmbeddableStartApi } from '../../start';
 
 jest.mock('../../lib/context_menu_actions');
 
@@ -52,12 +50,11 @@ class TestAction extends Action {
   }
 }
 
-let setup: EmbeddableSetupApi;
-let start: EmbeddableStartApi;
+let embeddables: TestPluginReturn;
 const reset = () => {
-  ({ setup, start } = createApi());
+  embeddables = testPlugin();
 
-  setup.registerTrigger({
+  embeddables.setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
     actionIds: [SEND_MESSAGE_ACTION],
   });
@@ -68,6 +65,7 @@ const reset = () => {
 beforeEach(reset);
 
 test('executes a single action mapped to a trigger', async () => {
+  const { setup, doStart } = embeddables;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
@@ -81,6 +79,7 @@ test('executes a single action mapped to a trigger', async () => {
     embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
     triggerContext: {},
   };
+  const start = doStart();
   await start.executeTriggerActions('MY-TRIGGER', context);
 
   expect(executeFn).toBeCalledTimes(1);
@@ -88,6 +87,7 @@ test('executes a single action mapped to a trigger', async () => {
 });
 
 test('throws an error if there are no compatible actions to execute', async () => {
+  const { setup, doStart } = embeddables;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
@@ -99,6 +99,7 @@ test('throws an error if there are no compatible actions to execute', async () =
     embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
     triggerContext: {},
   };
+  const start = doStart();
   const [, error] = await of(start.executeTriggerActions('MY-TRIGGER', context));
 
   expect(error).toBeInstanceOf(Error);
@@ -108,6 +109,7 @@ test('throws an error if there are no compatible actions to execute', async () =
 });
 
 test('does not execute an incompatible action', async () => {
+  const { setup, doStart } = embeddables;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
@@ -117,7 +119,8 @@ test('does not execute an incompatible action', async () => {
   const embeddable = new ContactCardEmbeddable({ id: 'executeme', firstName: 'Stacey', lastName: 'G' });
   setup.registerTrigger(trigger);
   setup.registerAction(action);
-
+  
+  const start = doStart();
   const context = {
     embeddable,
     triggerContext: {},
@@ -128,6 +131,7 @@ test('does not execute an incompatible action', async () => {
 });
 
 test('shows a context menu when more than one action is mapped to a trigger', async () => {
+  const { setup, doStart } = embeddables;
   const trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
@@ -142,6 +146,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
+  const start = doStart();
   const context = {
     embeddable,
     triggerContext: {},

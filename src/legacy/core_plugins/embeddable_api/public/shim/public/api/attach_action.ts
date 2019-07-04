@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { EmbeddableStartApiPure } from './types';
-import { executeTriggerActions } from './execute_trigger_actions';
-import { getEmbeddableFactories } from './get_embeddable_factories';
-import { getTrigger } from './get_trigger';
-import { getTriggerActions } from './get_trigger_actions';
-import { getTriggerCompatibleActions } from './get_trigger_compatible_actions';
+import { EmbeddableApiPure } from './types';
 
-export * from './types';
-export const pureStartApi: EmbeddableStartApiPure = {
-  executeTriggerActions,
-  getEmbeddableFactories,
-  getTrigger,
-  getTriggerActions,
-  getTriggerCompatibleActions,
-};
+export const attachAction: EmbeddableApiPure['attachAction'] = ({triggers}) => (triggerId, actionId) => {
+  const trigger = triggers.get(triggerId);
+
+  if (!trigger) {
+    throw new Error(`No trigger [triggerId = ${triggerId}] exists, for detaching action [actionId = ${actionId}].`);
+  }
+
+  if (!trigger.actionIds.find(id => id === actionId)) {
+    trigger.actionIds.push(actionId);
+  }
+}

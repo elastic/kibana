@@ -17,14 +17,27 @@
 * under the License.
 */
 
-import { EmbeddableSetupDependencies } from '../types';
+import { EmbeddablePublicPlugin } from '../plugin';
 
-export const createDeps = (): EmbeddableSetupDependencies => {
-  const deps: EmbeddableSetupDependencies = {
-    api: {} as any,
-    triggers: new Map<any, any>(),
-    actions: new Map<any, any>(),
-    embeddableFactories: new Map<any, any>(),
+export interface TestPluginReturn {
+  plugin: EmbeddablePublicPlugin;
+  core: any;
+  setup: ReturnType<EmbeddablePublicPlugin['setup']>;
+  doStart: () => ReturnType<EmbeddablePublicPlugin['start']>;
+}
+
+export const testPlugin = (): TestPluginReturn => {
+  const plugin = new EmbeddablePublicPlugin({});
+  const core = {} as any;
+  const setup = plugin.setup(core);
+
+  return {
+    plugin,
+    core,
+    setup,
+    doStart: () => {
+      const start = plugin.start(core);
+      return start;
+    },
   };
-  return deps;
 };

@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { pureSetupApi } from '..';
+import { createApi } from '..';
 import { createDeps } from './helpers';
 import { expectError } from '../../tests/helpers';
 
-const { registerTrigger, registerAction, attachAction, detachAction } = pureSetupApi;
 const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
 
 test('can register trigger', () => {
   const deps = createDeps();
+  const { api } = createApi(deps);
 
-  registerTrigger(deps)({
+  api.registerTrigger({
     actionIds: [],
     description: 'foo',
     id: 'bar',
@@ -44,8 +44,9 @@ test('can register trigger', () => {
 
 test('can register action', () => {
   const deps = createDeps();
+  const { api } = createApi(deps);
 
-  registerAction(deps)({
+  api.registerAction({
     id: HELLO_WORLD_ACTION_ID,
     order: 13,
   } as any);
@@ -58,6 +59,7 @@ test('can register action', () => {
 
 test('can attach an action to a trigger', () => {
   const deps = createDeps();
+  const { api } = createApi(deps);
   const trigger = {
     id: 'MY-TRIGGER',
     actionIds: [],
@@ -69,15 +71,16 @@ test('can attach an action to a trigger', () => {
 
   expect(trigger.actionIds).toEqual([]);
 
-  registerTrigger(deps)(trigger);
-  registerAction(deps)(action);
-  attachAction(deps)('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+  api.registerTrigger(trigger);
+  api.registerAction(action);
+  api.attachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
 
   expect(trigger.actionIds).toEqual([HELLO_WORLD_ACTION_ID]);
 });
 
 test('can detach an action to a trigger', () => {
   const deps = createDeps();
+  const { api } = createApi(deps);
   const trigger = {
     id: 'MY-TRIGGER',
     actionIds: [],
@@ -89,23 +92,24 @@ test('can detach an action to a trigger', () => {
 
   expect(trigger.actionIds).toEqual([]);
 
-  registerTrigger(deps)(trigger);
-  registerAction(deps)(action);
-  attachAction(deps)('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
-  detachAction(deps)('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+  api.registerTrigger(trigger);
+  api.registerAction(action);
+  api.attachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+  api.detachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
 
   expect(trigger.actionIds).toEqual([]);
 });
 
 test('detaching an invalid action from a trigger throws an error', async () => {
   const deps = createDeps();
+  const { api } = createApi(deps);
   const action = {
     id: HELLO_WORLD_ACTION_ID,
     order: 25,
   } as any;
 
-  registerAction(deps)(action);
-  const error = expectError(() => detachAction(deps)('i do not exist', HELLO_WORLD_ACTION_ID));
+  api.registerAction(action);
+  const error = expectError(() => api.detachAction('i do not exist', HELLO_WORLD_ACTION_ID));
 
   expect(error).toBeInstanceOf(Error);
   expect(error.message).toMatchInlineSnapshot(
@@ -115,13 +119,14 @@ test('detaching an invalid action from a trigger throws an error', async () => {
 
 test('attaching an invalid action to a trigger throws an error', async () => {
   const deps = createDeps();
+  const { api } = createApi(deps);
   const action = {
     id: HELLO_WORLD_ACTION_ID,
     order: 25,
   } as any;
 
-  registerAction(deps)(action);
-  const error = expectError(() => attachAction(deps)('i do not exist', HELLO_WORLD_ACTION_ID));
+  api.registerAction(action);
+  const error = expectError(() => api.attachAction('i do not exist', HELLO_WORLD_ACTION_ID));
 
   expect(error).toBeInstanceOf(Error);
   expect(error.message).toMatchInlineSnapshot(

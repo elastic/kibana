@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { EmbeddableStartApiPure } from './types';
+import { EmbeddableApiPure } from './types';
+import { Action } from '../lib';
 
-export const getTrigger: EmbeddableStartApiPure['getTrigger'] = ({triggers}) => id => {
-  const trigger = triggers.get(id);
-
-  if (!trigger) {
-    throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
-  }
-
-  return trigger;
-}
+export const getTriggerCompatibleActions: EmbeddableApiPure['getTriggerCompatibleActions'] = ({api}) => async (triggerId, context) => {
+  const actions = api.getTriggerActions!(triggerId);
+  const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+  return actions.reduce<Action[]>((acc, action, i) => isCompatibles[i] ? [...acc, action] : acc, []);
+};

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createApi } from '..';
+import { testPlugin } from '../test_plugin';
 import { Action } from '../../lib';
 
 const action1 = {
@@ -32,7 +32,7 @@ const action2 = {
 } as any as Action;
 
 test('returns actions set on trigger', () => {
-  const { setup, start } = createApi();
+  const { setup, doStart } = testPlugin();
   setup.registerAction(action1);
   setup.registerAction(action2);
   setup.registerTrigger({
@@ -42,6 +42,7 @@ test('returns actions set on trigger', () => {
     title: 'baz',
   });
 
+  const start = doStart();
   const list0 = start.getTriggerActions('trigger');
 
   expect(list0).toHaveLength(0);

@@ -19,52 +19,40 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
-import { EmbeddableSetupApi, pureSetupApi } from './setup';
-import { EmbeddableStartApi, pureStartApi } from './start';
-import { bootstrap } from './bootstrap';
+import { createEmbeddables, Embeddables } from './api';
 
-export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, EmbeddableStartApi> {
+export class EmbeddablePublicPlugin implements Plugin<any, any> {
   private readonly triggers: TriggerRegistry = new Map();
   private readonly actions: ActionRegistry = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private setupApi!: EmbeddableSetupApi;
+  private embeddables!: Embeddables;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    const api = this.setupApi = {} as EmbeddableSetupApi;
-    const deps = {
-      api: () => api,
+    this.embeddables = createEmbeddables({
       actions: this.actions,
       embeddableFactories: this.embeddableFactories,
       triggers: this.triggers,
+    });
+
+    const {
+      registerTrigger,
+      registerAction,
+      registerEmbeddableFactory,
+      attachAction
+    } = this.embeddables.api;
+
+    return {
+      registerTrigger,
+      registerAction,
+      registerEmbeddableFactory,
+      attachAction,
     };
-
-    for (const [key, fn] of Object.entries(pureSetupApi)) {
-      (api as any)[key] = fn(deps);
-    }
-    Object.freeze(api);
-    bootstrap(api);
-
-    return api;
   }
 
   public start(core: CoreStart) {
-    const api = {} as EmbeddableStartApi;
-    const deps = {
-      setupApi: this.setupApi,
-      api: () => api,
-      actions: this.actions,
-      embeddableFactories: this.embeddableFactories,
-      triggers: this.triggers,
-    };
-
-    for (const [key, fn] of Object.entries(pureStartApi)) {
-      (api as any)[key] = fn(deps);
-    }
-    Object.freeze(api);
-
-    return api;
+    return this.embeddables.api;
   }
 
   public stop() {}

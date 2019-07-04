@@ -17,13 +17,13 @@
 * under the License.
 */
 
-import { EmbeddablePublicPlugin } from '../plugin';
+import { EmbeddableDependencies } from '../types';
 
-export const createApi = () => {
-  const plugin = new EmbeddablePublicPlugin({});
-  const core = {} as any;
-  const setup = plugin.setup(core);
-  const start = plugin.start(core);
-
-  return { setup, start, plugin, core };
+export const createDeps = (): EmbeddableDependencies => {
+  const deps: EmbeddableDependencies = {
+    triggers: new Map<any, any>(),
+    actions: new Map<any, any>(),
+    embeddableFactories: new Map<any, any>(),
+  };
+  return deps;
 };

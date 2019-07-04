@@ -17,36 +17,14 @@
  * under the License.
  */
 
-import { pureSetupApi } from '..';
-import { createDeps } from './helpers';
-import { expectError } from '../../tests/helpers';
+import { EmbeddableApiPure } from './types';
 
-const { getTrigger, registerTrigger } = pureSetupApi;
+export const getTrigger: EmbeddableApiPure['getTrigger'] = ({triggers}) => id => {
+  const trigger = triggers.get(id);
 
-test('can get Trigger from registry', () => {
-  const deps = createDeps();
-  registerTrigger(deps)({
-    actionIds: [],
-    description: 'foo',
-    id: 'bar',
-    title: 'baz',
-  });
+  if (!trigger) {
+    throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
+  }
 
-  const trigger = getTrigger(deps)('bar');
-
-  expect(trigger).toEqual({
-    actionIds: [],
-    description: 'foo',
-    id: 'bar',
-    title: 'baz',
-  });
-});
-
-test('throws if trigger does not exist', () => {
-  const deps = createDeps();
-
-  const error = expectError(() => getTrigger(deps)('foo'));
-
-  expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(`"Trigger [triggerId = foo] does not exist."`);
-});
+  return trigger;
+}

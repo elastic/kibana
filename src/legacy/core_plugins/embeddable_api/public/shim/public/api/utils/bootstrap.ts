@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { EmbeddableSetupApi } from './setup';
-import { CONTEXT_MENU_TRIGGER, APPLY_FILTER_TRIGGER } from './lib/triggers';
-import { ApplyFilterAction } from './lib/actions';
+import { EmbeddableApi } from '../types';
+import { CONTEXT_MENU_TRIGGER, APPLY_FILTER_TRIGGER, ApplyFilterAction } from '../../lib';
 
 /**
  * This method initialized Embeddable plugin with initial set of 
@@ -27,7 +26,7 @@ import { ApplyFilterAction } from './lib/actions';
  * 
  * @param api 
  */
-export const bootstrap = (api: EmbeddableSetupApi) => {
+export const bootstrap = (api: EmbeddableApi) => {
   const triggerContext = {
     id: CONTEXT_MENU_TRIGGER,
     title: 'Context menu',

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { EmbeddableSetupApiPure } from './types';
+import { EmbeddableApiPure } from './types';
 
-export const registerEmbeddableFactory: EmbeddableSetupApiPure['registerEmbeddableFactory'] = ({embeddableFactories}) => (id, factory) => {
-  embeddableFactories.set(id, factory);
+export const registerAction: EmbeddableApiPure['registerAction'] = ({ actions }) => action => {
+  actions.set(action.id, action);
 };

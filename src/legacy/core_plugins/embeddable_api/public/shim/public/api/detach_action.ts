@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { EmbeddableStartApiPure } from './types';
+import { EmbeddableApiPure } from './types';
 
-export const getEmbeddableFactories: EmbeddableStartApiPure['getEmbeddableFactories'] = ({embeddableFactories}) => () => {
-  return embeddableFactories.values();
-};
+export const detachAction: EmbeddableApiPure['detachAction'] = ({triggers}) => (triggerId, actionId) => {
+  const trigger = triggers.get(triggerId);
+
+  if (!trigger) {
+    throw new Error(`No trigger [triggerId = ${triggerId}] exists, for detaching action [actionId = ${actionId}].`);
+  }
+
+  trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
+}
