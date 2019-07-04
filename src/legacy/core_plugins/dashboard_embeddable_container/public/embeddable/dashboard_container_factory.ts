@@ -25,8 +25,8 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
-  EmbeddableFactoryRegistry,
-} from '../../../embeddable_api/public';
+  GetEmbeddableFactory,
+} from '../../../embeddable_api/public/shim/public';
 import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
@@ -48,7 +48,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
       showWriteControls: boolean;
       createNew: boolean;
     };
-  }, private embeddableFactories: EmbeddableFactoryRegistry) {
+  }, private readonly getFactory: GetEmbeddableFactory) {
     super({ savedObjectMetaData });
     this.allowEditing = capabilities.createNew && capabilities.showWriteControls;
   }
@@ -75,6 +75,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.embeddableFactories, parent);
+    return new DashboardContainer(initialInput, this.getFactory, parent);
   }
 }

@@ -34,7 +34,8 @@ import {
   isErrorEmbeddable,
   EmbeddableFactory,
   IEmbeddable,
-} from '../../../embeddable_api/public/index';
+  GetEmbeddableFactory,
+} from '../../../embeddable_api/public/shim/public';
 
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
 import { createPanelState } from './panel';
@@ -75,7 +76,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    embeddableFactories: Map<string, EmbeddableFactory>,
+    private readonly getFactory: GetEmbeddableFactory,
     parent?: Container
   ) {
     super(

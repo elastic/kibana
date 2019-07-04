@@ -20,6 +20,8 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
+export * from './lib';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }

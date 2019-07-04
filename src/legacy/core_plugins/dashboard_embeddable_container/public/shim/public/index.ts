@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { PluginInitializerContext } from 'kibana/public';
+import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    uiExports: {
-      hacks: 'plugins/dashboard_embeddable_container/shim/public/legacy',
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  });
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
 }
+
+export { DashboardEmbeddableContainerPublicPlugin as Plugin };

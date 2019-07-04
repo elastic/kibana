@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { plugin } from '.';
+import { npSetup, npStart } from 'ui/new_platform';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    uiExports: {
-      hacks: 'plugins/dashboard_embeddable_container/shim/public/legacy',
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  });
-}
+const pluginInstance = plugin({} as any);
+export const setup = pluginInstance.setup(npSetup.core);
+export const start = pluginInstance.start(npStart.core);

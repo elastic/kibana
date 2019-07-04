@@ -25,7 +25,7 @@ import {
   IEmbeddable,
   ActionContext,
   IncompatibleActionError,
-} from '../../../embeddable_api/public';
+} from '../../../embeddable_api/public/shim/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';
@@ -41,7 +41,7 @@ function isExpanded(embeddable: IEmbeddable) {
     throw new IncompatibleActionError();
   }
 
-  return embeddable.id === embeddable.parent.getInput().expandedPanelId;
+  return embeddable.id === (embeddable.parent.getInput() as any).expandedPanelId;
 }
 
 export class ExpandPanelAction extends Action {
@@ -91,6 +91,6 @@ export class ExpandPanelAction extends Action {
     const newValue = isExpanded(embeddable) ? undefined : embeddable.id;
     embeddable.parent.updateInput({
       expandedPanelId: newValue,
-    });
+    } as any);
   }
 }

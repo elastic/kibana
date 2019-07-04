@@ -17,21 +17,16 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { plugin } from '.';
 import { npSetup, npStart } from 'ui/new_platform';
-import { embeddablePlugin } from '../../../embeddable_api/public';
-import { Plugin } from './plugin';
+import { setup as embeddableSetup, start as embeddableStart } from '../../../../embeddable_api/public/shim/public/legacy';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  const dashboardContainerPlugin = new Plugin(initializerContext);
+const pluginInstance = plugin({} as any);
 
-  dashboardContainerPlugin.setup(npSetup.core, {
-    embeddable: embeddablePlugin,
-  });
+export const setup = pluginInstance.setup(npSetup.core, {
+  embeddable: embeddableSetup,
+});
 
-  dashboardContainerPlugin.start(npStart.core, {
-    embeddable: embeddablePlugin,
-  });
-}
-
-plugin({} as any);
+export const start = pluginInstance.start(npStart.core, {
+  embeddable: embeddableStart,
+});
