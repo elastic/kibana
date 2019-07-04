@@ -48,7 +48,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     direction: 'asc' | 'desc',
     maxCount: number,
     filterQuery: LogEntryQuery,
-    highlightQuery: string
+    highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]> {
     if (maxCount <= 0) {
       return [];
@@ -87,7 +87,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     start: TimeKey,
     end: TimeKey,
     filterQuery: LogEntryQuery,
-    highlightQuery: string
+    highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]> {
     const documents = await this.getLogEntryDocumentsBetween(
       request,
@@ -203,7 +203,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     after: TimeKey | null,
     maxCount: number,
     filterQuery?: LogEntryQuery,
-    highlightQuery?: string
+    highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]> {
     if (maxCount <= 0) {
       return [];
@@ -236,6 +236,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             number_of_fragments: 100,
             post_tags: [''],
             pre_tags: [''],
+            highlight_query: highlightQuery,
           },
         }
       : {};
@@ -314,6 +315,7 @@ const convertHitToLogEntryDocument = (fields: string[]) => (
         : flattenedFields,
     {} as { [fieldName: string]: string | number | boolean | null }
   ),
+  highlights: hit.highlight || {},
   key: {
     time: hit.sort[0],
     tiebreaker: hit.sort[1],

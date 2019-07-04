@@ -15,11 +15,13 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiLink,
 } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
-import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
+import { UIM_RESTORE_LIST_LOAD, BASE_PATH } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
+import { useAppState } from '../../../services/state';
 import { uiMetricService } from '../../../services/ui_metric';
 import { RestoreTable } from './restore_table';
 
@@ -41,6 +43,40 @@ export const RestoreList: React.FunctionComponent = () => {
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
+
+  // Check that we have all index privileges needed to view recovery information
+  const [appState] = useAppState();
+  const { permissions: { missingIndexPrivileges } = { missingIndexPrivileges: [] } } = appState;
+
+  // Render permission missing screen
+  if (missingIndexPrivileges.length) {
+    return (
+      <EuiEmptyPrompt
+        iconType="securityApp"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreList.deniedPermissionTitle"
+              defaultMessage="You're missing index privileges"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreList.deniedPermissionDescription"
+              defaultMessage="To view snapshot restore status, you must have {indexPrivilegesCount,
+                plural, one {this index privilege} other {these index privileges}} for one or more indices: {indexPrivileges}."
+              values={{
+                indexPrivileges: missingIndexPrivileges.join(', '),
+                indexPrivilegesCount: missingIndexPrivileges.length,
+              }}
+            />
+          </p>
+        }
+      />
+    );
+  }
 
   // State for tracking interval picker
   const [isIntervalMenuOpen, setIsIntervalMenuOpen] = useState<boolean>(false);
@@ -88,7 +124,7 @@ export const RestoreList: React.FunctionComponent = () => {
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
-              defaultMessage="You don't have any snapshot restores"
+              defaultMessage="You don't have any restored snapshots"
             />
           </h1>
         }
@@ -97,7 +133,17 @@ export const RestoreList: React.FunctionComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
-                defaultMessage="Track progress of indices that are restored from snapshots."
+                defaultMessage="Go to {snapshotsLink} to start a restore."
+                values={{
+                  snapshotsLink: (
+                    <EuiLink href={`#${BASE_PATH}/snapshots`}>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
+                        defaultMessage="Snapshots"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             </p>
           </Fragment>
