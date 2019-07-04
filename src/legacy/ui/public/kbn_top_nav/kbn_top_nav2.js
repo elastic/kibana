@@ -29,7 +29,7 @@ module.directive('kbnTopNav2', (reactDirective) => {
     wrapInI18nContext(TopNavMenu),
     [
       ['name', { watchDepth: 'reference' }],
-      ['config', { watchDepth: 'reference' }],
+      ['config', { watchDepth: 'value' }],
 
       ['query', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
