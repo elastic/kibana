@@ -42,12 +42,18 @@ module.directive('kbnTopNav2', (reactDirective) => {
       ['indexPatterns', { watchDepth: 'collection' }],
       ['filters', { watchDepth: 'collection' }],
 
+      // All modifiers default to true.
+      // Set to false to hide subcomponents.
       'showSearchBar',
-      'appName',
-      'screenTitle',
       'showFilterBar',
       'showQueryBar',
+      'showQueryInput',
       'showDatePicker',
+
+      'showSearchBarInline', // temp solution for timelion app
+
+      'appName',
+      'screenTitle',
       'dateRangeFrom',
       'dateRangeTo',
       'isRefreshPaused',

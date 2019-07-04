@@ -302,9 +302,30 @@ app.controller('timelion', function (
     return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];
   }
 
+  let refresher;
+  const setRefreshData = function () {
+    if (refresher) $timeout.cancel(refresher);
+    const interval = timefilter.getRefreshInterval();
+    if (interval.value > 0 && !interval.pause) {
+      function startRefresh() {
+        refresher = $timeout(function () {
+          if (!$scope.running) $scope.search();
+          startRefresh();
+        }, interval.value);
+      }
+      startRefresh();
+    }
+  };
+
   const init = function () {
     $scope.running = false;
     $scope.search();
+    setRefreshData();
+
+    $scope.model = {
+      timeRange: timefilter.getTime(),
+      refreshInterval: timefilter.getRefreshInterval(),
+    };
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
     $scope.$listen(timefilter, 'fetch', $scope.search);
@@ -342,20 +363,25 @@ app.controller('timelion', function (
     };
   };
 
-  let refresher;
-  $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
-    if (refresher) $timeout.cancel(refresher);
-    const interval = timefilter.getRefreshInterval();
-    if (interval.value > 0 && !interval.pause) {
-      function startRefresh() {
-        refresher = $timeout(function () {
-          if (!$scope.running) $scope.search();
-          startRefresh();
-        }, interval.value);
-      }
-      startRefresh();
-    }
-  });
+  $scope.onTimeUpdate = function ({ dateRange }) {
+    $scope.model.timeRange = {
+      ...dateRange
+    };
+    timefilter.setTime(dateRange);
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    $scope.model.refreshInterval = {
+      pause: isPaused,
+      value: refreshInterval,
+    };
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
+
+    setRefreshData();
+  };
 
   $scope.$watch(function () { return savedSheet.lastSavedTitle; }, function (newTitle) {
     docTitle.change(savedSheet.id ? newTitle : undefined);

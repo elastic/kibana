@@ -48,8 +48,9 @@ export interface SearchBarProps {
   disableAutoFocus?: boolean;
   // Query bar
   showQueryBar?: boolean;
+  showQueryInput?: boolean;
   query: Query;
-  onQuerySubmit: (payload: { dateRange: DateRange; query: Query }) => void;
+  onQuerySubmit: (payload: { dateRange: DateRange; query?: Query }) => void;
   // Filter bar
   showFilterBar?: boolean;
   filters?: Filter[];
@@ -73,6 +74,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public static defaultProps = {
     showQueryBar: true,
     showFilterBar: true,
+    showDatePicker: true,
   };
 
   public filterBarRef: Element | null = null;
@@ -175,6 +177,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             store={this.props.store}
             prepend={this.props.showFilterBar ? filterTriggerButton : ''}
             showDatePicker={this.props.showDatePicker}
+            showQueryInput={this.props.showQueryInput}
             dateRangeFrom={this.props.dateRangeFrom}
             dateRangeTo={this.props.dateRangeTo}
             isRefreshPaused={this.props.isRefreshPaused}

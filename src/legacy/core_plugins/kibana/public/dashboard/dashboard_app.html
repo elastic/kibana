@@ -8,6 +8,8 @@
     config="topNavMenu" 
     
     show-search-bar="chrome.getVisible()"
+    show-filter-bar="showFilterBar()"
+
     filters="model.filters"
     query="model.query"
     screen-title="screenTitle"
@@ -16,8 +18,6 @@
     index-patterns="indexPatterns"
     filters="model.filters"
     on-filters-updated="onFiltersUpdated"
-    show-filter-bar="showFilterBar()"
-    show-date-picker="true"
     date-range-from="model.timeRange.from"
     date-range-to="model.timeRange.to"
     is-refresh-paused="model.refreshInterval.pause"

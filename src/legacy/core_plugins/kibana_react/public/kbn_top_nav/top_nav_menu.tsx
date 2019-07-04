@@ -19,9 +19,10 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
@@ -34,6 +35,7 @@ interface Props extends SearchBarProps {
   showBorder?: boolean;
   activeItem: string;
   showSearchBar: boolean;
+  showSearchBarInline?: boolean;
 }
 
 export function TopNavMenu(props: Props) {
@@ -45,31 +47,29 @@ export function TopNavMenu(props: Props) {
     ));
   }
 
-  function getBorder() {
-    if (!props.showBorder) return;
-    return <EuiHorizontalRule margin="none" />;
-  }
-
   function menuItemClickHandler(key: string, action: TopNavMenuAction, target?: any) {
     action(null, null, target);
   }
 
-  function getSearchBar() {
+  function renderSearchBar() {
     if (!props.showSearchBar) return;
     return (
       <SearchBar
         query={props.query}
         filters={props.filters}
         showQueryBar={props.showQueryBar}
+        showQueryInput={props.showQueryInput}
+        showFilterBar={props.showFilterBar}
+        showDatePicker={props.showDatePicker}
         appName={props.appName}
         screenTitle={props.screenTitle}
         onQuerySubmit={props.onQuerySubmit}
         onFiltersUpdated={props.onFiltersUpdated}
-        showFilterBar={props.showFilterBar}
         dateRangeFrom={props.dateRangeFrom}
         dateRangeTo={props.dateRangeTo}
-        showDatePicker={props.showDatePicker}
         isRefreshPaused={props.isRefreshPaused}
+        showAutoRefreshOnly={props.showAutoRefreshOnly}
+        onRefreshChange={props.onRefreshChange}
         refreshInterval={props.refreshInterval}
         indexPatterns={props.indexPatterns}
         store={localStorage}
@@ -77,15 +77,49 @@ export function TopNavMenu(props: Props) {
     );
   }
 
-  return (
-    <I18nProvider>
-      <div>
-        <EuiFlexGroup data-test-subj="top-nav" justifyContent="flexStart" gutterSize="xs">
-          {renderItems()}
-        </EuiFlexGroup>
-        {getBorder()}
-        {getSearchBar()}
-      </div>
-    </I18nProvider>
-  );
+  function renderLayout() {
+    if (props.showSearchBarInline) {
+      return (
+        <div>
+          <EuiFlexGroup
+            data-test-subj="top-nav"
+            justifyContent="spaceBetween"
+            gutterSize="none"
+            wrap={true}
+            className="topNavMenu"
+          >
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
+              {renderItems()}
+            </EuiFlexGroup>
+            <EuiFlexItem grow={false}>{renderSearchBar()}</EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      );
+    } else {
+      return (
+        <span>
+          <EuiFlexGroup
+            data-test-subj="top-nav"
+            justifyContent="flexStart"
+            gutterSize="s"
+            className="topNavMenu"
+          >
+            {renderItems()}
+          </EuiFlexGroup>
+          {renderSearchBar()}
+        </span>
+      );
+    }
+  }
+
+  return <I18nProvider>{renderLayout()}</I18nProvider>;
 }
+
+TopNavMenu.defaultProps = {
+  showSearchBar: false,
+  showQueryBarInline: false,
+  showQueryBar: true,
+  showQueryInput: true,
+  showDatePicker: true,
+  showFilterBar: true,
+};

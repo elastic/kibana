@@ -1,52 +1,52 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
-  <!-- Local nav. -->
-  <kbn-top-nav2 name="visualize" config="topNavMenu">
-  </kbn-top-nav2>
-
-  <!-- Search. -->
+  <!-- Linked search. -->
   <div
-        ng-show="chrome.getVisible()"
-        class="fullWidth"
+      ng-show="chrome.getVisible()"
+      ng-if="vis.type.requiresSearch && state.linked"
+      class="fullWidth visEditor__linkedMessage"
+    >
+    <div class="kuiVerticalRhythmSmall">
+      {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
+      <a
+        href="#/discover/{{savedVis.savedSearch.id}}"
       >
-        <div ng-if="vis.type.requiresSearch && state.linked" class="kuiVerticalRhythmSmall">
-          {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
-          <a
-            href="#/discover/{{savedVis.savedSearch.id}}"
-          >
-            {{ savedVis.savedSearch.title }}
-          </a>
-          &nbsp;
-          <a
-            data-test-subj="unlinkSavedSearch"
-            href=""
-            ng-dblclick="unlink()"
-            tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
-          >
-            <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
-          </a>
-        </div>
-
-        <div class="fullWidth kuiVerticalRhythmSmall">
-          <search-bar
-            query="state.query"
-            screen-title="state.vis.title"
-            on-query-submit="updateQueryAndFetch"
-            app-name="'visualize'"
-            index-patterns="[indexPattern]"
-            filters="filters"
-            on-filters-updated="onFiltersUpdated"
-            show-query-bar="showQueryBar()"
-            show-filter-bar="vis.type.options.showFilterBar && chrome.getVisible()"
-            show-date-picker="enableQueryBarTimeRangeSelector"
-            date-range-from="timeRange.from"
-            date-range-to="timeRange.to"
-            is-refresh-paused="refreshInterval.pause"
-            refresh-interval="refreshInterval.value"
-            show-auto-refresh-only="showAutoRefreshOnlyInQueryBar"
-            on-refresh-change="onRefreshChange"
-          ></search-bar>
-        </div>
-      </div>
+        {{ savedVis.savedSearch.title }}
+      </a>
+      &nbsp;
+      <a
+        data-test-subj="unlinkSavedSearch"
+        href=""
+        ng-dblclick="unlink()"
+        tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
+      >
+        <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- Local nav. -->
+  <kbn-top-nav2 
+    name="visualize" 
+    config="topNavMenu"
+    show-search-bar="true"
+    show-query-bar="showQueryBar()"
+    show-filter-bar="vis.type.options.showFilterBar && chrome.getVisible()"
+    show-date-picker="enableQueryBarTimeRangeSelector"
+    show-auto-refresh-only="showAutoRefreshOnlyInQueryBar"
+    query="state.query"
+    screen-title="state.vis.title"
+    on-query-submit="updateQueryAndFetch"
+    app-name="'visualize'"
+    index-patterns="[indexPattern]"
+    filters="filters"
+    on-filters-updated="onFiltersUpdated"
+    date-range-from="timeRange.from"
+    date-range-to="timeRange.to"
+    is-refresh-paused="refreshInterval.pause"
+    refresh-interval="refreshInterval.value"
+    on-refresh-change="onRefreshChange"
+  >
+  </kbn-top-nav2>
 
   <!--
     The top nav is hidden in embed mode but the filter bar must still be present so

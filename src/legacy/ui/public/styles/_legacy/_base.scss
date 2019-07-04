@@ -62,8 +62,8 @@ input[type="checkbox"],
   > kbn-top-nav, kbn-top-nav2 {
     z-index: 5;
 
-    > div {
-      padding: $euiSizeS 0px;
+    .topNavMenu {
+      padding: $euiSizeS 0px $euiSizeXS;
     }
   }
 
