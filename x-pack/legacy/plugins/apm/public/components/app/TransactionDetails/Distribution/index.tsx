@@ -110,48 +110,42 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     transactionType
   ]);
 
-  const redirectToDefaultSample = useCallback(
-    () => {
-      const defaultSample =
-        distribution && distribution.defaultSample
-          ? distribution.defaultSample
-          : {};
+  const redirectToDefaultSample = useCallback(() => {
+    const defaultSample =
+      distribution && distribution.defaultSample
+        ? distribution.defaultSample
+        : {};
 
-      const parsedQueryParams = toQuery(history.location.search);
+    const parsedQueryParams = toQuery(history.location.search);
 
-      history.replace({
-        ...history.location,
-        search: fromQuery({
-          ...omit(parsedQueryParams, 'transactionId', 'traceId'),
-          ...defaultSample
-        })
-      });
-    },
-    [distribution, loading]
-  );
+    history.replace({
+      ...history.location,
+      search: fromQuery({
+        ...omit(parsedQueryParams, 'transactionId', 'traceId'),
+        ...defaultSample
+      })
+    });
+  }, [distribution, loading]);
 
-  useEffect(
-    () => {
-      if (loading) {
-        return;
-      }
-      const selectedSampleIsAvailable = distribution
-        ? !!distribution.buckets.find(
-            bucket =>
-              !!(
-                bucket.sample &&
-                bucket.sample.transactionId === transactionId &&
-                bucket.sample.traceId === traceId
-              )
-          )
-        : false;
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+    const selectedSampleIsAvailable = distribution
+      ? !!distribution.buckets.find(
+          bucket =>
+            !!(
+              bucket.sample &&
+              bucket.sample.transactionId === transactionId &&
+              bucket.sample.traceId === traceId
+            )
+        )
+      : false;
 
-      if (!selectedSampleIsAvailable && !!distribution) {
-        redirectToDefaultSample();
-      }
-    },
-    [distribution, transactionId, traceId, redirectToDefaultSample, loading]
-  );
+    if (!selectedSampleIsAvailable && !!distribution) {
+      redirectToDefaultSample();
+    }
+  }, [distribution, transactionId, traceId, redirectToDefaultSample, loading]);
 
   if (!distribution || !distribution.totalHits || !traceId || !transactionId) {
     return (

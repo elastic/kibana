@@ -135,21 +135,8 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid));
 
   // expose state to wizard
-  useEffect(
-    () => {
-      onChange({
-        continuousModeDateField,
-        continuousModeDelay,
-        createIndexPattern,
-        isContinuousModeEnabled,
-        jobId,
-        jobDescription,
-        destinationIndex,
-        touched: true,
-        valid,
-      });
-    },
-    [
+  useEffect(() => {
+    onChange({
       continuousModeDateField,
       continuousModeDelay,
       createIndexPattern,
@@ -157,9 +144,19 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       jobId,
       jobDescription,
       destinationIndex,
+      touched: true,
       valid,
-    ]
-  );
+    });
+  }, [
+    continuousModeDateField,
+    continuousModeDelay,
+    createIndexPattern,
+    isContinuousModeEnabled,
+    jobId,
+    jobDescription,
+    destinationIndex,
+    valid,
+  ]);
 
   return (
     <EuiForm>
