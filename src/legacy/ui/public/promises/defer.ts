@@ -17,26 +17,17 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+interface Defer<T> {
+  promise: Promise<T>;
+  resolve(value: T): void;
+  reject(reason: Error): void;
+}
 
-import execa from 'execa';
-
-const MINUTE = 60 * 1000;
-
-it(
-  'types return values to prevent mutations in typescript',
-  async () => {
-    await expect(
-      execa.stdout('tsc', ['--noEmit'], {
-        cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-"Command failed: tsc --noEmit
-
-index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a read-only property.
-index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a read-only property.
-"
-`);
-  },
-  MINUTE
-);
+export function createDefer<T = unknown>(Class: typeof Promise): Defer<T> {
+  const defer: Partial<Defer<T>> = {};
+  defer.promise = new Class<T>((resolve, reject) => {
+    defer.resolve = resolve;
+    defer.reject = reject;
+  });
+  return defer as Defer<T>;
+}

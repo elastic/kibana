@@ -43,20 +43,17 @@ function getWithRelativeImpact(items: TransactionListAPIResponse) {
 export function useTransactionList(urlParams: IUrlParams) {
   const { serviceName, transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
-  const { data = [], error, status } = useFetcher(
-    () => {
-      if (serviceName && start && end && transactionType) {
-        return loadTransactionList({
-          serviceName,
-          start,
-          end,
-          transactionType,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, transactionType, uiFilters]
-  );
+  const { data = [], error, status } = useFetcher(() => {
+    if (serviceName && start && end && transactionType) {
+      return loadTransactionList({
+        serviceName,
+        start,
+        end,
+        transactionType,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, transactionType, uiFilters]);
 
   const memoizedData = useMemo(() => getWithRelativeImpact(data), [data]);
   return {
