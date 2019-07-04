@@ -37,14 +37,28 @@ const chance = new Chance();
 
 let server: HttpServer;
 let config: HttpConfig;
+let configWithSSL: HttpConfig;
 
 const logger = loggingServiceMock.create();
+
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
     port: chance.integer({ min: 10000, max: 15000 }),
-    ssl: {},
+    ssl: { enabled: false },
+  } as HttpConfig;
+
+  configWithSSL = {
+    ...config,
+    ssl: {
+      enabled: true,
+      certificate: '/certificate',
+      cipherSuites: ['cipherSuite'],
+      getSecureOptions: () => 0,
+      key: '/key',
+      redirectHttpFromPort: config.port + 1,
+    },
   } as HttpConfig;
 
   server = new HttpServer(logger, 'tests');
@@ -527,30 +541,14 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 });
 
-describe('with defined `redirectHttpFromPort`', () => {
-  let configWithSSL: HttpConfig;
+test('with defined `redirectHttpFromPort`', async () => {
+  const router = new Router('/');
+  router.get({ path: '/', validate: false }, (req, res) => res.ok({ key: 'value:/' }));
 
-  beforeEach(async () => {
-    configWithSSL = {
-      ...config,
-      ssl: {
-        certificate: '/certificate',
-        cipherSuites: ['cipherSuite'],
-        enabled: true,
-        getSecureOptions: () => 0,
-        key: '/key',
-        redirectHttpFromPort: config.port + 1,
-      },
-    } as HttpConfig;
+  const { registerRouter } = await server.setup(configWithSSL);
+  registerRouter(router);
 
-    const router = new Router('/');
-    router.get({ path: '/', validate: false }, (req, res) => res.ok({ key: 'value:/' }));
-
-    const { registerRouter } = await server.setup(configWithSSL);
-    registerRouter(router);
-
-    await server.start();
-  });
+  await server.start();
 });
 
 test('returns server and connection options on start', async () => {
@@ -978,5 +976,16 @@ describe('#auth.get()', () => {
       .expect(200, { status: 'unauthenticated' });
 
     expect(authenticate).not.toHaveBeenCalled();
+  });
+});
+
+describe('#isTLSEnabled', () => {
+  it('returns "true" if TLS enabled', async () => {
+    const { isTLSEnabled } = await server.setup(configWithSSL);
+    expect(isTLSEnabled).toBe(true);
+  });
+  it('returns "false" if TLS not enabled', async () => {
+    const { isTLSEnabled } = await server.setup(config);
+    expect(isTLSEnabled).toBe(false);
   });
 });

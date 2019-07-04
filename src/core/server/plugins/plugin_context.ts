@@ -122,6 +122,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       basePath: deps.http.basePath,
       createNewServer: deps.http.createNewServer,
+      isTLSEnabled: deps.http.isTLSEnabled,
     },
   };
 }
