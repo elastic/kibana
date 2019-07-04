@@ -11,7 +11,8 @@ import { SnapshotDetailsEs } from '../types';
 
 export function deserializeSnapshotDetails(
   repository: string,
-  snapshotDetailsEs: SnapshotDetailsEs
+  snapshotDetailsEs: SnapshotDetailsEs,
+  managedRepository?: string
 ): SnapshotDetails {
   if (!snapshotDetailsEs || typeof snapshotDetailsEs !== 'object') {
     throw new Error('Unable to deserialize snapshot details');
@@ -75,5 +76,6 @@ export function deserializeSnapshotDetails(
     durationInMillis,
     indexFailures,
     shards,
+    isManagedRepository: repository === managedRepository,
   };
 }

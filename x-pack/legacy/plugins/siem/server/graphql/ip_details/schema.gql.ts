@@ -26,6 +26,7 @@ const ipOverviewSchema = gql`
     host: HostEcsFields!
     server: Overview
     source: Overview
+    inspect: Inspect
   }
 
   extend type Source {
@@ -85,6 +86,7 @@ const domainsSchema = gql`
     edges: [DomainsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   extend type Source {
@@ -106,6 +108,7 @@ const firstLastSeenSchema = gql`
   type FirstLastSeenDomain {
     firstSeen: Date
     lastSeen: Date
+    inspect: Inspect
   }
 
   extend type Source {
@@ -144,6 +147,7 @@ const tlsSchema = gql`
     edges: [TlsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
   extend type Source {
     Tls(
@@ -193,6 +197,7 @@ const usersSchema = gql`
     edges: [UsersEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   extend type Source {

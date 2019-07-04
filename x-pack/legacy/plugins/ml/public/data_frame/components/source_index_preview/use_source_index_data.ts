@@ -90,11 +90,8 @@ export const useSourceIndexData = (
     }
   };
 
-  useEffect(
-    () => {
-      getSourceIndexData();
-    },
-    [indexPattern.title, JSON.stringify(query)]
-  );
+  useEffect(() => {
+    getSourceIndexData();
+  }, [indexPattern.title, JSON.stringify(query)]);
   return { errorMessage, status, tableItems };
 };

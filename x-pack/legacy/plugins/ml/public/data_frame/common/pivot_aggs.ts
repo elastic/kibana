@@ -57,7 +57,7 @@ export const pivotAggsFieldSupport = {
 export type PivotAgg = {
   [key in PIVOT_SUPPORTED_AGGS]?: {
     field: FieldName;
-  }
+  };
 };
 
 export type PivotAggDict = { [key in AggName]: PivotAgg };

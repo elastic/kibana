@@ -29,7 +29,7 @@ import { Schemas } from '../schemas';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 
-describe('Vis-Editor-Agg-Params plugin directive', function () {
+describe.skip('Vis-Editor-Agg-Params plugin directive', function () {
   let $parentScope = {};
   let Vis;
   let vis;
