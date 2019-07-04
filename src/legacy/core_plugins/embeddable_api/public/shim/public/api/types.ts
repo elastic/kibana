@@ -24,6 +24,7 @@ export interface EmbeddableApi {
   attachAction: (triggerId: string, actionId: string) => void;
   detachAction: (triggerId: string, actionId: string) => void;
   executeTriggerActions: ExecuteTriggerActions;
+  getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
   getEmbeddableFactories: GetEmbeddableFactories;
   getTrigger: (id: string) => Trigger;
   getTriggerActions: (id: string) => Action[];
