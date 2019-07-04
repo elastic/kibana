@@ -15,6 +15,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Class | Description |
 |  --- | --- |
 |  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
+|  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers provided to simplify future migration away from Boom as internal Error. |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [Router](./kibana-plugin-server.router.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
@@ -30,6 +31,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
+|  [ElasticsearchError](./kibana-plugin-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
 |  [FakeRequest](./kibana-plugin-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
