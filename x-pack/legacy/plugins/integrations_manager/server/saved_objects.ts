@@ -11,11 +11,12 @@ export const getClient = (req: Request) => req.getSavedObjectsClient();
 export const mappings = {
   [SAVED_OBJECT_TYPE]: {
     properties: {
-      is_working: {
-        type: 'boolean',
-      },
-      other: {
-        type: 'keyword',
+      installed: {
+        type: 'nested',
+        properties: {
+          id: { type: 'keyword' },
+          type: { type: 'keyword' },
+        },
       },
     },
   },

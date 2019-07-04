@@ -9,6 +9,7 @@ export const API_ROOT = `/api/${PLUGIN_ID}`;
 export const API_LIST_PATTERN = `${API_ROOT}/list`;
 export const API_INFO_PATTERN = `${API_ROOT}/package/{pkgkey}`;
 export const API_INSTALL_PATTERN = `${API_ROOT}/install/{pkgkey}/{feature?}`;
+export const API_DELETE_PATTERN = `${API_ROOT}/delete/{pkgkey}/{feature?}`;
 
 export function getListPath() {
   return API_LIST_PATTERN;

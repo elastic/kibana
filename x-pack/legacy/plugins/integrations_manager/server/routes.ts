@@ -3,10 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObject, SavedObjectsBulkCreateObject } from 'src/core/server/saved_objects';
-import { PLUGIN_ID } from '../common/constants';
+import { SavedObject } from 'src/core/server/saved_objects';
+import { PLUGIN_ID, SAVED_OBJECT_TYPE } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
-import { API_LIST_PATTERN, API_INFO_PATTERN, API_INSTALL_PATTERN } from '../common/routes';
+import {
+  API_LIST_PATTERN,
+  API_INFO_PATTERN,
+  API_INSTALL_PATTERN,
+  API_DELETE_PATTERN,
+} from '../common/routes';
 import { getClient } from './saved_objects';
 import { fetchInfo, fetchList, getArchiveInfo } from './registry';
 import { cacheGet } from './cache';
@@ -60,36 +65,57 @@ export const routes: ServerRoute[] = [
       const { pkgkey, feature } = req.params;
 
       if (feature === 'dashboard') {
-        const dashboardObjects = await getDashboardObjects(pkgkey);
-        const toBeSavedObjects = Array.from(dashboardObjects.values(), obj => {
-          const { attributes } = obj;
-          if (
-            attributes.kibanaSavedObjectMeta &&
-            typeof attributes.kibanaSavedObjectMeta.searchSourceJSON !== 'string'
-          ) {
-            attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
-              attributes.kibanaSavedObjectMeta.searchSourceJSON
-            );
-          }
-          ['optionsJSON', 'panelsJSON', 'uiStateJSON', 'visState']
-            .filter(key => typeof attributes[key] !== 'string')
-            .forEach(key => (attributes[key] = JSON.stringify(attributes[key])));
-          return obj;
-        });
+        const toBeSavedObjects = await getDashboardObjects(pkgkey);
         const client = getClient(req);
         const createResults = await client.bulkCreate(toBeSavedObjects, { overwrite: true });
-        return {
-          pkgkey,
-          feature,
-          toBeSavedObjects,
-          createResults,
-        };
+        const installed = createResults.saved_objects.map(({ id, type }) => ({ id, type }));
+        const mgrResults = await client.create(
+          SAVED_OBJECT_TYPE,
+          { installed },
+          { id: pkgkey, overwrite: true }
+        );
+
+        return mgrResults;
       }
 
       return {
-        reqKeys: Object.keys(req),
         pkgkey,
         feature,
+        created: [],
+      };
+    },
+  },
+  {
+    method: 'GET',
+    path: API_DELETE_PATTERN,
+    options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
+    handler: async (req: InstallFeatureRequest) => {
+      const { pkgkey, feature } = req.params;
+      const client = getClient(req);
+
+      if (feature === 'dashboard') {
+        const toBeDeletedObjects = await getDashboardObjects(pkgkey);
+        // ASK: should the manager uninstall the assets it installed
+        // or just the references in SAVED_OBJECT_TYPE?
+        const deletePromises = toBeDeletedObjects.map(async ({ id, type }) =>
+          client.delete(type, id)
+        );
+
+        await Promise.all(deletePromises);
+
+        return {
+          pkgkey,
+          feature,
+          deleted: toBeDeletedObjects.map(({ id, type }) => ({ id, type })),
+        };
+      }
+
+      const deleted = await client.delete(SAVED_OBJECT_TYPE, pkgkey);
+
+      return {
+        pkgkey,
+        feature,
+        deleted: deleted || [],
       };
     },
   },
@@ -101,7 +127,7 @@ function getAsset(key: string) {
   return JSON.parse(json);
 }
 
-async function getDashboardObjects(pkgkey: string): Promise<Map<string, SavedObject>> {
+async function getDashboardObjects(pkgkey: string): Promise<SavedObject[]> {
   const paths = await getArchiveInfo(`${pkgkey}.tar.gz`);
   const toBeSavedObjects: Map<string, SavedObject> = new Map();
 
@@ -112,7 +138,7 @@ async function getDashboardObjects(pkgkey: string): Promise<Map<string, SavedObj
   const dashboardPath = dashboardPaths[0];
   const dashboard: SavedObject = getAsset(dashboardPath);
   dashboard.type = 'dashboard';
-  dashboard.id = dashboardPath.replace('apache-1.0.1/kibana/dashboard/', '').replace('.json', '');
+  dashboard.id = dashboardPath.replace(`${pkgkey}/kibana/dashboard/`, '').replace('.json', '');
   if (!toBeSavedObjects.has(dashboardPath)) toBeSavedObjects.set(dashboardPath, dashboard);
 
   // does dashboard contain references? (e.g. to visualizations?)
@@ -151,5 +177,21 @@ async function getDashboardObjects(pkgkey: string): Promise<Map<string, SavedObj
       });
   }
 
-  return toBeSavedObjects;
+  return Array.from(toBeSavedObjects.values(), obj => {
+    // the assets from the registry are malformed
+    // https://github.com/elastic/integrations-registry/issues/42
+    const { attributes } = obj;
+    if (
+      attributes.kibanaSavedObjectMeta &&
+      typeof attributes.kibanaSavedObjectMeta.searchSourceJSON !== 'string'
+    ) {
+      attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+        attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+    }
+    ['optionsJSON', 'panelsJSON', 'uiStateJSON', 'visState']
+      .filter(key => typeof attributes[key] !== 'string')
+      .forEach(key => (attributes[key] = JSON.stringify(attributes[key])));
+    return obj;
+  });
 }
