@@ -45,7 +45,7 @@ export function PanelConfig(props) {
   const [formValidationResults] = useState({});
 
   useEffect(() => {
-    model.isModelValid = checkModelValidity(formValidationResults);
+    model.isModelInvalid = !checkModelValidity(formValidationResults);
   });
 
   const updateControlValidity = (controlKey, isControlValid) => {
