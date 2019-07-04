@@ -10,6 +10,8 @@ import { Action, handleActions } from 'redux-actions';
 import { RepositoryUri, WorkerReservedProgress } from '../../model';
 import {
   deleteRepoFinished,
+  FetchFilePayload,
+  FetchRepoFileStatusSuccess,
   loadStatus,
   loadStatusFailed,
   loadStatusSuccess,
@@ -20,11 +22,14 @@ import {
   RepoStatus,
   RepoState,
 } from '../actions';
+import { StatusReport } from '../../common/repo_file_status';
 
 export interface StatusState {
   status: { [key: string]: RepoStatus };
   loading: boolean;
   error?: Error;
+  currentStatusPath?: FetchFilePayload;
+  repoFileStatus?: StatusReport;
 }
 
 const initialState: StatusState = {
@@ -169,6 +174,12 @@ export const status = handleActions<StatusState, StatusPayload>(
     [String(deleteRepoFinished)]: (state, action: Action<string>) =>
       produce<StatusState>(state, draft => {
         delete draft.status[action.payload!];
+      }),
+    [String(FetchRepoFileStatusSuccess)]: (state: StatusState, action: Action<any>) =>
+      produce<StatusState>(state, (draft: StatusState) => {
+        const { path, statusReport } = action.payload;
+        draft.repoFileStatus = statusReport;
+        draft.currentStatusPath = path;
       }),
   },
   initialState

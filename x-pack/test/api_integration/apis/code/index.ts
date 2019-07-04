@@ -12,5 +12,6 @@ export default function apmApiIntegrationTests({
 }: KibanaFunctionalTestDefaultProviders) {
   describe('Code', () => {
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./repo_status'));
   });
 }

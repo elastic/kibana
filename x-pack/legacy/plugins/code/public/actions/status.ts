@@ -13,6 +13,8 @@ import {
   Repository,
   CloneProgress,
 } from '../../model';
+import { FetchFilePayload } from './file';
+import { StatusReport } from '../../common/repo_file_status';
 
 export enum RepoState {
   CLONING,
@@ -60,3 +62,10 @@ export const pollRepoDeleteStatusStart = createAction<string>('POLL DELETE STATU
 export const pollRepoCloneStatusStop = createAction<RepositoryUri>('POLL CLONE STATUS STOP');
 export const pollRepoIndexStatusStop = createAction<RepositoryUri>('POLL INDEX STATUS STOP');
 export const pollRepoDeleteStatusStop = createAction<RepositoryUri>('POLL DELETE STATUS STOP');
+
+export const FetchRepoFileStatus = createAction<FetchFilePayload>('FETCH REPO FILE STATUS');
+export const FetchRepoFileStatusSuccess = createAction<{
+  path: FetchFilePayload;
+  statusReport: StatusReport;
+}>('FETCH REPO FILE STATUS SUCCESS');
+export const FetchRepoFileStatusFailed = createAction<any>('FETCH REPO FILE STATUS FAILED');
