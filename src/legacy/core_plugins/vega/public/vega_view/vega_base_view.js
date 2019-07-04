@@ -146,8 +146,6 @@ export class VegaBaseView {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
-
-        //todoL
       } else if (!this._enableExternalUrls) {
         throw new Error(i18n.translate('vega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
           defaultMessage: 'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',

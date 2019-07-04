@@ -23,38 +23,41 @@ import { Status } from 'ui/vis/update_status';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-import { VegaVisualization } from './vega_visualization';
+import { createVegaVisualization } from './vega_visualization';
 
 import vegaEditorTemplate from './vega_editor_template.html';
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
 import { visFactory } from '../../visualizations/public';
 
-const requestHandler = createVegaRequestHandler();
+export const createVegaTypeDefinition = (es, serviceSettings) => {
+  const requestHandler = createVegaRequestHandler(es, serviceSettings);
+  const visualization = createVegaVisualization(serviceSettings);
 
-export const VegaVisualizationType = visFactory.createBaseVisualization({
-  name: 'vega',
-  title: 'Vega',
-  description: i18n.translate('vega.type.vegaDescription', {
-    defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
-    description: 'Vega and Vega-Lite are product names and should not be translated',
-  }),
-  icon: 'visVega',
-  visConfig: { defaults: { spec: defaultSpec } },
-  editorConfig: {
-    optionsTemplate: vegaEditorTemplate,
-    enableAutoApply: true,
-    defaultSize: DefaultEditorSize.MEDIUM,
-  },
-  visualization: VegaVisualization,
-  requestHandler,
-  requiresUpdateStatus: [Status.DATA, Status.RESIZE],
-  responseHandler: 'none',
-  options: {
-    showIndexSelection: false,
-    showQueryBar: true,
-    showFilterBar: true,
-  },
-  stage: 'experimental',
-  feedbackMessage: defaultFeedbackMessage,
-});
+  return visFactory.createBaseVisualization({
+    name: 'vega',
+    title: 'Vega',
+    description: i18n.translate('vega.type.vegaDescription', {
+      defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
+      description: 'Vega and Vega-Lite are product names and should not be translated',
+    }),
+    icon: 'visVega',
+    visConfig: { defaults: { spec: defaultSpec } },
+    editorConfig: {
+      optionsTemplate: vegaEditorTemplate,
+      enableAutoApply: true,
+      defaultSize: DefaultEditorSize.MEDIUM,
+    },
+    visualization,
+    requestHandler,
+    requiresUpdateStatus: [Status.DATA, Status.RESIZE],
+    responseHandler: 'none',
+    options: {
+      showIndexSelection: false,
+      showQueryBar: true,
+      showFilterBar: true,
+    },
+    stage: 'experimental',
+    feedbackMessage: defaultFeedbackMessage,
+  });
+};

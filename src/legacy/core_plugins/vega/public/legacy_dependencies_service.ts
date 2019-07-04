@@ -17,28 +17,31 @@
  * under the License.
  */
 
-// @ts-ignore
-import { createVegaFn } from './vega_fn';
-// @ts-ignore
-import { createVegaTypeDefinition } from './vega_type';
+import chrome from 'ui/chrome';
+import { setupVegaLegacyModule } from './vega_legacy_module';
 
-import { VegaSetupPlugin } from './setup';
+export class LegacyDependenciesService {
+  public async setup() {
+    setupVegaLegacyModule();
 
-export class VegaPlugin {
-  public async setup({ data, visualizations, legacy }: VegaSetupPlugin) {
-    const { es, serviceSettings } = await legacy.setup();
+    const $injector = await chrome.dangerouslyGetActiveInjector();
 
-    data.expressions.registerFunction(() => createVegaFn(es, serviceSettings));
-    visualizations.types.VisTypesRegistryProvider.register(() =>
-      createVegaTypeDefinition(es, serviceSettings)
-    );
-  }
+    return {
+      // Client of Elastic Search.
+      es: $injector.get('es'),
 
-  public start() {
-    // nothing to do here yet
+      // Settings for EMSClient.
+      // EMSClient, which currently lives in the tile_map vis,
+      //  will probably end up being exposed from the future vis_type_maps plugin,
+      //  which would register both the tile_map and the region_map vis plugins.
+      serviceSettings: $injector.get('serviceSettings'),
+    };
   }
 
   public stop() {
     // nothing to do here yet
   }
 }
+
+/** @public */
+export type LegacyDependenciesSetup = ReturnType<LegacyDependenciesService['setup']>;

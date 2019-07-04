@@ -25,14 +25,7 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
 
-export async function createVegaRequestHandler() {
-
-  // todo: work in progress.
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const es = $injector.get('es');
-  const serviceSettings = $injector.get('serviceSettings');
-  // ^
-
+export function createVegaRequestHandler(es, serviceSettings) {
   const uiSettings = chrome.getUiSettingsClient();
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);

@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
+import { Legacy } from 'kibana';
 
 const vegaPluginInitializer = (kibana: any) =>
   new kibana.Plugin({
@@ -27,7 +27,7 @@ const vegaPluginInitializer = (kibana: any) =>
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: [resolve(__dirname, 'public/setup')],
+      hacks: [resolve(__dirname, 'public/index')],
       injectDefaultVars: server => ({
         enableExternalUrls: server.config().get('vega.enableExternalUrls'),
       }),

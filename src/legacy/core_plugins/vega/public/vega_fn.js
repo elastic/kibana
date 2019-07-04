@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { createVegaRequestHandler } from './vega_request_handler';
 
-export const kibanaVegaFn = () => ({
+export const createVegaFn = (es, serviceSettings) => ({
   name: 'vega',
   type: 'render',
   context: {
@@ -31,7 +31,7 @@ export const kibanaVegaFn = () => ({
     ],
   },
   help: i18n.translate('vega.function.help', {
-    defaultMessage: 'Vega visualization'
+    defaultMessage: 'Vega visualization',
   }),
   args: {
     spec: {
@@ -40,14 +40,14 @@ export const kibanaVegaFn = () => ({
     },
   },
   async fn(context, args) {
-    const vegaRequestHandler = await createVegaRequestHandler();
+    const vegaRequestHandler = createVegaRequestHandler(es, serviceSettings);
 
     const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       visParams: { spec: args.spec },
-      forceFetch: true
+      forceFetch: true,
     });
 
     return {
@@ -57,9 +57,9 @@ export const kibanaVegaFn = () => ({
         visData: response,
         visType: 'vega',
         visConfig: {
-          spec: args.spec
+          spec: args.spec,
         },
-      }
+      },
     };
-  }
+  },
 });

@@ -17,25 +17,7 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
-import { visualizations, VisualizationsSetup } from '../../visualizations/public';
-import { DataSetup } from '../../data/public';
-import { LegacyDependenciesService } from './legacy_dependencies_service';
+import { VegaPlugin } from './plugin';
+import { plugins } from './setup';
 
-export const plugins: VegaSetupPlugin = {
-  data: {
-    expressions: {
-      registerFunction: (fn: any) => functionsRegistry.register(fn),
-    },
-  },
-  visualizations,
-  legacy: new LegacyDependenciesService(),
-};
-
-/** @public */
-export interface VegaSetupPlugin {
-  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
-  data: DataSetup | any;
-  visualizations: VisualizationsSetup;
-  legacy: LegacyDependenciesService;
-}
+export const plugin = new VegaPlugin().setup(plugins);

@@ -22,6 +22,8 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import 'brace/mode/hjson';
 import 'brace/ext/searchbox';
 
+import { once } from 'lodash';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { wrapInI18nContext } from 'ui/i18n';
 
@@ -32,7 +34,7 @@ import { VegaHelpMenu } from './help_menus/vega_help_menu';
 // @ts-ignore
 import { VegaActionsMenu } from './help_menus/vega_action_menu';
 
-export const setupModule = () => {
+export const setupVegaLegacyModule = once(() => {
   uiModules
     .get('kibana/vega', ['react'])
     .controller('VegaEditorController', ($scope: any) => new VegaEditorController($scope))
@@ -42,4 +44,4 @@ export const setupModule = () => {
     .directive('vegaHelpMenu', (reactDirective: any) =>
       reactDirective(wrapInI18nContext(VegaHelpMenu))
     );
-};
+});

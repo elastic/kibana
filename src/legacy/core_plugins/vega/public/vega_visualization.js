@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { findObjectByTitle } from 'ui/saved_objects';
 
-// Temporary solution
-import chrome from 'ui/chrome';
-
-export class VegaVisualization {
+export const createVegaVisualization = (serviceSettings) => class VegaVisualization {
   constructor(el, vis) {
+    this.savedObjectsClient =  chrome.getSavedObjectsClient();
     this._el = el;
     this._vis = vis;
   }
@@ -65,13 +63,6 @@ export class VegaVisualization {
    * @returns {Promise<void>}
    */
   async render(visData, visParams, status) {
-
-    // todo: work in progress.
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    this.savedObjectsClient = chrome.getSavedObjectsClient();
-    this.serviceSettings = $injector.get('serviceSettings');
-    //
-
     if (!visData && !this._vegaView) {
       toastNotifications.addWarning(i18n.translate('vega.visualization.unableToRenderWithoutDataWarningMessage', {
         defaultMessage: 'Unable to render without data',
@@ -108,7 +99,7 @@ export class VegaVisualization {
       const vegaViewParams = {
         parentEl: this._el,
         vegaParser,
-        serviceSettings: this.serviceSettings,
+        serviceSettings,
         queryfilter: this._vis.API.queryFilter,
         timefilter: this._vis.API.timeFilter,
         findIndex: this.findIndex.bind(this),
@@ -132,4 +123,4 @@ export class VegaVisualization {
   destroy() {
     return this._vegaView && this._vegaView.destroy();
   }
-}
+};
