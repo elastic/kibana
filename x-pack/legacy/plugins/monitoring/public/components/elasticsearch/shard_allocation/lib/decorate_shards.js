@@ -32,11 +32,23 @@ export function decorateShards(shards, nodes) {
         });
       }
     }
-    let retMsg = 'Shard ' + shard.shard + ' ' + shard.state.toLowerCase();
     if (shard.nodeName && shard.state.toLowerCase() !== 'relocating') {
-      retMsg = retMsg + ' on node ' + shard.nodeName;
+      return i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.decorateShards.shardStateOnNodeTextMessage', {
+        defaultMessage: 'Shard {shardName} {shardState} on node {nodeName}',
+        values: {
+          shardName: shard.shard,
+          shardState: shard.state.toLowerCase(),
+          nodeName: shard.nodeName
+        }
+      });
     }
-    return  retMsg;
+    return i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.decorateShards.shardStateTextMessage', {
+      defaultMessage: 'Shard {shardName} {shardState}',
+      values: {
+        shardName: shard.shard,
+        shardState: shard.state.toLowerCase()
+      }
+    });
   }
 
   return shards.map((shard) => {
