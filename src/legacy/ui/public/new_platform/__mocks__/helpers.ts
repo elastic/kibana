@@ -17,14 +17,29 @@
  * under the License.
  */
 
-import { coreMock } from './mocks';
+import { coreMock } from '../../../../../core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 
-export const coreSetupMock = coreMock.createSetup();
-export const coreStartMock = coreMock.createStart();
+export const pluginsMock = {
+  createSetup: () => ({
+    data: dataPluginMock.createSetupContract(),
+  }),
+  createStart: () => ({
+    data: dataPluginMock.createStartContract(),
+  }),
+};
 
-jest.doMock('ui/new_platform', () => {
-  return {
-    npStart: { core: coreStartMock },
-    npSetup: { core: coreSetupMock },
+export const createUiNewPlatformMock = () => {
+  const mock = {
+    npSetup: {
+      core: coreMock.createSetup(),
+      plugins: pluginsMock.createSetup(),
+    },
+    npStart: {
+      core: coreMock.createStart(),
+      plugins: pluginsMock.createStart(),
+    },
   };
-});
+  return mock;
+};
