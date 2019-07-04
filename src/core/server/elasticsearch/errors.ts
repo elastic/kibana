@@ -22,7 +22,9 @@ import { get } from 'lodash';
 
 const code = Symbol('ElasticsearchError');
 
-const CODE_NOT_AUTHORIZED = 'Elasticsearch/notAuthorized';
+enum ErrorCode {
+  NOT_AUTHORIZED = 'Elasticsearch/notAuthorized',
+}
 
 export interface ElasticsearchError extends Boom {
   [code]?: string;
@@ -34,7 +36,7 @@ function isElasticsearchError(error: any): error is ElasticsearchError {
 
 function decorate(
   error: Error,
-  errorCode: string,
+  errorCode: ErrorCode,
   statusCode: number,
   message?: string
 ): ElasticsearchError {
@@ -45,6 +47,7 @@ function decorate(
   const boom = Boom.boomify(error, {
     statusCode,
     message,
+    // keep status and messages if Boom error object already has them
     override: false,
   }) as ElasticsearchError;
 
@@ -54,14 +57,16 @@ function decorate(
 }
 
 /**
- * Helpers for working with errors returned from the Elasticsearch service. Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as `body.error.header[WWW-Authenticate]`
+ * Helpers for working with errors returned from the Elasticsearch service.Since the internal data of
+ * errors are subject to change, consumers of the Elasticsearch service should always use these helpers
+ * to classify errors instead of checking error internals such as `body.error.header[WWW-Authenticate]`
  * @public
  *
  * @example
  * Handle errors
  * ```js
  * try {
- *   await client.callWithRequest(request, '...');
+ *   await client.asScoped(request).callAsCurrentUser(...);
  * } catch (err) {
  *   if (ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
  *     const authHeader = err.output.headers['WWW-Authenticate'];
@@ -70,12 +75,12 @@ function decorate(
  */
 export class ElasticsearchErrorHelpers {
   public static isNotAuthorizedError(error: any): error is ElasticsearchError {
-    return isElasticsearchError(error) && error[code] === CODE_NOT_AUTHORIZED;
+    return isElasticsearchError(error) && error[code] === ErrorCode.NOT_AUTHORIZED;
   }
 
   public static decorateNotAuthorizedError(error: Error, reason?: string) {
-    const decoratedError = decorate(error, CODE_NOT_AUTHORIZED, 401, reason);
-    const wwwAuthHeader: string = get(error, 'body.error.header[WWW-Authenticate]');
+    const decoratedError = decorate(error, ErrorCode.NOT_AUTHORIZED, 401, reason);
+    const wwwAuthHeader = get<string>(error, 'body.error.header[WWW-Authenticate]');
 
     decoratedError.output.headers['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';
