@@ -28,23 +28,40 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  async function getMessages() {
-    try {
-      setIsLoading(true);
-      const messagesResp = await ml.dataFrame.getTransformAuditMessages(transformId);
-      setIsLoading(false);
-      setMessages(messagesResp);
-    } catch (error) {
-      setIsLoading(false);
-      setErrorMessage(
-        i18n.translate('xpack.ml.dfJobsList.jobDetails.messagesPane.errorMessage', {
-          defaultMessage: 'Messages could not be loaded',
-        })
-      );
-    }
-  }
+  const getMessagesFactory = () => {
+    let concurrentLoads = 0;
 
-  useRefreshTransformList({ onRefresh: getMessages });
+    return async function getMessages() {
+      try {
+        concurrentLoads++;
+
+        if (concurrentLoads > 1) {
+          return;
+        }
+
+        setIsLoading(true);
+        const messagesResp = await ml.dataFrame.getTransformAuditMessages(transformId);
+        setIsLoading(false);
+        setMessages(messagesResp);
+
+        concurrentLoads--;
+
+        if (concurrentLoads > 0) {
+          concurrentLoads = 0;
+          getMessages();
+        }
+      } catch (error) {
+        setIsLoading(false);
+        setErrorMessage(
+          i18n.translate('xpack.ml.dfJobsList.jobDetails.messagesPane.errorMessage', {
+            defaultMessage: 'Messages could not be loaded',
+          })
+        );
+      }
+    };
+  };
+
+  useRefreshTransformList({ onRefresh: () => getMessagesFactory() });
 
   const columns = [
     {

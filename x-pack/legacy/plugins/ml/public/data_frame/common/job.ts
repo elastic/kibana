@@ -67,22 +67,22 @@ export const useRefreshTransformList = (
 
     const subscriptions: Subscription[] = [];
 
-    if (typeof callback.onRefresh !== 'undefined') {
+    if (typeof callback.onRefresh === 'function') {
       // initial call to refresh
       callback.onRefresh();
 
       subscriptions.push(
         distinct$
           .pipe(filter(state => state === REFRESH_TRANSFORM_LIST_STATE.REFRESH))
-          .subscribe(() => typeof callback.onRefresh !== 'undefined' && callback.onRefresh())
+          .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
       );
     }
 
-    if (typeof callback.isLoading !== 'undefined') {
+    if (typeof callback.isLoading === 'function') {
       subscriptions.push(
         distinct$.subscribe(
           state =>
-            typeof callback.isLoading !== 'undefined' &&
+            typeof callback.isLoading === 'function' &&
             callback.isLoading(state === REFRESH_TRANSFORM_LIST_STATE.LOADING)
         )
       );
@@ -95,7 +95,10 @@ export const useRefreshTransformList = (
 
   return {
     refresh: () => {
+      // A refresh is followed immediately by setting the state to loading
+      // to trigger data fetching and loading indicators in one go.
       refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.LOADING);
     },
   };
 };

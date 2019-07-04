@@ -76,41 +76,57 @@ export const PreviewPane: FC<Props> = ({ transformConfig }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  async function getPreview() {
-    try {
-      const { previewRequest, groupByArr } = getDataFromTransform(transformConfig);
-      setIsLoading(true);
-      const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
-      setIsLoading(false);
+  const getPreviewFactory = () => {
+    let concurrentLoads = 0;
 
-      if (resp.preview.length > 0) {
-        const columnKeys = getFlattenedFields(resp.preview[0]);
-        columnKeys.sort(sortColumns(groupByArr));
-        const tableColumns = columnKeys.map(k => {
-          return {
-            field: k,
-            name: k,
-            sortable: true,
-            truncateText: true,
-          };
-        });
+    return async function getPreview() {
+      try {
+        concurrentLoads++;
 
-        setDataFramePreviewData(resp.preview);
-        setColumns(tableColumns);
-        setSortField(sortField);
-        setSortDirection(sortDirection);
+        if (concurrentLoads > 1) {
+          return;
+        }
+
+        const { previewRequest, groupByArr } = getDataFromTransform(transformConfig);
+        setIsLoading(true);
+        const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
+        setIsLoading(false);
+
+        if (resp.preview.length > 0) {
+          const columnKeys = getFlattenedFields(resp.preview[0]);
+          columnKeys.sort(sortColumns(groupByArr));
+          const tableColumns = columnKeys.map(k => {
+            return {
+              field: k,
+              name: k,
+              sortable: true,
+              truncateText: true,
+            };
+          });
+
+          setDataFramePreviewData(resp.preview);
+          setColumns(tableColumns);
+          setSortField(sortField);
+          setSortDirection(sortDirection);
+        }
+        concurrentLoads--;
+
+        if (concurrentLoads > 0) {
+          concurrentLoads = 0;
+          getPreview();
+        }
+      } catch (error) {
+        setIsLoading(false);
+        setErrorMessage(
+          i18n.translate('xpack.ml.dfJobsList.jobDetails.previewPane.errorMessage', {
+            defaultMessage: 'Preview could not be loaded',
+          })
+        );
       }
-    } catch (error) {
-      setIsLoading(false);
-      setErrorMessage(
-        i18n.translate('xpack.ml.dfJobsList.jobDetails.previewPane.errorMessage', {
-          defaultMessage: 'Preview could not be loaded',
-        })
-      );
-    }
-  }
+    };
+  };
 
-  useRefreshTransformList({ onRefresh: getPreview });
+  useRefreshTransformList({ onRefresh: getPreviewFactory() });
 
   const pagination = {
     initialPageIndex: pageIndex,
