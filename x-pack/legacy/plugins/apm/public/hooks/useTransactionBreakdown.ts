@@ -17,26 +17,23 @@ export function useTransactionBreakdown() {
     uiFilters
   } = useUrlParams();
 
-  const { data, error, status } = useFetcher(
-    async () => {
-      if (serviceName && start && end) {
-        return callApi<TransactionBreakdownAPIResponse>({
-          pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
-          query: {
-            start,
-            end,
-            transactionName,
-            uiFiltersES: await getUiFiltersES(uiFilters)
-          }
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+  const { data, error, status } = useFetcher(async () => {
+    if (serviceName && start && end) {
+      return callApi<TransactionBreakdownAPIResponse>({
+        pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
+        query: {
+          start,
+          end,
+          transactionName,
+          uiFiltersES: await getUiFiltersES(uiFilters)
+        }
+      });
+    }
+  }, [serviceName, start, end, uiFilters]);
 
   const receivedDataDuringLifetime = useRef(false);
 
-  if (data && data.length) {
+  if (data && data.kpis.length) {
     receivedDataDuringLifetime.current = true;
   }
 

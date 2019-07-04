@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -70,6 +70,12 @@ export const getColumns = (
       truncateText: true,
     },
     {
+      field: DataFrameJobListColumn.description,
+      name: i18n.translate('xpack.ml.dataframe.description', { defaultMessage: 'Description' }),
+      sortable: true,
+      truncateText: true,
+    },
+    {
       field: DataFrameJobListColumn.configSourceIndex,
       name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
@@ -85,16 +91,30 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.status', { defaultMessage: 'Status' }),
-      sortable: true,
+      sortable: (item: DataFrameJobListRow) => item.state.task_state,
       truncateText: true,
       render(item: DataFrameJobListRow) {
         const color = item.state.task_state === 'started' ? 'primary' : 'hollow';
         return <EuiBadge color={color}>{item.state.task_state}</EuiBadge>;
       },
+      width: '100px',
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
+      sortable: (item: DataFrameJobListRow) =>
+        typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch',
+      truncateText: true,
+      render(item: DataFrameJobListRow) {
+        const mode = typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch';
+        const color = 'hollow';
+        return <EuiBadge color={color}>{mode}</EuiBadge>;
+      },
+      width: '100px',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
-      sortable: true,
+      sortable: (item: DataFrameJobListRow) =>
+        item.state.progress !== undefined ? item.state.progress.percent_complete : 0,
       truncateText: true,
       render(item: DataFrameJobListRow) {
         let progress = 0;
@@ -103,23 +123,44 @@ export const getColumns = (
           progress = Math.round(item.state.progress.percent_complete);
         }
 
+        const isBatchTransform = typeof item.config.sync === 'undefined';
+
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiProgress value={progress} max={100} color="primary" size="m">
-                {progress}%
-              </EuiProgress>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">{`${progress}%`}</EuiText>
-            </EuiFlexItem>
+            {isBatchTransform && (
+              <Fragment>
+                <EuiFlexItem style={{ width: '40px' }} grow={false}>
+                  <EuiProgress value={progress} max={100} color="primary" size="m">
+                    {progress}%
+                  </EuiProgress>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ width: '35px' }} grow={false}>
+                  <EuiText size="xs">{`${progress}%`}</EuiText>
+                </EuiFlexItem>
+              </Fragment>
+            )}
+            {!isBatchTransform && (
+              <Fragment>
+                <EuiFlexItem style={{ width: '40px' }} grow={false}>
+                  {item.state.task_state === 'started' && <EuiProgress color="primary" size="m" />}
+                  {item.state.task_state !== 'started' && (
+                    <EuiProgress value={0} max={100} color="primary" size="m" />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem style={{ width: '35px' }} grow={false}>
+                  &nbsp;
+                </EuiFlexItem>
+              </Fragment>
+            )}
           </EuiFlexGroup>
         );
       },
+      width: '100px',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.tableActionLabel', { defaultMessage: 'Actions' }),
       actions,
+      width: '200px',
     },
   ];
 };

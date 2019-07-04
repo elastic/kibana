@@ -45,6 +45,7 @@ export interface DataFrameJobStats {
 
 export interface DataFrameJobListRow {
   id: JobId;
+  checkpointing: object;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
   config: DataFrameTransformWithId;
@@ -54,6 +55,7 @@ export interface DataFrameJobListRow {
 export enum DataFrameJobListColumn {
   configDestIndex = 'config.dest.index',
   configSourceIndex = 'config.source.index',
+  description = 'config.description',
   id = 'id',
 }
 

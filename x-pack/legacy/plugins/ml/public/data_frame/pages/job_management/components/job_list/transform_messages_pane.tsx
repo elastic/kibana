@@ -15,18 +15,19 @@ import { ml } from '../../../../../services/ml_api_service';
 // @ts-ignore
 import { JobIcon } from '../../../../../components/job_message_icon';
 import { TransformMessage } from '../../../../../../common/types/audit_message';
+import { useRefreshTransformList } from '../../../../common';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface Props {
   transformId: string;
-  lastUpdate: number;
 }
 
-export const TransformMessagesPane: React.SFC<Props> = ({ transformId, lastUpdate }) => {
+export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
   const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const { isRefresh } = useRefreshTransformList();
 
   async function getMessages() {
     try {
@@ -43,12 +44,18 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId, lastUpdat
     }
   }
 
-  useEffect(
-    () => {
+  // Initial load
+  useEffect(() => {
+    getMessages();
+    setIsLoading(true);
+  }, []);
+  // Check for isRefresh on every render. Avoiding setIsLoading(true) because
+  // it causes some weird table flickering.
+  useEffect(() => {
+    if (isRefresh) {
       getMessages();
-    },
-    [lastUpdate]
-  );
+    }
+  });
 
   const columns = [
     {
