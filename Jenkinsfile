@@ -38,6 +38,7 @@ pipeline {
           script {
             dumpEnv()
             dumpWorkspaceSize()
+            createWorkspaceCache()
             tarWorkspace()
           }
           step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
@@ -49,6 +50,9 @@ pipeline {
       // options { skipDefaultCheckout() }
       steps {
         // deleteDir()
+        script {
+          createWorkspaceCache()
+        }
         step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         // sh './test/scripts/jenkins_unit.sh'
       }
@@ -76,9 +80,13 @@ pipeline {
     }
   }
 }
-def tarWorkspace(){
+def createWorkspaceCache(){
   script {
     sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
+  }
+}
+def tarWorkspace(){
+  script {
     sh "tar -czf ${WORKSPACE_CACHE_NAME} ${BASE_DIR}"
   }
 }
