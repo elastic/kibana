@@ -58,6 +58,7 @@ export class TopNavMenuItem extends Component<Props, State> {
         size="xs"
         isDisabled={this.isDisabled()}
         onClick={this.handleClick.bind(this)}
+        data-test-subj={menuData.testId}
       >
         {_.capitalize(menuData.label || menuData.key)}
       </EuiButtonEmpty>
