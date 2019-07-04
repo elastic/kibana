@@ -132,9 +132,11 @@ export const routes: ServerRoute[] = [
 ];
 
 function getAsset(key: string) {
-  const value: Buffer = cacheGet(key);
-  const json = value.toString('utf8');
-  return JSON.parse(json);
+  const value = cacheGet(key);
+  if (value !== undefined) {
+    const json = value.toString('utf8');
+    return JSON.parse(json);
+  }
 }
 
 async function getDashboardObjects(pkgkey: string): Promise<SavedObject[]> {
