@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
 import { isNumber } from 'lodash';
-import { TimeKey } from '../../../../common/time';
-import { getLogEntryIndexBeforeTime, getLogEntryIndexAtTime } from '../../../utils/log_entry';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-export const useNextAndPrevious = (visibleMidpoint, logEntryHighlights, highlightTerms) => {
+import { TimeKey } from '../../../../common/time';
+import { getLogEntryIndexAtTime } from '../../../utils/log_entry';
+import { LogEntryHighlights } from './data_fetching';
+
+export const useNextAndPrevious = (
+  visibleMidpoint: TimeKey | null,
+  logEntryHighlights: LogEntryHighlights | undefined,
+  highlightTerms: string[]
+) => {
   const [shouldJumpToHighlight, setShouldJumpToHighlight] = useState<boolean>(false);
   const [currentTimeKey, setCurrentTimeKey] = useState<TimeKey | null>(null);
 
@@ -54,6 +60,8 @@ export const useNextAndPrevious = (visibleMidpoint, logEntryHighlights, highligh
   const hasNextHighlight = useMemo(
     () => {
       return (
+        !!logEntryHighlights &&
+        logEntryHighlights.length > 0 &&
         isNumber(indexOfCurrentTimeKey) &&
         indexOfCurrentTimeKey !== logEntryHighlights[0].entries.length - 1
       );
@@ -63,7 +71,7 @@ export const useNextAndPrevious = (visibleMidpoint, logEntryHighlights, highligh
 
   const goToPreviousHighlight = useCallback(
     () => {
-      if (isNumber(indexOfCurrentTimeKey)) {
+      if (logEntryHighlights && logEntryHighlights.length > 0 && isNumber(indexOfCurrentTimeKey)) {
         const previousIndex = indexOfCurrentTimeKey - 1;
         const entryTimeKey = logEntryHighlights[0].entries[previousIndex].key;
         setCurrentTimeKey(entryTimeKey);
@@ -74,7 +82,7 @@ export const useNextAndPrevious = (visibleMidpoint, logEntryHighlights, highligh
 
   const goToNextHighlight = useCallback(
     () => {
-      if (isNumber(indexOfCurrentTimeKey)) {
+      if (logEntryHighlights && logEntryHighlights.length > 0 && isNumber(indexOfCurrentTimeKey)) {
         const nextIndex = indexOfCurrentTimeKey + 1;
         const entryTimeKey = logEntryHighlights[0].entries[nextIndex].key;
         setCurrentTimeKey(entryTimeKey);

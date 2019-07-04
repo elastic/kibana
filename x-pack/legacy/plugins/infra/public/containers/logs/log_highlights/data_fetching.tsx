@@ -5,21 +5,23 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
+
+import { getNextTimeKey, getPreviousTimeKey, TimeKey } from '../../../../common/time';
 import { LogEntryHighlightsQuery } from '../../../graphql/types';
+import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
+import { LogEntryHighlightsMap } from '../../../utils/log_entry';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { logEntryHighlightsQuery } from './log_highlights.gql_query';
-import { getPreviousTimeKey, getNextTimeKey } from '../../../../common/time';
 
-type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
+export type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
 
 export const useHighlightsFetcher = (
-  sourceId,
-  sourceVersion,
-  startKey,
-  endKey,
-  filterQuery,
-  highlightTerms
+  sourceId: string,
+  sourceVersion: string | undefined,
+  startKey: TimeKey | null,
+  endKey: TimeKey | null,
+  filterQuery: string | null,
+  highlightTerms: string[]
 ) => {
   const apolloClient = useApolloClient();
   const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights | undefined>(

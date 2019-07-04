@@ -20,7 +20,7 @@ export type LogEntryMessageSegment = InfraLogEntryFields.Message;
 export type LogEntryConstantMessageSegment = InfraLogEntryFields.InfraLogMessageConstantSegmentInlineFragment;
 export type LogEntryFieldMessageSegment = InfraLogEntryFields.InfraLogMessageFieldSegmentInlineFragment;
 
-export const getLogEntryKey = (entry: LogEntry) => entry.key;
+export const getLogEntryKey = (entry: { key: TimeKey }) => entry.key;
 
 const logEntryTimeBisector = bisector(compareToTimeKey(getLogEntryKey));
 

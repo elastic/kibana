@@ -6,8 +6,9 @@
 
 import createContainer from 'constate-latest';
 import { useState } from 'react';
-import { useNextAndPrevious } from './next_and_previous';
+
 import { useHighlightsFetcher } from './data_fetching';
+import { useNextAndPrevious } from './next_and_previous';
 import { useReduxBridgeSetters } from './redux_bridge_setters';
 
 export const useLogHighlightsState = ({

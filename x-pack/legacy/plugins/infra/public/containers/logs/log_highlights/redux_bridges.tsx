@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext } from 'react';
 
 import { TimeKey } from '../../../../common/time';
 import { withLogFilter } from '../with_log_filter';
@@ -30,7 +30,13 @@ export const LogHighlightsStreamItemsBridge = withStreamItems(
 );
 
 export const LogHighlightsPositionBridge = withLogPosition(
-  ({ visibleMidpoint, jumpToTargetPosition }: { visibleMidpoint: TimeKey | null }) => {
+  ({
+    visibleMidpoint,
+    jumpToTargetPosition,
+  }: {
+    visibleMidpoint: TimeKey | null;
+    jumpToTargetPosition: (target: TimeKey) => void;
+  }) => {
     const { setVisibleMidpoint, currentTimeKey } = useContext(LogHighlightsState.Context);
     useEffect(
       () => {
@@ -41,7 +47,9 @@ export const LogHighlightsPositionBridge = withLogPosition(
 
     useEffect(
       () => {
-        jumpToTargetPosition(currentTimeKey);
+        if (currentTimeKey) {
+          jumpToTargetPosition(currentTimeKey);
+        }
       },
       [currentTimeKey]
     );
