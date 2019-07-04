@@ -11,6 +11,7 @@ import { Coordinate } from '../../../../../typings/timeseries';
 import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
 import { asPercent } from '../../../../utils/formatters';
 import { unit } from '../../../../style/variables';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 interface Props {
   timeseries: Array<{
@@ -30,19 +31,26 @@ const TransactionBreakdownGraph: React.FC<Props> = props => {
       return {
         title: timeseriesConfig.name,
         color: timeseriesConfig.color,
-        data: timeseriesConfig.values,
+        data: timeseriesConfig.values.map(value => {
+          return 'y' in value && isValidCoordinateValue(value.y)
+            ? value
+            : {
+                ...value,
+                y: undefined
+              };
+        }),
         type: 'area',
         hideLegend: true
       };
     }, {});
   }, [timeseries]);
 
-  const tickFormatY = useCallback((y: number | null) => {
+  const tickFormatY = useCallback((y: number | null | undefined) => {
     return numeral(y || 0).format('0 %');
   }, []);
 
   const formatTooltipValue = useCallback((coordinate: Coordinate) => {
-    return coordinate.y !== null && coordinate.y !== undefined
+    return isValidCoordinateValue(coordinate.y)
       ? asPercent(coordinate.y, 1)
       : NOT_AVAILABLE_LABEL;
   }, []);

@@ -168,18 +168,22 @@ export async function getTransactionBreakdown({
       const time = bucket.key;
 
       return kpiNames.reduce((p, kpiName) => {
-        const value = formattedValues.find(val => val.name === kpiName) || {
+        const { name, percentage } = formattedValues.find(
+          val => val.name === kpiName
+        ) || {
           name: kpiName,
           percentage: null
         };
 
-        const { name, percentage } = value;
         if (!p[name]) {
           p[name] = [];
         }
         return {
           ...p,
-          [value.name]: p[name].concat({ x: time, y: percentage })
+          [name]: p[name].concat({
+            x: time,
+            y: percentage
+          })
         };
       }, prev);
     },

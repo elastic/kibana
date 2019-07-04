@@ -21,8 +21,13 @@ import { rgba } from 'polished';
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';
 import { i18n } from '@kbn/i18n';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+
+// undefined values are converted by react-vis into NaN when stacking
+const getNull = d => isValidCoordinateValue(d.y) && !isNaN(d.y);
 
 const X_TICK_TOTAL = 7;
+
 class StaticPlot extends PureComponent {
   getVisSeries(series, plotValues) {
     return series
@@ -36,7 +41,7 @@ class StaticPlot extends PureComponent {
       case 'line':
         return (
           <LineSeries
-            getNull={d => d.y !== null}
+            getNull={getNull}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}
@@ -48,7 +53,7 @@ class StaticPlot extends PureComponent {
       case 'area':
         return (
           <AreaSeries
-            getNull={d => d.y !== null}
+            getNull={getNull}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}
@@ -70,7 +75,7 @@ class StaticPlot extends PureComponent {
 
         return (
           <VerticalRectSeries
-            getNull={d => d.y !== null}
+            getNull={getNull}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}
@@ -83,7 +88,7 @@ class StaticPlot extends PureComponent {
       case 'linemark':
         return (
           <LineMarkSeries
-            getNull={d => d.y !== null}
+            getNull={getNull}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}

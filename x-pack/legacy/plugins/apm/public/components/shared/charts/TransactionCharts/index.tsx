@@ -25,6 +25,7 @@ import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -53,7 +54,7 @@ const msTimeUnitLabel = i18n.translate(
 );
 
 export class TransactionCharts extends Component<TransactionChartProps> {
-  public getResponseTimeTickFormatter = (t: number | null) => {
+  public getResponseTimeTickFormatter = (t: number | null | undefined) => {
     return this.props.charts.noHits ? `- ${msTimeUnitLabel}` : asMillis(t);
   };
 
@@ -63,10 +64,10 @@ export class TransactionCharts extends Component<TransactionChartProps> {
       : asMillis(p.y);
   };
 
-  public getTPMFormatter = (t: number | null) => {
+  public getTPMFormatter = (t: number | null | undefined) => {
     const { urlParams, charts } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return charts.noHits || t === null
+    return charts.noHits || !isValidCoordinateValue(t)
       ? `- ${unit}`
       : `${asInteger(t)} ${unit}`;
   };

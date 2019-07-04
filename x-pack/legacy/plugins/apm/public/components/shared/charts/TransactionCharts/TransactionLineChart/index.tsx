@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import { flatten } from 'lodash';
 import d3 from 'd3';
+import { isValidCoordinateValue } from '../../../../../utils/isValidCoordinateValue';
 import {
   Coordinate,
   RectCoordinate
@@ -28,7 +29,7 @@ interface Props {
   }>;
   stacked?: boolean;
   truncateLegends?: boolean;
-  tickFormatY: (y: number | null) => React.ReactNode;
+  tickFormatY: (y: number | null | undefined) => React.ReactNode;
   formatTooltipValue: (c: Coordinate) => React.ReactNode;
   yMax?: string | number;
   height?: number;
@@ -52,7 +53,9 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
 
   const noHits = series.every(
     serie =>
-      serie.data.filter(value => 'y' in value && value.y !== null).length === 0
+      serie.data.filter(
+        value => 'y' in value && isValidCoordinateValue(value.y)
+      ).length === 0
   );
   const { time, setTime } = useChartsTime();
 

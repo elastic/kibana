@@ -17,6 +17,7 @@ import {
 } from '../../../utils/formatters';
 import { Coordinate } from '../../../../typings/timeseries';
 import { getEmptySeries } from '../../shared/charts/CustomPlot/getEmptySeries';
+import { isValidCoordinateValue } from '../../../utils/isValidCoordinateValue';
 
 interface Props {
   start: number | string | undefined;
@@ -64,10 +65,11 @@ function getYTickFormatter(chart: GenericMetricsChart) {
       return getFixedByteFormatter(max);
     }
     case 'percent': {
-      return (y: number | null) => asPercent(y || 0, 1);
+      return (y: number | null | undefined) => asPercent(y || 0, 1);
     }
     default: {
-      return (y: number | null) => (y === null ? y : asDecimal(y));
+      return (y: number | null | undefined) =>
+        isValidCoordinateValue(y) ? asDecimal(y) : y;
     }
   }
 }
@@ -81,7 +83,8 @@ function getTooltipFormatter({ yUnit }: GenericMetricsChart) {
       return (c: Coordinate) => asPercent(c.y || 0, 1);
     }
     default: {
-      return (c: Coordinate) => (c.y === null ? c.y : asDecimal(c.y));
+      return (c: Coordinate) =>
+        isValidCoordinateValue(c.y) ? asDecimal(c.y) : c.y;
     }
   }
 }
