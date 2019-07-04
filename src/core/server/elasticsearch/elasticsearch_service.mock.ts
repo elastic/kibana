@@ -19,8 +19,20 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
+import { ScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch_service';
+
+const createScopedClusterClientMock = (): jest.Mocked<PublicMethodsOf<ScopedClusterClient>> => ({
+  callAsInternalUser: jest.fn(),
+  callAsCurrentUser: jest.fn(),
+});
+
+const createClusterClientMock = (): jest.Mocked<PublicMethodsOf<ClusterClient>> => ({
+  callAsInternalUser: jest.fn(),
+  asScoped: jest.fn().mockImplementation(createScopedClusterClientMock),
+  close: jest.fn(),
+});
 
 const createSetupContractMock = () => {
   const setupContract: ElasticsearchServiceSetup = {
@@ -28,9 +40,9 @@ const createSetupContractMock = () => {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
 
-    createClient: jest.fn(),
-    adminClient$: new BehaviorSubject({} as ClusterClient),
-    dataClient$: new BehaviorSubject({} as ClusterClient),
+    createClient: jest.fn().mockImplementation(createClusterClientMock),
+    adminClient$: new BehaviorSubject((createClusterClientMock() as unknown) as ClusterClient),
+    dataClient$: new BehaviorSubject((createClusterClientMock() as unknown) as ClusterClient),
   };
   return setupContract;
 };
@@ -50,4 +62,6 @@ const createMock = () => {
 export const elasticsearchServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createClusterClient: createClusterClientMock,
+  createScopedClusterClient: createScopedClusterClientMock,
 };
