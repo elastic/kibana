@@ -23,20 +23,22 @@ import { RestrictedAction } from '../../lib/test_samples/actions/restricted_acti
 import { EmptyEmbeddable } from '../../lib/test_samples/embeddables/empty_embeddable';
 import { ActionContext, CONTEXT_MENU_TRIGGER } from '../../lib';
 import { EmbeddableSetupApi } from '../../setup';
-import { createSetupApi } from '..';
+import { createApi } from '..';
 import { of } from '../helpers';
 import { EmbeddablePublicPlugin } from '../../plugin';
+import { EmbeddableStartApi } from '../../start';
 
-let api: EmbeddableSetupApi;
+let setup: EmbeddableSetupApi;
+let start: EmbeddableStartApi;
 let plugin: EmbeddablePublicPlugin;
 let action: SayHelloAction;
 
 const reset = () => {
-  ({ api, plugin } = createSetupApi());
+  ({ setup, start, plugin } = createApi());
   action = new SayHelloAction(() => {});
 
-  api.registerAction(action);
-  api.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+  setup.registerAction(action);
+  setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);
 };
 
 beforeEach(reset);
@@ -45,7 +47,7 @@ test('can register and get actions', async () => {
   const helloWorldAction = new HelloWorldAction();
   const length = (plugin as any).actions.size;
 
-  api.registerAction(helloWorldAction);
+  setup.registerAction(helloWorldAction);
 
   expect((plugin as any).actions.size - length).toBe(1);
   expect((plugin as any).actions.get(action.id)).toBe(action);
@@ -56,17 +58,17 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
   const embeddable = new EmptyEmbeddable({ id: '123' });
   const helloWorldAction = new HelloWorldAction();
 
-  api.registerAction(helloWorldAction);
+  setup.registerAction(helloWorldAction);
 
   const testTrigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
     actionIds: [],
   };
-  api.registerTrigger(testTrigger);
-  api.attachAction('MY-TRIGGER', helloWorldAction.id);
+  setup.registerTrigger(testTrigger);
+  setup.attachAction('MY-TRIGGER', helloWorldAction.id);
 
-  const actions = await api.getTriggerCompatibleActions('MY-TRIGGER', {
+  const actions = await start.getTriggerCompatibleActions('MY-TRIGGER', {
     embeddable,
   });
 
@@ -79,7 +81,7 @@ test('filters out actions not applicable based on the context', async () => {
     return context.embeddable.id === 'accept';
   });
 
-  api.registerAction(action);
+  setup.registerAction(action);
 
   const acceptEmbeddable = new EmptyEmbeddable({ id: 'accept' });
   const rejectEmbeddable = new EmptyEmbeddable({ id: 'reject' });
@@ -90,15 +92,15 @@ test('filters out actions not applicable based on the context', async () => {
     actionIds: [action.id],
   };
 
-  api.registerTrigger(testTrigger);
+  setup.registerTrigger(testTrigger);
 
-  let actions = await api.getTriggerCompatibleActions(testTrigger.id, {
+  let actions = await start.getTriggerCompatibleActions(testTrigger.id, {
     embeddable: acceptEmbeddable,
   });
 
   expect(actions.length).toBe(1);
 
-  actions = await api.getTriggerCompatibleActions(testTrigger.id, {
+  actions = await start.getTriggerCompatibleActions(testTrigger.id, {
     embeddable: rejectEmbeddable,
   });
 
@@ -107,7 +109,7 @@ test('filters out actions not applicable based on the context', async () => {
 
 test(`throws an error with an invalid trigger ID`, async () => {
   const [, error] = await of(
-    api.getTriggerCompatibleActions('I do not exist', {
+    start.getTriggerCompatibleActions('I do not exist', {
       embeddable: new EmptyEmbeddable({ id: 'empty' }),
     })
   );
@@ -124,9 +126,9 @@ test(`with a trigger mapping that maps to an non-existing action returns empty l
     title: '123',
     actionIds: ['I do not exist'],
   };
-  api.registerTrigger(testTrigger);
+  setup.registerTrigger(testTrigger);
 
-  const actions = await api.getTriggerCompatibleActions(testTrigger.id, {
+  const actions = await start.getTriggerCompatibleActions(testTrigger.id, {
     embeddable: new EmptyEmbeddable({ id: 'empty' }),
   });
   

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { EmbeddableSetupApiPure } from './types';
+import { EmbeddableStartApiPure } from './types';
 
-export const getTrigger: EmbeddableSetupApiPure['getTrigger'] = ({triggers}) => id => {
+export const getTrigger: EmbeddableStartApiPure['getTrigger'] = ({triggers}) => id => {
   const trigger = triggers.get(id);
 
   if (!trigger) {

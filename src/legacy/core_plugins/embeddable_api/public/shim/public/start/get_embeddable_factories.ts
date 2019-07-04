@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { EmbeddableSetupApiPure } from './types';
+import { EmbeddableStartApiPure } from './types';
 
-export const getEmbeddableFactories: EmbeddableSetupApiPure['getEmbeddableFactories'] = ({embeddableFactories}) => () => {
+export const getEmbeddableFactories: EmbeddableStartApiPure['getEmbeddableFactories'] = ({embeddableFactories}) => () => {
   return embeddableFactories.values();
 };

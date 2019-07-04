@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { createSetupApi } from '..';
+import { createApi } from '..';
 import { of } from '../helpers';
 import { ActionContext, Action, openContextMenu } from '../../lib';
 import { EmbeddableSetupApi } from '../../setup';
-import {
-  SEND_MESSAGE_ACTION,
-  CONTACT_USER_TRIGGER,
-  ContactCardEmbeddable,
-} from '../../lib/test_samples';
+import { CONTACT_USER_TRIGGER, ContactCardEmbeddable } from '../../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+import { SEND_MESSAGE_ACTION } from '../../lib/test_samples/actions/send_message_action';
+import { EmbeddableStartApi } from '../../start';
 
 jest.mock('../../lib/context_menu_actions');
 
@@ -54,11 +52,12 @@ class TestAction extends Action {
   }
 }
 
-let api: EmbeddableSetupApi;
+let setup: EmbeddableSetupApi;
+let start: EmbeddableStartApi;
 const reset = () => {
-  ({ api } = createSetupApi());
+  ({ setup, start } = createApi());
 
-  api.registerTrigger({
+  setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
     actionIds: [SEND_MESSAGE_ACTION],
   });
@@ -75,14 +74,14 @@ test('executes a single action mapped to a trigger', async () => {
     actionIds: ['test1'],
   };
   const action = new TestAction('test1', () => true);
-  api.registerTrigger(trigger);
-  api.registerAction(action);
+  setup.registerTrigger(trigger);
+  setup.registerAction(action);
 
   const context = {
     embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
     triggerContext: {},
   };
-  await api.executeTriggerActions('MY-TRIGGER', context);
+  await start.executeTriggerActions('MY-TRIGGER', context);
 
   expect(executeFn).toBeCalledTimes(1);
   expect(executeFn).toBeCalledWith(context);
@@ -94,13 +93,13 @@ test('throws an error if there are no compatible actions to execute', async () =
     title: 'My trigger',
     actionIds: ['testaction'],
   };
-  api.registerTrigger(trigger);
+  setup.registerTrigger(trigger);
 
   const context = {
     embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
     triggerContext: {},
   };
-  const [, error] = await of(api.executeTriggerActions('MY-TRIGGER', context));
+  const [, error] = await of(start.executeTriggerActions('MY-TRIGGER', context));
 
   expect(error).toBeInstanceOf(Error);
   expect(error.message).toMatchInlineSnapshot(
@@ -116,14 +115,14 @@ test('does not execute an incompatible action', async () => {
   };
   const action = new TestAction('test1', ({ embeddable }) => embeddable.id === 'executeme');
   const embeddable = new ContactCardEmbeddable({ id: 'executeme', firstName: 'Stacey', lastName: 'G' });
-  api.registerTrigger(trigger);
-  api.registerAction(action);
+  setup.registerTrigger(trigger);
+  setup.registerAction(action);
 
   const context = {
     embeddable,
     triggerContext: {},
   };
-  await api.executeTriggerActions('MY-TRIGGER', context);
+  await start.executeTriggerActions('MY-TRIGGER', context);
 
   expect(executeFn).toBeCalledTimes(1);
 });
@@ -137,9 +136,9 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const action1 = new TestAction('test1', () => true);
   const action2 = new TestAction('test2', () => true);
   const embeddable = new ContactCardEmbeddable({ id: 'executeme', firstName: 'Stacey', lastName: 'G' });
-  api.registerTrigger(trigger);
-  api.registerAction(action1);
-  api.registerAction(action2);
+  setup.registerTrigger(trigger);
+  setup.registerAction(action1);
+  setup.registerAction(action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -147,7 +146,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
     embeddable,
     triggerContext: {},
   };
-  await api.executeTriggerActions('MY-TRIGGER', context);
+  await start.executeTriggerActions('MY-TRIGGER', context);
 
   expect(executeFn).toBeCalledTimes(0);
   expect(openContextMenu).toHaveBeenCalledTimes(1);

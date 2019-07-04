@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { EmbeddableSetupApiPure } from './types';
+import { EmbeddableStartApiPure } from './types';
 import { Action } from '../lib';
 
-export const getTriggerActions: EmbeddableSetupApiPure['getTriggerActions'] = ({api, actions}) => id => {
+export const getTriggerActions: EmbeddableStartApiPure['getTriggerActions'] = ({api, actions}) => id => {
   const trigger = api().getTrigger(id);
   return trigger.actionIds.map(actionId => actions.get(actionId)).filter(Boolean) as Action[];
 };

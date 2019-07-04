@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createSetupApi } from '..';
+import { createApi } from '..';
 import { Action } from '../../lib';
 
 const action1 = {
@@ -32,28 +32,28 @@ const action2 = {
 } as any as Action;
 
 test('returns actions set on trigger', () => {
-  const { api } = createSetupApi();
-  api.registerAction(action1);
-  api.registerAction(action2);
-  api.registerTrigger({
+  const { setup, start } = createApi();
+  setup.registerAction(action1);
+  setup.registerAction(action2);
+  setup.registerTrigger({
     actionIds: [],
     description: 'foo',
     id: 'trigger',
     title: 'baz',
   });
 
-  const list0 = api.getTriggerActions('trigger');
+  const list0 = start.getTriggerActions('trigger');
 
   expect(list0).toHaveLength(0);
 
-  api.attachAction('trigger', 'action1');
-  const list1 = api.getTriggerActions('trigger');
+  setup.attachAction('trigger', 'action1');
+  const list1 = start.getTriggerActions('trigger');
   
   expect(list1).toHaveLength(1);
   expect(list1).toEqual([action1]);
 
-  api.attachAction('trigger', 'action2');
-  const list2 = api.getTriggerActions('trigger');
+  setup.attachAction('trigger', 'action2');
+  const list2 = start.getTriggerActions('trigger');
   
   expect(list2).toHaveLength(2);
   expect(!!list2.find(({id}: any) => id === 'action1')).toBe(true);

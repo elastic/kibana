@@ -18,15 +18,18 @@
  */
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { createSetupApi } from '..';
+import { createApi } from '..';
 import { EmbeddableSetupApi } from '../../setup';
-import { FILTERABLE_CONTAINER, FILTERABLE_EMBEDDABLE, FilterableEmbeddableFactory, FilterableContainerFactory } from '../../lib/test_samples';
+import { FILTERABLE_CONTAINER } from '../../lib/test_samples/embeddables/filterable_container';
+import { FILTERABLE_EMBEDDABLE } from '../../lib/test_samples/embeddables/filterable_embeddable';
+import { FilterableContainerFactory } from '../../lib/test_samples/embeddables/filterable_container_factory';
+import { FilterableEmbeddableFactory } from '../../lib/test_samples/embeddables/filterable_embeddable_factory';
 
-let api: EmbeddableSetupApi;
+let setup: EmbeddableSetupApi;
 const reset = () => {
-  ({ api } = createSetupApi());
-  api.registerEmbeddableFactory(FILTERABLE_CONTAINER, new FilterableContainerFactory());
-  api.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+  ({ setup } = createApi());
+  setup.registerEmbeddableFactory(FILTERABLE_CONTAINER, new FilterableContainerFactory());
+  setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 };
 beforeEach(reset);
 

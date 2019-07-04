@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EmbeddableSetupApiPure } from './types';
+import { EmbeddableStartApiPure } from './types';
 import { Action, ActionContext, buildContextMenuForActions, openContextMenu } from '../lib';
 
 const executeSingleAction = async (action: Action, actionContext: ActionContext) => {
@@ -32,7 +32,7 @@ const executeSingleAction = async (action: Action, actionContext: ActionContext)
   await action.execute(actionContext);
 };
 
-export const executeTriggerActions: EmbeddableSetupApiPure['executeTriggerActions'] = ({api}) => async (triggerId, actionContext) => {
+export const executeTriggerActions: EmbeddableStartApiPure['executeTriggerActions'] = ({api}) => async (triggerId, actionContext) => {
   const actions = await api().getTriggerCompatibleActions(triggerId, {
     embeddable: actionContext.embeddable,
   });

@@ -17,11 +17,18 @@
  * under the License.
  */
 
-import { EmbeddableSetupApiPure } from './types';
-import { Action } from '../lib';
+import { EmbeddableStartApiPure } from './types';
+import { executeTriggerActions } from './execute_trigger_actions';
+import { getEmbeddableFactories } from './get_embeddable_factories';
+import { getTrigger } from './get_trigger';
+import { getTriggerActions } from './get_trigger_actions';
+import { getTriggerCompatibleActions } from './get_trigger_compatible_actions';
 
-export const getTriggerCompatibleActions: EmbeddableSetupApiPure['getTriggerCompatibleActions'] = ({api}) => async (triggerId, context) => {
-  const actions = api().getTriggerActions(triggerId);
-  const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
-  return actions.reduce<Action[]>((acc, action, i) => isCompatibles[i] ? [...acc, action] : acc, []);
+export * from './types';
+export const pureStartApi: EmbeddableStartApiPure = {
+  executeTriggerActions,
+  getEmbeddableFactories,
+  getTrigger,
+  getTriggerActions,
+  getTriggerCompatibleActions,
 };

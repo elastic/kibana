@@ -19,10 +19,11 @@
 
 import { EmbeddablePublicPlugin } from '../plugin';
 
-export const createSetupApi = () => {
+export const createApi = () => {
   const plugin = new EmbeddablePublicPlugin({});
   const core = {} as any;
-  const api = plugin.setup(core);
+  const setup = plugin.setup(core);
+  const start = plugin.start(core);
 
-  return { api, plugin, core };
+  return { setup, start, plugin, core };
 };

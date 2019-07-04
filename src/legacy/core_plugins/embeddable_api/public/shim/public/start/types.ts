@@ -18,24 +18,25 @@
 */
 
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from '../types';
-import { Trigger, Action, EmbeddableFactory } from '../lib';
+import { Trigger, Action, TriggerContext, ExecuteTriggerActions, GetEmbeddableFactories } from '../lib';
+import { EmbeddableSetupApi } from '../setup/types';
 
-export interface EmbeddableSetupApi {
-  attachAction: (triggerId: string, actionId: string) => void;
-  detachAction: (triggerId: string, actionId: string) => void;
-  registerAction: (action: Action) => void;
-  // TODO: Make `registerEmbeddableFactory` receive only `factory` argument.
-  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
-  registerTrigger: (trigger: Trigger) => void;
+export interface EmbeddableStartApi {
+  executeTriggerActions: ExecuteTriggerActions;
+  getEmbeddableFactories: GetEmbeddableFactories;
+  getTrigger: (id: string) => Trigger;
+  getTriggerActions: (id: string) => Action[];
+  getTriggerCompatibleActions: (triggerId: string, context: TriggerContext) => Promise<Action[]>;
 }
 
-export interface EmbeddableSetupDependencies {
+export interface EmbeddableStartDependencies {
   actions: ActionRegistry;
-  api: () => EmbeddableSetupApi,
+  api: () => EmbeddableStartApi,
   embeddableFactories: EmbeddableFactoryRegistry;
+  setupApi: EmbeddableSetupApi;
   triggers: TriggerRegistry;
 }
 
-export type EmbeddableSetupApiPure = {
-  [K in keyof EmbeddableSetupApi]: (deps: EmbeddableSetupDependencies) => EmbeddableSetupApi[K];
+export type EmbeddableStartApiPure = {
+  [K in keyof EmbeddableStartApi]: (deps: EmbeddableStartDependencies) => EmbeddableStartApi[K];
 };

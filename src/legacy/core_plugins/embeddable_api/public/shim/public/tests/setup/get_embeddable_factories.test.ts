@@ -17,31 +17,31 @@
  * under the License.
  */
 
-import { createSetupApi } from '..';
+import { createApi } from '..';
 import { FilterableContainerFactory } from '../../lib/test_samples/embeddables/filterable_container_factory';
 import { ContactCardEmbeddableFactory } from '../../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 
 test('returns empty list if there are no embeddable factories', () => {
-  const { api } = createSetupApi();
-  expect(typeof api.getEmbeddableFactories).toBe('function');
+  const { start } = createApi();
+  expect(typeof start.getEmbeddableFactories).toBe('function');
 });
 
 test('returns empty list if there are no embeddable factories', () => {
-  const { api } = createSetupApi();
-  const list = [...api.getEmbeddableFactories()];
+  const { start } = createApi();
+  const list = [...start.getEmbeddableFactories()];
   expect(list).toEqual([]);
 });
 
 test('returns existing embeddable factories', () => {
-  const { api } = createSetupApi();
-  const { length } = [...api.getEmbeddableFactories()];
+  const { setup, start } = createApi();
+  const { length } = [...start.getEmbeddableFactories()];
 
   const factory1 = new FilterableContainerFactory({} as any);
   const factory2 = new ContactCardEmbeddableFactory({} as any);
-  api.registerEmbeddableFactory(factory1.type, factory1);
-  api.registerEmbeddableFactory(factory2.type, factory2);
+  setup.registerEmbeddableFactory(factory1.type, factory1);
+  setup.registerEmbeddableFactory(factory2.type, factory2);
 
-  const list = [...api.getEmbeddableFactories()];
+  const list = [...start.getEmbeddableFactories()];
   expect(list.length - length).toBe(2);
   expect(!!list.find(({type}) => factory1.type === type)).toBe(true);
   expect(!!list.find(({type}) => factory2.type === type)).toBe(true);

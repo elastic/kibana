@@ -20,17 +20,19 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
 import { EmbeddableSetupApi, pureSetupApi } from './setup';
+import { EmbeddableStartApi, pureStartApi } from './start';
 import { bootstrap } from './bootstrap';
 
-export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, void> {
+export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, EmbeddableStartApi> {
   private readonly triggers: TriggerRegistry = new Map();
   private readonly actions: ActionRegistry = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
+  private setupApi!: EmbeddableSetupApi;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    const api = {} as EmbeddableSetupApi;
+    const api = this.setupApi = {} as EmbeddableSetupApi;
     const deps = {
       api: () => api,
       actions: this.actions,
@@ -42,12 +44,28 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetupApi, void> 
       (api as any)[key] = fn(deps);
     }
     Object.freeze(api);
-
     bootstrap(api);
 
     return api;
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    const api = {} as EmbeddableStartApi;
+    const deps = {
+      setupApi: this.setupApi,
+      api: () => api,
+      actions: this.actions,
+      embeddableFactories: this.embeddableFactories,
+      triggers: this.triggers,
+    };
+
+    for (const [key, fn] of Object.entries(pureStartApi)) {
+      (api as any)[key] = fn(deps);
+    }
+    Object.freeze(api);
+
+    return api;
+  }
+
   public stop() {}
 }
