@@ -9,5 +9,5 @@ Creates multiple documents at once
 <b>Signature:</b>
 
 ```typescript
-bulkCreate: (objects?: BulkCreateOptions<SavedObjectAttributes>[], options?: HttpFetchQuery) => Promise<BatchResponse<SavedObjectAttributes>>;
+bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
 ```

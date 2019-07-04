@@ -8,11 +8,6 @@ import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { SavedObject } from 'src/core/server';
-import { SavedObjectAttributes } from 'src/core/server';
-import { SavedObjectReference } from 'src/core/server';
-import { SavedObjectsFindOptions } from 'src/core/server';
-import { SavedObjectsMigrationVersion } from 'src/core/server';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public (undocumented)
@@ -511,33 +506,156 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
 
+// @public (undocumented)
+export interface SavedObject<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    error?: {
+        message: string;
+        statusCode: number;
+    };
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    references: SavedObjectReference[];
+    // (undocumented)
+    type: string;
+    // (undocumented)
+    updated_at?: string;
+    // (undocumented)
+    version?: string;
+}
+
+// @public (undocumented)
+export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+
+// @public (undocumented)
+export interface SavedObjectAttributes {
+    // (undocumented)
+    [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
+}
+
+// @public
+export interface SavedObjectReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBaseOptions {
+    namespace?: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
+    // (undocumented)
+    savedObjects: Array<SimpleSavedObject<T>>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsCreateOptions {
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkCreateOptions {
+    overwrite?: boolean;
+}
+
 // @public
 export class SavedObjectsClient {
     constructor(http: HttpSetup);
-    // Warning: (ae-forgotten-export) The symbol "BulkCreateOptions" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "BatchResponse" needs to be exported by the entry point index.d.ts
-    bulkCreate: (objects?: BulkCreateOptions<SavedObjectAttributes>[], options?: HttpFetchQuery) => Promise<BatchResponse<SavedObjectAttributes>>;
+    bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     bulkGet: (objects?: {
         id: string;
         type: string;
-    }[]) => Promise<BatchResponse<SavedObjectAttributes>>;
-    // Warning: (ae-forgotten-export) The symbol "CreateOptions" needs to be exported by the entry point index.d.ts
-    create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: CreateOptions) => Promise<SimpleSavedObject<T>>;
+    }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    // Warning: (ae-forgotten-export) The symbol "FindResults" needs to be exported by the entry point index.d.ts
-    find: <T extends SavedObjectAttributes>(options?: SavedObjectsFindOptions) => Promise<FindResults<T>>;
+    find: <T extends SavedObjectAttributes>(options?: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    // Warning: (ae-forgotten-export) The symbol "UpdateOptions" needs to be exported by the entry point index.d.ts
-    update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: UpdateOptions): Promise<SimpleSavedObject<T>>;
+    update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
 // @public (undocumented)
+export interface SavedObjectsCreateOptions {
+    id?: string;
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    overwrite?: boolean;
+    // (undocumented)
+    references?: SavedObjectReference[];
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+    // (undocumented)
+    defaultSearchOperator?: 'AND' | 'OR';
+    // (undocumented)
+    fields?: string[];
+    // (undocumented)
+    hasReference?: {
+        type: string;
+        id: string;
+    };
+    // (undocumented)
+    page?: number;
+    // (undocumented)
+    perPage?: number;
+    // (undocumented)
+    search?: string;
+    searchFields?: string[];
+    // (undocumented)
+    sortField?: string;
+    // (undocumented)
+    sortOrder?: string;
+    // (undocumented)
+    type?: string | string[];
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsBatchResponse<T> {
+    // (undocumented)
+    page: number;
+    // (undocumented)
+    perPage: number;
+    // (undocumented)
+    total: number;
+}
+
+// @public
+export interface SavedObjectsMigrationVersion {
+    // (undocumented)
+    [pluginName: string]: string;
+}
+
+// @public (undocumented)
 export interface SavedObjectsStart {
     // (undocumented)
     client: SavedObjectsClientContract;
+}
+
+// @public (undocumented)
+export interface SavedObjectsUpdateOptions {
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    references?: SavedObjectReference[];
+    // (undocumented)
+    version?: string;
 }
 
 // @public

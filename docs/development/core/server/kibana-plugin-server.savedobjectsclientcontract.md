@@ -4,6 +4,8 @@
 
 ## SavedObjectsClientContract type
 
+Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state.
+
 \#\# SavedObjectsClient errors
 
 Since the SavedObjectsClient has its hands in everything we are a little paranoid about the way we present errors back to to application code. Ideally, all errors will be either:

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 import { ImportError } from './types';
 
 export function extractErrors(

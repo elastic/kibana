@@ -87,28 +87,32 @@ export {
 } from './plugins';
 
 export {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsClient,
-  SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-  SavedObjectsMigrationVersion,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
+
+export {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+} from './types';
 
 /**
  * Context passed to the plugins `setup` method.

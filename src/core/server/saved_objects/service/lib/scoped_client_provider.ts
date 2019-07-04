@@ -17,7 +17,7 @@
  * under the License.
  */
 import { PriorityCollection } from './priority_collection';
-import { SavedObjectsClientContract } from '..';
+import { SavedObjectsClientContract } from '../../types';
 
 export interface SavedObjectsClientWrapperOptions<Request = unknown> {
   client: SavedObjectsClientContract;

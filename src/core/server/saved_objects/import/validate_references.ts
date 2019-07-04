@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObject, SavedObjectsClientContract } from '../';
+import { SavedObject, SavedObjectsClientContract } from '../types';
 import { ImportError } from './types';
 
 const REF_TYPES_TO_VLIDATE = ['index-pattern', 'search'];

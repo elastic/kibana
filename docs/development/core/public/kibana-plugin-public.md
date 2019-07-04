@@ -14,7 +14,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Class | Description |
 |  --- | --- |
-|  [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) | The SavedObjectsClient class acts as a generic data fetcher and data saver for saved objects regardless of type. |
+|  [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects. |
 |  [SimpleSavedObject](./kibana-plugin-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) |  |
 |  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
@@ -53,7 +53,19 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
+|  [SavedObject](./kibana-plugin-public.savedobject.md) |  |
+|  [SavedObjectAttributes](./kibana-plugin-public.savedobjectattributes.md) |  |
+|  [SavedObjectReference](./kibana-plugin-public.savedobjectreference.md) | A reference to another saved object. |
+|  [SavedObjectsBaseOptions](./kibana-plugin-public.savedobjectsbaseoptions.md) |  |
+|  [SavedObjectsBatchResponse](./kibana-plugin-public.savedobjectsbatchresponse.md) |  |
+|  [SavedObjectsBulkCreateObject](./kibana-plugin-public.savedobjectsbulkcreateobject.md) |  |
+|  [SavedObjectsBulkCreateOptions](./kibana-plugin-public.savedobjectsbulkcreateoptions.md) |  |
+|  [SavedObjectsCreateOptions](./kibana-plugin-public.savedobjectscreateoptions.md) |  |
+|  [SavedObjectsFindOptions](./kibana-plugin-public.savedobjectsfindoptions.md) |  |
+|  [SavedObjectsFindResponse](./kibana-plugin-public.savedobjectsfindresponse.md) |  |
+|  [SavedObjectsMigrationVersion](./kibana-plugin-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |  |
+|  [SavedObjectsUpdateOptions](./kibana-plugin-public.savedobjectsupdateoptions.md) |  |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
 
 ## Type Aliases
@@ -66,6 +78,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
+|  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |  |
 |  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
 |  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |

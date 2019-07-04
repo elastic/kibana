@@ -9,5 +9,5 @@ Search for objects
 <b>Signature:</b>
 
 ```typescript
-find: <T extends SavedObjectAttributes>(options?: SavedObjectsFindOptions) => Promise<FindResults<T>>;
+find: <T extends SavedObjectAttributes>(options?: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T>>;
 ```

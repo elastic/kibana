@@ -24,7 +24,7 @@ import {
   createMapStream,
   createPromiseFromStreams,
 } from '../../../../legacy/utils/streams';
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 import { createLimitStream } from './create_limit_stream';
 import { ImportError } from './types';
 

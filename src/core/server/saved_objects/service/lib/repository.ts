@@ -29,19 +29,21 @@ import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
 import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
 import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsCreateOptions,
-  SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-  SavedObjectsMigrationVersion,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+} from '../../types';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.

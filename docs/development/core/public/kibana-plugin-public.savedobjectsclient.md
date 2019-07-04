@@ -4,7 +4,7 @@
 
 ## SavedObjectsClient class
 
-The SavedObjectsClient class acts as a generic data fetcher and data saver for saved objects regardless of type.
+Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects.
 
 <b>Signature:</b>
 
@@ -22,11 +22,11 @@ export declare class SavedObjectsClient
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [bulkCreate](./kibana-plugin-public.savedobjectsclient.bulkcreate.md) |  | <code>(objects?: BulkCreateOptions&lt;SavedObjectAttributes&gt;[], options?: HttpFetchQuery) =&gt; Promise&lt;BatchResponse&lt;SavedObjectAttributes&gt;&gt;</code> | Creates multiple documents at once |
-|  [bulkGet](./kibana-plugin-public.savedobjectsclient.bulkget.md) |  | <code>(objects?: {</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }[]) =&gt; Promise&lt;BatchResponse&lt;SavedObjectAttributes&gt;&gt;</code> | Returns an array of objects by id |
-|  [create](./kibana-plugin-public.savedobjectsclient.create.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(type: string, attributes: T, options?: CreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Persists an object |
+|  [bulkCreate](./kibana-plugin-public.savedobjectsclient.bulkcreate.md) |  | <code>(objects?: SavedObjectsBulkCreateObject&lt;SavedObjectAttributes&gt;[], options?: SavedObjectsBulkCreateOptions) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;SavedObjectAttributes&gt;&gt;</code> | Creates multiple documents at once |
+|  [bulkGet](./kibana-plugin-public.savedobjectsclient.bulkget.md) |  | <code>(objects?: {</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }[]) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;SavedObjectAttributes&gt;&gt;</code> | Returns an array of objects by id |
+|  [create](./kibana-plugin-public.savedobjectsclient.create.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(type: string, attributes: T, options?: SavedObjectsCreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Persists an object |
 |  [delete](./kibana-plugin-public.savedobjectsclient.delete.md) |  | <code>(type: string, id: string) =&gt; Promise&lt;{}&gt;</code> | Deletes an object |
-|  [find](./kibana-plugin-public.savedobjectsclient.find.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(options?: SavedObjectsFindOptions) =&gt; Promise&lt;FindResults&lt;T&gt;&gt;</code> | Search for objects |
+|  [find](./kibana-plugin-public.savedobjectsclient.find.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(options?: SavedObjectsFindOptions) =&gt; Promise&lt;SavedObjectsFindResponse&lt;T&gt;&gt;</code> | Search for objects |
 |  [get](./kibana-plugin-public.savedobjectsclient.get.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(type: string, id: string) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Fetches a single object |
 
 ## Methods

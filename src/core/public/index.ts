@@ -66,11 +66,28 @@ import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
-import { SavedObjectsClient, SimpleSavedObject, SavedObjectsClientContract } from './saved_objects';
-import { SavedObjectsStart } from './saved_objects/saved_objects_service';
+import { SavedObjectsStart } from './saved_objects';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+export {
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateOptions,
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  SavedObjectsClientContract,
+  SavedObjectsClient,
+  SimpleSavedObject,
+} from './saved_objects';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -168,10 +185,7 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
-  SavedObjectsClient,
-  SavedObjectsClientContract,
   SavedObjectsStart,
-  SimpleSavedObject,
   Toast,
   ToastInput,
   ToastsApi,

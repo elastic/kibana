@@ -9,7 +9,7 @@ Updates an object
 <b>Signature:</b>
 
 ```typescript
-update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: UpdateOptions): Promise<SimpleSavedObject<T>>;
+update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 ```
 
 ## Parameters
@@ -19,7 +19,7 @@ update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T,
 |  type | <code>string</code> |  |
 |  id | <code>string</code> |  |
 |  attributes | <code>T</code> |  |
-|  { version, migrationVersion, references } | <code>UpdateOptions</code> |  |
+|  { version, migrationVersion, references } | <code>SavedObjectsUpdateOptions</code> |  |
 
 <b>Returns:</b>
 

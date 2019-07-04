@@ -436,9 +436,10 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
 }
 
 // @public (undocumented)
+export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+
+// @public (undocumented)
 export interface SavedObjectAttributes {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectAttribute" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }

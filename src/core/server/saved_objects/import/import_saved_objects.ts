@@ -22,7 +22,7 @@ import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
 import { ImportError } from './types';
 import { validateReferences } from './validate_references';
-import { SavedObjectsClientContract } from '../';
+import { SavedObjectsClientContract } from '../types';
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;

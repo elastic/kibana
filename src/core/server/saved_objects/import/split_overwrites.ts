@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 import { Retry } from './types';
 
 export function splitOverwrites(savedObjects: SavedObject[], retries: Retry[]) {

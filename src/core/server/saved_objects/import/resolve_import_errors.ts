@@ -18,7 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClientContract } from '../';
+import { SavedObjectsClientContract } from '../../types';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { extractErrors } from './extract_errors';
