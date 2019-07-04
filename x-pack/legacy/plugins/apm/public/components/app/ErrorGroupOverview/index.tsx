@@ -35,35 +35,29 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
 }) => {
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
   const uiFilters = useUiFilters(urlParams);
-  const { data: errorDistributionData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadErrorDistribution({
-          serviceName,
-          start,
-          end,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadErrorDistribution({
+        serviceName,
+        start,
+        end,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, uiFilters]);
 
-  const { data: errorGroupListData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadErrorGroupList({
-          serviceName,
-          start,
-          end,
-          sortField,
-          sortDirection,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
-  );
+  const { data: errorGroupListData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadErrorGroupList({
+        serviceName,
+        start,
+        end,
+        sortField,
+        sortDirection,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;

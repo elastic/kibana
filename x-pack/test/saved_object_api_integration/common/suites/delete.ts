@@ -90,9 +90,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .expect(tests.spaceAware.statusCode)
           .then(tests.spaceAware.response));
 
-      it(`should return ${
-        tests.notSpaceAware.statusCode
-      } when deleting a non-space-aware doc`, async () =>
+      it(`should return ${tests.notSpaceAware.statusCode} when deleting a non-space-aware doc`, async () =>
         await supertest
           .delete(
             `${getUrlPrefix(
