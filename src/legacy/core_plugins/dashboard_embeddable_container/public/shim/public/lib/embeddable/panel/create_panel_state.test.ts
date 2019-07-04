@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import '../../np_core.test.mocks';
-
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
-import { CONTACT_CARD_EMBEDDABLE } from '../../../../embeddable_api/public/test_samples';
-import { EmbeddableInput } from '../../../../embeddable_api/public';
+import { EmbeddableInput } from '../../embeddable_api';
+import { CONTACT_CARD_EMBEDDABLE } from 'src/legacy/core_plugins/embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 
 interface TestInput extends EmbeddableInput {
   test: string;

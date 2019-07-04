@@ -37,6 +37,7 @@ export interface DashboardOptions {
     showWriteControls: boolean;
     createNew: boolean;
   };
+  getFactory: GetEmbeddableFactory;
 }
 
 export class DashboardContainerFactory extends EmbeddableFactory<
@@ -47,12 +48,9 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   public readonly type = DASHBOARD_CONTAINER_TYPE;
   private allowEditing: boolean;
 
-  constructor({
-    savedObjectMetaData,
-    capabilities,
-  }: DashboardOptions, private readonly getFactory: GetEmbeddableFactory) {
-    super({ savedObjectMetaData });
-    this.allowEditing = capabilities.createNew && capabilities.showWriteControls;
+  constructor(private readonly options: DashboardOptions) {
+    super({ savedObjectMetaData: options.savedObjectMetaData });
+    this.allowEditing = options.capabilities.createNew && options.capabilities.showWriteControls;
   }
 
   public isEditable() {
@@ -77,6 +75,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.getFactory, parent);
+    return new DashboardContainer(initialInput, this.options.getFactory, parent);
   }
 }

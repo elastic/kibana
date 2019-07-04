@@ -17,23 +17,22 @@
  * under the License.
  */
 
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+
 import { injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
+import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
+import { ViewMode, EmbeddableChildPanel } from '../../embeddable_api';
+import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT, DashboardConstants } from '../dashboard_constants';
+import { DashboardContainer } from '../dashboard_container';
+import { DashboardPanelState, GridData } from '../types';
 
 // @ts-ignore
 import sizeMe from 'react-sizeme';
-import { toastNotifications } from 'ui/notify';
-import { Subscription } from 'rxjs';
-import { DashboardConstants } from '../../../../kibana/public/dashboard/dashboard_constants';
-import { ViewMode, EmbeddableChildPanel } from '../../../../embeddable_api/public';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardContainer } from '../dashboard_container';
-import { DashboardPanelState, GridData } from '../types';
 
 let lastValidGridSize = 0;
 
@@ -160,7 +159,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       console.error(error); // eslint-disable-line no-console
 
       isLayoutInvalid = true;
-      toastNotifications.addDanger({
+      alert({
         title: this.props.intl.formatMessage({
           id: 'dashboardEmbeddableContainer.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',

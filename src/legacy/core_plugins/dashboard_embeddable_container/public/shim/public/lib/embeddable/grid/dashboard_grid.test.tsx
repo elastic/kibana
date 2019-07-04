@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import '../../np_core.test.mocks';
+ // @ts-ignore
+import sizeMe from 'react-sizeme';
 
 import React from 'react';
 import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
-// @ts-ignore
-import sizeMe from 'react-sizeme';
-
 import { skip } from 'rxjs/operators';
-
-import { EmbeddableFactory } from '../../../../embeddable_api/public';
-import {
-  ContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-} from '../../../../embeddable_api/public/test_samples';
-
+import { EmbeddableFactory } from '../../embeddable_api';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
+import { CONTACT_CARD_EMBEDDABLE, ContactCardEmbeddableFactory } from 'src/legacy/core_plugins/embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 
 let dashboardContainer: DashboardContainer | undefined;
 

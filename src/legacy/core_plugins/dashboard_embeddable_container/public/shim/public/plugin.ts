@@ -18,10 +18,8 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from '../../../../embeddable_api/public/shim/public';
-import { ExpandPanelAction } from './lib';
-import { DashboardContainerFactory } from './lib';
-import { DashboardCapabilities } from './lib/types';
+import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './lib/embeddable_api';
+import { ExpandPanelAction, DashboardContainerFactory, DashboardCapabilities } from './lib';
 
 interface SetupDependencies {
   embeddable: ReturnType<EmbeddablePlugin['setup']>;
@@ -43,8 +41,9 @@ export class DashboardEmbeddableContainerPublicPlugin implements Plugin<any, any
   public start({ application }: CoreStart, { embeddable }: StartDependencies) {
     const dashboardOptions = {
       capabilities: application.capabilities.dashboard as unknown as DashboardCapabilities,
+      getFactory: embeddable.getEmbeddableFactory,
     };
-    const factory = new DashboardContainerFactory(dashboardOptions, (embeddable as any).getEmbeddableFactory);
+    const factory = new DashboardContainerFactory(dashboardOptions);
     embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
