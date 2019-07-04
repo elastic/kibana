@@ -46,7 +46,7 @@ pipeline {
     }
     stage('kibana-intake') {
       agent { label 'linux || immutable' }
-      options { skipDefaultCheckout() }
+      // options { skipDefaultCheckout() }
       steps {
         // deleteDir()
         step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
