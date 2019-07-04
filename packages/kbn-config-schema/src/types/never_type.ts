@@ -17,24 +17,18 @@
  * under the License.
  */
 
-import { internals, Reference as InternalReference } from '../internals';
+import { internals } from '../internals';
+import { Type } from './type';
 
-export class Reference<T> {
-  public static isReference<V>(value: V | Reference<V> | undefined): value is Reference<V> {
-    return (
-      value != null &&
-      typeof (value as Reference<V>).getSchema === 'function' &&
-      internals.isRef((value as Reference<V>).getSchema())
-    );
+export class NeverType extends Type<never> {
+  constructor() {
+    super(internals.any().forbidden());
   }
 
-  private readonly internalSchema: InternalReference;
-
-  constructor(key: string) {
-    this.internalSchema = internals.ref(key);
-  }
-
-  public getSchema() {
-    return this.internalSchema;
+  protected handleError(type: string) {
+    switch (type) {
+      case 'any.unknown':
+        return "a value wasn't expected to be present";
+    }
   }
 }
