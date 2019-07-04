@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
+
 import { InstallationType } from '../../common/installation';
 import { LanguageServer } from '../../common/language_server';
 import { CtagsLauncher } from './ctags_launcher';
@@ -100,13 +102,13 @@ export const CTAGS: LanguageServerDefinition = {
     'yacc',
   ],
   launcher: CtagsLauncher,
-  installationType: InstallationType.Plugin,
-  installationPluginName: 'ctagsLanguageServer',
+  installationType: InstallationType.Embed,
+  embedPath: require.resolve('@elastic/ctags-langserver/lib/cli.js'),
 };
-export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
-export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO, CTAGS];
+export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA, CTAGS];
+export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO];
 
-export function enabledLanguageServers(server: any) {
+export function enabledLanguageServers(server: Hapi.Server) {
   const devMode: boolean = server.config().get('env.dev');
 
   function isEnabled(lang: LanguageServerDefinition, defaultEnabled: boolean) {

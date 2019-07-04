@@ -37,6 +37,7 @@ export class CorePluginBPlugin
   }
 
   public start() {}
+  public stop() {}
 }
 
 export type CorePluginBPluginSetup = ReturnType<CorePluginBPlugin['setup']>;

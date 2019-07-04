@@ -14,5 +14,17 @@ export interface RectCoordinate {
   x0: number;
 }
 
+export interface TimeSeries {
+  title: string;
+  titleShort?: string;
+  hideLegend?: boolean;
+  hideTooltipValue?: boolean;
+  data: Array<Coordinate | RectCoordinate>;
+  legendValue?: string;
+  type: string;
+  color: string;
+  areaColor?: string;
+}
+
 export type ChartType = 'area' | 'linemark';
 export type YUnit = 'percent' | 'bytes' | 'number';

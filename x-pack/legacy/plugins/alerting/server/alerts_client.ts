@@ -95,9 +95,7 @@ export class AlertsClient {
         // Skip the cleanup error and throw the task manager error to avoid confusion
         this.log(
           ['alerting', 'error'],
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${
-            err.message
-          }`
+          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
         );
       }
       throw e;

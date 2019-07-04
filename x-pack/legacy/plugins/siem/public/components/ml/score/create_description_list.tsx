@@ -80,7 +80,7 @@ export const createDescriptionList = (
       title: i18n.TOP_ANOMALY_SUSPECT,
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>{`${score.entityName}: “${score.entityValue}”`}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{`${score.entityName}: "${score.entityValue}"`}</EuiFlexItem>
         </EuiFlexGroup>
       ),
     },

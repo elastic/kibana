@@ -23,6 +23,7 @@ import { collectSavedObjects } from './collect_saved_objects';
 describe('collectSavedObjects()', () => {
   test('collects nothing when stream is empty', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
         this.push(null);
       },
@@ -38,34 +39,9 @@ Object {
 
   test('collects objects from stream', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        this.push('{"foo":true,"type":"a"}');
-        this.push(null);
-      },
-    });
-    const result = await collectSavedObjects({
-      readStream,
-      objectLimit: 1,
-      supportedTypes: ['a'],
-    });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "collectedObjects": Array [
-    Object {
-      "foo": true,
-      "migrationVersion": Object {},
-      "type": "a",
-    },
-  ],
-  "errors": Array [],
-}
-`);
-  });
-
-  test('filters out empty lines', async () => {
-    const readStream = new Readable({
-      read() {
-        this.push('{"foo":true,"type":"a"}\n\n');
+        this.push({ foo: true, type: 'a' });
         this.push(null);
       },
     });
@@ -90,9 +66,10 @@ Object {
 
   test('throws error when object limit is reached', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        this.push('{"foo":true,"type":"a"}\n');
-        this.push('{"bar":true,"type":"a"}\n');
+        this.push({ foo: true, type: 'a' });
+        this.push({ bar: true, type: 'a' });
         this.push(null);
       },
     });
@@ -107,9 +84,10 @@ Object {
 
   test('unsupported types return as import errors', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        this.push('{"id":"1","type":"a","attributes":{"title":"my title"}}\n');
-        this.push('{"id":"2","type":"b","attributes":{"title":"my title 2"}}\n');
+        this.push({ id: '1', type: 'a', attributes: { title: 'my title' } });
+        this.push({ id: '2', type: 'b', attributes: { title: 'my title 2' } });
         this.push(null);
       },
     });
@@ -141,9 +119,10 @@ Object {
 
   test('unsupported types still count towards object limit', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        this.push('{"foo":true,"type":"a"}\n');
-        this.push('{"bar":true,"type":"b"}\n');
+        this.push({ foo: true, type: 'a' });
+        this.push({ bar: true, type: 'b' });
         this.push(null);
       },
     });

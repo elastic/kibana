@@ -34,13 +34,14 @@ describe('Load More Events Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <EventsTable
-            loading={false}
             data={mockData.Events.edges.map(i => i.node)}
-            totalCount={mockData.Events.totalCount}
-            tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
+            id="events"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
+            tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            totalCount={mockData.Events.totalCount}
             type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>
