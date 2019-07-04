@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import util from 'util';
+import path from 'path';
 
 import { ResponseError } from 'vscode-jsonrpc';
 
@@ -210,7 +211,7 @@ export class LspIndexer extends AbstractIndexer {
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
 
-    const localFilePath = `${localRepoPath}${filePath}`;
+    const localFilePath = path.join(localRepoPath, filePath);
     const lstat = util.promisify(fs.lstat);
     const stat = await lstat(localFilePath);
 

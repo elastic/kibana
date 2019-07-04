@@ -97,8 +97,7 @@ export class WorkspaceHandler {
     } else {
       workspace = await this.cloneWorkspace(bareRepo, repositoryUri, revision, targetCommit);
     }
-    const workspaceHeadCommit = workspace.workspaceHeadCommit;
-    const workspaceDir = workspace.workspaceDir;
+    const { workspaceDir, workspaceHeadCommit } = workspace;
 
     this.setWorkspaceRevision(workspaceDir, workspace.workspaceHeadCommit);
     return {
@@ -312,7 +311,7 @@ export class WorkspaceHandler {
       const { repoUri, file, revision } = parseLspUrl(uri)!;
       const { workspaceDir, workspaceRevision } = await this.openWorkspace(repoUri, revision);
       if (file) {
-        const isValidPath = await this.checkFile(workspaceDir, file);
+        const isValidPath = await this.checkFile(repoUri, revision, file);
         if (!isValidPath) {
           throw new Error('invalid file path in requests.');
         }
@@ -366,8 +365,8 @@ export class WorkspaceHandler {
     }
   }
 
-  private workspaceWorktreeBranchName(repoName: string): string {
-    return `workspace-${repoName}`;
+  private workspaceWorktreeBranchName(branch: string): string {
+    return `workspace-${branch}`;
   }
 
   private async updateWorkspace(repositoryUri: string, revision: string, targetCommit: Commit) {
@@ -383,6 +382,7 @@ export class WorkspaceHandler {
         throw Boom.internal(`Reset workspace to commit ${targetCommit.sha()} failed.`);
       }
     }
+    workspaceRepo.cleanup();
     return { workspaceHeadCommit, workspaceDir };
   }
 
@@ -422,6 +422,7 @@ export class WorkspaceHandler {
         throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
       }
     }
+    workspaceRepo.cleanup();
     return { workspaceHeadCommit, workspaceDir };
   }
 
@@ -458,14 +459,14 @@ export class WorkspaceHandler {
    *  1. exists in git repo
    *  2. is a valid file or dir, can't be a link or submodule
    *
-   * @param workspaceRepo
+   * @param repoUri
+   * @param revision
    * @param filePath
    */
-  private async checkFile(workspaceDir: string, filePath: string) {
-    const workspaceRepo = await Repository.open(workspaceDir);
+  private async checkFile(repoUri: string, revision: string, filePath: string) {
     try {
-      const headCommit = await workspaceRepo.getHeadCommit();
-      const entry = await headCommit.getEntry(filePath);
+      const commit = await this.gitOps.getCommit(repoUri, revision);
+      const entry = await commit.getEntry(filePath);
       switch (entry.filemode()) {
         case TreeEntry.FILEMODE.TREE:
         case TreeEntry.FILEMODE.BLOB:

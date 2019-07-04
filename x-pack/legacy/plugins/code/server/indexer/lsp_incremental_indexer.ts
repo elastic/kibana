@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import util from 'util';
+import path from 'path';
 
 import { ProgressReporter } from '.';
 import { Diff, DiffKind } from '../../common/git_diff';
@@ -207,7 +208,7 @@ export class LspIncrementalIndexer extends LspIndexer {
       this.log.error(error);
     }
 
-    const localFilePath = `${localRepoPath}${filePath}`;
+    const localFilePath = path.join(localRepoPath, filePath);
     const lstat = util.promisify(fs.lstat);
     const stat = await lstat(localFilePath);
 
