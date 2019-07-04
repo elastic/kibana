@@ -11,7 +11,9 @@ import {
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
 
-export type CMServicesAPIResponse = PromiseReturnType<typeof getServiceNames>;
+export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
+  typeof getServiceNames
+>;
 export async function getServiceNames({ setup }: { setup: Setup }) {
   const { client, config } = setup;
 
