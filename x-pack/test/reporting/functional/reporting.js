@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
       const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
       await retry.try(async () => {
         const isDisabled = await generateReportButton.getAttribute('disabled');
-        expect(isDisabled).to.be('false');
+        expect(isDisabled).to.be(null);
       });
     };
 
