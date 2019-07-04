@@ -22,6 +22,7 @@ import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { plugin } from './server/';
+import { CustomCoreSetup } from './server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -45,9 +46,7 @@ export default function(kibana: any) {
 
     init(server: Legacy.Server) {
       const initializerContext = {} as PluginInitializerContext;
-      // TODO: Remove '@ts-ignore' as soon as CoreSetup is completed.
-      // @ts-ignore
-      const core = { http: { server } } as CoreSetup;
+      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
 
       plugin(initializerContext).setup(core);
     },

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { CoreSetup } from 'src/core/server';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 // @ts-ignore
@@ -24,10 +25,15 @@ import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
 
+// TODO: Remove as CoreSetup is completed.
+export interface CustomCoreSetup {
+  http: {
+    server: any;
+  };
+}
+
 export class Plugin {
-  // TODO: Add the CoreSetup type as soon as it is completed.
-  // @ts-ignore
-  public setup(core) {
+  public setup(core: CoreSetup & CustomCoreSetup) {
     const { http } = core;
     fieldsRoutes(http.server);
     visDataRoutes(http.server);
