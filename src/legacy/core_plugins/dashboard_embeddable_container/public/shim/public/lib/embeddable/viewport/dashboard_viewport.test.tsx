@@ -27,12 +27,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
-
-import {
-  ContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-} from '../../../../embeddable_api/public/test_samples';
-import { EmbeddableFactory } from '../../../../embeddable_api/public';
+import { EmbeddableFactory } from '../../embeddable_api';
 
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer } from '../dashboard_container';

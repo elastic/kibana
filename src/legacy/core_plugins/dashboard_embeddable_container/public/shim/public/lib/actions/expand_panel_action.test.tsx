@@ -19,15 +19,8 @@
 
 import '../np_core.test.mocks';
 
-import { isErrorEmbeddable, EmbeddableFactory } from '../../../embeddable_api/public';
+import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_api';
 import { ExpandPanelAction } from './expand_panel_action';
-import {
-  ContactCardEmbeddable,
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  ContactCardEmbeddableFactory,
-} from '../../../embeddable_api/public/test_samples/index';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 

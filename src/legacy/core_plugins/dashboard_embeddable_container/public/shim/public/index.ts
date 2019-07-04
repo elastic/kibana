@@ -20,6 +20,8 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
 
+export * from './lib';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
 }

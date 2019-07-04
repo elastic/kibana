@@ -26,10 +26,18 @@ import {
   ErrorEmbeddable,
   Container,
   GetEmbeddableFactory,
-} from '../../../embeddable_api/public/shim/public';
+} from '../embeddable_api';
 import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
+
+export interface DashboardOptions {
+  savedObjectMetaData?: SavedObjectMetaData<SavedObjectAttributes>;
+  capabilities: {
+    showWriteControls: boolean;
+    createNew: boolean;
+  };
+}
 
 export class DashboardContainerFactory extends EmbeddableFactory<
   DashboardContainerInput,
@@ -42,13 +50,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   constructor({
     savedObjectMetaData,
     capabilities,
-  }: {
-    savedObjectMetaData?: SavedObjectMetaData<SavedObjectAttributes>;
-    capabilities: {
-      showWriteControls: boolean;
-      createNew: boolean;
-    };
-  }, private readonly getFactory: GetEmbeddableFactory) {
+  }: DashboardOptions, private readonly getFactory: GetEmbeddableFactory) {
     super({ savedObjectMetaData });
     this.allowEditing = capabilities.createNew && capabilities.showWriteControls;
   }

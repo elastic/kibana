@@ -19,13 +19,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import { I18nProvider } from '@kbn/i18n/react';
-import { IndexPattern } from 'ui/index_patterns';
-
 import { Filter } from '@kbn/es-query';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { IndexPattern } from '../../../../../../../ui/public/index_patterns';
+import { RefreshInterval } from '../../../../../../../ui/public/timefilter/timefilter';
+import { TimeRange } from '../../../../../../../ui/public/timefilter/time_history';
 import {
   Container,
   ContainerInput,
@@ -35,13 +33,13 @@ import {
   EmbeddableFactory,
   IEmbeddable,
   GetEmbeddableFactory,
-} from '../../../embeddable_api/public/shim/public';
-
+  PanelState,
+} from '../../../../../../embeddable_api/public/shim/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
-import { Query } from '../../../data/public';
+import { Query } from '../../../../../../data/public';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -54,7 +52,9 @@ export interface DashboardContainerInput extends ContainerInput {
   title: string;
   description?: string;
   isFullScreenMode: boolean;
-  panels: { [panelId: string]: DashboardPanelState<any> };
+  panels: {
+    [panelId: string]: PanelState<DashboardPanelState & { id: string }>;
+  }
 }
 
 interface IndexSignature {
@@ -76,7 +76,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    private readonly getFactory: GetEmbeddableFactory,
+    getFactory: GetEmbeddableFactory,
     parent?: Container
   ) {
     super(
@@ -88,7 +88,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      embeddableFactories,
+      getFactory,
       parent
     );
   }
@@ -106,7 +106,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public render(dom: HTMLElement) {
     ReactDOM.render(
-      // @ts-ignore - hitting https://github.com/DefinitelyTyped/DefinitelyTyped/issues/27805
       <I18nProvider>
         <DashboardViewport container={this} />
       </I18nProvider>,

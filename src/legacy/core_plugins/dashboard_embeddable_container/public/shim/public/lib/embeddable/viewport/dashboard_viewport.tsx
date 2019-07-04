@@ -18,14 +18,14 @@
  */
 
 import React from 'react';
-// @ts-ignore
-import { ExitFullScreenButton } from 'ui/exit_full_screen';
 import { Subscription } from 'rxjs';
-
-import { PanelState } from '../../../../embeddable_api/public';
-
+import { PanelState } from '../../embeddable_api';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
+
+// TODO: Adapt this for NP, this used to be `import { ExitFullScreenButton } from 'ui/exit_full_screen';`.
+const ExitFullScreenButton: React.FC<any> = (props) =>
+  <button {...props} style={{ border: '1px solid tomato', width: 16, height: 16}}>X</button>
 
 export interface DashboardViewportProps {
   container: DashboardContainer;

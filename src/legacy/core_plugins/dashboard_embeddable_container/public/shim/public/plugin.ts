@@ -19,8 +19,9 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from '../../../../embeddable_api/public/shim/public';
-import { ExpandPanelAction } from '../../actions';
-import { DashboardContainerFactory } from '../../embeddable';
+import { ExpandPanelAction } from './lib';
+import { DashboardContainerFactory } from './lib';
+import { DashboardCapabilities } from './lib/types';
 
 interface SetupDependencies {
   embeddable: ReturnType<EmbeddablePlugin['setup']>;
@@ -35,20 +36,16 @@ export class DashboardEmbeddableContainerPublicPlugin implements Plugin<any, any
 
   public setup(core: CoreSetup, { embeddable }: SetupDependencies) {
     const expandPanelAction = new ExpandPanelAction();
-
     embeddable.registerAction(expandPanelAction);
     embeddable.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
   }
 
-  public start(core: CoreStart, { embeddable }: StartDependencies) {
-    const dashboardContainerFactory = new DashboardContainerFactory({
-      capabilities: core.application.capabilities.dashboard as {
-        showWriteControls: boolean;
-        createNew: boolean;
-      }
-    });
-    
-    embeddable.registerEmbeddableFactory(dashboardContainerFactory.type, dashboardContainerFactory);
+  public start({ application }: CoreStart, { embeddable }: StartDependencies) {
+    const dashboardOptions = {
+      capabilities: application.capabilities.dashboard as unknown as DashboardCapabilities,
+    };
+    const factory = new DashboardContainerFactory(dashboardOptions, (embeddable as any).getEmbeddableFactory);
+    embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   public stop() {}

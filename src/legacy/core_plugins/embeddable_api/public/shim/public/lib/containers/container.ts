@@ -49,7 +49,7 @@ export abstract class Container<
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    private readonly getFactory: GetEmbeddableFactory,
+    protected readonly getFactory: GetEmbeddableFactory,
     parent?: Container
   ) {
     super(input, output, parent);

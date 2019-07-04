@@ -25,15 +25,15 @@ import {
   IEmbeddable,
   ActionContext,
   IncompatibleActionError,
-} from '../../../embeddable_api/public/shim/public';
+} from '../../../../../../embeddable_api/public/shim/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';
 
 function isDashboard(
-  embeddable: IEmbeddable | DashboardContainer
+  embeddable: IEmbeddable
 ): embeddable is DashboardContainer {
-  return (embeddable as DashboardContainer).type === DASHBOARD_CONTAINER_TYPE;
+  return embeddable.type === DASHBOARD_CONTAINER_TYPE;
 }
 
 function isExpanded(embeddable: IEmbeddable) {

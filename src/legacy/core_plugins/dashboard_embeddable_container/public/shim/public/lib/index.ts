@@ -17,14 +17,5 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    uiExports: {
-      hacks: 'plugins/dashboard_embeddable_container/shim/public/legacy',
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+export * from './actions';
+export * from './embeddable';
