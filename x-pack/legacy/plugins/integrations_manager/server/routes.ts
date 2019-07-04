@@ -34,8 +34,18 @@ export const routes: ServerRoute[] = [
   {
     method: 'GET',
     path: API_LIST_PATTERN,
-    options: { tags: [`access:${PLUGIN_ID}`] },
-    handler: fetchList,
+    options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
+    handler: async (req: Request) => {
+      const fromRegistry = await fetchList();
+      const searchObjects = fromRegistry.map(({ name, version }) => ({
+        type: SAVED_OBJECT_TYPE,
+        id: `${name}-${version}`,
+      }));
+      const client = getClient(req);
+      const results = await client.bulkGet(searchObjects);
+
+      return results.saved_objects;
+    },
   },
   {
     method: 'GET',
