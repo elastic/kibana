@@ -47,7 +47,7 @@ export function Overview(props) {
 
         <LogstashPanel {...props.cluster.logstash} setupMode={props.setupMode} changeUrl={props.changeUrl} />
 
-        <BeatsPanel {...props.cluster.beats} changeUrl={props.changeUrl} />
+        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} changeUrl={props.changeUrl} />
 
         <ApmPanel {...props.cluster.apm} changeUrl={props.changeUrl} />
       </EuiPageBody>

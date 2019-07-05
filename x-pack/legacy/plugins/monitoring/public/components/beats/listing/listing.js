@@ -74,9 +74,9 @@ export class Listing extends PureComponent {
       data,
       sorting,
       pagination,
-      onTableChange
+      onTableChange,
+      setupMode
     } = this.props;
-
 
     const types = uniq(data.map(item => item.type)).map(type => {
       return { value: type };
@@ -95,6 +95,9 @@ export class Listing extends PureComponent {
             <EuiMonitoringTable
               className="beatsTable"
               rows={data}
+              setupMode={setupMode}
+              uuidField="uuid"
+              nameField="name"
               columns={this.getColumns()}
               sorting={sorting}
               pagination={pagination}

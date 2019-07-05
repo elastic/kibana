@@ -17,11 +17,15 @@ import {
   getLogstashInstructionsForDisablingInternalCollection,
 } from './logstash';
 import {
+  getBeatsInstructionsForEnablingMetricbeat,
+  getBeatsInstructionsForDisablingInternalCollection,
+} from './beats';
+import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
 import { ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
-import { KIBANA_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import { KIBANA_SYSTEM_ID, LOGSTASH_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 
 export function getInstructionSteps(productName, product, step, meta, opts) {
   switch (productName) {
@@ -45,6 +49,13 @@ export function getInstructionSteps(productName, product, step, meta, opts) {
       }
       if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
         return getLogstashInstructionsForDisablingInternalCollection(product, meta, opts);
+      }
+    case BEATS_SYSTEM_ID:
+      if (step === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+        return getBeatsInstructionsForEnablingMetricbeat(product, meta, opts);
+      }
+      if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
+        return getBeatsInstructionsForDisablingInternalCollection(product, meta, opts);
       }
   }
   return [];

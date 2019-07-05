@@ -60,7 +60,6 @@ uiRoutes.when('/logstash/nodes', {
                 </Fragment>
               )}
             />
-
           </I18nContext>
         );
       });
