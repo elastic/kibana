@@ -76,7 +76,7 @@ export class WebElementWrapper {
     return elements;
   }
 
-  private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By) {
+  private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By | null) {
     return new WebElementWrapper(
       otherWebElement,
       locator,
@@ -88,8 +88,8 @@ export class WebElementWrapper {
     );
   }
 
-  private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>, locator: By) {
-    return otherWebElements.map(e => this._wrap(e, locator));
+  private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
+    return otherWebElements.map(e => this._wrap(e, null));
   }
 
   private retryCount: number = 3;
@@ -99,21 +99,11 @@ export class WebElementWrapper {
       return await fn();
     } catch (err) {
       this.logger.debug(`${fn.name}: ${err.message}`);
-      if (this.locator === null) throw new Error(`WebElement locator is null, cannot retry`);
-      if (n === 1) throw err;
+      if (this.locator === null || n === 1) throw err;
       this.logger.debug(
-        `WebElementWrapper: finding '${this.locator.toString()}', ${n - 1} attempts left`
+        `WebElementWrapper: searching element '${this.locator.toString()}', ${n - 1} attempts left`
       );
-      const elements = await this.driver.findElements(this.locator);
-      switch (elements.length) {
-        case 0:
-          throw new Error(`WebElementWrapper: Element '${this.locator.toString()}' not found`);
-        case 1:
-          this._webElement = elements[0];
-          break;
-        default:
-          throw new Error(`WebElementWrapper: Multiple matches with '${this.locator.toString()}'`);
-      }
+      this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, n - 1);
     }
   }
@@ -409,8 +399,7 @@ export class WebElementWrapper {
         await this._findWithCustomTimeout(
           async () => await this._webElement.findElements(this.By.css(selector)),
           timeout
-        ),
-        this.By.css(selector)
+        )
       );
     };
     return await this.retryCall(_findAllByCssSelector);
@@ -450,8 +439,7 @@ export class WebElementWrapper {
         await this._findWithCustomTimeout(
           async () => await this._webElement.findElements(this.By.className(className)),
           timeout
-        ),
-        this.By.className(className)
+        )
       );
 
     return await this.retryCall(_findAllByClassName);
@@ -500,8 +488,7 @@ export class WebElementWrapper {
         await this._findWithCustomTimeout(
           async () => await this._webElement.findElements(this.By.tagName(tagName)),
           timeout
-        ),
-        this.By.tagName(tagName)
+        )
       );
     };
     return await this.retryCall(_findAllByTagName);
@@ -538,8 +525,7 @@ export class WebElementWrapper {
         await this._findWithCustomTimeout(
           async () => await this._webElement.findElements(this.By.xpath(selector)),
           timeout
-        ),
-        this.By.xpath(selector)
+        )
       );
     };
     return await this.retryCall(_findAllByXpath);
@@ -579,8 +565,7 @@ export class WebElementWrapper {
         await this._findWithCustomTimeout(
           async () => await this._webElement.findElements(this.By.partialLinkText(linkText)),
           timeout
-        ),
-        this.By.partialLinkText(linkText)
+        )
       );
     };
     return await this.retryCall(_findAllByPartialLinkText);
