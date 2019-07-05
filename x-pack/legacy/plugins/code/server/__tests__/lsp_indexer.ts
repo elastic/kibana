@@ -19,7 +19,6 @@ import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
-import { PREPARE_WORKSPACE_ERROR_MSG } from '../lsp/workspace_handler';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { createTestHapiServer, createTestServerOption, emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -314,10 +313,8 @@ describe('lsp_indexer unit tests', function(this: any) {
     // Apply a checkpoint in here.
     await indexer.start(undefined, {
       repoUri: '',
-      workspaceOpened: true,
       filePath: 'src/public/js/main.ts',
       revision: 'HEAD',
-      localRepoPath: '',
     });
 
     // Expect EsClient deleteByQuery called 0 times for repository cleaning while
@@ -342,73 +339,6 @@ describe('lsp_indexer unit tests', function(this: any) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
     assert.strictEqual(total, 48 * 2);
-    // @ts-ignore
-  }).timeout(20000);
-
-  it('Indexer should continue with file content index if workspace fails to be created', async () => {
-    // Setup the esClient spies
-    const {
-      existsAliasSpy,
-      createSpy,
-      putAliasSpy,
-      deleteByQuerySpy,
-      bulkSpy,
-    } = setupEsClientSpy();
-
-    const lspservice = new LspService(
-      '127.0.0.1',
-      serverOptions,
-      gitOps,
-      esClient as EsClient,
-      new InstallManager(server, serverOptions),
-      new ConsoleLoggerFactory(),
-      new RepositoryConfigController(esClient as EsClient)
-    );
-
-    // Mock the exception of preparing the workspace.
-    lspservice.workspaceHandler.openWorkspace = sinon
-      .stub()
-      .throws(new Error(PREPARE_WORKSPACE_ERROR_MSG));
-
-    const lspSendRequestSpy = setupLsServiceSendRequestSpy();
-    lspservice.sendRequest = lspSendRequestSpy;
-    const supportLanguageSpy = sinon.stub();
-
-    // Setup supported languages, so that unsupported source files won't be
-    // sent for lsp requests.
-    supportLanguageSpy.withArgs('javascript').returns(true);
-    supportLanguageSpy.withArgs('typescript').returns(true);
-    lspservice.supportLanguage = supportLanguageSpy;
-
-    const indexer = new LspIndexer(
-      repoUri,
-      'master',
-      lspservice,
-      serverOptions,
-      gitOps,
-      esClient as EsClient,
-      log
-    );
-    await indexer.start();
-
-    // Expect EsClient deleteByQuery called 3 times for repository cleaning before
-    // the index for document, symbol and reference, respectively.
-    assert.strictEqual(deleteByQuerySpy.callCount, 3);
-
-    // Ditto for index and alias creation
-    assert.strictEqual(existsAliasSpy.callCount, 3);
-    assert.strictEqual(createSpy.callCount, 3);
-    assert.strictEqual(putAliasSpy.callCount, 3);
-
-    // Only file content will be indexed because the workspace fails to be created.
-    assert.strictEqual(bulkSpy.callCount, 4);
-    // Thus, 0 lsp request should be sent.
-    assert.strictEqual(lspSendRequestSpy.callCount, 0);
-    let total = 0;
-    for (let i = 0; i < bulkSpy.callCount; i++) {
-      total += bulkSpy.getCall(i).args[0].body.length;
-    }
-    assert.strictEqual(total, 170 * 2);
     // @ts-ignore
   }).timeout(20000);
 });

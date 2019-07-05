@@ -18,7 +18,6 @@ import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
-import { PREPARE_WORKSPACE_ERROR_MSG } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 import { detectLanguage, detectLanguageByFilename } from '../utils/detect_language';
 import { AbstractIndexer } from './abstract_indexer';
@@ -99,33 +98,12 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
-    let wsRepo;
-    let workspaceOpened = false;
     try {
-      try {
-        const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
-          this.repoUri,
-          HEAD
-        );
-        wsRepo = workspaceRepo;
-        workspaceOpened = true;
-      } catch (error) {
-        if (error.message && error.message === PREPARE_WORKSPACE_ERROR_MSG) {
-          workspaceOpened = false;
-          this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
-          this.log.warn(error);
-        } else {
-          throw error;
-        }
-      }
-      const workspaceDir = wsRepo && wsRepo.workdir();
       const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
       for await (const file of fileIterator) {
         const filePath = file.path!;
         const req: LspIndexRequest = {
           repoUri: this.repoUri,
-          workspaceOpened,
-          localRepoPath: workspaceDir,
           filePath,
           // Always use HEAD for now until we have multi revision.
           // Also, since the workspace might get updated during the index, we always
@@ -139,10 +117,6 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
-    } finally {
-      if (wsRepo) {
-        wsRepo.cleanup();
-      }
     }
   }
 
@@ -291,7 +265,7 @@ export class LspIndexer extends AbstractIndexer {
       .set(IndexStatsKey.Symbol, 0)
       .set(IndexStatsKey.Reference, 0)
       .set(IndexStatsKey.File, 0);
-    const { repoUri, revision, filePath, workspaceOpened } = request;
+    const { repoUri, revision, filePath } = request;
     this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
 
     let content = '';
@@ -308,13 +282,9 @@ export class LspIndexer extends AbstractIndexer {
       }
     }
 
-    let symbols: Set<string> = new Set<string>();
-    if (workspaceOpened) {
-      const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
-      symbols = symbolNames;
-      stats.set(IndexStatsKey.Symbol, symbolsLength);
-      stats.set(IndexStatsKey.Reference, referencesLength);
-    }
+    const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
+    stats.set(IndexStatsKey.Symbol, symbolsLength);
+    stats.set(IndexStatsKey.Reference, referencesLength);
 
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
@@ -322,7 +292,7 @@ export class LspIndexer extends AbstractIndexer {
       path: filePath,
       content,
       language,
-      qnames: Array.from(symbols),
+      qnames: Array.from(symbolNames),
     };
     await this.docBatchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);

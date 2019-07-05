@@ -34,7 +34,6 @@ import { RepositoryObjectClient } from '../search';
 import { LoggerFactory } from '../utils/log_factory';
 
 export const MAX_RESULT_COUNT = 20;
-export const PREPARE_WORKSPACE_ERROR_MSG = 'Prepare workspace error.';
 
 export class WorkspaceHandler {
   private revisionMap: { [uri: string]: string } = {};

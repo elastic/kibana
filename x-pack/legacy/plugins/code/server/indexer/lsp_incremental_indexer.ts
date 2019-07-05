@@ -18,7 +18,6 @@ import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
-import { PREPARE_WORKSPACE_ERROR_MSG } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 import { detectLanguage } from '../utils/detect_language';
 import { LspIndexer } from './lsp_indexer';
@@ -121,32 +120,11 @@ export class LspIncrementalIndexer extends LspIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
-    let wsRepo;
-    let workspaceOpened = false;
     try {
-      try {
-        const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
-          this.repoUri,
-          HEAD
-        );
-        wsRepo = workspaceRepo;
-        workspaceOpened = true;
-      } catch (error) {
-        if (error.message && error.message === PREPARE_WORKSPACE_ERROR_MSG) {
-          workspaceOpened = false;
-          this.log.warn('Open workspace for indexing error. Will skip symbol indexing.');
-          this.log.warn(error);
-        } else {
-          throw error;
-        }
-      }
-      const workspaceDir = wsRepo && wsRepo.workdir();
       if (this.diff) {
         for (const f of this.diff.files) {
           yield {
             repoUri: this.repoUri,
-            workspaceOpened,
-            localRepoPath: workspaceDir,
             filePath: f.path,
             originPath: f.originPath,
             // Always use HEAD for now until we have multi revision.
@@ -188,7 +166,7 @@ export class LspIncrementalIndexer extends LspIndexer {
   }
 
   private async handleAddedRequest(request: LspIncIndexRequest, stats: IndexStats) {
-    const { repoUri, filePath, workspaceOpened } = request;
+    const { repoUri, filePath } = request;
 
     let content = '';
     try {
@@ -204,13 +182,9 @@ export class LspIncrementalIndexer extends LspIndexer {
       }
     }
 
-    let symbols: Set<string> = new Set<string>();
-    if (workspaceOpened) {
-      const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
-      symbols = symbolNames;
-      stats.set(IndexStatsKey.Symbol, symbolsLength);
-      stats.set(IndexStatsKey.Reference, referencesLength);
-    }
+    const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
+    stats.set(IndexStatsKey.Symbol, symbolsLength);
+    stats.set(IndexStatsKey.Reference, referencesLength);
 
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
@@ -218,7 +192,7 @@ export class LspIncrementalIndexer extends LspIndexer {
       path: filePath,
       content,
       language,
-      qnames: Array.from(symbols),
+      qnames: Array.from(symbolNames),
     };
     await this.docBatchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);

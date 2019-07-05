@@ -20,7 +20,6 @@ import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
-import { PREPARE_WORKSPACE_ERROR_MSG } from '../lsp/workspace_handler';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { createTestServerOption, emptyAsyncFunc, createTestHapiServer } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -296,11 +295,9 @@ describe('lsp_incremental_indexer unit tests', () => {
     // Apply a checkpoint in here.
     await indexer.start(undefined, {
       repoUri: '',
-      workspaceOpened: true,
       filePath: 'package.json',
       revision: 'HEAD',
       originRevision: '67002808',
-      localRepoPath: '',
       kind: DiffKind.MODIFIED,
     });
 
@@ -318,68 +315,6 @@ describe('lsp_incremental_indexer unit tests', () => {
     }
     assert.strictEqual(total, 5 * 2);
     assert.strictEqual(deleteByQuerySpy.callCount, 4);
-    // @ts-ignore
-  }).timeout(20000);
-
-  it('Indexer should continue with file content index if workspace fails to be created', async () => {
-    // Setup the esClient spies
-    const {
-      existsAliasSpy,
-      createSpy,
-      putAliasSpy,
-      deleteByQuerySpy,
-      bulkSpy,
-    } = setupEsClientSpy();
-
-    const lspservice = new LspService(
-      '127.0.0.1',
-      serverOptions,
-      gitOps,
-      esClient as EsClient,
-      new InstallManager(server, serverOptions),
-      new ConsoleLoggerFactory(),
-      new RepositoryConfigController(esClient as EsClient)
-    );
-
-    // Mock the exception of preparing the workspace.
-    lspservice.workspaceHandler.openWorkspace = sinon
-      .stub()
-      .throws(new Error(PREPARE_WORKSPACE_ERROR_MSG));
-
-    const lspSendRequestSpy = setupLsServiceSendRequestSpy();
-    lspservice.sendRequest = lspSendRequestSpy;
-
-    const indexer = new LspIncrementalIndexer(
-      'github.com/elastic/TypeScript-Node-Starter',
-      'HEAD',
-      '67002808',
-      lspservice,
-      serverOptions,
-      gitOps,
-      esClient as EsClient,
-      log
-    );
-    await indexer.start();
-
-    // Index and alias creation are not necessary for incremental indexing
-    assert.strictEqual(existsAliasSpy.callCount, 0);
-    assert.strictEqual(createSpy.callCount, 0);
-    assert.strictEqual(putAliasSpy.callCount, 0);
-
-    // DeletebyQuery is called 10 times (1 file + 1 symbol reuqests per diff item)
-    // for 5 MODIFIED items
-    assert.strictEqual(deleteByQuerySpy.callCount, 10);
-
-    // Only file content will be indexed because the workspace fails to be created.
-    assert.strictEqual(bulkSpy.callCount, 1);
-    // Thus, 0 lsp request should be sent.
-    assert.strictEqual(lspSendRequestSpy.callCount, 0);
-    let total = 0;
-    for (let i = 0; i < bulkSpy.callCount; i++) {
-      total += bulkSpy.getCall(i).args[0].body.length;
-    }
-    assert.strictEqual(total, 6 * 2);
-
     // @ts-ignore
   }).timeout(20000);
   // @ts-ignore
