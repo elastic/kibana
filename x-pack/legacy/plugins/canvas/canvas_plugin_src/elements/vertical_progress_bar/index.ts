@@ -19,8 +19,6 @@ export const verticalProgressBar: ElementFactory = () => ({
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"
-| progress shape="verticalBar" label={formatnumber 0%} font={font size=24 family="${
-    openSans.value
-  }" color="#000000" align=center}
+| progress shape="verticalBar" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}
 | render`,
 });

@@ -78,4 +78,42 @@ export interface AnomaliesTableProps {
   endDate: number;
   narrowDateRange: NarrowDateRange;
   skip: boolean;
+  hostName?: string;
+  ip?: string;
 }
+
+export interface MlCapabilities {
+  capabilities: {
+    canGetJobs: boolean;
+    canCreateJob: boolean;
+    canDeleteJob: boolean;
+    canOpenJob: boolean;
+    canCloseJob: boolean;
+    canForecastJob: boolean;
+    canGetDatafeeds: boolean;
+    canStartStopDatafeed: boolean;
+    canUpdateJob: boolean;
+    canUpdateDatafeed: boolean;
+    canPreviewDatafeed: boolean;
+    canGetCalendars: boolean;
+    canCreateCalendar: boolean;
+    canDeleteCalendar: boolean;
+    canGetFilters: boolean;
+    canCreateFilter: boolean;
+    canDeleteFilter: boolean;
+    canFindFileStructure: boolean;
+    canGetDataFrameJobs: boolean;
+    canDeleteDataFrameJob: boolean;
+    canPreviewDataFrameJob: boolean;
+    canCreateDataFrameJob: boolean;
+    canStartStopDataFrameJob: boolean;
+  };
+  isPlatinumOrTrialLicense: boolean;
+  mlFeatureEnabledInSpace: boolean;
+  upgradeInProgress: boolean;
+}
+
+const sourceOrDestination = ['source.ip', 'destination.ip'];
+
+export const isDestinationOrSource = (value: string | null): value is DestinationOrSource =>
+  value != null && sourceOrDestination.includes(value);

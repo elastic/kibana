@@ -63,6 +63,7 @@ src/plugins
 ```json
 {
   "id": "demo",
+  "version": "kibana",
   "server": true,
   "ui": true
 }
