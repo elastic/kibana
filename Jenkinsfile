@@ -83,7 +83,7 @@ def zipAll(){
   }
 }
 def globName(){
-  return "${WORKSPACE_DIR_NAME}/elasticsearch/**/*.*,${WORKSPACE_DIR_NAME}/${JOB_NAME}/**/*.*"
+  return "${WORKSPACE_DIR}/elasticsearch/**/*.*,${WORKSPACE_DIR}/${JOB_NAME}/**/*.*"
 }
 def createWorkspaceCache(){
   script {
