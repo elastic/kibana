@@ -15,7 +15,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Class | Description |
 |  --- | --- |
 |  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
-|  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers provided to simplify future migration away from Boom as internal Error. |
+|  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [Router](./kibana-plugin-server.router.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
