@@ -21,21 +21,18 @@ export function useTransactionDetailsCharts(urlParams: IUrlParams) {
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
-  const { data, error, status } = useFetcher(
-    () => {
-      if (serviceName && start && end && transactionName && transactionType) {
-        return loadTransactionCharts({
-          serviceName,
-          start,
-          end,
-          transactionName,
-          transactionType,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, transactionName, transactionType, uiFilters]
-  );
+  const { data, error, status } = useFetcher(() => {
+    if (serviceName && start && end && transactionName && transactionType) {
+      return loadTransactionCharts({
+        serviceName,
+        start,
+        end,
+        transactionName,
+        transactionType,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, transactionName, transactionType, uiFilters]);
 
   const memoizedData = useMemo(() => getTransactionCharts(urlParams, data), [
     data

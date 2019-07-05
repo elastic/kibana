@@ -53,12 +53,9 @@ function OrderByParamEditor({
   });
   const isValid = !!value;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   useEffect(() => {
     // setup the initial value of orderBy
@@ -73,21 +70,18 @@ function OrderByParamEditor({
     }
   }, []);
 
-  useEffect(
-    () => {
-      if (responseValueAggs && value && value !== 'custom') {
-        // ensure that orderBy is set to a valid agg
-        const respAgg = responseValueAggs
-          .filter(isCompatibleAgg)
-          .find(aggregation => aggregation.id === value);
+  useEffect(() => {
+    if (responseValueAggs && value && value !== 'custom') {
+      // ensure that orderBy is set to a valid agg
+      const respAgg = responseValueAggs
+        .filter(isCompatibleAgg)
+        .find(aggregation => aggregation.id === value);
 
-        if (!respAgg) {
-          setValue('_key');
-        }
+      if (!respAgg) {
+        setValue('_key');
       }
-    },
-    [responseValueAggs]
-  );
+    }
+  }, [responseValueAggs]);
 
   const defaultOptions = [
     {

@@ -5,7 +5,7 @@
  */
 
 import { UMMonitorStatesAdapter } from '../adapters/monitor_states';
-import { MonitorSummary, SnapshotCount } from '../../../common/graphql/types';
+import { MonitorSummary, SnapshotCount, StatesIndexStatus } from '../../../common/graphql/types';
 
 export class UMMonitorStatesDomain {
   constructor(private readonly adapter: UMMonitorStatesAdapter, libs: {}) {
@@ -31,7 +31,7 @@ export class UMMonitorStatesDomain {
     return this.adapter.getSummaryCount(request, dateRangeStart, dateRangeEnd, filters);
   }
 
-  public async statesIndexExists(request: any): Promise<boolean> {
+  public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
     return this.adapter.statesIndexExists(request);
   }
 

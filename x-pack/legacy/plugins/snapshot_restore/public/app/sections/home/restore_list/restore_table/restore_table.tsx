@@ -111,26 +111,20 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
   };
 
   // Update current restores to show if table changes
-  useEffect(
-    () => {
-      setCurrentRestores(getCurrentRestores());
-    },
-    [sorting, pagination]
-  );
+  useEffect(() => {
+    setCurrentRestores(getCurrentRestores());
+  }, [sorting, pagination]);
 
   // Update current restores to show if data changes
   // as well as any expanded index details
-  useEffect(
-    () => {
-      setPagination({
-        ...pagination,
-        totalItemCount: restores.length,
-      });
-      setCurrentRestores(getCurrentRestores());
-      refreshIndexRestoreDetails();
-    },
-    [restores]
-  );
+  useEffect(() => {
+    setPagination({
+      ...pagination,
+      totalItemCount: restores.length,
+    });
+    setCurrentRestores(getCurrentRestores());
+    refreshIndexRestoreDetails();
+  }, [restores]);
 
   const columns = [
     {

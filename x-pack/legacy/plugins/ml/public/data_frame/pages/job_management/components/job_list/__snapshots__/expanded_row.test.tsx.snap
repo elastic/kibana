@@ -95,7 +95,7 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
         }
       />,
       "id": "job-details",
-      "name": "Job details",
+      "name": "Transform details",
     }
   }
   onTabClick={[Function]}
@@ -192,7 +192,7 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
           }
         />,
         "id": "job-details",
-        "name": "Job details",
+        "name": "Transform details",
       },
       Object {
         "content": <JobJsonPane
@@ -235,7 +235,6 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
       },
       Object {
         "content": <TransformMessagesPane
-          lastUpdate={12345678}
           transformId="fq_date_histogram_1m_1441"
         />,
         "id": "job-messages",
@@ -243,7 +242,6 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
       },
       Object {
         "content": <PreviewPane
-          lastUpdate={12345678}
           transformConfig={
             Object {
               "dest": Object {

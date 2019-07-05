@@ -353,9 +353,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   };
 
   // metadata.branch corresponds to the version used in documentation links.
-  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${
-    metadata.branch
-  }/data-frame-transform-pivot.html`;
+  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/data-frame-transform-pivot.html`;
   const advancedEditorHelpText = (
     <Fragment>
       {i18n.translate('xpack.ml.dataframe.definePivotForm.advancedEditorHelpText', {
@@ -372,34 +370,31 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const valid = pivotGroupByArr.length > 0 && pivotAggsArr.length > 0;
 
-  useEffect(
-    () => {
-      const previewRequestUpdate = getDataFramePreviewRequest(
-        indexPattern.title,
-        pivotQuery,
-        pivotGroupByArr,
-        pivotAggsArr
-      );
+  useEffect(() => {
+    const previewRequestUpdate = getDataFramePreviewRequest(
+      indexPattern.title,
+      pivotQuery,
+      pivotGroupByArr,
+      pivotAggsArr
+    );
 
-      const stringifiedPivotConfigUpdate = JSON.stringify(previewRequestUpdate.pivot, null, 2);
-      setAdvancedEditorConfig(stringifiedPivotConfigUpdate);
+    const stringifiedPivotConfigUpdate = JSON.stringify(previewRequestUpdate.pivot, null, 2);
+    setAdvancedEditorConfig(stringifiedPivotConfigUpdate);
 
-      onChange({
-        aggList,
-        groupByList,
-        isAdvancedEditorEnabled,
-        search,
-        valid,
-      });
-    },
-    [
-      JSON.stringify(pivotAggsArr),
-      JSON.stringify(pivotGroupByArr),
+    onChange({
+      aggList,
+      groupByList,
       isAdvancedEditorEnabled,
       search,
       valid,
-    ]
-  );
+    });
+  }, [
+    JSON.stringify(pivotAggsArr),
+    JSON.stringify(pivotGroupByArr),
+    isAdvancedEditorEnabled,
+    search,
+    valid,
+  ]);
 
   // TODO This should use the actual value of `indices.query.bool.max_clause_count`
   const maxIndexFields = 1024;

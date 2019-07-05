@@ -72,34 +72,28 @@ function TopAggregateParamEditor({
     </>
   );
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (isFirstRun.current) {
-        isFirstRun.current = false;
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
+    if (value) {
+      if (aggParam.options.byValue[value.value]) {
         return;
       }
 
-      if (value) {
-        if (aggParam.options.byValue[value.value]) {
-          return;
-        }
+      setValue();
+    }
 
-        setValue();
-      }
-
-      if (filteredOptions.length === 1) {
-        setValue(aggParam.options.byValue[filteredOptions[0].value]);
-      }
-    },
-    [fieldType]
-  );
+    if (filteredOptions.length === 1) {
+      setValue(aggParam.options.byValue[filteredOptions[0].value]);
+    }
+  }, [fieldType]);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (event.target.value === emptyValue.value) {
