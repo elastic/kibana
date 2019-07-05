@@ -18,4 +18,7 @@
  */
 
 require('../src/setup_node_env');
+
+console.log('process.env.NODE_PATH', process.env.NODE_PATH);
+
 require('../src/dev/build/cli');
