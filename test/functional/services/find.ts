@@ -35,11 +35,6 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
-  const findElement = async (locator: By, timeout: number) => {
-    const webElement = await driver.wait(until.elementLocated(locator), timeout);
-    return { webElement, locator };
-  };
-
   const wrap = (webElement: WebElement | WebElementWrapper, locator: By | null) =>
     new WebElementWrapper(
       webElement,
@@ -54,6 +49,11 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) =>
     webElements.map(e => wrap(e, null));
 
+  const findAndWrap = async (locator: By, timeout: number): Promise<WebElementWrapper> => {
+    const webElement = await driver.wait(until.elementLocated(locator), timeout);
+    return wrap(webElement, locator);
+  };
+
   class Find {
     public currentWait = defaultFindTimeout;
 
@@ -62,8 +62,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<WebElementWrapper> {
       log.debug(`Find.byName('${selector}') with timeout=${timeout}`);
-      const element = await findElement(By.name(selector), timeout);
-      return wrap(element.webElement, element.locator);
+      return await findAndWrap(By.name(selector), timeout);
     }
 
     public async byCssSelector(
@@ -71,8 +70,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<WebElementWrapper> {
       log.debug(`Find.findByCssSelector('${selector}') with timeout=${timeout}`);
-      const element = await findElement(By.css(selector), timeout);
-      return wrap(element.webElement, element.locator);
+      return findAndWrap(By.css(selector), timeout);
     }
 
     public async byXPath(
@@ -80,8 +78,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<WebElementWrapper> {
       log.debug(`Find.byXPath('${selector}') with timeout=${timeout}`);
-      const element = await findElement(By.xpath(selector), timeout);
-      return wrap(element.webElement, element.locator);
+      return findAndWrap(By.xpath(selector), timeout);
     }
 
     public async byClassName(
@@ -89,8 +86,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<WebElementWrapper> {
       log.debug(`Find.findByClassName('${selector}') with timeout=${timeout}`);
-      const element = await findElement(By.className(selector), timeout);
-      return wrap(element.webElement, element.locator);
+      return findAndWrap(By.className(selector), timeout);
     }
 
     public async activeElement(): Promise<WebElementWrapper> {
@@ -235,8 +231,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<WebElementWrapper> {
       log.debug(`Find.byLinkText('${selector}') with timeout=${timeout}`);
-      const element = await findElement(By.linkText(selector), timeout);
-      return wrap(element.webElement, element.locator);
+      return findAndWrap(By.linkText(selector), timeout);
     }
 
     public async byPartialLinkText(
@@ -244,8 +239,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<WebElementWrapper> {
       log.debug(`Find.byPartialLinkText('${partialLinkText}')  with timeout=${timeout}`);
-      const element = await findElement(By.partialLinkText(partialLinkText), timeout);
-      return wrap(element.webElement, element.locator);
+      return findAndWrap(By.partialLinkText(partialLinkText), timeout);
     }
 
     public async exists(
