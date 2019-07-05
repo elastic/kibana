@@ -63,7 +63,10 @@ export const getAnomaliesNetworkTableColumns = (
     field: 'anomaly.jobId',
     sortable: true,
     render: (jobId, anomaliesByHost) => (
-      <EuiLink href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}>
+      <EuiLink
+        href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}
+        target="_blank"
+      >
         {jobId}
       </EuiLink>
     ),
