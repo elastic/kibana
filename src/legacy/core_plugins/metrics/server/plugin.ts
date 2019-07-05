@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Legacy } from 'kibana';
 import { CoreSetup } from 'src/core/server';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
@@ -28,7 +29,7 @@ import { SearchStrategiesRegister } from './lib/search_strategies/search_strateg
 // TODO: Remove as CoreSetup is completed.
 export interface CustomCoreSetup {
   http: {
-    server: any;
+    server: Legacy.Server;
   };
 }
 
