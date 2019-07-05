@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { filterRatioOperation } from './filter_ratio';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 import { act } from 'react-dom/test-utils';
+import { filterRatioOperation } from './filter_ratio';
+import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 
 describe('filter_ratio', () => {
   let state: IndexPatternPrivateState;
@@ -110,7 +110,7 @@ describe('filter_ratio', () => {
       }).not.toThrow();
     });
 
-    it('should call the query bar properly', () => {
+    it('should show only the numerator by default', () => {
       const wrapper = shallowWithIntl(
         <InlineOptions
           state={state}
@@ -121,7 +121,82 @@ describe('filter_ratio', () => {
         />
       );
 
+      expect(wrapper.find('QueryBarInput')).toHaveLength(1);
       expect(wrapper.find('QueryBarInput').prop('indexPatterns')).toEqual(['1']);
+    });
+
+    it('should update the state when typing into the query bar', () => {
+      const setState = jest.fn();
+      const wrapper = shallowWithIntl(
+        <InlineOptions
+          state={state}
+          setState={setState}
+          columnId="col1"
+          storage={storageMock}
+          dataPlugin={dataMock}
+        />
+      );
+
+      wrapper.find('QueryBarInput').prop('onChange')!({
+        query: 'geo.src : "US"',
+        language: 'kuery',
+      } as any);
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        columns: {
+          col1: {
+            ...state.columns.col1,
+            params: {
+              numerator: { query: 'geo.src : "US"', language: 'kuery' },
+              denominator: { query: '*', language: 'kuery' },
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow editing the denominator', () => {
+      const setState = jest.fn();
+      const wrapper = shallowWithIntl(
+        <InlineOptions
+          state={state}
+          setState={setState}
+          columnId="col1"
+          storage={storageMock}
+          dataPlugin={dataMock}
+        />
+      );
+
+      act(() => {
+        wrapper
+          .find('[data-test-subj="lns-indexPatternFilterRatio-showDenominatorButton"]')
+          .first()
+          .simulate('click');
+      });
+
+      expect(wrapper.find('QueryBarInput')).toHaveLength(2);
+
+      wrapper
+        .find('QueryBarInput')
+        .at(1)
+        .prop('onChange')!({
+        query: 'geo.src : "US"',
+        language: 'kuery',
+      } as any);
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        columns: {
+          col1: {
+            ...state.columns.col1,
+            params: {
+              numerator: { query: '', language: 'kuery' },
+              denominator: { query: 'geo.src : "US"', language: 'kuery' },
+            },
+          },
+        },
+      });
     });
   });
 });

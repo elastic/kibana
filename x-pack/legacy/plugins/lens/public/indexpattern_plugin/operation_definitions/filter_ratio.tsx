@@ -128,7 +128,11 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               />
 
               <EuiFormRow>
-                <EuiButton fill onClick={() => setDenominator(true)}>
+                <EuiButton
+                  data-test-subj="lns-indexPatternFilterRatio-showDenominatorButton"
+                  fill
+                  onClick={() => setDenominator(true)}
+                >
                   <FormattedMessage
                     id="xpack.lens.indexPattern.filterRatioUseDenominatorButton"
                     defaultMessage="Divide by filter instead"
