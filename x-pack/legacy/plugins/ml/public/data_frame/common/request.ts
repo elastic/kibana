@@ -50,7 +50,7 @@ export interface DataFrameJobConfig extends DataFrameRequest {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator: DefaultOperator;
+    default_operator?: DefaultOperator;
   };
 }
 
