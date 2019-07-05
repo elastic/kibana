@@ -24,12 +24,51 @@ import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnTopNav2', (reactDirective) => {
+module.directive('kbnTopNav2', () => {
+  return {
+    restrict: 'E',
+    template: '',
+    compile: (elem) => {
+      const child = document.createElement('kbn-top-nav2-helper');
+
+      // Copy attributes to the child directive
+      for (const attr of elem[0].attributes) {
+        child.setAttribute(attr.name, attr.value);
+      }
+
+      // Add a special attribute that will change every time that one
+      // of the config array's disableButton function return value changes.
+      child.setAttribute('disabled-buttons', 'disabledButtons');
+      elem.append(child);
+
+      const linkFn = ($scope, _, $attr) => {
+        // Watch the disableButton functions
+        $scope.$watch(() => {
+          const config = $scope.$eval($attr.config);
+          return config.map((item) => {
+            if (typeof item.disableButton === 'function') {
+              return item.disableButton();
+            }
+            return item.disableButton;
+          });
+        }, (newVal) => {
+          $scope.disabledButtons = newVal;
+        },
+        true);
+      };
+
+      return linkFn;
+    }
+  };
+});
+
+module.directive('kbnTopNav2Helper', (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
       ['name', { watchDepth: 'reference' }],
       ['config', { watchDepth: 'value' }],
+      ['disabledButtons', { watchDepth: 'reference' }],
 
       ['query', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
