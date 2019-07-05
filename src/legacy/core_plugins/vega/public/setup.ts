@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
+import { functionsRegistry } from '../../interpreter/public/registries';
 import { visualizations, VisualizationsSetup } from '../../visualizations/public';
 import { DataSetup } from '../../data/public';
 import { LegacyDependenciesService } from './legacy_dependencies_service';
@@ -37,5 +37,8 @@ export const plugins: VegaSetupPlugin = {
     },
   },
   visualizations,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
   legacy: new LegacyDependenciesService(),
 };
