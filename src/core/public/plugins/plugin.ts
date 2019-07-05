@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DiscoveredPlugin, PluginName } from '../../server';
+import { DiscoveredPlugin } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 import { CoreStart, CoreSetup } from '..';
@@ -47,8 +47,8 @@ export interface Plugin<
 export type PluginInitializer<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown> = {},
-  TPluginsStart extends Record<string, unknown> = {}
+  TPluginsSetup extends {} = {},
+  TPluginsStart extends {} = {}
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -60,8 +60,8 @@ export type PluginInitializer<
 export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends {} = {},
+  TPluginsStart extends {} = {}
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];
