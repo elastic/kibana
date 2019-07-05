@@ -502,8 +502,8 @@ const mapStateToProps = (state: RootState) => ({
   searchLoading: state.search.isScopeSearchLoading,
   searchScope: state.search.scope,
   searchOptions: state.search.searchOptions,
-  defaultRepoOptions: state.repository.repositories.slice(0, 5),
-  currentRepository: state.repository.currentRepository,
+  defaultRepoOptions: state.repositoryManagement.repositories.slice(0, 5),
+  currentRepository: state.repository.repository,
 });
 
 const mapDispatchToProps = {

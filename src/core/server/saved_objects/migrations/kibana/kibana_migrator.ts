@@ -56,7 +56,7 @@ interface Server {
 }
 
 interface ElasticsearchPlugin {
-  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
+  getCluster: (name: 'admin') => { callWithInternalUser: CallCluster };
   waitUntilReady: () => Promise<any>;
 }
 

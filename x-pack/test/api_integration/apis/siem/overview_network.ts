@@ -45,6 +45,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -85,6 +86,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -125,6 +127,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

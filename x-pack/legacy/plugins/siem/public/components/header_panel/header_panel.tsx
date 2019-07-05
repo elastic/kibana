@@ -9,6 +9,8 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { InspectButton } from '../inspect';
+
 const Header = styled.header<{ border?: boolean }>`
   ${props => `
     margin-bottom: ${props.theme.eui.euiSizeL};
@@ -24,28 +26,37 @@ const Header = styled.header<{ border?: boolean }>`
 export interface HeaderPanelProps {
   border?: boolean;
   children?: React.ReactNode;
+  id?: string;
   subtitle?: string | React.ReactNode;
+  showInspect?: boolean;
   title: string | React.ReactNode;
   tooltip?: string;
 }
 
 export const HeaderPanel = pure<HeaderPanelProps>(
-  ({ border, children, subtitle, title, tooltip }) => (
+  ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
-          <EuiTitle>
-            <h2 data-test-subj="page_headline_title">
-              {title}{' '}
-              {tooltip && <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />}
-            </h2>
-          </EuiTitle>
-
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h2 data-test-subj="page_headline_title">{title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {tooltip && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           <EuiText color="subdued" size="s">
             {subtitle}
           </EuiText>
         </EuiFlexItem>
-
+        <EuiFlexItem grow={false}>
+          {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
+        </EuiFlexItem>
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
       </EuiFlexGroup>
     </Header>

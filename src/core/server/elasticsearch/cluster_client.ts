@@ -16,12 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import Boom from 'boom';
 import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 import { Request } from 'hapi';
 
+import { ElasticsearchErrorHelpers } from './errors';
 import { GetAuthHeaders, isRealRequest } from '../http';
 import { filterHeaders, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
@@ -97,13 +96,7 @@ async function callAPI(
       throw err;
     }
 
-    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-    const wwwAuthHeader: string = get(err, 'body.error.header[WWW-Authenticate]');
-
-    boomError.output.headers['WWW-Authenticate'] =
-      wwwAuthHeader || 'Basic realm="Authorization Required"';
-
-    throw boomError;
+    throw ElasticsearchErrorHelpers.decorateNotAuthorizedError(err);
   }
 }
 

@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { GRID_RESOLUTION } from '../../grid_resolution';
 import {
   EuiSuperSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 
 const OPTIONS = [
   {
@@ -39,22 +35,12 @@ const OPTIONS = [
 
 export function ResolutionEditor({ resolution, onChange }) {
   return (
-    <Fragment>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={true}>
-          <EuiFormLabel style={{ marginBottom: 0 }}>
-            <FormattedMessage
-              id="xpack.maps.geoGrid.resolutionLabel"
-              defaultMessage="Grid resolution"
-            />
-          </EuiFormLabel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={true}>
-          <EuiSuperSelect options={OPTIONS} valueOfSelected={resolution} onChange={onChange} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Fragment>
+    <EuiFormRow
+      label={i18n.translate('xpack.maps.geoGrid.resolutionLabel', {
+        defaultMessage: 'Grid resolution'
+      })}
+    >
+      <EuiSuperSelect options={OPTIONS} valueOfSelected={resolution} onChange={onChange} />
+    </EuiFormRow>
   );
 }

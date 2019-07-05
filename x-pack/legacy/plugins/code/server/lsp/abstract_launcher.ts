@@ -33,7 +33,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   private proxyConnected: boolean = false;
   protected readonly log: Logger;
   private spawnTimes: number = 0;
-  private launchReject?: ((reason?: any) => void);
+  private launchReject?: (reason?: any) => void;
   protected constructor(
     readonly name: string,
     readonly targetHost: string,
