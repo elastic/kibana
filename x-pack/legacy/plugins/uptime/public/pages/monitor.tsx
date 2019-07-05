@@ -24,6 +24,7 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { BaseLocationOptions } from '../components/functional/ping_list';
+import { useTrackVisit } from '../../../infra/public';
 
 interface MonitorPageProps {
   history: { push: any };
@@ -89,6 +90,9 @@ export const MonitorPage = ({
   useEffect(() => {
     logMonitorPageLoad();
   }, []);
+
+  useTrackVisit({ app: 'uptime', path: 'monitor' });
+  useTrackVisit({ app: 'uptime', path: 'monitor', delay: 15000 });
 
   return (
     <Fragment>
