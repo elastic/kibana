@@ -76,7 +76,7 @@ export class WebElementWrapper {
     return elements;
   }
 
-  private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By | null) {
+  private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By | null = null) {
     return new WebElementWrapper(
       otherWebElement,
       locator,
@@ -89,7 +89,7 @@ export class WebElementWrapper {
   }
 
   private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
-    return otherWebElements.map(e => this._wrap(e, null));
+    return otherWebElements.map(e => this._wrap(e));
   }
 
   private retryCount: number = 3;

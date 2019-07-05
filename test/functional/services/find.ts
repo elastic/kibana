@@ -35,7 +35,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
-  const wrap = (webElement: WebElement | WebElementWrapper, locator: By | null) =>
+  const wrap = (webElement: WebElement | WebElementWrapper, locator: By | null = null) =>
     new WebElementWrapper(
       webElement,
       locator,
@@ -47,7 +47,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     );
 
   const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) =>
-    webElements.map(e => wrap(e, null));
+    webElements.map(e => wrap(e));
 
   const findAndWrap = async (locator: By, timeout: number): Promise<WebElementWrapper> => {
     const webElement = await driver.wait(until.elementLocated(locator), timeout);
@@ -90,7 +90,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     }
 
     public async activeElement(): Promise<WebElementWrapper> {
-      return wrap(await driver.switchTo().activeElement(), null);
+      return wrap(await driver.switchTo().activeElement());
     }
 
     public async setValue(selector: string, text: string): Promise<void> {
