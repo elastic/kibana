@@ -39,7 +39,8 @@ pipeline {
             dumpEnv()
             dumpWorkspaceSize()
             createWorkspaceCache()
-            tarWorkspace()
+            // tarWorkspace()
+            zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: '*'
           }
           step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         }
