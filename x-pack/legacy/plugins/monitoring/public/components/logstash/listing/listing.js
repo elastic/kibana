@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { get } from 'lodash';
-import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
@@ -110,8 +110,9 @@ export class Listing extends PureComponent {
       }
     ];
   }
+
   render() {
-    const { data, stats, sorting, pagination, onTableChange } = this.props;
+    const { stats, sorting, pagination, onTableChange, data, setupMode } = this.props;
     const columns = this.getColumns();
     const flattenedData = data.map(item => ({
       ...item,
@@ -123,6 +124,29 @@ export class Listing extends PureComponent {
       version: get(item, 'logstash.version', 'N/A'),
     }));
 
+    let netNewUserMessage = null;
+    if (setupMode.enabled && setupMode.data && get(setupMode.data, 'detected.mightExist')) {
+      netNewUserMessage = (
+        <Fragment>
+          <EuiCallOut
+            title={i18n.translate('xpack.monitoring.logstash.nodes.metribeatMigration.netNewUserTitle', {
+              defaultMessage: 'No monitoring data detected',
+            })}
+            color="warning"
+            iconType="help"
+          >
+            <p>
+              {i18n.translate('xpack.monitoring.logstash.nodes.metribeatMigration.netNewUserDescription', {
+                defaultMessage: `We did not detect any monitoring data, but we think you are using a Logstash node.
+                Click the setup button below the table to start monitoring this Logstash node.`
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m"/>
+        </Fragment>
+      );
+    }
+
     return (
       <EuiPage>
         <EuiPageBody>
@@ -130,10 +154,14 @@ export class Listing extends PureComponent {
             <ClusterStatus stats={stats} />
           </EuiPanel>
           <EuiSpacer size="m" />
+          {netNewUserMessage}
           <EuiPageContent>
             <EuiMonitoringTable
               className="logstashNodesTable"
               rows={flattenedData}
+              setupMode={setupMode}
+              uuidField="logstash.uuid"
+              nameField="name"
               columns={columns}
               sorting={{
                 ...sorting,

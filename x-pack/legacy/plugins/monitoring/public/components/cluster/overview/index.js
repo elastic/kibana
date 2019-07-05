@@ -45,7 +45,7 @@ export function Overview(props) {
           : null
         }
 
-        <LogstashPanel {...props.cluster.logstash} changeUrl={props.changeUrl} />
+        <LogstashPanel {...props.cluster.logstash} setupMode={props.setupMode} changeUrl={props.changeUrl} />
 
         <BeatsPanel {...props.cluster.beats} changeUrl={props.changeUrl} />
 

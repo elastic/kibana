@@ -13,25 +13,38 @@ import {
   getElasticsearchInstructionsForDisablingInternalCollection
 } from './elasticsearch';
 import {
+  getLogstashInstructionsForEnablingMetricbeat,
+  getLogstashInstructionsForDisablingInternalCollection,
+} from './logstash';
+import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
+import { ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { KIBANA_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 
 export function getInstructionSteps(productName, product, step, meta, opts) {
   switch (productName) {
-    case 'kibana':
+    case KIBANA_SYSTEM_ID:
       if (step === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
         return getKibanaInstructionsForEnablingMetricbeat(product, meta, opts);
       }
       if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
         return getKibanaInstructionsForDisablingInternalCollection(product, meta, opts);
       }
-    case 'elasticsearch':
+    case ELASTICSEARCH_CUSTOM_ID:
       if (step === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
         return getElasticsearchInstructionsForEnablingMetricbeat(product, meta, opts);
       }
       if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
         return getElasticsearchInstructionsForDisablingInternalCollection(product, meta, opts);
+      }
+    case LOGSTASH_SYSTEM_ID:
+      if (step === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+        return getLogstashInstructionsForEnablingMetricbeat(product, meta, opts);
+      }
+      if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
+        return getLogstashInstructionsForDisablingInternalCollection(product, meta, opts);
       }
   }
   return [];

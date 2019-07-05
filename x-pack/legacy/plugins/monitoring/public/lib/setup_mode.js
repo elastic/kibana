@@ -60,13 +60,14 @@ export const fetchCollectionData = async () => {
   }
 };
 
-const notifySetupModeDataChange = () => {
-  setupModeState.callbacks.forEach(cb => cb());
+const notifySetupModeDataChange = (oldData) => {
+  setupModeState.callbacks.forEach(cb => cb(oldData));
 };
 
 export const updateSetupModeData = async () => {
+  const oldData = setupModeState.data;
   setupModeState.data = await fetchCollectionData();
-  notifySetupModeDataChange();
+  notifySetupModeDataChange(oldData);
 };
 
 export const toggleSetupMode = inSetupMode => {

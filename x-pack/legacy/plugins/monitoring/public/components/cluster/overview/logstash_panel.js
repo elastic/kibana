@@ -21,18 +21,43 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiIconTip,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 export function LogstashPanel(props) {
-  if (!props.node_count) {
+  const { setupMode } = props;
+  const nodesCount = props.node_count || 0;
+  const queueTypes = props.queue_types || {};
+
+  // Do not show if we are not in setup mode
+  if (!nodesCount && !setupMode.enabled) {
     return null;
   }
 
   const goToLogstash = () => props.changeUrl('logstash');
   const goToNodes = () => props.changeUrl('logstash/nodes');
   const goToPipelines = () => props.changeUrl('logstash/pipelines');
+
+  let setupModeInstancesData = null;
+  if (setupMode.enabled && setupMode.data) {
+    const logstashData = get(setupMode.data, 'logstash.byUuid');
+    const migratedNodesCount = Object.values(logstashData).filter(node => node.isFullyMigrated).length;
+    let totalNodesCount = Object.values(logstashData).length;
+    if (totalNodesCount === 0 && get(setupMode.data, 'logstash.detected.mightExist', false)) {
+      totalNodesCount = 1;
+    }
+
+    setupModeInstancesData = (
+      <EuiFlexItem grow={false}>
+        <EuiNotificationBadge>
+          {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+        </EuiNotificationBadge>
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <ClusterItemContainer
@@ -86,27 +111,32 @@ export function LogstashPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  onClick={goToNodes}
-                  data-test-subj="lsNodes"
-                  aria-label={i18n.translate(
-                    'xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkAriaLabel',
-                    {
-                      defaultMessage: 'Logstash Nodes: {nodesCount}',
-                      values: { nodesCount: props.node_count }
-                    }
-                  )}
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkLabel"
-                    defaultMessage="Nodes: {nodesCount}"
-                    values={{ nodesCount: (<span data-test-subj="number_of_logstash_instances">{ props.node_count }</span>) }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      onClick={goToNodes}
+                      data-test-subj="lsNodes"
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkAriaLabel',
+                        {
+                          defaultMessage: 'Logstash Nodes: {nodesCount}',
+                          values: { nodesCount }
+                        }
+                      )}
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkLabel"
+                        defaultMessage="Nodes: {nodesCount}"
+                        values={{ nodesCount: (<span data-test-subj="number_of_logstash_instances">{ nodesCount }</span>) }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {setupModeInstancesData}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>
@@ -177,14 +207,14 @@ export function LogstashPanel(props) {
                   defaultMessage="With Memory Queues"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ props.queue_types[LOGSTASH.QUEUE_TYPES.MEMORY] }</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.MEMORY] }</EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.withPersistentQueuesLabel"
                   defaultMessage="With Persistent Queues"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ props.queue_types[LOGSTASH.QUEUE_TYPES.PERSISTED] }</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.PERSISTED] }</EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
