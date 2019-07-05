@@ -17,8 +17,18 @@
  * under the License.
  */
 
-export const isEmptyArray = (value: any[]): boolean => value.length === 0;
+import { ValidationFunc } from '../hook_form_lib';
+import { hasMinLengthString } from '../../validators/string';
+import { hasMinLengthArray } from '../../validators/array';
+import { minLengthError } from '../errors';
 
-export const minLengthArray = (length = 1) => (value: any[]): boolean => value.length >= length;
+export const minLengthField = (length = 0) => (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
 
-export const maxLengthArray = (length = 5) => (value: any[]): boolean => value.length <= length;
+  if (Array.isArray(value)) {
+    return hasMinLengthArray(length)(value) ? undefined : minLengthError(length);
+  }
+  return hasMinLengthString(length)((value as string).trim()) ? undefined : minLengthError(length);
+};

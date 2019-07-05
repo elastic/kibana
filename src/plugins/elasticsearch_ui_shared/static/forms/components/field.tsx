@@ -34,7 +34,7 @@ import {
   FIELD_TYPES,
   ERROR_TYPES,
   FieldValidateResponse,
-} from 'ui/forms/hook_form_lib';
+} from '../hook_form_lib';
 
 interface Props {
   field: FieldType;
@@ -140,7 +140,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
             }}
             hasNoInitialSelection={true}
             isInvalid={false}
-            {...fieldProps as { options: any; [key: string]: any }}
+            {...(fieldProps as { options: any; [key: string]: any })}
           />
         );
       case FIELD_TYPES.COMBO_BOX:

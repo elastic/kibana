@@ -17,8 +17,10 @@
  * under the License.
  */
 
-export const minLengthString = (length: number) => (str: string) => str.length >= length;
-
-export const maxLengthString = (length: number) => (str: string) => str.length <= length;
-
-export const isEmptyString = (value: string) => value.trim() === '';
+export * from './contains_string';
+export * from './ends_with';
+export * from './has_max_length';
+export * from './has_min_length';
+export * from './is_empty';
+export * from './is_url';
+export * from './starts_with';

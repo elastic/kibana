@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Option } from '@elastic/eui/src/components/selectable/types';
-import { InputTransformFunc } from 'ui/forms/hook_form_lib';
 
-export const multiSelectSelectedValueToOptions: InputTransformFunc = (
-  defaultValue,
-  defaultFormValue
-) => {
-  if (!defaultFormValue) {
-    return defaultValue;
-  }
-  return (defaultValue as Option[]).map(option => ({
-    ...option,
-    checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,
-  }));
+export const containsChars = (chars: string | string[]) => (value: string) => {
+  const charToArray = Array.isArray(chars) ? (chars as string[]) : ([chars] as string[]);
+
+  const charsFound = charToArray.reduce(
+    (acc, char) => (value.includes(char) ? [...acc, char] : acc),
+    [] as string[]
+  );
+
+  return {
+    charsFound,
+    doesContain: charsFound.length > 0,
+  };
 };

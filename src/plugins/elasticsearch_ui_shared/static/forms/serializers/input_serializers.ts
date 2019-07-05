@@ -16,23 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Option } from '@elastic/eui/src/components/selectable/types';
+import { InputSerializerFunc } from '../hook_form_lib';
 
-import { ValidationFunc } from '../hook_form_lib';
-import { isEmptyString, isUrl } from '../../validators';
-import { formatError } from '../errors';
-
-export const urlField = (allowEmpty = false) => (
-  ...args: Parameters<ValidationFunc>
-): ReturnType<ValidationFunc> => {
-  const [{ value }] = args;
-
-  if (typeof value !== 'string') {
-    return formatError('URL');
+export const multiSelectSelectedValueToOptions: InputSerializerFunc = (
+  defaultValue,
+  defaultFormValue
+) => {
+  if (!defaultFormValue) {
+    return defaultValue;
   }
-
-  if (allowEmpty && isEmptyString(value)) {
-    return;
-  }
-
-  return isUrl(value) ? undefined : formatError('URL');
+  return (defaultValue as Option[]).map(option => ({
+    ...option,
+    checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,
+  }));
 };

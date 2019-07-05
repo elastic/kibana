@@ -7,8 +7,12 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle, EuiButton } from '@elastic/eui';
-import { useForm, FormConfig, UseField } from 'ui/forms/hook_form_lib';
-import { FormRow } from 'ui/forms/components';
+import {
+  useForm,
+  FormConfig,
+  UseField,
+} from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+import { FormRow } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
 
 import { MyForm } from './types';
 import { formSchema } from './form.schema';

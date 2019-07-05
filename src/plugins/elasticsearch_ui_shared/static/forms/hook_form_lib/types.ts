@@ -72,9 +72,10 @@ export interface Field {
   readonly form: Form;
   getErrorsMessages: (errorType?: 'field' | string) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
-  validate: (
-    validateData?: { formData?: any; value?: unknown }
-  ) => FieldValidateResponse | Promise<FieldValidateResponse>;
+  validate: (validateData?: {
+    formData?: any;
+    value?: unknown;
+  }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
   getOutputValue: () => unknown;
@@ -90,8 +91,8 @@ export interface FieldConfig<T = FormData> {
   readonly validations?: Array<ValidationConfig<T>>;
   readonly validationsArrayItems?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
-  readonly outputTransform?: OutputTransformFunc;
-  readonly inputTransform?: InputTransformFunc;
+  readonly inputSerializer?: InputSerializerFunc;
+  readonly outputSerializer?: OutputSerializerFunc;
   readonly fieldsToValidateOnChange?: string[];
   readonly isValidationAsync?: boolean;
   readonly errorDisplayDelay?: number;
@@ -110,23 +111,24 @@ export interface ValidationError {
   [key: string]: any;
 }
 
-export type ValidationFunc<T = any> = (
-  data: {
-    path: string;
-    value: unknown;
-    formData: T;
-    errors: ReadonlyArray<ValidationError>;
-  }
-) => ValidationError | void | undefined | Promise<ValidationError | void | undefined>;
+export type ValidationFunc<T = any> = (data: {
+  path: string;
+  value: unknown;
+  formData: T;
+  errors: ReadonlyArray<ValidationError>;
+}) => ValidationError | void | undefined | Promise<ValidationError | void | undefined>;
 
 export interface FieldValidateResponse {
   isValid: boolean;
   errors: ValidationError[];
 }
 
-export type OutputTransformFunc = (value: any) => unknown;
+export type InputSerializerFunc<T = unknown> = (
+  defaultValue: unknown,
+  formDataValue?: unknown
+) => T;
 
-export type InputTransformFunc = (defaultValue: unknown, formDataValue?: unknown) => unknown;
+export type OutputSerializerFunc<T = unknown> = (value: any) => T;
 
 type FormData = Record<string, string>;
 

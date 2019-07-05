@@ -37,11 +37,13 @@
  */
 
 import { Option } from '@elastic/eui/src/components/selectable/types';
+import { OutputSerializerFunc } from '../hook_form_lib';
 
 /**
  * Return an array of labels of all the options that are selected
  *
  * @param value The Eui Selectable options array
  */
-export const multiSelectOptionsToSelectedValue = (options: Option[]) =>
-  options.filter(option => option.checked === 'on').map(option => option.label);
+export const multiSelectOptionsToSelectedValue: OutputSerializerFunc<string[]> = (
+  options: Option[]
+): string[] => options.filter(option => option.checked === 'on').map(option => option.label);

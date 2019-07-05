@@ -66,7 +66,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     errorDisplayDelay = form.options.errorDisplayDelay,
   } = config;
 
-  const { outputTransform } = config;
+  const { outputSerializer } = config;
 
   const [value, setStateValue] = useState(
     typeof defaultValue === 'function' ? defaultValue() : defaultValue
@@ -311,7 +311,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   };
 
   const getOutputValue: Field['getOutputValue'] = () =>
-    outputTransform ? outputTransform(value) : value;
+    outputSerializer ? outputSerializer(value) : value;
 
   const getErrorsMessages: Field['getErrorsMessages'] = (errorType = ERROR_TYPES.FIELD) => {
     const errorMessages = errors.reduce((messages, error) => {
@@ -329,16 +329,13 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
   // -- EFFECTS
   // ----------------------------------
-  useEffect(
-    () => {
-      if (isPristine) {
-        // Avoid validate on mount
-        return;
-      }
-      form.validateFields(fieldsToValidateOnChange);
-    },
-    [value]
-  );
+  useEffect(() => {
+    if (isPristine) {
+      // Avoid validate on mount
+      return;
+    }
+    form.validateFields(fieldsToValidateOnChange);
+  }, [value]);
 
   const field: Field = {
     path,

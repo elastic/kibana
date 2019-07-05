@@ -23,13 +23,11 @@ import { Form } from '../types';
 interface Props {
   path: string;
   form: Form<any>;
-  children: (
-    args: {
-      rows: Row[];
-      addRow: () => void;
-      removeRow: (id: number) => void;
-    }
-  ) => JSX.Element;
+  children: (args: {
+    rows: Row[];
+    addRow: () => void;
+    removeRow: (id: number) => void;
+  }) => JSX.Element;
 }
 
 interface Row {

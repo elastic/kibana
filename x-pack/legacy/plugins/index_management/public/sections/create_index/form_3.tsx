@@ -17,8 +17,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useForm, FormConfig, FieldConfig, UseField, UseArray } from 'ui/forms/hook_form_lib';
-import { FormRow, Field } from 'ui/forms/components';
+import {
+  useForm,
+  FormConfig,
+  FieldConfig,
+  UseField,
+  UseArray,
+} from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+import {
+  FormRow,
+  Field,
+} from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
 
 import { MyForm } from './types';
 import { formSchema } from './form.schema';

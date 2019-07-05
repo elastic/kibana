@@ -18,16 +18,21 @@
  */
 
 import { ValidationFunc } from '../hook_form_lib';
-import { minLengthString, minLengthArray } from '../../validators';
-import { minLengthError } from '../errors';
+import { isEmptyString, isUrl } from '../../validators/string';
+import { formatError } from '../errors';
 
-export const minLengthField = (length = 0) => (
+export const urlField = (allowEmpty = false) => (
   ...args: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc> => {
   const [{ value }] = args;
 
-  if (Array.isArray(value)) {
-    return minLengthArray(length)(value) ? undefined : minLengthError(length);
+  if (typeof value !== 'string') {
+    return formatError('URL');
   }
-  return minLengthString(length)((value as string).trim()) ? undefined : minLengthError(length);
+
+  if (allowEmpty && isEmptyString(value)) {
+    return;
+  }
+
+  return isUrl(value) ? undefined : formatError('URL');
 };

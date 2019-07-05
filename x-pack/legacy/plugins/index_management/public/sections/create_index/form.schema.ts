@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormSchema, FIELD_TYPES, ERROR_TYPES } from 'ui/forms/hook_form_lib';
-import { emptyField, minLengthField, minSelectionField } from 'ui/forms/field_validators';
-import { multiSelectOptionsToSelectedValue } from 'ui/forms/output_transforms';
-import { multiSelectSelectedValueToOptions } from 'ui/forms/input_transforms';
+import {
+  emptyField,
+  minLengthField,
+  minSelectionField,
+} from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/field_validators';
+import { multiSelectSelectedValueToOptions } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/serializers/input_serializers';
+import { multiSelectOptionsToSelectedValue } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/serializers/output_serializers';
+import {
+  FormSchema,
+  FIELD_TYPES,
+  ERROR_TYPES,
+} from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 import { MyForm } from './types';
 
 export const formSchema: FormSchema<MyForm> = {

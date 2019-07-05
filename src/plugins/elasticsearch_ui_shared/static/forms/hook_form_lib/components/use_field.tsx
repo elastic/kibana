@@ -48,8 +48,8 @@ export const UseField = ({
   const defaultValueOnForm = form.getDefaultValueField(path);
   const defaultValueProvided = defaultValue;
 
-  const _defaultValue = config.inputTransform
-    ? config.inputTransform(defaultValueProvided, defaultValueOnForm)
+  const _defaultValue = config.inputSerializer
+    ? config.inputSerializer(defaultValueProvided, defaultValueOnForm)
     : typeof defaultValueProvided !== 'undefined'
     ? defaultValueProvided
     : defaultValueOnForm;
