@@ -154,7 +154,7 @@ export interface ElasticsearchServiceSetup {
 
 // @public
 export interface FakeRequest {
-    headers: Record<string, string>;
+    headers: Headers;
 }
 
 // @public

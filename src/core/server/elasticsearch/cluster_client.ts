@@ -22,7 +22,7 @@ import { Request } from 'hapi';
 
 import { ElasticsearchErrorHelpers } from './errors';
 import { GetAuthHeaders, isRealRequest } from '../http';
-import { filterHeaders, KibanaRequest, ensureRawRequest } from '../http/router';
+import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
 import {
   ElasticsearchClientConfig,
@@ -106,7 +106,7 @@ async function callAPI(
  */
 export interface FakeRequest {
   /** Headers used for authentication against Elasticsearch */
-  headers: Record<string, string>;
+  headers: Headers;
 }
 
 /**
