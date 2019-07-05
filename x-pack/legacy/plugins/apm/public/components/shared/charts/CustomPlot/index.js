@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, flatten } from 'lodash';
 import { makeWidthFlexible } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent, Fragment } from 'react';
@@ -15,6 +15,7 @@ import InteractivePlot from './InteractivePlot';
 import VoronoiPlot from './VoronoiPlot';
 import { createSelector } from 'reselect';
 import { getPlotValues } from './plotUtils';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 const VISIBLE_LEGEND_COUNT = 4;
 
@@ -33,31 +34,22 @@ export class InnerCustomPlot extends PureComponent {
   getEnabledSeries = createSelector(
     state => state.visibleSeries,
     state => state.seriesEnabledState,
-    state => state.stacked,
-    (visibleSeries, seriesEnabledState, stacked) =>
-      visibleSeries
-        .filter((serie, i) => !seriesEnabledState[i])
-        .map(serie => {
-          return stacked ? { ...serie, stack: true } : serie;
-        })
+    (visibleSeries, seriesEnabledState) =>
+      visibleSeries.filter((serie, i) => !seriesEnabledState[i])
   );
 
   getOptions = createSelector(
     state => state.width,
     state => state.yMin,
     state => state.yMax,
-    state => state.start,
-    state => state.end,
     state => state.height,
-    state => state.stacked,
-    (width, yMin, yMax, start, end, height, stacked) => ({
+    state => state.stackBy,
+    (width, yMin, yMax, height, stackBy) => ({
       width,
       yMin,
       yMax,
-      start,
-      end,
       height,
-      stacked
+      stackBy
     })
   );
 
@@ -75,18 +67,6 @@ export class InnerCustomPlot extends PureComponent {
         0,
         VISIBLE_LEGEND_COUNT + getHiddenLegendCount(series)
       );
-    }
-  );
-
-  getStackedPlotSeries = createSelector(
-    state => state.enabledSeries,
-    series => {
-      return series.map(serie => {
-        return {
-          ...serie,
-          type: 'line'
-        };
-      });
     }
   );
 
@@ -142,7 +122,7 @@ export class InnerCustomPlot extends PureComponent {
   }
 
   render() {
-    const { series, truncateLegends, noHits, width, stacked } = this.props;
+    const { series, truncateLegends, width } = this.props;
 
     if (isEmpty(series) || !width) {
       return null;
@@ -155,8 +135,7 @@ export class InnerCustomPlot extends PureComponent {
     const visibleSeries = this.getVisibleSeries({ series });
     const enabledSeries = this.getEnabledSeries({
       visibleSeries,
-      seriesEnabledState: this.state.seriesEnabledState,
-      stacked
+      seriesEnabledState: this.state.seriesEnabledState
     });
     const options = this.getOptions(this.props);
 
@@ -170,15 +149,10 @@ export class InnerCustomPlot extends PureComponent {
       return null;
     }
 
-    const staticPlot = (
-      <StaticPlot
-        noHits={noHits}
-        plotValues={plotValues}
-        series={enabledSeries}
-        tickFormatY={this.props.tickFormatY}
-        tickFormatX={this.props.tickFormatX}
-      />
-    );
+    const noHits =
+      flatten(enabledSeries.map(s => s.data)).filter(coord =>
+        isValidCoordinateValue(coord.y)
+      ).length === 0;
 
     return (
       <Fragment>
@@ -190,12 +164,6 @@ export class InnerCustomPlot extends PureComponent {
             tickFormatY={this.props.tickFormatY}
             tickFormatX={this.props.tickFormatX}
           />
-
-          {stacked
-            ? React.cloneElement(staticPlot, {
-                series: this.getStackedPlotSeries({ enabledSeries })
-              })
-            : null}
 
           <InteractivePlot
             plotValues={plotValues}
@@ -232,7 +200,6 @@ export class InnerCustomPlot extends PureComponent {
 InnerCustomPlot.propTypes = {
   formatTooltipValue: PropTypes.func,
   hoverX: PropTypes.number,
-  noHits: PropTypes.bool.isRequired,
   onHover: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
   onSelectionEnd: PropTypes.func.isRequired,
@@ -240,16 +207,15 @@ InnerCustomPlot.propTypes = {
   tickFormatY: PropTypes.func,
   truncateLegends: PropTypes.bool,
   width: PropTypes.number.isRequired,
-  stacked: PropTypes.bool,
-  height: PropTypes.number
+  height: PropTypes.number,
+  stackBy: PropTypes.string
 };
 
 InnerCustomPlot.defaultProps = {
   formatTooltipValue: p => p.y,
   tickFormatX: undefined,
   tickFormatY: y => y,
-  truncateLegends: false,
-  stacked: false
+  truncateLegends: false
 };
 
 export default makeWidthFlexible(InnerCustomPlot);

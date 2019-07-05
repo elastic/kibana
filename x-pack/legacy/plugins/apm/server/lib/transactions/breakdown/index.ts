@@ -18,15 +18,11 @@ import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
-import { MAX_KPIS } from './constants';
+import { MAX_KPIS, COLORS } from './constants';
 
 export type TransactionBreakdownAPIResponse = PromiseReturnType<
   typeof getTransactionBreakdown
 >;
-
-interface TimeseriesMap {
-  [key: string]: Array<{ x: number; y: number | null }>;
-}
 
 export async function getTransactionBreakdown({
   setup,
@@ -154,11 +150,18 @@ export async function getTransactionBreakdown({
     return breakdowns;
   };
 
-  const kpis = sortByOrder(
+  const visibleKpis = sortByOrder(
     formatBucket(resp.aggregations),
     'percentage',
     'desc'
   ).slice(0, MAX_KPIS);
+
+  const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
+    return {
+      ...kpi,
+      color: COLORS[index % COLORS.length]
+    };
+  });
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
@@ -187,11 +190,19 @@ export async function getTransactionBreakdown({
         };
       }, prev);
     },
-    {} as TimeseriesMap
+    {} as Record<string, Array<{ x: number; y: number | null }>>
   );
+
+  const timeseries = kpis.map(kpi => ({
+    title: kpi.name,
+    color: kpi.color,
+    type: 'areaStacked',
+    data: timeseriesPerSubtype[kpi.name],
+    hideLegend: true
+  }));
 
   return {
     kpis,
-    timeseries_per_subtype: timeseriesPerSubtype
+    timeseries
   };
 }

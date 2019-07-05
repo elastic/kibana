@@ -7,18 +7,14 @@
 import React, { useMemo, useCallback } from 'react';
 import numeral from '@elastic/numeral';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { Coordinate } from '../../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
 import { asPercent } from '../../../../utils/formatters';
 import { unit } from '../../../../style/variables';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 interface Props {
-  timeseries: Array<{
-    name: string;
-    color: string;
-    values: Array<{ x: number; y: number | null }>;
-  }>;
+  timeseries: TimeSeries[];
 }
 
 const TransactionBreakdownGraph: React.FC<Props> = props => {
@@ -29,18 +25,17 @@ const TransactionBreakdownGraph: React.FC<Props> = props => {
   >['series'] = useMemo(() => {
     return timeseries.map(timeseriesConfig => {
       return {
-        title: timeseriesConfig.name,
-        color: timeseriesConfig.color,
-        data: timeseriesConfig.values.map(value => {
+        ...timeseriesConfig,
+        // convert null into undefined because of stack issues,
+        // see https://github.com/uber/react-vis/issues/1214
+        data: timeseriesConfig.data.map(value => {
           return 'y' in value && isValidCoordinateValue(value.y)
             ? value
             : {
                 ...value,
                 y: undefined
               };
-        }),
-        type: 'area',
-        hideLegend: true
+        })
       };
     }, {});
   }, [timeseries]);
@@ -58,11 +53,11 @@ const TransactionBreakdownGraph: React.FC<Props> = props => {
   return (
     <TransactionLineChart
       series={series}
-      stacked={true}
       tickFormatY={tickFormatY}
       formatTooltipValue={formatTooltipValue}
       yMax={1}
       height={unit * 12}
+      stacked={true}
     />
   );
 };

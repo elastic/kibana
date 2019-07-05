@@ -18,7 +18,7 @@ import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
-import { ChartsTimeContextProvider } from '../../../context/ChartsTimeContext';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -43,7 +43,7 @@ export function TransactionDetails() {
         </EuiTitle>
       </ApmHeader>
 
-      <ChartsTimeContextProvider>
+      <ChartsSyncContextProvider>
         <TransactionBreakdown />
 
         <EuiSpacer size="s" />
@@ -54,7 +54,7 @@ export function TransactionDetails() {
           urlParams={urlParams}
           location={location}
         />
-      </ChartsTimeContextProvider>
+      </ChartsSyncContextProvider>
 
       <EuiHorizontalRule size="full" margin="l" />
 

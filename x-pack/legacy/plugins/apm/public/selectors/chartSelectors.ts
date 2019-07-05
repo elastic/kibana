@@ -29,14 +29,12 @@ export interface ITpmBucket {
 }
 
 export interface ITransactionChartData {
-  noHits: boolean;
   tpmSeries: ITpmBucket[];
   responseTimeSeries: TimeSeries[];
 }
 
 const INITIAL_DATA = {
   apmTimeseries: {
-    totalHits: 0,
     responseTimes: {
       avg: [],
       p95: [],
@@ -52,7 +50,6 @@ export function getTransactionCharts(
   { transactionType }: IUrlParams,
   { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
-  const noHits = apmTimeseries.totalHits === 0;
   const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
 
   const responseTimeSeries = getResponseTimeSeries({
@@ -61,7 +58,6 @@ export function getTransactionCharts(
   });
 
   return {
-    noHits,
     tpmSeries,
     responseTimeSeries
   };

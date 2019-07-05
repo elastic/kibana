@@ -7,14 +7,30 @@
 import { mount } from 'enzyme';
 import moment from 'moment';
 import React from 'react';
-
+import d3 from 'd3';
 import { toJson } from '../../../../../utils/testHelpers';
 import { InnerCustomPlot } from '../index';
 import responseWithData from './responseWithData.json';
 import VoronoiPlot from '../VoronoiPlot';
 import InteractivePlot from '../InteractivePlot';
 import { getResponseTimeSeries } from '../../../../../selectors/chartSelectors';
-import { getEmptySeries } from '../getEmptySeries';
+
+const getEmptySeries = (start = Date.now() - 3600000, end = Date.now()) => {
+  const dates = d3.time
+    .scale()
+    .domain([new Date(start), new Date(end)])
+    .ticks();
+
+  return [
+    {
+      type: 'line',
+      data: dates.map(x => ({
+        x: x.getTime(),
+        y: null
+      }))
+    }
+  ];
+};
 
 function getXValueByIndex(index) {
   return responseWithData.responseTimes.avg[index].x;
@@ -33,7 +49,6 @@ describe('when response has data', () => {
     onSelectionEnd = jest.fn();
     wrapper = mount(
       <InnerCustomPlot
-        noHits={false}
         series={series}
         onHover={onHover}
         onMouseLeave={onMouseLeave}
@@ -291,7 +306,6 @@ describe('when response has no data', () => {
 
     wrapper = mount(
       <InnerCustomPlot
-        noHits={true}
         series={series}
         onHover={onHover}
         onMouseLeave={onMouseLeave}
@@ -333,8 +347,8 @@ describe('when response has no data', () => {
       expect(wrapper.prop('series').length).toBe(1);
     });
 
-    it('The series is empty and every y-value is 1', () => {
-      expect(wrapper.prop('series')[0].data.every(d => d.y === 1)).toEqual(
+    it('The series is empty and every y-value is null', () => {
+      expect(wrapper.prop('series')[0].data.every(d => d.y === null)).toEqual(
         true
       );
     });

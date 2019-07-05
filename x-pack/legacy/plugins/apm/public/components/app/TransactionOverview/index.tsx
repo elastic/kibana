@@ -27,7 +27,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
-import { ChartsTimeContextProvider } from '../../../context/ChartsTimeContext';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 interface Props {
   urlParams: IUrlParams;
@@ -115,7 +115,7 @@ export function TransactionOverview({
         </EuiFormRow>
       ) : null}
 
-      <ChartsTimeContextProvider>
+      <ChartsSyncContextProvider>
         <TransactionBreakdown initialIsOpen={true} />
 
         <EuiSpacer size="s" />
@@ -126,7 +126,7 @@ export function TransactionOverview({
           location={location}
           urlParams={urlParams}
         />
-      </ChartsTimeContextProvider>
+      </ChartsSyncContextProvider>
 
       <EuiSpacer size="s" />
 

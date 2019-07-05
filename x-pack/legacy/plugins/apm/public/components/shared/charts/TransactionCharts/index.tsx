@@ -55,21 +55,17 @@ const msTimeUnitLabel = i18n.translate(
 
 export class TransactionCharts extends Component<TransactionChartProps> {
   public getResponseTimeTickFormatter = (t: number | null | undefined) => {
-    return this.props.charts.noHits ? `- ${msTimeUnitLabel}` : asMillis(t);
+    return isValidCoordinateValue(t) ? asMillis(t) : `- ${msTimeUnitLabel}`;
   };
 
   public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return this.props.charts.noHits || !p
-      ? `- ${msTimeUnitLabel}`
-      : asMillis(p.y);
+    return isValidCoordinateValue(p.y) ? asMillis(p.y) : `- ${msTimeUnitLabel}`;
   };
 
   public getTPMFormatter = (t: number | null | undefined) => {
-    const { urlParams, charts } = this.props;
+    const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return charts.noHits || !isValidCoordinateValue(t)
-      ? `- ${unit}`
-      : `${asInteger(t)} ${unit}`;
+    return isValidCoordinateValue(t) ? `${asInteger(t)} ${unit}` : `- ${unit}`;
   };
 
   public getTPMTooltipFormatter = (p: Coordinate) => {

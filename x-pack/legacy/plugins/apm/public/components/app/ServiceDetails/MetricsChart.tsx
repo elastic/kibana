@@ -8,7 +8,6 @@ import React from 'react';
 import { GenericMetricsChart } from '../../../../server/lib/metrics/transform_metrics_chart';
 // @ts-ignore
 import CustomPlot from '../../shared/charts/CustomPlot';
-import { HoverXHandlers } from '../../shared/charts/SyncChartGroup';
 import {
   asDynamicBytes,
   asPercent,
@@ -16,17 +15,16 @@ import {
   asDecimal
 } from '../../../utils/formatters';
 import { Coordinate } from '../../../../typings/timeseries';
-import { getEmptySeries } from '../../shared/charts/CustomPlot/getEmptySeries';
 import { isValidCoordinateValue } from '../../../utils/isValidCoordinateValue';
+import { useChartsSync } from '../../../hooks/useChartsSync';
 
 interface Props {
   start: number | string | undefined;
   end: number | string | undefined;
   chart: GenericMetricsChart;
-  hoverXHandlers: HoverXHandlers;
 }
 
-export function MetricsChart({ start, end, chart, hoverXHandlers }: Props) {
+export function MetricsChart({ chart }: Props) {
   const formatYValue = getYTickFormatter(chart);
   const formatTooltip = getTooltipFormatter(chart);
 
@@ -35,7 +33,7 @@ export function MetricsChart({ start, end, chart, hoverXHandlers }: Props) {
     legendValue: formatYValue(series.overallValue)
   }));
 
-  const noHits = chart.totalHits === 0;
+  const { hoverXHandlers } = useChartsSync();
 
   return (
     <React.Fragment>
@@ -44,8 +42,7 @@ export function MetricsChart({ start, end, chart, hoverXHandlers }: Props) {
       </EuiTitle>
       <CustomPlot
         {...hoverXHandlers}
-        noHits={noHits}
-        series={noHits ? getEmptySeries(start, end) : transformedSeries}
+        series={transformedSeries}
         tickFormatY={formatYValue}
         formatTooltipValue={formatTooltip}
         yMax={chart.yUnit === 'percent' ? 1 : 'max'}
