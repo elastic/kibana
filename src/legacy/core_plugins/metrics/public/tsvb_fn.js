@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { MetricsRequestHandlerProvider } from './kbn_vis_types/request_handler';
+import { createMetricsRequestHandler } from './request_handler';
 import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
+
+const uiSettings = chrome.getUiSettingsClient();
 
 export const tsvb = () => ({
   name: 'tsvb',
@@ -45,9 +46,7 @@ export const tsvb = () => ({
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
+    const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
 
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
@@ -75,5 +74,3 @@ export const tsvb = () => ({
     };
   },
 });
-
-functionsRegistry.register(tsvb);
