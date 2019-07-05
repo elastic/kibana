@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObject } from 'src/core/server/saved_objects';
 import { PLUGIN_ID, SAVED_OBJECT_TYPE } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
 import {
@@ -13,8 +12,7 @@ import {
   API_DELETE_PATTERN,
 } from '../common/routes';
 import { getClient } from './saved_objects';
-import { fetchInfo, fetchList, getArchiveInfo } from './registry';
-import { cacheGet } from './cache';
+import { fetchInfo, fetchList, getArchiveInfo, getObjects } from './registry';
 
 interface PackageRequest extends Request {
   params: {
@@ -75,7 +73,7 @@ export const routes: ServerRoute[] = [
       const { pkgkey, feature } = req.params;
 
       if (feature === 'dashboard') {
-        const toBeSavedObjects = await getDashboardObjects(pkgkey);
+        const toBeSavedObjects = await getObjects(pkgkey, feature);
         const client = getClient(req);
         const createResults = await client.bulkCreate(toBeSavedObjects, { overwrite: true });
         const installed = createResults.saved_objects.map(({ id, type }) => ({ id, type }));
@@ -104,7 +102,7 @@ export const routes: ServerRoute[] = [
       const client = getClient(req);
 
       if (feature === 'dashboard') {
-        const toBeDeletedObjects = await getDashboardObjects(pkgkey);
+        const toBeDeletedObjects = await getObjects(pkgkey, feature);
         // ASK: should the manager uninstall the assets it installed
         // or just the references in SAVED_OBJECT_TYPE?
         const deletePromises = toBeDeletedObjects.map(async ({ id, type }) =>
@@ -130,80 +128,3 @@ export const routes: ServerRoute[] = [
     },
   },
 ];
-
-function getAsset(key: string) {
-  const value = cacheGet(key);
-  if (value !== undefined) {
-    const json = value.toString('utf8');
-    return JSON.parse(json);
-  }
-}
-
-async function getDashboardObjects(pkgkey: string): Promise<SavedObject[]> {
-  const paths = await getArchiveInfo(`${pkgkey}.tar.gz`);
-  const toBeSavedObjects: Map<string, SavedObject> = new Map();
-
-  const dashboardPaths = paths
-    .filter(path => /\.json$/.test(path))
-    .filter(path => /dashboard/.test(path));
-
-  const dashboardPath = dashboardPaths[0];
-  const dashboard: SavedObject = getAsset(dashboardPath);
-  dashboard.type = 'dashboard';
-  dashboard.id = dashboardPath.replace(`${pkgkey}/kibana/dashboard/`, '').replace('.json', '');
-  if (!toBeSavedObjects.has(dashboardPath)) toBeSavedObjects.set(dashboardPath, dashboard);
-
-  // does dashboard contain references? (e.g. to visualizations?)
-  if (Array.isArray(dashboard.references)) {
-    dashboard.references
-      .filter(ref => ref.type === 'visualization')
-      .forEach(dashDepRef => {
-        const vizPath = `${pkgkey}/kibana/visualization/${dashDepRef.id}.json`;
-        const viz: SavedObject = getAsset(vizPath);
-
-        if (!toBeSavedObjects.has(vizPath)) {
-          toBeSavedObjects.set(vizPath, {
-            id: dashDepRef.id,
-            type: dashDepRef.type,
-            ...viz,
-          });
-        }
-
-        // do those visualizations contain references (e.g. to index-patterns?)
-        if (Array.isArray(viz.references)) {
-          viz.references
-            .filter(reference => reference.type === 'index-pattern')
-            .forEach(vizDepRef => {
-              const indexPatternsKey = `${pkgkey}/kibana/index-pattern/${vizDepRef.id}.json`;
-              const pattern = getAsset(indexPatternsKey);
-
-              if (!toBeSavedObjects.has(indexPatternsKey)) {
-                toBeSavedObjects.set(indexPatternsKey, {
-                  id: vizDepRef.id,
-                  type: vizDepRef.type,
-                  ...pattern,
-                });
-              }
-            });
-        }
-      });
-  }
-
-  return Array.from(toBeSavedObjects.values(), obj => {
-    // the assets from the registry are malformed
-    // https://github.com/elastic/integrations-registry/issues/42
-    const { attributes } = obj;
-    if (
-      attributes.kibanaSavedObjectMeta &&
-      typeof attributes.kibanaSavedObjectMeta.searchSourceJSON !== 'string'
-    ) {
-      attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
-        attributes.kibanaSavedObjectMeta.searchSourceJSON
-      );
-    }
-    ['optionsJSON', 'panelsJSON', 'uiStateJSON', 'visState']
-      .filter(key => typeof attributes[key] !== 'string')
-      .forEach(key => (attributes[key] = JSON.stringify(attributes[key])));
-    return obj;
-  });
-}
