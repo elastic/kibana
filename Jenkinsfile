@@ -13,9 +13,12 @@ pipeline {
     MAIN_CACHE_DIR = "${JENKINS_HOME}/.kibana" // /var/lib/jenkins/.kibana
     BOOTSTRAP_CACHE_DIR = "${MAIN_CACHE_DIR}/bootstrap_cache" // /var/lib/jenkins/.kibana/bootstrap_cache
 
-    WORKSPACE_DIR = "${JENKINS_HOME}/workspace"
+    WORKSPACE_DIR = "${JENKINS_HOME}/workspace" // /var/lib/jenkins/workspace
+
     WORKSPACE_CACHE_DIR = "${MAIN_CACHE_DIR}/workspace_cache" // /var/lib/jenkins/.kibana/workspace_cache
-    WORKSPACE_CACHE_NAME = "${WORKSPACE_CACHE_DIR}/BUILD_ID-${BUILD_ID}.zip" // /var/lib/jenkins/.kibana/workspace_cache/BUILD_ID-SOMEBUILDNUMBER.tgz
+    WORKSPACE_CACHE_NAME = "JOB_NAME-${JOB_NAME}-BUILD_ID-${BUILD_ID}.tgz"
+    // /var/lib/jenkins/.kibana/workspace_cache/JOB_NAME-SOMEBRANCHNAME-BUILD_ID-SOMEBUILDNUMBER.tgz
+    FULL_WORKSPACE_CACHE_PATH = "${WORKSPACE_CACHE_DIR}/${WORKSPACE_CACHE_NAME}"
 
     TEMP_PIPELINE_SETUP_DIR = "src/dev/temp_pipeline_setup"
     // PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
@@ -24,7 +27,7 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
     CREDENTIALS_ID ='kibana-ci-gcs-plugin'
     BUCKET = "gs://kibana-ci-artifacts/jobs/${JOB_NAME}/${BUILD_NUMBER}"
-    PATTERN = "${WORKSPACE_CACHE_NAME}"
+    PATTERN = "${FULL_WORKSPACE_CACHE_PATH"}"
   }
   stages {
     stage('Install All-The-Things') {
@@ -34,9 +37,12 @@ pipeline {
           sh "${CI_DIR}/run_pipeline.sh"
           script {
             dumpEnv()
-            zipAll()
+            createWorkspaceCache()
+            tarAll()
+            dumpSizes(["${WORKSPACE}", "${WORKSPACE_DIR}/elasticsearch", "${FULL_WORKSPACE_CACHE_PATH}"])
           }
-          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
+          step([$class: 'ClassicUploadStep',
+            credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         }
       }
     }
@@ -74,21 +80,23 @@ pipeline {
     }
   }
 }
-def zipAll(){
-  script {
-    createWorkspaceCache()
-    zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: globName()
-    ["${WORKSPACE}", "${WORKSPACE_DIR}/elasticsearch", "${WORKSPACE_CACHE_NAME}"]
-      .each { dumpSize(it) }
-  }
+def tarGlobs(){
+  return "${WORKSPACE_DIR}/elasticsearch/* ${WORKSPACE_DIR}/${JOB_NAME}/*"
 }
-def globName(){
-  return "${WORKSPACE_DIR}/elasticsearch/*,${WORKSPACE_DIR}/${JOB_NAME}/*"
+def tarAll(xs){
+  dir("${env.WORKSPACE_CACHE_DIR}"){
+    script {
+      sh "tar -czvf ${WORKSPACE_CACHE_NAME} ${tarGlobs()}"
+    }
+  }
 }
 def createWorkspaceCache(){
   script {
     sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
   }
+}
+def dumpSizes(xs){
+     xs.each { dumpSize(it) }
 }
 def dumpSize(String x){
   script {
