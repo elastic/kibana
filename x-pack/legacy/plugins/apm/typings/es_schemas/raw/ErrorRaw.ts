@@ -27,6 +27,7 @@ interface Exception {
   module?: string;
   handled?: boolean;
   stacktrace?: IStackframe[];
+  [key: string]: unknown;
 }
 
 interface Log {
