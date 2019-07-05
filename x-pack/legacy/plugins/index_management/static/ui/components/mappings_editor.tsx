@@ -4,6 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-export const MappingsEditor = () => <h1>Mappings editor</h1>;
+interface Props {
+  setGetDataHandler: (handler: () => Mappings) => void;
+}
+
+export interface Mappings {
+  [key: string]: any;
+}
+
+export const MappingsEditor = ({ setGetDataHandler }: Props) => {
+  const getFormData = () => ({
+    hello: 'world',
+  });
+
+  useEffect(() => {
+    setGetDataHandler(getFormData);
+  }, []);
+  return <h1>Mappings editor</h1>;
+};
