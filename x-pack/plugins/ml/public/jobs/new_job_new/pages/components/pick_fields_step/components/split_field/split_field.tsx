@@ -9,7 +9,7 @@ import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { Description } from './description';
 import {
   MultiMetricJobCreator,
   isMultiMetricJobCreator,
@@ -53,11 +53,12 @@ export const SplitFieldSelector: FC<Props> = ({ detectorIndex }) => {
   );
 
   return (
-    <SplitFieldSelect
-      fields={categoryFields}
-      changeHandler={setSplitField}
-      selectedField={splitField}
-      jobType={jobCreator.type}
-    />
+    <Description jobType={jobCreator.type}>
+      <SplitFieldSelect
+        fields={categoryFields}
+        changeHandler={setSplitField}
+        selectedField={splitField}
+      />
+    </Description>
   );
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 // import { timefilter } from 'ui/timefilter';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -13,14 +13,14 @@ import { Results, ModelItem, Anomaly } from '../../../../../common/results_loade
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AggFieldPair, SplitField } from '../../../../../../../../common/types/fields';
+import { Field, AggFieldPair, SplitField } from '../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { DetectorTitle } from '../detector_title';
 import { JobProgress } from '../job_progress';
-// import { SplitCards } from '../split_cards';
-import { SplitFieldSelector } from '../split_field';
+import { SplitCards } from '../split_cards';
+import { SplitFieldSelector, SplitFieldSelect } from '../split_field';
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
 import { MlTimeBuckets } from '../../../../../../../util/ml_time_buckets';
 
@@ -28,6 +28,8 @@ interface Props {
   isActive: boolean;
   setIsValid: (na: boolean) => void;
 }
+
+type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const {
@@ -43,6 +45,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     return <Fragment />;
   }
   const jobCreator = jc as PopulationJobCreator;
+  const { categoryFields } = newJobCapsService;
 
   const { fields } = newJobCapsService;
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
@@ -56,7 +59,8 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
-  const [fieldValues, setFieldValues] = useState<string[]>([]);
+  const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
+  const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number) => number>(s => s + 1, 0);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     addDetector(selectedOptionsIn);
@@ -74,6 +78,17 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
         setAggFieldPairList([]);
         // setByFieldList([]);
       }
+    }
+  }
+
+  function setDetectorByField(sf: SplitField, index: number) {
+    const pair = aggFieldPairList[index];
+    if (pair !== undefined && pair.by !== undefined) {
+      pair.by.field = sf;
+      const newList = [...aggFieldPairList];
+      newList.splice(index, 1, pair);
+      setAggFieldPairList(newList);
+      setByFieldsUpdated(0);
     }
   }
 
@@ -110,6 +125,21 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       setIsValid(aggFieldPairList.length > 0);
     },
     [aggFieldPairList.length]
+  );
+
+  useEffect(
+    () => {
+      // console.log(byFieldsUpdated);
+    },
+    [byFieldsUpdated]
+  );
+
+  useEffect(
+    () => {
+      // console.log(byFieldsUpdated);
+      loadCharts();
+    },
+    [JSON.stringify(fieldValuesPerDetector)]
   );
 
   useEffect(
@@ -165,24 +195,55 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   useEffect(
     () => {
-      if (splitField !== null) {
-        chartLoader
-          .loadFieldExampleValues(splitField)
-          .then(setFieldValues)
-          .catch(() => {});
-      } else {
-        setFieldValues([]);
-      }
+      loadFieldExamples();
     },
-    [splitField]
+    [splitField, byFieldsUpdated]
   );
 
-  useEffect(
-    () => {
-      loadCharts();
-    },
-    [fieldValues]
-  );
+  async function loadFieldExamples() {
+    // const promises: Array<{ index: number; promise: Promise<string[]> }> = [];
+    const promises: any[] = [];
+    aggFieldPairList.forEach((af, i) => {
+      if (af.by !== undefined && af.by.field !== null) {
+        promises.push(
+          (async (index: number, field: Field) => {
+            return {
+              index,
+              fields: await chartLoader.loadFieldExampleValues(field),
+            };
+          })(i, af.by.field)
+        );
+      }
+    });
+    const results = await Promise.all(promises);
+    const fieldValues = results.reduce((p, c) => {
+      p[c.index] = c.fields;
+      return p;
+    }, {}) as DetectorFieldValues;
+
+    const newPairs = aggFieldPairList.map(pair => ({
+      ...pair,
+      ...(pair.by === undefined
+        ? {}
+        : {
+            by: {
+              ...pair.by,
+              value: fieldValues[0][0],
+            },
+          }),
+    }));
+    setAggFieldPairList([...newPairs]);
+    setFieldValuesPerDetector(fieldValues);
+    // loadCharts();
+    // console.log(fieldValues);
+  }
+
+  // useEffect(
+  //   () => {
+  //     loadCharts();
+  //   },
+  //   [fieldValues]
+  // );
 
   return (
     <Fragment>
@@ -198,12 +259,15 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
                   aggFieldPairList={aggFieldPairList}
                   chartSettings={chartSettings}
                   splitField={splitField}
-                  fieldValues={fieldValues}
+                  // fieldValues={fieldValues}
                   lineChartsData={lineChartsData}
                   modelData={modelData}
                   anomalyData={anomalyData}
                   deleteDetector={deleteDetector}
                   jobType={jobCreator.type}
+                  categoryFields={categoryFields}
+                  setDetectorByField={setDetectorByField}
+                  fieldValuesPerDetector={fieldValuesPerDetector}
                 />
               )}
               <MetricSelector
@@ -225,11 +289,14 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
                 aggFieldPairList={aggFieldPairList}
                 chartSettings={chartSettings}
                 splitField={splitField}
-                fieldValues={fieldValues}
+                // fieldValues={fieldValues}
                 lineChartsData={lineChartsData}
                 modelData={modelData}
                 anomalyData={anomalyData}
                 jobType={jobCreator.type}
+                categoryFields={categoryFields}
+                setDetectorByField={setDetectorByField}
+                fieldValuesPerDetector={fieldValuesPerDetector}
               />
               <JobProgress progress={progress} />
             </Fragment>
@@ -244,32 +311,32 @@ interface ChartGridProps {
   aggFieldPairList: AggFieldPair[];
   chartSettings: ChartSettings;
   splitField: SplitField;
-  fieldValues: string[];
+  // fieldValues: string[];
   lineChartsData: LineChartData;
   modelData: Record<number, ModelItem[]>;
   anomalyData: Record<number, Anomaly[]>;
   deleteDetector?: (index: number) => void;
   jobType: JOB_TYPE;
+  categoryFields: Field[];
+  setDetectorByField: (field: SplitField, index: number) => void;
+  fieldValuesPerDetector: DetectorFieldValues;
 }
 
 const ChartGrid: FC<ChartGridProps> = ({
   aggFieldPairList,
   chartSettings,
   splitField,
-  fieldValues,
+  // fieldValues,
   lineChartsData,
   modelData,
   anomalyData,
   deleteDetector,
   jobType,
+  categoryFields,
+  setDetectorByField,
+  fieldValuesPerDetector,
 }) => {
   return (
-    // <SplitCards
-    //   fieldValues={fieldValues}
-    //   splitField={splitField}
-    //   numberOfDetectors={aggFieldPairList.length}
-    //   jobType={jobType}
-    // >
     <EuiFlexGrid columns={chartSettings.cols as any}>
       {aggFieldPairList.map((af, i) => (
         <EuiFlexItem key={i}>
@@ -282,19 +349,30 @@ const ChartGrid: FC<ChartGridProps> = ({
                 splitField={splitField}
                 deleteDetector={deleteDetector}
               />
-              <AnomalyChart
-                chartType={CHART_TYPE.SCATTER}
-                chartData={lineChartsData[i]}
-                modelData={modelData[i]}
-                anomalyData={anomalyData[i]}
-                height={chartSettings.height}
-                width={chartSettings.width}
+              <SplitFieldSelect
+                changeHandler={sf => setDetectorByField(sf, i)}
+                fields={categoryFields}
+                selectedField={af.by === undefined ? null : af.by.field}
               />
+              <SplitCards
+                fieldValues={fieldValuesPerDetector[i] || []}
+                splitField={splitField}
+                numberOfDetectors={aggFieldPairList.length}
+                jobType={jobType}
+              >
+                <AnomalyChart
+                  chartType={CHART_TYPE.SCATTER}
+                  chartData={lineChartsData[i]}
+                  modelData={modelData[i]}
+                  anomalyData={anomalyData[i]}
+                  height={chartSettings.height}
+                  width={chartSettings.width}
+                />
+              </SplitCards>
             </Fragment>
           )}
         </EuiFlexItem>
       ))}
     </EuiFlexGrid>
-    // </SplitCards>
   );
 };

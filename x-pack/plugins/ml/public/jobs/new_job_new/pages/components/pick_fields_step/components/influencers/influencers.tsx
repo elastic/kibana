@@ -24,8 +24,7 @@ export const Influencers: FC = () => {
 
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
   const { fields } = newJobCapsService;
-
-  const [influencers, setInfluencers] = useState(jobCreator.influencers);
+  const [influencers, setInfluencers] = useState([...jobCreator.influencers]);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
 
   useEffect(
@@ -50,7 +49,7 @@ export const Influencers: FC = () => {
   useEffect(
     () => {
       setSplitField(jobCreator.splitField);
-      setInfluencers(jobCreator.influencers);
+      setInfluencers([...jobCreator.influencers]);
     },
     [jobCreatorUpdated]
   );

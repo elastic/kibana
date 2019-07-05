@@ -54,7 +54,7 @@ export const Wizard: FC<Props> = ({
     return null;
   }
 
-  const [jobCreatorUpdated, jobCreatorUpdate] = useReducer(s => s + 1, 0);
+  const [jobCreatorUpdated, jobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
 
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,

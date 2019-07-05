@@ -8,8 +8,6 @@ import React, { FC } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { Field, SplitField } from '../../../../../../../../common/types/fields';
-import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
-import { Description } from './description';
 
 interface DropDownLabel {
   label: string;
@@ -20,10 +18,9 @@ interface Props {
   fields: Field[];
   changeHandler(f: SplitField): void;
   selectedField: SplitField;
-  jobType: JOB_TYPE;
 }
 
-export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField, jobType }) => {
+export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const options: EuiComboBoxOptionProps[] = fields.map(
     f =>
       ({
@@ -47,14 +44,12 @@ export const SplitFieldSelect: FC<Props> = ({ fields, changeHandler, selectedFie
   }
 
   return (
-    <Description jobType={jobType}>
-      <EuiComboBox
-        singleSelection={{ asPlainText: true }}
-        options={options}
-        selectedOptions={selection}
-        onChange={onChange}
-        isClearable={true}
-      />
-    </Description>
+    <EuiComboBox
+      singleSelection={{ asPlainText: true }}
+      options={options}
+      selectedOptions={selection}
+      onChange={onChange}
+      isClearable={true}
+    />
   );
 };

@@ -4,3 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { SplitFieldSelector } from './split_field';
+export { SplitFieldSelect } from './split_field_select';
