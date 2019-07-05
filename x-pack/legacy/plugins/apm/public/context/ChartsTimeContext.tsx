@@ -14,15 +14,12 @@ const ChartsTimeContext = React.createContext<{
 const ChartsTimeContextProvider: React.FC = ({ children }) => {
   const [time, setTime] = useState<number | null>(null);
 
-  const value = useMemo(
-    () => {
-      return {
-        time,
-        setTime
-      };
-    },
-    [time, setTime]
-  );
+  const value = useMemo(() => {
+    return {
+      time,
+      setTime
+    };
+  }, [time, setTime]);
 
   return <ChartsTimeContext.Provider value={value} children={children} />;
 };

@@ -10612,10 +10612,10 @@ ejs@^2.6.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.1.tgz#498ec0d495655abc6f23cd61868d926464071aa0"
   integrity sha512-0xy4A/twfrRCnkhfk8ErDi5DqdAsAqeGxht4xkCUrsvhhbQNs7E+4jV0CN7+NKIY0aHE72+XvqtBIXzD31ZbXQ==
 
-elasticsearch-browser@^15.5.0:
-  version "15.5.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-15.5.0.tgz#84c0b441063635edad089dadf01966d93f5be46c"
-  integrity sha512-BqnbbUs2sO+2X6ePgUUJxDUy+CK4Xx9t9VlxptMbieaP4I0K8tpoKb3o6rY1j8idZi6chWrlYQiif/g+GN6B4g==
+elasticsearch-browser@^16.2.0:
+  version "16.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.2.0.tgz#f107907bad31c7be994215530a8996664cddc3b0"
+  integrity sha512-hJ1lBa+GUfwcIp7gvh0EaTVUOcfrhiVAYjVUpFanhp8Fc2HagpBRCYbZnzBzBPyi8FeT9M/kuFUKqVnfMeU6kg==
 
 elasticsearch@^15.2.0:
   version "15.2.0"
@@ -10626,10 +10626,10 @@ elasticsearch@^15.2.0:
     chalk "^1.0.0"
     lodash "^4.17.10"
 
-elasticsearch@^15.5.0:
-  version "15.5.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.5.0.tgz#62d9f238cf9e10b81c50a2303aa470c1f7da6b37"
-  integrity sha512-ZGKKaDkOFAap61ObBNkAxhYXCcAbRfkI4NVoSeLGnTD6/cItvY2j9LII/VV8/zclGe1x5m6DsVp47E4ze4aAeQ==
+elasticsearch@^16.2.0:
+  version "16.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.2.0.tgz#c1f5dd41b5c5a0d65794888d042e3e240074a0fc"
+  integrity sha512-wOaz8HjpRiZ08d33+5rKaJkHsS/nkjD80Mh0s77Bs3DdKjB4ZfrJS8P4FfNKMGP/Gx658eVBlifcLqFnREbPhA==
   dependencies:
     agentkeepalive "^3.4.1"
     chalk "^1.0.0"
@@ -11165,10 +11165,10 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint-config-prettier@4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-4.3.0.tgz#c55c1fcac8ce4518aeb77906984e134d9eb5a4f0"
-  integrity sha512-sZwhSTHVVz78+kYD3t5pCWSYEdVSBR0PXnwjDRsUs8ytIrK8PLXw+6FKp8r3Z7rx4ZszdetWlXYKOHoUrrwPlA==
+eslint-config-prettier@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-6.0.0.tgz#f429a53bde9fc7660e6353910fd996d6284d3c25"
+  integrity sha512-vDrcCFE3+2ixNT5H83g28bO/uYAwibJxerXPj+E7op4qzBCsAV36QfvdAyVOoNxKAH2Os/e01T/2x++V0LPukA==
   dependencies:
     get-stdin "^6.0.0"
 
@@ -21644,12 +21644,7 @@ prettier@1.14.3:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.14.3.tgz#90238dd4c0684b7edce5f83b0fb7328e48bd0895"
   integrity sha512-qZDVnCrnpsRJJq5nSsiHCE3BYMED2OtsI+cmzIzF1QIfqm5ALf8tEJcO27zV1gKNKRPdhjO0dNWnrzssDQ1tFg==
 
-prettier@^1.13.7, prettier@^1.14.3:
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.15.2.tgz#d31abe22afa4351efa14c7f8b94b58bb7452205e"
-  integrity sha512-YgPLFFA0CdKL4Eg2IHtUSjzj/BWgszDHiNQAe0VAIBse34148whfdzLagRL+QiKS+YfK5ftB6X4v/MBw8yCoug==
-
-prettier@^1.17.0:
+prettier@1.18.2, prettier@^1.13.7, prettier@^1.14.3, prettier@^1.17.0:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
   integrity sha512-OeHeMc0JhFE9idD4ZdtNibzY0+TPHSpSSb9h8FqtP+YnoZZ1sl8Vc9b1sasjfymH3SonAF4QcA2+mzHPhMvIiw==

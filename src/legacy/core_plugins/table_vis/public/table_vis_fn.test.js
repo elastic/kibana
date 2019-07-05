@@ -20,7 +20,7 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaTable } from './table_vis_fn';
 
-jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
+jest.mock('ui/new_platform');
 
 const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
   tables: [{ columns: [], rows: [] }],

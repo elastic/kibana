@@ -17,14 +17,6 @@
  * under the License.
  */
 
-import { coreMock } from './mocks';
+import React from 'react';
 
-export const coreSetupMock = coreMock.createSetup();
-export const coreStartMock = coreMock.createStart();
-
-jest.doMock('ui/new_platform', () => {
-  return {
-    npStart: { core: coreStartMock },
-    npSetup: { core: coreSetupMock },
-  };
-});
+export const FormValidationContext = React.createContext({});

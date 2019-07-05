@@ -23,7 +23,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-  return new class AppsMenu {
+  return new (class AppsMenu {
     /**
      * Get the text and href from each of the links in the apps menu
      */
@@ -69,5 +69,5 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
         // Intentionally empty
       }
     }
-  }();
+  })();
 }

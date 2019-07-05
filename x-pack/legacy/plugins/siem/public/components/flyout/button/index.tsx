@@ -44,9 +44,7 @@ export const Button = styled(EuiPanel)`
   border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: 6px 0 0 6px;
   box-shadow: ${({ theme }) =>
-    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
-      theme.eui.euiColorLightestShade
-    }`};
+    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${theme.eui.euiColorLightestShade}`};
   background-color: inherit;
   cursor: pointer;
 `;
