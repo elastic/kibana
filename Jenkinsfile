@@ -37,12 +37,12 @@ pipeline {
           sh "${CI_DIR}/run_pipeline.sh"
           script {
             dumpEnv()
-            dumpWorkspaceSize()
+            dumpSize("${WORKSPACE}")
             createWorkspaceCache()
-            // tarWorkspace()
             zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: '*'
+            dumpSize("${WORKSPACE_CACHE_NAME}")
           }
-          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
+          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: "${WORKSPACE_CACHE_NAME}"])
         }
       }
     }
@@ -54,8 +54,9 @@ pipeline {
           createWorkspaceCache()
         }
 //         deleteDir()
-        step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
-        // sh './test/scripts/jenkins_unit.sh'
+        // Download from GCS bucket object named PATTERN to directory LOCAL_DIR.
+        step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID,  bucketUri: "gs://${env.BUCKET}/${env.PATTERN}", localDirectory: "${WORKSPACE}"])
+        sh './test/scripts/jenkins_unit.sh'
       }
     }
     stage('Component Integration Tests') {
@@ -86,15 +87,15 @@ def createWorkspaceCache(){
     sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
   }
 }
-def tarWorkspace(){
+// def tarWorkspace(){
+//   script {
+//     sh "tar -czf ${WORKSPACE_CACHE_NAME} ${BASE_DIR}"
+//     sh "du -hcs ${WORKSPACE_CACHE_NAME}"
+//   }
+// }
+def dumpSize(String x){
   script {
-    sh "tar -czf ${WORKSPACE_CACHE_NAME} ${BASE_DIR}"
-    sh "du -hcs ${WORKSPACE_CACHE_NAME}"
-  }
-}
-def dumpWorkspaceSize(){
-  script {
-    sh "du -hcs ${WORKSPACE}"
+    sh "du -hcs ${x}"
   }
 }
 def dumpEnv(){
