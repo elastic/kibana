@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import moment from 'moment';
 import { Columns } from '../../load_more_table';
 import { AnomaliesByHost, Anomaly, NarrowDateRange } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
@@ -17,6 +18,9 @@ import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
 import { createExplorerLink } from '../links/create_explorer_link';
+import { LocalizedDateTooltip } from '../../localized_date_tooltip';
+import { PreferenceFormattedDate } from '../../formatted_date';
+import { HostsType } from '../../../store/hosts/model';
 
 export const getAnomaliesHostTableColumns = (
   startDate: number,
@@ -28,7 +32,8 @@ export const getAnomaliesHostTableColumns = (
   Columns<Anomaly['severity'], AnomaliesByHost>,
   Columns<Anomaly['jobId'], AnomaliesByHost>,
   Columns<Anomaly['entityValue'], AnomaliesByHost>,
-  Columns<Anomaly['influencers'], AnomaliesByHost>
+  Columns<Anomaly['influencers'], AnomaliesByHost>,
+  Columns<Anomaly['time'], AnomaliesByHost>
 ] => [
   {
     name: i18n.HOST_NAME,
@@ -110,4 +115,31 @@ export const getAnomaliesHostTableColumns = (
       </EuiFlexGroup>
     ),
   },
+  {
+    name: i18n.TIME_STAMP,
+    field: 'anomaly.time',
+    sortable: true,
+    render: time => (
+      <LocalizedDateTooltip date={moment(new Date(time)).toDate()}>
+        <PreferenceFormattedDate value={new Date(time)} />
+      </LocalizedDateTooltip>
+    ),
+  },
 ];
+
+export const getAnomaliesHostTableColumnsCurated = (
+  pageType: HostsType,
+  startDate: number,
+  endDate: number,
+  interval: string,
+  narrowDateRange: NarrowDateRange
+) => {
+  const columns = getAnomaliesHostTableColumns(startDate, endDate, interval, narrowDateRange);
+
+  // Columns to exclude from host details pages
+  if (pageType === 'details') {
+    return columns.filter(column => column.name !== i18n.HOST_NAME);
+  } else {
+    return columns;
+  }
+};

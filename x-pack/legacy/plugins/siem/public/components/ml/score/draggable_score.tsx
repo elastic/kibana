@@ -10,7 +10,7 @@ import { Anomaly } from '../types';
 import { IS_OPERATOR } from '../../timeline/data_providers/data_provider';
 import { Provider } from '../../timeline/data_providers/provider';
 import { Spacer } from '../../page';
-import { getScoreString } from './get_score_string';
+import { getScoreString } from './score_health';
 
 export const DraggableScore = React.memo<{
   id: string;

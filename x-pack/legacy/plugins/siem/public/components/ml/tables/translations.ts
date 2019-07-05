@@ -41,3 +41,7 @@ export const DETECTOR = i18n.translate('xpack.siem.ml.table.detectorTitle', {
 export const NETWORK_NAME = i18n.translate('xpack.siem.ml.table.networkNameTitle', {
   defaultMessage: 'Network IP',
 });
+
+export const TIME_STAMP = i18n.translate('xpack.siem.ml.table.timestampTitle', {
+  defaultMessage: 'Timestamp',
+});

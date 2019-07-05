@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import moment from 'moment';
 import { Columns } from '../../load_more_table';
 import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
@@ -17,6 +18,9 @@ import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
 import { createExplorerLink } from '../links/create_explorer_link';
+import { LocalizedDateTooltip } from '../../localized_date_tooltip';
+import { PreferenceFormattedDate } from '../../formatted_date';
+import { NetworkType } from '../../../store/network/model';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: number,
@@ -28,7 +32,8 @@ export const getAnomaliesNetworkTableColumns = (
   Columns<Anomaly['severity'], AnomaliesByNetwork>,
   Columns<Anomaly['jobId'], AnomaliesByNetwork>,
   Columns<Anomaly['entityValue'], AnomaliesByNetwork>,
-  Columns<Anomaly['influencers'], AnomaliesByNetwork>
+  Columns<Anomaly['influencers'], AnomaliesByNetwork>,
+  Columns<Anomaly['time'], AnomaliesByNetwork>
 ] => [
   {
     name: i18n.NETWORK_NAME,
@@ -104,4 +109,31 @@ export const getAnomaliesNetworkTableColumns = (
       </EuiFlexGroup>
     ),
   },
+  {
+    name: i18n.TIME_STAMP,
+    field: 'anomaly.time',
+    sortable: true,
+    render: time => (
+      <LocalizedDateTooltip date={moment(new Date(time)).toDate()}>
+        <PreferenceFormattedDate value={new Date(time)} />
+      </LocalizedDateTooltip>
+    ),
+  },
 ];
+
+export const getAnomaliesNetworkTableColumnsCurated = (
+  pageType: NetworkType,
+  startDate: number,
+  endDate: number,
+  interval: string,
+  narrowDateRange: NarrowDateRange
+) => {
+  const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
+
+  // Columns to exclude from host details pages
+  if (pageType === 'details') {
+    return columns.filter(column => column.name !== i18n.NETWORK_NAME);
+  } else {
+    return columns;
+  }
+};

@@ -13,8 +13,8 @@ import * as i18n from './translations';
 import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
 import { BackgroundRefetch, BasicTableContainer } from '../../load_more_table';
 import { LoadingPanel } from '../../loading';
-import { AnomaliesTableProps } from '../types';
-import { getAnomaliesNetworkTableColumns } from './get_anomalies_network_table_columns';
+import { AnomaliesNetworkTableProps } from '../types';
+import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
 import { dateTimesAreEqual } from './date_time_equality';
@@ -29,8 +29,8 @@ const sorting = {
   },
 };
 
-export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
-  ({ startDate, endDate, narrowDateRange, skip, ip }): JSX.Element | null => {
+export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
+  ({ startDate, endDate, narrowDateRange, skip, ip, type }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({
       influencers: [],
@@ -42,7 +42,13 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
 
     const networks = convertAnomaliesToNetwork(tableData, ip);
     const interval = getIntervalFromAnomalies(tableData);
-    const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
+    const columns = getAnomaliesNetworkTableColumnsCurated(
+      type,
+      startDate,
+      endDate,
+      interval,
+      narrowDateRange
+    );
     const pagination = {
       pageIndex: 0,
       pageSize: 10,
