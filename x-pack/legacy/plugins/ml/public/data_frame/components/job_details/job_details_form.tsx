@@ -7,9 +7,14 @@
 import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { metadata } from 'ui/metadata';
 import { toastNotifications } from 'ui/notify';
 
-import { EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+
+// @ts-ignore
+import { isJobIdValid } from '../../../../common/util/job_utils';
+import { isValidIndexName } from '../../../../common/util/es_utils';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -124,13 +129,20 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   }, []);
 
   const jobIdExists = jobIds.some(id => jobId === id);
+  const jobIdEmpty = jobId === '';
+  const jobIdValid = isJobIdValid(jobId);
+
   const indexNameExists = indexNames.some(name => destinationIndex === name);
+  const indexNameEmpty = destinationIndex === '';
+  const indexNameValid = isValidIndexName(destinationIndex);
   const indexPatternTitleExists = indexPatternTitles.some(name => destinationIndex === name);
+
   const valid =
-    jobId !== '' &&
-    destinationIndex !== '' &&
+    !jobIdEmpty &&
+    jobIdValid &&
     !jobIdExists &&
-    !indexNameExists &&
+    !indexNameEmpty &&
+    indexNameValid &&
     (!indexPatternTitleExists || !createIndexPattern) &&
     (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid));
 
@@ -164,14 +176,24 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
         label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdLabel', {
           defaultMessage: 'Transform id',
         })}
-        isInvalid={jobIdExists}
-        error={
-          jobIdExists && [
-            i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdError', {
-              defaultMessage: 'A transform with this id already exists.',
-            }),
-          ]
-        }
+        isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+        error={[
+          ...(!jobIdEmpty && !jobIdValid
+            ? [
+                i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdInvalidError', {
+                  defaultMessage:
+                    'Must contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores only and must start and end with alphanumeric characters.',
+                }),
+              ]
+            : []),
+          ...(jobIdExists
+            ? [
+                i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdExistsError', {
+                  defaultMessage: 'A transform with this id already exists.',
+                }),
+              ]
+            : []),
+        ]}
       >
         <EuiFieldText
           placeholder="transform id"
@@ -180,12 +202,15 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           aria-label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdInputAriaLabel', {
             defaultMessage: 'Choose a unique transform id.',
           })}
-          isInvalid={jobIdExists}
+          isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
         />
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobDescriptionLabel', {
           defaultMessage: 'Transform description',
+        })}
+        helpText={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobDescriptionHelpText', {
+          defaultMessage: 'Optional descriptive text.',
         })}
       >
         <EuiFieldText
@@ -204,12 +229,33 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
         label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.destinationIndexLabel', {
           defaultMessage: 'Destination index',
         })}
-        isInvalid={indexNameExists}
+        isInvalid={!indexNameEmpty && !indexNameValid}
+        helpText={
+          indexNameExists &&
+          i18n.translate('xpack.ml.dataframe.jobDetailsForm.destinationIndexHelpText', {
+            defaultMessage: 'An index with this name already exists.',
+          })
+        }
         error={
-          indexNameExists && [
-            i18n.translate('xpack.ml.dataframe.jobDetailsForm.destinationIndexError', {
-              defaultMessage: 'An index with this name already exists.',
-            }),
+          !indexNameEmpty &&
+          !indexNameValid && [
+            <Fragment>
+              {i18n.translate('xpack.ml.dataframe.jobDetailsForm.destinationIndexInvalidError', {
+                defaultMessage: 'Invalid destination index name.',
+              })}
+              <br />
+              <EuiLink
+                href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-create-index.html#indices-create-index`}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.ml.dataframe.definePivotForm.destinationIndexInvalidErrorLink',
+                  {
+                    defaultMessage: 'Learn more about index name limitations.',
+                  }
+                )}
+              </EuiLink>
+            </Fragment>,
           ]
         }
       >
@@ -223,7 +269,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               defaultMessage: 'Choose a unique destination index name.',
             }
           )}
-          isInvalid={indexNameExists}
+          isInvalid={!indexNameEmpty && !indexNameValid}
         />
       </EuiFormRow>
       <EuiFormRow
