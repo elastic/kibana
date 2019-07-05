@@ -80,10 +80,7 @@ export default function (kibana) {
         // We fill all the missing properties in the `clientConfig` using the default
         // Elasticsearch config so that we don't depend on default values set and
         // controlled by underlying Elasticsearch JS client.
-        const cluster = new Cluster(server.newPlatform.setup.core.elasticsearch.createClient(name, {
-          ...esConfig,
-          ...clientConfig,
-        }));
+        const cluster = new Cluster(server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig));
 
         clusters.set(name, cluster);
 

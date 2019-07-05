@@ -18,7 +18,8 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, map, publishReplay, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+import { merge } from 'lodash';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -45,7 +46,10 @@ export interface ElasticsearchServiceSetup {
     readonly config$: Observable<ElasticsearchConfig>;
   };
 
-  readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+  readonly createClient: (
+    type: string,
+    config: Partial<ElasticsearchClientConfig>
+  ) => ClusterClient;
   readonly adminClient$: Observable<ClusterClient>;
   readonly dataClient$: Observable<ClusterClient>;
 }
@@ -100,15 +104,16 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     ) as ConnectableObservable<CoreClusterClients>;
 
     this.subscription = clients$.connect();
-
+    const config = await this.config$.pipe(first()).toPromise();
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
       adminClient$: clients$.pipe(map(clients => clients.adminClient)),
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
-      createClient: (type: string, clientConfig: ElasticsearchClientConfig) => {
-        return this.createClusterClient(type, clientConfig, deps.http.auth.getAuthHeaders);
+      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig>) => {
+        const finalConfig = merge({}, config, clientConfig);
+        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
       },
     };
   }

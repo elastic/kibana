@@ -115,7 +115,7 @@ describe('#setup', () => {
     expect(clusterClient).toBe(mockClusterClientInstance);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      mockConfig,
+      expect.objectContaining(mockConfig),
       expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
       expect.any(Function)
     );
