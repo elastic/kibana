@@ -8,6 +8,7 @@ import {
   emptyField,
   minLengthField,
   minSelectionField,
+  indexNameField,
 } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/field_validators';
 import { multiSelectSelectedValueToOptions } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/serializers/input_serializers';
 import { multiSelectOptionsToSelectedValue } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/serializers/output_serializers';
@@ -48,6 +49,10 @@ export const formSchema: FormSchema<MyForm> = {
       {
         // With default message
         validator: emptyField,
+        exitOnFail: true,
+      },
+      {
+        validator: indexNameField,
         exitOnFail: true,
       },
       {

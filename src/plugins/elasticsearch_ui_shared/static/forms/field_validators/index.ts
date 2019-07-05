@@ -18,9 +18,7 @@
  */
 
 export * from './empty_field';
-
 export * from './min_length';
-
 export * from './min_selection';
-
 export * from './url';
+export * from './index_name';
