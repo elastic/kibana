@@ -6,7 +6,7 @@
 
 import { editor } from 'monaco-editor';
 
-const editors = new Set();
+const editors = new Set<editor.IStandaloneCodeEditor>();
 
 function clearSelection(ed: editor.IStandaloneCodeEditor) {
   const sel = ed.getSelection();
