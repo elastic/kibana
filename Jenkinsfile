@@ -9,22 +9,19 @@ pipeline {
     CI_DIR = "./.ci"
 
     HOME = "${JENKINS_HOME}"  // /var/lib/jenkins
-    MAIN_CACHE_DIR = "${HOME}/.kibana" // /var/lib/jenkins/.kibana
 
-    WORKSPACE_CACHE_DIR = "${MAIN_CACHE_DIR}/workspace_cache" // /var/lib/jenkins/.kibana/workspace_cache
-    WORKSPACE_CACHE_NAME = "${WORKSPACE_CACHE_DIR}/BUILD_ID-${BUILD_ID}.tgz" // /var/lib/jenkins/.kibana/workspace_cache/BUILD_ID-SOMEBUILDNUMBER.tgz
-
+    MAIN_CACHE_DIR = "${JENKINS_HOME}/.kibana" // /var/lib/jenkins/.kibana
     BOOTSTRAP_CACHE_DIR = "${MAIN_CACHE_DIR}/bootstrap_cache" // /var/lib/jenkins/.kibana/bootstrap_cache
 
+    WORKSPACE_DIR = "${JENKINS_HOME}/workspace"
+    WORKSPACE_CACHE_DIR = "${MAIN_CACHE_DIR}/workspace_cache" // /var/lib/jenkins/.kibana/workspace_cache
+    WORKSPACE_CACHE_NAME = "${WORKSPACE_CACHE_DIR}/BUILD_ID-${BUILD_ID}.zip" // /var/lib/jenkins/.kibana/workspace_cache/BUILD_ID-SOMEBUILDNUMBER.tgz
+
     TEMP_PIPELINE_SETUP_DIR = "src/dev/temp_pipeline_setup"
-
     // PIPELINE_DIR = "${CI_DIR}pipeline-setup/"
-
     // PR_SOURCE_BRANCH = "${ghprbSourceBranch}"
     // PR_TARGET_BRANCH = "${ghprbTargetBranch}"
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
-
-
     CREDENTIALS_ID ='kibana-ci-gcs-plugin'
     BUCKET = "gs://kibana-ci-artifacts/jobs/${JOB_NAME}/${BUILD_NUMBER}"
     PATTERN = "${WORKSPACE_CACHE_NAME}"
@@ -38,11 +35,12 @@ pipeline {
           script {
             dumpEnv()
             dumpSize("${WORKSPACE}")
+            dumpSize("${WORKSPACE_DIR}/elasticsearch")
             createWorkspaceCache()
-            zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: '*'
+            zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: globName()
             dumpSize("${WORKSPACE_CACHE_NAME}")
           }
-          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: "gs://${env.BUCKET}", pattern: env.PATTERN])
+          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         }
       }
     }
@@ -53,7 +51,6 @@ pipeline {
         script {
           createWorkspaceCache()
         }
-//         deleteDir()
         step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID,  bucketUri: "gs://${env.BUCKET}/${env.PATTERN}", localDirectory: "${WORKSPACE}"])
         sh './test/scripts/jenkins_unit.sh'
       }
@@ -81,17 +78,14 @@ pipeline {
     }
   }
 }
+def globName(){
+  return "${WORKSPACE_DIR_NAME}/elasticsearch/**/*.*,${WORKSPACE_DIR_NAME}/${JOB_NAME}/**/*.*"
+}
 def createWorkspaceCache(){
   script {
     sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
   }
 }
-// def tarWorkspace(){
-//   script {
-//     sh "tar -czf ${WORKSPACE_CACHE_NAME} ${BASE_DIR}"
-//     sh "du -hcs ${WORKSPACE_CACHE_NAME}"
-//   }
-// }
 def dumpSize(String x){
   script {
     sh "du -hcs ${x}"
