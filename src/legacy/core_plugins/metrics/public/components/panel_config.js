@@ -43,18 +43,15 @@ export function PanelConfig(props) {
   const Component = types[model.type];
   const [uiRestrictions, setUIRestrictions] = useState(null);
 
-  useEffect(
-    () => {
-      const visDataSubscription = props.visData$.subscribe(visData =>
-        setUIRestrictions(get(visData, 'uiRestrictions', null))
-      );
+  useEffect(() => {
+    const visDataSubscription = props.visData$.subscribe(visData =>
+      setUIRestrictions(get(visData, 'uiRestrictions', null))
+    );
 
-      return function cleanup() {
-        visDataSubscription.unsubscribe();
-      };
-    },
-    [props.visData$]
-  );
+    return function cleanup() {
+      visDataSubscription.unsubscribe();
+    };
+  }, [props.visData$]);
 
   if (Component) {
     return (
