@@ -141,6 +141,10 @@ export class Project {
     return (this.json.kibana && this.json.kibana.clean) || {};
   }
 
+  public getRootImports(): { [key: string]: string } {
+    return (this.json.kibana && this.json.kibana.rootImports) || {};
+  }
+
   public hasScript(name: string) {
     return name in this.scripts;
   }

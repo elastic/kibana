@@ -17,10 +17,13 @@
  * under the License.
  */
 
+import { resolve, dirname } from 'path';
+
 import chalk from 'chalk';
 
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
+import { createSymlink, chmod, mkdirp } from '../utils/fs';
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
@@ -70,6 +73,19 @@ export const BootstrapCommand: ICommand = {
         await pkg.runScriptStreaming('kbn:bootstrap');
       }
     });
+
+    log.write(chalk.bold('\nLinking root imports:\n'));
+    for (const project of projects.values()) {
+      for (const [request, actual] of Object.entries(project.getRootImports())) {
+        const dest = resolve(project.nodeModulesLocation, request);
+        const src = resolve(project.path, actual);
+
+        await mkdirp(dirname(dest));
+        await createSymlink(src, dest, 'exec');
+        await chmod(dest, '755');
+        log.write(chalk`{dim [${project.name}]} ${request} -> {dim ${actual}}`);
+      }
+    }
 
     log.write(chalk.green.bold('\nBootstrapping completed!\n'));
   },

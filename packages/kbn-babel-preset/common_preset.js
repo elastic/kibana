@@ -17,6 +17,11 @@
  * under the License.
  */
 
+const { dirname } = require('path');
+
+const REPO_ROOT = dirname(require.resolve('../../package.json'));
+const kibanaPkgJson = require('../../package.json');
+
 module.exports = {
   presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
   plugins: [
@@ -30,6 +35,10 @@ module.exports = {
     //
     // See https://github.com/babel/proposals/issues/12 for progress
     require.resolve('@babel/plugin-proposal-class-properties'),
+    [require.resolve('babel-plugin-module-resolver'), {
+      root: REPO_ROOT,
+      alias: kibanaPkgJson.kibana.rootImports
+    }],
   ],
   overrides: [
     {

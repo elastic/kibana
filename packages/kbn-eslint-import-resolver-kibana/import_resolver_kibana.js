@@ -17,10 +17,13 @@
  * under the License.
  */
 
-const { join, dirname, extname } = require('path');
+const { join, dirname, extname, resolve, relative } = require('path');
 
 const webpackResolver = require('eslint-import-resolver-webpack');
 const nodeResolver = require('eslint-import-resolver-node');
+
+const REPO_ROOT = dirname(require.resolve('../../package.json'));
+const kbnPkgJson = require('../../package.json');
 
 const {
   getKibanaPath,
@@ -31,6 +34,11 @@ const {
   getIsPathRequest,
   resolveWebpackAlias,
 } = require('./lib');
+
+const ROOT_IMPORTS = Object.entries(kbnPkgJson.kibana.rootImports).map(([from, to]) => ({
+  from,
+  to: resolve(REPO_ROOT, to),
+}));
 
 // cache context, it shouldn't change
 let context;
@@ -68,8 +76,17 @@ function tryNodeResolver(importRequest, file, config) {
 
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
+  let forceNode = config.forceNode;
 
-  if (config.forceNode) {
+  const rootImport = ROOT_IMPORTS.find(
+    i => importRequest === i.from || importRequest.startsWith(i.from + '/')
+  );
+  if (rootImport) {
+    importRequest = resolve(rootImport.to, relative(rootImport.from, importRequest));
+    forceNode = true;
+  }
+
+  if (forceNode) {
     return tryNodeResolver(importRequest, file, config);
   }
 

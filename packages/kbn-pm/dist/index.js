@@ -2541,12 +2541,15 @@ const commands = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BootstrapCommand", function() { return BootstrapCommand; });
-/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(19);
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(33);
-/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(34);
-/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(35);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _utils_link_project_executables__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(19);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(33);
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(20);
+/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(34);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(35);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -2570,6 +2573,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 const BootstrapCommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
@@ -2577,17 +2582,17 @@ const BootstrapCommand = {
   async run(projects, projectGraph, {
     options
   }) {
-    const batchedProjectsByWorkspace = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph, {
+    const batchedProjectsByWorkspace = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_6__["topologicallyBatchProjects"])(projects, projectGraph, {
       batchByWorkspace: true
     });
-    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph);
+    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_6__["topologicallyBatchProjects"])(projects, projectGraph);
     const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])];
-    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold('\nRunning installs in topological order:'));
+    _utils_log__WEBPACK_IMPORTED_MODULE_3__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_1___default.a.bold('\nRunning installs in topological order:'));
 
     for (const batch of batchedProjectsByWorkspace) {
       for (const project of batch) {
         if (project.isWorkspaceProject) {
-          _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(`Skipping workspace project: ${project.name}`);
+          _utils_log__WEBPACK_IMPORTED_MODULE_3__["log"].write(`Skipping workspace project: ${project.name}`);
           continue;
         }
 
@@ -2599,8 +2604,8 @@ const BootstrapCommand = {
       }
     }
 
-    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold('\nInstalls completed, linking package executables:\n'));
-    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph);
+    _utils_log__WEBPACK_IMPORTED_MODULE_3__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_1___default.a.bold('\nInstalls completed, linking package executables:\n'));
+    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_2__["linkProjectExecutables"])(projects, projectGraph);
     /**
      * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
      * in the list of projects. We do this because some projects need to be
@@ -2608,13 +2613,26 @@ const BootstrapCommand = {
      * have to, as it will slow down the bootstrapping process.
      */
 
-    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
-    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_3__["parallelizeBatches"])(batchedProjects, async pkg => {
+    _utils_log__WEBPACK_IMPORTED_MODULE_3__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_1___default.a.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_5__["parallelizeBatches"])(batchedProjects, async pkg => {
       if (pkg.hasScript('kbn:bootstrap')) {
         await pkg.runScriptStreaming('kbn:bootstrap');
       }
     });
-    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green.bold('\nBootstrapping completed!\n'));
+    _utils_log__WEBPACK_IMPORTED_MODULE_3__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_1___default.a.bold('\nLinking root imports:\n'));
+
+    for (const project of projects.values()) {
+      for (const [request, actual] of Object.entries(project.getRootImports())) {
+        const dest = Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(project.nodeModulesLocation, request);
+        const src = Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(project.path, actual);
+        await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["mkdirp"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["dirname"])(dest));
+        await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["createSymlink"])(src, dest, 'exec');
+        await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["chmod"])(dest, '755');
+        _utils_log__WEBPACK_IMPORTED_MODULE_3__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_1___default.a`{dim [${project.name}]} ${request} -> {dim ${actual}}`);
+      }
+    }
+
+    _utils_log__WEBPACK_IMPORTED_MODULE_3__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_1___default.a.green.bold('\nBootstrapping completed!\n'));
   }
 
 };
@@ -8021,6 +8039,10 @@ class Project {
 
   getCleanConfig() {
     return this.json.kibana && this.json.kibana.clean || {};
+  }
+
+  getRootImports() {
+    return this.json.kibana && this.json.kibana.rootImports || {};
   }
 
   hasScript(name) {

@@ -24,6 +24,11 @@
     "url": "http://github.com/elastic/kibana/issues"
   },
   "kibana": {
+    "rootImports": {
+      "@kbn/src": "./src",
+      "@kbn/types": "./target/types",
+      "@kbn/x-pack": "./x-pack"
+    },
     "clean": {
       "extraPatterns": [
         "build",
