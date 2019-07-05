@@ -134,7 +134,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
@@ -161,9 +161,24 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                 }
               }
             })
-            .then(function () {
+            .then(async function () {
               log.debug('navigate to: ' + url);
-              return browser.get(url);
+              try {
+                await browser.get(url);
+              } catch(e) {
+                log.debug('Error navigating to url');
+                try {
+                  if (shouldAcceptAlert) {
+                    log.debug('Accept alert');
+                    await browser.acceptAlert();
+                  } else {
+                    throw e;
+                  }
+                } catch(e) {
+                  log.debug('Error accepting alert');
+                  throw e;
+                }
+              }
             })
             .then(function () {
               return self.sleep(700);
