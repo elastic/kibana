@@ -42,7 +42,7 @@ pipeline {
             zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: '*'
             dumpSize("${WORKSPACE_CACHE_NAME}")
           }
-          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: "${WORKSPACE_CACHE_NAME}"])
+          step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: "gs://${env.BUCKET}", pattern: env.PATTERN])
         }
       }
     }
@@ -54,7 +54,6 @@ pipeline {
           createWorkspaceCache()
         }
 //         deleteDir()
-        // Download from GCS bucket object named PATTERN to directory LOCAL_DIR.
         step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID,  bucketUri: "gs://${env.BUCKET}/${env.PATTERN}", localDirectory: "${WORKSPACE}"])
         sh './test/scripts/jenkins_unit.sh'
       }
