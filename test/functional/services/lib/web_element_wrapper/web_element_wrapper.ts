@@ -104,7 +104,9 @@ export class WebElementWrapper {
         `WebElementWrapper: searching element '${this.locator.toString()}', ${n - 1} attempts left`
       );
       await delay(200);
-      this._webElement = await this.driver.findElement(this.locator);
+      const element = await this.driver.findElement(this.locator);
+      this._webElement = element;
+      this.webElement = element;
       return await this.retryCall(fn, n - 1);
     }
   }
