@@ -96,13 +96,14 @@ export class WebElementWrapper {
 
   private async retryCall(fn: Function, n: number = this.retryCount): Promise<any> {
     try {
-      return await fn();
+      return await fn(this);
     } catch (err) {
       this.logger.debug(`${fn.name}: ${err.message}`);
       if (this.locator === null || n === 1) throw err;
       this.logger.debug(
         `WebElementWrapper: searching element '${this.locator.toString()}', ${n - 1} attempts left`
       );
+      await delay(200);
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, n - 1);
     }
@@ -123,8 +124,9 @@ export class WebElementWrapper {
    * @return {Promise<boolean>}
    */
   public async isDisplayed(): Promise<boolean> {
-    const _isDisplayed = async () => await this._webElement.isDisplayed();
-    return await this.retryCall(_isDisplayed);
+    return await this.retryCall(async function isDisplayed(wrapper: WebElementWrapper) {
+      await wrapper._webElement.isEnabled();
+    });
   }
 
   /**
@@ -134,8 +136,9 @@ export class WebElementWrapper {
    * @return {Promise<boolean>}
    */
   public async isEnabled(): Promise<boolean> {
-    const _isEnabled = async () => await this._webElement.isEnabled();
-    return await this.retryCall(_isEnabled);
+    return await this.retryCall(async function isEnabled(wrapper: WebElementWrapper) {
+      await wrapper._webElement.isEnabled();
+    });
   }
 
   /**
@@ -145,8 +148,9 @@ export class WebElementWrapper {
    * @return {Promise<boolean>}
    */
   public async isSelected(): Promise<boolean> {
-    const _isSelected = async () => await this._webElement.isSelected();
-    return await this.retryCall(_isSelected);
+    return await this.retryCall(async function isSelected(wrapper: WebElementWrapper) {
+      await wrapper._webElement.isSelected();
+    });
   }
 
   /**
@@ -156,11 +160,10 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async click(): Promise<void> {
-    const _click = async () => {
-      await this.scrollIntoViewIfNecessary();
-      await this._webElement.click();
-    };
-    await this.retryCall(_click);
+    await this.retryCall(async function click(wrapper: WebElementWrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper._webElement.click();
+    });
   }
 
   /**
@@ -172,10 +175,10 @@ export class WebElementWrapper {
    */
   async clearValue() {
     // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
-    // await this._webElement.clear();
-    const _clearValue = async () =>
-      await this.driver.executeScript(`arguments[0].value=''`, this._webElement);
-    await this.retryCall(_clearValue);
+    // await wrapper._webElement.clear();
+    await this.retryCall(async function clearValue(wrapper: WebElementWrapper) {
+      await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+    });
   }
 
   /**
@@ -184,27 +187,26 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }): Promise<void> {
-    const _clearValueWithKeyboard = async () => {
-      if (options.charByChar === true) {
-        const value = await this.getAttribute('value');
-        for (let i = 0; i <= value.length; i++) {
-          await this.pressKeys(this.Keys.BACK_SPACE);
-          await delay(100);
-        }
-      } else {
-        if (this.browserType === Browsers.Chrome) {
-          // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
-          await this.driver.executeScript(`arguments[0].select();`, this._webElement);
-          await this.pressKeys(this.Keys.BACK_SPACE);
-        } else {
-          const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-          await this.pressKeys([selectionKey, 'a']);
-          await this.pressKeys(this.Keys.NULL); // Release modifier keys
-          await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
-        }
+    if (options.charByChar === true) {
+      const value = await this.getAttribute('value');
+      for (let i = 0; i <= value.length; i++) {
+        await this.pressKeys(this.Keys.BACK_SPACE);
+        await delay(100);
       }
-    };
-    await this.retryCall(_clearValueWithKeyboard);
+    } else {
+      if (this.browserType === Browsers.Chrome) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
+        await this.retryCall(async function clearValueWithKeyboard(wrapper: WebElementWrapper) {
+          await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
+        });
+        await this.pressKeys(this.Keys.BACK_SPACE);
+      } else {
+        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await this.pressKeys([selectionKey, 'a']);
+        await this.pressKeys(this.Keys.NULL); // Release modifier keys
+        await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
+      }
+    }
   }
 
   /**
@@ -227,17 +229,18 @@ export class WebElementWrapper {
     value: string | string[],
     options: TypeOptions = { charByChar: false }
   ): Promise<void> {
-    const _type = async () => {
-      if (options.charByChar) {
-        for (const char of value) {
-          await this._webElement.sendKeys(char);
+    if (options.charByChar) {
+      for (const char of value) {
+        await this.retryCall(async function type(wrapper: WebElementWrapper) {
+          await wrapper._webElement.sendKeys(char);
           await delay(100);
-        }
-      } else {
-        await this._webElement.sendKeys(...value);
+        });
       }
-    };
-    await this.retryCall(_type);
+    } else {
+      await this.retryCall(async function type(wrapper: WebElementWrapper) {
+        await wrapper._webElement.sendKeys(...value);
+      });
+    }
   }
 
   /**
@@ -250,15 +253,14 @@ export class WebElementWrapper {
   public async pressKeys<T extends IKey>(keys: T | T[]): Promise<void>;
   public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
-    const _pressKeys = async () => {
+    await this.retryCall(async function pressKeys(wrapper: WebElementWrapper) {
       if (Array.isArray(keys)) {
-        const chord = this.Keys.chord(keys);
-        await this._webElement.sendKeys(chord);
+        const chord = wrapper.Keys.chord(keys);
+        await wrapper._webElement.sendKeys(chord);
       } else {
-        await this._webElement.sendKeys(keys);
+        await wrapper._webElement.sendKeys(keys);
       }
-    };
-    await this.retryCall(_pressKeys);
+    });
   }
 
   /**
@@ -273,8 +275,9 @@ export class WebElementWrapper {
    * @param {string} name
    */
   public async getAttribute(name: string): Promise<string> {
-    const _getAttribute = async () => await this._webElement.getAttribute(name);
-    return await this.retryCall(_getAttribute);
+    return await this.retryCall(async function getAttribute(wrapper: WebElementWrapper) {
+      return await wrapper._webElement.getAttribute(name);
+    });
   }
 
   /**
@@ -287,8 +290,9 @@ export class WebElementWrapper {
    * @return {Promise<string>}
    */
   public async getComputedStyle(propertyName: string): Promise<string> {
-    const _getComputedStyle = async () => await this._webElement.getCssValue(propertyName);
-    return await this.retryCall(_getComputedStyle);
+    return await this.retryCall(async function getComputedStyle(wrapper: WebElementWrapper) {
+      return await wrapper._webElement.getCssValue(propertyName);
+    });
   }
 
   /**
@@ -299,8 +303,9 @@ export class WebElementWrapper {
    * @return {Promise<string>}
    */
   public async getVisibleText(): Promise<string> {
-    const _getVisibleText = async () => await this._webElement.getText();
-    return this.retryCall(_getVisibleText);
+    return await this.retryCall(async function getVisibleText(wrapper: WebElementWrapper) {
+      return await wrapper._webElement.getText();
+    });
   }
 
   /**
@@ -312,8 +317,9 @@ export class WebElementWrapper {
   public async getTagName<T extends keyof HTMLElementTagNameMap>(): Promise<T>;
   public async getTagName<T extends string>(): Promise<T>;
   public async getTagName(): Promise<string> {
-    const _getTagName = async () => await this._webElement.getTagName();
-    return await this.retryCall(_getTagName);
+    return await this.retryCall(async function getTagName(wrapper: WebElementWrapper) {
+      return await wrapper._webElement.getTagName();
+    });
   }
 
   /**
@@ -324,8 +330,9 @@ export class WebElementWrapper {
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
   public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
-    const _getPosition = async () => await (this._webElement as any).getRect();
-    return await this.retryCall(_getPosition);
+    return await this.retryCall(async function getPosition(wrapper: WebElementWrapper) {
+      return await (wrapper._webElement as any).getRect();
+    });
   }
 
   /**
@@ -336,8 +343,9 @@ export class WebElementWrapper {
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
   public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
-    const _getSize = async () => await (this._webElement as any).getRect();
-    return await this.retryCall(_getSize);
+    return await this.retryCall(async function getSize(wrapper: WebElementWrapper) {
+      return await (wrapper._webElement as any).getRect();
+    });
   }
 
   /**
@@ -347,22 +355,21 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async moveMouseTo(): Promise<void> {
-    const _moveMouseTo = async () => {
-      await this.scrollIntoViewIfNecessary();
-      if (this.browserType === Browsers.Firefox) {
-        const actions = (this.driver as any).actions();
+    await this.retryCall(async function moveMouseTo(wrapper: WebElementWrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      if (wrapper.browserType === Browsers.Firefox) {
+        const actions = (wrapper.driver as any).actions();
         await actions.move({ x: 0, y: 0 }).perform();
-        await actions.move({ x: 10, y: 10, origin: this._webElement }).perform();
+        await actions.move({ x: 10, y: 10, origin: wrapper._webElement }).perform();
       } else {
-        const mouse = (this.driver.actions() as any).mouse();
-        const actions = (this.driver as any).actions({ bridge: true });
+        const mouse = (wrapper.driver.actions() as any).mouse();
+        const actions = (wrapper.driver as any).actions({ bridge: true });
         await actions
           .pause(mouse)
-          .move({ origin: this._webElement })
+          .move({ origin: wrapper._webElement })
           .perform();
       }
-    };
-    await this.retryCall(_moveMouseTo);
+    });
   }
 
   /**
@@ -373,13 +380,12 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   public async findByCssSelector(selector: string): Promise<WebElementWrapper> {
-    const _findByCssSelector = async () => {
-      return this._wrap(
-        await this._webElement.findElement(this.By.css(selector)),
-        this.By.css(selector)
+    return await this.retryCall(async function findByCssSelector(wrapper: WebElementWrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.css(selector)),
+        wrapper.By.css(selector)
       );
-    };
-    return await this.retryCall(_findByCssSelector);
+    });
   }
 
   /**
@@ -394,15 +400,14 @@ export class WebElementWrapper {
     selector: string,
     timeout?: number
   ): Promise<WebElementWrapper[]> {
-    const _findAllByCssSelector = async () => {
-      return this._wrapAll(
-        await this._findWithCustomTimeout(
-          async () => await this._webElement.findElements(this.By.css(selector)),
+    return await this.retryCall(async function findAllByCssSelector(wrapper: WebElementWrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.css(selector)),
           timeout
         )
       );
-    };
-    return await this.retryCall(_findAllByCssSelector);
+    });
   }
 
   /**
@@ -413,13 +418,12 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   public async findByClassName(className: string): Promise<WebElementWrapper> {
-    const _findByClassName = async () => {
-      return this._wrap(
-        await this._webElement.findElement(this.By.className(className)),
-        this.By.className(className)
+    return await this.retryCall(async function findByClassName(wrapper: WebElementWrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.className(className)),
+        wrapper.By.className(className)
       );
-    };
-    return await this.retryCall(_findByClassName);
+    });
   }
 
   /**
@@ -434,15 +438,14 @@ export class WebElementWrapper {
     className: string,
     timeout?: number
   ): Promise<WebElementWrapper[]> {
-    const _findAllByClassName = async () =>
-      this._wrapAll(
-        await this._findWithCustomTimeout(
-          async () => await this._webElement.findElements(this.By.className(className)),
+    return await this.retryCall(async function findAllByClassName(wrapper: WebElementWrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.className(className)),
           timeout
         )
       );
-
-    return await this.retryCall(_findAllByClassName);
+    });
   }
 
   /**
@@ -457,13 +460,12 @@ export class WebElementWrapper {
   ): Promise<WebElementWrapper>;
   public async findByTagName<T extends string>(tagName: T): Promise<WebElementWrapper>;
   public async findByTagName(tagName: string): Promise<WebElementWrapper> {
-    const _findByTagName = async () => {
-      return this._wrap(
-        await this._webElement.findElement(this.By.tagName(tagName)),
-        this.By.tagName(tagName)
+    return await this.retryCall(async function findByTagName(wrapper: WebElementWrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.tagName(tagName)),
+        wrapper.By.tagName(tagName)
       );
-    };
-    return await this.retryCall(_findByTagName);
+    });
   }
 
   /**
@@ -483,15 +485,14 @@ export class WebElementWrapper {
     timeout?: number
   ): Promise<WebElementWrapper[]>;
   public async findAllByTagName(tagName: string, timeout?: number): Promise<WebElementWrapper[]> {
-    const _findAllByTagName = async () => {
-      return this._wrapAll(
-        await this._findWithCustomTimeout(
-          async () => await this._webElement.findElements(this.By.tagName(tagName)),
+    return await this.retryCall(async function findAllByTagName(wrapper: WebElementWrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.tagName(tagName)),
           timeout
         )
       );
-    };
-    return await this.retryCall(_findAllByTagName);
+    });
   }
 
   /**
@@ -502,13 +503,12 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   async findByXpath(selector: string): Promise<WebElementWrapper> {
-    const _findByXpath = async () => {
-      return this._wrap(
-        await this._webElement.findElement(this.By.xpath(selector)),
-        this.By.xpath(selector)
+    return await this.retryCall(async function findByXpath(wrapper: WebElementWrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.xpath(selector)),
+        wrapper.By.xpath(selector)
       );
-    };
-    return await this.retryCall(_findByXpath);
+    });
   }
 
   /**
@@ -520,39 +520,37 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper[]>}
    */
   public async findAllByXpath(selector: string, timeout?: number): Promise<WebElementWrapper[]> {
-    const _findAllByXpath = async () => {
-      return this._wrapAll(
-        await this._findWithCustomTimeout(
-          async () => await this._webElement.findElements(this.By.xpath(selector)),
+    return await this.retryCall(async function findAllByXpath(wrapper: WebElementWrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.xpath(selector)),
           timeout
         )
       );
-    };
-    return await this.retryCall(_findAllByXpath);
+    });
   }
 
   /**
    * Gets the first element inside this element matching the given partial link text.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
-   * @param {string} selector
+   * @param {string} linkText
    * @return {Promise<WebElementWrapper[]>}
    */
   public async findByPartialLinkText(linkText: string): Promise<WebElementWrapper> {
-    const _findByPartialLinkText = async () => {
-      return await this._wrap(
-        await this._webElement.findElement(this.By.partialLinkText(linkText)),
-        this.By.partialLinkText(linkText)
+    return await this.retryCall(async function findByPartialLinkText(wrapper: WebElementWrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.partialLinkText(linkText)),
+        wrapper.By.partialLinkText(linkText)
       );
-    };
-    return await this.retryCall(_findByPartialLinkText);
+    });
   }
 
   /**
    * Gets all elements inside this element matching the given partial link text.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
-   * @param {string} selector
+   * @param {string} linkText
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
@@ -560,15 +558,16 @@ export class WebElementWrapper {
     linkText: string,
     timeout?: number
   ): Promise<WebElementWrapper[]> {
-    const _findAllByPartialLinkText = async () => {
-      return this._wrapAll(
-        await this._findWithCustomTimeout(
-          async () => await this._webElement.findElements(this.By.partialLinkText(linkText)),
+    return await this.retryCall(async function findAllByPartialLinkText(
+      wrapper: WebElementWrapper
+    ) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () => await wrapper._webElement.findElements(wrapper.By.partialLinkText(linkText)),
           timeout
         )
       );
-    };
-    return await this.retryCall(_findAllByPartialLinkText);
+    });
   }
 
   /**
