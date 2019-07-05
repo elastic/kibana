@@ -32,6 +32,10 @@ module.exports = {
           '@kbn/eslint-import-resolver-kibana': {
             forceNode: true,
           },
+          node: {
+            paths: ['.'],
+            extensions: ['.js', '.ts', '.tsx']
+          },
         },
       },
 

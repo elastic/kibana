@@ -10,6 +10,8 @@
       "ui/*": [
         "src/legacy/ui/public/*"
       ],
+      "src": ["src/"],
+      "x-pack": ["x-pack/"],
       "test_utils/*": [
         "src/test_utils/public/*"
       ],
