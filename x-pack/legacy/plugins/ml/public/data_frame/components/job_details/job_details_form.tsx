@@ -233,7 +233,8 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
         helpText={
           indexNameExists &&
           i18n.translate('xpack.ml.dataframe.jobDetailsForm.destinationIndexHelpText', {
-            defaultMessage: 'An index with this name already exists.',
+            defaultMessage:
+              'An index with this name already exists. Be aware that running this transform will modify this destination index.',
           })
         }
         error={
