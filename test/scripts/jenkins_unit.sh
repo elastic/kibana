@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -e
-source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
+trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-xvfb-run "$(yarn bin)/grunt" jenkins:unit;
+export TEST_BROWSER_HEADLESS=1
+
+"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;

@@ -1,0 +1,18 @@
+/**
+ * 1. Make seamless transition from ToolBar to Table header and contained Menu.
+ * 1. Make seamless transition from Table to ToolBarFooter header.
+ */
+.kuiControlledTable {
+  background: $tableBackgroundColor;
+  .kuiTable {
+    border-top: none; /* 1 */
+  }
+
+  .kuiToolBarFooter {
+    border-top: none; /* 2 */
+  }
+
+  .kuiMenu--contained {
+    border-top: none; /* 1 */
+  }
+}

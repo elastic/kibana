@@ -1,0 +1,61 @@
+/**
+ * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
+ *    ugly default appearance which we can't customize, so our best option is to give Firefox
+ *    control over the checkbox's appearance.
+ * 2. Override default styles (possibly from Bootstrap).
+ */
+.kuiCheckBox {
+  -webkit-appearance: none; /* 1 */
+  background-color: $checkboxBackgroundColor;
+  border: 1px solid $checkboxBorderColor;
+  border-radius: $kuiBorderRadius;
+  width: 16px;
+  height: 16px;
+  line-height: $kuiLineHeight !important; /* 2 */
+  margin: 0 !important; /* 2 */
+  font: $kuiFontFamily !important; /* 2 */
+  font-family: $kuiFontFamily !important; /* 2 */
+  font-size: 10px !important; /* 2 */
+  transition: background-color $kuiInputTransitionTiming;
+
+  &:before {
+    position: relative;
+    left: 0.25em;
+    font-family: FontAwesome;
+    content: "\F00C";
+    font-size: 1em;
+    opacity: 0;
+    color: $checkboxIconColor;
+    transition: opacity $kuiInputTransitionTiming;
+  }
+
+  &:checked {
+    border-color: $checkboxCheckedBackgroundColor;
+    background-color: $checkboxCheckedBackgroundColor;
+    &:before {
+      opacity: 1;
+    }
+  }
+
+  &:focus {
+    @include focus;
+  }
+
+  &:disabled {
+    background-color: $checkboxDisabledColor !important;
+    border-color: $checkboxDisabledColor !important;
+    cursor: not-allowed !important;
+  }
+}
+
+.kuiCheckBoxLabel {
+  display: flex;
+  align-items: center;
+  font-weight: normal !important;
+  line-height: $kuiLineHeight;
+}
+
+  .kuiCheckBoxLabel__text {
+    font-size: $kuiFontSize;
+    margin-left: 8px;
+  }

@@ -1,0 +1,42 @@
+.guidePage {
+  display: flex;
+  flex: 1 0 auto;
+  padding-bottom: 20px;
+}
+
+.guidePageBody {
+  $topMargin: 40px;
+  $leftMargin: 120px + $guideSideNavWidth;
+  $rightMargin: 80px;
+  $scrollBarWidth: 20px;
+
+  background-color: $guidePanelBackgroundColor;
+  border: $euiBorderThin;
+  border-radius: 4px;
+  flex: 1 1 auto;
+  padding: 40px 60px;
+  margin: $topMargin $rightMargin 0 $leftMargin;
+  width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth});
+
+  .is-code-viewer-open & {
+    width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth + $guideCodeViewerWidth});
+  }
+
+  @include whenNarrowerThan($guideNormalBreakpoint) {
+    $leftMargin: 20px + $guideSideNavSmallWidth;
+    $rightMargin: 20px;
+
+    margin: $topMargin $rightMargin 0 $leftMargin;
+    width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth});
+
+    .is-code-viewer-open & {
+      width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth + $guideCodeViewerSmallWidth});
+    }
+  }
+}
+
+.guidePageKillScreen {
+  background-color: tintOrShade($euiColorDanger, 90%, 70%);
+  padding: $euiSizeL;
+  margin-bottom: $euiSizeL;
+}

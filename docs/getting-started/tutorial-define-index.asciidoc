@@ -1,22 +1,45 @@
 [[tutorial-define-index]]
-== Defining Your Index Patterns
+=== Defining your index patterns
 
-Each set of data loaded to Elasticsearch has an index pattern. In the previous section, the
-Shakespeare data set has an index named `shakespeare`, and the accounts  data set has an index named `bank`. An _index
-pattern_ is a string with optional wildcards that can match multiple indices. For example, in the common logging use
-case, a typical index name contains the date in YYYY.MM.DD format, and an index pattern for May would look something
-like `logstash-2015.05*`.
+Index patterns tell Kibana which Elasticsearch indices you want to explore.
+An index pattern can match the name of a single index, or include a wildcard
+(*) to match multiple indices.
 
-For this tutorial, any pattern that matches the name of an index we've loaded will work. Open a browser and
-navigate to `localhost:5601`. Click the *Management* tab, then the *Index Patterns* tab. Click *Add New* to define a new index
-pattern. Two of the sample data sets, the Shakespeare plays and the financial accounts, don't contain time-series data.
-Make sure the *Index contains time-based events* box is unchecked when you create index patterns for these data sets.
-Specify `shakes*`  as the index pattern for the Shakespeare data set and click *Create* to define the index pattern, then
-define a second index pattern named `ba*`.
+For example, Logstash typically creates a
+series of indices in the format `logstash-YYYY.MMM.DD`. To explore all
+of the log data from May 2018, you could specify the index pattern
+`logstash-2018.05*`.
 
-The Logstash data set does contain time-series data, so after clicking *Add New* to define the index for this data
-set, make sure the *Index contains time-based events* box is checked and select the `@timestamp` field from the
-*Time-field name* drop-down.
+You'll create patterns for the Shakespeare data set, which has an
+index named `shakespeare,` and the accounts data set, which has an index named
+`bank.` These data sets don't contain time-series data.
 
-NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must
-contain data.
+. In Kibana, open *Management*, and then click *Index Patterns.*
+. If this is your first index pattern, the *Create index pattern* page opens automatically.
+Otherwise, click *Create index pattern* in the upper left.
+. Enter `shakes*` in the *Index pattern* field.
++
+[role="screenshot"]
+image::images/tutorial-pattern-1.png[]
+
+. Click *Next step*.
+. In *Configure settings*, click *Create index pattern*.  For this pattern,
+you don't need to configure any settings.
+. Define a second index pattern named  `ba*` You don't need to configure any settings for this pattern.
+
+Now create an index pattern for the Logstash data set. This data set
+contains time-series data.
+
+. Define an index pattern named `logstash*`.
+. Click *Next step*.
+. In *Configure settings*, select *@timestamp* in the *Time Filter field name* dropdown menu.
+. Click *Create index pattern*.
+
+
+
+
+NOTE: When you define an index pattern, the indices that match that pattern must
+exist in Elasticsearch and they must contain data. To check which indices are
+available, go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
+`curl -XGET "http://localhost:9200/_cat/indices"`.
+

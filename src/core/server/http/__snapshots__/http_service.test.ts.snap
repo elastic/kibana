@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`logs error if already set up 1`] = `
+Array [
+  Array [
+    "Received new HTTP config after server was started. Config will **not** be applied.",
+  ],
+]
+`;
+
+exports[`spins up notReady server until started if configured with \`autoListen:true\`: 503 response 1`] = `
+Object {
+  "body": Array [
+    Array [
+      "Kibana server is not ready yet",
+    ],
+  ],
+  "code": Array [
+    Array [
+      503,
+    ],
+  ],
+  "header": Array [
+    Array [
+      "Retry-After",
+      "30",
+    ],
+  ],
+}
+`;

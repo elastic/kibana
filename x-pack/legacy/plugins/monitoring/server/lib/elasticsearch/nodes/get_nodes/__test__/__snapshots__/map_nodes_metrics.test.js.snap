@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`map nodes metrics should summarize the info 1`] = `
+Object {
+  "sg-ldUAbRUCOPIytxxhcIA": Object {
+    "node_cpu_utilization": Object {
+      "metric": Object {
+        "app": "elasticsearch",
+        "description": "Percentage of CPU usage for the Elasticsearch process.",
+        "field": "node_stats.process.cpu.percent",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false,
+        "label": "CPU Utilization",
+        "metricAgg": "max",
+        "units": "%",
+      },
+      "summary": Object {
+        "lastVal": 0,
+        "maxVal": 0,
+        "minVal": 0,
+        "slope": -1,
+      },
+    },
+    "node_jvm_mem_percent": Object {
+      "metric": Object {
+        "app": "elasticsearch",
+        "description": "Total heap used by Elasticsearch running in the JVM.",
+        "field": "node_stats.jvm.mem.heap_used_percent",
+        "format": "0,0.[00]",
+        "hasCalculation": false,
+        "isDerivative": false,
+        "label": "Used Heap",
+        "metricAgg": "max",
+        "title": "JVM Heap",
+        "units": "%",
+      },
+      "summary": Object {
+        "lastVal": 13,
+        "maxVal": 35,
+        "minVal": 13,
+        "slope": -1,
+      },
+    },
+  },
+}
+`;

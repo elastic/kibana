@@ -1,0 +1,45 @@
+{
+  "cluster.reroute": {
+    "data_autocomplete_rules": {
+      "commands": [
+        {
+          "move": {
+            "__template": {
+              "index": "",
+              "shard": 0,
+              "from_node": "",
+              "to_node": ""
+            },
+            "index": "{index}",
+            "shard": 0,
+            "from_node": "{node}",
+            "to_node": "{node}"
+          },
+          "cancel": {
+            "__template": {
+              "index": "",
+              "shard": 0,
+              "node": ""
+            },
+            "index": "{index}",
+            "shard": 0,
+            "node": "{node}",
+            "allow_primary": { "__one_of": [true, false] }
+          },
+          "allocate": {
+            "__template": {
+              "index": "",
+              "shard": 0,
+              "node": ""
+            },
+            "index": "{index}",
+            "shard": 0,
+            "node": "{node}",
+            "allow_primary": { "__one_of": [true, false] }
+          }
+        }
+      ],
+      "dry_run": { "__one_of": [true, false] }
+    }
+  }
+}

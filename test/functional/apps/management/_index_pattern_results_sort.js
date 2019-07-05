@@ -1,4 +1,23 @@
-import expect from 'expect.js';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -6,113 +25,69 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('index result field sort', function describeIndexTests() {
-    before(function () {
+    before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.replace({});
     });
 
     const columns = [{
-      heading: 'name',
+      heading: 'Name',
       first: '@message',
       last: 'xss.raw',
-      selector: function () {
-        return PageObjects.settings.getTableRow(0, 0).getVisibleText();
+      selector: async function () {
+        const tableRow = await PageObjects.settings.getTableRow(0, 0);
+        return await tableRow.getVisibleText();
       }
     }, {
-      heading: 'type',
+      heading: 'Type',
       first: '_source',
       last: 'string',
-      selector: function () {
-        return PageObjects.settings.getTableRow(0, 1).getVisibleText();
+      selector: async function () {
+        const tableRow = await PageObjects.settings.getTableRow(0, 1);
+        return await tableRow.getVisibleText();
       }
     }];
 
     columns.forEach(function (col) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
-        before(function () {
-          return PageObjects.settings.navigateTo()
-            .then(function () {
-              return PageObjects.settings.clickKibanaIndices();
-            });
+        before(async function () {
+          await PageObjects.settings.createIndexPattern();
         });
 
-        beforeEach(function () {
-          return PageObjects.settings.createIndexPattern();
+        after(async function () {
+          return await PageObjects.settings.removeIndexPattern();
         });
 
-        afterEach(function () {
-          return PageObjects.settings.removeIndexPattern();
+        it('should sort ascending', async function () {
+          await PageObjects.settings.sortBy(col.heading);
+          const rowText = await col.selector();
+          expect(rowText).to.be(col.first);
         });
 
-        it('should sort ascending', function () {
-          return PageObjects.settings.sortBy(col.heading)
-            .then(function getText() {
-              return col.selector();
-            })
-            .then(function (rowText) {
-              expect(rowText).to.be(col.first);
-            });
-        });
-
-        it('should sort descending', function () {
-          return PageObjects.settings.sortBy(col.heading)
-            .then(function sortAgain() {
-              return PageObjects.settings.sortBy(col.heading);
-            })
-            .then(function getText() {
-              return col.selector();
-            })
-            .then(function (rowText) {
-              expect(rowText).to.be(col.last);
-            });
+        it('should sort descending', async function () {
+          await PageObjects.settings.sortBy(col.heading);
+          const getText = await col.selector();
+          expect(getText).to.be(col.last);
         });
       });
     });
-
     describe('field list pagination', function () {
-      const EXPECTED_DEFAULT_PAGE_SIZE = 25;
       const EXPECTED_FIELD_COUNT = 86;
-      const EXPECTED_LAST_PAGE_COUNT = EXPECTED_FIELD_COUNT % EXPECTED_DEFAULT_PAGE_SIZE;
-      const LAST_PAGE_NUMBER = Math.ceil(EXPECTED_FIELD_COUNT / EXPECTED_DEFAULT_PAGE_SIZE);
 
-      before(function () {
-        return PageObjects.settings.navigateTo()
-          .then(function () {
-            return PageObjects.settings.createIndexPattern();
-          });
+      before(async function () {
+        await PageObjects.settings.createIndexPattern();
       });
 
-      after(function () {
-        return PageObjects.settings.removeIndexPattern();
+      after(async function () {
+        return await PageObjects.settings.removeIndexPattern();
       });
 
-      it('makelogs data should have expected number of fields', function () {
-        return retry.try(function () {
-          return PageObjects.settings.getFieldsTabCount()
-            .then(function (tabCount) {
-              expect(tabCount).to.be('' + EXPECTED_FIELD_COUNT);
-            });
+      it('makelogs data should have expected number of fields', async function () {
+        await retry.try(async function () {
+          const TabCount = await PageObjects.settings.getFieldsTabCount();
+          expect(TabCount).to.be('' + EXPECTED_FIELD_COUNT);
+
         });
-      });
-
-      it('should have correct default page size selected', function () {
-        return PageObjects.settings.getPageSize()
-          .then(function (pageSize) {
-            expect(pageSize).to.be('' + EXPECTED_DEFAULT_PAGE_SIZE);
-          });
-      });
-
-      it('should have the correct number of rows per page', async function () {
-        for (let pageNum = 1; pageNum <= LAST_PAGE_NUMBER; pageNum += 1) {
-          await PageObjects.settings.goToPage(pageNum);
-          const pageFieldNames = await retry.tryMethod(PageObjects.settings, 'getFieldNames');
-
-          if (pageNum === LAST_PAGE_NUMBER) {
-            expect(pageFieldNames).to.have.length(EXPECTED_LAST_PAGE_COUNT);
-          } else {
-            expect(pageFieldNames).to.have.length(EXPECTED_DEFAULT_PAGE_SIZE);
-          }
-        }
       });
     }); // end describe pagination
   }); // end index result field sort

@@ -1,0 +1,6 @@
+npm-debug.log*
+node_modules
+/build/
+<%_ if (generateScss) { -%>
+/public/app.css
+<%_ } -%>

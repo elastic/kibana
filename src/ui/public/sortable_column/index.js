@@ -1,1 +1,0 @@
-import './sortable_column';

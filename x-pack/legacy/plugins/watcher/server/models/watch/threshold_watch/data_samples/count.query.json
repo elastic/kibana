@@ -1,0 +1,15 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": {
+        "range": {
+          "@timestamp": {
+            "from": "now-30d",
+            "to": "now"
+          }
+        }
+      }
+    }
+  }
+}

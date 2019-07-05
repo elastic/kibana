@@ -1,0 +1,97 @@
+[[console-kibana]]
+== Console
+
+Console enables you to interact with the REST API of {es}. *Note:* You cannot 
+interact with {kib} API endpoints via Console.
+
+Go to *Dev Tools > Console* to get started. 
+
+Console has two main areas: 
+
+* The *editor*, where you compose requests to send to {es}.
+* The *response* pane, which displays the responses to the request.
+
+[role="screenshot"]
+image::dev-tools/console/images/console.png["Console"]
+
+[float]
+[[console-api]]
+=== Writing requests
+
+Console understands commands in a cURL-like syntax. 
+For example, the following is a `GET` request to the {es} `_search` API. 
+
+[source,js]
+----------------------------------
+GET /_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+----------------------------------
+
+Here is the equivalent command in cURL:
+
+[source,bash]
+----------------------------------
+curl -XGET "http://localhost:9200/_search" -d'
+{
+  "query": {
+    "match_all": {}
+  }
+}'
+----------------------------------
+
+If you paste the above command into Console, {kib} automatically converts it
+to Console syntax.  Alternatively, if you want to want to see Console syntax in cURL, 
+click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*. 
+
+For help with formatting requests, you can use Console's <<auto-formatting, auto formatting>> 
+feature.
+
+
+[float]
+[[console-request]]
+=== Submitting requests 
+
+Once you enter a command in the editor, click the 
+green triangle to submit the request to {es}.
+
+You can select multiple requests and submit them together.
+Console sends the requests to {es} one by one and shows the output 
+in the response pane. Submitting multiple request is helpful when you're debugging an issue or trying query 
+combinations in multiple scenarios.
+
+[float]
+[[console-autocomplete]]
+=== Using autocomplete
+
+When typing a command, Console makes context-sensitive suggestions.
+These suggestions can help you explore parameters for each API and speed up typing. 
+To configure your preferences for autocomplete, go to 
+<<configuring-console, Settings>>. 
+
+[float]
+[[console-view-api]]
+=== Viewing API docs
+
+You can view the documentation for an API endpoint by clicking
+the action icon (image:dev-tools/console/images/wrench.png[]) and selecting
+*Open documentation*.
+
+[float]
+[[console-history]]
+=== Getting your request history
+
+Console maintains a list of the last 500 requests that {es} successfully executed. 
+To view your most recent requests, click *History*. If you select a request
+and click *Apply*, {kib} adds it to the editor at the current cursor position.
+
+
+
+include::auto-formatting.asciidoc[]
+
+include::keyboard-shortcuts.asciidoc[]
+
+include::configuring-console.asciidoc[]

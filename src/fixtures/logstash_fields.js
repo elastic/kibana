@@ -1,11 +1,31 @@
-import { castEsToKbnFieldTypeName } from '../utils';
-import { shouldReadFieldFromDocValues } from '../server/index_patterns/service/lib/field_capabilities/should_read_field_from_doc_values';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { castEsToKbnFieldTypeName } from '../legacy/utils';
+// eslint-disable-next-line max-len
+import { shouldReadFieldFromDocValues } from '../legacy/server/index_patterns/service/lib/field_capabilities/should_read_field_from_doc_values';
 
 function stubbedLogstashFields() {
   return [
     //                                  |aggregatable
     //                                  |      |searchable
-    // name               esType        |      |      |metadata
+    // name               esType        |      |      |metadata       | parent      | subType
     ['bytes',             'long',       true,  true,  { count: 10 } ],
     ['ssl',               'boolean',    true,  true,  { count: 20 } ],
     ['@timestamp',        'date',       true,  true,  { count: 30 } ],
@@ -21,7 +41,7 @@ function stubbedLogstashFields() {
     ['geo.coordinates',   'geo_point',  true,  true ],
     ['extension',         'keyword',    true,  true ],
     ['machine.os',        'text',       true,  true ],
-    ['machine.os.raw',    'keyword',    true,  true ],
+    ['machine.os.raw',    'keyword',    true,  true,   {},            'machine.os', 'multi' ],
     ['geo.src',           'keyword',    true,  true ],
     ['_id',               '_id',        true,  true ],
     ['_type',             '_type',      true,  true ],
@@ -39,7 +59,9 @@ function stubbedLogstashFields() {
       esType,
       aggregatable,
       searchable,
-      metadata = {}
+      metadata = {},
+      parent = undefined,
+      subType = undefined,
     ] = row;
 
     const {
@@ -56,6 +78,7 @@ function stubbedLogstashFields() {
     return {
       name,
       type,
+      esTypes: [esType],
       readFromDocValues: shouldReadFieldFromDocValues(aggregatable, esType),
       aggregatable,
       searchable,
@@ -63,6 +86,8 @@ function stubbedLogstashFields() {
       script,
       lang,
       scripted,
+      parent,
+      subType,
     };
   });
 }

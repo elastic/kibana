@@ -1,0 +1,12 @@
+{
+  "name": "kibana",
+  "version": "1.0.0",
+  "dependencies": {
+    "foo": "1.0.0"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  }
+}

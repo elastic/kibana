@@ -1,0 +1,43 @@
+/**
+ * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
+ *    a bit.
+ */
+.kuiLocalBreadcrumbs {
+  display: flex;
+  align-items: center;
+  padding: ($localNavSideSpacing * 1.5) $localNavSideSpacing; /* 1 */
+  border-bottom: $euiBorderThin;
+  flex-grow: 1;
+  flex-basis: 100%;
+  background-color: $euiColorEmptyShade;
+}
+
+.kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal;
+
+  & + & {
+    margin-left: 6px;
+
+    &:before {
+      content: '/';
+      user-select: none;
+      margin-right: 4px;
+      color: $localNavBreadcrumbDelimiterColor;
+    }
+  }
+}
+
+/**
+ * 1. Make it a bit darker to contrast with the gray background.
+ */
+.kuiLocalBreadcrumb__link {
+  @include link;
+  color: $localBreadcrumbLinkColor; /* 1 */
+  font-size: $kuiFontSize;
+}
+
+.kuiLocalBreadcrumb__emphasis {
+  font-weight: $kuiFontWeightBold;
+}

@@ -1,31 +1,66 @@
-import { writeFile } from 'fs';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
+import { writeFile } from 'fs';
+import os from 'os';
 import Boom from 'boom';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';
-import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
-import DefinePlugin from 'webpack/lib/DefinePlugin';
-import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
-import NoEmitOnErrorsPlugin from 'webpack/lib/NoEmitOnErrorsPlugin';
 import Stats from 'webpack/lib/Stats';
+import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
+import { DynamicDllPlugin } from './dynamic_dll_plugin';
 
 import { defaults } from 'lodash';
 
-import { fromRoot } from '../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../legacy/utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
-const BABEL_PRESET_PATH = require.resolve('../babel-preset/webpack');
+const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
+const STATS_WARNINGS_FILTER = new RegExp([
+  '(export .* was not found in)',
+  '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
+].join(''));
+
+function recursiveIssuer(m) {
+  if (m.issuer) {
+    return recursiveIssuer(m.issuer);
+  } else if (m.name) {
+    return m.name;
+  } else {
+    return false;
+  }
+}
 
 export default class BaseOptimizer {
   constructor(opts) {
+    this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
+    this.discoveredPlugins = opts.discoveredPlugins;
     this.profile = opts.profile || false;
+    this.workers = opts.workers;
 
     switch (opts.sourceMaps) {
       case true:
@@ -41,22 +76,39 @@ export default class BaseOptimizer {
         break;
     }
 
-    this.unsafeCache = opts.unsafeCache || false;
-    if (typeof this.unsafeCache === 'string') {
-      this.unsafeCache = [
-        new RegExp(this.unsafeCache.slice(1, -1))
-      ];
-    }
+    // Run some pre loading in order to prevent
+    // high delay when booting thread loader workers
+    this.warmupThreadLoaderPool();
   }
 
-  async initCompiler() {
-    if (this.compiler) return this.compiler;
+  async init() {
+    if (this.compiler) {
+      return this;
+    }
 
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
-    this.compiler.plugin('done', stats => {
-      if (!this.profile) return;
+    // register the webpack compiler hooks
+    // for the base optimizer
+    this.registerCompilerHooks();
+
+    return this;
+  }
+
+  registerCompilerHooks() {
+    this.registerCompilerDoneHook();
+  }
+
+  registerCompilerDoneHook() {
+    this.compiler.hooks.done.tap('base_optimizer-done', stats => {
+      // We are not done while we have an additional
+      // compilation pass to run
+      // We also don't need to emit the stats if we don't have
+      // the profile option set
+      if (!this.profile || stats.compilation.needAdditionalPass) {
+        return;
+      }
 
       const path = this.uiBundles.resolvePath('stats.json');
       const content = JSON.stringify(stats.toJson());
@@ -64,38 +116,93 @@ export default class BaseOptimizer {
         if (err) throw err;
       });
     });
+  }
 
-    return this.compiler;
+  warmupThreadLoaderPool() {
+    const baseModules = [
+      'babel-loader',
+      BABEL_PRESET_PATH
+    ];
+
+    threadLoader.warmup(
+      // pool options, like passed to loader options
+      // must match loader options to boot the correct pool
+      this.getThreadLoaderPoolConfig(),
+      [
+        // modules to load on the pool
+        ...baseModules,
+      ]
+    );
+  }
+
+  getThreadPoolCpuCount() {
+    if (this.workers) {
+      return this.workers;
+    }
+
+    const cpus = os.cpus();
+    if (!cpus) {
+      // sometimes this call returns undefined so we fall back to 1: https://github.com/nodejs/node/issues/19022
+      return 1;
+    }
+
+    return Math.max(
+      1,
+      Math.min(
+        cpus.length - 1,
+        7
+      )
+    );
+  }
+
+  getThreadLoaderPoolConfig() {
+    // Calculate the node options from the NODE_OPTIONS env var
+    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
+
+    return {
+      name: 'optimizer-thread-loader-main-pool',
+      workers: this.getThreadPoolCpuCount(),
+      workerParallelJobs: 20,
+      // This is a safe check in order to set
+      // the parent node options applied from
+      // the NODE_OPTIONS env var for every launched worker.
+      // Otherwise, if the user sets max_old_space_size, as they
+      // are used to, into NODE_OPTIONS, it won't affect the workers.
+      workerNodeArgs: parsedNodeOptions,
+      poolParallelJobs: this.getThreadPoolCpuCount() * 20,
+      poolTimeout: this.uiBundles.isDevMode() ? Infinity : 2000
+    };
   }
 
   getConfig() {
+    function getStyleLoaderExtractor() {
+      return [
+        MiniCssExtractPlugin.loader
+      ];
+    }
+
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
-      return ExtractTextPlugin.extract({
-        fallback: {
-          loader: 'style-loader'
+      return [
+        ...postProcessors,
+        {
+          loader: 'css-loader',
+          options: {
+            // importLoaders needs to know the number of loaders that follow this one,
+            // so we add 1 (for the postcss-loader) to the length of the preProcessors
+            // array that we merge into this array
+            importLoaders: 1 + preProcessors.length,
+          },
         },
-        use: [
-          ...postProcessors,
-          {
-            loader: 'css-loader',
-            options: {
-              // importLoaders needs to know the number of loaders that follow this one,
-              // so we add 1 (for the postcss-loader) to the length of the preProcessors
-              // array that we merge into this array
-              importLoaders: 1 + preProcessors.length,
+        {
+          loader: 'postcss-loader',
+          options: {
+            config: {
+              path: POSTCSS_CONFIG_PATH,
             },
           },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: POSTCSS_CONFIG_PATH,
-              },
-            },
-          },
-          ...preProcessors,
-        ],
-      });
+        },
+        ...preProcessors,
+      ];
     }
 
     /**
@@ -104,26 +211,53 @@ export default class BaseOptimizer {
      * files in optimize/.cache that are not necessary for distributable versions
      * of Kibana and just make compressing and extracting it more difficult.
      */
-    function maybeAddCacheLoader(uiBundles, cacheName, loaders) {
-      if (!uiBundles.isDevMode()) {
-        return loaders;
-      }
-
+    const maybeAddCacheLoader = (cacheName, loaders) => {
       return [
         {
           loader: 'cache-loader',
           options: {
-            cacheDirectory: uiBundles.getCacheDirectory(cacheName)
+            cacheContext: fromRoot('.'),
+            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
+            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
           }
         },
         ...loaders
       ];
-    }
+    };
+
+    /**
+     * Creates the selection rules for a loader that will only pass for
+     * source files that are eligible for automatic transpilation.
+     */
+    const createSourceFileResourceSelector = (test) => {
+      return [
+        {
+          test,
+          exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
+        },
+        {
+          test,
+          include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
+          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
+        }
+      ];
+    };
 
     const commonConfig = {
+      mode: 'development',
       node: { fs: 'empty' },
       context: fromRoot('.'),
-      entry: this.uiBundles.toWebpackEntries(),
+      cache: true,
+      entry: {
+        ...this.uiBundles.toWebpackEntries(),
+        ...this._getDiscoveredPluginEntryPoints(),
+        light_theme: [
+          require.resolve('../legacy/ui/public/styles/bootstrap_light.less'),
+        ],
+        dark_theme: [
+          require.resolve('../legacy/ui/public/styles/bootstrap_dark.less'),
+        ],
+      },
 
       devtool: this.sourceMaps,
       profile: this.profile || false,
@@ -133,56 +267,114 @@ export default class BaseOptimizer {
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+
+        // When the entry point is loaded, assign it's exported `plugin`
+        // value to a key on the global `__kbnBundles__` object.
+        // NOTE: Only actually used by new platform plugins
+        library: ['__kbnBundles__', '[name]'],
+        libraryExport: 'plugin',
+      },
+
+      optimization: {
+        splitChunks: {
+          cacheGroups: {
+            commons: {
+              name: 'commons',
+              chunks: chunk => chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
+              minChunks: 2,
+              reuseExistingChunk: true
+            },
+            light_theme: {
+              name: 'light_theme',
+              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
+              chunks: 'all',
+              enforce: true
+            },
+            dark_theme: {
+              name: 'dark_theme',
+              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
+              chunks: 'all',
+              enforce: true
+            }
+          }
+        },
+        noEmitOnErrors: true
       },
 
       plugins: [
-        new ExtractTextPlugin('[name].style.css', {
-          allChunks: true
+        new DynamicDllPlugin({
+          uiBundles: this.uiBundles,
+          threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
+          logWithMetadata: this.logWithMetadata
         }),
 
-        new CommonsChunkPlugin({
-          name: 'commons',
-          filename: 'commons.bundle.js'
+        new MiniCssExtractPlugin({
+          filename: '[name].style.css',
         }),
 
-        new NoEmitOnErrorsPlugin(),
+        // replace imports for `uiExports/*` modules with a synthetic module
+        // created by create_ui_exports_module.js
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
+          // the map of uiExport types to module ids
+          const extensions = this.uiBundles.getAppExtensions();
+
+          // everything following the first / in the request is
+          // treated as a type of appExtension
+          const type = resource.request.slice(resource.request.indexOf('/') + 1);
+
+          resource.request = [
+            // the "val-loader" is used to execute create_ui_exports_module
+            // and use its return value as the source for the module in the
+            // bundle. This allows us to bypass writing to the file system
+            require.resolve('val-loader'),
+            '!',
+            require.resolve('./create_ui_exports_module'),
+            '?',
+            // this JSON is parsed by create_ui_exports_module and determines
+            // what require() calls it will execute within the bundle
+            JSON.stringify({ type, modules: extensions[type] || [] })
+          ].join('');
+        }),
+
+        ...this.uiBundles.getWebpackPluginProviders()
+          .map(provider => provider(webpack)),
       ],
 
       module: {
         rules: [
           {
             test: /\.less$/,
-            use: getStyleLoaders(
-              ['less-loader'],
-              maybeAddCacheLoader(this.uiBundles, 'less', [])
-            ),
+            use: [
+              ...getStyleLoaderExtractor(),
+              ...getStyleLoaders(['less-loader'], maybeAddCacheLoader('less', []))
+            ],
           },
           {
             test: /\.css$/,
-            use: getStyleLoaders(),
-          },
-          {
-            // TODO: this doesn't seem to be used, remove?
-            test: /\.jade$/,
-            loader: 'jade-loader'
+            use: [
+              ...getStyleLoaderExtractor(),
+              ...getStyleLoaders([], maybeAddCacheLoader('css', []))
+            ],
           },
           {
             test: /\.(html|tmpl)$/,
             loader: 'raw-loader'
           },
           {
-            test: /\.png$/,
-            loader: 'url-loader'
+            test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+            loader: 'url-loader',
+            options: {
+              limit: 8192
+            }
           },
           {
-            test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-            loader: 'file-loader'
-          },
-          {
-            test: /\.js$/,
-            exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
-            use: maybeAddCacheLoader(this.uiBundles, 'babel', [
+            resource: createSourceFileResourceSelector(/\.(js|tsx?)$/),
+            use: maybeAddCacheLoader('babel', [
+              {
+                loader: 'thread-loader',
+                options: this.getThreadLoaderPoolConfig()
+              },
               {
                 loader: 'babel-loader',
                 options: {
@@ -203,7 +395,7 @@ export default class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.json'],
+        extensions: ['.js', '.ts', '.tsx', '.json'],
         mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',
@@ -212,53 +404,133 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.uiBundles.getAliases(),
-        unsafeCache: this.unsafeCache,
+        alias: {
+          ...this.uiBundles.getAliases(),
+          'dll/set_csp_nonce$': require.resolve('./dynamic_dll_plugin/public/set_csp_nonce')
+        }
       },
+
+      performance: {
+        // NOTE: we are disabling this as those hints
+        // are more tailored for the final bundles result
+        // and not for the webpack compilations performance itself
+        hints: false
+      }
     };
 
-    if (this.uiBundles.isDevMode()) {
-      return webpackMerge(commonConfig, {
-        // In the test env we need to add react-addons (and a few other bits) for the
-        // enzyme tests to work.
-        // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
-        externals: {
-          'mocha': 'mocha',
-          'react/lib/ExecutionEnvironment': true,
-          'react/addons': true,
-          'react/lib/ReactContext': true,
-        }
-      });
-    }
-
-    return webpackMerge(commonConfig, {
+    // when running from the distributable define an environment variable we can use
+    // to exclude chunks of code, modules, etc.
+    const isDistributableConfig = {
       plugins: [
-        new DefinePlugin({
+        new webpack.DefinePlugin({
           'process.env': {
-            'NODE_ENV': '"production"'
+            'IS_KIBANA_DISTRIBUTABLE': `"true"`
           }
         }),
-        new UglifyJsPlugin({
-          compress: {
-            warnings: false
-          },
-          sourceMap: false,
-          mangle: false
-        }),
       ]
-    });
+    };
+
+    // We need to add react-addons (and a few other bits) for enzyme to work.
+    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
+    const supportEnzymeConfig = {
+      externals: {
+        'mocha': 'mocha',
+        'react/lib/ExecutionEnvironment': true,
+        'react/addons': true,
+        'react/lib/ReactContext': true,
+      }
+    };
+
+    const watchingConfig = {
+      plugins: [
+        new webpack.WatchIgnorePlugin([
+          // When our bundle entry files are fresh they cause webpack
+          // to think they might have changed since the watcher was
+          // initialized, which triggers a second compilation on startup.
+          // Since we can't reliably update these files anyway, we can
+          // just ignore them in the watcher and prevent the extra compilation
+          /bundles[\/\\].+\.entry\.js/,
+        ])
+      ]
+    };
+
+    // in production we set the process.env.NODE_ENV and run
+    // the terser minimizer over our bundles
+    const productionConfig = {
+      mode: 'production',
+      optimization: {
+        minimizer: [
+          new TerserPlugin({
+            parallel: true,
+            sourceMap: false,
+            terserOptions: {
+              compress: false,
+              mangle: false
+            }
+          }),
+        ]
+      }
+    };
+
+    return this.uiBundles.getExtendedConfig(
+      webpackMerge(
+        commonConfig,
+        IS_KIBANA_DISTRIBUTABLE
+          ? isDistributableConfig
+          : {},
+        this.uiBundles.isDevMode()
+          ? webpackMerge(watchingConfig, supportEnzymeConfig)
+          : productionConfig
+      )
+    );
+  }
+
+  isFailure(stats) {
+    if (stats.hasErrors()) {
+      return true;
+    }
+
+    const { warnings } = stats.toJson({ all: false, warnings: true });
+
+    // 1 - when typescript doesn't do a full type check, as we have the ts-loader
+    // configured here, it does not have enough information to determine
+    // whether an imported name is a type or not, so when the name is then
+    // exported, typescript has no choice but to emit the export. Fortunately,
+    // the extraneous export should not be harmful, so we just suppress these warnings
+    // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+    //
+    // 2 - Mini Css Extract plugin tracks the order for each css import we have
+    // through the project (and it's successive imports) since version 0.4.2.
+    // In case we have the same imports more than one time with different
+    // sequences, this plugin will throw a warning. This should not be harmful,
+    // but the an issue was opened and can be followed on:
+    // https://github.com/webpack-contrib/mini-css-extract-plugin/issues/250#issuecomment-415345126
+    const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
+
+    return filteredWarnings.length > 0;
   }
 
   failedStatsToError(stats) {
     const details = stats.toString(defaults(
-      { colors: true },
+      { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
       Stats.presetToOptions('minimal')
     ));
 
-    return Boom.create(
-      500,
+    return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(Stats.presetToOptions('detailed'))
+      stats.toJson(defaults({
+        warningsFilter: STATS_WARNINGS_FILTER,
+        ...Stats.presetToOptions('detailed')
+      }))
     );
+  }
+
+  _getDiscoveredPluginEntryPoints() {
+    // New platform plugin entry points
+    return [...this.discoveredPlugins.entries()]
+      .reduce((entryPoints, [pluginId, plugin]) => {
+        entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
+        return entryPoints;
+      }, {});
   }
 }

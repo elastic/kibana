@@ -1,0 +1,25 @@
+[
+  {
+    "_id": "c45e6c50-ba72-11e7-a8f9-ad70f02e633d",
+    "_type": "search",
+    "_source": {
+      "title": "PHP saved search",
+      "description": "",
+      "hits": 0,
+      "columns": [
+        "_source"
+      ],
+      "sort": [
+        "@timestamp",
+        "desc"
+      ],
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"f1e4c910-a2e6-11e7-bb30-233be9be6a15\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"php\"},\"filter\":[]}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  }
+]

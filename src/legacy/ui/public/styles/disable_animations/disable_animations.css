@@ -1,0 +1,17 @@
+*:not(.essentialAnimation),
+*:not(.essentialAnimation):before,
+*:not(.essentialAnimation):after {
+  /**
+   * set the animation/transition duration to 0s so that animation callbacks are
+   * still triggered, allowing components that require them to remain functional
+   */
+
+  -webkit-animation-duration: 0s !important;
+  animation-duration: 0s !important;
+
+  -webkit-transition-duration: 0s !important;
+  transition-duration: 0s !important;
+
+  -webkit-transition-delay: 0s !important;
+  transition-delay: 0s !important;
+}

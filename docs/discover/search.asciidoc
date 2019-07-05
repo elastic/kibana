@@ -1,10 +1,12 @@
 [[search]]
 == Searching Your Data
 You can search the indices that match the current index pattern by entering
-your search criteria in the Query bar. You can use the Lucene
-https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[
-query syntax], the full JSON-based {ref}/query-dsl.html[Elasticsearch
-Query DSL] or Kuery, an experimental new query language built specifically for Kibana.
+your search criteria in the Query bar. By default you can use Kibana's standard query language
+which features autocomplete and a simple, easy to use syntax. Kibana's legacy query
+language (based on Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax])
+is still available for the time being under the options menu in the Query Bar. When this
+legacy query language is selected, the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]
+can also be used.
 
 When you submit a search request, the histogram, Documents table, and Fields
 list are updated to reflect the search results. The total number of hits
@@ -19,17 +21,14 @@ To search your data, enter your search criteria in the Query bar and
 press *Enter* or click *Search* image:images/search-button.jpg[] to submit
 the request to Elasticsearch.
 
-[NOTE]
-===========
-By default, Kibana will accept either the Lucene query syntax or the
-Elasticsearch Query DSL in the Query bar. In order to use the new Kuery
-language you must enable language switching in *Management > Advanced Settings*
-via the `search:queryLanguage:switcher:enable` option. You can also change the 
-default language with the `search:queryLanguage` setting.
-===========
+include::kuery.asciidoc[]
 
 [[lucene-query]]
 === Lucene Query Syntax
+Kibana's legacy query language was based on the Lucene query syntax. For the time being this syntax
+is still available under the options menu in the Query Bar and in Advanced Settings. The following
+are some tips that can help get you started.
+
 * To perform a free text search, simply enter a text string. For example, if
 you're searching web server logs, you could enter `safari` to search all
 fields for the term `safari`.
@@ -54,13 +53,22 @@ docs.
 NOTE: These examples use the Lucene query syntax. When lucene is selected as your
 query language you can also submit queries using the {ref}/query-dsl.html[Elasticsearch Query DSL].
 
-include::kuery.asciidoc[]
 
 [[save-open-search]]
 === Saving and Opening Searches
 Saving searches enables you to reload them into Discover and use them as the basis
 for <<visualize, visualizations>>. Saving a search saves both the search query string
 and the currently selected index pattern.
+
+[role="xpack"]
+[[discover-read-only-access]]
+==== Read only access
+When you have insufficient privileges to save searches, the following indicator in Kibana will be
+displayed and the *Save* button won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 
 ==== Saving a Search
 To save the current search:

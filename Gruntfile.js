@@ -1,52 +1,31 @@
-require('./src/babel-register');
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+require('./src/setup_node_env');
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
   // and once during so that we have access to it via
   // grunt.config.get() within the config files
   const config = {
-    pkg: grunt.file.readJSON('package.json'),
     root: __dirname,
-    src: __dirname + '/src',
-    buildDir: __dirname + '/build', // temporary build directory
-    plugins: __dirname + '/src/core_plugins',
-    server: __dirname + '/src/server',
-    target: __dirname + '/target', // location of the compressed build targets
-    configFile: __dirname + '/src/config/kibana.yml',
-
-    karmaBrowser: (function () {
-      if (grunt.option('browser')) {
-        return grunt.option('browser');
-      }
-
-      switch (require('os').platform()) {
-        case 'win32':
-          return 'IE';
-        default:
-          return 'Chrome';
-      }
-    }()),
-
-    nodeVersion: grunt.file.read('.node-version').trim(),
-
-    meta: {
-      banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
-        '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-        '<%= package.homepage ? " * " + package.homepage + "\\n" : "" %>' +
-        ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
-        ' Licensed <%= package.license %> */\n'
-    },
   };
-
-  grunt.config.merge(config);
-
-  // must run before even services/platforms
-  grunt.config.set('build', require('./tasks/config/build')(grunt));
-
-  config.packageScriptsDir = __dirname + '/tasks/build/package_scripts';
-  // ensure that these run first, other configs need them
-  config.services = require('./tasks/config/services')(grunt);
-  config.platforms = require('./tasks/config/platforms')(grunt);
 
   grunt.config.merge(config);
 
@@ -62,5 +41,4 @@ module.exports = function (grunt) {
 
   // load task definitions
   grunt.task.loadTasks('tasks');
-  grunt.task.loadTasks('tasks/build');
 };

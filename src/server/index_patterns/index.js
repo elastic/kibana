@@ -1,1 +1,0 @@
-export { indexPatternsMixin } from './mixin';

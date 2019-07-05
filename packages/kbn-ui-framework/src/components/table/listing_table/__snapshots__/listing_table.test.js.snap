@@ -1,0 +1,192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiListingTable 1`] = `
+<div
+  class="kuiControlledTable"
+>
+  <div
+    class="kuiToolBar"
+  >
+    <div
+      class="kuiToolBarSearch"
+    >
+      <div
+        class="kuiToolBarSearchBox"
+      >
+        <div
+          class="kuiToolBarSearchBox__icon kuiIcon fa-search"
+        />
+        <input
+          aria-label="Filter"
+          class="kuiToolBarSearchBox__input"
+          placeholder="Search..."
+          type="text"
+          value=""
+        />
+      </div>
+    </div>
+  </div>
+  <table
+    class="kuiTable"
+  >
+    <thead>
+      <tr>
+        <th
+          class="kuiTableHeaderCell kuiTableHeaderCell--checkBox"
+          scope="col"
+        >
+          <div
+            class="kuiTableHeaderCell__liner"
+          >
+            <input
+              aria-label="Select all rows"
+              class="kuiCheckBox"
+              type="checkbox"
+            />
+          </div>
+        </th>
+        <th
+          class="kuiTableHeaderCell"
+          scope="col"
+        >
+          <div
+            class="kuiTableHeaderCell__liner"
+          >
+            Breed
+          </div>
+        </th>
+        <th
+          class="kuiTableHeaderCell"
+          scope="col"
+        >
+          <div
+            class="kuiTableHeaderCell__liner"
+          >
+            Description
+          </div>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        class="kuiTableRow"
+      >
+        <td
+          class="kuiTableRowCell kuiTableRowCell--checkBox"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            <input
+              aria-label="Select row"
+              class="kuiCheckBox"
+              type="checkbox"
+            />
+          </div>
+        </td>
+        <td
+          class="kuiTableRowCell"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            Bengal
+          </div>
+        </td>
+        <td
+          class="kuiTableRowCell"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            An athlete, spotted cat
+          </div>
+        </td>
+      </tr>
+      <tr
+        class="kuiTableRow"
+      >
+        <td
+          class="kuiTableRowCell kuiTableRowCell--checkBox"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            <input
+              aria-label="Select row"
+              class="kuiCheckBox"
+              type="checkbox"
+            />
+          </div>
+        </td>
+        <td
+          class="kuiTableRowCell"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            Himalayan
+          </div>
+        </td>
+        <td
+          class="kuiTableRowCell"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            Affectionate but discriminating
+          </div>
+        </td>
+      </tr>
+      <tr
+        class="kuiTableRow"
+      >
+        <td
+          class="kuiTableRowCell kuiTableRowCell--checkBox"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            <input
+              aria-label="Select row"
+              class="kuiCheckBox"
+              type="checkbox"
+            />
+          </div>
+        </td>
+        <td
+          class="kuiTableRowCell"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            Chartreux
+          </div>
+        </td>
+        <td
+          class="kuiTableRowCell"
+        >
+          <div
+            class="kuiTableRowCell__liner"
+          >
+            Silent but communicative and sometimes silly
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    class="kuiToolBarFooter"
+  >
+    <div
+      class="kuiToolBarFooterSection"
+    >
+      <div
+        class="kuiToolBarText"
+      >
+        0 items selected
+      </div>
+    </div>
+  </div>
+</div>
+`;

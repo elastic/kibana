@@ -4,6 +4,13 @@
 Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
 are the easiest formats to use when trying out Kibana.
 
+These packages are free to use under the Elastic license. They contain open 
+source and free commercial features and access to paid commercial features. 
+{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
+paid commercial features. See the 
+https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+Elastic license levels.
+
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page.
 Other versions can be found on the
@@ -26,12 +33,12 @@ The Linux archive for Kibana v{version} can be downloaded and installed as follo
 ["source","sh",subs="attributes"]
 --------------------------------------------
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
-sha1sum kibana-{version}-linux-x86_64.tar.gz <1>
+shasum -a 512 kibana-{version}-linux-x86_64.tar.gz <1>
 tar -xzf kibana-{version}-linux-x86_64.tar.gz
 cd kibana-{version}-linux-x86_64/ <2>
 --------------------------------------------
-<1> Compare the SHA produced by `sha1sum` or `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha1[published SHA].
+<1> Compare the SHA produced by `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha512[published SHA].
 <2> This directory is known as `$KIBANA_HOME`.
 
 endif::[]
@@ -53,29 +60,23 @@ The Darwin archive for Kibana v{version} can be downloaded and installed as foll
 ["source","sh",subs="attributes"]
 --------------------------------------------
 curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
-shasum kibana-{version}-darwin-x86_64.tar.gz <1>
+shasum -a 512 kibana-{version}-darwin-x86_64.tar.gz <1>
 tar -xzf kibana-{version}-darwin-x86_64.tar.gz
 cd kibana-{version}-darwin-x86_64/ <2>
 --------------------------------------------
-<1> Compare the SHA produced by `sha1sum` or `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha1[published SHA].
+<1> Compare the SHA produced by `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512[published SHA].
 <2> This directory is known as `$KIBANA_HOME`.
+
+Alternatively, you can download the following package, which contains only 
+features that are available under the Apache 2.0 license:
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz  
 
 endif::[]
 
 
 [[targz-running]]
-==== Running Kibana from the command line
-
-Kibana can be started from the command line as follows:
-
-[source,sh]
---------------------------------------------
-./bin/kibana
---------------------------------------------
-
-By default, Kibana runs in the foreground, prints its logs to the
-standard output (`stdout`), and can be stopped by pressing `Ctrl-C`.
+include::targz-running.asciidoc[]
 
 
 [[targz-configuring]]

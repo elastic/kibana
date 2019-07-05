@@ -1,0 +1,10 @@
+{
+  "indices.put_alias": {
+    "data_autocomplete_rules": {
+      "filter": {},
+      "routing": "1",
+      "search_routing": "1,2",
+      "index_routing": "1"
+    }
+  }
+}

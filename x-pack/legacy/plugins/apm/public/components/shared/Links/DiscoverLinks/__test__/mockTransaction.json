@@ -1,0 +1,114 @@
+{
+  "agent": {
+    "hostname": "227453131a17",
+    "type": "apm-server",
+    "version": "7.0.0"
+  },
+  "processor": {
+    "name": "transaction",
+    "event": "transaction"
+  },
+  "trace": {
+    "id": "8b60bd32ecc6e1506735a8b6cfcf175c"
+  },
+  "@timestamp": "2018-12-18T00:14:30.952Z",
+  "host": {
+    "hostname": "227453131a17"
+  },
+  "service": {
+    "agent": {
+      "name": "go",
+      "version": "1.1.1"
+    },
+    "framework": {
+      "name": "gin",
+      "version": "v1.4.0-dev"
+    },
+    "name": "opbeans-go",
+    "runtime": {
+      "name": "gc",
+      "version": "go1.10.6"
+    },
+    "language": {
+      "name": "go",
+      "version": "go1.10.6"
+    }
+  },
+  "process": {
+    "pid": 1,
+    "title": "opbeans-go",
+    "argv": [
+      "/opbeans-go",
+      "-listen=:3000",
+      "-frontend=/opbeans-frontend",
+      "-db=postgres:",
+      "-cache=redis://redis:6379"
+    ],
+    "ppid": 0
+  },
+  "context": {
+    "request": {
+      "headers": {
+        "Accept": "*/*",
+        "User-Agent": "Python/3.7 aiohttp/3.3.2",
+        "Accept-Encoding": "gzip, deflate"
+      },
+      "method": "GET",
+      "http_version": "1.1",
+      "socket": {
+        "remote_address": "172.18.0.12"
+      },
+      "url": {
+        "protocol": "http",
+        "hostname": "172.18.0.7",
+        "port": "3000",
+        "full": "http://172.18.0.7:3000/api/products/3/customers",
+        "pathname": "/api/products/3/customers"
+      }
+    },
+    "system": {
+      "hostname": "8acb9c1a71f3",
+      "ip": "172.18.0.7",
+      "platform": "linux",
+      "architecture": "amd64"
+    },
+    "response": {
+      "headers": {
+        "X-Frame-Options": "SAMEORIGIN",
+        "Server": "gunicorn/19.9.0",
+        "Vary": "Cookie",
+        "Content-Length": "31646",
+        "Date": "Tue, 18 Dec 2018 00:14:45 GMT",
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      "status_code": 200
+    }
+  },
+  "transaction": {
+    "result": "HTTP 2xx",
+    "duration": {
+      "us": 14586403
+    },
+    "name": "GET /api/products/:id/customers",
+    "span_count": {
+      "dropped": {
+        "total": 0
+      },
+      "started": 1
+    },
+    "id": "8b60bd32ecc6e150",
+    "type": "request",
+    "sampled": true
+  },
+  "kubernetes": {
+    "pod": {
+      "uid": "pod123456abcdef"
+    }
+  },
+  "container": {
+    "id": "container123456abcdef"
+  },
+  "timestamp": {
+    "us": 1545092070952472
+  }
+}

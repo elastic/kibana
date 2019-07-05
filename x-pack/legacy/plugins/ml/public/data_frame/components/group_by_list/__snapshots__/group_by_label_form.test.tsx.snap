@@ -1,0 +1,238 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="eui-textTruncate"
+    >
+      the-group-by-agg-name
+    </span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    grow={false}
+  >
+    <EuiTextColor
+      className="eui-textTruncate"
+      color="subdued"
+    >
+      1m
+    </EuiTextColor>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--button"
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonIcon
+          aria-label="Edit interval"
+          color="primary"
+          iconSize="m"
+          iconType="pencil"
+          onClick={[Function]}
+          size="s"
+          type="button"
+        />
+      }
+      closePopover={[Function]}
+      hasArrow={true}
+      id="mlIntervalFormPopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="m"
+    >
+      <PopoverForm
+        defaultData={
+          Object {
+            "agg": "date_histogram",
+            "aggName": "the-group-by-agg-name",
+            "calendar_interval": "1m",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-group-by-field",
+          }
+        }
+        onChange={[Function]}
+        options={Object {}}
+        otherAggNames={Array []}
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--button"
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete item"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="eui-textTruncate"
+    >
+      the-group-by-agg-name
+    </span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    grow={false}
+  >
+    <EuiTextColor
+      className="eui-textTruncate"
+      color="subdued"
+    >
+      100
+    </EuiTextColor>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--button"
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonIcon
+          aria-label="Edit interval"
+          color="primary"
+          iconSize="m"
+          iconType="pencil"
+          onClick={[Function]}
+          size="s"
+          type="button"
+        />
+      }
+      closePopover={[Function]}
+      hasArrow={true}
+      id="mlIntervalFormPopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="m"
+    >
+      <PopoverForm
+        defaultData={
+          Object {
+            "agg": "histogram",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-group-by-field",
+            "interval": "100",
+          }
+        }
+        onChange={[Function]}
+        options={Object {}}
+        otherAggNames={Array []}
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--button"
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete item"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="eui-textTruncate"
+    >
+      the-group-by-agg-name
+    </span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--button"
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonIcon
+          aria-label="Edit interval"
+          color="primary"
+          iconSize="m"
+          iconType="pencil"
+          onClick={[Function]}
+          size="s"
+          type="button"
+        />
+      }
+      closePopover={[Function]}
+      hasArrow={true}
+      id="mlIntervalFormPopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="m"
+    >
+      <PopoverForm
+        defaultData={
+          Object {
+            "agg": "terms",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-group-by-field",
+          }
+        }
+        onChange={[Function]}
+        options={Object {}}
+        otherAggNames={Array []}
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--button"
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete item"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

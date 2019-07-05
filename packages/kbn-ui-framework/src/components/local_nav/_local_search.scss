@@ -1,0 +1,80 @@
+.kuiLocalSearch {
+  display: flex;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.kuiLocalSearchInput {
+  @include formControl;
+  flex: 1 1 100%;
+  border-color: $localSearchBackgroundColor;
+  border-color: $kuiColorLightGray;
+  border-radius: $kuiBorderRadius 0 0 $kuiBorderRadius;
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &.kuiLocalSearchInput-isInvalid {
+    border-color: $localSearchBorderColor-isInvalid;
+  }
+}
+
+.kuiLocalSearchInput--secondary {
+  height: $localSearchHeight;
+  flex: 0 0 auto;
+  border-radius: 0;
+  border-left-width: 0;
+}
+
+.kuiLocalSearchAssistedInput {
+  display: flex;
+  flex: 1 1 100%;
+  position: relative;
+}
+
+/**
+ * 1. em used for right padding so documentation link and query string
+ *    won't overlap if the user increases their default browser font size
+ *    This is sized for the 'Options' link
+ */
+ .kuiLocalSearchInput,
+ .kuiLocalSearchAssistedInput__input {
+   padding-right: 6em; /* 1 */
+ }
+
+  /**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+  .kuiLocalSearchAssistedInput__assistance {
+    position: absolute;
+    right: $kuiFormControlHorizontalPadding/2;
+    top: 50%; /* 1 */
+    z-index: 2;
+    transform: translateY(-50%); /* 1 */
+  }
+
+.kuiLocalSearchSelect {
+  @include select;
+
+  border-left-width: 0;
+  border-radius: 0;
+}
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiLocalSearchButton {
+  width: 43px;
+  height: $localSearchHeight;
+  font-size: $kuiFontSize;
+  line-height: 0; /* 1 */
+  color: $localSearchButtonTextColor;
+  background-color: $localSearchButtonBackgroundColor;
+  border: 0;
+  border-radius: 0 $kuiBorderRadius $kuiBorderRadius 0;
+
+  &:focus {
+    @include focus($kuiFocusColor, $kuiBorderColor);
+  }
+}

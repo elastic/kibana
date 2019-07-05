@@ -1,0 +1,684 @@
+{ "default":  {
+    "anomalies": [
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.004741615571416013,
+          "multi_bucket_impact": 0,
+          "record_score": 25.662,
+          "initial_record_score": 41.00971774894037,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486062900000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "1",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.012071679592192066
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "1"
+          ]
+        },
+        "rowId": "1546553208554_0",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 25.662,
+        "entityName": "mlcategory",
+        "entityValue": "1",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.012071679592192066
+        ],
+        "typicalSort": 0.012071679592192066,
+        "metricDescriptionSort": 82.83851409101328,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false,
+          "influencers": [
+            "mockInfluencer"
+          ]
+      },
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.019155040437768597,
+          "multi_bucket_impact": 0,
+          "record_score": 10.4834,
+          "initial_record_score": 19.66680192782777,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486020600000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "3",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.02575857847964643
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "3"
+          ]
+        },
+        "rowId": "1546553208554_1",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 10.4834,
+        "entityName": "mlcategory",
+        "entityValue": "3",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.02575857847964643
+        ],
+        "typicalSort": 0.02575857847964643,
+        "metricDescriptionSort": 38.82201810127708,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false,
+          "influencers": [
+            "mockInfluencer"
+          ]
+      }
+    ],
+    "jobIds": ["it-ops-count-by-mlcategory-one"],
+    "interval": "day",
+    "examplesByJobId": {
+      "it-ops-count-by-mlcategory-one": {
+        "1": [
+          "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "2": [
+          "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "3": [
+          "Using: 10.16.1.63!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+          "Using: sssvcdbj1.acme.com!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ]
+      }
+    },
+    "showViewSeriesLink": true
+  },
+  "noEntityValue": {
+    "anomalies": [
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.004741615571416013,
+          "multi_bucket_impact": 0,
+          "record_score": 25.662,
+          "initial_record_score": 41.00971774894037,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486062900000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "1",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.012071679592192066
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "1"
+          ]
+        },
+        "rowId": "1546553208554_0",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 25.662,
+        "entityName": "mlcategory",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.012071679592192066
+        ],
+        "typicalSort": 0.012071679592192066,
+        "metricDescriptionSort": 82.83851409101328,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false,
+        "influencers": [
+          "mockInfluencer"
+        ]
+      },
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.019155040437768597,
+          "multi_bucket_impact": 0,
+          "record_score": 10.4834,
+          "initial_record_score": 19.66680192782777,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486020600000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "3",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.02575857847964643
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "3"
+          ]
+        },
+        "rowId": "1546553208554_1",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 10.4834,
+        "entityName": "mlcategory",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.02575857847964643
+        ],
+        "typicalSort": 0.02575857847964643,
+        "metricDescriptionSort": 38.82201810127708,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false,
+        "influencers": [
+          "mockInfluencer"
+        ]
+      }
+    ],
+    "jobIds": [
+      "it-ops-count-by-mlcategory-one"
+    ],
+    "interval": "day",
+    "examplesByJobId": {
+      "it-ops-count-by-mlcategory-one": {
+        "1": [
+          "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "2": [
+          "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "3": [
+          "Using: 10.16.1.63!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+          "Using: sssvcdbj1.acme.com!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ]
+      }
+    },
+    "showViewSeriesLink": true
+  },
+  "noInfluencers": {
+    "anomalies": [
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.004741615571416013,
+          "multi_bucket_impact": 0,
+          "record_score": 25.662,
+          "initial_record_score": 41.00971774894037,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486062900000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "1",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.012071679592192066
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "1"
+          ]
+        },
+        "rowId": "1546553208554_0",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 25.662,
+        "entityName": "mlcategory",
+        "entityValue": "1",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.012071679592192066
+        ],
+        "typicalSort": 0.012071679592192066,
+        "metricDescriptionSort": 82.83851409101328,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false
+      },
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.019155040437768597,
+          "multi_bucket_impact": 0,
+          "record_score": 10.4834,
+          "initial_record_score": 19.66680192782777,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486020600000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "3",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.02575857847964643
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "3"
+          ]
+        },
+        "rowId": "1546553208554_1",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 10.4834,
+        "entityName": "mlcategory",
+        "entityValue": "3",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.02575857847964643
+        ],
+        "typicalSort": 0.02575857847964643,
+        "metricDescriptionSort": 38.82201810127708,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false
+      }
+    ],
+    "jobIds": [
+      "it-ops-count-by-mlcategory-one"
+    ],
+    "interval": "day",
+    "examplesByJobId": {
+      "it-ops-count-by-mlcategory-one": {
+        "1": [
+          "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "2": [
+          "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "3": [
+          "Using: 10.16.1.63!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+          "Using: sssvcdbj1.acme.com!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ]
+      }
+    },
+    "showViewSeriesLink": true
+  },
+  "noActual": {
+    "anomalies": [
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.004741615571416013,
+          "multi_bucket_impact": 0,
+          "record_score": 25.662,
+          "initial_record_score": 41.00971774894037,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486062900000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "1",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.012071679592192066
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "1"
+          ]
+        },
+        "rowId": "1546553208554_0",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 25.662,
+        "entityName": "mlcategory",
+        "entityValue": "1",
+        "actualSort": 1,
+        "typical": [
+          0.012071679592192066
+        ],
+        "typicalSort": 0.012071679592192066,
+        "metricDescriptionSort": 82.83851409101328,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false
+      },
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.019155040437768597,
+          "multi_bucket_impact": 0,
+          "record_score": 10.4834,
+          "initial_record_score": 19.66680192782777,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486020600000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "3",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.02575857847964643
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "3"
+          ]
+        },
+        "rowId": "1546553208554_1",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 10.4834,
+        "entityName": "mlcategory",
+        "entityValue": "3",
+        "actualSort": 1,
+        "typical": [
+          0.02575857847964643
+        ],
+        "typicalSort": 0.02575857847964643,
+        "metricDescriptionSort": 38.82201810127708,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false
+      }
+    ],
+    "jobIds": [
+      "it-ops-count-by-mlcategory-one"
+    ],
+    "interval": "day",
+    "examplesByJobId": {
+      "it-ops-count-by-mlcategory-one": {
+        "1": [
+          "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "2": [
+          "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "3": [
+          "Using: 10.16.1.63!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+          "Using: sssvcdbj1.acme.com!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ]
+      }
+    },
+    "showViewSeriesLink": true
+  },
+  "noTypical": {
+    "anomalies": [
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.004741615571416013,
+          "multi_bucket_impact": 0,
+          "record_score": 25.662,
+          "initial_record_score": 41.00971774894037,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486062900000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "1",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.012071679592192066
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "1"
+          ]
+        },
+        "rowId": "1546553208554_0",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 25.662,
+        "entityName": "mlcategory",
+        "entityValue": "1",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typicalSort": 0.012071679592192066,
+        "metricDescriptionSort": 82.83851409101328,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false,
+        "influencers": [
+          "mockInfluencer"
+        ]
+      },
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.019155040437768597,
+          "multi_bucket_impact": 0,
+          "record_score": 10.4834,
+          "initial_record_score": 19.66680192782777,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486020600000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "3",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.02575857847964643
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "3"
+          ]
+        },
+        "rowId": "1546553208554_1",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 10.4834,
+        "entityName": "mlcategory",
+        "entityValue": "3",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typicalSort": 0.02575857847964643,
+        "metricDescriptionSort": 38.82201810127708,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false,
+        "influencers": [
+          "mockInfluencer"
+        ]
+      }
+    ],
+    "jobIds": [
+      "it-ops-count-by-mlcategory-one"
+    ],
+    "interval": "day",
+    "examplesByJobId": {
+      "it-ops-count-by-mlcategory-one": {
+        "1": [
+          "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "2": [
+          "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "3": [
+          "Using: 10.16.1.63!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+          "Using: sssvcdbj1.acme.com!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ]
+      }
+    },
+    "showViewSeriesLink": true
+  },
+  "multipleJobIds": {
+    "anomalies": [
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.004741615571416013,
+          "multi_bucket_impact": 0,
+          "record_score": 25.662,
+          "initial_record_score": 41.00971774894037,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486062900000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "1",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.012071679592192066
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "1"
+          ]
+        },
+        "rowId": "1546553208554_0",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 25.662,
+        "entityName": "mlcategory",
+        "entityValue": "1",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.012071679592192066
+        ],
+        "typicalSort": 0.012071679592192066,
+        "metricDescriptionSort": 82.83851409101328,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false
+      },
+      {
+        "time": 1486018800000,
+        "source": {
+          "job_id": "it-ops-count-by-mlcategory-one",
+          "result_type": "record",
+          "probability": 0.019155040437768597,
+          "multi_bucket_impact": 0,
+          "record_score": 10.4834,
+          "initial_record_score": 19.66680192782777,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1486020600000,
+          "by_field_name": "mlcategory",
+          "by_field_value": "3",
+          "function": "count",
+          "function_description": "count",
+          "typical": [
+            0.02575857847964643
+          ],
+          "actual": [
+            1
+          ],
+          "mlcategory": [
+            "3"
+          ]
+        },
+        "rowId": "1546553208554_1",
+        "jobId": "it-ops-count-by-mlcategory-one",
+        "detectorIndex": 0,
+        "severity": 10.4834,
+        "entityName": "mlcategory",
+        "entityValue": "3",
+        "actual": [
+          1
+        ],
+        "actualSort": 1,
+        "typical": [
+          0.02575857847964643
+        ],
+        "typicalSort": 0.02575857847964643,
+        "metricDescriptionSort": 38.82201810127708,
+        "detector": "count by mlcategory",
+        "isTimeSeriesViewDetector": false
+      }
+    ],
+    "jobIds": [
+      "it-ops-count-by-mlcategory-one",
+      "second-job-id"
+    ],
+    "interval": "day",
+    "examplesByJobId": {
+      "it-ops-count-by-mlcategory-one": {
+        "1": [
+          "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "2": [
+          "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ],
+        "3": [
+          "Using: 10.16.1.63!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+          "Using: sssvcdbj1.acme.com!svc_prod#uid=dbadmin1;pwd=#####;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com"
+        ]
+      }
+    },
+    "showViewSeriesLink": true
+  },
+  "showExamples": {},
+  "showLinks": {}
+}

@@ -3,6 +3,13 @@
 
 Kibana can be installed on Windows using the `.zip` package.
 
+This package is free to use under the Elastic license. It contains open source 
+and free commercial features and access to paid commercial features. 
+{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
+paid commercial features. See the 
+https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+Elastic license levels.
+
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page.
 Other versions can be found on the
@@ -32,20 +39,14 @@ terminal window, `CD` to the `$KIBANA_HOME` directory, for instance:
 CD c:\kibana-{version}-windows-x86_64
 ----------------------------
 
+Alternatively, you can download the following package, which contains only 
+features that are available under the Apache 2.0 license:
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-windows-x86_64.zip  
+
 endif::[]
 
 [[windows-running]]
-==== Running Kibana from the command line
-
-Kibana can be started from the command line as follows:
-
-[source,sh]
---------------------------------------------
-.\bin\kibana
---------------------------------------------
-
-By default, Kibana runs in the foreground, prints its logs to `STDOUT`,
-and can be stopped by pressing `Ctrl-C`.
+include::windows-running.asciidoc[]
 
 [[windows-configuring]]
 ==== Configuring Kibana via config file

@@ -1,0 +1,46 @@
+/**
+ * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
+ */
+.kuiLocalTabs {
+  display: flex;
+  align-items: flex-end; // 1
+  height: 100%;
+}
+
+  /**
+   * 1. Override inherited typographic styles.
+   */
+  .kuiLocalTab {
+    padding: 5px 0 6px 0;
+    font-size: 18px;
+    color: $localTabTextColor;
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 0 !important; /* 1 */
+    margin-bottom: 0 !important; /* 1 */
+
+    &:hover:not(.kuiLocalTab-isDisabled),
+    &:active:not(.kuiLocalTab-isDisabled) {
+      color: $localTabTextColor-isHover;
+    }
+
+    &.kuiLocalTab-isSelected {
+      color: $localTabTextColor-isSelected;
+      border-bottom-color: $localTabTextColor-isSelected;
+      cursor: default;
+    }
+
+    /**
+     * 1. We may want to show a tooltip to explain why the tab is disabled, so we will just show
+     *    a regular cursor instead of setting pointer-events: none.
+     */
+    &.kuiLocalTab-isDisabled {
+      opacity: 0.5;
+      cursor: default; /* 1 */
+    }
+
+    & + & {
+      margin-left: 15px;
+    }
+  }

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 
@@ -5,9 +24,9 @@ import { fromNode as fcb } from 'bluebird';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { setupJunitReportGeneration } from '../junit_report_generation';
+import { setupJUnitReportGeneration } from '../junit_report_generation';
 
 const PROJECT_DIR = resolve(__dirname, 'fixtures/project');
 const DURATION_REGEX = /^\d+\.\d{3}$/;
@@ -21,7 +40,7 @@ describe('dev/mocha/junit report generation', () => {
   it('reports on failed setup hooks', async () => {
     const mocha = new Mocha({
       reporter: function Runner(runner) {
-        setupJunitReportGeneration(runner, {
+        setupJUnitReportGeneration(runner, {
           reportName: 'test',
           rootDirectory: PROJECT_DIR
         });
@@ -30,7 +49,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise(resolve => mocha.run(resolve));
-    const report = await fcb(cb => parseString(readFileSync(resolve(PROJECT_DIR, 'target/junit/test.xml')), cb));
+    const report = await fcb(cb => parseString(readFileSync(resolve(PROJECT_DIR, 'target/junit/TEST-test.xml')), cb));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).to.eql({
@@ -74,7 +93,8 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE works',
         time: testPass.$.time,
-      }
+      },
+      'system-out': testPass['system-out']
     });
 
     expect(testFail.$.time).to.match(DURATION_REGEX);
@@ -85,6 +105,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE fails',
         time: testFail.$.time,
       },
+      'system-out': testFail['system-out'],
       failure: [
         testFail.failure[0]
       ]
@@ -99,6 +120,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
         time: beforeEachFail.$.time,
       },
+      'system-out': testFail['system-out'],
       failure: [
         beforeEachFail.failure[0]
       ]
@@ -109,6 +131,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE never runs',
       },
+      'system-out': testFail['system-out'],
       skipped: ['']
     });
   });

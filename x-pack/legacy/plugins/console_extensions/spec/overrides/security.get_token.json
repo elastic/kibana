@@ -1,0 +1,10 @@
+{
+  "security.get_token": {
+    "data_autocomplete_rules": {
+      "grant_type": "",
+      "password": "",
+      "scope": "",
+      "username": ""
+    }
+  }
+}

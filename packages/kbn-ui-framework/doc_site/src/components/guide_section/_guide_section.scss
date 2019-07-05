@@ -1,0 +1,39 @@
+.guideSection {
+  margin-bottom: 40px;
+}
+
+  .guideSection__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 2px;
+    line-height: $guideLineHeight;
+  }
+
+  .guideSection__title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .guideSection__sourceButton {
+    appearance: none;
+    border: none;
+    line-height: 10px;
+    padding: 4px 10px;
+    color: $guideLinkHoverColor;
+    background-color: $euiColorEmptyShade;
+    border: 1px solid $guideLinkHoverColor;
+    border-radius: 3px;
+    cursor: pointer;
+    transform: translateX(0);
+    transition: transform $guideChromeTransition;
+
+    &:hover,
+    &:active {
+      background-color: $euiColorLightestShade;
+    }
+
+    .is-chrome-hidden & {
+      transform: translateX(60px);
+    }
+  }

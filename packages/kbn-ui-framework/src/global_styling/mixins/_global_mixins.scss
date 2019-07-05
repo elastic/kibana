@@ -1,0 +1,269 @@
+/**
+ * 1. Enforce pointer when there's no href.
+ * 2. Allow these styles to be applied to a button element.
+ */
+@mixin link {
+  color: $kuiLinkColor;
+  text-decoration: none;
+  cursor: pointer; /* 1 */
+  appearance: none; /* 2 */
+  background-color: transparent; /* 2 */
+  border: none; /* 2 */
+  font-size: inherit; /* 2 */
+  line-height: inherit; /* 2 */
+
+  &:visited,
+  &:active {
+    color: $kuiLinkColor;
+  }
+
+  &:hover {
+    color: $kuiLinkHoverColor;
+    text-decoration: underline;
+  }
+}
+
+/**
+ * 1. Override Bootstrap styles.
+ */
+@mixin collapseButton {
+  appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  line-height: 1;
+  font-size: 16px;
+  color: $kuiTextColor !important; /* 1 */
+  cursor: pointer;
+  opacity: 0.35;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :disabled.
+ */
+@mixin kuiButtonDisabled {
+  &:disabled {
+    @content;
+  }
+
+  @at-root a#{&}.kuiButton-isDisabled {
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonHover {
+  &:enabled:hover {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):hover { /* 1 */
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonActive {
+  &:enabled:active {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):active { /* 1 */
+    @content;
+  }
+}
+
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+@mixin kuiButtonFocus {
+  &:not(a):enabled:focus {
+    @content;
+  }
+
+  @at-root a#{&}:not(.kuiButton-isDisabled):focus { /* 1 */
+    @content;
+  }
+}
+
+@mixin kuiButtonHoverAndActive {
+  @include kuiButtonHover { @content }
+  @include kuiButtonActive { @content }
+}
+
+@mixin focus($color: $kuiFocusColor, $backgroundColor: $kuiFocusBackgroundColor) {
+  z-index: 1; /* 1 */
+  outline: none !important; /* 2 */
+  box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 2px $color; /* 3 */
+}
+
+@mixin formControlFocus {
+  outline: none;
+  border-color: $kuiSelectedBorderColor;
+}
+
+/**
+ * Nothing fancy, just the basics so we can use this for both regular and static controls.
+ */
+@mixin formControlBase {
+  appearance: none;
+  font-family: $kuiFontFamily;
+  padding: $kuiFormControlPadding;
+  font-size: $kuiFontSize;
+  font-weight: 400;
+  line-height: $kuiLineHeight;
+  color: $kuiFontColor;
+}
+
+/**
+ * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
+ */
+@mixin formControl($borderRadius: $kuiBorderRadius) {
+  @include formControlBase;
+  background-color: $euiFormBackgroundColor;
+  border: 1px solid $euiFormBorderColor;
+  border-radius: $borderRadius;
+  transition: border-color $kuiInputTransitionTiming;
+  min-height: $kuiFormInputHeight; /* 1 */
+
+  &:invalid {
+    @include formControlInvalid;
+  }
+
+  &:focus {
+    @include formControlFocus;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/**
+ * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
+ * coupled with Angular.
+ */
+@mixin formControlInvalid {
+  border-color: $kuiDangerBorderColor;
+}
+
+/**
+ * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
+ * 2. Make room on right side for the caret.
+ * 3. Prevent Firefox from showing dotted line around text on focus.
+ */
+@mixin select($borderRadius: $kuiBorderRadius) {
+  @include formControl($borderRadius);
+  padding-right: 30px; /* 2 */
+  background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>'); /* 1 */
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: calc(100% - 8px); /* 2 */
+
+  &:-moz-focusring {
+    text-shadow: 0 0 0; /* 3 */
+  }
+}
+
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
+@mixin microButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: $kuiSubduedTextColor;
+  background-color: transparent;
+  line-height: 1; /* 2 */
+
+  &:hover {
+    color: $kuiFontColor;
+  }
+}
+
+/**
+ * 1. Give Bar a consistent height for when it contains shorter children, and therefore can't
+ *    depend on them to give it the desired height.
+ */
+@mixin bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 30px; /* 1 */
+}
+
+/**
+ * 1. Put 10px of space between each child.
+ * 2. If there is only one section, align it to the right. If you wanted it aligned right, you
+ *    wouldn't use the Bar in the first place.
+ * 3. Children in the middle should center their content.
+ * 4. Fix an IE bug which causes the last child to overflow the container.
+ * 5. Fixing this bug means we now need to align the children to the right.
+ */
+@mixin barSection {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  margin-left: $toolBarSectionSpacing * 0.5;
+  margin-right: $toolBarSectionSpacing * 0.5;
+
+  &:not(:first-child):not(:last-child):not(:only-child) {
+    justify-content: center; /* 3 */
+  }
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+    flex: 0 1 auto; /* 4 */
+    justify-content: flex-end; /* 5 */
+  }
+
+  &:only-child {
+    margin-left: auto; /* 2 */
+  }
+
+  & > * + * {
+    margin-left: $toolBarItemSpacing; /* 1 */
+  }
+}
+
+@mixin buttonOnStandoutBackground {
+  .kuiButton {
+    @include kuiButtonFocus {
+      @include focus($kuiFocusColor, $kuiBorderColor);
+    }
+  }
+
+  .kuiButton--danger {
+    @include kuiButtonFocus {
+      @include focus($kuiFocusDangerColor, $kuiBorderColor);
+    }
+  }
+}
+
+@mixin selectOnStandoutBackground {
+  .kuiSelect {
+    border-color: $euiFormBackgroundColor;
+
+    @include kuiButtonFocus {
+      @include formControlFocus;
+    }
+  }
+}
+

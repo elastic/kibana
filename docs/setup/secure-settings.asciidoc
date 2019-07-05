@@ -1,5 +1,5 @@
 [[secure-settings]]
-=== Secure Settings
+=== Secure settings
 
 Some settings are sensitive, and relying on filesystem permissions to protect
 their values is not sufficient. For this use case, Kibana provides a
@@ -43,6 +43,17 @@ can be added using the `add` command:
 ----------------------------------------------------------------
 bin/kibana-keystore add the.setting.name.to.set
 ----------------------------------------------------------------
+
+Once added to the keystore, these setting will be automatically applied
+to this instance of Kibana when started. For example if you do
+
+[source,sh]
+----------------------------------------------------------------
+bin/kibana-keystore add elasticsearch.username
+----------------------------------------------------------------
+
+you will be prompted to provide the value for elasticsearch.username.
+(Your input will show as asterisks.)
 
 The tool will prompt for the value of the setting. To pass the value
 through stdin, use the `--stdin` flag:

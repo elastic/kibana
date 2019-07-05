@@ -1,0 +1,109 @@
+<div
+  id="timelionSuggestionList"
+  class="timSuggestions"
+  role="listbox"
+  ng-class="{ 'timSuggestions-isPopover': shouldPopover === 'true' }"
+  data-suggestions-list
+>
+  <div
+    class="timSuggestions__item"
+    id="timelionSuggestion{{$index}}"
+    role="option"
+    tabindex="0"
+    data-suggestion-list-item
+    ng-class="{active: $index === selectedIndex}"
+    ng-repeat="suggestion in suggestions track by suggestion.name"
+    ng-mousedown="onMouseDown($event)"
+    ng-click="onClickSuggestion({ suggestionIndex: $index })"
+    aria-label="{{suggestion.name}}"
+    aria-describedby="timelionSuggestionDescription{{$index}}"
+    data-test-subj="timelionSuggestionListItem"
+  >
+
+    <div ng-switch on="suggestionsType">
+
+      <div ng-switch-when="functions">
+        <h4>
+          <strong>.{{suggestion.name}}()</strong>
+          <small id="timelionSuggestionDescription{{$index}}">
+            <span
+              ng-if="suggestion.chainable"
+              i18n-id="timelion.expressionSuggestions.func.description.chainableText"
+              i18n-default-message="{help} (Chainable)"
+              i18n-values="{ help: suggestion.help }"
+            ></span>
+            <span
+              ng-if="!suggestion.chainable"
+              i18n-id="timelion.expressionSuggestions.func.description.dataSourceText"
+              i18n-default-message="{help} (Data Source)"
+              i18n-values="{ help: suggestion.help }"
+            ></span>
+          </small>
+        </h4>
+
+        <div ng-show="suggestion.args.length > (suggestion.chainable ? 1: 0)">
+          <div ng-show="suggestions.length > 1">
+            <strong
+              i18n-id="timelion.expressionSuggestions.arg.listTitle"
+              i18n-default-message="Arguments:"
+            ></strong>
+            <span ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
+              <strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>)
+              <em ng-show="!$last">,</em>
+            </span>
+          </div>
+
+          <div class="timSuggestions__details" ng-show="suggestions.length === 1">
+            <table class="table table-striped table-condensed table-bordered">
+            <thead>
+              <th
+                scope="col"
+                i18n-id="timelion.expressionSuggestions.arg.nameTitle"
+                i18n-default-message="Argument Name"
+              ></th>
+              <th
+                scope="col"
+                i18n-id="timelion.expressionSuggestions.arg.typesTitle"
+                i18n-default-message="Accepted Types"
+              ></th>
+              <th
+                scope="col"
+                i18n-id="timelion.expressionSuggestions.arg.infoTitle"
+                i18n-default-message="Information"
+              ></th>
+            </thead>
+            <tr ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
+              <td>{{arg.name}}</td>
+              <td><em>{{arg.types.join(', ')}}</em></td>
+              <td>{{arg.help}}</td>
+            </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div ng-switch-when="arguments">
+        <h4>
+          <strong>{{suggestion.name}}=</strong>
+          <small id="timelionSuggestionDescription{{$index}}">
+            {{suggestion.help}}
+          </small>
+        </h4>
+        <div>
+          <strong>Accepts:</strong>
+          <em>{{suggestion.types.join(', ')}}</em>
+        </div>
+      </div>
+
+      <div ng-switch-when="argument_value">
+        <h4>
+          <strong>{{suggestion.name}}</strong>
+          <small id="timelionSuggestionDescription{{$index}}">
+            {{suggestion.help}}
+          </small>
+        </h4>
+      </div>
+
+    </div>
+  </div>
+</div>

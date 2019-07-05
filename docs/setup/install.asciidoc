@@ -1,6 +1,15 @@
 [[install]]
 == Installing Kibana
 
+[float]
+=== Hosted Kibana
+
+If you are running our https://cloud.elastic.co[hosted Elasticsearch Service]
+on Elastic Cloud, you can access Kibana with a single click.
+
+[float]
+=== Installing Kibana Yourself
+
 NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
 
 Kibana is provided in the following package formats:
@@ -34,15 +43,20 @@ Elastic website or from our RPM repository.
 `docker`::
 
 Images are available for running Kibana as a Docker container. They may be
-downloaded from the Elastic Docker Registry. The default image ships with
-{xpack-ref}/index.html[X-Pack] pre-installed.
+downloaded from the Elastic Docker Registry.
 +
 <<docker,Running Kibana on Docker>>
 
-IMPORTANT: If your Elasticsearch installation is protected by {xpack-ref}/xpack-security.html[X-Pack Security]
-see {kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana]
-for additional setup instructions.
+`brew`::
 
+Formulae are available from the Elastic Homebrew tap for installing {kib} on macOS with the Homebrew package manager.
++
+<<brew>>
+
+IMPORTANT: If your Elasticsearch installation is protected by
+{xpack-ref}/elasticsearch-security.html[{security}] see
+{kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana] for
+additional setup instructions.
 
 include::install/targz.asciidoc[]
 
@@ -51,3 +65,5 @@ include::install/deb.asciidoc[]
 include::install/rpm.asciidoc[]
 
 include::install/windows.asciidoc[]
+
+include::install/brew.asciidoc[]

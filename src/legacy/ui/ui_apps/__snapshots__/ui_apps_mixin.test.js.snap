@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UiAppsMixin creates kbnServer.uiApps from uiExports 1`] = `
+Array [
+  StubUiApp {
+    "_hidden": true,
+    "_id": "foo",
+  },
+  StubUiApp {
+    "_hidden": false,
+    "_id": "bar",
+  },
+]
+`;
+
+exports[`UiAppsMixin decorates server with methods 1`] = `
+Array [
+  Array [
+    "server",
+    "getAllUiApps",
+    [Function],
+  ],
+  Array [
+    "server",
+    "getUiAppById",
+    [Function],
+  ],
+  Array [
+    "server",
+    "getHiddenUiAppById",
+    [Function],
+  ],
+  Array [
+    "server",
+    "injectUiAppVars",
+    [Function],
+  ],
+  Array [
+    "server",
+    "getInjectedUiAppVars",
+    [Function],
+  ],
+]
+`;
+
+exports[`UiAppsMixin server.getAllUiApps() returns hidden and non-hidden apps 1`] = `
+Array [
+  StubUiApp {
+    "_hidden": true,
+    "_id": "foo",
+  },
+  StubUiApp {
+    "_hidden": false,
+    "_id": "bar",
+  },
+]
+`;
+
+exports[`UiAppsMixin server.getHiddenUiAppById() returns hidden apps when requested, undefined for non-hidden and unknown apps 1`] = `
+StubUiApp {
+  "_hidden": true,
+  "_id": "foo",
+}
+`;
+
+exports[`UiAppsMixin server.getUiAppById() returns non-hidden apps when requested, undefined for non-hidden and unknown apps 1`] = `
+StubUiApp {
+  "_hidden": false,
+  "_id": "bar",
+}
+`;
+
+exports[`UiAppsMixin server.injectUiAppVars()/server.getInjectedUiAppVars() merges injected vars provided by multiple providers in the order they are registered: foo 1`] = `
+Object {
+  "bar": false,
+  "baz": 1,
+  "box": true,
+  "foo": true,
+}
+`;
+
+exports[`UiAppsMixin server.injectUiAppVars()/server.getInjectedUiAppVars() stored injectVars provider and returns provider result when requested: bar 1`] = `
+Object {
+  "thisIsFoo": false,
+}
+`;
+
+exports[`UiAppsMixin server.injectUiAppVars()/server.getInjectedUiAppVars() stored injectVars provider and returns provider result when requested: foo 1`] = `
+Object {
+  "thisIsFoo": true,
+}
+`;

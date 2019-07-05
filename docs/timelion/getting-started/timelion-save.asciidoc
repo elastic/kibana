@@ -1,9 +1,29 @@
 [[timelion-save]]
-=== Add to dashboard
+=== Save and add to dashboard
 
-You’ve officially harnessed the power of Timelion to create time series visualizations. The final step of this tutorial is to add your new visualizations to a dashboard. Below, this section will show you how to save a visualization from your Timelion sheet and add it to an existing dashboard.
+You’ve officially harnessed the power of Timelion to create time series visualizations. The final steps of this tutorial are to save your entire Timelion sheet and save an expression as a dashboard panel.
 
-To save a Timelion visualization as a dashboard panel, follow the steps below.
+[role="xpack"]
+[[timelion-read-only-access]]
+==== Read only access
+When you have insufficient privileges to save Timelion sheets, the following indicator in Kibana will be
+displayed and the *Save* button won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/timelion-read-only-badge.png[Example of Timelion's read only access indicator in Kibana's header]
+
+==== Save entire Timelion sheet
+
+Saving an entire Timelion sheet allows you to reload it in the Timelion application and make changes to any of the expressions:
+
+. Click the `Save` option in the top menu
+. Select `Save entire Timelion sheet`
+. Name your sheet and click `Save`
+
+==== Save as dashboard panel
+
+To save a Timelion expression as a dashboard panel, follow the steps below.
 
 . Select the visualization you’d like to add to one (or multiple) dashboards
 . Click the `Save` option in the top menu

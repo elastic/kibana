@@ -6,9 +6,7 @@ source code and the existing visualizations provided with it.
 
 - <<development-visualization-factory>>
 * <<development-base-visualization-type>>
-* <<development-angular-visualization-type>>
 * <<development-react-visualization-type>>
-* <<development-vislib-visualization-type>>
 - <<development-vis-editors>>
 * <<development-default-editor>>
 * <<development-custom-editor>>
@@ -33,7 +31,6 @@ You should also register the visualization with `VisTypesRegistryProvider`.
 
 ["source","js"]
 -----------
-import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
@@ -45,7 +42,6 @@ const MyNewVisType = (Private) => {
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
-    category: CATEGORY.OTHER
     ...
   });
 }
@@ -57,10 +53,10 @@ The list of common parameters:
 
 - *name*: unique visualization name, only lowercase letters and underscore
 - *title*: title of your visualization as displayed in kibana
-- *icon*: the icon class to use (font awesome)
-- *image*: instead of icon you can provide svg image (imported)
+- *icon*: <string> the https://elastic.github.io/eui/#/display/icons[EUI icon] type to use for this visualization
+- *image*: instead of an icon you can provide a SVG image (imported)
 - *description*: description of your visualization as shown in kibana
-- *category*: the category your visualization falls into (one of `ui/vis/vis_category` values)
+- *hidden*: <bool> if set to true, will hide the type from showing up in the visualization wizard
 - *visConfig*: object holding visualization parameters
 - *visConfig.defaults*: object holding default visualization configuration
 - *visualization*: A constructor function for a Visualization.
@@ -72,8 +68,8 @@ The list of common parameters:
 - *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
 - *options.showFilterBar*: <bool> show or hide filter bar (defaults to true)
 - *options.showIndexSelection*: <bool> show or hide index selection (defaults to true)
-- *stage*: <string> Set this to "experimental" or "labs" to mark your visualization as experimental. 
-Labs visualizations can also be disabled from the advanced settings. (defaults to "production")
+- *stage*: <string> Set this to "experimental" to mark your visualization as experimental.
+Experimental visualizations can also be disabled from the advanced settings. (defaults to "production")
 - *feedbackMessage*: <string> You can provide a message (which can contain HTML), that will be appended 
 to the experimental notification in visualize, if your visualization is experimental or in lab mode.
 
@@ -83,7 +79,7 @@ Each of the factories have some of the custom parameters, which will be describe
 [[development-base-visualization-type]]
 ==== Base Visualization Type
 The base visualization type does not make any assumptions about the rendering technology you are going to use and
-works with pure Javascript. It is the visualization type we recommend to use.
+works with pure JavaScript. It is the visualization type we recommend to use.
 
 You need to provide a type with a constructor function, a render method which will be called every time 
 options or data change, and a destroy method which will be called to cleanup.
@@ -91,9 +87,42 @@ options or data change, and a destroy method which will be called to cleanup.
 The render function receives the data object and status object which tells what actually changed.
 Render function needs to return a promise, which should be resolved once the visualization is done rendering.
 
-Status object has the following properties: `aggs`, `data`, `params`, `resize`, `time`, `uiState`. Each of them is set to true if the matching
-object changed since last call to the render function or set to false otherwise. You can use it to make your 
-visualization rendering more efficient.
+The status object provides information about changes since the previous render call.
+Due to performance reasons you need to opt-in for each status change, that you want
+to be informed about by Kibana. This is done by using the `requiresUpdateStatus` key
+in your visualization registration object. You pass it an array, that contains all
+the status updates you want to receive. By default none of it will be calculated.
+
+The following snippet shows explain all available status updates. You should only
+activate those changes, that you actually use in your `render` method.
+
+["source","js"]
+-----------
+import { Status } from 'ui/vis/update_status';
+
+// ...
+return  VisFactory.createBaseVisualization({
+  // ...
+  requiresUpdateStatus: [
+    // Check for changes in the aggregation configuration for the visualization
+    Status.AGGS,
+    // Check for changes in the actual data returned from Elasticsearch
+    Status.DATA,
+    // Check for changes in the parameters (configuration) for the visualization
+    Status.PARAMS,
+    // Check if the visualization has changes its size
+    Status.RESIZE,
+    // Check if the time range for the visualization has been changed
+    Status.TIME,
+    // Check if the UI state of the visualization has been changed
+    Status.UI_STATE
+  ]
+});
+-----------
+
+If you activate any of these status updates, the `status` object passed as second
+parameter to the `render` method will contain a key for that status (e.g. `status[Status.DATA]`),
+that is either `true` if a change has been detected or `false` otherwise.
 
 
 image::images/visualize-flow.png[Main Flow]
@@ -145,38 +174,13 @@ const MyNewVisType = (Private) => {
 VisTypesRegistryProvider.register(MyNewVisType);
 -----------
 
-[[development-angular-visualization-type]]
-==== AngularJS Visualization Type
-The AngularJS visualization type assumes you are using angular as your rendering technology. Instead of providing the
-controller we need to provide the angular template to render. 
-
-The visualization will receive `vis`, `uiState` and `visData` on the $scope and needs to 
-call `$scope.renderComplete()` once it is done rendering.
-
-["source","js"]
------------
-const MyNewVisType = (Private) => {
-  const VisFactory = Private(VisFactoryProvider);
-  
-  return VisFactory.createAngularVisualization({
-    name: 'my_new_vis',
-    title: 'My New Vis',
-    icon: 'my_icon',
-    description: 'Cool new chart',
-    visConfig: {
-       template: '<div ng-controller="MyAngularController"></div>`
-    }
-  });
-}
------------
-
 [[development-react-visualization-type]]
 ==== React Visualization Type
-React visualization type assumes you are using React as your rendering technology. Instead of passing it an AngularJS
-template you need to pass a React component.
+React visualization type assumes you are using React as your rendering technology.
+Just pass in a React component to `visConfig.component`.
 
-The visualization will receive `vis`, `uiState` and `visData` as props.
-It also has a `renderComplete` function, which needs to be called once the rendering has completed.
+The visualization will receive `vis`, `appState`, `updateStatus` and `visData` as props.
+It also has a `renderComplete` property, which needs to be called once the rendering has completed.
 
 ["source","js"]
 -----------
@@ -191,16 +195,11 @@ const MyNewVisType = (Private) => {
     icon: 'my_icon',
     description: 'Cool new chart',
     visConfig: {
-       template: ReactComponent
+       component: ReactComponent
     }
   });
 }
 -----------
-
-[[development-vislib-visualization-type]]
-==== Vislib Visualization Type
-This visualization type should only be used for `vislib` visualizations. Vislib is kibana's D3 library which can produce
-point series charts and pie charts.
 
 [[development-vis-editors]]
 === Visualization Editors
@@ -293,8 +292,12 @@ Using 'none' as your request handles means your visualization does not require a
 
 [[development-custom-request-handler]]
 ==== custom request handler
-You can define your custom request handler by providing a function with the following definition:
-`function (vis, appState, uiState, searchSource) { ... }`
+You can define your custom request handler by providing a function with the following signature:
+`function (vis, { uiState, appState, timeRange }) { ... }`
+
+The `timeRange` will be an object with a `from` and `to` key, that can contain
+datemath expressions, like `now-7d`. You can use the `datemath` library to parse
+them.
 
 This function must return a promise, which should get resolved with new data that will be passed to responseHandler.
 
@@ -305,7 +308,7 @@ It's up to function to decide when it wants to issue a new request or return pre
 -----------
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
-const myRequestHandler = async (vis, appState, uiState, searchSource) => {
+const myRequestHandler = async (vis, { appState, uiState, timeRange }) => {
   const data = ... parse ...
   return data;
 };
@@ -382,7 +385,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
 const myResponseHandler = (vis, response) => {
    // transform the response (based on vis object?)
-   const resposne = ... transform data ...;
+   const response = ... transform data ...;
    return response;
 };
 
@@ -416,9 +419,6 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.isEditorMode()*: returns true if in editor mode
 - *vis.API.timeFilter*: allows you to access time picker
 - *vis.API.queryFilter*: gives you access to queryFilter
-- *vis.API.queryManager*: gives you access to add filters to the filter bar
-- *vis.API.filterManager*: gives you access to filterManager
-- *vis.API.kuery*: gives you access to the experimental `keury`-language filter bar
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
 

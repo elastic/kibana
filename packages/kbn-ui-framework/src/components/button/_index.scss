@@ -1,0 +1,45 @@
+// All buttons
+$buttonHeight: 30px;
+$buttonIconSpacing: 8px;
+$buttonIconSmallSpacing: 4px;
+$buttonFontWeight: $kuiFontWeightRegular;
+
+// Size
+$buttonSmallFontSize: 12px;
+$buttonSmallPadding: 2px 8px 3px;
+$buttonSmallHeight: 22px;
+
+// Most buttons
+$buttonDefaultTextColor: $euiColorGhost;
+
+// Basic
+$buttonBasicTextColor: $kuiTextColor;
+$buttonBasicBackgroundColor: $kuiColorLightestGray;
+$buttonBasicHoverBackgroundColor: darken($kuiColorLightestGray, 10%);
+$buttonBasicDisabledTextColor: $kuiTextColor;
+
+// Primary
+$buttonPrimaryBackgroundColor: $kuiLinkColor;
+$buttonPrimaryHoverBackgroundColor: $kuiLinkColor-isHover;
+$buttonPrimaryDisabledBackgroundColor: desaturate($kuiLinkColor, 70%);
+
+// Success
+$buttonSuccessBackgroundColor: $kuiColorTeal;
+$buttonSuccessHoverBackgroundColor: darken($kuiColorTeal, 10%);
+$buttonSuccessDisabledBackgroundColor: desaturate($kuiColorTeal, 70%);
+
+// Danger
+$buttonDangerBackgroundColor: $kuiColorRed;
+$buttonDangerHoverBackgroundColor: darken($kuiColorRed, 10%);
+$buttonDangerDisabledBackgroundColor: lighten($buttonDangerBackgroundColor, 50%);
+
+// Warning
+$buttonWarningBackgroundColor: $euiColorWarning;
+$buttonWarningHoverBackgroundColor: darken($buttonWarningBackgroundColor, 10%);
+$buttonWarningDisabledBackgroundColor: lighten($buttonWarningBackgroundColor, 10%);
+
+// Hollow
+$buttonHollowDisabledTextColor: $euiColorMediumShade;
+
+@import "button";
+@import "button_group/button_group";

@@ -12,20 +12,20 @@ There are three ways to run the tests depending on your goals:
 
 1. Easiest option:
 ** Description: Starts up Kibana & Elasticsearch servers, followed by running tests. This is much slower when running the tests multiple times because slow startup time for the servers. Recommended for single-runs.
-** `yarn test:ui`
+** `node scripts/functional_tests`
 *** does everything in a single command, including running Elasticsearch and Kibana locally
 *** tears down everything after the tests run
 *** exit code reports success/failure of the tests
 
 2. Best for development:
 ** Description: Two commands, run in separate terminals, separate the components that are long-running and slow from those that are ephemeral and fast. Tests can be re-run much faster, and this still runs Elasticsearch & Kibana locally.
-** `yarn test:ui:server`
+** `node scripts/functional_tests_server`
 *** starts Elasticsearch and Kibana servers
 *** slow to start
 *** can be reused for multiple executions of the tests, thereby saving some time when re-running tests
 *** automatically restarts the Kibana server when relevant changes are detected
 ** `node scripts/functional_test_runner`
-*** runs the tests against Kibana & Elasticsearch servers that were started `yarn test:ui:server`
+*** runs the tests against Kibana & Elasticsearch servers that were started by `node scripts/functional_tests_server`
 *** exit code reports success or failure of the tests
 
 3. Custom option:
@@ -33,6 +33,17 @@ There are three ways to run the tests depending on your goals:
 ** just executes the functional tests
 ** url, credentials, etc. for Elasticsearch and Kibana are specified via environment variables
 ** Here's an example that runs against an Elastic Cloud instance. Note that you should run the same branch of tests as the version of Kibana you're testing.
++
+["source","shell"]
+----------
+export TEST_KIBANA_URL=https://kibana:password@my-kibana-instance.internal.net:443
+
+export TEST_ES_URL=https://elastic:password@my-es-cluster.internal.net:9200
+node scripts/functional_test_runner
+----------
+
+
+** Or you can override any or all of these individual parts of the URL and leave the others to the default values.
 +
 ["source","shell"]
 ----------
@@ -53,7 +64,10 @@ node scripts/functional_test_runner
 [float]
 ===== More about `node scripts/functional_test_runner`
 
-When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag.
+When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
+
+* `--config test/functional/config.js` starts Elasticsearch and Kibana servers with the selenium tests configuration.
+* `--config test/api_integration/config.js` starts Elasticsearch and Kibana servers with the api integration tests configuration.
 
 There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
 
@@ -68,7 +82,7 @@ Use the `--help` flag for more options.
 [float]
 ===== Environment
 
-The tests are written in https://mochajs.org[mocha] using https://github.com/Automattic/expect.js[expect] for assertions.
+The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
 
 We use https://sites.google.com/a/chromium.org/chromedriver/[chromedriver], https://theintern.github.io/leadfoot[leadfoot], and https://github.com/theintern/digdug[digdug] for automating Chrome. When the `FunctionalTestRunner` launches, digdug opens a `Tunnel` which starts chromedriver and a stripped-down instance of Chrome. It also creates an instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command`] class, which is available via the `remote` service. The `remote` communicates to Chrome through the digdug `Tunnel`. See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] docs for all the commands you can use with `remote`.
 
@@ -81,7 +95,7 @@ The `FunctionalTestRunner` automatically transpiles functional tests using babel
 
 Code run by the `FunctionalTestRunner` is wrapped in a function so it can be passed around via config files and be parameterized. Any of these Provider functions may be asynchronous and should return/resolve-to the value they are meant to _provide_. Provider functions will always be called with a single argument: a provider API (see the <<functional_test_runner_provider_api,Provider API Section>>).
 
-A config provder:
+A config provider:
 
 ["source","js"]
 -----------
@@ -108,11 +122,11 @@ A test suite is a collection of tests defined by calling `describe()`, and then 
 [float]
 ===== Anatomy of a test file
 
-The annotated example file below shows the basic structure every test suite uses. It starts by importing https://github.com/Automattic/expect.js[`expect.js`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+The annotated example file below shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 // test files must `export default` a function that defines a test suite
 export default function ({ getService, getPageObject }) {
 

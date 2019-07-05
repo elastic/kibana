@@ -1,0 +1,63 @@
+/**
+ * 1. Put 10px of space between each child.
+ * 2. Fix IE11 bug which causes this item to grow too wide when there is only a single
+ *    kuiToolBarSection sibling.
+ */
+.kuiToolBarSearch {
+  display: flex;
+  align-items: center;
+  margin-left: $toolBarSectionSpacing * 0.5;
+  margin-right: $toolBarSectionSpacing * 0.5;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  & > * + * {
+    margin-left: $toolBarItemSpacing; /* 1 */
+  }
+
+  flex: 1 1 auto;
+  max-width: 100%; /* 2 */
+  line-height: $kuiLineHeight;
+}
+
+.kuiToolBarSearchBox {
+  flex: 1 1 auto;
+  position: relative;
+  font-size: $kuiFontSize;
+  max-width: 800px;
+}
+
+  .kuiToolBarSearchBox__icon {
+    position: absolute;
+    top: 0.5em;
+    left: 0.7em;
+    font-size: 1em;
+    color: #ACACAC;
+  }
+
+  /**
+   * 1. Fix inherited styles (possibly from Bootstrap).
+   */
+  .kuiToolBarSearchBox__input {
+    width: 100%;
+    min-width: 200px;
+    padding: 4px 12px 5px 28px;
+    font-family: $kuiFontFamily; /* 1 */
+    background-color: $euiColorEmptyShade;
+    color: $kuiFontColor;
+    border-radius: $kuiBorderRadius;
+    font-size: 1em;
+    border: 1px solid $kuiColorLightGray;
+    line-height: normal; /* 1 */
+    transition: border-color $kuiInputTransitionTiming;
+
+    &:focus {
+      @include formControlFocus;
+    }
+  }

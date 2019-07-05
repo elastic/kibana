@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/extract_default_translations extracts messages from path to map 1`] = `
+Array [
+  Array [
+    "plugin_1.id_1",
+    Object {
+      "description": undefined,
+      "message": "Message 1",
+    },
+  ],
+  Array [
+    "plugin_1.id_2",
+    Object {
+      "description": "Message description",
+      "message": "Message 2",
+    },
+  ],
+  Array [
+    "plugin_1.id_3",
+    Object {
+      "description": undefined,
+      "message": "Message 3",
+    },
+  ],
+  Array [
+    "plugin_1.id_4",
+    Object {
+      "description": undefined,
+      "message": "Message 4",
+    },
+  ],
+  Array [
+    "plugin_1.id_5",
+    Object {
+      "description": undefined,
+      "message": "Message 5",
+    },
+  ],
+  Array [
+    "plugin_1.id_7",
+    Object {
+      "description": undefined,
+      "message": "Message 7",
+    },
+  ],
+]
+`;
+
+exports[`dev/i18n/extract_default_translations throws on id collision 1`] = `
+Array [
+  "[37m[41m I18N ERROR [49m[39m Error in src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3/test_file.jsx
+Error: There is more than one default message for the same id \\"plugin_3.duplicate_id\\":
+\\"Message 1\\" and \\"Message 2\\"",
+]
+`;
+
+exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `
+Array [
+  Array [
+    [Error: Expected "wrong_plugin_namespace.message-id" id to have "plugin_2" namespace. See .i18nrc.json for the list of supported namespaces.],
+  ],
+]
+`;

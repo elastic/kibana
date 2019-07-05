@@ -1,0 +1,36 @@
+.monSparkline {
+  height: 2em;
+}
+
+// SASSTODO: Replace with EUI tooltip
+.monSparklineTooltip {
+  font-weight: normal;
+  background: transparentize($euiColorDarkestShade, .3);
+  font-size: $euiFontSizeXS;
+  padding: $euiSizeXS;
+  border-radius: $euiBorderRadius;
+  pointer-events: none;
+}
+
+.monSparklineTooltip__xValue {
+  color: transparentize($euiColorGhost, .3);
+}
+
+.monSparklineTooltip__yValue {
+  color: $euiColorGhost;
+}
+
+.monSparklineTooltip__caret {
+  font-size: $euiFontSizeL;
+  color: transparentize($euiColorDarkestShade, .3);
+  display: none;
+}
+
+.monSparklineTooltip__container {
+  position: fixed;
+  z-index: $euiZContentMenu;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}

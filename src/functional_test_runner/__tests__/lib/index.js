@@ -1,1 +1,0 @@
-export { startupKibana } from './kibana';

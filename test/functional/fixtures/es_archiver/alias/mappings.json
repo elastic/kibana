@@ -1,0 +1,203 @@
+{
+  "type": "index",
+  "value": {
+    "index": "test3",
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test9",
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test4",
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test2",
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test7",
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test6",
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test8",
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test5",
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test1",
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
+      }
+    }
+  }
+}

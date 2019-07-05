@@ -1,0 +1,20 @@
+[role="xpack"]
+[[xpack-profiler]]
+= Profiling queries and aggregations
+
+[partintro]
+--
+{es} has a powerful {ref}/search-profile.html[Profile API] which can be used to inspect and analyze
+your search queries. The response returns a large JSON blob, which can be
+difficult to analyze manually.
+
+The {searchprofiler} tool can transform this JSON output
+into a visualization that is easy to navigate, allowing you to diagnose and debug
+poorly performing queries much faster.
+
+[role="screenshot"]
+image::dev-tools/searchprofiler/images/overview.png["{searchprofiler} Visualization"]
+
+--
+
+include::getting-started.asciidoc[]

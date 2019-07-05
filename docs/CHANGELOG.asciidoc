@@ -1,0 +1,21 @@
+[[release-notes]]
+= Release Notes
+
+[partintro]
+--
+// Use these for links to issue and pulls. Note issues and pulls redirect one to
+// each other on Github, so don't worry too much on using the right prefix.
+:issue: https://github.com/elastic/kibana/issues/
+:pull: https://github.com/elastic/kibana/pull/
+
+This section summarizes the changes in each release.
+
+* <<release-notes-8.0.0-alpha1>>
+
+--
+
+
+[[release-notes-8.0.0-alpha1]]
+== {kib} 8.0.0-alpha1
+
+coming[8.0.0]

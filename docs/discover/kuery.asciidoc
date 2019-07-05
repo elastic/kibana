@@ -1,24 +1,28 @@
 [[kuery-query]]
-=== Kuery
+=== Kibana Query Language
 
-experimental[This functionality is experimental and may be changed or removed completely in a future release.]
+In Kibana 6.3, we introduced a number of exciting experimental query language enhancements. These
+features are now available by default in 7.0. Out of the box, Kibana's query language now includes scripted field support and a 
+simplified, easier to use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled. 
 
-Kuery is a new query language built specifically for Kibana. It aims to simplify the search experience in Kibana
-and enable the creation of helpful features like auto-complete, seamless migration of saved searches, additional
-query types, and more. Kuery is a basic experience today but we're hard at work building these additional features on
-top of the foundation Kuery provides.
+==== Language Syntax
 
-Kueries are built with functions. Many functions take a field name as their first argument. Extremely common functions have shorthand notations.
+If you're familiar with Kibana's old lucene query syntax, you should feel right at home with the new syntax. The basics
+stay the same, we've simply refined things to make the query language easier to use. Read about the changes below.
 
-`is("response", 200)` will match documents where the response field matches the value 200.
-`response:200` does the same thing. `:` is an alias for the `is` function.
+`response:200` will match documents where the response field matches the value 200.
 
-Multiple search terms are separated by whitespace.
+Quotes around a search term will initiate a phrase search. For example, `message:"Quick brown fox"` will search
+for the phrase "quick brown fox" in the message field. Without the quotes, your query will get broken down into tokens via
+the message field's configured analyzer and will match documents that contain those tokens, regardless of the order in which
+they appear. This means documents with "quick brown fox" will match, but so will "quick fox brown". Remember to use quotes if you want
+to search for a phrase.
 
-`response:200 extension:php` will match documents where response matches 200 and extension matches php.
+The query parser will no longer split on whitespace. Multiple search terms must be separated by explicit
+boolean operators. Note that boolean operators are not case sensitive.
 
-*All terms must match by default*. The language supports boolean logic with and/or operators. The above query is equivalent to `response:200 and extension:php`.
-This is a departure from the Lucene query syntax where all terms are optional by default.
+`response:200 extension:php` in lucene would become `response:200 and extension:php`.
+ This will match documents where response matches 200 and extension matches php.
 
 We can make terms optional by using `or`.
 
@@ -32,85 +36,40 @@ We can override the default precedence with grouping.
 
 `response:200 and (extension:php or extension:css)` will match documents where response is 200 and extension is either php or css.
 
-Terms can be inverted by prefixing them with `!`.
+A shorthand exists that allows us to easily search a single field for multiple values.
 
-`!response:200` will match all documents where response is not 200.
+`response:(200 or 404)` searches for docs where the `response` field matches 200 or 404. We can also search for docs
+with multi-value fields that contain a list of terms, for example: `tags:(success and info and security)`
+
+Terms can be inverted by prefixing them with `not`.
+
+`not response:200` will match all documents where response is not 200.
 
 Entire groups can also be inverted.
 
-`response:200 and !(extension:php or extension:css)`
+`response:200 and not (extension:php or extension:css)`
 
-Some query functions have named arguments.
+Ranges are similar to lucene with a small syntactical difference. 
 
-`range("bytes", gt=1000, lt=8000)` will match documents where the bytes field is greater than 1000 and less than 8000.
+Instead of `bytes:>1000`, we omit the colon: `bytes > 1000`. 
 
-Quotes are generally optional if your terms don't have whitespace or special characters. `range(bytes, gt=1000, lt=8000)`
-would also be a valid query.
+`>, >=, <, <=` are all valid range operators.
+
+Exist queries are simple and do not require a special operator. `response:*` will find all docs where the response
+field exists.
+
+Wildcard queries are available. `machine.os:win*` would match docs where the machine.os field starts with "win", which
+would match values like "windows 7" and "windows 10".
+
+Wildcards also allow us to search multiple fields at once. This can come in handy when you have both `text` and `keyword`
+versions of a field. Let's say we have `machine.os` and `machine.os.keyword` fields and we want to check both for the term
+"windows 10". We can do it like this: `machine.os*:windows 10".
+
 
 [NOTE]
 ============
-Terms without fields will be matched against all fields. For example, a query for `response:200` will search for the value 200
+Terms without fields will be matched against the default field in your index settings. If a default field is not
+set these terms will be matched against all fields. For example, a query for `response:200` will search for the value 200
 in the response field, but a query for just `200` will search for 200 across all fields in your index.
 ============
 
-==== Function Reference
-
-[horizontal]
-Function Name::  Description
-
-and:: 
-Purpose::: Match all given sub-queries
-Alias::: `and` as a binary operator
-Examples::: 
-* `and(response:200, extension:php)`
-* `response:200 and extension:php`
-
-or::
-Purpose::: Match one or more sub-queries
-Alias::: `or` as a binary operator
-Examples::: 
-* `or(extension:css, extension:php)`
-* `extension:css or extension:php`
-
-not::
-Purpose::: Negates a sub-query
-Alias::: `!` as a prefix operator
-Examples:::
-* `not(response:200)` 
-* `!response:200`
-
-is::
-Purpose::: Matches a field with a given term
-Alias::: `:`
-Examples::: 
-* `is("response", 200)`
-* `response:200`
-
-range::
-Purpose::: Match a field against a range of values.
-Alias::: `:[]`
-Examples::: 
-* `range("bytes", gt=1000, lt=8000)`
-* `bytes:[1000 to 8000]`
-Named arguments:::
-* `gt` - greater than
-* `gte` - greater than or equal to
-* `lt` - less than
-* `lte` - less than or equal to
-
-exists::
-Purpose::: Match documents where a given field exists
-Examples::: `exists("response")`
-
-geoBoundingBox::
-Purpose::: Creates a geo_bounding_box query
-Examples:::
-* `geoBoundingBox("coordinates", topLeft="40.73, -74.1", bottomRight="40.01, -71.12")` (whitespace between lat and lon is ignored)
-Named arguments:::
-* `topLeft` - the top left corner of the bounding box as a "lat, lon" string
-* `bottomRight` - the bottom right corner of the bounding box as a "lat, lon" string
-
-geoPolygon::
-Purpose::: Creates a geo_polygon query given 3 or more points as "lat, lon"
-Examples::: 
-* `geoPolygon("geo.coordinates", "40.97, -127.26", "24.20, -84.375", "40.44, -66.09")`

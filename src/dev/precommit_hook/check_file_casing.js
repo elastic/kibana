@@ -1,4 +1,26 @@
-import { relative } from 'path';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { relative, basename } from 'path';
+
+import { dim } from 'chalk';
+
 import { createFailError } from '../run';
 import { matchesAnyGlob } from '../globs';
 
@@ -6,13 +28,15 @@ import {
   IGNORE_DIRECTORY_GLOBS,
   IGNORE_FILE_GLOBS,
   TEMPORARILY_IGNORED_PATHS,
+  KEBAB_CASE_DIRECTORY_GLOBS,
 } from './casing_check_config';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
+const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
-function listFileNames(files) {
-  return files
-    .map(file => ` - ${file.getRelativePath()}`)
+function listPaths(paths) {
+  return paths
+    .map(path => ` - ${path}`)
     .join('\n');
 }
 
@@ -41,6 +65,33 @@ function getPathWithoutIgnoredParents(file) {
 }
 
 /**
+ * Check for directories in the passed File objects which match the
+ * KEBAB_CASE_DIRECTORY_GLOBS and ensure that those directories use
+ * keban case
+ *
+ * @param  {ToolingLog} log
+ * @param  {Array<File>} files
+ * @return {Promise<undefined>}
+ */
+async function checkForKebabCase(log, files) {
+  const errorPaths = files
+    .reduce((acc, file) => {
+      const parents = file.getRelativeParentDirs();
+
+      return acc.concat(parents.filter(parent => (
+        matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) && NON_KEBAB_CASE_RE.test(basename(parent))
+      )));
+    }, [])
+    .reduce((acc, path) => (
+      acc.includes(path) ? acc : acc.concat(path)
+    ), []);
+
+  if (errorPaths.length) {
+    throw createFailError(`These directories MUST use kebab-case.\n${listPaths(errorPaths)}`);
+  }
+}
+
+/**
  * Check that all passed File objects are using valid casing. Every
  * file SHOULD be using snake_case but some files are allowed to stray:
  *
@@ -54,37 +105,44 @@ function getPathWithoutIgnoredParents(file) {
  * @param {Array<File>} files
  * @return {Promise<undefined>}
  */
-export async function checkFileCasing(log, files) {
-  const errors = [];
-  const warnings = [];
+async function checkForSnakeCase(log, files) {
+  const errorPaths = [];
+  const warningPaths = [];
 
   files.forEach(file => {
     const path = file.getRelativePath();
 
     if (TEMPORARILY_IGNORED_PATHS.includes(path)) {
-      warnings.push(file);
+      warningPaths.push(file.getRelativePath());
       return;
     }
 
     const ignored = matchesAnyGlob(path, IGNORE_FILE_GLOBS);
     if (ignored) {
-      log.debug('%j ignored', file);
+      log.debug('[casing] %j ignored', file);
       return;
     }
 
-    const invalid = NON_SNAKE_CASE_RE.test(getPathWithoutIgnoredParents(file));
+    const pathToValidate = getPathWithoutIgnoredParents(file);
+    const invalid = NON_SNAKE_CASE_RE.test(pathToValidate);
     if (!invalid) {
-      log.debug('%j uses valid casing', file);
+      log.debug('[casing] %j uses valid casing', file);
     } else {
-      errors.push(file);
+      const ignoredParent = file.getRelativePath().slice(0, -pathToValidate.length);
+      errorPaths.push(`${dim(ignoredParent)}${pathToValidate}`);
     }
   });
 
-  if (warnings.length) {
-    log.warning(`Filenames SHOULD be snake_case.\n${listFileNames(warnings)}`);
+  if (warningPaths.length) {
+    log.warning(`Filenames SHOULD be snake_case.\n${listPaths(warningPaths)}`);
   }
 
-  if (errors.length) {
-    throw createFailError(`Filenames MUST use snake_case.\n${listFileNames(errors)}`);
+  if (errorPaths.length) {
+    throw createFailError(`Filenames MUST use snake_case.\n${listPaths(errorPaths)}`);
   }
+}
+
+export async function checkFileCasing(log, files) {
+  await checkForKebabCase(log, files);
+  await checkForSnakeCase(log, files);
 }

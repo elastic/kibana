@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve, dirname, relative } from 'path';
 import { writeFileSync } from 'fs';
 import { inspect } from 'util';
@@ -5,7 +24,12 @@ import { inspect } from 'util';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-export function setupJunitReportGeneration(runner, options = {}) {
+import { getSnapshotOfRunnableLogs } from './log_cache';
+import { escapeCdata } from '../xml';
+
+const dateNow = Date.now.bind(Date);
+
+export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = dirname(require.resolve('../../../package.json')),
@@ -25,11 +49,11 @@ export function setupJunitReportGeneration(runner, options = {}) {
   );
 
   const setStartTime = (node) => {
-    node.startTime = Date.now();
+    node.startTime = dateNow();
   };
 
   const setEndTime = node => {
-    node.endTime = Date.now();
+    node.endTime = dateNow();
   };
 
   const getFullTitle = node => {
@@ -63,6 +87,9 @@ export function setupJunitReportGeneration(runner, options = {}) {
   runner.on('end', () => {
     // crawl the test graph to collect all defined tests
     const allTests = findAllTests(runner.suite);
+    if (!allTests.length) {
+      return;
+    }
 
     // filter out just the failures
     const failures = results.filter(result => result.failed);
@@ -101,9 +128,12 @@ export function setupJunitReportGeneration(runner, options = {}) {
 
     [...results, ...skippedResults].forEach(result => {
       const el = addTestcaseEl(result.node);
+      el.ele('system-out').dat(
+        escapeCdata(getSnapshotOfRunnableLogs(result.node) || '')
+      );
 
       if (result.failed) {
-        el.ele('failure').dat(inspect(result.error));
+        el.ele('failure').dat(escapeCdata(inspect(result.error)));
         return;
       }
 
@@ -112,7 +142,7 @@ export function setupJunitReportGeneration(runner, options = {}) {
       }
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/${reportName}.xml`);
+    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
     const reportXML = builder.end({
       pretty: true,
       indent: '  ',

@@ -1,8 +1,0 @@
-
-include::plugins.asciidoc[]
-
-include::development.asciidoc[]
-
-include::limitations.asciidoc[]
-
-include::release-notes.asciidoc[]

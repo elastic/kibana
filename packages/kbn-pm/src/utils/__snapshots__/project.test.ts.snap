@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#ensureValidProjectDependency using link: in workspace 1`] = `"[kibana] depends on [foo] but should be using a workspace. Update its package.json to the expected value below."`;
+
+exports[`#ensureValidProjectDependency using link:, but with wrong path 1`] = `"[kibana] depends on [foo] using 'link:', but the path is wrong. Update its package.json to the expected value below."`;
+
+exports[`#ensureValidProjectDependency using version instead of link: 1`] = `"[kibana] depends on [foo] but it's not using the local package. Update its package.json to the expected value below."`;
+
+exports[`#ensureValidProjectDependency using wrong version in workspace 1`] = `"[kibana] depends on [foo] but it's not using the local package. Update its package.json to the expected value below."`;
+
+exports[`#getExecutables() throws CliError when bin is something strange 1`] = `"[kibana] has an invalid \\"bin\\" field in its package.json, expected an object or a string"`;

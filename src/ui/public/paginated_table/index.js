@@ -1,1 +1,0 @@
-import './paginated_table';

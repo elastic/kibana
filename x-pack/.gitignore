@@ -1,0 +1,17 @@
+/.gradle
+/build
+/target
+/test/functional/failure_debug
+/test/functional/screenshots
+/test/functional/apps/reporting/reports/session
+/legacy/plugins/reporting/.chromium/
+/legacy/plugins/reporting/.phantom/
+/.aws-config.json
+/.env
+/.kibana-plugin-helpers.dev.*
+!/legacy/plugins/infra/**/target
+.cache
+!/legacy/plugins/siem/**/target
+
+# We don't want any yarn.lock files in here
+/yarn.lock

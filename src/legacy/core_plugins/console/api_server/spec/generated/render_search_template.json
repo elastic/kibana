@@ -1,0 +1,13 @@
+{
+  "render_search_template": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_render/template",
+      "_render/template/{id}"
+    ],
+    "documentation": "http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-template.html"
+  }
+}

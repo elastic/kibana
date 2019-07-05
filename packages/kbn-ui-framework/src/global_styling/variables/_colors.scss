@@ -1,0 +1,42 @@
+// True colors
+
+$kuiColorBlue: $euiColorPrimary;
+$kuiColorTeal: $euiColorSecondary;
+$kuiColorRed: $euiColorDanger;
+$kuiColorLightestGray: $euiColorLightestShade;
+$kuiColorLightGray: $euiColorLightShade;
+$kuiColorMediumGray: $euiColorMediumShade;
+$kuiColorDarkGray: $euiColorDarkShade;
+$kuiColorDarkestGray: $euiColorDarkestShade;
+$kuiColorBlack: $euiColorFullShade;
+$kuiColorWhite: $euiColorGhost;
+$kuiColorEmptyShade: $euiColorEmptyShade;
+$kuiColorLightestShade: $euiColorLightestShade;
+
+// Normal colors
+
+$kuiTextColor: $euiTextColor;
+$kuiLinkColor: $euiColorPrimary;
+$kuiLinkColor-isHover: darken($kuiLinkColor, 10%);
+$kuiInputTextColor: $kuiTextColor;
+$kuiInputBackgroundColor: $euiFormBackgroundColor;
+$kuiInputBorderColor: $euiFormBorderColor;
+
+// Colors
+
+$kuiInfoColor: $euiColorPrimary;
+$kuiInactiveColor: $euiColorLightShade;
+$kuiSuccessColor: $euiColorSecondary;
+$kuiWarningColor: $euiColorWarning;
+$kuiDangerColor: $euiColorDanger;
+$kuiFocusColor: $euiColorPrimary;
+$kuiFocusAltBackgroundColor: rgba($kuiInfoColor, 0.2);
+$kuiFocusDangerColor: $euiColorDanger;
+$kuiFocusWarningColor: $euiColorWarning;
+$kuiFocusBackgroundColor: $euiColorEmptyShade;
+$kuiFontColor: $euiTextColor;
+$kuiSubduedTextColor: $euiColorDarkShade;
+$kuiLinkHoverColor: darken($euiColorPrimary, 10%);
+$kuiSelectedBorderColor: $euiColorPrimary;
+$kuiDangerBorderColor: $euiColorDanger;
+$kuiFormControlBorderColor: transparentize($euiColorFullShade, .9);

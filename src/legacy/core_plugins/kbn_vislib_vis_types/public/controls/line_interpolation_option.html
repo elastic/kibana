@@ -1,0 +1,11 @@
+<div>
+  <label>
+    Line Mode
+  </label>
+  <select
+    class="form-control"
+    ng-model="editorState.params.interpolate"
+    ng-options="mode.value as mode.text for mode in vis.type.params.interpolationModes"
+  >
+  </select>
+</div>

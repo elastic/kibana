@@ -64,9 +64,9 @@ the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format defini
 
 Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
-Scripted field values are computed at query time so they aren't indexed and cannot be searched.
-
-NOTE: Kibana cannot query scripted fields.
+Scripted field values are computed at query time so they aren't indexed and cannot be searched using Kibana's default
+query language. However they can be queried using Kibana's new <<kuery-query, experimental query language>>. Scripted 
+fields are also supported in the filter bar.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
 Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
@@ -77,7 +77,7 @@ options are {ref}/modules-scripting-expression.html[Lucene expressions] and {ref
 While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended
 because they cannot be sufficiently {ref}/modules-scripting-security.html[sandboxed].
 
-WARNING: Use of Groovy, Javascript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those
+WARNING: Use of Groovy, JavaScript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those
 scripting languages will be removed in the future.
 
 You can reference any single value numeric field in your expressions, for example:
@@ -94,13 +94,13 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 === Creating a Scripted Field
 To create a scripted field:
 
-. Go to *Settings > Indices*
+. Go to *Management > Kibana > Index Patterns*
 . Select the index pattern you want to add a scripted field to.
-. Go to the pattern's *Scripted Fields* tab.
-. Click *Add Scripted Field*.
+. Go to the pattern's *Scripted fields* tab.
+. Click *Add scripted field*.
 . Enter a name for the scripted field.
 . Enter the expression that you want to use to compute a value on the fly from your index data.
-. Click *Save Scripted Field*.
+. Click *Create field*.
 
 For more information about scripted fields in Elasticsearch, see
 {ref}/modules-scripting.html[Scripting].
@@ -110,9 +110,10 @@ For more information about scripted fields in Elasticsearch, see
 === Updating a Scripted Field
 To modify a scripted field:
 
-. Go to *Settings > Indices*
+. Go to *Management > Kibana > Index Patterns*
+. Click the index pattern's *Scripted fields* tab.
 . Click the *Edit* button for the scripted field you want to change.
-. Make your changes and then click *Save Scripted Field* to update the field.
+. Make your changes and then click *Save field* to update the field.
 
 WARNING: Keep in mind that there's no built-in validation of a scripted field. If your scripts are buggy, you'll get
 exceptions whenever you try to view the dynamically generated data.
@@ -122,6 +123,7 @@ exceptions whenever you try to view the dynamically generated data.
 === Deleting a Scripted Field
 To delete a scripted field:
 
-. Go to *Settings > Indices*
+. Go to *Management > Kibana > Index Patterns*
+. Click the index pattern's *Scripted fields* tab.
 . Click the *Delete* button for the scripted field you want to remove.
-. Confirm that you really want to delete the field.
+. Click *Delete* in the confirmation window.
