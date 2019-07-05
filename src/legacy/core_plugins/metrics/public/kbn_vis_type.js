@@ -30,8 +30,8 @@ export function MetricsVisProvider(Private) {
   const uiSettings = chrome.getUiSettingsClient();
   const savedObjectsClient = chrome.getSavedObjectsClient();
   const VisFactory = Private(VisFactoryProvider);
-  const ReactEditorController = createEditorController(uiSettings, savedObjectsClient);
-  const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
+  const EditorController = createEditorController(uiSettings, savedObjectsClient);
+  const metricsRequestHandler = new MetricsRequestHandlerProvider(uiSettings).handler;
 
   return VisFactory.createReactVisualization({
     name: 'metrics',
@@ -77,7 +77,7 @@ export function MetricsVisProvider(Private) {
       },
       component: require('./components/vis_editor').VisEditor,
     },
-    editor: ReactEditorController,
+    editor: EditorController,
     editorConfig: {
       component: require('./components/vis_editor').VisEditor,
     },

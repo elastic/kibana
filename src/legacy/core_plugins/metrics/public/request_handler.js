@@ -22,8 +22,8 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
 
-const MetricsRequestHandlerProvider = function(Private, config) {
-  const timezone = Private(timezoneProvider)();
+export const MetricsRequestHandlerProvider = function(config) {
+  const timezone = timezoneProvider(config)();
 
   return {
     name: 'metrics',
@@ -68,5 +68,3 @@ const MetricsRequestHandlerProvider = function(Private, config) {
     },
   };
 };
-
-export { MetricsRequestHandlerProvider };

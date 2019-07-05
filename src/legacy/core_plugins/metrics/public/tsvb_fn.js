@@ -44,9 +44,8 @@ export const tsvb = () => ({
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
+    const uiSettings = chrome.getUiSettingsClient();
+    const metricsRequestHandler = new MetricsRequestHandlerProvider(uiSettings).handler;
 
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);

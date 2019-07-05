@@ -23,7 +23,7 @@ import { I18nContext } from 'ui/i18n';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
 
 export function createEditorController(config, savedObjectsClient) {
-  return class EditorController {
+  return class {
     constructor(el, savedObj) {
       this.el = el;
 
