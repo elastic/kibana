@@ -87,8 +87,8 @@ export const Form3 = ({
       <UseField
         path="nested.prop"
         form={form}
-        render={FormRow}
-        renderProps={{
+        component={FormRow}
+        componentProps={{
           title: 'Nested prop',
           description: 'Description of the nested prop.',
         }}
@@ -155,10 +155,10 @@ export const Form3 = ({
         <div>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
-              <UseField path="comboBoxField" render={Field} form={form} />
+              <UseField path="comboBoxField" component={Field} form={form} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <UseField path="title" render={Field} form={form} />
+              <UseField path="title" component={Field} form={form} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
@@ -166,8 +166,8 @@ export const Form3 = ({
           <UseField
             path="field.not.on.schema"
             config={inlineConfig}
-            renderProps={{ fieldProps: { disabled: isEditing } }}
-            render={Field}
+            componentProps={{ fieldProps: { disabled: isEditing } }}
+            component={Field}
             form={form}
           />
         </EuiFlexItem>
@@ -176,8 +176,8 @@ export const Form3 = ({
       <UseField
         path="comboBoxFieldWithValidation"
         form={form}
-        render={FormRow}
-        renderProps={{
+        component={FormRow}
+        componentProps={{
           title: 'Combobox with validation',
           description:
             'We can see here how we have the validation _before_ adding an item to the comboBox array',
@@ -187,9 +187,9 @@ export const Form3 = ({
       <UseField
         path="selectedIndices"
         form={form}
-        render={FormRow}
+        component={FormRow}
         defaultValue={[{ label: 'index_1' }, { label: 'index_2' }, { label: 'index_3' }]}
-        renderProps={{
+        componentProps={{
           title: 'Indices to backup',
           description: 'Choose any indices than you want to include in your backup',
           fieldProps: {
@@ -211,7 +211,7 @@ export const Form3 = ({
                         path={rowPath + '.firstName'}
                         config={{ label: 'First name' }}
                         defaultValue={isNew ? '' : undefined}
-                        render={Field}
+                        component={Field}
                         form={form}
                       />
                     </EuiFlexItem>
@@ -220,7 +220,7 @@ export const Form3 = ({
                         path={rowPath + '.lastName'}
                         config={{ label: 'Last name' }}
                         defaultValue={isNew ? '' : undefined}
-                        render={Field}
+                        component={Field}
                         form={form}
                       />
                     </EuiFlexItem>

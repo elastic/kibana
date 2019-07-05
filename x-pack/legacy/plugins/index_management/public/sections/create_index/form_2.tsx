@@ -41,8 +41,8 @@ export const Form2 = () => {
       <UseField
         path="country"
         form={form}
-        render={FormRow}
-        renderProps={{
+        component={FormRow}
+        componentProps={{
           title: 'Country',
           description: 'Not much to say about a field to select a country.',
           fieldProps: { options: countries },
@@ -51,18 +51,18 @@ export const Form2 = () => {
       <UseField
         path="name"
         form={form}
-        render={FormRow}
-        renderProps={{
+        component={FormRow}
+        componentProps={{
           title: 'Name',
           description: 'Description of the name row.',
         }}
       />
-      <UseField path="title" form={form} render={FormRow} renderProps={{ title: 'Title' }} />
+      <UseField path="title" form={form} component={FormRow} componentProps={{ title: 'Title' }} />
       <UseField
         path="nested.prop"
         form={form}
-        render={FormRow}
-        renderProps={{
+        component={FormRow}
+        componentProps={{
           title: 'Nested prop',
           description: 'Description of the nested.prop.',
         }}
@@ -70,16 +70,16 @@ export const Form2 = () => {
       <UseField
         path="numeric"
         form={form}
-        render={FormRow}
-        renderProps={{
+        component={FormRow}
+        componentProps={{
           title: 'This is a numeric field',
         }}
       />
       <UseField
         path="doWeAgree"
         form={form}
-        render={FormRow}
-        renderProps={{
+        component={FormRow}
+        componentProps={{
           title: 'This is a toggle field',
           description: 'If you activate it, great things will happen.',
         }}

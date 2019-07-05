@@ -27,8 +27,8 @@ interface Props {
   config?: FieldConfig<any>;
   defaultValue?: unknown;
   form: Form<any>;
-  render?: (({ field }: { field: FieldType } & any) => JSX.Element) | 'input';
-  renderProps?: any;
+  component?: (({ field }: { field: FieldType } & any) => JSX.Element) | 'input';
+  componentProps?: any;
   children?: (field: FieldType) => JSX.Element;
 }
 
@@ -37,8 +37,8 @@ export const UseField = ({
   config,
   form,
   defaultValue,
-  render = 'input',
-  renderProps = {},
+  component = 'input',
+  componentProps = {},
   children,
 }: Props) => {
   if (!config) {
@@ -72,20 +72,21 @@ export const UseField = ({
 
   const field = useField(form, path, configCopy);
 
+  // Children prevails over anything else provided.
   if (children) {
     return children!(field);
   }
 
-  if (render === 'input') {
+  if (component === 'input') {
     return (
       <input
         type={field.type}
         onChange={field.onChange}
         value={field.value as string}
-        {...renderProps}
+        {...componentProps}
       />
     );
   }
 
-  return render({ field, ...renderProps });
+  return component({ field, ...componentProps });
 };

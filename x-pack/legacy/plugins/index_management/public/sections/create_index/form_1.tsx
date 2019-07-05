@@ -37,11 +37,11 @@ export const Form1 = () => {
         <h2>1. HTML input form</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <UseField path="name" form={form} renderProps={{ className: 'euiFieldText' }} />
+      <UseField path="name" form={form} componentProps={{ className: 'euiFieldText' }} />
       <UseField
         path="notOnSchema.myProperty"
         form={form}
-        renderProps={{ className: 'euiFieldText' }}
+        componentProps={{ className: 'euiFieldText' }}
       />
       <EuiSpacer size="m" />
       <EuiButton
