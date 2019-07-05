@@ -29,13 +29,13 @@ export interface JobInfo {
   jobtype: string;
   created_by: string;
   timeout: number;
-  output: {
+  output?: {
     content_type: string;
     size: number;
   };
   process_expiration: string;
   completed_at: string;
-  payload: {
+  payload?: {
     layout: { id: string; dimensions: { width: number; height: number } };
     objects: Array<{ relativeUrl: string }>;
     type: string;
@@ -43,7 +43,7 @@ export interface JobInfo {
     forceNow: string;
     browserTimezone: string;
   };
-  meta: {
+  meta?: {
     layout: string;
     objectType: string;
   };
