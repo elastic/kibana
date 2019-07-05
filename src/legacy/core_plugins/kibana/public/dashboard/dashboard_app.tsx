@@ -87,9 +87,13 @@ export interface DashboardAppScope extends ng.IScope {
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
   updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
-  onRefreshChange: (
-    { isPaused, refreshInterval }: { isPaused: boolean; refreshInterval: any }
-  ) => void;
+  onRefreshChange: ({
+    isPaused,
+    refreshInterval,
+  }: {
+    isPaused: boolean;
+    refreshInterval: any;
+  }) => void;
   onFiltersUpdated: (filters: Filter[]) => void;
   $listenAndDigestAsync: any;
   onCancelApplyFilters: () => void;

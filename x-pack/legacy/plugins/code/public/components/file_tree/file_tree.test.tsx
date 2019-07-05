@@ -44,6 +44,7 @@ test('render correctly', () => {
         location={location}
         closeTreePath={mockFunction}
         openTreePath={mockFunction}
+        isNotFound={false}
       />
     )
     .toJSON();
