@@ -11,7 +11,7 @@ import {
   API_INSTALL_PATTERN,
   API_DELETE_PATTERN,
 } from '../common/routes';
-import { getClient } from './saved_objects';
+import { getClient, InstallationSavedObject } from './saved_objects';
 import { fetchInfo, fetchList, getArchiveInfo, getObjects } from './registry';
 
 interface PackageRequest extends Request {
@@ -101,29 +101,27 @@ export const routes: ServerRoute[] = [
       const { pkgkey, feature } = req.params;
       const client = getClient(req);
 
+      const installation: InstallationSavedObject = await client.get(SAVED_OBJECT_TYPE, pkgkey);
+      const installedObjects = installation.attributes.installed;
+
+      // Delete the manager saved object with references to the asset objects
+      // could also update with [] or some other state
+      await client.delete(SAVED_OBJECT_TYPE, pkgkey);
+
+      // ASK: should the manager uninstall the assets it installed
+      // or just the references in SAVED_OBJECT_TYPE?
       if (feature === 'dashboard') {
-        const toBeDeletedObjects = await getObjects(pkgkey, feature);
-        // ASK: should the manager uninstall the assets it installed
-        // or just the references in SAVED_OBJECT_TYPE?
-        const deletePromises = toBeDeletedObjects.map(async ({ id, type }) =>
+        // Delete the installed assets
+        const deletePromises = installedObjects.map(async ({ id, type }) =>
           client.delete(type, id)
         );
-
         await Promise.all(deletePromises);
-
-        return {
-          pkgkey,
-          feature,
-          deleted: toBeDeletedObjects.map(({ id, type }) => ({ id, type })),
-        };
       }
-
-      const deleted = await client.delete(SAVED_OBJECT_TYPE, pkgkey);
 
       return {
         pkgkey,
         feature,
-        deleted: deleted || [],
+        deleted: installedObjects || [],
       };
     },
   },

@@ -7,9 +7,9 @@
 import { SavedObject } from 'src/core/server/saved_objects';
 import { IntegrationInfo, IntegrationList } from '../common/types';
 import { cacheGet, cacheSet, cacheHas } from './cache';
+import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
-import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 
 const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 
