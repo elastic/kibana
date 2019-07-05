@@ -57,7 +57,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
     {
       id: 'job-details',
       name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobSettingsLabel', {
-        defaultMessage: 'Job details',
+        defaultMessage: 'Transform details',
       }),
       content: <JobDetailsPane sections={[state, checkpointing, stats]} />,
     },

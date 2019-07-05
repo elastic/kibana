@@ -70,9 +70,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             // since ip fields may contain multiple IP addresses, return a FormattedIp here to avoid a "draggable of draggables"
             return (
               <FormattedIp
-                key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${
-                  field.id
-                }--${value}`}
+                key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
                 eventId={eventId}
                 contextId={contextId}
                 fieldName={field.id}
@@ -88,9 +86,7 @@ export const plainColumnRenderer: ColumnRenderer = {
                 <TruncatableText
                   size="s"
                   width={width}
-                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${
-                    field.id
-                  }--${value}`}
+                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
                 >
                   <FormattedFieldValue
                     eventId={eventId}
@@ -106,9 +102,7 @@ export const plainColumnRenderer: ColumnRenderer = {
                 <EuiText
                   data-test-subj="draggable-content"
                   size="s"
-                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${
-                    field.id
-                  }--${value}`}
+                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
                 >
                   <FormattedFieldValue
                     eventId={eventId}
@@ -125,9 +119,7 @@ export const plainColumnRenderer: ColumnRenderer = {
           // because we pass a width to enable text truncation, and we will show empty values
           return (
             <DraggableWrapper
-              key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${
-                field.id
-              }--${value}`}
+              key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
               dataProvider={itemDataProvider}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (

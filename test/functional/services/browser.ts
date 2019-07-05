@@ -52,7 +52,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       });
   }
 
-  return new class BrowserService {
+  return new (class BrowserService {
     /**
      * Keyboard events
      */
@@ -490,5 +490,5 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
     }
-  }();
+  })();
 }

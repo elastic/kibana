@@ -56,4 +56,9 @@ export const sharedSchema = gql`
     endCursor: CursorType
     hasNextPage: Boolean
   }
+
+  type Inspect {
+    dsl: [String!]!
+    response: [String!]!
+  }
 `;
