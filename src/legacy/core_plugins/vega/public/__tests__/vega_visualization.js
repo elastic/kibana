@@ -21,7 +21,7 @@ import Promise from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
-import { VegaVisualizationProvider } from '../vega_visualization';
+import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
@@ -44,6 +44,9 @@ import { SearchCache } from '../data_model/search_cache';
 const THRESHOLD = 0.10;
 const PIXEL_DIFF = 10;
 
+
+// This tests are not executing at all. Will be refactored after migrating to Rect
+// Mocha tests disabled for 'public' folder in run_mocha_cli.js
 describe('VegaVisualizations', () => {
 
   let domNode;
@@ -52,12 +55,13 @@ describe('VegaVisualizations', () => {
   let indexPattern;
   let vis;
   let imageComparator;
+  let serviceSettings;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private) => {
-
+    serviceSettings = {};
     Vis = Private(visModule.VisProvider);
-    VegaVisualization = Private(VegaVisualizationProvider);
+    VegaVisualization = createVegaVisualization(serviceSettings);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 
   }));

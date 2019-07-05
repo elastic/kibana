@@ -22,6 +22,14 @@ import { visualizations, VisualizationsSetup } from '../../visualizations/public
 import { DataSetup } from '../../data/public';
 import { LegacyDependenciesService } from './legacy_dependencies_service';
 
+/** @public */
+export interface VegaSetupPlugin {
+  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
+  data: DataSetup | any;
+  visualizations: VisualizationsSetup;
+  legacy: LegacyDependenciesService;
+}
+
 export const plugins: VegaSetupPlugin = {
   data: {
     expressions: {
@@ -31,11 +39,3 @@ export const plugins: VegaSetupPlugin = {
   visualizations,
   legacy: new LegacyDependenciesService(),
 };
-
-/** @public */
-export interface VegaSetupPlugin {
-  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
-  data: DataSetup | any;
-  visualizations: VisualizationsSetup;
-  legacy: LegacyDependenciesService;
-}
