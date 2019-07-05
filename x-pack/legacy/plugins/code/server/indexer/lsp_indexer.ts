@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
-import util from 'util';
-import path from 'path';
-
 import { ResponseError } from 'vscode-jsonrpc';
 
 import { ProgressReporter } from '.';
@@ -223,32 +219,13 @@ export class LspIndexer extends AbstractIndexer {
 
   protected FILE_OVERSIZE_ERROR_MSG = 'File size exceeds limit. Skip index.';
   protected async getFileSource(request: LspIndexRequest): Promise<string> {
-    const { revision, filePath, localRepoPath, workspaceOpened } = request;
-    let content: string = '';
-    if (workspaceOpened) {
-      // Read file content from the workspace repo
-      const localFilePath = `${localRepoPath}${filePath}`;
-      const lstat = util.promisify(fs.lstat);
-      const stat = await lstat(localFilePath);
-
-      if (stat.size > TEXT_FILE_LIMIT) {
-        throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
-      }
-
-      const readLink = util.promisify(fs.readlink);
-      const readFile = util.promisify(fs.readFile);
-      content = stat.isSymbolicLink()
-        ? await readLink(localFilePath, 'utf8')
-        : await readFile(localFilePath, 'utf8');
-    } else {
-      // Fall back to reading file content from the original bare repo
-      const blob = await this.gitOps.fileContent(this.repoUri, filePath, revision);
-      if (blob.rawsize() > TEXT_FILE_LIMIT) {
-        throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
-      }
-      content = blob.content().toString();
+    const { revision, filePath } = request;
+    // Always read file content from the original bare repo
+    const blob = await this.gitOps.fileContent(this.repoUri, filePath, revision);
+    if (blob.rawsize() > TEXT_FILE_LIMIT) {
+      throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
     }
-    return content;
+    return blob.content().toString();
   }
 
   protected async execLspIndexing(
