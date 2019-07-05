@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { Columns } from '../../load_more_table';
 import { AnomaliesByHost, Anomaly, NarrowDateRange } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
@@ -14,8 +14,9 @@ import { createCompoundHostKey } from './create_compound_key';
 import { HostDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { AnomalyScore } from '../score/anomaly_score';
 import { getEntries } from '../get_entries';
+import { DraggableScore } from '../score/draggable_score';
+import { createExplorerLink } from '../links/create_explorer_link';
 
 export const getAnomaliesHostTableColumns = (
   startDate: number,
@@ -25,9 +26,9 @@ export const getAnomaliesHostTableColumns = (
 ): [
   Columns<AnomaliesByHost['hostName'], AnomaliesByHost>,
   Columns<Anomaly['severity'], AnomaliesByHost>,
+  Columns<Anomaly['jobId'], AnomaliesByHost>,
   Columns<Anomaly['entityValue'], AnomaliesByHost>,
-  Columns<Anomaly['influencers'], AnomaliesByHost>,
-  Columns<Anomaly['jobId']>
+  Columns<Anomaly['influencers'], AnomaliesByHost>
 ] => [
   {
     name: i18n.HOST_NAME,
@@ -48,14 +49,20 @@ export const getAnomaliesHostTableColumns = (
     field: 'anomaly.severity',
     sortable: true,
     render: (_, anomaliesByHost) => (
-      <AnomalyScore
-        startDate={startDate}
-        endDate={endDate}
-        jobKey={`anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`}
-        narrowDateRange={narrowDateRange}
-        interval={interval}
+      <DraggableScore
+        id={`anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`}
         score={anomaliesByHost.anomaly}
       />
+    ),
+  },
+  {
+    name: i18n.DETECTOR,
+    field: 'anomaly.jobId',
+    sortable: true,
+    render: (jobId, anomaliesByHost) => (
+      <EuiLink href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}>
+        {jobId}
+      </EuiLink>
     ),
   },
   {
@@ -102,10 +109,5 @@ export const getAnomaliesHostTableColumns = (
         })}
       </EuiFlexGroup>
     ),
-  },
-  {
-    name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
-    sortable: true,
   },
 ];

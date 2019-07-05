@@ -14,10 +14,10 @@ import { getScoreString } from './get_score_string';
 
 export const DraggableScore = React.memo<{
   id: string;
-  index: number;
+  index?: number;
   score: Anomaly;
 }>(
-  ({ id, index, score }): JSX.Element => (
+  ({ id, index = 0, score }): JSX.Element => (
     <DraggableWrapper
       key={id}
       dataProvider={{

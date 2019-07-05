@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { Columns } from '../../load_more_table';
 import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
@@ -14,8 +14,9 @@ import { createCompoundNetworkKey } from './create_compound_key';
 import { IPDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { AnomalyScore } from '../score/anomaly_score';
 import { getEntries } from '../get_entries';
+import { DraggableScore } from '../score/draggable_score';
+import { createExplorerLink } from '../links/create_explorer_link';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: number,
@@ -25,9 +26,9 @@ export const getAnomaliesNetworkTableColumns = (
 ): [
   Columns<AnomaliesByNetwork['ip'], AnomaliesByNetwork>,
   Columns<Anomaly['severity'], AnomaliesByNetwork>,
+  Columns<Anomaly['jobId'], AnomaliesByNetwork>,
   Columns<Anomaly['entityValue'], AnomaliesByNetwork>,
-  Columns<Anomaly['influencers'], AnomaliesByNetwork>,
-  Columns<Anomaly['jobId']>
+  Columns<Anomaly['influencers'], AnomaliesByNetwork>
 ] => [
   {
     name: i18n.NETWORK_NAME,
@@ -46,14 +47,20 @@ export const getAnomaliesNetworkTableColumns = (
     field: 'anomaly.severity',
     sortable: true,
     render: (_, anomaliesByNetwork) => (
-      <AnomalyScore
-        startDate={startDate}
-        endDate={endDate}
-        jobKey={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
-        narrowDateRange={narrowDateRange}
-        interval={interval}
+      <DraggableScore
+        id={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
         score={anomaliesByNetwork.anomaly}
       />
+    ),
+  },
+  {
+    name: i18n.DETECTOR,
+    field: 'anomaly.jobId',
+    sortable: true,
+    render: (jobId, anomaliesByHost) => (
+      <EuiLink href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}>
+        {jobId}
+      </EuiLink>
     ),
   },
   {
@@ -96,10 +103,5 @@ export const getAnomaliesNetworkTableColumns = (
         })}
       </EuiFlexGroup>
     ),
-  },
-  {
-    name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
-    sortable: true,
   },
 ];

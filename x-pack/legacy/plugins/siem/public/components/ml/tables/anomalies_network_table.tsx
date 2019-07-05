@@ -5,14 +5,13 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiInMemoryTable, EuiPanel } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiPanel } from '@elastic/eui';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderPanel } from '../../header_panel';
 
 import * as i18n from './translations';
 import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
-import { BackgroundRefetch } from '../../load_more_table';
+import { BackgroundRefetch, BasicTableContainer } from '../../load_more_table';
 import { LoadingPanel } from '../../loading';
 import { AnomaliesTableProps } from '../types';
 import { getAnomaliesNetworkTableColumns } from './get_anomalies_network_table_columns';
@@ -21,10 +20,7 @@ import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
 import { dateTimesAreEqual } from './date_time_equality';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
-
-const BasicTableContainer = styled.div`
-  position: relative;
-`;
+import { BasicTable } from './basic_table';
 
 const sorting = {
   sort: {
@@ -77,7 +73,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
               subtitle={`${i18n.SHOWING}: ${networks.length.toLocaleString()} ${i18n.ANOMALIES}`}
               title={i18n.ANOMALIES}
             />
-            <EuiInMemoryTable
+            <BasicTable
               items={networks}
               columns={columns}
               pagination={pagination}

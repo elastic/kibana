@@ -51,13 +51,12 @@ export const useAnomaliesTableData = ({
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
-
+  const userPermissions = hasMlUserPermissions(capabilities);
   const fetchFunc = async (
     influencersInput: InfluencerInput[] | null,
     earliestMs: number,
     latestMs: number
   ) => {
-    const userPermissions = hasMlUserPermissions(capabilities);
     if (userPermissions && influencersInput != null && !skip) {
       const data = await anomaliesTableData(
         {
@@ -89,7 +88,7 @@ export const useAnomaliesTableData = ({
   useEffect(() => {
     setLoading(true);
     fetchFunc(influencers, startDate, endDate);
-  }, [influencersToString(influencers), startDate, endDate, skip]);
+  }, [influencersToString(influencers), startDate, endDate, skip, userPermissions]);
 
   return [loading, tableData];
 };
