@@ -79,10 +79,17 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
         );
       });
 
-      test('should also work if the user specifies an integer with decimal 0s', () => {
-        expect(bucketTransform.static({ value: '1234567890123.0' })).toHaveProperty(
+      test('should not return a long script for exponential values', () => {
+        expect(bucketTransform.static({ value: '123123123e12' })).toHaveProperty(
           'bucket_script.script.source',
-          '1234567890123L'
+          '123123123e12'
+        );
+      });
+
+      test('should return decimal scripts for very large decimals', () => {
+        expect(bucketTransform.static({ value: '1234178312312381273123123.11123' })).toHaveProperty(
+          'bucket_script.script.source',
+          '1234178312312381273123123.11123'
         );
       });
     });

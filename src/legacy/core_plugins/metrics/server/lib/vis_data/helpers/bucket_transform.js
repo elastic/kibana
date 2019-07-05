@@ -78,12 +78,13 @@ export const bucketTransform = {
   },
   static: bucket => {
     checkMetric(bucket, ['value']);
-    const isDecimalValue = !Number.isInteger(Number(bucket.value));
+    // Anything containing a decimal point or an exponent is considered decimal value
+    const isDecimalValue = bucket.value.match(/[.e]/i);
     return {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          source: isDecimalValue ? bucket.value : `${bucket.value.replace(/\.\d*$/, '')}L`,
+          source: isDecimalValue ? bucket.value : `${bucket.value}L`,
           lang: 'painless',
         },
         gap_policy: 'skip',
