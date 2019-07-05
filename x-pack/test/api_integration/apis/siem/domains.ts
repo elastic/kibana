@@ -47,6 +47,7 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -81,6 +82,7 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -115,6 +117,7 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

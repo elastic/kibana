@@ -23,6 +23,10 @@ import {
   mockJobsSummaryResponse,
 } from './__mocks__/api';
 
+jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
+  hasMlAdminPermissions: () => true,
+}));
+
 describe('MlPopover', () => {
   describe('MlPopover', () => {
     test('showing a popover on a mouse click', () => {

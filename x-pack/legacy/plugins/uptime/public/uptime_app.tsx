@@ -41,6 +41,7 @@ export interface UptimeAppColors {
   success: string;
   range: string;
   mean: string;
+  warning: string;
 }
 
 export interface UptimeAppProps {
@@ -78,17 +79,19 @@ const Application = (props: UptimeAppProps) => {
   let colors: UptimeAppColors;
   if (darkMode) {
     colors = {
-      success: euiDarkVars.euiColorSuccess,
-      range: euiDarkVars.euiFocusBackgroundColor,
-      mean: euiDarkVars.euiColorPrimary,
       danger: euiDarkVars.euiColorDanger,
+      mean: euiDarkVars.euiColorPrimary,
+      range: euiDarkVars.euiFocusBackgroundColor,
+      success: euiDarkVars.euiColorSuccess,
+      warning: euiDarkVars.euiColorWarning,
     };
   } else {
     colors = {
-      success: euiLightVars.euiColorSuccess,
-      range: euiLightVars.euiFocusBackgroundColor,
-      mean: euiLightVars.euiColorPrimary,
       danger: euiLightVars.euiColorDanger,
+      mean: euiLightVars.euiColorPrimary,
+      range: euiLightVars.euiFocusBackgroundColor,
+      success: euiLightVars.euiColorSuccess,
+      warning: euiLightVars.euiColorWarning,
     };
   }
 

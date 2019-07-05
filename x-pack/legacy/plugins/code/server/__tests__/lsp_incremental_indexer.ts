@@ -21,7 +21,7 @@ import { Logger } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
-import { createTestServerOption, emptyAsyncFunc } from '../test_utils';
+import { createTestServerOption, emptyAsyncFunc, createTestHapiServer } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
@@ -59,9 +59,10 @@ function prepareProject(url: string, p: string) {
   });
 }
 
-const repoUri = 'github.com/Microsoft/TypeScript-Node-Starter';
+const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
+const server = createTestHapiServer();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
 function cleanWorkspace() {
@@ -76,7 +77,7 @@ function setupEsClientSpy() {
     Promise.resolve({
       _source: {
         [RepositoryGitStatusReservedField]: {
-          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          uri: 'github.com/elastic/TypeScript-Node-Starter',
           progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
           cloneProgress: {
@@ -140,7 +141,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     // @ts-ignore
     this.timeout(200000);
     return await prepareProject(
-      'https://github.com/Microsoft/TypeScript-Node-Starter.git',
+      'https://github.com/elastic/TypeScript-Node-Starter.git',
       path.join(serverOptions.repoPath, repoUri)
     );
   });
@@ -168,7 +169,7 @@ describe('lsp_incremental_indexer unit tests', () => {
       serverOptions,
       gitOps,
       esClient as EsClient,
-      {} as InstallManager,
+      new InstallManager(server, serverOptions),
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
@@ -176,8 +177,8 @@ describe('lsp_incremental_indexer unit tests', () => {
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
     const indexer = new LspIncrementalIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
-      '4779cb7e',
+      'github.com/elastic/TypeScript-Node-Starter',
+      'HEAD',
       '6206f643',
       lspservice,
       serverOptions,
@@ -192,19 +193,19 @@ describe('lsp_incremental_indexer unit tests', () => {
     assert.strictEqual(createSpy.callCount, 0);
     assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // DeletebyQuery is called 6 times (1 file + 1 symbol reuqests per diff item)
-    // for 3 MODIFIED items
-    assert.strictEqual(deleteByQuerySpy.callCount, 6);
+    // DeletebyQuery is called 8 times (1 file + 1 symbol reuqests per diff item)
+    // for 4 MODIFIED items
+    assert.strictEqual(deleteByQuerySpy.callCount, 8);
 
-    // There are 3 MODIFIED items. 1 file + 1 symbol + 1 reference = 3 objects to
-    // index for each item. Total doc indexed should be 3 * 3 = 9, which can be
-    // fitted into a single batch index.
+    // There are 4 MODIFIED items and 1 ADDED item. 1 file + 1 symbol + 1 reference
+    //  = 3 objects to index for each item. Total doc indexed should be 5 * 3 = 15,
+    // which can be fitted into a single batch index.
     assert.strictEqual(bulkSpy.callCount, 2);
     let total = 0;
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 9 * 2);
+    assert.strictEqual(total, 15 * 2);
 
     // @ts-ignore
   }).timeout(20000);
@@ -224,7 +225,7 @@ describe('lsp_incremental_indexer unit tests', () => {
       serverOptions,
       gitOps,
       esClient as EsClient,
-      {} as InstallManager,
+      new InstallManager(server, serverOptions),
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
@@ -232,8 +233,8 @@ describe('lsp_incremental_indexer unit tests', () => {
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
     const indexer = new LspIncrementalIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
-      '4779cb7e',
+      'github.com/elastic/TypeScript-Node-Starter',
+      'HEAD',
       '6206f643',
       lspservice,
       serverOptions,
@@ -271,7 +272,7 @@ describe('lsp_incremental_indexer unit tests', () => {
       serverOptions,
       gitOps,
       esClient as EsClient,
-      {} as InstallManager,
+      new InstallManager(server, serverOptions),
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
@@ -279,8 +280,8 @@ describe('lsp_incremental_indexer unit tests', () => {
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
     const indexer = new LspIncrementalIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
-      '46971a84',
+      'github.com/elastic/TypeScript-Node-Starter',
+      'HEAD',
       '6206f643',
       lspservice,
       serverOptions,
@@ -293,7 +294,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     await indexer.start(undefined, {
       repoUri: '',
       filePath: 'package.json',
-      revision: '46971a84',
+      revision: 'HEAD',
       originRevision: '6206f643',
       localRepoPath: '',
       kind: DiffKind.MODIFIED,
@@ -304,15 +305,15 @@ describe('lsp_incremental_indexer unit tests', () => {
     assert.strictEqual(createSpy.callCount, 0);
     assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // There are 3 MODIFIED items, but 1 item after the checkpoint. 1 file
+    // There are 2 items after the checkpoint. 1 file
     // + 1 symbol + 1 ref = 3 objects to be indexed for each item. Total doc
-    // indexed should be 3 * 2 = 2, which can be fitted into a single batch index.
+    // indexed should be 3 * 2 = 6, which can be fitted into a single batch index.
     assert.strictEqual(bulkSpy.callCount, 2);
     let total = 0;
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 3 * 2);
+    assert.strictEqual(total, 6 * 2);
     assert.strictEqual(deleteByQuerySpy.callCount, 2);
     // @ts-ignore
   }).timeout(20000);

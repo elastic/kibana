@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { AlertExecuteOptions } from '../types';
+import { AlertExecutorOptions } from '../types';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
@@ -30,7 +30,7 @@ const getCreateTaskRunnerFunctionParams = {
   alertType: {
     id: 'test',
     name: 'My test alert',
-    execute: jest.fn(),
+    executor: jest.fn(),
   },
   fireAction: jest.fn(),
   internalSavedObjectsRepository: savedObjectsClient,
@@ -93,8 +93,8 @@ Object {
   },
 }
 `);
-  expect(getCreateTaskRunnerFunctionParams.alertType.execute).toHaveBeenCalledTimes(1);
-  const call = getCreateTaskRunnerFunctionParams.alertType.execute.mock.calls[0][0];
+  expect(getCreateTaskRunnerFunctionParams.alertType.executor).toHaveBeenCalledTimes(1);
+  const call = getCreateTaskRunnerFunctionParams.alertType.executor.mock.calls[0][0];
   expect(call.params).toMatchInlineSnapshot(`
 Object {
   "bar": true,
@@ -108,8 +108,8 @@ Object {
 });
 
 test('fireAction is called per alert instance that fired', async () => {
-  getCreateTaskRunnerFunctionParams.alertType.execute.mockImplementation(
-    ({ services }: AlertExecuteOptions) => {
+  getCreateTaskRunnerFunctionParams.alertType.executor.mockImplementation(
+    ({ services }: AlertExecutorOptions) => {
       services.alertInstanceFactory('1').fire('default');
     }
   );
@@ -132,8 +132,8 @@ Array [
 });
 
 test('persists alertInstances passed in from state, only if they fire', async () => {
-  getCreateTaskRunnerFunctionParams.alertType.execute.mockImplementation(
-    ({ services }: AlertExecuteOptions) => {
+  getCreateTaskRunnerFunctionParams.alertType.executor.mockImplementation(
+    ({ services }: AlertExecutorOptions) => {
       services.alertInstanceFactory('1').fire('default');
     }
   );

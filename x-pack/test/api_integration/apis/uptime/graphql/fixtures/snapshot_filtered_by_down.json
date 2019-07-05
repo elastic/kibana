@@ -1,1 +1,5 @@
-{ "snapshot": { "up": 0, "down": 2, "total": 2 } }
+{
+  "snapshot": {
+    "counts": { "down": 2, "mixed": 0, "up": 0, "total": 2 }
+  }
+}

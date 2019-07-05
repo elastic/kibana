@@ -116,13 +116,11 @@ const getIds = {
   clearCache: jest.fn(),
 };
 
-const config = {
-  get: jest.fn(),
-};
+const getConfig = jest.fn();
 
 // helper function to create index patterns
 function create(id, payload) {
-  const indexPattern = new IndexPattern(id, config, savedObjectsClient, patternCache, fieldsFetcher, getIds);
+  const indexPattern = new IndexPattern(id, getConfig, savedObjectsClient, patternCache, fieldsFetcher, getIds);
 
   setDocsourcePayload(id, payload);
 
@@ -326,13 +324,13 @@ describe('IndexPattern', () => {
       }
     });
     // Create a normal index pattern
-    const pattern = new IndexPattern('foo', config, savedObjectsClient, patternCache, fieldsFetcher, getIds);
+    const pattern = new IndexPattern('foo', getConfig, savedObjectsClient, patternCache, fieldsFetcher, getIds);
     await pattern.init();
 
     expect(pattern.version).toBe('fooa');
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = new IndexPattern('foo', config, savedObjectsClient, patternCache, fieldsFetcher, getIds);
+    const samePattern = new IndexPattern('foo', getConfig, savedObjectsClient, patternCache, fieldsFetcher, getIds);
     await samePattern.init();
 
     expect(samePattern.version).toBe('fooaa');
