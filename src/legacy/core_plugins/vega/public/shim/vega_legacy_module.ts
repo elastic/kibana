@@ -28,13 +28,13 @@ import { uiModules } from 'ui/modules';
 import { wrapInI18nContext } from 'ui/i18n';
 
 // @ts-ignore
-import { VegaEditorController } from './vega_editor_controller';
+import { VegaEditorController } from '../vega_editor_controller';
 // @ts-ignore
-import { VegaHelpMenu } from './help_menus/vega_help_menu';
+import { VegaHelpMenu } from '../help_menus/vega_help_menu';
 // @ts-ignore
-import { VegaActionsMenu } from './help_menus/vega_action_menu';
+import { VegaActionsMenu } from '../help_menus/vega_action_menu';
 
-export const setupVegaLegacyModule = once(() => {
+export const initVegaLegacyModule = once(() => {
   uiModules
     .get('kibana/vega', ['react'])
     .controller('VegaEditorController', ($scope: any) => new VegaEditorController($scope))

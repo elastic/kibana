@@ -20,17 +20,17 @@
 import { functionsRegistry } from '../../interpreter/public/registries';
 import { visualizations, VisualizationsSetup } from '../../visualizations/public';
 import { DataSetup } from '../../data/public';
-import { LegacyDependenciesService } from './legacy_dependencies_service';
+import { LegacyDependenciesPlugin } from './shim';
 
 /** @public */
-export interface VegaSetupPlugin {
+export interface VegaPluginSetupDependencies {
   // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
   data: DataSetup | any;
   visualizations: VisualizationsSetup;
-  legacy: LegacyDependenciesService;
+  __LEGACY: LegacyDependenciesPlugin;
 }
 
-export const plugins: VegaSetupPlugin = {
+export const plugins: VegaPluginSetupDependencies = {
   data: {
     expressions: {
       registerFunction: (fn: any) => functionsRegistry.register(fn),
@@ -40,5 +40,5 @@ export const plugins: VegaSetupPlugin = {
 
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.
-  legacy: new LegacyDependenciesService(),
+  __LEGACY: new LegacyDependenciesPlugin(),
 };

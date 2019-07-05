@@ -30,9 +30,9 @@ import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
 import { visFactory } from '../../visualizations/public';
 
-export const createVegaTypeDefinition = (es, serviceSettings) => {
-  const requestHandler = createVegaRequestHandler(es, serviceSettings);
-  const visualization = createVegaVisualization(serviceSettings);
+export const createVegaTypeDefinition = (dependencies) => {
+  const requestHandler = createVegaRequestHandler(dependencies);
+  const visualization = createVegaVisualization(dependencies);
 
   return visFactory.createBaseVisualization({
     name: 'vega',

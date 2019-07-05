@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { VegaPlugin } from './plugin';
+import { UiSettingsClientContract } from 'kibana/public';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new VegaPlugin(initializerContext);
+export * from './legacy_dependencies_plugin';
+
+// @public
+export interface VegaVisualizationDependencies {
+  es: any;
+  serviceSettings: any;
+  uiSettings: UiSettingsClientContract;
 }
-
-export { VegaPlugin as Plugin };

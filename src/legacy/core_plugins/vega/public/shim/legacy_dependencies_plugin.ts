@@ -18,11 +18,13 @@
  */
 
 import chrome from 'ui/chrome';
-import { setupVegaLegacyModule } from './vega_legacy_module';
+import { CoreStart, Plugin } from 'kibana/public';
+import { initVegaLegacyModule } from './vega_legacy_module';
 
-export class LegacyDependenciesService {
+export class LegacyDependenciesPlugin implements Plugin<any, any> {
   public async setup() {
-    setupVegaLegacyModule();
+    // Init kibana/vega AngularJS module.
+    initVegaLegacyModule();
 
     const $injector = await chrome.dangerouslyGetActiveInjector();
 
@@ -38,10 +40,7 @@ export class LegacyDependenciesService {
     };
   }
 
-  public stop() {
+  public start(core: CoreStart) {
     // nothing to do here yet
   }
 }
-
-/** @public */
-export type LegacyDependenciesSetup = ReturnType<LegacyDependenciesService['setup']>;

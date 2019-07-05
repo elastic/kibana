@@ -55,13 +55,17 @@ describe('VegaVisualizations', () => {
   let indexPattern;
   let vis;
   let imageComparator;
-  let serviceSettings;
+  let vegaVisualizationDependencies;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private) => {
-    serviceSettings = {};
+    vegaVisualizationDependencies = {
+      es: {},
+      serviceSettings: {},
+      uiSettings: {},
+    };
     Vis = Private(visModule.VisProvider);
-    VegaVisualization = createVegaVisualization(serviceSettings);
+    VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 
   }));

@@ -23,7 +23,7 @@ import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { findObjectByTitle } from 'ui/saved_objects';
 
-export const createVegaVisualization = (serviceSettings) => class VegaVisualization {
+export const createVegaVisualization = ({ serviceSettings }) => class VegaVisualization {
   constructor(el, vis) {
     this.savedObjectsClient =  chrome.getSavedObjectsClient();
     this._el = el;

@@ -20,14 +20,16 @@
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
 
-const vegaPluginInitializer = (kibana: any) =>
-  new kibana.Plugin({
+import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
+
+const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+  new Plugin({
     id: 'vega',
-    require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
+    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: [resolve(__dirname, 'public/index')],
+      hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({
         enableExternalUrls: server.config().get('vega.enableExternalUrls'),
       }),

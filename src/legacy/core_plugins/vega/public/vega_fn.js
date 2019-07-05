@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { createVegaRequestHandler } from './vega_request_handler';
 
-export const createVegaFn = (es, serviceSettings) => ({
+export const createVegaFn = (dependencies) => ({
   name: 'vega',
   type: 'render',
   context: {
@@ -40,7 +40,7 @@ export const createVegaFn = (es, serviceSettings) => ({
     },
   },
   async fn(context, args) {
-    const vegaRequestHandler = createVegaRequestHandler(es, serviceSettings);
+    const vegaRequestHandler = createVegaRequestHandler(dependencies);
 
     const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),

@@ -16,29 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 // @ts-ignore
 import { createVegaFn } from './vega_fn';
 // @ts-ignore
 import { createVegaTypeDefinition } from './vega_type';
 
-import { VegaSetupPlugin } from './setup';
+import { VegaPluginSetupDependencies } from './setup';
+import { VegaVisualizationDependencies } from './shim';
 
-export class VegaPlugin {
-  public async setup({ data, visualizations, legacy }: VegaSetupPlugin) {
-    const { es, serviceSettings } = await legacy.setup();
+export class VegaPlugin implements Plugin<any, any> {
+  initializerContext: PluginInitializerContext;
 
-    data.expressions.registerFunction(() => createVegaFn(es, serviceSettings));
+  constructor(initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
+  }
+
+  public async setup(
+    core: CoreSetup,
+    { data, visualizations, __LEGACY }: VegaPluginSetupDependencies
+  ) {
+    const visualizationDependencies = {
+      uiSettings: core.uiSettings,
+      ...(await __LEGACY.setup()),
+    } as VegaVisualizationDependencies;
+
+    data.expressions.registerFunction(() => createVegaFn(visualizationDependencies));
     visualizations.types.VisTypesRegistryProvider.register(() =>
-      createVegaTypeDefinition(es, serviceSettings)
+      createVegaTypeDefinition(visualizationDependencies)
     );
   }
 
-  public start() {
-    // nothing to do here yet
-  }
-
-  public stop() {
+  public start(core: CoreStart) {
     // nothing to do here yet
   }
 }

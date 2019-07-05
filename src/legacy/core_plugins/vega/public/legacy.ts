@@ -18,10 +18,11 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { VegaPlugin } from './plugin';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugins } from './setup';
+import { plugin } from '.';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new VegaPlugin(initializerContext);
-}
+const pluginInstance = plugin({} as PluginInitializerContext);
 
-export { VegaPlugin as Plugin };
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);

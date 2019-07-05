@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
@@ -25,8 +23,7 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
 
-export function createVegaRequestHandler(es, serviceSettings) {
-  const uiSettings = chrome.getUiSettingsClient();
+export function createVegaRequestHandler({ uiSettings, es, serviceSettings }) {
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
