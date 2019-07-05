@@ -50,30 +50,27 @@ export const MonitorPage = ({
   const [params, updateUrlParams] = useUrlParams(history, location);
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
-  useEffect(
-    () => {
-      query({
-        query: gql`
-          query MonitorPageTitle($monitorId: String!) {
-            monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-              id
-              url
-              name
-            }
+  useEffect(() => {
+    query({
+      query: gql`
+        query MonitorPageTitle($monitorId: String!) {
+          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+            id
+            url
+            name
           }
-        `,
-        variables: { monitorId },
-      }).then((result: any) => {
-        const { name, url, id } = result.data.monitorPageTitle;
-        const heading: string = name || url || id;
-        setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
-        if (setHeadingText) {
-          setHeadingText(heading);
         }
-      });
-    },
-    [params]
-  );
+      `,
+      variables: { monitorId },
+    }).then((result: any) => {
+      const { name, url, id } = result.data.monitorPageTitle;
+      const heading: string = name || url || id;
+      setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+      if (setHeadingText) {
+        setHeadingText(heading);
+      }
+    });
+  }, [params]);
 
   const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
     BaseLocationOptions

@@ -126,7 +126,7 @@ export const withUnconnectedElementsLoadedTelemetry = function<P extends object>
       }
     });
 
-    return <Component {...other as P} workpad={workpad} />;
+    return <Component {...(other as P)} workpad={workpad} />;
   };
 };
 
