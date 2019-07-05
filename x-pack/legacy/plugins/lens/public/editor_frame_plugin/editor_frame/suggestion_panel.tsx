@@ -39,12 +39,9 @@ const SuggestionPreview = ({
 }) => {
   const [expressionError, setExpressionError] = useState<boolean>(false);
 
-  useEffect(
-    () => {
-      setExpressionError(false);
-    },
-    [previewExpression]
-  );
+  useEffect(() => {
+    setExpressionError(false);
+  }, [previewExpression]);
 
   return (
     <EuiPanel
