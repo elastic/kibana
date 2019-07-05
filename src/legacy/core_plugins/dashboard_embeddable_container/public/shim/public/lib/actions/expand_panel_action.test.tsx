@@ -17,15 +17,23 @@
  * under the License.
  */
 
-import '../np_core.test.mocks';
-
-import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_api';
+import { isErrorEmbeddable, EmbeddableFactory, GetEmbeddableFactory } from '../embeddable_api';
 import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import {
+  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
+} from '../../../../../../embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+} from '../../../../../../embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+const __embeddableFactories = new Map<string, EmbeddableFactory>();
+__embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
@@ -40,7 +48,7 @@ beforeEach(async () => {
         }),
       },
     }),
-    embeddableFactories
+    getFactory
   );
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
