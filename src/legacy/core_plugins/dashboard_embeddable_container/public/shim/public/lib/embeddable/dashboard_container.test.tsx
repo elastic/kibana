@@ -19,26 +19,26 @@
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import React from 'react';
+import { nextTick } from 'test_utils/enzyme_helpers';
 import {
   isErrorEmbeddable,
   ViewMode,
-  CONTEXT_MENU_TRIGGER,
   EmbeddableFactory,
+  GetEmbeddableFactory,
 } from '../embeddable_api';
 import { DashboardContainer } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-import { mount } from 'enzyme';
-import { nextTick } from 'test_utils/enzyme_helpers';
-import { I18nProvider } from '@kbn/i18n/react';
-import { CONTACT_CARD_EMBEDDABLE, ContactCardEmbeddableFactory } from 'src/legacy/core_plugins/embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { ContactCardEmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+import { CONTACT_CARD_EMBEDDABLE, ContactCardEmbeddableFactory } from '../../../../../../embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { ContactCardEmbeddableInput, ContactCardEmbeddable, ContactCardEmbeddableOutput } from '../../../../../../embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 
-// TODO: Needs refactoring for NP.
-/*
+let getFactory: GetEmbeddableFactory;
+beforeEach(() => {
+  const __embeddableFactories = new Map<string, EmbeddableFactory>();
+  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  getFactory = (id: string) => __embeddableFactories.get(id);
+});
+
 test('DashboardContainer initializes embeddables', async done => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(
     getSampleDashboardInput({
       panels: {
@@ -48,7 +48,7 @@ test('DashboardContainer initializes embeddables', async done => {
         }),
       },
     }),
-    embeddableFactories
+    getFactory
   );
 
   const subscription = container.getOutput$().subscribe(output => {
@@ -70,9 +70,7 @@ test('DashboardContainer initializes embeddables', async done => {
 });
 
 test('DashboardContainer.addNewEmbeddable', async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  const container = new DashboardContainer(getSampleDashboardInput(), embeddableFactories);
+  const container = new DashboardContainer(getSampleDashboardInput(), getFactory);
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -93,8 +91,6 @@ test('DashboardContainer.addNewEmbeddable', async () => {
 });
 
 test('Container view mode change propagates to existing children', async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(
     getSampleDashboardInput({
       panels: {
@@ -104,7 +100,7 @@ test('Container view mode change propagates to existing children', async () => {
         }),
       },
     }),
-    embeddableFactories
+    getFactory
   );
   await nextTick();
 
@@ -115,9 +111,7 @@ test('Container view mode change propagates to existing children', async () => {
 });
 
 test('Container view mode change propagates to new children', async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  const container = new DashboardContainer(getSampleDashboardInput(), embeddableFactories);
+  const container = new DashboardContainer(getSampleDashboardInput(), getFactory);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -132,65 +126,3 @@ test('Container view mode change propagates to new children', async () => {
 
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
 });
-
-test('DashboardContainer in edit mode shows edit mode actions', async () => {
-  const triggerRegistry: TriggerRegistry = new Map();
-  const actionRegistry: ActionRegistry = new Map();
-  const editModeAction = new EditModeAction();
-  actionRegistry.set(editModeAction.id, editModeAction);
-  attachAction(triggerRegistry, {
-    triggerId: CONTEXT_MENU_TRIGGER,
-    actionId: editModeAction.id,
-  });
-
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  const container = new DashboardContainer(
-    getSampleDashboardInput({ viewMode: ViewMode.VIEW }),
-    embeddableFactories
-  );
-
-  const embeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Bob',
-  });
-
-  const component = mount(
-    <I18nProvider>
-      <EmbeddablePanel embeddable={embeddable} />
-    </I18nProvider>
-  );
-
-  const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
-
-  expect(button.length).toBe(1);
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-
-  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-
-  const editAction = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
-
-  expect(editAction.length).toBe(0);
-
-  container.updateInput({ viewMode: ViewMode.EDIT });
-  await nextTick();
-  component.update();
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
-  component.update();
-  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(0);
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
-  component.update();
-  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
-
-  await nextTick();
-  component.update();
-
-  const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
-  expect(action.length).toBe(1);
-});
-*/
