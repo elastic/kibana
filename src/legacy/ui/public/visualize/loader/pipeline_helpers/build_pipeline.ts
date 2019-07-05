@@ -267,7 +267,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (maxFontSize) {
       expr += `maxFontSize=${maxFontSize} `;
     }
-    if (showLabel) {
+    if (showLabel !== undefined) {
       expr += `showLabel=${showLabel} `;
     }
 
