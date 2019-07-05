@@ -400,7 +400,10 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByCssSelector(selector: string, timeout?: number) {
+  public async findAllByCssSelector(
+    selector: string,
+    timeout?: number
+  ): Promise<WebElementWrapper[]> {
     const _findAllByCssSelector = async () => {
       return this._wrapAll(
         await this._findWithCustomTimeout(
@@ -567,7 +570,10 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByPartialLinkText(linkText: string, timeout?: number) {
+  public async findAllByPartialLinkText(
+    linkText: string,
+    timeout?: number
+  ): Promise<WebElementWrapper[]> {
     const _findAllByPartialLinkText = async () => {
       return this._wrapAll(
         await this._findWithCustomTimeout(

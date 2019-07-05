@@ -390,15 +390,15 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<void> {
       log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
-      // await retry.try(async () => {
-      const element = await this.byCssSelector(selector, timeout);
-      if (element) {
-        // await element.moveMouseTo();
-        await element.click();
-      } else {
-        throw new Error(`Element with css='${selector}' is not found`);
-      }
-      // });
+      await retry.try(async () => {
+        const element = await this.byCssSelector(selector, timeout);
+        if (element) {
+          // await element.moveMouseTo();
+          await element.click();
+        } else {
+          throw new Error(`Element with css='${selector}' is not found`);
+        }
+      });
     }
 
     public async clickByDisplayedLinkText(
