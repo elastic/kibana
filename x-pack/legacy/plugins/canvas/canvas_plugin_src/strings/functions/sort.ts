@@ -11,12 +11,12 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof sort>> = {
   help: i18n.translate('xpack.canvas.functions.sortHelpText', {
-    defaultMessage: 'Sorts a datatable on a column',
+    defaultMessage: 'Sorts a datatable by the specified column.',
   }),
   args: {
     by: i18n.translate('xpack.canvas.functions.sort.args.byHelpText', {
       defaultMessage:
-        'The column to sort on. When unspecified, the `{datatable}` ' +
+        'The column to sort by. When unspecified, the `{datatable}` ' +
         'is sorted by the first column.',
       values: {
         datatable: 'datatable',

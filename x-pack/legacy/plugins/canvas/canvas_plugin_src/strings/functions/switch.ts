@@ -11,14 +11,25 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof switchFn>> = {
   help: i18n.translate('xpack.canvas.functions.switchHelpText', {
-    defaultMessage: 'Perform conditional logic with multiple conditions',
+    defaultMessage:
+      'Performs conditional logic with multiple conditions. ' +
+      'See also {caseFn} which builds a `case` to pass to the {switchFn} function.',
+    values: {
+      caseFn: 'case',
+      switchFn: 'switch',
+    },
   }),
   args: {
     case: i18n.translate('xpack.canvas.functions.switch.args.caseHelpText', {
-      defaultMessage: 'The list of conditions to check',
+      defaultMessage: 'The conditions to check',
     }),
     default: i18n.translate('xpack.canvas.functions.switch.args.defaultHelpText', {
-      defaultMessage: 'The default case if no cases match',
+      defaultMessage:
+        'The value returned when no conditions are met. ' +
+        'When unspecified and no conditions are met, the original {context} is returned.',
+      values: {
+        context: '_context_',
+      },
     }),
   },
 };

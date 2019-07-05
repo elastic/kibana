@@ -11,17 +11,20 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof table>> = {
   help: i18n.translate('xpack.canvas.functions.tableHelpText', {
-    defaultMessage: 'Configure a {datatable} element',
-    values: {
-      datatable: 'datatable',
-    },
+    defaultMessage: 'Configures a table element',
   }),
   args: {
     font: i18n.translate('xpack.canvas.functions.table.args.fontHelpText', {
-      defaultMessage: 'Font style',
+      defaultMessage:
+        'The {css} font properties for the contents of the table. For example, {fontFamily} or {fontWeight}.',
+      values: {
+        css: 'CSS',
+        fontFamily: 'font-family',
+        fontWeight: 'font-weight',
+      },
     }),
     paginate: i18n.translate('xpack.canvas.functions.table.args.paginateHelpText', {
-      defaultMessage: 'Show pagination controls. When `false`, only the first page is displayed.',
+      defaultMessage: 'Show pagination controls? When `false`, only the first page is displayed.',
     }),
     perPage: i18n.translate('xpack.canvas.functions.table.args.perPageHelpText', {
       defaultMessage: 'The number of rows to display on each page.',

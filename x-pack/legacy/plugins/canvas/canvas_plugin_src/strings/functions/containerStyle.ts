@@ -14,25 +14,10 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     defaultMessage: `Creates an object used for styling an element's container, including background, border, and opacity.`,
   }),
   args: {
-    border: i18n.translate('xpack.canvas.functions.containerStyle.args.borderHelpText', {
-      defaultMessage: 'A valid {css} border',
-      values: {
-        css: 'CSS',
-      },
-    }),
-    borderRadius: i18n.translate(
-      'xpack.canvas.functions.containerStyle.args.borderRadiusHelpText',
-      {
-        defaultMessage: 'The number of pixels to use when rounding the border',
-      }
-    ),
-    padding: i18n.translate('xpack.canvas.functions.containerStyle.args.paddingHelpText', {
-      defaultMessage: 'Content distance, in pixels, from border',
-    }),
     backgroundColor: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundColorHelpText',
       {
-        defaultMessage: 'A valid {css} background color',
+        defaultMessage: 'A valid {css} background color.',
         values: {
           css: 'CSS',
         },
@@ -41,16 +26,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     backgroundImage: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundImageHelpText',
       {
-        defaultMessage: 'A valid {css} background image',
-        values: {
-          css: 'CSS',
-        },
-      }
-    ),
-    backgroundSize: i18n.translate(
-      'xpack.canvas.functions.containerStyle.args.backgroundSizeHelpText',
-      {
-        defaultMessage: 'A valid {css} background size',
+        defaultMessage: 'A valid {css} background image.',
         values: {
           css: 'CSS',
         },
@@ -59,18 +35,42 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     backgroundRepeat: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundRepeatHelpText',
       {
-        defaultMessage: 'A valid {css} background repeat',
+        defaultMessage: 'A valid {css} background repeat.',
         values: {
           css: 'CSS',
         },
       }
     ),
+    backgroundSize: i18n.translate(
+      'xpack.canvas.functions.containerStyle.args.backgroundSizeHelpText',
+      {
+        defaultMessage: 'A valid {css} background size.',
+        values: {
+          css: 'CSS',
+        },
+      }
+    ),
+    border: i18n.translate('xpack.canvas.functions.containerStyle.args.borderHelpText', {
+      defaultMessage: 'A valid {css} border.',
+      values: {
+        css: 'CSS',
+      },
+    }),
+    borderRadius: i18n.translate(
+      'xpack.canvas.functions.containerStyle.args.borderRadiusHelpText',
+      {
+        defaultMessage: 'The number of pixels to use when rounding the corners.',
+      }
+    ),
     opacity: i18n.translate('xpack.canvas.functions.containerStyle.args.opacityHelpText', {
       defaultMessage:
-        'A number between 0 and 1 that represents the degree of transparency of the element',
+        'A number between 0 and 1 that represents the degree of transparency of the element.',
     }),
     overflow: i18n.translate('xpack.canvas.functions.containerStyle.args.overflowHelpText', {
-      defaultMessage: 'A valid CSS overflow',
+      defaultMessage: 'A valid CSS overflow.',
+    }),
+    padding: i18n.translate('xpack.canvas.functions.containerStyle.args.paddingHelpText', {
+      defaultMessage: 'The distance of the content, in pixels, from border.',
     }),
   },
 };

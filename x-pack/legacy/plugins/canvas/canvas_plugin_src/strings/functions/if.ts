@@ -24,7 +24,7 @@ export const help: FunctionHelp<FunctionFactory<typeof ifFn>> = {
     }),
     then: i18n.translate('xpack.canvas.functions.if.args.thenHelpText', {
       defaultMessage:
-        'The return value if the condition is `true`. ' +
+        'The return value when the condition is `true`. ' +
         'When unspecified and the condition is met, the original {context} is returned.',
       values: {
         context: '_context_',
@@ -32,7 +32,7 @@ export const help: FunctionHelp<FunctionFactory<typeof ifFn>> = {
     }),
     else: i18n.translate('xpack.canvas.functions.if.args.elseHelpText', {
       defaultMessage:
-        'The return value if the condition is `false`. ' +
+        'The return value when the condition is `false`. ' +
         'When unspecified and the condition is not met, the original {context} is returned.',
       values: {
         context: '_context_',

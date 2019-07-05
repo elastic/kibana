@@ -13,15 +13,20 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
   help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
     defaultMessage:
       'Adds a column calculated as the result of other columns. ' +
-      'Changes are made only when you provide arguments.',
+      'Changes are made only when you provide arguments.' +
+      'See also {mapColumnFn} and {staticColumnFn}.',
+    values: {
+      mapColumnFn: 'mapColumn',
+      staticColumnFn: 'staticColumn',
+    },
   }),
   args: {
     name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
-      defaultMessage: 'The name of the resulting column',
+      defaultMessage: 'The name of the resulting column.',
     }),
     expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
       defaultMessage:
-        'A {canvas} expression that is passed to each row as a single row `{datatable}`',
+        'A {canvas} expression that is passed to each row as a single row `{datatable}`.',
       values: {
         canvas: 'Canvas',
         datatable: 'datatable',

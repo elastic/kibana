@@ -13,7 +13,7 @@ A *** denotes a required argument.
 
 A *†* denotes an argument can be passed multiple times.
 
-<<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | J | K | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | V | W | X | Y | Z
+<<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | <<j_fns>> | K | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | V | W | X | Y | Z
 
 [float]
 [[a_fns]]
@@ -21,7 +21,7 @@ A *†* denotes an argument can be passed multiple times.
 [[all_fn]]
 === `all`
 
-Returns `true` if all of the conditions are `true`. See also <<any_fn>>.
+Returns `true` if all of the conditions are met. See also <<any_fn>>.
 
 *Accepts:* `null`
 
@@ -33,7 +33,7 @@ Returns `true` if all of the conditions are `true`. See also <<any_fn>>.
 
 Alias: `condition`
 |`boolean`
-|The conditions to check
+|The conditions to check.
 |===
 
 *Returns:* `boolean`
@@ -43,7 +43,7 @@ Alias: `condition`
 [[alterColumn_fn]]
 === `alterColumn`
 
-Converts between core types, for example, `string`, `number`, `null`, `boolean`, `date` and renames columns. See also <<mapColumn_fn>> and <<staticColumn_fn>>.
+Converts between core types, including `string`, `number`, `null`, `boolean`, and `date`, and renames columns. See also <<mapColumn_fn>> and <<staticColumn_fn>>.
 
 *Accepts:* `datatable`
 
@@ -55,15 +55,15 @@ Converts between core types, for example, `string`, `number`, `null`, `boolean`,
 
 Alias: `column`
 |`string`
-|The name of the column to alter
-
-|`type`
-|`string`
-|The type to convert the column to; leave blank to not change type
+|The name of the column to alter.
 
 |`name`
 |`string`
-|The resultant column name; leave blank to not rename
+|The resultant column name. Leave blank to not rename.
+
+|`type`
+|`string`
+|The type to convert the column to. Leave blank to not change the type.
 |===
 
 *Returns:* `datatable`
@@ -73,7 +73,7 @@ Alias: `column`
 [[any_fn]]
 === `any`
 
-Returns `true` if any of the conditions are `true`. See also <<all_fn>>.
+Returns `true` if at least one of the conditions is met. See also <<all_fn>>.
 
 *Accepts:* `null`
 
@@ -85,7 +85,7 @@ Returns `true` if any of the conditions are `true`. See also <<all_fn>>.
 
 Alias: `condition`
 |`boolean`
-|The conditions to check
+|The conditions to check.
 |===
 
 *Returns:* `boolean`
@@ -107,7 +107,7 @@ Creates a `datatable` with a single value. See also <<getCell_fn>>.
 
 Alias: `name`
 |`string`
-|A name to give the column 
+|The name to give the column.
 
 Default: `"value"`
 |===
@@ -119,7 +119,7 @@ Default: `"value"`
 [[asset_fn]]
 === `asset`
 
-Uses Canvas workpad asset objects to provide argument values. Usually images.
+Retrieves Canvas workpad asset objects to provide as argument values. Usually images.
 
 *Accepts:* `null`
 
@@ -128,8 +128,10 @@ Uses Canvas workpad asset objects to provide argument values. Usually images.
 |Argument |Type |Description
 
 |_Unnamed_ ***
+
+Alias: `id`
 |`string`
-|The ID of the asset value to return
+|The ID of the asset to retrieve.
 |===
 
 *Returns:* `string`
@@ -139,7 +141,7 @@ Uses Canvas workpad asset objects to provide argument values. Usually images.
 [[axisConfig_fn]]
 === `axisConfig`
 
-Configures axis of a visualization, only used in <<plot_fn>>
+Configures the axis of a visualization. Only used with <<plot_fn>>.
 
 *Accepts:* `null`
 
@@ -147,29 +149,29 @@ Configures axis of a visualization, only used in <<plot_fn>>
 |===
 |Argument |Type |Description
 
+|`max`
+|`number`, `string`, `null`
+|The maximum value displayed in the axis. Must be a `number`, a date in milliseconds since epoch, or an ISO8601 `string`
+
+|`min`
+|`number`, `string`, `null`
+|The minimum value displayed in the axis. Must be a `number`, a date in milliseconds since epoch, or an ISO8601 `string`
+
+|`position`
+|`string`
+|The position of the axis labels. For example, `"top"`, `"bottom"`, `"left"`, or `"right"`. 
+
+Default: `"left"`
+
 |`show`
 |`boolean`
 |Show the axis labels? 
 
 Default: `true`
 
-|`position`
-|`string`
-|The position of the axis labels, for example, top, bottom, left, and right 
-
-Default: `"left"`
-
-|`min`
-|`number`, `string`, `null`
-|Minimum value displayed in the axis. Must be a `number`, a date in milliseconds since epoch, or an ISO8601 `string`
-
-|`max`
-|`number`, `string`, `null`
-|Maximum value displayed in the axis. Must be a `number`, a date in milliseconds since epoch, or an ISO8601 `string`
-
 |`tickSize`
 |`number`, `null`
-|Increment size between each tick. Use for `number` axes only.
+|The increment size between each tick. Use for `number` axes only.
 |===
 
 *Returns:* `axisConfig`
@@ -192,17 +194,15 @@ Builds a `case` (including a condition/result) to pass to the <<switch_fn>> func
 
 Alias: `when`
 |`any`
-|This value is compared to the _context_ to see if the condition 
-is met. It is overridden by the "if" argument if both are provided.
+|The value compared to the _context_ to see if they are equal. The `when` argument is ignored when the `if` argument is also specified.
 
 |`if`
 |`boolean`
-|This value determines whether or not the condition is met. 
-It overrides the unnamed argument if both are provided.
+|This value indicates whether the condition is met. The `if` argument overrides the `when` argument when both are provided.
 
 |`then` ***
 |`any`
-|The value to return if the condition is met
+|The value returned if the condition is met.
 |===
 
 *Returns:* `case`
@@ -212,7 +212,7 @@ It overrides the unnamed argument if both are provided.
 [[clear_fn]]
 === `clear`
 
-Clears _context_ and returns `null`
+Clears the _context_, and returns `null`.
 
 *Accepts:* `null`
 
@@ -231,13 +231,15 @@ Includes or excludes columns from a data table. If you specify both, this will e
 |===
 |Argument |Type |Description
 
-|`include`
+|_Unnamed_ 
+
+Alias: `include`
 |`string`
-|A comma separated list of column names to keep in the table 
+|A comma-separated list of column names to keep in the `datatable`. 
 
 |`exclude`
 |`string`
-|A comma separated list of column names to remove from the table 
+|A comma-separated list of column names to remove from the `datatable`.
 |===
 
 *Returns:* `datatable`
@@ -247,8 +249,8 @@ Includes or excludes columns from a data table. If you specify both, this will e
 [[compare_fn]]
 === `compare`
 
-Compares the input to something else to determine `true` or `false`. 
-Usually used in combination with <<if_fn>>. This only works with primitive types, 
+Compares the _context_ to specified value to determine `true` or `false`. 
+Usually used in combination with <<if_fn>> or <<case_fn>>. This only works with primitive types, 
 such as `number`, `string`, and `boolean`. See also <<eq_fn>>, <<gt_fn>>, <<gte_fn>>, <<lt_fn>>, <<lte_fn>>, and <<neq_fn>>.
 
 *Accepts:* `string`, `number`, `boolean`, `null`
@@ -269,7 +271,7 @@ Default: `"eq"`
 
 Alias: `this`, `b`
 |`any`
-|The value to compare the _context_ to, usually returned by a sub-expression.
+|The value compared to the _context_.
 |===
 
 *Returns:* `boolean`
@@ -287,18 +289,6 @@ Creates an object used for styling an element's container, including background,
 |===
 |Argument |Type |Description
 
-|`border`
-|`string`
-|A valid CSS border
-
-|`borderRadius`
-|`string`
-|The number of pixels to use when rounding the border
-
-|`padding`
-|`string`
-|Content distance, in pixels, from the border.
-
 |`backgroundColor`
 |`string`
 |A valid CSS background color.
@@ -307,17 +297,25 @@ Creates an object used for styling an element's container, including background,
 |`string`
 |A valid CSS background image.
 
+|`backgroundRepeat`
+|`string`
+|A valid CSS background repeat.
+
+Default: `"no-repeat"`
+
 |`backgroundSize`
 |`string`
 |A valid CSS background size.
 
 Default: `"contain"`
 
-|`backgroundRepeat`
+|`border`
 |`string`
-|A valid CSS background repeat.
+|A valid CSS border.
 
-Default: `"no-repeat"`
+|`borderRadius`
+|`string`
+|The number of pixels to use when rounding the corners.
 
 |`opacity`
 |`number`
@@ -328,6 +326,10 @@ Default: `"no-repeat"`
 |A valid CSS overflow.
 
 Default: `"hidden"`
+
+|`padding`
+|`string`
+|The distance of the content, in pixels, from the border.
 |===
 
 *Returns:* `containerStyle`
@@ -337,8 +339,8 @@ Default: `"hidden"`
 [[context_fn]]
 === `context`
 
-Returns whatever you pass into it. This can be useful when you need to use 
-context as an argument to a function as a sub-expression.
+Returns whatever you pass into it. This can be useful when you need to use the 
+_context_ as an argument to a function as a sub-expression.
 
 *Accepts:* `any`
 
@@ -360,15 +362,15 @@ Creates a `datatable` from CSV input.
 
 Alias: `data`
 |`string`
-|CSV data to use
+|The CSV data to use.
 
 |`delimiter`
 |`string`
-|Data separation character
+|The data separation character.
 
 |`newLine`
 |`string`
-|Row separation character
+|The row separation character.
 |===
 
 *Returns:* `datatable`
@@ -392,9 +394,8 @@ Returns the current time, or a time parsed from a `string`, as milliseconds sinc
 
 Alias: `value`
 |`string`
-|An optional date string to be parsed into milliseconds 
-since epoch. Can be either a valid JavaScript Date input or a string to parse 
-using the format argument. Must be an ISO8601 string or you must provide the format.
+|A date string to be parsed into milliseconds since epoch. The date string be either a valid JavaScript Date input or a string to parse 
+using the `format` argument. Must be an ISO8601 string or you must provide the format.
 
 |`format`
 |`string`
@@ -421,7 +422,7 @@ A mock data set that includes project CI times with usernames, countries, and ru
 
 Alias: `type`
 |`string`
-|The name of the demo data set to use  
+|The name of the demo data set to use.  
 
 Default: `"ci"`
 |===
@@ -433,7 +434,7 @@ Default: `"ci"`
 [[do_fn]]
 === `do`
 
-Runs multiple sub-expressions and returns the original _context_ after executing the sub-expressions. Use for running functions that produce an action.
+Executes multiple sub-expressions, then returns the original _context_. Use for running functions that produce an action or side effect without changing the original _context_.
 
 *Accepts:* `any`
 
@@ -445,11 +446,10 @@ Runs multiple sub-expressions and returns the original _context_ after executing
 
 Aliases: `expression`, `exp`, `fn`, `function`
 |`any`
-|One or more sub-expressions. The value of these is not 
-available in the root pipeline as this function simply returns the _context_.
+|The sub-expressions to execute. The return values of these sub-expressions are not available in the root pipeline as this function simply returns the _context_.
 |===
 
-*Returns:* original _context_
+*Returns:* Original _context_
 
 
 [float]
@@ -470,11 +470,11 @@ Configures a dropdown filter control element.
 
 |`valueColumn` ***
 |`string`
-|The column or field to extract the unique values for the drop-down filter.
+|The column or field to extract the unique values for the drop-down control.
 
 |`filterGroup`
 |`string`
-|The group name for the filter
+|The group name for the filter.
 |===
 
 *Returns:* `render`
@@ -486,7 +486,7 @@ Configures a dropdown filter control element.
 [[eq_fn]]
 === `eq`
 
-Returns whether the _context_ is equal to the argument
+Returns whether the _context_ is equal to the argument.
 
 *Accepts:* `boolean`, `number`, `string`, `null`
 
@@ -498,7 +498,7 @@ Returns whether the _context_ is equal to the argument
 
 Alias: `value`
 |`boolean`, `number`, `string`, `null`
-|The value to compare to the _context_.
+|The value compared to the _context_.
 |===
 
 *Returns:* `boolean`
@@ -508,7 +508,7 @@ Alias: `value`
 [[escount_fn]]
 === `escount`
 
-Queries {es} for the number of hits matching a query.
+Queries {es} for the number of hits matching the specified query.
 
 *Accepts:* `filter`
 
@@ -520,7 +520,7 @@ Queries {es} for the number of hits matching a query.
 
 Alias: `q`, `query`
 |`string`
-|A Lucene query `string` 
+|A Lucene query string.
 
 Default: `"-_index:.kibana"`
 
@@ -538,7 +538,7 @@ Default: `_all`
 [[esdocs_fn]]
 === `esdocs`
 
-Queries {es} for raw documents. Specify the fields you want to receive, 
+Queries {es} for raw documents. Specify the fields you want to retrieve, 
 especially if you are asking for a lot of rows.
 
 *Accepts:* `filter`
@@ -551,10 +551,19 @@ especially if you are asking for a lot of rows.
 
 Aliases: `q`, `query`
 |`string`
-|A Lucene query string 
+|A Lucene query string.
 
 Default: `"-_index:.kibana"`
 
+|`count`
+|`number`
+|The number of documents to retrieve. For better performance, use a smaller data set.
+
+Default: `100`
+
+|`fields`
+|`string`
+|A comma-separated list of fields. For better performance, use fewer fields.
 
 |`index`
 |`string`
@@ -562,20 +571,9 @@ Default: `"-_index:.kibana"`
 
 Default: `"_all"`
 
-
 |`sort`
 |`string`
 |The sort direction formatted as `"field, direction"`. For example, `"@timestamp, desc"` or `"bytes, asc"`.
-
-|`fields`
-|`string`
-|A comma-separated list of fields. For better performance, use fewer fields.
-
-|`count`
-|`number`
-|The number of docs to retrieve. For better performance, use a smaller data set.
-
-Default: `100`
 |===
 
 *Returns:* `datatable`
@@ -585,7 +583,7 @@ Default: `100`
 [[essql_fn]]
 === `essql`
 
-Specifies an {es} SQL query.
+Queries {es} using {es} SQL.
 
 *Accepts:* `filter`
 
@@ -597,7 +595,7 @@ Specifies an {es} SQL query.
 
 Alias: `q`, `query`
 |`string`
-|An {es} SQL query
+|An {es} SQL query.
 
 |`count`
 |`number`
@@ -607,7 +605,7 @@ Default: `1000`
 
 |`timezone`
 |`string`
-|The timezone to use for date operations, valid ISO8601 formats and UTC offsets both work.
+|The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.
 
 Default: `UTC`
 |===
@@ -638,11 +636,11 @@ Aliases: `field`, `c`
 Aliases: `v`, `val`
 |`string`
 |The value to match exactly, including white space and 
-capitalization
+capitalization.
 
 |`filterGroup`
 |`string`
-|The group name for the filter
+|The group name for the filter.
 |===
 
 *Returns:* `filter`
@@ -690,13 +688,13 @@ Aggregates element filters from the workpad for use elsewhere, usually a data so
 
 Alias: `group`
 |`string`
-|The name of the filter group to use
+|The name of the filter group to use.
 
 |`ungrouped`
 
 Alias: `nogroup`, `nogroups`
 |`boolean`
-|Exclude filters that belong to a filter group
+|Exclude filters that belong to a filter group?
 
 Default: `false`
 |===
@@ -708,7 +706,7 @@ Default: `false`
 [[font_fn]]
 === `font`
 
-Creates font style.
+Creates a font style.
 
 *Accepts:* `null`
 
@@ -716,40 +714,21 @@ Creates font style.
 |===
 |Argument |Type |Description
 
-|`size`
-|`number`
-|The font size in pixels 
-
-Default: `14`
-
-|`lHeight` 
-
-Alias: `lineHeight`
-|`number`, `null`
-|The line height in pixels
-
-|`family`
+|`align`
 |`string`
-|An acceptable CSS web font string 
+|The horizontal alignment of text.
 
-Default: `"'Open Sans', Helvetica, Arial, sans-serif"`
+Default: `left`
 
 |`color`
 |`string`
-|The text color
+|The text color.
 
-|`weight`
+|`family`
 |`string`
-|The font weight, for example, `"normal"`, `"bold"`, `"bolder"`, `"lighter"`, 
-`"100"`, `"200"`, `"300"`, `"400"`, `"500"`, `"600"`, `"700"`, `"800"`, `"900"` 
+|An acceptable CSS web font string.
 
-Default: `"normal"`
-
-|`underline`
-|`boolean`
-|Underline the text? 
-
-Default: `false`
+Default: `"'Open Sans', Helvetica, Arial, sans-serif"`
 
 |`italic`
 |`boolean`
@@ -757,11 +736,30 @@ Default: `false`
 
 Default: `false`
 
-|`align`
-|`string`
-|The horizontal alignment of text 
+|`lHeight` 
 
-Default: `left`
+Alias: `lineHeight`
+|`number`, `null`
+|The line height in pixels.
+
+|`size`
+|`number`
+|The font size in pixels.
+
+Default: `14`
+
+|`underline`
+|`boolean`
+|Underline the text? 
+
+Default: `false`
+
+|`weight`
+|`string`
+|The font weight. For example, `"normal"`, `"bold"`, `"bolder"`, `"lighter"`, `"100"`, `"200"`, `"300"`, `"400"`, `"500"`, `"600"`, `"700"`, `"800"`, or `"900"`. 
+
+Default: `"normal"`
+
 |===
 
 *Returns:* `style`
@@ -793,7 +791,7 @@ Alias: `format`
 [[formatnumber_fn]]
 === `formatnumber`
 
-Format a `number` into a formatted `string` using NumeralJS. See http://numeraljs.com/#format.
+Formats a `number` into a formatted `string` using NumeralJS. See http://numeraljs.com/#format.
 
 *Accepts:* `number`
 
@@ -805,7 +803,7 @@ Format a `number` into a formatted `string` using NumeralJS. See http://numeralj
 
 Alias: `format`
 |`string`
-|A NumeralJS format string. See http://numeraljs.com/#format.
+|A NumeralJS format string. For example, `"0.0a"` or `"0%"`. See http://numeraljs.com/#format.
 |===
 
 *Returns:* `string`
@@ -817,7 +815,7 @@ Alias: `format`
 [[getCell_fn]]
 === `getCell`
 
-Fetches a single cell in a table.
+Fetches a single cell from a `datatable`.
 
 *Accepts:* `datatable`
 
@@ -829,13 +827,13 @@ Fetches a single cell in a table.
 
 Aliases: `column`, `c`
 |`string`
-|The name of the column to fetch the value from. If not provided, the value will be retrieved from the first column.
+|The name of the column to fetch the value from. If not provided, the value is retrieved from the first column.
 
 |`row` 
 
 Alias: `r`
 |`number`
-|The row number, starting at 0 
+|The row number, starting at 0.
 
 Default: `0`
 |===
@@ -859,7 +857,7 @@ Returns whether the _context_ is greater than the argument.
 
 Alias: `value`
 |`number`, `string`
-|The value to compare the _context_ to
+|The value compared to the _context_.
 |===
 
 *Returns:* `boolean`
@@ -881,7 +879,7 @@ Returns whether the _context_ is greater or equal to the argument.
 
 Alias: `value`
 |`number`, `string`
-|The value to compare the _context_ to
+|The value compared to the _context_.
 |===
 
 *Returns:* `boolean`
@@ -893,7 +891,7 @@ Alias: `value`
 [[head_fn]]
 === `head`
 
-Gets the first N rows from the `datatable`. See also <<tail_fn>>.
+Retrieves the first N rows from the `datatable`. See also <<tail_fn>>.
 
 *Accepts:* `datatable`
 
@@ -905,7 +903,7 @@ Gets the first N rows from the `datatable`. See also <<tail_fn>>.
 
 Alias: `count`
 |`number`
-|The number of rows to retrieve from the beginning of the `datatable`. See also <<tail_fn>>.
+|The number of rows to retrieve from the beginning of the `datatable`.
 
 Default: `1`
 |===
@@ -935,11 +933,11 @@ Alias: `condition`
 
 |`then`
 |`any`
-|The return value if the condition is `true`. When unspecified and the condition is met, the original _context_ is returned.
+|The return value when the condition is `true`. When unspecified and the condition is met, the original _context_ is returned.
 
 |`else`
 |`any`
-|The return value if the condition is `false`. When unspecified and the condition is not met, the original _context_ is returned.
+|The return value when the condition is `false`. When unspecified and the condition is not met, the original _context_ is returned.
 |===
 
 *Returns:* Depends on your _context_ and arguments
@@ -949,7 +947,7 @@ Alias: `condition`
 [[image_fn]]
 === `image`
 
-Displays an image.
+Displays an image. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
 
 *Accepts:* `null`
 
@@ -961,13 +959,13 @@ Displays an image.
 
 Aliases: `dataurl`, `url`
 |`string`, `null`
-|An image asset can be provided as a `base64` data URL, or passed in as a sub-expression
+|The HTTP(S) URL or `base64` data URL of an image.
 
 |`mode`
 |`string`
 |`"contain"` shows the entire image, scaled to fit.
-'`"cover"` fills the container with the image, cropping from the sides or bottom as needed.
-`"stretch"` resizes the height and width of the image to 100% of the container'.
+`"cover"` fills the container with the image, cropping from the sides or bottom as needed.
+`"stretch"` resizes the height and width of the image to 100% of the container.
 
 
 Default: `"contain"`
@@ -983,6 +981,55 @@ data:image/svg+xml;`base64`,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0
 
 
 [float]
+[[j_fns]]
+== J
+
+[float]
+[[joinRows_fn]]
+=== `joinRows`
+
+Concatenates values from rows in a `datatable` into a single string.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ *** 
+
+Alias: `column`
+|`string`
+|The column or field from which to extract the values. 
+
+|distinct  
+|`boolean`
+|Extract only unique values? 
+
+Default: `true`
+
+|quote  
+|`string`
+|The quote character to wrap around each extracted value. 
+
+Default: `"'"`
+
+|separator  
+
+Aliases: `sep`, `delimiter`
+|`string`
+|The delimiter to insert between each extracted value.
+
+Default: `", "`
+|===
+
+*Returns:* `string`
+
+
+[float]
+[[l_fns]]
+== L
+[float]
 [[location_fn]]
 === `location`
 
@@ -995,12 +1042,10 @@ See: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation.
 
 
 [float]
-[[l_fns]]
-== L
 [[lt_fn]]
 === `lt`
 
-Returns whether the _context_ is less than the argument passed in.
+Returns whether the _context_ is less than the argument.
 
 *Accepts:* `number`, `string`
 
@@ -1012,7 +1057,7 @@ Returns whether the _context_ is less than the argument passed in.
 
 Alias: `value`
 |`number`, `string`
-|The value to compare the _context_ to
+|The value compared to the _context_.
 |===
 
 *Returns:* `boolean`
@@ -1022,7 +1067,7 @@ Alias: `value`
 [[lte_fn]]
 === `lte`
 
-Returns whether the _context_ is less than or equal to the argument passed in.
+Returns whether the _context_ is less than or equal to the argument.
 
 *Accepts:* `number`, `string`
 
@@ -1034,7 +1079,7 @@ Returns whether the _context_ is less than or equal to the argument passed in.
 
 Alias: `value`
 |`number`, `string`
-|The value to compare the _context_ to
+|The value compared to the _context_.
 |===
 
 *Returns:* `boolean`
@@ -1058,13 +1103,13 @@ Adds a column calculated as the result of other columns. Changes are made only w
 
 Alias: `column`
 |`string`
-|The name of the resulting column
+|The name of the resulting column.
 
 |`expression` ***
 
 Alias: `exp`, `fn`, `function`
 |`boolean`, `number`, `string`, `null`
-|A Canvas expression that is passed to each row as a single row `datatable`
+|A Canvas expression that is passed to each row as a single row `datatable`.
 |===
 
 *Returns:* `datatable`
@@ -1092,7 +1137,7 @@ Default: `""`
 
 |`font`
 |`style`
-|Set the CSS font properties for the content. For exmaple, `font-family` or `font-weight`.
+|The CSS font properties for the content. For example, `font-family` or `font-weight`.
 
 Default: `{<<font_fn>>}`
 |===
@@ -1104,7 +1149,7 @@ Default: `{<<font_fn>>}`
 [[math_fn]]
 === `math`
 
-Interprets a `TinyMath` math expression using a `number` or `datatable` as _context_. Datatable columns are available by their column name. If you pass in a `number`, it is available as `value`.
+Interprets a `TinyMath` math expression using a `number` or `datatable` as _context_. The `datatable` columns are available by their column name. If the _context_ is a `number`, it is available as `value`.
 
 *Accepts:* `number`, `datatable`
 
@@ -1116,7 +1161,7 @@ Interprets a `TinyMath` math expression using a `number` or `datatable` as _cont
 
 Alias: `expression`
 |`string`
-|An evaluated TinyMath expression. See <<canvas-tinymath-functions>>
+|An evaluated TinyMath expression. See <<canvas-tinymath-functions>>.
 |===
 
 *Returns:* `number`
@@ -1126,7 +1171,7 @@ Alias: `expression`
 [[metric_fn]]
 === `metric`
 
-A number with a label.
+Displays a number over a label.
 
 *Accepts:* `number`, `string`, `null`
 
@@ -1135,20 +1180,22 @@ A number with a label.
 |Argument |Type |Description
 
 |_Unnamed_
+
+Aliases: `label`, `text`, `description`
 |`string`
-|Text describing the metric 
+|The text describing the metric.
 
 Default: `""`
 
 |`metricFont`
 |`style`
-|Set the CSS font properties for the metric. For example, `font-family` or `font-weight`
+|The CSS font properties for the metric. For example, `font-family` or `font-weight`.
 
 Default: `{<<font_fn>> size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}`.
 
 |`labelFont`
 |`style`
-|Set the CSS font properties for the label. For example, `font-family` or `font-weight`.
+|The CSS font properties for the label. For example, `font-family` or `font-weight`.
 
 Default: `{<<font_fn>> size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`.
 |===
@@ -1174,7 +1221,7 @@ Returns whether the _context_ is not equal to the argument.
 
 Alias: `value`
 |`boolean`, `number`, `string`, `null`
-|The value to compare the _context_ to
+|The value compared to the _context_.
 |===
 
 *Returns:* `boolean`
@@ -1186,7 +1233,7 @@ Alias: `value`
 [[palette_fn]]
 === `palette`
 
-Creates a color palette
+Creates a color palette.
 
 *Accepts:* `null`
 
@@ -1198,17 +1245,17 @@ Creates a color palette
 
 Alias: `color`
 |`string`
-|Palette colors, rgba, hex, or HTML color string
+|The palette colors. Accepts an HTML color name, HEX, HSL, HSLA, RGB, or RGBA.
 
 |`gradient`
 |`boolean`
-|Make a gradient, where supported 
+|Make a gradient where supported?
 
 Default: `false`
 
 |`reverse`
 |`boolean`
-|Reverse the palette 
+|Reverse the palette?
 
 Default: `false`
 |===
@@ -1228,53 +1275,51 @@ Configures a pie chart element.
 |===
 |Argument |Type |Description
 
+|`font`
+|`style`
+|The CSS font properties for the labels. For example, `font-family` or `font-weight`.
+
+Default: `{<<font_fn>>}`
+
+|`hole`
+|`number`
+|Draws a hole in the pie, 0-100, as a percentage of the pie radius.
+
+Default: `0`
+
+|`labelRadius`
+|`number`
+|The percentage of the container area to use as a radius for the label circle. 
+
+Default: `100`
+
+|`labels`
+|`boolean`
+|Displays the pie labels?
+
+Default: `true`
+
+|`legend`
+|`string`, `boolean`
+|The legend position. For example, `"nw"`, `"sw"`, `"ne"`, `"se"`. When `false`, the legend is hidden.
+
+Default: `false`
+
 |`palette`
 |`palette`
-|A palette object for describing the colors to use in this pie chart 
+|A `palette` object for describing the colors to use in this pie chart 
 
 Default: `{<<palette_fn>>}`
+
+|`radius`
+|`string`, `number`
+|The radius of the pie as a percentage (between 0 and 1) of the available space. To automatically set radius, use `"auto"`.
+
+Default: `"auto"`
 
 |`seriesStyle` *†*
 |`seriesStyle`
 |A style of a specific series
-
-|`radius`
-|`string`, `number`
-|Radius of the pie as a percentage (between 0 and 1) of the available space. 
-To automatically set radius, use `"auto"`.
-
-Default: `"auto"`)
-
-|`hole`
-|`number`
-|Draws a hole in the pie, 0-100, as a percentage of the pie radius 
-
-Default: `0`
-
-|`labels`
-|`boolean`
-|Displays the pie labels.
-
-Default: `true`
-
-|`labelRadius`
-|`number`
-|The percentage of the container area to use as a radius for the label circle 
-
-
-Default: `100`
-
-|`font`
-|`style`
-|The label font 
-
-Default: `{<<font_fn>>}`
-
-|`legend`
-|`string`, `boolean`
-|The legend position, `"nw"`, `"sw"`, `"ne"`, `"se"`, or `false` 
-
-Default: `false`
 
 |`tilt`
 |`number`
@@ -1298,16 +1343,23 @@ Configures a plot element.
 |===
 |Argument |Type |Description
 
-|`seriesStyle` *†*
-|`seriesStyle`
-|A style of a specific series
-
 |`defaultStyle`
 |`seriesStyle`
-|The default style to use for every series 
-
+|The default style to use for every series.
 
 Default: `{<<seriesStyle_fn>> points=5}`
+
+|`font`
+|`style`
+|The CSS font properties for the labels. For example, `font-family` or `font-weight`.
+
+Default: `{<<font_fn>>}`
+
+|`legend`
+|`string`, `boolean`
+|The legend position. For example, `"nw"`, `"sw"`, `"ne"`, `"se"`, or `false`. When `false`, the legend is hidden.
+
+Default: `"ne"`
 
 |`palette`
 |`palette`
@@ -1315,27 +1367,19 @@ Default: `{<<seriesStyle_fn>> points=5}`
 
 Default: `{<<palette_fn>>}`
 
-|`font`
-|`style`
-|The legend and tick mark fonts 
-
-Default: `{<<font_fn>>}`
-
-|`legend`
-|`string`, `boolean`
-|The legend position, `"nw"`, `"sw"`, `"ne"`, `"se"`, or `false` 
-
-Default: `"ne"`
-
-|`yaxis`
-|`boolean`, `axisConfig`
-|Axis configuration, or use `false` to disable 
-
-Default: `true`
+|`seriesStyle` *†*
+|`seriesStyle`
+|A style of a specific series
 
 |`xaxis`
 |`boolean`, `axisConfig`
-|Axis configuration, or use `false` to disable 
+|The axis configuration. When `false`, the axis is hidden.
+
+Default: `true`
+
+|`yaxis`
+|`boolean`, `axisConfig`
+|The axis configuration. When `false`, the axis is hidden.
 
 Default: `true`
 |===
@@ -1347,8 +1391,7 @@ Default: `true`
 [[ply_fn]]
 === `ply`
 
-Subdivides a `datatable` and passes the resulting tables into an expression, 
-then merges the output.
+Subdivides a `datatable` by the unique values of the specified columns, and passes the resulting tables into an expression, then merges the outputs of each expression.
 
 *Accepts:* `datatable`
 
@@ -1358,17 +1401,13 @@ then merges the output.
 
 |`by` *** *†*
 |`string`
-|The column to subdivide
+|The column to subdivide the `datatable`.
 
 |`expression` *** *†*
 
 Alias: `fn`, `exp`, `function`
 |`datatable`
-|An expression to pass into each resulting data table.
-Expressions must return a `datatable`. Use `as` to turn literals into datatables.
-Multiple expressions must return the same number of rows. If you need to return 
-a different row count, pipe into another instance of `ply`.				
-If multiple expressions return the same columns, the last one wins.
+|An expression to pass into each resulting data table. Expressions must return a `datatable`. Use `as` to turn literals into `datatable`s. Multiple expressions must return the same number of rows. If you need to return a different row count, pipe into another instance of <<ply_fn>>. If multiple expressions return `datatable`s with the same column names, the last one wins.
 |===
 
 *Returns:* `datatable`
@@ -1378,11 +1417,8 @@ If multiple expressions return the same columns, the last one wins.
 [[pointseries_fn]]
 === `pointseries`
 
-Turns a `datatable` into a point series model. Currently Canvas differentiates measure 
-from dimensions by looking for a <<canvas-tinymath-functions, Tiny Math function>>. If you enter a TinyMath 
-expression in your argument, Canvas treats that argument as a measure. Otherwise, it 
-is a dimension. Dimensions are combined to create unique keys. Measures are 
-then deduplicated by those keys using the specified TinyMath function.
+Turns a `datatable` into a point series model. Currently we differentiate measure from dimensions by looking for a <<canvas-tinymath-functions, Tiny Math function>>. If you enter a TinyMath 
+expression in your argument, Canvas treats that argument as a measure. Otherwise, it is a dimension. Dimensions are combined to create unique keys. Measures are then deduplicated by those keys using the specified TinyMath function.
 
 *Accepts:* `datatable`
 
@@ -1390,17 +1426,9 @@ then deduplicated by those keys using the specified TinyMath function.
 |===
 |Argument |Type |Description
 
-|`x`
-|`string`
-|The values along the X-axis
-
-|`y`
-|`string`
-|The values along the Y-axis
-
 |`color`
 |`string`
-|An expression to use in determining the mark's color
+|An expression to use in determining the mark's color.
 
 |`size`
 |`string`
@@ -1409,6 +1437,14 @@ then deduplicated by those keys using the specified TinyMath function.
 |`text`
 |`string`
 |The text to show on the mark. Only applicable to supported elements.
+
+|`x`
+|`string`
+|The values along the X-axis.
+
+|`y`
+|`string`
+|The values along the Y-axis.
 |===
 
 *Returns:* `pointseries`
@@ -1418,7 +1454,7 @@ then deduplicated by those keys using the specified TinyMath function.
 [[progress_fn]]
 === `progress`
 
-Configure a progress element
+Configures a progress element
 
 *Accepts:* `number`
 
@@ -1426,57 +1462,53 @@ Configure a progress element
 |===
 |Argument |Type |Description
 
+| _Unnamed_
+
+Alias: `shape`
+|`string`
+|Select `"gauge"`, `"horizontalBar"`, `"horizontalPill"`, `"semicircle"`, `"unicorn"`, `"verticalBar"`, `"verticalPill"`, or `"wheel"`.
+
+Default: `"gauge"`
+
 |`barColor`
 |`string`
-|Color of the background bar
+|The color of the background bar.
 
 Default: `"#f0f0f0"`
 
 |`barWeight`
 |`number`
-|Thickness of the background bar
+|The thickness of the background bar.
 
 Default: `20`
 
 |`font`
 |`style`
-|Font settings for the label. Technically you can stick other styles in here too
+|The CSS font properties for the label. For example, `font-family` or `font-weight`.
 
 Default: `{<<font_fn>> size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`
 
 |`label`
 |`boolean`, `string`
-|To show or hide labels, or provide a string to display as a label, use `true` or `false`.
+|To show or hide the value, use `true` or `false`. Alternatively, provide a string to display as a label.
 
 Default: `true`
    
 |`max`
 |`number`
-|Maximum value of the progress element
+|The maximum value of the progress element.
 
 Default: `1`
 
-|`shape`
-|`string`
-|Select {list}, or {end}`,
-      values: {
-        list: Object.values(Shape)
-          .slice(0, -1)
-          .join(', '),
-        end: Object.values(Shape).slice(-1)[0],
-      },
-
-Default: `"gauge"`
-
 |`valueColor`
 |`string`
-|Color of the progress bar
+|The color of the progress bar.
 
 Default: `"#1785b0"`
 
 |`valueWeight`
 |`number`
-|Thickness of the progress bar
+|The thickness of the progress bar.
 
 Default: `20`
 |===
@@ -1490,8 +1522,7 @@ Default: `20`
 [[render_fn]]
 === `render`
 
-Renders an input as a specific element and sets element level options,
-such as styling.
+Renders the _context_ as a specific element and sets element level options, such as background and border styling.
 
 *Accepts:* `render`
 
@@ -1501,8 +1532,7 @@ such as styling.
 
 |`as`
 |`string`
-|The element type to use in rendering. You might want to use a
-specialized function instead, such as `<<plot_fn>>` or `debug`.
+|The element type to render. You might want to use a specialized function instead, such as <<plot_fn>> or <<shape_fn>>.
 
 |`css`
 |`string`
@@ -1512,7 +1542,7 @@ Default: `".canvasRenderEl{\n\n}"`
 
 |`containerStyle`
 |`containerStyle`
-|Style for the container, including background, border, and opacity
+|The style for the container, including background, border, and opacity.
 
 Default: `{<<containerStyle_fn>>}`
 |===
@@ -1532,27 +1562,27 @@ Configures a repeating image element.
 |===
 |Argument |Type |Description
 
+|`emptyImage`
+|`string`
+|Fills the difference between the _context_ and `max` parameter for the element with this image. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
+
+Default: `null`
+
 |`image`
 |`string`
 |The image to repeat. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
+
+|`max`
+|`number`
+|The maximum number of times the image can repeat.
+
+Default: `100`
 
 |`size`
 |`number`
 |The maximum height or width of the image, in pixels. When the image is taller than it is wide, this function limits the height.
 
 Default: `100`
-
-|`max`
-|`number`
-|The maximum number of times the image can repeat 
-
-Default: `100`
-
-|`emptyImage`
-|`string`
-|Fills the difference between the _context_ and `max` parameter for the element with this image. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
-
-Default: `null`
 |===
 
 
@@ -1563,7 +1593,6 @@ data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3
 ------------
 
 *Returns:* `render`
-
 
 
 [float]
@@ -1598,7 +1627,7 @@ Default: `"g"`
 |`replacement`
 |`string`
 |The replacement for the matching parts of `string`. Capturing groups can be accessed 
-by their index. For example, `$1` 
+by their index. For example, `$1`.
 
 Default: `""`
 |===
@@ -1659,8 +1688,7 @@ Uses a MomentJS formatting string to round milliseconds since epoch, and returns
 
 Alias: `format`
 |`string`
-|The MomentJS Format to use for bucketing. For example, `"YYYY-MM"` rounds to the month. See 
-https://momentjs.com/docs/#/displaying/.
+|The MomentJS Format to use for bucketing. For example, `"YYYY-MM"` rounds to months. See https://momentjs.com/docs/#/displaying/.
 |===
 
 *Returns:* `number`
@@ -1670,8 +1698,7 @@ https://momentjs.com/docs/#/displaying/.
 [[rowCount_fn]]
 === `rowCount`
 
-Returns the number of rows. Pairs with `<<ply_fn>>` to get the count of unique column 
-values, or combinations of unique column values.
+Returns the number of rows. Pairs with `<<ply_fn>>` to get the count of unique column values, or combinations of unique column values.
 
 *Accepts:* `datatable`
 
@@ -1683,8 +1710,7 @@ values, or combinations of unique column values.
 [[seriesStyle_fn]]
 === `seriesStyle`
 
-Creates an object used for describing the properties of a series on a chart. 
-Use <<seriesStyle_fn>> inside of a charting function, like <<plot_fn>> or <<pie_fn>>.
+Creates an object used for describing the properties of a series on a chart. Use <<seriesStyle_fn>> inside of a charting function, like <<plot_fn>> or <<pie_fn>>.
 
 *Accepts:* `null`
 
@@ -1698,23 +1724,23 @@ Use <<seriesStyle_fn>> inside of a charting function, like <<plot_fn>> or <<pie_
 
 |`color`
 |`string`
-|The line color
+|The line color.
 
 |`lines`
 |`number`
-|The width of the line
+|The width of the line.
 
 |`bars`
 |`number`
-|The width of bars
+|The width of bars.
 
 |`points`
 |`number`
-|The size of points on line
+|The size of points on line.
 
 |`fill`
 |`number`, `boolean`
-|Designates if points should be filled 
+|Should we fill in the points?
 
 Default: `false`
 
@@ -1724,7 +1750,7 @@ Default: `false`
 
 |`horizontalBars`
 |`boolean`
-|Sets the orientation of the bars in the chart to horizontal 
+|Sets the orientation of the bars in the chart to horizontal.
 
 Default: `false`
 |===
@@ -1752,29 +1778,29 @@ Alias: `shape`
 
 Default: `"square"`
 
-|`fill`
-|`string`
-|Valid CSS color string 
-
-Default: `"black"`
-
 |`border` 
 
 Alias `stroke`
 |`number`
-|Valid CSS color string
+|An SVG color for the border outlining the shape.
 
 |`borderWidth` 
 
 Alias: `strokeWidth`
 |`number`
-|Thickness of the border 
+|The thickness of the border 
 
 Default: `0`
 
+|`fill`
+|`string`
+|An SVG color to fill the shape.
+
+Default: `"black"`
+
 |`maintainAspect`
 |`boolean`
-|Select `true` to maintain aspect ratio 
+|Maintain the shape's original aspect ratio?
 
 Default: `false`
 |===
@@ -1786,7 +1812,7 @@ Default: `false`
 [[sort_fn]]
 === `sort`
 
-Sorts a `datatable on a column.`
+Sorts a `datatable` by the specified column.
 
 *Accepts:* `datatable`
 
@@ -1798,11 +1824,11 @@ Sorts a `datatable on a column.`
 
 Alias: `column`
 |`string`
-|The column to sort on. When unspecified, the `datatable` is sorted by the first column.
+|The column to sort by. When unspecified, the `datatable` is sorted by the first column.
 
 |`reverse`
 |`boolean`
-|Reverses the sorting order. When unspecified, the `datatable` is sorted in ascending order. 
+|Reverse the sorting order? When unspecified, the `datatable` is sorted in ascending order. 
 
 Default: `false`
 |===
@@ -1814,7 +1840,7 @@ Default: `false`
 [[staticColumn_fn]]
 === `staticColumn`
 
-Adds a column with a static value. See also <<alterColumn_fn>> and <<mapColumn_fn>>.
+Adds a column with the same static value in every row. See also <<alterColumn_fn>> and <<mapColumn_fn>>.
 
 *Accepts:* `datatable`
 
@@ -1826,11 +1852,11 @@ Adds a column with a static value. See also <<alterColumn_fn>> and <<mapColumn_f
 
 Alias: `column`, `name`
 |`string`
-|The name of the new column
+|The name of the new column.
 
 |`value`
 |`string`, `number`, `boolean`, `null`
-|The columns values. TIP: To roll up other columns into a static value, use a sub-expression.	 
+|The value to insert in each row in the new column. Tip: use a sub-expression to rollup other columns into a static value. 
 
 Default: `null`
 |===
@@ -1842,8 +1868,7 @@ Default: `null`
 [[string_fn]]
 === `string`
 
-Outputs a string made of other strings. Mostly useful when combined with 
-sub-expressions that output a string, or something castable to `string`.
+Concatenates all of the arguments into a single string.
 
 *Accepts:* `null`
 
@@ -1855,7 +1880,7 @@ sub-expressions that output a string, or something castable to `string`.
 
 Alias: `value`
 |`string`, `number`, `boolean`
-|One or more values to join together into one `string`. Include spaces where needed.
+|The values to join together into one string. Include spaces where needed.
 |===
 
 *Returns:* `string`
@@ -1865,8 +1890,7 @@ Alias: `value`
 [[switch_fn]]
 === `switch`
 
-Performs conditional logic with multiple conditions. See also <<case_fn>>,
-which builds a `case` to pass to the <<switch_fn>> function.
+Performs conditional logic with multiple conditions. See also <<case_fn>>, which builds a `case` to pass to the <<switch_fn>> function.
 
 *Accepts:* `any`
 
@@ -1878,16 +1902,16 @@ which builds a `case` to pass to the <<switch_fn>> function.
 
 Alias: `case`
 |`case`
-|The list of conditions to check. See <<case_fn>>
+|The conditions to check.
 
 |`default` 
 
 Alias: `finally`
 |`any`
-|The value returned when no conditions are met
+|The value returned when no conditions are met. When unspecified and no conditions are met, the original _context_ is returned.
 |===
 
-*Returns:* Depends on your input and arguments
+*Returns:* Depends on your arguments
 
 
 [float]
@@ -1896,7 +1920,7 @@ Alias: `finally`
 [[table_fn]]
 === `table`
 
-Configures a data table element.
+Configures a table element.
 
 *Accepts:* `datatable`
 
@@ -1906,13 +1930,13 @@ Configures a data table element.
 
 |`font`
 |`style`
-|Font style 
+|The CSS font properties for the contents of the table. For example, `font-family` or `font-weight`.
 
 Default: `{<<font_fn>>}`
 
 |`paginate`
 |`boolean`
-|Show pagination controls. When `false`, only the first page is displayed.
+|Show pagination controls? When `false`, only the first page is displayed.
 
 Default: `true`
 
@@ -1948,7 +1972,7 @@ Retrieves the last N rows from the end of a `datatable`. See also <<head_fn>>.
 
 Alias: `count`
 |`number`
-|Return this many rows from the end of the `datatable`
+|The number of rows to retrieve from the end of the datatable.
 |===
 
 *Returns:* `datatable`
@@ -1978,13 +2002,13 @@ Default: `"@timestamp"`
 
 Alias: `f`, `start`
 |`string`
-|Beginning of the range, in ISO8601 or {es} `datemath` format
+|The beginning of the range, in ISO8601 or {es} `datemath` format
 
 |`to` 
 
 Alias: `t`, `end`
 |`string`
-|End of the range, in ISO8601 or {es} `datemath` format
+|The end of the range, in ISO8601 or {es} `datemath` format
 
 |`filterGroup`
 |`string`
@@ -2022,7 +2046,7 @@ Default: `true`
 
 |`filterGroup`
 |`string`
-|The group name for the filter
+|The group name for the filter.
 |===
 
 
@@ -2057,7 +2081,7 @@ Default: `"auto"`
 
 |`from`
 |`string`
-|The {es} `datemath` string for the start of the time range.
+|The {es} `datemath` string for the beginning of the time range.
 
 Default: `"now-1y"`
 
@@ -2069,7 +2093,7 @@ Default: `"now"`
 
 |`timezone`
 |`string`
-|Timezone for the time range. See [Moment Timezone](https://momentjs.com/timezone/).
+|The timezone for the time range. See [Moment Timezone](https://momentjs.com/timezone/).
 
 Default: `"UTC"`
 |===
@@ -2081,7 +2105,7 @@ Default: `"UTC"`
 [[to_fn]]
 === `to`
 
-Explicitly casts from one type to another.
+Explicitly casts the type of the _context_ from one type to the specified type.
 
 *Accepts:* `any`
 
@@ -2105,7 +2129,7 @@ Alias: `type`
 [[urlparam_fn]]
 === `urlparam`
 
-Retrieves the URL parameters, then uses the parameters in expressions. The <<urlparam_fn>> function always returns a `string`. For example, you can retrieve the value of `"20"` from the parameter `myVar` in the URL `https://localhost:5601/app/canvas?myVar=20`. 
+Retrieves a URL parameter to use in an expression. The <<urlparam_fn>> function always returns a `string`. For example, you can retrieve the value `"20"` from the parameter `myVar` from the URL `https://localhost:5601/app/canvas?myVar=20`. 
 
 *Accepts:* `null`
 
@@ -2117,11 +2141,11 @@ Retrieves the URL parameters, then uses the parameters in expressions. The <<url
 
 Aliases: `var`, `variable`
 |`string`
-|The URL hash parameter to access
+|The URL hash parameter to retrieve.
 
 |`default`
 |`string`
-|If the URL parameter is not present, return this string instead.
+|The string returned when the URL parameter is unspecified.
 
 Default: `""`
 |===

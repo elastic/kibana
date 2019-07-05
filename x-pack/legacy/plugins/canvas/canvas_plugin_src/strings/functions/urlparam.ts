@@ -12,21 +12,26 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof urlparam>> = {
   help: i18n.translate('xpack.canvas.functions.urlparamHelpText', {
     defaultMessage:
-      'Accesses {url} parameters to use in expressions, (e.g. {example}) and returns them as a string.',
+      'Retreives a {url} parameter to use in an expression. ' +
+      'The `{urlparamFn}` function always returns a `string`. ' +
+      'For example, you can retrieve the value `{value}` from the parameter `{myVar}` from the {url} {example}).',
     values: {
+      urlparamFn: 'urlparam',
       url: 'URL',
+      value: '"20"',
+      myVar: 'myVar',
       example: 'https://localhost:5601/app/canvas?myVar=20',
     },
   }),
   args: {
     param: i18n.translate('xpack.canvas.functions.urlparam.args.paramHelpText', {
-      defaultMessage: 'The {url} hash parameter to access',
+      defaultMessage: 'The {url} hash parameter to retrieve.',
       values: {
         url: 'URL',
       },
     }),
     default: i18n.translate('xpack.canvas.functions.urlparam.args.defaultHelpText', {
-      defaultMessage: 'If the {url} parameter is not present, return this string instead.',
+      defaultMessage: 'The string returned when the URL parameter is unspecified.',
       values: {
         url: 'URL',
       },

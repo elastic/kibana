@@ -13,44 +13,50 @@ import { Shape } from '../../functions/common/progress';
 
 export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
   help: i18n.translate('xpack.canvas.functions.progressHelpText', {
-    defaultMessage: 'Configure a progress element',
+    defaultMessage: 'Configure a progress element.',
   }),
   args: {
     barColor: i18n.translate('xpack.canvas.functions.progress.args.barColorHelpText', {
-      defaultMessage: 'Color of the background bar',
+      defaultMessage: 'The color of the background bar.',
     }),
     barWeight: i18n.translate('xpack.canvas.functions.progress.args.barWeightHelpText', {
-      defaultMessage: 'Thickness of the background bar',
+      defaultMessage: 'The thickness of the background bar.',
     }),
     font: i18n.translate('xpack.canvas.functions.progress.args.fontHelpText', {
       defaultMessage:
-        'Font settings for the label. Technically you can stick other styles in here too!',
+        'The {css} font properties for the label. For example, {fontFamily} or {fontWeight}.',
+      values: {
+        css: 'CSS',
+        fontFamily: 'font-family',
+        fontWeight: 'font-weight',
+      },
     }),
     label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
       defaultMessage:
-        'To show or hide labels, or provide a string to display as a label, use `{true}` or `{false}`.',
+        'To show or hide labels, use `true` or `false`. Alternatively, provide a string to display as a label.',
       values: {
         true: 'true',
         false: 'false',
       },
     }),
     max: i18n.translate('xpack.canvas.functions.progress.args.maxHelpText', {
-      defaultMessage: 'Maximum value of the progress element',
+      defaultMessage: 'The maximum value of the progress element',
     }),
     shape: i18n.translate('xpack.canvas.functions.progress.args.shapeHelpText', {
-      defaultMessage: `Select {list}, or {end}`,
+      defaultMessage: `Select {list}, or {end}.`,
       values: {
         list: Object.values(Shape)
           .slice(0, -1)
+          .map(shape => `\`"${shape}"\``)
           .join(', '),
-        end: Object.values(Shape).slice(-1)[0],
+        end: `\`"${Object.values(Shape).slice(-1)[0]}"\``,
       },
     }),
     valueColor: i18n.translate('xpack.canvas.functions.progress.args.valueColorHelpText', {
-      defaultMessage: 'Color of the progress bar',
+      defaultMessage: 'The color of the progress bar',
     }),
     valueWeight: i18n.translate('xpack.canvas.functions.progress.args.valueWeightHelpText', {
-      defaultMessage: 'Thickness of the progress bar',
+      defaultMessage: 'The thickness of the progress bar',
     }),
   },
 };

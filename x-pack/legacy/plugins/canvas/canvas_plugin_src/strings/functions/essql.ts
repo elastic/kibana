@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
   help: i18n.translate('xpack.canvas.functions.essqlHelpText', {
-    defaultMessage: 'Queries {es} using {es} {sql}',
+    defaultMessage: 'Queries {es} using {es} {sql}.',
     values: {
       es: 'Elasticsearch',
       sql: 'SQL',
@@ -30,7 +30,7 @@ export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
     }),
     timezone: i18n.translate('xpack.canvas.functions.essql.args.timezoneHelpText', {
       defaultMessage:
-        'Timezone to use for date operations, valid {iso} formats and {utc} offsets both work',
+        'The timezone to use for date operations. Valid {iso} formats and {utc} offsets both work',
       values: {
         iso: 'ISO',
         utc: 'UTC',

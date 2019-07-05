@@ -11,11 +11,14 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof any>> = {
   help: i18n.translate('xpack.canvas.functions.anyHelpText', {
-    defaultMessage: 'Return true if any of the conditions are true',
+    defaultMessage: 'Returns `true` if at least one of the conditions is met. See also `{all_fn}`.',
+    values: {
+      all_fn: 'all',
+    },
   }),
   args: {
     condition: i18n.translate('xpack.canvas.functions.any.args.conditionHelpText', {
-      defaultMessage: 'One or more conditions to check',
+      defaultMessage: 'The conditions to check.',
     }),
   },
 };

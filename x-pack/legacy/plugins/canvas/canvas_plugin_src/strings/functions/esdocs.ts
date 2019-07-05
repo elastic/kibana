@@ -12,23 +12,30 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
   help: i18n.translate('xpack.canvas.functions.esdocsHelpText', {
     defaultMessage:
-      'Query {es} for raw documents. Specify the fields you want to receive, ' +
-      'especially if you are asking for a lot of rows',
+      'Query {es} for raw documents. Specify the fields you want to retrieve, ' +
+      'especially if you are asking for a lot of rows.',
     values: {
-      es: 'elasticsearch',
+      es: 'Elasticsearch',
     },
   }),
   args: {
+    query: i18n.translate('xpack.canvas.functions.esdocs.args.queryHelpText', {
+      defaultMessage: 'A {lucene} query string.',
+      values: {
+        lucene: 'Lucene',
+      },
+    }),
+    count: i18n.translate('xpack.canvas.functions.esdocs.args.countHelpText', {
+      defaultMessage:
+        'The number of documents to retrieve. For better performance, use a smaller data set.',
+    }),
+    fields: i18n.translate('xpack.canvas.functions.esdocs.args.fieldsHelpText', {
+      defaultMessage: 'A comma-separated list of fields. For better performance, use fewer fields.',
+    }),
     index: i18n.translate('xpack.canvas.functions.esdocs.args.indexHelpText', {
       defaultMessage: 'An index or index pattern. For example, "{example}".',
       values: {
         example: 'logstash-*',
-      },
-    }),
-    query: i18n.translate('xpack.canvas.functions.esdocs.args.queryHelpText', {
-      defaultMessage: 'A {lucene} query string',
-      values: {
-        lucene: 'Lucene',
       },
     }),
     sort: i18n.translate('xpack.canvas.functions.esdocs.args.sortHelpText', {
@@ -39,13 +46,6 @@ export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
         example1: ['@timestamp', 'desc'].join(', '),
         example2: ['bytes', 'asc'].join(', '),
       },
-    }),
-    fields: i18n.translate('xpack.canvas.functions.esdocs.args.fieldsHelpText', {
-      defaultMessage: 'A comma-separated list of fields. For better performance, use fewer fields.',
-    }),
-    count: i18n.translate('xpack.canvas.functions.esdocs.args.countHelpText', {
-      defaultMessage:
-        'The number of docs to retrieve. For better performance, use a smaller data set.',
     }),
   },
 };

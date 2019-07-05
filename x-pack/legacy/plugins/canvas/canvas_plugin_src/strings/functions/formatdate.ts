@@ -16,16 +16,15 @@ export const help: FunctionHelp<FunctionFactory<typeof formatdate>> = {
     values: {
       iso: 'ISO8601',
       moment: 'MomentJS',
-      url: 'https://momentjs.com/',
+      url: 'https://momentjs.com/docs/#/displaying/',
     },
   }),
   args: {
     format: i18n.translate('xpack.canvas.functions.formatdate.args.formatHelpText', {
-      defaultMessage:
-        'The {moment} format of the resulting date string. For example, `"MM/DD/YYYY"`. See {url}',
+      defaultMessage: 'A {moment} format. For example, `"MM/DD/YYYY"`. See {url}.',
       values: {
         moment: 'MomentJS',
-        url: 'https://momentjs.com/',
+        url: 'https://momentjs.com/docs/#/displaying/',
       },
     }),
   },

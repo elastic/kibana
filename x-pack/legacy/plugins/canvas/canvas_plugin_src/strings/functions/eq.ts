@@ -11,11 +11,17 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof eq>> = {
   help: i18n.translate('xpack.canvas.functions.eqHelpText', {
-    defaultMessage: 'Return if the context is equal to the argument',
+    defaultMessage: 'Return whether the {context} is equal to the argument.',
+    values: {
+      context: '_context_',
+    },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.eq.args.valueHelpText', {
-      defaultMessage: 'The value to compare to the _context_.',
+      defaultMessage: 'The value compared to the {context}.',
+      values: {
+        context: '_context_',
+      },
     }),
   },
 };

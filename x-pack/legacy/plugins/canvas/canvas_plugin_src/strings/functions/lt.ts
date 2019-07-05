@@ -11,11 +11,17 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof lt>> = {
   help: i18n.translate('xpack.canvas.functions.ltHelpText', {
-    defaultMessage: 'Return if the context is less than the argument',
+    defaultMessage: 'Returns whether the {context} is less than the argument.',
+    values: {
+      context: '_context_',
+    },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.lt.args.valueHelpText', {
-      defaultMessage: 'The value to compare the context to',
+      defaultMessage: 'The value compared to the {context}.',
+      values: {
+        context: '_context_',
+      },
     }),
   },
 };

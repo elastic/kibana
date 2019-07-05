@@ -11,11 +11,17 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof neq>> = {
   help: i18n.translate('xpack.canvas.functions.neqHelpText', {
-    defaultMessage: 'Return if the context is not equal to the argument',
+    defaultMessage: 'Returns whether the {context} is not equal to the argument.',
+    values: {
+      context: '_context_',
+    },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.neq.args.valueHelpText', {
-      defaultMessage: 'The value to compare the context to',
+      defaultMessage: 'The value compared to the {context}.',
+      values: {
+        context: '_context_',
+      },
     }),
   },
 };

@@ -11,20 +11,26 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
   help: i18n.translate('xpack.canvas.functions.alterColumnHelpText', {
-    defaultMessage: 'Converts between core types (eg {examples}) and rename columns',
+    defaultMessage:
+      'Converts between core types, including {examples}, and rename columns. ' +
+      'See also `{mapColumnFn}` and `{staticColumnFn}`.',
     values: {
-      examples: ['string', 'number', 'null', 'boolean', 'date'].join(','),
+      examples: ['string', 'number', 'null', 'boolean', 'date']
+        .map(type => `\`${type}\``)
+        .join(', '),
+      mapColumnFn: 'mapColumn',
+      staticColumnFn: 'staticColumn',
     },
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.alterColumn.args.columnHelpText', {
-      defaultMessage: 'The name of the column to alter',
+      defaultMessage: 'The name of the column to alter.',
     }),
     name: i18n.translate('xpack.canvas.functions.alterColumn.args.nameHelpText', {
-      defaultMessage: 'The resultant column name. Leave blank to not rename',
+      defaultMessage: 'The resultant column name. Leave blank to not rename.',
     }),
     type: i18n.translate('xpack.canvas.functions.alterColumn.args.typeHelpText', {
-      defaultMessage: 'The type to convert the column to. Leave blank to not change type',
+      defaultMessage: 'The type to convert the column to. Leave blank to not change type.',
     }),
   },
 };

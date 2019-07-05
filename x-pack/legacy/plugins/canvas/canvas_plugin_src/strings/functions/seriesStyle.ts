@@ -25,19 +25,19 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
       defaultMessage: 'The name of the series to style.',
     }),
     color: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorHelpText', {
-      defaultMessage: 'The line',
+      defaultMessage: 'The line color.',
     }),
     lines: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesHelpText', {
-      defaultMessage: 'Width of the line',
+      defaultMessage: 'The width of the line',
     }),
     bars: i18n.translate('xpack.canvas.functions.seriesStyle.args.barsHelpText', {
-      defaultMessage: 'Width of bars',
+      defaultMessage: 'The width of bars',
     }),
     points: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsHelpText', {
       defaultMessage: 'Size of points on line',
     }),
     fill: i18n.translate('xpack.canvas.functions.seriesStyle.args.fillHelpText', {
-      defaultMessage: 'Should we fill points?',
+      defaultMessage: 'Should we fill in the points?',
     }),
     stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
       defaultMessage:
@@ -48,7 +48,7 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
     horizontalBars: i18n.translate(
       'xpack.canvas.functions.seriesStyle.args.horizontalBarsHelpText',
       {
-        defaultMessage: 'Sets the orientation of the bars in the chart to horizontal',
+        defaultMessage: 'Sets the orientation of the bars in the chart to horizontal.',
       }
     ),
   },

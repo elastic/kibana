@@ -11,19 +11,29 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
   help: i18n.translate('xpack.canvas.functions.metricHelpText', {
-    defaultMessage: 'A number with a label',
+    defaultMessage: 'Displays a number over a label.',
   }),
   args: {
     label: i18n.translate('xpack.canvas.functions.metric.args.labelHelpText', {
-      defaultMessage: 'Text describing the metric',
+      defaultMessage: 'The text describing the metric.',
     }),
     metricFont: i18n.translate('xpack.canvas.functions.metric.args.metricFontHelpText', {
       defaultMessage:
-        'Font settings for the metric. Technically you can stick other styles in here too!',
+        'The {css} font properties for the metric. For example, {fontFamily} or {fontWeight}.',
+      values: {
+        css: 'CSS',
+        fontFamily: 'font-family',
+        fontWeight: 'font-weight',
+      },
     }),
     labelFont: i18n.translate('xpack.canvas.functions.metric.args.labelFontHelpText', {
       defaultMessage:
-        'Font settings for the label. Technically you can stick other styles in here too!',
+        'The {css} font properties for the label. For example, {fontFamily} or {fontWeight}.',
+      values: {
+        css: 'CSS',
+        fontFamily: 'font-family',
+        fontWeight: 'font-weight',
+      },
     }),
   },
 };

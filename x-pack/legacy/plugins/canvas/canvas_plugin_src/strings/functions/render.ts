@@ -12,15 +12,18 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof render>> = {
   help: i18n.translate('xpack.canvas.functions.renderHelpText', {
     defaultMessage:
-      'Render an input as a specific element and set element level options such as styling',
+      'Render the {context} as a specific element and sets element level options, such as background and border styling.',
+    values: {
+      context: '_context_',
+    },
   }),
   args: {
     as: i18n.translate('xpack.canvas.functions.render.args.asHelpText', {
       defaultMessage:
-        'The element type to use in rendering. You probably want a specialized function instead, such as `{plot}` or `{grid}`',
+        'The element type to render. You probably want a specialized function instead, such as `{plotFn}` or `{shapeFn}`',
       values: {
-        plot: 'plot',
-        grid: 'grid',
+        plotFn: 'plot',
+        shapeFn: 'shape',
       },
     }),
     css: i18n.translate('xpack.canvas.functions.render.args.cssHelpText', {
@@ -30,7 +33,7 @@ export const help: FunctionHelp<FunctionFactory<typeof render>> = {
       },
     }),
     containerStyle: i18n.translate('xpack.canvas.functions.render.args.containerStyleHelpText', {
-      defaultMessage: 'Style for the container, including background, border, and opacity',
+      defaultMessage: 'The style for the container, including background, border, and opacity.',
     }),
   },
 };

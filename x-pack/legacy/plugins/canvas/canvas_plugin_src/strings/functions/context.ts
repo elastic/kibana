@@ -13,7 +13,10 @@ export const help: FunctionHelp<FunctionFactory<typeof context>> = {
   help: i18n.translate('xpack.canvas.functions.contextHelpText', {
     defaultMessage:
       'Returns whatever you pass into it. This can be useful when you need to use ' +
-      'context as argument to a function as a sub-expression',
+      '{context} as argument to a function as a sub-expression.',
+    values: {
+      context: '_context_',
+    },
   }),
   args: {},
 };

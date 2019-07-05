@@ -11,11 +11,17 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof gte>> = {
   help: i18n.translate('xpack.canvas.functions.gteHelpText', {
-    defaultMessage: 'Return whether the _context_ is greater or equal to the argument.',
+    defaultMessage: 'Returns whether the {context} is greater or equal to the argument.',
+    values: {
+      context: '_context_',
+    },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.gte.args.valueHelpText', {
-      defaultMessage: 'The value to compare the context to',
+      defaultMessage: 'The value compared to the {context}.',
+      values: {
+        context: '_context_',
+      },
     }),
   },
 };

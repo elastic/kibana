@@ -11,11 +11,17 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof gt>> = {
   help: i18n.translate('xpack.canvas.functions.gtHelpText', {
-    defaultMessage: 'Return if the context is greater than the argument',
+    defaultMessage: 'Returns whether the {context} is greater than the argument.',
+    values: {
+      context: '_context_',
+    },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.gt.args.valueHelpText', {
-      defaultMessage: 'The value to compare the context to',
+      defaultMessage: 'The value compared to the {context}.',
+      values: {
+        context: '_context_',
+      },
     }),
   },
 };

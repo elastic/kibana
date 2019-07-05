@@ -11,12 +11,15 @@ import { FunctionFactory, Position } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   help: i18n.translate('xpack.canvas.functions.axisConfigHelpText', {
-    defaultMessage: 'Configure axis of a visualization',
+    defaultMessage: 'Configures the axis of a visualization. Only used with `{plotFn}`.',
+    values: {
+      plotFn: 'plot',
+    },
   }),
   args: {
     max: i18n.translate('xpack.canvas.functions.axisConfig.args.maxHelpText', {
       defaultMessage:
-        'Maximum value displayed in the axis. Must be a number or a date in {ms} or {iso} string',
+        'The maximum value displayed in the axis. Must be a number or a date in {ms} or {iso} string.',
       values: {
         ms: 'ms',
         iso: 'ISO8601',
@@ -24,23 +27,27 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
     }),
     min: i18n.translate('xpack.canvas.functions.axisConfig.args.minHelpText', {
       defaultMessage:
-        'Minimum value displayed in the axis. Must be a number or a date in {ms} or {iso} string',
+        'The minimum value displayed in the axis. Must be a number or a date in {ms} or {iso} string.',
       values: {
         ms: 'ms',
         iso: 'ISO8601',
       },
     }),
     position: i18n.translate('xpack.canvas.functions.axisConfig.args.positionHelpText', {
-      defaultMessage: 'Position of the axis labels: {examples}',
+      defaultMessage: 'The position of the axis labels. For example, {list}, or {end}.',
       values: {
-        examples: Object.values(Position).join(', '),
+        list: Object.values(Position)
+          .slice(0, -1)
+          .map(position => `\`"${position}"\``)
+          .join(', '),
+        end: Object.values(Position).slice(-1)[0],
       },
     }),
     show: i18n.translate('xpack.canvas.functions.axisConfig.args.showHelpText', {
       defaultMessage: 'Show the axis labels?',
     }),
     tickSize: i18n.translate('xpack.canvas.functions.axisConfig.args.tickSizeHelpText', {
-      defaultMessage: 'Increment size between each tick. Use for number axes only',
+      defaultMessage: 'The increment size between each tick. Use for `number` axes only',
     }),
   },
 };

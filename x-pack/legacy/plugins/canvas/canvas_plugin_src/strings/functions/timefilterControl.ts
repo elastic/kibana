@@ -11,10 +11,7 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof timefilterControl>> = {
   help: i18n.translate('xpack.canvas.functions.timefilterControlHelpText', {
-    defaultMessage: 'Configure a {timefilter} control element',
-    values: {
-      timefilter: 'timefilter',
-    },
+    defaultMessage: 'Configures a time filter control element.',
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.timefilterControl.args.columnHelpText', {
@@ -24,7 +21,7 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilterControl>> = {
       defaultMessage: 'Shows the time filter as a button, which triggers a popover.',
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
-      defaultMessage: 'The group name for the filter',
+      defaultMessage: 'The group name for the filter.',
     }),
   },
 };

@@ -11,7 +11,10 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
   help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
-    defaultMessage: 'Fetch a single cell in a table',
+    defaultMessage: 'Fetchs a single cell from a `{datatable}`.',
+    values: {
+      datatable: 'datatable',
+    },
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.getCell.args.columnHelpText', {
@@ -20,7 +23,7 @@ export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
         'If not provided, the value is retrieved from the first column.',
     }),
     row: i18n.translate('xpack.canvas.functions.getCell.args.rowHelpText', {
-      defaultMessage: 'The row number, starting at 0',
+      defaultMessage: 'The row number, starting at 0.',
     }),
   },
 };

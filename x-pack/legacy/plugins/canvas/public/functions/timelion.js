@@ -11,6 +11,8 @@ import { buildBoolArray } from '../../server/lib/build_bool_array';
 
 export const timelion = () => ({
   name: 'timelion',
+  type: 'datatable',
+  help: 'Use Timelion to extract one or more timeseries from many sources.',
   context: {
     types: ['filter'],
   },
@@ -18,7 +20,7 @@ export const timelion = () => ({
     query: {
       types: ['string'],
       aliases: ['_', 'q'],
-      help: 'A timelion query',
+      help: 'A Timelion query',
       default: '".es(*)"',
     },
     interval: {
@@ -28,7 +30,7 @@ export const timelion = () => ({
     },
     from: {
       type: ['string'],
-      help: 'The Elasticsearch `datemath` string for the start of the time range.',
+      help: 'The Elasticsearch `datemath` string for the beginning of the time range.',
       default: 'now-1y',
     },
     to: {
@@ -38,12 +40,11 @@ export const timelion = () => ({
     },
     timezone: {
       type: ['string'],
-      help: 'Timezone for the time range. See [Moment Timezone](https://momentjs.com/timezone/)',
+      help:
+        'The timezone for the time range. See [Moment Timezone](https://momentjs.com/timezone/).',
       default: 'UTC',
     },
   },
-  type: 'datatable',
-  help: 'Use timelion to extract one or more timeseries from many sources',
   fn: (context, args) => {
     // Timelion requires a time range. Use the time range from the timefilter element in the
     // workpad, if it exists. Otherwise fall back on the function args.

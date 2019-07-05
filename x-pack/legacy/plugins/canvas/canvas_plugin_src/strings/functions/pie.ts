@@ -11,47 +11,57 @@ import { FunctionFactory, Position } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {
-    defaultMessage: 'Configure a pie chart element',
+    defaultMessage: 'Configure a pie chart element.',
   }),
   args: {
+    font: i18n.translate('xpack.canvas.functions.pie.args.fontHelpText', {
+      defaultMessage:
+        'The {css} font properties for the labels. For example, {fontFamily} or {fontWeight}.',
+      values: {
+        css: 'CSS',
+        fontFamily: 'font-family',
+        fontWeight: 'font-weight',
+      },
+    }),
+    hole: i18n.translate('xpack.canvas.functions.pie.args.holeHelpText', {
+      defaultMessage: 'Draws a hole in the pie, 0-100, as a percentage of the pie radius.',
+    }),
+    labelRadius: i18n.translate('xpack.canvas.functions.pie.args.labelRadiusHelpText', {
+      defaultMessage:
+        'The percentage of the container area to use as a radius for the label circle.',
+    }),
+    labels: i18n.translate('xpack.canvas.functions.pie.args.labelsHelpText', {
+      defaultMessage: 'Displays the pie labels?',
+    }),
+    legend: i18n.translate('xpack.canvas.functions.pie.args.legendHelpText', {
+      defaultMessage:
+        'The legend position. For example, {positions}, or {false}. When `false`, the legend is hidden.',
+      values: {
+        positions: Object.values(Position)
+          .map(position => `\`"${position}"\``)
+          .join(', '),
+        false: 'false',
+      },
+    }),
     palette: i18n.translate('xpack.canvas.functions.pie.args.paletteHelpText', {
       defaultMessage: 'A {palette} object for describing the colors to use in this pie chart',
       values: {
         palette: 'palette',
       },
     }),
-    seriesStyle: i18n.translate('xpack.canvas.functions.pie.args.seriesStyleHelpText', {
-      defaultMessage: 'A style of a specific series',
-    }),
     radius: i18n.translate('xpack.canvas.functions.pie.args.radiusHelpText', {
       defaultMessage:
-        'Radius of the pie as a percentage (between 0 and 1) of the available ' +
+        'The radius of the pie as a percentage (between 0 and 1) of the available ' +
         'space. To automatically set radius, use `"{auto}"`.',
       values: {
         auto: 'auto',
       },
     }),
-    hole: i18n.translate('xpack.canvas.functions.pie.args.holeHelpText', {
-      defaultMessage: 'Draws a hole in the pie, 0-100, as a percentage of the pie radius',
-    }),
-    labels: i18n.translate('xpack.canvas.functions.pie.args.labelsHelpText', {
-      defaultMessage: 'Displays the pie labels.',
-    }),
-    labelRadius: i18n.translate('xpack.canvas.functions.pie.args.labelRadiusHelpText', {
-      defaultMessage: 'Percentage of the container area to use as radius for the label circle',
-    }),
-    font: i18n.translate('xpack.canvas.functions.pie.args.fontHelpText', {
-      defaultMessage: 'Label font',
-    }),
-    legend: i18n.translate('xpack.canvas.functions.pie.args.legendHelpText', {
-      defaultMessage: 'Legend position: {position} or {false}',
-      values: {
-        position: Object.values(Position).join(', '),
-        false: 'false',
-      },
+    seriesStyle: i18n.translate('xpack.canvas.functions.pie.args.seriesStyleHelpText', {
+      defaultMessage: 'A style of a specific series',
     }),
     tilt: i18n.translate('xpack.canvas.functions.pie.args.tiltHelpText', {
-      defaultMessage: 'Percentage of tilt where 1 is fully vertical, and 0 is completely flat.',
+      defaultMessage: 'The percentage of tilt where 1 is fully vertical, and 0 is completely flat.',
     }),
   },
 };

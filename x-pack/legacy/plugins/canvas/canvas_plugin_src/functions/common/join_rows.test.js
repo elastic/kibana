@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { joinRows } from '../join_rows';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../../strings/functions';
-import { testTable } from './fixtures/test_tables';
+import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../strings/functions';
+import { testTable } from './__tests__/fixtures/test_tables';
+import { joinRows } from './join_rows';
 
 const errors = getFunctionErrors().joinRows;
 

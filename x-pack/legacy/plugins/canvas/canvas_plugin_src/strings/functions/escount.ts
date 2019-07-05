@@ -11,22 +11,22 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof escount>> = {
   help: i18n.translate('xpack.canvas.functions.escountHelpText', {
-    defaultMessage: 'Query {es} for the number of hits matching a query',
+    defaultMessage: 'Query {es} for the number of hits matching the specified query.',
     values: {
-      es: 'elasticsearch',
+      es: 'Elasticsearch',
     },
   }),
   args: {
+    query: i18n.translate('xpack.canvas.functions.escount.args.queryHelpText', {
+      defaultMessage: 'A {lucene} query string.',
+      values: {
+        lucene: 'Lucene',
+      },
+    }),
     index: i18n.translate('xpack.canvas.functions.escount.args.indexHelpText', {
       defaultMessage: 'An index or index pattern. For example, "{example}".',
       values: {
         example: 'logstash-*',
-      },
-    }),
-    query: i18n.translate('xpack.canvas.functions.escount.args.queryHelpText', {
-      defaultMessage: 'A {lucene} query string',
-      values: {
-        lucene: 'Lucene',
       },
     }),
   },

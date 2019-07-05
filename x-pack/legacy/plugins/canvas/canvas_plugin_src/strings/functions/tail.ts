@@ -19,7 +19,7 @@ export const help: FunctionHelp<FunctionFactory<typeof tail>> = {
   }),
   args: {
     count: i18n.translate('xpack.canvas.functions.tail.args.countHelpText', {
-      defaultMessage: 'Return this many rows from the end of the {datatable}',
+      defaultMessage: 'The number of rows to retrieve from the end of the {datatable}.',
       values: {
         datatable: 'datatable',
       },

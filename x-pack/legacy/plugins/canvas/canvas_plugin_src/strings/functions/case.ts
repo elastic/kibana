@@ -11,21 +11,28 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
   help: i18n.translate('xpack.canvas.functions.caseHelpText', {
-    defaultMessage: 'Build a case (including a condition/result) to pass to the {switch} function',
+    defaultMessage:
+      'Builds a case (including a condition/result) to pass to the {switch} function.',
     values: {
       switch: 'switch',
     },
   }),
   args: {
-    if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
-      defaultMessage:
-        'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
-    }),
     when: i18n.translate('xpack.canvas.functions.case.args.whenHelpText', {
       defaultMessage:
-        'This value is compared to the context to see if the condition is met. It is overridden by the "{if}" argument if both are provided.',
+        'The value compared to the {context} to see if they are equal. The `{whenArg}` argument is ignored when the `{ifArg}` argument is also specified.',
       values: {
-        if: 'if',
+        context: '_context_',
+        ifArg: 'if',
+        whenArg: 'when',
+      },
+    }),
+    if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
+      defaultMessage:
+        'This value indicates whether the condition is met. The `{ifArg}` argument overrides the `{whenArg}` argument when both are provided.',
+      values: {
+        ifArg: 'if',
+        whenArg: 'when',
       },
     }),
     then: i18n.translate('xpack.canvas.functions.case.args.thenHelpText', {

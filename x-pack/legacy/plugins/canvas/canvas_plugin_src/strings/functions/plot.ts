@@ -17,11 +17,27 @@ export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
     },
   }),
   args: {
-    seriesStyle: i18n.translate('xpack.canvas.functions.plot.args.seriesStyleHelpText', {
-      defaultMessage: 'A style of a specific series',
-    }),
     defaultStyle: i18n.translate('xpack.canvas.functions.plot.args.defaultStyleHelpText', {
-      defaultMessage: 'The default style to use for every series',
+      defaultMessage: 'The default style to use for every series.',
+    }),
+    font: i18n.translate('xpack.canvas.functions.plot.args.fontHelpText', {
+      defaultMessage:
+        'The {css} font properties for the labels. For example, {fontFamily} or {fontWeight}.',
+      values: {
+        css: 'CSS',
+        fontFamily: 'font-family',
+        fontWeight: 'font-weight',
+      },
+    }),
+    legend: i18n.translate('xpack.canvas.functions.plot.args.legendHelpText', {
+      defaultMessage:
+        'The legend position. For example, {positions}, or {false}. When `false`, the legend is hidden.',
+      values: {
+        positions: Object.values(Position)
+          .map(position => `\`"${position}"\``)
+          .join(', '),
+        false: 'false',
+      },
     }),
     palette: i18n.translate('xpack.canvas.functions.plot.args.paletteHelpText', {
       defaultMessage: 'A {palette} object for describing the colors to use in this chart',
@@ -29,24 +45,17 @@ export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
         palette: 'palette',
       },
     }),
-    font: i18n.translate('xpack.canvas.functions.plot.args.fontHelpText', {
-      defaultMessage: 'Legend and tick mark fonts',
+    seriesStyle: i18n.translate('xpack.canvas.functions.plot.args.seriesStyleHelpText', {
+      defaultMessage: 'A style of a specific series',
     }),
-    legend: i18n.translate('xpack.canvas.functions.plot.args.legendHelpText', {
-      defaultMessage: 'Legend position: {position} or {false}',
+    xaxis: i18n.translate('xpack.canvas.functions.plot.args.xaxisHelpText', {
+      defaultMessage: 'The axis configuration. When `{false}`, the axis is hidden.',
       values: {
-        position: Object.values(Position).join(', '),
         false: 'false',
       },
     }),
     yaxis: i18n.translate('xpack.canvas.functions.plot.args.yaxisHelpText', {
-      defaultMessage: 'Axis configuration, or {false} to disable',
-      values: {
-        false: 'false',
-      },
-    }),
-    xaxis: i18n.translate('xpack.canvas.functions.plot.args.xaxisHelpText', {
-      defaultMessage: 'Axis configuration, or {false} to disable',
+      defaultMessage: 'The axis configuration. When `{false}`, the axis is hidden.',
       values: {
         false: 'false',
       },

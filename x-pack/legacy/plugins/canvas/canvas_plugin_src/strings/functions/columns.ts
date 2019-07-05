@@ -12,14 +12,24 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof columns>> = {
   help: i18n.translate('xpack.canvas.functions.columnsHelpText', {
     defaultMessage:
-      'Include or exclude columns from a data table. If you specify both, this will exclude first',
+      'Includes or excludes columns from a `{datatable}`. ' +
+      'When both arguments are specified, the excluded columns will be removed first.',
+    values: {
+      datatable: 'datatable',
+    },
   }),
   args: {
     include: i18n.translate('xpack.canvas.functions.columns.args.includeHelpText', {
-      defaultMessage: 'A comma separated list of column names to keep in the table',
+      defaultMessage: 'A comma-separated list of column names to keep in the `{datatable}`.',
+      values: {
+        datatable: 'datatable',
+      },
     }),
     exclude: i18n.translate('xpack.canvas.functions.columns.args.excludeHelpText', {
-      defaultMessage: 'A comma separated list of column names to remove from the table',
+      defaultMessage: 'A comma-separated list of column names to remove from the `{datatable}`.',
+      values: {
+        datatable: 'datatable',
+      },
     }),
   },
 };

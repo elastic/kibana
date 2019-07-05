@@ -11,9 +11,20 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
   help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
-    defaultMessage: 'Configure a repeating image element',
+    defaultMessage: 'Configures a repeating image element.',
   }),
   args: {
+    emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
+      defaultMessage:
+        'Fills the difference between the {context} and `{max}` parameter for the element with this image' +
+        'Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
+      values: {
+        context: '_context_',
+        base64: 'base64',
+        max: 'max',
+        url: 'URL',
+      },
+    }),
     image: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
       defaultMessage:
         'The image to repeat. Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
@@ -22,24 +33,13 @@ export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
         url: 'URL',
       },
     }),
+    max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
+      defaultMessage: 'The maximum number of times the image can repeat',
+    }),
     size: i18n.translate('xpack.canvas.functions.repeatImage.args.sizeHelpText', {
       defaultMessage:
         'The maximum height or width of the image, in pixels. ' +
         'When the image is taller than it is wide, this function limits the height.',
-    }),
-    max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
-      defaultMessage: 'The maximum number of times the image can repeat',
-    }),
-    emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
-      defaultMessage:
-        'Fills the difference between the `{context}` and `{max}` parameter for the element with this image' +
-        'Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
-      values: {
-        context: '_context',
-        base64: 'base64',
-        max: 'max',
-        url: 'URL',
-      },
     }),
   },
 };

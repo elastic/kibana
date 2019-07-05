@@ -11,11 +11,14 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof asFn>> = {
   help: i18n.translate('xpack.canvas.functions.asHelpText', {
-    defaultMessage: 'One or more conditions to check',
+    defaultMessage: 'Creates a `datatable` with a single value. See also `{getCellFn}`.',
+    values: {
+      getCellFn: 'getCell',
+    },
   }),
   args: {
     name: i18n.translate('xpack.canvas.functions.as.args.nameHelpText', {
-      defaultMessage: 'A name to give the column',
+      defaultMessage: 'The name to give the column.',
     }),
   },
 };

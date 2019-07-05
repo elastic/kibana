@@ -11,7 +11,7 @@ import { FunctionFactory, Position } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
-    defaultMessage: 'Configure an image reveal element',
+    defaultMessage: 'Configure an image reveal element.',
   }),
   args: {
     image: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {
@@ -33,11 +33,13 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
       },
     }),
     origin: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {
-      defaultMessage: 'The position to start the image fill. For example, {positions}',
+      defaultMessage: 'The position to start the image fill. For example, {list}, or {end}.',
       values: {
-        positions: Object.values(Position)
+        list: Object.values(Position)
+          .slice(0, -1)
           .map(position => `\`"${position}"\``)
           .join(', '),
+        end: Object.values(Position).slice(-1)[0],
       },
     }),
   },

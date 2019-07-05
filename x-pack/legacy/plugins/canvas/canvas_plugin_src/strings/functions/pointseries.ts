@@ -25,20 +25,20 @@ export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
     },
   }),
   args: {
-    x: i18n.translate('xpack.canvas.functions.pointseries.args.xHelpText', {
-      defaultMessage: 'The values along the x-axis',
-    }),
-    y: i18n.translate('xpack.canvas.functions.pointseries.args.yHelpText', {
-      defaultMessage: 'The values along the y-axis',
-    }),
     color: i18n.translate('xpack.canvas.functions.pointseries.args.colorHelpText', {
-      defaultMessage: "An expression to use in determining the mark's color",
+      defaultMessage: "An expression to use in determining the mark's color.",
     }),
     size: i18n.translate('xpack.canvas.functions.pointseries.args.sizeHelpText', {
       defaultMessage: 'The size of the marks. Only applicable to supported elements.',
     }),
     text: i18n.translate('xpack.canvas.functions.pointseries.args.textHelpText', {
       defaultMessage: 'The text to show on the mark. Only applicable to supported elements.',
+    }),
+    x: i18n.translate('xpack.canvas.functions.pointseries.args.xHelpText', {
+      defaultMessage: 'The values along the x-axis.',
+    }),
+    y: i18n.translate('xpack.canvas.functions.pointseries.args.yHelpText', {
+      defaultMessage: 'The values along the y-axis.',
     }),
   },
 };
