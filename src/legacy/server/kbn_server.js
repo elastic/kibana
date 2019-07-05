@@ -23,6 +23,7 @@ import { constant, once, compact, flatten } from 'lodash';
 import { isWorker } from 'cluster';
 import { foo } from 'src/foo';
 import { bar } from 'x-pack/legacy/server/bar';
+import { baz } from 'x-pack/legacy/server/baz';
 
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -179,6 +180,7 @@ export default class KbnServer {
 
     foo('kbn_server');
     bar('kbn_server');
+    baz('kbn_server');
 
     return server;
   }
