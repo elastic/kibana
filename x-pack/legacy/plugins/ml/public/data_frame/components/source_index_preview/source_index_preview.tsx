@@ -253,7 +253,25 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       return formatField(d);
     };
 
-    column.render = render;
+    if (typeof field !== 'undefined') {
+      switch (field.type) {
+        case KBN_FIELD_TYPES.BOOLEAN:
+          column.dataType = 'boolean';
+          break;
+        case KBN_FIELD_TYPES.DATE:
+          column.align = 'right';
+          column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+          break;
+        case KBN_FIELD_TYPES.NUMBER:
+          column.dataType = 'number';
+          break;
+        default:
+          column.render = render;
+          break;
+      }
+    } else {
+      column.render = render;
+    }
 
     if (CELL_CLICK_ENABLED && cellClick) {
       column.render = (d: string) => (
