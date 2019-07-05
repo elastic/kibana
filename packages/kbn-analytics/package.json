@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/analytics",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Kibana Analytics tool",
+  "main": "lib/index.js",
+  "types": "./lib/index.d.ts",
+  "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^3.3.3333"
+  },
+  "dependencies": {
+  }
+}
