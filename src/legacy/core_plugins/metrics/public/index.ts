@@ -17,18 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionsRegistry } from 'plugins/interpreter/registries';
-import { CoreSetup } from 'src/core/public';
-import { visualizations } from '../../visualizations/public';
-import { TsvbSetupPlugins } from './plugin';
+import { Plugin } from './plugin';
+import { core, plugins } from './setup';
 
-export const core = {} as CoreSetup;
-export const plugins = {
-  data: {
-    expressions: {
-      functionsRegistry,
-    },
-  },
-  visualizations,
-} as TsvbSetupPlugins;
+export function plugin() {
+  return new Plugin();
+}
+
+plugin().setup(core, plugins);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { InternalCoreSetup } from 'kibana/server';
+import { CoreSetup } from 'src/core/server';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 // @ts-ignore
@@ -25,8 +25,15 @@ import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
 
+// TODO: Remove as CoreSetup is completed.
+export interface CustomCoreSetup {
+  http: {
+    server: any;
+  };
+}
+
 export class Plugin {
-  public setup(core: InternalCoreSetup) {
+  public setup(core: CoreSetup & CustomCoreSetup) {
     const { http } = core;
     fieldsRoutes(http.server);
     visDataRoutes(http.server);
