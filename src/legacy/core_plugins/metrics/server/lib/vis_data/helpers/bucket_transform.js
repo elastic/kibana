@@ -79,7 +79,7 @@ export const bucketTransform = {
   static: bucket => {
     checkMetric(bucket, ['value']);
     // Anything containing a decimal point or an exponent is considered decimal value
-    const isDecimalValue = bucket.value.match(/[.e]/i);
+    const isDecimalValue = Boolean(bucket.value.match(/[.e]/i));
     return {
       bucket_script: {
         buckets_path: { count: '_count' },
