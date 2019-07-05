@@ -34,15 +34,26 @@ export const routes: ServerRoute[] = [
     path: API_LIST_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
     handler: async (req: Request) => {
-      const fromRegistry = await fetchList();
-      const searchObjects = fromRegistry.map(({ name, version }) => ({
+      const registryItems = await fetchList();
+      const searchObjects = registryItems.map(({ name, version }) => ({
         type: SAVED_OBJECT_TYPE,
         id: `${name}-${version}`,
       }));
       const client = getClient(req);
       const results = await client.bulkGet(searchObjects);
+      const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
 
-      return results.saved_objects;
+      for (const item of registryItems) {
+        const installedObject = savedObjects.find(o => o.id === `${item.name}-${item.version}`);
+        if (installedObject) {
+          item.status = 'installed';
+          item.savedObject = installedObject;
+        } else {
+          item.status = 'not_installed';
+        }
+      }
+
+      return registryItems;
     },
   },
   {
@@ -55,6 +66,9 @@ export const routes: ServerRoute[] = [
         fetchInfo(pkgkey),
         getArchiveInfo(`${pkgkey}.tar.gz`),
       ]);
+
+      const savedObject = await getClient(req).get(SAVED_OBJECT_TYPE, pkgkey);
+
       // map over paths and test types from https://github.com/elastic/integrations-registry/blob/master/ASSETS.md
       const features = ['injest-pipeline', 'visualization', 'dashboard', 'index-pattern'];
 
@@ -62,6 +76,8 @@ export const routes: ServerRoute[] = [
         ...info,
         paths,
         features,
+        status: savedObject.error ? 'not_installed' : 'installed',
+        savedObject,
       };
     },
   },
