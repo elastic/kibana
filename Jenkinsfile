@@ -34,11 +34,7 @@ pipeline {
           sh "${CI_DIR}/run_pipeline.sh"
           script {
             dumpEnv()
-            dumpSize("${WORKSPACE}")
-            dumpSize("${WORKSPACE_DIR}/elasticsearch")
-            createWorkspaceCache()
-            zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: globName()
-            dumpSize("${WORKSPACE_CACHE_NAME}")
+            zipAll()
           }
           step([$class: 'ClassicUploadStep', credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         }
@@ -76,6 +72,14 @@ pipeline {
         sh 'echo "Not implemented yet"'
       }
     }
+  }
+}
+def zipAll(){
+  script {
+    createWorkspaceCache()
+    zip zipFile: "${WORKSPACE_CACHE_NAME}", archive: false, glob: globName()
+    ["${WORKSPACE}", "${WORKSPACE_DIR}/elasticsearch", "${WORKSPACE_CACHE_NAME}"]
+      .each { dumpSize(it) }
   }
 }
 def globName(){
