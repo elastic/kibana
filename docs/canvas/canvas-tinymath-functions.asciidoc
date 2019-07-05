@@ -1,8 +1,8 @@
-
+[role="xpack"]
 [[canvas-tinymath-functions]]
 === TinyMath functions
 
-beta[]TinyMath provides a set of functions that can be used with the Canvas expression
+TinyMath provides a set of functions that can be used with the Canvas expression
 language to perform complex math calculations. Read on for detailed information about 
 the functions available in TinyMath, including what parameters each function accepts, 
 the return value of that function, and examples of how each function behaves.
@@ -22,9 +22,7 @@ applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -50,9 +48,7 @@ least one array of numbers is passed into the function, the function will calcul
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -82,9 +78,7 @@ index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -110,9 +104,7 @@ For arrays, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -138,9 +130,7 @@ is provided, values are restricted to only a lower bound.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...a
 |number \| Array.<number>
@@ -182,9 +172,7 @@ Returns the length of an array. Alias for size.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |Array.<any>
@@ -211,9 +199,7 @@ index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -238,9 +224,7 @@ the function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -278,9 +262,7 @@ index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -305,9 +287,7 @@ in, the input is returned.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |Array.<any>
@@ -331,9 +311,7 @@ function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -359,9 +337,7 @@ For arrays, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -387,9 +363,7 @@ in, the input is returned.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |Array.<any>
@@ -413,9 +387,7 @@ index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -452,9 +424,7 @@ applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -484,9 +454,7 @@ find the maximum by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -517,9 +485,7 @@ find the mean by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -550,9 +516,7 @@ find the mean by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -581,9 +545,7 @@ find the median by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -613,9 +575,7 @@ find the minimum by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -645,9 +605,7 @@ into the function, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -686,9 +644,7 @@ find the mode by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -717,9 +673,7 @@ the function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -753,9 +707,7 @@ index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -788,9 +740,7 @@ between 0 and the number passed in.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number
@@ -825,9 +775,7 @@ the range by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -856,9 +804,7 @@ the range by index.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |...args
 |number \| Array.<number>
@@ -886,9 +832,7 @@ For arrays, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -919,9 +863,7 @@ Returns the length of an array. Alias for count.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |Array.<any>
@@ -948,9 +890,7 @@ index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -978,9 +918,7 @@ index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>
@@ -1005,9 +943,7 @@ the function will be applied index-wise to each element.
 
 [cols="3*^<"]
 |===
-s|Param
-s|Type
-s|Description
+|Param |Type |Description
 
 |a
 |number \| Array.<number>

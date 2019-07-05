@@ -18,7 +18,7 @@ import {
 
 import { MODE as DATAVISUALIZER_MODE } from '../file_datavisualizer_view';
 
-export function BottomBar({ showBar, mode, changeMode, onCancel }) {
+export function BottomBar({ showBar, mode, changeMode, onCancel, disableImport }) {
   if (showBar) {
     if (mode === DATAVISUALIZER_MODE.READ) {
       return (
@@ -27,6 +27,7 @@ export function BottomBar({ showBar, mode, changeMode, onCancel }) {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                isDisabled={(disableImport === true)}
                 onClick={() => changeMode(DATAVISUALIZER_MODE.IMPORT)}
               >
                 <FormattedMessage

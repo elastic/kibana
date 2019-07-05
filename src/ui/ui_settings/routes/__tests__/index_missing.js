@@ -20,11 +20,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import {
-  getServices,
-  chance,
-  assertSinonMatch,
-} from './lib';
+import { getServices, chance, assertSinonMatch } from './lib';
 
 export function indexMissingSuite() {
   async function setup() {
@@ -41,17 +37,18 @@ export function indexMissingSuite() {
       // but automatically by writing to es when index didn't exist
       async assertValidKibanaIndex() {
         const resp = await callCluster('indices.get', {
-          index: indexName
+          index: indexName,
+          include_type_name: true,
         });
 
-        expect(resp[indexName].mappings).to.have.property('doc');
-        expect(resp[indexName].mappings.doc.properties).to.have.keys(
+        const mappings = resp[indexName].mappings.doc;
+        expect(mappings.properties).to.have.keys(
           'index-pattern',
           'visualization',
           'search',
           'dashboard'
         );
-      }
+      },
     };
   }
 
@@ -61,7 +58,7 @@ export function indexMissingSuite() {
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'GET',
-        url: '/api/kibana/settings'
+        url: '/api/kibana/settings',
       });
 
       expect(statusCode).to.be(200);
@@ -72,9 +69,9 @@ export function indexMissingSuite() {
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
-          }
-        }
+            isOverridden: true,
+          },
+        },
       });
     });
   });
@@ -88,24 +85,24 @@ export function indexMissingSuite() {
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
         payload: {
-          value: defaultIndex
-        }
+          value: defaultIndex,
+        },
       });
 
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
           buildNum: {
-            userValue: sinon.match.number
+            userValue: sinon.match.number,
           },
           defaultIndex: {
-            userValue: defaultIndex
+            userValue: defaultIndex,
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
-          }
-        }
+            isOverridden: true,
+          },
+        },
       });
 
       await assertValidKibanaIndex();
@@ -121,24 +118,24 @@ export function indexMissingSuite() {
         method: 'POST',
         url: '/api/kibana/settings',
         payload: {
-          changes: { defaultIndex }
-        }
+          changes: { defaultIndex },
+        },
       });
 
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
           buildNum: {
-            userValue: sinon.match.number
+            userValue: sinon.match.number,
           },
           defaultIndex: {
-            userValue: defaultIndex
+            userValue: defaultIndex,
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
-          }
-        }
+            isOverridden: true,
+          },
+        },
       });
 
       await assertValidKibanaIndex();
@@ -151,20 +148,20 @@ export function indexMissingSuite() {
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
-        url: '/api/kibana/settings/defaultIndex'
+        url: '/api/kibana/settings/defaultIndex',
       });
 
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
         settings: {
           buildNum: {
-            userValue: sinon.match.number
+            userValue: sinon.match.number,
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
-          }
-        }
+            isOverridden: true,
+          },
+        },
       });
 
       await assertValidKibanaIndex();

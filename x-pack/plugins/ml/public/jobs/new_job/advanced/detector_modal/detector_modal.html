@@ -4,7 +4,9 @@
   <div class="euiSpacer euiSpacer--m"></div>
 
   <div class="form-group">
-    <ml-form-label label-id="new_job_detector_description">Description</ml-form-label>
+    <ml-form-label label-id="new_job_detector_description">
+      {{ ::'xpack.ml.newJob.advanced.detectorModal.descriptionLabel' | i18n: {defaultMessage: 'Description'} }}
+    </ml-form-label>
     <input
       aria-labelledby="ml_aria_label_new_job_detector_description"
       aria-describedby="ml_aria_description_new_job_detector_description"
@@ -105,14 +107,15 @@
     ng-click="save()"
     ng-disabled="(saveLock === true) || (detector.function === '')"
     class="kuiButton kuiButton--primary"
-    aria-label="Save">
-    {{ (editMode? "Update" : "Add") }}
+    aria-label="{{ ::'xpack.ml.newJob.advanced.detectorModal.saveButtonAriaLabel' | i18n: {defaultMessage: 'Save'} }}">
+    {{ (editMode ? updateButtonLabel : addButtonLabel) }}
   </button>
   <button
     ng-click="cancel()"
     ng-disabled="(saveLock === true)"
     class="kuiButton kuiButton--primary"
-    aria-label="Cancel">
-    Cancel
-  </button>
+    aria-label="{{ ::'xpack.ml.newJob.advanced.detectorModal.cancelButtonAriaLabel' | i18n: {defaultMessage: 'Cancel'} }}"
+    i18n-id="xpack.ml.newJob.advanced.detectorModal.cancelButtonLabel"
+    i18n-default-message="Cancel"
+  ></button>
 </div>

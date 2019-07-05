@@ -124,7 +124,10 @@ export class Config {
     });
 
     if (results.error) {
-      throw results.error;
+      const error = new Error(results.error.message);
+      error.name = results.error.name;
+      error.stack = results.error.stack;
+      throw error;
     }
 
     this[vals] = results.value;

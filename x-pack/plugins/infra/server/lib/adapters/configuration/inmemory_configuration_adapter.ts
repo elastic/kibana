@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraConfigurationAdapter } from './adapter_types';
+import { InfraBaseConfiguration, InfraConfigurationAdapter } from './adapter_types';
 
-export class InfraInmemoryConfigurationAdapter<Configuration>
+export class InfraInmemoryConfigurationAdapter<Configuration extends InfraBaseConfiguration>
   implements InfraConfigurationAdapter<Configuration> {
   constructor(private readonly configuration: Configuration) {}
 

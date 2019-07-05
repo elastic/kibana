@@ -38,7 +38,7 @@ export function getComputedFields() {
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {
       script: {
-        inline: field.script,
+        source: field.script,
         lang: field.lang
       }
     };

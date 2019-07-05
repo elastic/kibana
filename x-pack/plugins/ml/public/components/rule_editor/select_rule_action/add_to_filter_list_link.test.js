@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { AddToFilterListLink } from './add_to_filter_list_link';
@@ -15,7 +15,7 @@ describe('AddToFilterListLink', () => {
   test(`renders the add to filter list link for a value`, () => {
     const addItemToFilterList = jest.fn(() => {});
 
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddToFilterListLink
         fieldValue="elastic.co"
         filterId="safe_domains"

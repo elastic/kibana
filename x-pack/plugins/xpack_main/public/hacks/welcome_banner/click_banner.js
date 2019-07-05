@@ -11,6 +11,7 @@ import {
   toastNotifications,
 } from 'ui/notify';
 import { EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 /**
  * Handle clicks from the user on the opt-in banner.
@@ -40,12 +41,25 @@ export async function clickBanner(
     _banners.remove(bannerId);
   } else {
     _toastNotifications.addDanger({
-      title: 'Telemetry Error',
+      title: (
+        <FormattedMessage
+          id="xpack.main.telemetry.telemetryErrorNotificationMessageTitle"
+          defaultMessage="Telemetry Error"
+        />
+      ),
       text: (
         <EuiText>
-          <p>Unable to save telemetry preference.</p>
+          <p>
+            <FormattedMessage
+              id="xpack.main.telemetry.telemetryErrorNotificationMessageDescription.unableToSaveTelemetryPreferenceText"
+              defaultMessage="Unable to save telemetry preference."
+            />
+          </p>
           <EuiText size="xs">
-            Check that Kibana and Elasticsearch are still running, then try again.
+            <FormattedMessage
+              id="xpack.main.telemetry.telemetryErrorNotificationMessageDescription.tryAgainText"
+              defaultMessage="Check that Kibana and Elasticsearch are still running, then try again."
+            />
           </EuiText>
         </EuiText>
       )

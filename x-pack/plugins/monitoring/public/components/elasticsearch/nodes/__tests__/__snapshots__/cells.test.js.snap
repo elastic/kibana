@@ -1,75 +1,77 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Node Listing Metric Cell should format N/A as the metric for an offline node 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="monTableCell__number monTableCell__offline"
 >
-  <div
-    class="kuiTableRowCell__liner"
-  >
-    <div
-      class="monTableCell__number monTableCell__offline"
-    >
-      N/A
-    </div>
-  </div>
-</td>
+  N/A
+</div>
 `;
 
 exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
 >
   <div
-    class="kuiTableRowCell__liner"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <h4
+      class="euiTitle euiTitle--medium"
+    >
+      206.3 GB 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </h4>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      class="monTableCell__metricCellMetric"
+      class="euiText euiText--extraSmall"
     >
-      206.3 GB
+      206.5 GB max
     </div>
-    <span
-      class="monTableCell__metricCellSlopeArrow fa fa-long-arrow-down"
-    />
     <div
-      class="monTableCell__metricCellMixMax"
+      class="euiText euiText--extraSmall"
     >
-      <div>
-        206.5 GB max
-      </div>
-      <div>
-        206.3 GB min
-      </div>
+      206.3 GB min
     </div>
   </div>
-</td>
+</div>
 `;
 
 exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
 >
   <div
-    class="kuiTableRowCell__liner"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <h4
+      class="euiTitle euiTitle--medium"
+    >
+      0% 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </h4>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      class="monTableCell__metricCellMetric"
+      class="euiText euiText--extraSmall"
     >
-      0%
+      2% max
     </div>
-    <span
-      class="monTableCell__metricCellSlopeArrow fa fa-long-arrow-down"
-    />
     <div
-      class="monTableCell__metricCellMixMax"
+      class="euiText euiText--extraSmall"
     >
-      <div>
-        2% max
-      </div>
-      <div>
-        0% min
-      </div>
+      0% min
     </div>
   </div>
-</td>
+</div>
 `;

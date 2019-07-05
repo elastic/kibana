@@ -46,9 +46,13 @@ export class PluginsSystem {
     this.log.info(`Starting [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
 
     for (const pluginName of sortedPlugins) {
+      const plugin = this.plugins.get(pluginName)!;
+      if (!plugin.includesServerPlugin) {
+        continue;
+      }
+
       this.log.debug(`Starting plugin "${pluginName}"...`);
 
-      const plugin = this.plugins.get(pluginName)!;
       const exposedDependencyValues = [
         ...plugin.requiredDependencies,
         ...plugin.optionalDependencies,

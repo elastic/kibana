@@ -40,7 +40,7 @@ export function rabbitmqMetricsSpecProvider(server, context) {
       },
     }),
     euiIconType: 'logoRabbitmq',
-    isBeta: true,
+    isBeta: false,
     artifacts: {
       dashboards: [
         {

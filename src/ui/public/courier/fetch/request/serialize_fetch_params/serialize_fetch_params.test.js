@@ -35,7 +35,8 @@ function serializeFetchParamsWithDefaults(paramOverrides) {
       get: () => {
         return 'sessionId';
       }
-    }
+    },
+    timeout: 100,
   };
   const params = { ...paramDefaults, ...paramOverrides };
 
@@ -46,23 +47,9 @@ function serializeFetchParamsWithDefaults(paramOverrides) {
     params.kbnIndex,
     params.sessionId,
     params.config,
+    params.timeout,
   );
 }
-
-test('filters out any body properties that begin with $', () => {
-  const requestFetchParams = [
-    {
-      index: ['logstash-123'],
-      type: 'blah',
-      search_type: 'blah2',
-      body: { foo: 'bar', $foo: 'bar' }
-    }
-  ];
-  return serializeFetchParamsWithDefaults({ requestFetchParams }).then(value => {
-    expect(_.includes(value, 'foo')).toBe(true);
-    expect(_.includes(value, '$foo')).toBe(false);
-  });
-});
 
 describe('when indexList is not empty', () => {
   test('includes the index', () => {
@@ -162,6 +149,38 @@ describe('headers', () => {
       };
       const header = await getHeader({ requestFetchParams, config });
       expect(header.preference).toBe(undefined);
+    });
+  });
+});
+
+describe('body', () => {
+  const requestFetchParams = [
+    {
+      index: ['logstash-123'],
+      type: 'blah',
+      search_type: 'blah2',
+      body: { foo: 'bar' }
+    }
+  ];
+
+  const getBody = async (paramOverrides) => {
+    const request = await serializeFetchParamsWithDefaults(paramOverrides);
+    const requestParts = request.split('\n');
+    if (requestParts.length < 2) {
+      throw new Error('fetch Body does not contain expected format: header newline body.');
+    }
+    return JSON.parse(requestParts[1]);
+  };
+
+  describe('timeout', () => {
+    test('should set a timeout as specified', async () => {
+      const request = await getBody({ requestFetchParams, timeout: 200 });
+      expect(request).toHaveProperty('timeout', '200ms');
+    });
+
+    test('should not set a timeout when timeout is 0', async () => {
+      const request = await getBody({ requestFetchParams, timeout: 0 });
+      expect(request).not.toHaveProperty('timeout');
     });
   });
 });

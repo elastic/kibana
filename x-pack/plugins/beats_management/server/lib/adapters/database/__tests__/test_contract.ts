@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { beatsIndexTemplate } from '../../../../utils/index_templates';
 import { DatabaseAdapter } from '../adapter_types';
 
 interface ContractConfig {
@@ -25,20 +24,6 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     afterAll(async () => config.after && (await config.after()));
     beforeEach(async () => {
       database = config.adapterSetup();
-    });
-
-    it('Should inject template into ES', async () => {
-      try {
-        await database.putTemplate(
-          { kind: 'internal' },
-          {
-            name: '.management-beats',
-            body: beatsIndexTemplate,
-          }
-        );
-      } catch (e) {
-        expect(e).toEqual(null);
-      }
     });
 
     it('Unauthorized users cant query', async () => {

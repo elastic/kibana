@@ -24,6 +24,7 @@ import { uiModules } from '../../modules';
 import { VisFiltersProvider } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
+export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
 
 uiModules.get('kibana')
   .directive('vislibLegend', function (Private, $timeout, i18n) {
@@ -102,11 +103,14 @@ uiModules.get('kibana')
         };
 
         $scope.filter = function (legendData, negate) {
-          $scope.vis.API.events.filter({ datum: legendData.values, negate: negate });
+          $scope.vis.API.events.filter({ datum: legendData, negate: negate, shallow: true });
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = visFilters.filter({ datum: legendData.values }, { simulate: true });
+          if (CUSTOM_LEGEND_VIS_TYPES.includes($scope.vis.vislibVis.visConfigArgs.type)) {
+            return false;
+          }
+          const filters = visFilters.filter({ datum: legendData, shallow: true }, { simulate: true });
           return filters.length;
         };
 
@@ -114,12 +118,20 @@ uiModules.get('kibana')
        * Keydown listener for a legend entry.
        * This will close the details panel of this legend entry when pressing Escape.
        */
-        $scope.onLegendEntryKeydown = function (event, scope) {
-          if (event.keyCode === keyCodes.ESCAPE && scope.showDetails) {
+        $scope.onLegendEntryKeydown = function (event) {
+          if (event.keyCode === keyCodes.ESCAPE) {
             event.preventDefault();
             event.stopPropagation();
-            scope.showDetails = false;
+            $scope.shownDetails = undefined;
           }
+        };
+
+        $scope.toggleDetails = function (label) {
+          $scope.shownDetails = $scope.shownDetails === label ? undefined : label;
+        };
+
+        $scope.areDetailsVisible = function (label) {
+          return $scope.shownDetails === label;
         };
 
         $scope.colors = [
@@ -143,7 +155,7 @@ uiModules.get('kibana')
             $scope.open = $scope.vis.params.addLegend;
           }
 
-          if (['heatmap', 'gauge'].includes(vislibVis.visConfigArgs.type)) {
+          if (CUSTOM_LEGEND_VIS_TYPES.includes(vislibVis.visConfigArgs.type)) {
             const labels = vislibVis.getLegendLabels();
             if (labels) {
               $scope.labels = _.map(labels, label => {

@@ -1,11 +1,10 @@
 [role="xpack"]
 [[monitoring-metricbeat]]
 === Collecting {kib} monitoring data with {metricbeat}
+[subs="attributes"]
 ++++
 <titleabbrev>Collecting monitoring data with {metricbeat}</titleabbrev>
 ++++
-
-beta[]
 
 In 6.4 and later, you can use {metricbeat} to collect data about {kib} 
 and ship it to the monitoring cluster, rather than routing it through the 

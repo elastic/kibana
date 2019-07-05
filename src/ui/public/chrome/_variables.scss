@@ -1,0 +1,11 @@
+
+$kbnChromeGlobalNavBackground: #005571;
+
+$kbnGlobalNavClosedWidth: 53px;
+$kbnGlobalNavOpenWidth: 180px;
+$kbnGlobalNavLogoHeight: 70px;
+$kbnGlobalNavAppIconHeight: $euiSizeXXL + $euiSizeXS;
+
+$kbnLoadingIndicatorBackgroundSize: $euiSizeXXL * 10;
+$kbnLoadingIndicatorColor1: tint($euiColorAccent, 15%);
+$kbnLoadingIndicatorColor2: tint($euiColorAccent, 60%);

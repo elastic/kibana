@@ -25,41 +25,58 @@ describe('initXAxis', function () {
 
   const field = {};
   const indexPattern = {};
+  let chart;
+  let table;
 
-  const baseChart = {
-    aspects: {
-      x: {
-        aggConfig: {
-          fieldFormatter: _.constant({}),
-          write: _.constant({ params: {} }),
-          aggConfigs: {},
-          getIndexPattern: () => {
-            return indexPattern;
+  beforeEach(function () {
+    chart = {
+      aspects: {
+        x: {
+          aggConfig: {
+            fieldFormatter: _.constant({}),
+            write: _.constant({ params: {} }),
+            aggConfigs: {},
+            getIndexPattern: () => {
+              return indexPattern;
+            },
+            type: {}
           },
-          type: {}
-        },
-        title: 'label'
+          title: 'label',
+          params: {
+            defaultValue: '_all',
+          },
+          i: 0,
+        }
       }
-    }
-  };
+    };
+
+    table = {
+      columns: [{ id: '0' }],
+      rows: [
+        [{ value: 'hello' }],
+        [{ value: 'world' }],
+        [{ value: 'foo' }],
+        [{ value: 'bar' }],
+        [{ value: 'baz' }],
+      ],
+    };
+  });
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
-    const chart = _.cloneDeep(baseChart);
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormatter', chart.aspects.x.aggConfig.fieldFormatter());
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
-    const chart = _.cloneDeep(baseChart);
     chart.aspects.x.aggConfig.type.ordered = true;
     chart.aspects.x.aggConfig.params = {
       field: field
     };
     chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
 
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormatter', chart.aspects.x.aggConfig.fieldFormatter())
@@ -72,8 +89,44 @@ describe('initXAxis', function () {
       .and.not.have.property('interval');
   });
 
+  describe('xAxisOrderedValues', function () {
+    it('sets the xAxisOrderedValues property', function () {
+      initXAxis(chart, table);
+      expect(chart).to.have.property('xAxisOrderedValues');
+    });
+
+    it('returns a list of values, preserving the table order', function () {
+      initXAxis(chart, table);
+      expect(chart.xAxisOrderedValues).to.eql(['hello', 'world', 'foo', 'bar', 'baz']);
+    });
+
+    it('only returns unique values', function () {
+      table = {
+        columns: [{ id: '0' }],
+        rows: [
+          [{ value: 'hello' }],
+          [{ value: 'world' }],
+          [{ value: 'hello' }],
+          [{ value: 'world' }],
+          [{ value: 'foo' }],
+          [{ value: 'bar' }],
+          [{ value: 'baz' }],
+          [{ value: 'hello' }],
+        ],
+      };
+      initXAxis(chart, table);
+      expect(chart.xAxisOrderedValues).to.eql(['hello', 'world', 'foo', 'bar', 'baz']);
+    });
+
+    it('returns the defaultValue if using fake x aspect', function () {
+      chart.aspects.x.i = -1;
+      chart.aspects.x.params.defaultValue = '_all';
+      initXAxis(chart, table);
+      expect(chart.xAxisOrderedValues).to.eql(['_all']);
+    });
+  });
+
   it('reads the interval param from the x agg', function () {
-    const chart = _.cloneDeep(baseChart);
     chart.aspects.x.aggConfig.type.ordered = true;
     chart.aspects.x.aggConfig.write = _.constant({ params: { interval: 10 } });
     chart.aspects.x.aggConfig.params = {
@@ -81,7 +134,7 @@ describe('initXAxis', function () {
     };
     chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
 
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormatter', chart.aspects.x.aggConfig.fieldFormatter())

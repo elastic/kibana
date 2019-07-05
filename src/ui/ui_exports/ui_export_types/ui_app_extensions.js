@@ -51,6 +51,7 @@ export const devTools = appExtension;
 export const docViews = appExtension;
 export const hacks = appExtension;
 export const home = appExtension;
+export const canvas = appExtension;
 export const inspectorViews = appExtension;
 export const search = appExtension;
 export const shareContextMenuExtensions = appExtension;

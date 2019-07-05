@@ -17,13 +17,11 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       const kibanaServer = getService('kibanaServer');
       const browser = getService('browser');
 
+      // provide extra height for the page and avoid clusters sending telemetry during tests
       await browser.setWindowSize(1600, 1000);
 
       await esArchiver.load(archive);
-      await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false // provide extra height for the page and avoid clusters sending telemetry during tests
-      });
+      await kibanaServer.uiSettings.replace({});
 
       await PageObjects.monitoring.navigateTo();
       await noData.isOnNoDataPage();

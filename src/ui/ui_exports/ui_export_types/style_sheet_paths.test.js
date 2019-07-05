@@ -21,51 +21,77 @@ import { resolve } from 'path';
 import { tmpdir } from 'os';
 import { styleSheetPaths } from './style_sheet_paths';
 
-describe('uiExports.styleSheetPaths', () => {
-  const dir = tmpdir();
-  const pluginSpec = {
-    getId: jest.fn(() => 'test'),
-    getPublicDir: jest.fn(() => resolve(dir, 'kibana/public'))
-  };
+const dir = tmpdir();
+const pluginSpec = {
+  getId: jest.fn(() => 'test'),
+  getPublicDir: jest.fn(() => resolve(dir, 'kibana/public')),
+};
 
+expect.addSnapshotSerializer({
+  test: value => typeof value === 'string' && value.startsWith(dir),
+  print: value => value.replace(dir, '<absolute>'),
+});
+
+describe('uiExports.styleSheetPaths', () => {
   it('does not support relative paths', () => {
-    expect(() => styleSheetPaths([], 'public/bar.css', 'styleSheetPaths', pluginSpec))
-      .toThrowError(/\[plugin:test\] uiExports.styleSheetPaths must be an absolute path/);
+    expect(() => styleSheetPaths([], 'public/bar.css', 'styleSheetPaths', pluginSpec)).toThrowError(
+      /\[plugin:test\] uiExports.styleSheetPaths must be an absolute path/
+    );
   });
 
   it('path must be child of public path', () => {
-    expect(() => styleSheetPaths([], '/another/public/bar.css', 'styleSheetPaths', pluginSpec))
-      .toThrowError(/\[plugin:test\] uiExports.styleSheetPaths must be child of publicDir/);
+    expect(() =>
+      styleSheetPaths([], '/another/public/bar.css', 'styleSheetPaths', pluginSpec)
+    ).toThrowError(/\[plugin:test\] uiExports.styleSheetPaths must be child of publicDir/);
   });
 
   it('only supports css or scss extensions', () => {
-    expect(() => styleSheetPaths([], '/kibana/public/bar.bad', 'styleSheetPaths', pluginSpec))
-      .toThrowError('[plugin:test] uiExports.styleSheetPaths supported extensions [.css, .scss], got ".bad"');
+    expect(() =>
+      styleSheetPaths([], '/kibana/public/bar.bad', 'styleSheetPaths', pluginSpec)
+    ).toThrowError(
+      '[plugin:test] uiExports.styleSheetPaths supported extensions [.css, .scss], got ".bad"'
+    );
   });
 
   it('provides publicPath for scss extensions', () => {
     const localPath = resolve(dir, 'kibana/public/bar.scss');
     const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
 
-    expect(uiExports.styleSheetPaths).toHaveLength(1);
-    expect(uiExports.styleSheetPaths[0].localPath).toEqual(localPath);
-    expect(uiExports.styleSheetPaths[0].publicPath).toEqual('plugins/test/bar.css');
+    expect(uiExports.styleSheetPaths).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/bar.css",
+  },
+]
+`);
   });
 
   it('provides publicPath for css extensions', () => {
     const localPath = resolve(dir, 'kibana/public/bar.scss');
     const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
 
-    expect(uiExports.styleSheetPaths).toHaveLength(1);
-    expect(uiExports.styleSheetPaths[0].localPath).toEqual(localPath);
-    expect(uiExports.styleSheetPaths[0].publicPath).toEqual('plugins/test/bar.css');
+    expect(uiExports.styleSheetPaths).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/bar.css",
+  },
+]
+`);
   });
 
   it('should normalize mixed slashes', () => {
     const localPath = resolve(dir, 'kibana/public\\bar.scss');
     const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
 
-    expect(uiExports.styleSheetPaths).toHaveLength(1);
-    expect(uiExports.styleSheetPaths[0].localPath).toEqual(localPath);
+    expect(uiExports.styleSheetPaths).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "localPath": <absolute>/kibana/public\\bar.scss,
+    "publicPath": "plugins/test/../public/bar.css",
+  },
+]
+`);
   });
 });

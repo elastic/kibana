@@ -1,16 +1,22 @@
 <div class="filterEditor kuiModal">
   <div class="kuiModalHeader">
     <div class="kuiModalHeader__title">
-      <span ng-show="filterEditor.filter.meta.isNew">Add</span>
-      <span ng-hide="filterEditor.filter.meta.isNew">Edit</span>
-      filter
+      <span
+        ng-show="filterEditor.filter.meta.isNew"
+        i18n-id="common.ui.filterEditor.addFilterLabel"
+        i18n-default-message="Add filter"
+      ></span>
+      <span ng-hide="filterEditor.filter.meta.isNew"
+        i18n-id="common.ui.filterEditor.editFilterLabel"
+        i18n-default-message="Edit filter"
+      ></span>
     </div>
 
     <button
       data-test-subj="filterEditorModalCloseButton"
       class="kuiModalHeaderCloseButton kuiIcon fa-times"
       ng-click="filterEditor.onCancel()"
-      aria-label="Close filter popover"
+      aria-label="{{ ::'common.ui.filterEditor.closeFilterPopoverAriaLabel' | i18n: { defaultMessage: 'Close filter popover' } }}"
     ></button>
   </div>
 
@@ -18,9 +24,11 @@
     <!-- Filter definition -->
     <div class="kuiVerticalRhythm">
       <div class="kuiVerticalRhythmSmall filterEditor__labelBar">
-        <label class="kuiLabel">
-          Filter
-        </label>
+        <label
+          class="kuiLabel"
+          i18n-id="common.ui.filterEditor.filterLabel"
+          i18n-default-message="Filter"
+        ></label>
 
         <div>
           <a
@@ -28,13 +36,17 @@
             ng-click="filterEditor.toggleEditingQueryDsl()"
             kbn-accessible-click
           >
-            <span ng-if="filterEditor.isEditingQueryDsl">
-              Search filter values
-            </span>
+            <span
+              ng-if="filterEditor.isEditingQueryDsl"
+              i18n-id="common.ui.filterEditor.searchFilterValuesLabel"
+              i18n-default-message="Search filter values"
+            ></span>
 
-            <span ng-if="!filterEditor.isEditingQueryDsl">
-              Edit Query DSL
-            </span>
+            <span
+              ng-if="!filterEditor.isEditingQueryDsl"
+              i18n-id="common.ui.filterEditor.editQueryDSLLabel"
+              i18n-default-message="Edit Query DSL"
+            ></span>
           </a>
         </div>
       </div>
@@ -87,7 +99,20 @@
         ></filter-query-dsl-editor>
 
         <p class="kuiText kuiVerticalRhythmSmall">
-          Filters are built using the <a class="kuiLink" target="_blank" rel="noopener noreferrer" documentation-href="query.queryDsl">Elasticsearch Query DSL</a>.
+          <span
+            i18n-id="common.ui.filterEditor.filtersAreBuiltUsingESQueryDSLDescription"
+            i18n-default-message="Filters are built using the "
+            description="Part of composite text: common.ui.filterEditor.filtersAreBuiltUsingESQueryDSLDescription + common.ui.filterEditor.filtersAreBuiltUsingESQueryDSLDescription.esQueryDSLLinkText"
+          ></span>
+          <a
+            class="kuiLink"
+            target="_blank"
+            rel="noopener"
+            documentation-href="query.queryDsl"
+            i18n-id="common.ui.filterEditor.filtersAreBuiltUsingESQueryDSLDescription.esQueryDSLLinkText"
+            i18n-default-message="Elasticsearch Query DSL"
+            description="Part of composite text: common.ui.filterEditor.filtersAreBuiltUsingESQueryDSLDescription + common.ui.filterEditor.filtersAreBuiltUsingESQueryDSLDescription.esQueryDSLLinkText"
+          ></a>.
         </p>
       </div>
     </div>
@@ -98,14 +123,14 @@
         <label
           class="kuiLabel"
           for="filterEditorLabelInput"
-        >
-          Label
-        </label>
+          i18n-id="common.ui.filterEditor.labelLabel"
+          i18n-default-message="Label"
+        ></label>
       </div>
 
       <input
         class="kuiTextInput kuiVerticalRhythmSmall"
-        placeholder="Optional"
+        placeholder="{{ ::'common.ui.filterEditor.optionalPlaceholder' | i18n: { defaultMessage: 'Optional' } }}"
         type="text"
         ng-model="filterEditor.alias"
         id="filterEditorLabelInput"
@@ -119,7 +144,7 @@
       <button
         class="kuiButton kuiButton--danger"
         ng-click="filterEditor.onDelete()"
-        aria-label="Delete filter"
+        aria-label="{{ ::'common.ui.filterEditor.deleteFilterAriaLabel' | i18n: { defaultMessage: 'Delete filter' } }}"
       >
         <span
           class="kuiIcon fa-trash"
@@ -132,17 +157,17 @@
       <button
         class="kuiButton kuiButton--basic"
         ng-click="filterEditor.onCancel()"
-      >
-        Cancel
-      </button>
+        i18n-id="common.ui.filterEditor.cancelButtonLabel"
+        i18n-default-message="Cancel"
+      ></button>
       <button
         class="kuiButton kuiButton--primary"
         ng-disabled="!filterEditor.isValid()"
         ng-click="filterEditor.save()"
         data-test-subj="saveFilter"
-      >
-        Save
-      </button>
+        i18n-id="common.ui.filterEditor.saveButtonLabel"
+        i18n-default-message="Save"
+      ></button>
     </div>
   </div>
 </div>

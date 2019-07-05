@@ -17,7 +17,9 @@ export const lte = () => ({
     },
   },
   fn: (context, args) => {
-    if (typeof context !== typeof args.value) return false;
+    if (typeof context !== typeof args.value) {
+      return false;
+    }
     return context <= args.value;
   },
 });

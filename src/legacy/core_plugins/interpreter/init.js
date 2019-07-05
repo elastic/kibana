@@ -18,8 +18,8 @@
  */
 
 import { routes } from './server/routes';
-import { functionsRegistry } from '@kbn/interpreter/common';
-import { populateServerRegistries } from '@kbn/interpreter/server';
+import { registryFactory } from '@kbn/interpreter/common';
+import { registries } from '@kbn/interpreter/server';
 
 export default async function (server /*options*/) {
   server.injectUiAppVars('canvas', () => {
@@ -35,12 +35,15 @@ export default async function (server /*options*/) {
       kbnIndex: config.get('kibana.index'),
       esShardTimeout: config.get('elasticsearch.shardTimeout'),
       esApiVersion: config.get('elasticsearch.apiVersion'),
-      serverFunctions: functionsRegistry.toArray(),
+      serverFunctions: registries.serverFunctions.toArray(),
       basePath,
       reportingBrowserType,
     };
   });
 
-  await populateServerRegistries(['serverFunctions', 'types']);
+  // Expose server.plugins.interpreter.register(specs) and
+  // server.plugins.interpreter.registries() (a getter).
+  server.expose(registryFactory(registries));
+
   routes(server);
 }

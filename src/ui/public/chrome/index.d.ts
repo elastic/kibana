@@ -18,13 +18,14 @@
  */
 
 import { Brand } from '../../../core/public/chrome';
-import { WithBreadcrumbsApi } from './api/breadcrumbs';
+import { BreadcrumbsApi } from './api/breadcrumbs';
 
 interface IInjector {
   get<T>(injectable: string): T;
 }
 
-declare interface Chrome extends WithBreadcrumbsApi {
+declare interface Chrome {
+  breadcrumbs: BreadcrumbsApi;
   addBasePath<T = string>(path: T): T;
   dangerouslyGetActiveInjector(): Promise<IInjector>;
   getBasePath(): string;
@@ -44,3 +45,4 @@ declare interface Chrome extends WithBreadcrumbsApi {
 declare const chrome: Chrome;
 
 export default chrome;
+export { Breadcrumb } from './api/breadcrumbs';

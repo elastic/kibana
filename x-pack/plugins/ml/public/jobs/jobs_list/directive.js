@@ -11,11 +11,11 @@ import React from 'react';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { loadIndexPatterns } from 'plugins/ml/util/index_utils';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
-import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
 
@@ -26,15 +26,15 @@ uiRoutes
     template,
     resolve: {
       CheckLicense: checkFullLicense,
+      indexPatterns: loadIndexPatterns,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
-      initPromise: initPromise(false)
     }
   });
 
 import { JobsPage } from './jobs';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 module.directive('jobsPage', function () {
   return {
@@ -42,9 +42,16 @@ module.directive('jobsPage', function () {
     restrict: 'E',
     link: (scope, element) => {
       ReactDOM.render(
-        <I18nProvider>{React.createElement(JobsPage)}</I18nProvider>,
+        <I18nContext>
+          {React.createElement(JobsPage, { angularWrapperScope: scope })}
+        </I18nContext>,
         element[0]
       );
+
+      element.on('$destroy', () => {
+        ReactDOM.unmountComponentAtNode(element[0]);
+        scope.$destroy();
+      });
     }
   };
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNode, InfraPathInput } from '../../../../../common/graphql/types';
+import { InfraNode, InfraNodePath, InfraPathInput } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { createNodeItem } from './create_node_item';
 
@@ -27,10 +27,11 @@ export function extractGroupPaths(
           bucket.path_1.buckets.map(
             (b: InfraBucket): InfraNode => {
               const innerNode = createNodeItem(options, node, b);
-              const nodePath = [
-                { value: bucket.key.toString() },
-                { value: b.key.toString() },
-              ].concat(innerNode.path);
+              const groupPaths: InfraNodePath[] = [
+                { value: bucket.key.toString(), label: bucket.key.toString() },
+                { value: b.key.toString(), label: b.key.toString() },
+              ];
+              const nodePath = groupPaths.concat(innerNode.path);
               return {
                 ...innerNode,
                 path: nodePath,
@@ -40,7 +41,8 @@ export function extractGroupPaths(
         );
       }
       const nodeItem = createNodeItem(options, node, bucket);
-      const path = [{ value: key }].concat(nodeItem.path);
+      const currentPath: InfraNodePath[] = [{ value: key, label: key }];
+      const path = currentPath.concat(nodeItem.path);
       return acc.concat({
         ...nodeItem,
         path,

@@ -25,12 +25,17 @@ import Markdown from 'react-markdown';
 import replaceVars from '../../lib/replace_vars';
 import convertSeriesToVars from '../../lib/convert_series_to_vars';
 import ErrorComponent from '../../error';
+import uuid from 'uuid';
+
+const getMarkdownId = id => `markdown-${id}`;
 
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = _.get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
   const style = {};
+  const markdownElementId = getMarkdownId(uuid.v1());
+
   let reversed = props.reversed;
   const panelBackgroundColor = model.background_color || backgroundColor;
   if (panelBackgroundColor) {
@@ -38,6 +43,8 @@ function MarkdownVisualization(props) {
     reversed = color(panelBackgroundColor).luminosity() < 0.45;
   }
   let markdown;
+  let markdownCss = '';
+
   if (model.markdown) {
     const markdownSource = replaceVars(
       model.markdown,
@@ -47,6 +54,12 @@ function MarkdownVisualization(props) {
         ...variables
       }
     );
+
+    if (model.markdown_css) {
+      markdownCss = model.markdown_css
+        .replace(new RegExp(getMarkdownId(model.id), 'g'), markdownElementId);
+    }
+
     let className = 'tvbMarkdown';
     let contentClassName = `tvbMarkdown__content ${model.markdown_vertical_align}`;
     if (model.markdown_scrollbars) contentClassName += ' scrolling';
@@ -55,9 +68,9 @@ function MarkdownVisualization(props) {
     markdown = (
       <div className={className} data-test-subj="tsvbMarkdown">
         {markdownError && <ErrorComponent error={markdownError} />}
-        <style type="text/css">{model.markdown_css}</style>
+        <style type="text/css">{markdownCss}</style>
         <div className={contentClassName}>
-          <div id={`markdown-${model.id}`}>{!markdownError && <Markdown escapeHtml={true} source={markdownSource} />}</div>
+          <div id={markdownElementId}>{!markdownError && <Markdown escapeHtml={true} source={markdownSource} />}</div>
         </div>
       </div>
     );
@@ -77,7 +90,8 @@ MarkdownVisualization.propTypes = {
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
   visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  getConfig: PropTypes.func
 };
 
 export default MarkdownVisualization;

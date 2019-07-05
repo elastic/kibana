@@ -23,53 +23,92 @@
  * and the returned object can be passed to the `stats` method of the request
  * logger.
  */
+
+import { i18n } from '@kbn/i18n';
+
 function getRequestInspectorStats(searchSource) {
   const stats = {};
   const index = searchSource.getField('index');
 
   if (index) {
-    stats['Index pattern'] = {
+    stats.indexPattern = {
+      label: i18n.translate('common.ui.courier.indexPatternLabel', {
+        defaultMessage: 'Index pattern'
+      }),
       value: index.title,
-      description: 'The index pattern that connected to the Elasticsearch indices.',
+      description: i18n.translate('common.ui.courier.indexPatternDescription', {
+        defaultMessage: 'The index pattern that connected to the Elasticsearch indices.'
+      }),
     };
-    stats ['Index pattern ID'] = {
+    stats.indexPatternId = {
+      label: i18n.translate('common.ui.courier.indexPatternIdLabel', {
+        defaultMessage: 'Index pattern ID'
+      }),
       value: index.id,
-      description: 'The ID in the .kibana index.',
+      description: i18n.translate('common.ui.courier.indexPatternIdDescription', {
+        defaultMessage: 'The ID in the {kibanaIndexPattern} index.',
+        values: { kibanaIndexPattern: '.kibana' }
+      }),
     };
   }
 
   return stats;
 }
-
 function getResponseInspectorStats(searchSource, resp) {
   const lastRequest = searchSource.history && searchSource.history[searchSource.history.length - 1];
   const stats = {};
 
   if (resp && resp.took) {
-    stats['Query time'] = {
-      value: `${resp.took}ms`,
-      description: `The time it took to process the query.
-        Does not include the time to send the request or parse it in the browser.`,
+    stats.queryTime = {
+      label: i18n.translate('common.ui.courier.queryTimeLabel', {
+        defaultMessage: 'Query time'
+      }),
+      value: i18n.translate('common.ui.courier.queryTimeValue', {
+        defaultMessage: '{queryTime}ms',
+        values: { queryTime: resp.took },
+      }),
+      description: i18n.translate('common.ui.courier.queryTimeDescription', {
+        defaultMessage: 'The time it took to process the query. ' +
+          'Does not include the time to send the request or parse it in the browser.'
+      }),
     };
   }
 
   if (resp && resp.hits) {
-    stats['Hits (total)'] = {
+    stats.hitsTotal = {
+      label: i18n.translate('common.ui.courier.hitsTotalLabel', {
+        defaultMessage: 'Hits (total)'
+      }),
       value: `${resp.hits.total}`,
-      description: 'The number of documents that match the query.',
+      description: i18n.translate('common.ui.courier.hitsTotalDescription', {
+        defaultMessage: 'The number of documents that match the query.'
+      }),
     };
 
-    stats.Hits = {
+    stats.hits = {
+      label: i18n.translate('common.ui.courier.hitsLabel', {
+        defaultMessage: 'Hits'
+      }),
       value: `${resp.hits.hits.length}`,
-      description: 'The number of documents returned by the query.',
+      description: i18n.translate('common.ui.courier.hitsDescription', {
+        defaultMessage: 'The number of documents returned by the query.'
+      }),
     };
   }
 
   if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
-    stats['Request time'] = {
-      value: `${lastRequest.ms}ms`,
-      description: `The time of the request from the browser to Elasticsearch and back.
-        Does not include the time the requested waited in the queue.`
+    stats.requestTime = {
+      label: i18n.translate('common.ui.courier.requestTimeLabel', {
+        defaultMessage: 'Request time'
+      }),
+      value: i18n.translate('common.ui.courier.requestTimeValue', {
+        defaultMessage: '{requestTime}ms',
+        values: { requestTime: lastRequest.ms },
+      }),
+      description: i18n.translate('common.ui.courier.requestTimeDescription', {
+        defaultMessage: 'The time of the request from the browser to Elasticsearch and back. ' +
+          'Does not include the time the requested waited in the queue.'
+      }),
     };
   }
 

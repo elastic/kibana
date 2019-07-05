@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogSummary as LogSummaryQuery } from '../../../../common/graphql/types';
+import { LogSummary as LogSummaryQuery } from '../../../graphql/types';
 import {
   createGraphqlInitialState,
   GraphqlState,

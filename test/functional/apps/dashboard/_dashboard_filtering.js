@@ -25,6 +25,7 @@ import expect from 'expect.js';
  */
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
+  const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
@@ -57,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('filters on pie charts', async () => {
-        await dashboardExpect.pieSliceCount(0);
+        await pieChart.expectPieSliceCount(0);
       });
 
       it('area, bar and heatmap charts filtered', async () => {
@@ -119,7 +120,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('filters on pie charts', async () => {
-        await dashboardExpect.pieSliceCount(0);
+        await pieChart.expectPieSliceCount(0);
       });
 
       it('area, bar and heatmap charts filtered', async () => {
@@ -177,7 +178,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('pie charts', async () => {
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
       });
 
       it('area, bar and heatmap charts', async () => {
@@ -238,7 +239,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
@@ -250,13 +251,13 @@ export default function ({ getService, getPageObjects }) {
         // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
         // as that expects an item with the `data-shared-items-count` tag.
         await renderable.waitForRender();
-        await dashboardExpect.pieSliceCount(3);
+        await pieChart.expectPieSliceCount(3);
 
         await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
-        await dashboardExpect.pieSliceCount(3);
+        await pieChart.expectPieSliceCount(3);
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
@@ -264,14 +265,14 @@ export default function ({ getService, getPageObjects }) {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        await PageObjects.dashboard.filterOnPieSlice('grr');
+        await pieChart.filterOnPieSlice('grr');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await dashboardExpect.pieSliceCount(1);
+        await pieChart.expectPieSliceCount(1);
 
         await PageObjects.visualize.saveVisualizationExpectSuccess('animal sounds pie');
         await PageObjects.header.clickDashboard();
 
-        await dashboardExpect.pieSliceCount(1);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it('Removing filter pills and query unfiters data as expected', async () => {
@@ -283,17 +284,17 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
         await filterBar.removeFilter('sound.keyword');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
 
         await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
       });
 
       it('Pie chart linked to saved search filters data', async () => {
         await dashboardAddPanel.addVisualization('Filter Test: animals: linked to search with filter');
-        await dashboardExpect.pieSliceCount(7);
+        await pieChart.expectPieSliceCount(7);
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
@@ -301,7 +302,7 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
       });
     });
   });

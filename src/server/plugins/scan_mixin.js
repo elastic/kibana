@@ -38,17 +38,16 @@ export async function scanMixin(kbnServer, server, config) {
   const logging$ = Rx.merge(
     pack$.pipe(
       tap(definition => {
-        server.log(['plugin', 'debug'], {
-          tmpl: 'Found plugin at <%= path %>',
-          path: definition.getPath()
+        const path = definition.getPath();
+        server.logWithMetadata(['plugin', 'debug'], `Found plugin at ${path}`, {
+          path
         });
       })
     ),
 
     invalidDirectoryError$.pipe(
       tap(error => {
-        server.log(['plugin', 'warning'], {
-          tmpl: '<%= err.code %>: Unable to scan directory for plugins "<%= dir %>"',
+        server.logWithMetadata(['plugin', 'warning'], `${error.code}: Unable to scan directory for plugins "${error.path}"`, {
           err: error,
           dir: error.path
         });
@@ -57,8 +56,7 @@ export async function scanMixin(kbnServer, server, config) {
 
     invalidPackError$.pipe(
       tap(error => {
-        server.log(['plugin', 'warning'], {
-          tmpl: 'Skipping non-plugin directory at <%= path %>',
+        server.logWithMetadata(['plugin', 'warning'], `Skipping non-plugin directory at ${error.path}`, {
           path: error.path
         });
       })

@@ -1,0 +1,535 @@
+{
+  "type": "index",
+  "value": {
+    "index": "heartbeat-6.7.0",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "analysis": {
+          "analyzer": {
+            "url": {
+              "type": "standard",
+              "max_token_length": "1000",
+              "tokenizer": "uax_url_email"
+            }
+          }
+        },
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "_meta": {
+          "version": "6.7.0"
+        },
+        "dynamic_templates": [
+          {
+            "fields": {
+              "path_match": "fields.*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "keyword"
+              }
+            }
+          },
+          {
+            "docker.container.labels": {
+              "path_match": "docker.container.labels.*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "keyword"
+              }
+            }
+          },
+          {
+            "strings_as_keyword": {
+              "match_mapping_type": "string",
+              "mapping": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              }
+            }
+          }
+        ],
+        "date_detection": false,
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "beat": {
+            "properties": {
+              "hostname": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "timezone": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "version": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "cloud": {
+            "properties": {
+              "availability_zone": {
+                "type": "alias",
+                "path": "meta.cloud.availability_zone"
+              },
+              "instance": {
+                "properties": {
+                  "id": {
+                    "type": "alias",
+                    "path": "meta.cloud.instance_id"
+                  },
+                  "name": {
+                    "type": "alias",
+                    "path": "meta.cloud.instance_name"
+                  }
+                }
+              },
+              "machine": {
+                "properties": {
+                  "type": {
+                    "type": "alias",
+                    "path": "meta.cloud.machine_type"
+                  }
+                }
+              },
+              "project": {
+                "properties": {
+                  "id": {
+                    "type": "alias",
+                    "path": "meta.cloud.project_id"
+                  }
+                }
+              },
+              "provider": {
+                "type": "alias",
+                "path": "meta.cloud.provider"
+              },
+              "region": {
+                "type": "alias",
+                "path": "meta.cloud.region"
+              }
+            }
+          },
+          "container": {
+            "properties": {
+              "id": {
+                "type": "alias",
+                "path": "docker.container.id"
+              },
+              "image": {
+                "properties": {
+                  "name": {
+                    "type": "alias",
+                    "path": "docker.container.image"
+                  }
+                }
+              },
+              "name": {
+                "type": "alias",
+                "path": "docker.container.name"
+              }
+            }
+          },
+          "docker": {
+            "properties": {
+              "container": {
+                "properties": {
+                  "id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "image": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "labels": {
+                    "type": "object"
+                  },
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "error": {
+            "properties": {
+              "code": {
+                "type": "long"
+              },
+              "message": {
+                "type": "text",
+                "norms": false
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "event": {
+            "properties": {
+              "dataset": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "timezone": {
+                "type": "alias",
+                "path": "beat.timezone"
+              }
+            }
+          },
+          "fields": {
+            "type": "object"
+          },
+          "host": {
+            "properties": {
+              "architecture": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "hostname": {
+                "type": "alias",
+                "path": "beat.hostname"
+              },
+              "id": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "ip": {
+                "type": "ip"
+              },
+              "mac": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "os": {
+                "properties": {
+                  "build": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "family": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "platform": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "version": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "http": {
+            "properties": {
+              "response": {
+                "properties": {
+                  "status_code": {
+                    "type": "long"
+                  }
+                }
+              },
+              "rtt": {
+                "properties": {
+                  "content": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "response_header": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "total": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "validate": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "validate_body": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "write_request": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "norms": false,
+                "fields": {
+                  "raw": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "icmp": {
+            "properties": {
+              "requests": {
+                "type": "long"
+              },
+              "rtt": {
+                "properties": {
+                  "us": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "kubernetes": {
+            "properties": {
+              "annotations": {
+                "type": "object"
+              },
+              "container": {
+                "properties": {
+                  "image": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "labels": {
+                "type": "object"
+              },
+              "namespace": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "node": {
+                "properties": {
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "pod": {
+                "properties": {
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "uid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "meta": {
+            "properties": {
+              "cloud": {
+                "properties": {
+                  "availability_zone": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "instance_id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "instance_name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "machine_type": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "project_id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "provider": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "region": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "monitor": {
+            "properties": {
+              "duration": {
+                "properties": {
+                  "us": {
+                    "type": "long"
+                  }
+                }
+              },
+              "host": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "id": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "ip": {
+                "type": "ip"
+              },
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "scheme": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "status": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "resolve": {
+            "properties": {
+              "host": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "ip": {
+                "type": "ip"
+              },
+              "rtt": {
+                "properties": {
+                  "us": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "socks5": {
+            "properties": {
+              "rtt": {
+                "properties": {
+                  "connect": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": {
+            "type": "keyword",
+            "ignore_above": 1024
+          },
+          "tcp": {
+            "properties": {
+              "port": {
+                "type": "long"
+              },
+              "rtt": {
+                "properties": {
+                  "connect": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "validate": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tls": {
+            "properties": {
+              "certificate_not_valid_after": {
+                "type": "date"
+              },
+              "certificate_not_valid_before": {
+                "type": "date"
+              },
+              "rtt": {
+                "properties": {
+                  "handshake": {
+                    "properties": {
+                      "us": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

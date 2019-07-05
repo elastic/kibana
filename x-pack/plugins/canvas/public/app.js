@@ -22,6 +22,7 @@ import 'uiExports/fieldFormats';
 // load application code
 import './lib/load_expression_types';
 import './lib/load_transitions';
+import 'uiExports/canvas';
 
 // load the application
 chrome.setRootController('canvas', CanvasRootController);

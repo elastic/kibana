@@ -6,7 +6,7 @@
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraPathType } from '../../../common/graphql/types';
+import { InfraPathType } from '../../graphql/types';
 import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../lib/lib';
 
 interface Props {
@@ -62,7 +62,7 @@ const GroupNameContainer = styled.div`
   position: relative;
   text-align: center
   font-size: 16px;
-  margin-bottom: 5px; 
+  margin-bottom: 5px;
   top: 20px;
   display: flex;
   justify-content: center;

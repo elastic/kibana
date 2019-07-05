@@ -1,10 +1,12 @@
 <div class='ml-job-selector'>
-  <div class="header">
-    Job Selection
-  </div>
+  <div
+    class="header"
+    i18n-id="xpack.ml.jobSelectList.jobSelectionTitle"
+    i18n-default-message="Job Selection"
+  ></div>
 
   <ml-loading-indicator
-    label="Loading jobs"
+    label="{{ ::'xpack.ml.jobSelectList.loadingJobsLabel' | i18n: { defaultMessage: 'Loading jobs'} }}"
     is-loading="noJobsCreated===undefined"
   />
   <div class="select-list" ng-show='noJobsCreated!==undefined'>
@@ -14,9 +16,12 @@
           ng-if="singleSelection !== true"
           type="checkbox"
           ng-checked="allGroupsSelected"
-          aria-label="Select all groups checkbox. Total count {{selected.groups.length}}."
+          aria-label="{{ 'xpack.ml.jobSelectList.selectAllGroupsCheckboxAriaLabel' | i18n: {
+            defaultMessage: 'Select all groups checkbox. Total count {selectedGroupsLength}.',
+            values: { selectedGroupsLength: selected.groups.length }
+          } }}"
           ng-click="toggleAllGroupsSelection()" />
-        Groups
+          {{ ::'xpack.ml.jobSelectList.groupsTitle' | i18n: { defaultMessage: 'Groups' } }}
       </div>
       <div class="list-section">
         <div class='group' ng-repeat="group in selected.groups">
@@ -25,7 +30,10 @@
               <label class="kuiFormLabel">
                 <div >
                   <input
-                    aria-label="Group ID {{group.id}}"
+                    aria-label="{{ 'xpack.ml.jobSelectList.groupIdAriaLabel' | i18n: {
+                      defaultMessage: 'Group ID {groupId}',
+                      values: { groupId: group.id }
+                    } }}"
                     ng-if="singleSelection !== true && group.selectable === true" type="checkbox"
                     ng-model="group.selected"
                     ng-click="toggleGroupSelection()" />
@@ -54,9 +62,12 @@
     <div class="list-section-title" ng-if="singleSelection !== true">
       <input type="checkbox"
         ng-checked="allJobsSelected"
-        aria-label="Select all jobs checkbox. Total count {{selected.jobs.length}}."
+        aria-label="{{ 'xpack.ml.jobSelectList.selectAllJobsCheckboxAriaLabel' | i18n: {
+          defaultMessage: 'Select all jobs checkbox. Total count {selectedJobsLength}.',
+          values: { selectedJobsLength: selected.jobs.length }
+        } }}"
         ng-click="toggleAllJobsSelection()" />
-      Jobs
+        {{ ::'xpack.ml.jobSelectList.jobsTitle' | i18n: { defaultMessage: 'Jobs' } }}
     </div>
     <div class="list-section" ng-class="{'list-section-single': singleSelection}">
       <div class='job-row' ng-repeat="job in selected.jobs">
@@ -73,7 +84,13 @@
                   value="{{job.id}}"
                   ng-model="$parent.$parent.selectedJobRadio"
                   ng-disabled='job.disabled' />
-                <span ng-class="{'disabled-job': job.disabled}" aria-label="Job ID {{job.id}}">{{job.id}}</span>
+                <span
+                  ng-class="{'disabled-job': job.disabled}"
+                  aria-label="{{ 'xpack.ml.jobSelectList.jobIdAriaLabel' | i18n: {
+                    defaultMessage: 'Job ID {jobId}',
+                    values: { jobId: job.id }
+                  } }}"
+                >{{job.id}}</span>
               </span>
             </div>
             <div>
@@ -82,7 +99,10 @@
               </div>
               <div
                 class='gant-bar'
-                aria-label="time range {{job.timeRange.label}}"
+                aria-label="{{ 'xpack.ml.jobSelectList.timeRangeAriaLabel' | i18n: {
+                  defaultMessage: 'time range {jobTimeRangeLabel}',
+                  values: { jobTimeRangeLabel: job.timeRange.label }
+                } }}"
                 ng-class="{'disabled-job': job.disabled, 'gant-bar-running': job.running}"
                 tooltip='{{job.timeRange.label}}'
                 tooltip-placement="bottom"
@@ -102,19 +122,25 @@
     <button
       ng-click="apply()"
       class="kuiButton kuiButton--primary"
-      aria-label="Apply"
+      aria-label="{{ ::'xpack.ml.jobSelectList.applyButtonAriaLabel' | i18n: { defaultMessage: 'Apply'} }}"
       ng-disabled="selectedCount===0"
-      >
-      Apply
-    </button>
-    <button ng-click="closePopover()" class="kuiButton kuiButton--primary" aria-label="Cancel">Cancel</button>
+      i18n-id="xpack.ml.jobSelectList.applyButtonLabel"
+      i18n-default-message="Apply"
+    ></button>
+    <button
+      ng-click="closePopover()"
+      class="kuiButton kuiButton--primary"
+      aria-label="{{ ::'xpack.ml.jobSelectList.cancelButtonAriaLabel' | i18n: { defaultMessage: 'Cancel'} }}"
+      i18n-id="xpack.ml.jobSelectList.cancelButtonLabel"
+      i18n-default-message="Cancel"
+    ></button>
   </div>
 
   <div class='apply-time-range'>
     <label class="kuiFormLabel">
     <input type="checkbox"
       ng-model="applyTimeRange"/>
-      Also apply time range
+      {{ ::'xpack.ml.jobSelectList.applyTimeRangeLabel' | i18n: { defaultMessage: 'Also apply time range' } }}
   </label>
   </div>
 

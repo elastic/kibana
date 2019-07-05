@@ -37,13 +37,22 @@ import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
 const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
-i18n.init(injectedMetadata.legacyMetadata.translations);
 
-new CoreSystem({
-  injectedMetadata,
-  rootDomElement: document.body,
-  requireLegacyFiles: () => {
-    ${bundle.getRequires().join('\n  ')}
-  }
-}).start()
+i18n.load(injectedMetadata.i18n.translationsUrl)
+  .catch(e => e)
+  .then((i18nError) => {
+    const coreSystem = new CoreSystem({
+      injectedMetadata,
+      rootDomElement: document.body,
+      requireLegacyFiles: () => {
+        ${bundle.getRequires().join('\n  ')}
+      }
+    });
+    
+    const coreStartContract = coreSystem.start();
+    
+    if (i18nError) {
+      coreStartContract.fatalErrors.add(i18nError);
+    }
+  });
 `;

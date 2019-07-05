@@ -106,7 +106,7 @@ export function VislibAxisLabelsProvider() {
         selection.selectAll('.tick text')
           .text(function (d) {
             const par = d3.select(this.parentNode).node();
-            const myPos = scaleStartPad + (config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d));
+            const myPos = scaleStartPad + self.axisScale.scale(d);
             const mySize = (config.isHorizontal() ? par.getBBox().width : par.getBBox().height) * padding;
             const halfSize = mySize / 2;
 

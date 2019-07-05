@@ -5,7 +5,7 @@
   spinner-enabled="true"
   spinner-class="kuiIcon kuiIcon--basic fa-spinner fa-spin"
 >
-  <ui-select-match placeholder="Values...">
+  <ui-select-match placeholder="{{ ::'common.ui.filterEditor.filterParamsPhraseEditor.valuesPlaceholder' | i18n: { defaultMessage: 'Values…' } }}">
     <span
       class="uiSelectMatch--ellipsis"
       tooltip="{{$select.selected}}"
@@ -25,7 +25,7 @@
 
 <filter-params-input-type
   ng-if="!(filterParamsPhraseEditor.shouldSuggestValues && field.aggregatable && field.type === 'string')"
-  placeholder="Value..."
+  placeholder="{{ ::'common.ui.filterEditor.filterParamsPhraseEditor.valuePlaceholder' | i18n: { defaultMessage: 'Value…' } }}"
   type="field.type"
   value="params.phrase"
   on-change="params.phrase = value"
@@ -39,7 +39,7 @@
     documentation-href="date.dateMath"
     target="_blank"
     rel="noopener noreferrer"
-  >
-    Accepted date formats
-  </a>
+    i18n-id="common.ui.filterEditor.filterParamsPhraseEditor.acceptedDateFormatsLinkText"
+    i18n-default-message="Accepted date formats"
+  ></a>
 </small>

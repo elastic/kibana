@@ -1,0 +1,21 @@
+[role="xpack"]
+[[vector-style]]
+=== Vector style
+
+*Border color*:: Defines the border color of the vector features.
+
+*Border width*:: Defines the border width of the vector features.
+
+*Fill color*:: Defines the fill color of the vector features.
+
+*Symbol size*:: Defines the symbol size of point features.
+
+Click the *link* button to toggle between static styling and data-driven styling.
+
+[role="screenshot"]
+image::maps/images/vector_style_static.png[]
+
+[role="screenshot"]
+image::maps/images/vector_style_dynamic.png[]
+
+NOTE: The *link* button is only available when your vector features contain numeric properties.

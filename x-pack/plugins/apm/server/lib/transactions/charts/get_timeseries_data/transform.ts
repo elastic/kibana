@@ -6,6 +6,7 @@
 
 import { isNumber, round, sortBy } from 'lodash';
 import { oc } from 'ts-optchain';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 import { ESResponse } from './fetcher';
 
@@ -56,16 +57,21 @@ export function getTpmBuckets(
   transactionResultBuckets: ESResponse['aggregations']['transaction_results']['buckets'],
   bucketSize: number
 ) {
-  const buckets = transactionResultBuckets.map(({ key, timeseries }) => {
-    const dataPoints = timeseries.buckets.slice(1, -1).map(bucket => {
-      return {
-        x: bucket.key,
-        y: round(bucket.doc_count * (60 / bucketSize), 1)
-      };
-    });
+  const buckets = transactionResultBuckets.map(
+    ({ key: resultKey, timeseries }) => {
+      const dataPoints = timeseries.buckets.slice(1, -1).map(bucket => {
+        return {
+          x: bucket.key,
+          y: round(bucket.doc_count * (60 / bucketSize), 1)
+        };
+      });
 
-    return { key, dataPoints };
-  });
+      // Handle empty string result keys
+      const key = resultKey === '' ? NOT_AVAILABLE_LABEL : resultKey;
+
+      return { key, dataPoints };
+    }
+  );
 
   return sortBy(
     buckets,

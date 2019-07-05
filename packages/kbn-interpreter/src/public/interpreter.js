@@ -17,48 +17,37 @@
  * under the License.
  */
 
-import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
+import { interpreterProvider } from '../common/interpreter/interpret';
 import { serializeProvider } from '../common/lib/serialize';
-import { getSocket } from './socket';
-import { typesRegistry } from '../common/lib/types_registry';
 import { createHandlers } from './create_handlers';
-import { functionsRegistry } from '../common/lib/functions_registry';
-import { getBrowserRegistries } from './browser_registries';
+import { batchedFetch } from './batched_fetch';
+import { FUNCTIONS_URL } from './consts';
 
-let socket;
-let resolve;
-const functionList = new Promise(_resolve => (resolve = _resolve));
+export async function initializeInterpreter(kfetch, typesRegistry, functionsRegistry) {
+  const serverFunctionList = await kfetch({ pathname: FUNCTIONS_URL });
+  const types = typesRegistry.toJS();
+  const { serialize } = serializeProvider(types);
+  const batch = batchedFetch({ kfetch, serialize });
 
-export async function initializeInterpreter() {
-  socket = getSocket();
-
-  // Listen for interpreter runs
-  socket.on('run', ({ ast, context, id }) => {
-    const types = typesRegistry.toJS();
-    const { serialize, deserialize } = serializeProvider(types);
-    interpretAst(ast, deserialize(context)).then(value => {
-      socket.emit(`resp:${id}`, { value: serialize(value) });
-    });
+  // For every sever-side function, register a client-side
+  // function that matches its definition, but which simply
+  // calls the server-side function endpoint.
+  Object.keys(serverFunctionList).forEach(functionName => {
+    functionsRegistry.register(() => ({
+      ...serverFunctionList[functionName],
+      fn: (context, args) => batch({ functionName, args, context }),
+    }));
   });
 
-  // Create the function list
-  socket.emit('getFunctionList');
-  socket.once('functionList', resolve);
-  return functionList;
+  const interpretAst = async (ast, context, handlers) => {
+    const interpretFn = await interpreterProvider({
+      types: typesRegistry.toJS(),
+      handlers: { ...handlers, ...createHandlers() },
+      functions: functionsRegistry.toJS(),
+    });
+    return interpretFn(ast, context);
+  };
+
+  return { interpretAst };
 }
 
-// Use the above promise to seed the interpreter with the functions it can defer to
-export async function interpretAst(ast, context) {
-  // Load plugins before attempting to get functions, otherwise this gets racey
-  return Promise.all([functionList, getBrowserRegistries()])
-    .then(([serverFunctionList]) => {
-      return socketInterpreterProvider({
-        types: typesRegistry.toJS(),
-        handlers: createHandlers(socket),
-        functions: functionsRegistry.toJS(),
-        referableFunctions: serverFunctionList,
-        socket: socket,
-      });
-    })
-    .then(interpretFn => interpretFn(ast, context));
-}

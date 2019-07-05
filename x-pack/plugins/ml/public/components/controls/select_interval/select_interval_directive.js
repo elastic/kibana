@@ -12,22 +12,24 @@ import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { SelectInterval } from './select_interval';
+import { SelectInterval, mlSelectIntervalService } from './select_interval';
 
-module.service('mlSelectIntervalService', function (Private) {
+module.service('mlSelectIntervalService', function (Private, i18n) {
   const stateFactory = Private(stateFactoryProvider);
-  this.state = stateFactory('mlSelectInterval', {
-    interval: { display: 'Auto', val: 'auto' }
+  this.state = mlSelectIntervalService.state = stateFactory('mlSelectInterval', {
+    interval: {
+      display: i18n('xpack.ml.controls.selectInterval.autoInitLabel', { defaultMessage: 'Auto' }),
+      val: 'auto'
+    }
   });
+  mlSelectIntervalService.initialized = true;
 })
   .directive('mlSelectInterval', function ($injector) {
     const reactDirective = $injector.get('reactDirective');
-    const mlSelectIntervalService = $injector.get('mlSelectIntervalService');
 
     return reactDirective(
       SelectInterval,
       undefined,
-      { restrict: 'E' },
-      { mlSelectIntervalService }
+      { restrict: 'E' }
     );
   });

@@ -29,6 +29,9 @@ export class EditFlyout extends Component {
     super(props);
 
     this.applyOverrides = () => {};
+    this.state = {
+      overridesValid: true
+    };
   }
 
   applyAndClose = () => {
@@ -42,10 +45,14 @@ export class EditFlyout extends Component {
   unsetApplyOverrides = () => {
     this.applyOverrides = () => {};
   }
+  setOverridesValid = (overridesValid) => {
+    this.setState({ overridesValid });
+  }
 
   render() {
-    const { isFlyoutVisible, closeEditFlyout } = this.props;
     const {
+      isFlyoutVisible,
+      closeEditFlyout,
       setOverrides,
       overrides,
       originalSettings,
@@ -78,6 +85,7 @@ export class EditFlyout extends Component {
                 overrides={overrides}
                 originalSettings={originalSettings}
                 setApplyOverrides={this.setApplyOverrides}
+                setOverridesValid={this.setOverridesValid}
                 fields={fields}
               />
 
@@ -105,8 +113,8 @@ export class EditFlyout extends Component {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={this.applyAndClose}
+                    isDisabled={(this.state.overridesValid === false)}
                     fill
-                    // isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
                   >
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.editFlyout.applyOverrideSettingsButtonLabel"

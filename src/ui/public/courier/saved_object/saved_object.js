@@ -208,7 +208,6 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           return savedObjectsClient.get(esType, this.id)
             .then(resp => {
               // temporary compatability for savedObjectsClient
-
               return {
                 _id: resp.id,
                 _type: resp.type,
@@ -324,9 +323,12 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
             return confirmModalPromise(confirmMessage, {
               confirmButtonText: i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteButtonLabel', {
-                defaultMessage: 'Overwrite {name}',
+                defaultMessage: 'Overwrite',
+              }),
+              title: i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteTitle', {
+                defaultMessage: 'Overwrite {name}?',
                 values: { name: this.getDisplayName() }
-              })
+              }),
             })
               .then(() => savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true })))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));

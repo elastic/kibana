@@ -41,6 +41,9 @@ export const documentationLinks = {
   logstash: {
     base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
   },
+  functionbeat: {
+    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
+  },
   aggs: {
     date_histogram: `${ELASTIC_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
     date_range: `${ELASTIC_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
@@ -84,6 +87,10 @@ export const documentationLinks = {
   indexPatterns: {
     loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
     introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+  },
+  kibana: {
+    visualize: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
+    dashboard: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
   },
   query: {
     luceneQuerySyntax: `${ELASTIC_DOCS}query-dsl-query-string-query.html#query-string-syntax`,

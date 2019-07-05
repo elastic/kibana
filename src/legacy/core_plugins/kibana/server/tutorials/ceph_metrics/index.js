@@ -28,7 +28,7 @@ export function cephMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.cephMetrics.nameTitle', {
       defaultMessage: 'Ceph metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.cephMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Ceph server.',

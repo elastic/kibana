@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import { tint } from 'polished';
+import { transparentize } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -66,7 +66,8 @@ const SuggestionItemField = styled.div`
 `;
 
 const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
-  background-color: ${props => tint(0.1, getEuiIconColor(props.theme, props.suggestionType))};
+  background-color: ${props =>
+    transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
   color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;

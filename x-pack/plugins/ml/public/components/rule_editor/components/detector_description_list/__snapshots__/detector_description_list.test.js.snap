@@ -9,15 +9,36 @@ exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
     Array [
       Object {
         "description": "responsetimes",
-        "title": "Job ID",
+        "title": <FormattedMessage
+          defaultMessage="Job ID"
+          id="xpack.ml.ruleEditor.detectorDescriptionList.jobIdTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "description": "mean response time",
-        "title": "Detector",
+        "title": <FormattedMessage
+          defaultMessage="Detector"
+          id="xpack.ml.ruleEditor.detectorDescriptionList.detectorTitle"
+          values={Object {}}
+        />,
       },
       Object {
-        "description": "actual 50, typical 1.23",
-        "title": "Selected anomaly",
+        "description": <FormattedMessage
+          defaultMessage="actual {actual}, typical {typical}"
+          id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
+          values={
+            Object {
+              "actual": 50,
+              "typical": 1.23,
+            }
+          }
+        />,
+        "title": <FormattedMessage
+          defaultMessage="Selected anomaly"
+          id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyTitle"
+          values={Object {}}
+        />,
       },
     ]
   }
@@ -35,11 +56,19 @@ exports[`DetectorDescriptionList render for population detector with no anomaly 
     Array [
       Object {
         "description": "population",
-        "title": "Job ID",
+        "title": <FormattedMessage
+          defaultMessage="Job ID"
+          id="xpack.ml.ruleEditor.detectorDescriptionList.jobIdTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "description": "count by status over clientip",
-        "title": "Detector",
+        "title": <FormattedMessage
+          defaultMessage="Detector"
+          id="xpack.ml.ruleEditor.detectorDescriptionList.detectorTitle"
+          values={Object {}}
+        />,
       },
     ]
   }

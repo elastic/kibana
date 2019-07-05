@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isObject, isNumber } from 'lodash';
 import { VislibComponentsZeroInjectionFlattenDataProvider } from './flatten_data';
 
 export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
@@ -32,7 +32,7 @@ export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
    */
 
   return function (obj) {
-    if (!_.isObject(obj)) {
+    if (!isObject(obj)) {
       throw new TypeError('UniqueXValuesUtilService expects an object');
     }
 
@@ -46,30 +46,45 @@ export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
       charts = [obj];
     }
 
-    const isDate = charts.every(function (chart) {
+    const isDate = charts.every(chart => {
       return chart.ordered && chart.ordered.date;
     });
 
-    const isOrdered = charts.every(function (chart) {
+    const isOrdered = charts.every(chart => {
       return chart.ordered;
     });
 
-    flattenedData.forEach(function (d, i) {
-      const key = d.x;
-      const prev = uniqueXValues.get(key);
-      let sum = d.y;
-
-      if (prev) {
-        i = Math.min(i, prev.index);
-        sum += prev.sum;
-      }
-
+    const initXValue = (key, index) => {
       uniqueXValues.set(key, {
-        index: i,
-        isDate: isDate,
-        isOrdered: isOrdered,
-        isNumber: _.isNumber(key),
-        sum: sum
+        index,
+        isDate,
+        isOrdered,
+        isNumber: isNumber(key),
+        sum: 0,
+      });
+    };
+
+    // Populate `uniqueXValues` with the preserved x key order from the
+    // original tabified data. `flattenedData` only contains the first
+    // non-zero values in each series, and therefore is not guaranteed
+    // to match the order that came back from ES.
+    if (obj.xAxisOrderedValues) {
+      obj.xAxisOrderedValues.forEach(initXValue);
+    }
+
+    // Generate a sum for each value
+    flattenedData.forEach(d => {
+      const key = d.x;
+      let prev = uniqueXValues.get(key);
+      if (!prev) {
+        // Value doesn't exist in xAxisOrderedValues, so we create it
+        // and index it at the end.
+        initXValue(key, uniqueXValues.size);
+        prev = uniqueXValues.get(key);
+      }
+      uniqueXValues.set(key, {
+        ...prev,
+        sum: prev.sum + d.y,
       });
     });
 

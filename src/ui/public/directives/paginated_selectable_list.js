@@ -40,7 +40,11 @@ module.directive('paginatedSelectableList', function () {
       disableAutoFocus: '='
     },
     template: paginatedSelectableListTemplate,
-    controller: function ($scope) {
+    controller: function ($scope, $filter) {
+      function calculateHitsByQuery() {
+        $scope.hitsByQuery = $filter('filter')($scope.hits, $scope.query);
+      }
+
       // Should specify either user-make-url or user-on-select
       if (!$scope.userMakeUrl && !$scope.userOnSelect) {
         throwError('paginatedSelectableList directive expects a makeUrl or onSelect function');
@@ -53,6 +57,8 @@ module.directive('paginatedSelectableList', function () {
 
       $scope.perPage = $scope.perPage || 10;
       $scope.hits = $scope.list = _.sortBy($scope.list, $scope.accessor);
+      $scope.$watchGroup(['hits', 'query'], calculateHitsByQuery);
+      calculateHitsByQuery();
       $scope.hitCount = $scope.hits.length;
 
       /**

@@ -88,6 +88,8 @@ function getWizardUrlFromCloningJob(job) {
       page = 'multi_metric';
     } else if (created === WIZARD_TYPE.POPULATION) {
       page = 'population';
+    } else {
+      return null;
     }
     const indexPatternId = getIndexPatternIdFromName(job.datafeed_config.indices[0]);
 

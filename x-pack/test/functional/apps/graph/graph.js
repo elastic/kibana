@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
 
@@ -24,7 +23,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
       log.debug('create secrepo index pattern');
       await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       log.debug('navigateTo graph');
       await PageObjects.common.navigateToApp('graph');
     });

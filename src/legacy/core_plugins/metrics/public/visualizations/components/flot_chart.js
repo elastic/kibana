@@ -25,6 +25,7 @@ import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
 import Resize from './resize';
 import calculateBarWidth from '../lib/calculate_bar_width';
+import calculateFillColor from '../lib/calculate_fill_color';
 import colors from '../lib/colors';
 
 class FlotChart extends Component {
@@ -99,7 +100,7 @@ class FlotChart extends Component {
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
-      if (!_.isEqual(this.props.series, series)) this.handleDraw(this.plot);
+      if (!_.isEqual(this.props.series, newProps.series)) this.handleDraw(this.plot);
     } else {
       this.renderChart();
     }
@@ -119,7 +120,11 @@ class FlotChart extends Component {
       .filter(this.filterByShow(show))
       .map(set => {
         if (_.isPlainObject(set)) {
-          return set;
+          return {
+            ...set,
+            lines: this.computeColor(set.lines, set.color),
+            bars: this.computeColor(set.bars, set.color),
+          };
         }
         return {
           color: '#990000',
@@ -128,6 +133,18 @@ class FlotChart extends Component {
       })
       .reverse()
       .value();
+  }
+
+  computeColor(style, color) {
+    if (style && style.show) {
+      const { fill, fillColor } = calculateFillColor(color, style.fill);
+      return {
+        ...style,
+        fill,
+        fillColor,
+      };
+    }
+    return style;
   }
 
   handleDraw(plot) {

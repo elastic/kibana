@@ -13,9 +13,11 @@ import { http } from '../../../../../services/http_service';
 import emailBody from './email.html';
 import emailInfluencersBody from './email-influencers.html';
 import { watch } from './watch.js';
+import { i18n } from '@kbn/i18n';
 
 
 const compiledEmailBody = _.template(emailBody);
+const compiledEmailInfluencersBody = _.template(emailInfluencersBody);
 
 const emailSection = {
   send_email: {
@@ -23,7 +25,7 @@ const emailSection = {
     email: {
       profile: 'standard',
       to: [],
-      subject: 'ML Watcher Alert',
+      subject: i18n.translate('xpack.ml.newJob.simple.watcher.email.mlWatcherAlertSubjectTitle', { defaultMessage: 'ML Watcher Alert' }),
       body: {
         html: ''
       }
@@ -96,7 +98,28 @@ class CreateWatchService {
           // create the html by adding the variables to the compiled email body.
           emailSection.send_email.email.body.html = compiledEmailBody({
             serverAddress: chrome.getAppUrl(),
-            influencersSection: ((this.config.includeInfluencers === true) ? emailInfluencersBody : '')
+            influencersSection: ((this.config.includeInfluencers === true) ?
+              compiledEmailInfluencersBody({
+                topInfluencersLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.topInfluencersLabel', {
+                  defaultMessage: 'Top influencers:'
+                })
+              }) : ''
+            ),
+            elasticStackMachineLearningAlertLabel: i18n.translate(
+              'xpack.ml.newJob.simple.watcher.email.elasticStackMachineLearningAlertLabel', {
+                defaultMessage: 'Elastic Stack Machine Learning Alert'
+              }
+            ),
+            jobLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.jobLabel', { defaultMessage: 'Job' }),
+            timeLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.timeLabel', { defaultMessage: 'Time' }),
+            anomalyScoreLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.anomalyScoreLabel', {
+              defaultMessage: 'Anomaly score'
+            }),
+            openInAnomalyExplorerLinkText: i18n.translate('xpack.ml.newJob.simple.watcher.email.openInAnomalyExplorerLinkText', {
+              defaultMessage: 'Click here to open in Anomaly Explorer.'
+            }),
+            topRecordsLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.topRecordsLabel', { defaultMessage: 'Top records:' }),
+
           });
 
           // add email section to watch

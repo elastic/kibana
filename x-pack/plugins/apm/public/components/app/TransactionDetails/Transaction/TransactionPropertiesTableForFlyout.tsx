@@ -4,24 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { capitalize, first, get } from 'lodash';
+import { Location } from 'history';
+import { first, get } from 'lodash';
 import React from 'react';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-// @ts-ignore
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
-  PropertiesTable
+  PropertiesTable,
+  Tab
 } from '../../../shared/PropertiesTable';
-// @ts-ignore
-import { Tab } from '../../../shared/UIComponents';
 
 // Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
-  return selectedTab && tabs.includes(selectedTab) ? selectedTab : first(tabs);
+function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
+  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
+  return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 function getTabs(transactionData: Transaction) {
@@ -30,7 +33,7 @@ function getTabs(transactionData: Transaction) {
 }
 
 interface Props {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
 }
@@ -47,7 +50,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
   return (
     <div>
       <EuiTabs>
-        {tabs.map(key => {
+        {tabs.map(({ key, label }) => {
           return (
             <EuiTab
               onClick={() => {
@@ -59,18 +62,18 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
                   })
                 });
               }}
-              isSelected={currentTab === key}
+              isSelected={currentTab.key === key}
               key={key}
             >
-              {capitalize(key)}
+              {label}
             </EuiTab>
           );
         })}
       </EuiTabs>
       <EuiSpacer />
       <PropertiesTable
-        propData={get(transaction.context, currentTab)}
-        propKey={currentTab}
+        propData={get(transaction.context, currentTab.key)}
+        propKey={currentTab.key}
         agentName={agentName}
       />
     </div>

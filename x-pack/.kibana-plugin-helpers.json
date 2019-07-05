@@ -16,6 +16,7 @@
     "common/**/*",
     "plugins/**/*",
     "server/**/*",
+    "typings/**/*",
     "webpackShims/*",
     "!**/README.md",
     "!__tests__",

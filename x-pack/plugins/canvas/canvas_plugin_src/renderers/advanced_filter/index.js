@@ -22,7 +22,6 @@ export const advancedFilter = () => ({
     );
 
     handlers.onDestroy(() => {
-      handlers.setFilter('');
       ReactDOM.unmountComponentAtNode(domNode);
     });
   },

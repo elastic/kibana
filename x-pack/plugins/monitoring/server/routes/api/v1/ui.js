@@ -18,7 +18,7 @@ export {
 } from './beats';
 export {
   clusterRoute,
-  clustersRoute
+  clustersRoute,
 } from './cluster';
 export {
   esIndexRoute,

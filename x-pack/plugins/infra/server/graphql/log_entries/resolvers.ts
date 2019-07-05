@@ -9,30 +9,31 @@ import {
   InfraLogMessageFieldSegment,
   InfraLogMessageSegment,
   InfraSourceResolvers,
-} from '../../../common/graphql/types';
-import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
+} from '../../graphql/types';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
-import { InfraContext } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-export type InfraSourceLogEntriesAroundResolver = InfraResolverOf<
-  InfraSourceResolvers.LogEntriesAroundResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceLogEntriesAroundResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogEntriesAroundResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceLogEntriesBetweenResolver = InfraResolverOf<
-  InfraSourceResolvers.LogEntriesBetweenResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceLogEntriesBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogEntriesBetweenResolver>,
+  QuerySourceResolver
 >;
 
-export type InfraSourceLogSummaryBetweenResolver = InfraResolverOf<
-  InfraSourceResolvers.LogSummaryBetweenResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogSummaryBetweenResolver>,
+  QuerySourceResolver
+>;
+
+export type InfraSourceLogItem = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogItemResolver>,
+  QuerySourceResolver
 >;
 
 export const createLogEntriesResolvers = (libs: {
@@ -42,6 +43,7 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
+    logItem: InfraSourceLogItem;
   };
   InfraLogMessageSegment: {
     __resolveType(
@@ -118,6 +120,9 @@ export const createLogEntriesResolvers = (libs: {
         end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
         buckets,
       };
+    },
+    async logItem(source, args, { req }) {
+      return await libs.logEntries.getLogItem(req, args.id, source.configuration);
     },
   },
   InfraLogMessageSegment: {

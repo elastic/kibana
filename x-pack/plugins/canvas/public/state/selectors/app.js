@@ -11,6 +11,10 @@ export function canUserWrite(state) {
   return get(state, 'transient.canUserWrite', true);
 }
 
+export function isFirstLoad(state) {
+  return get(state, 'transient.isFirstLoad', true);
+}
+
 export function getFullscreen(state) {
   return get(state, 'transient.fullscreen', false);
 }

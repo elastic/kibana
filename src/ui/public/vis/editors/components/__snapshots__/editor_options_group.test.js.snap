@@ -17,6 +17,7 @@ exports[`<EditorOptionsGroup/> renders as expected 1`] = `
           aria-controls="eog_staticId"
           aria-expanded="true"
           class="euiAccordion__button"
+          type="button"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -99,6 +100,7 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
           aria-controls="eog_staticId"
           aria-expanded="true"
           class="euiAccordion__button"
+          type="button"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -208,6 +210,7 @@ exports[`<EditorOptionsGroup/> renders as expected with initial collapsed 1`] = 
           aria-controls="eog_staticId"
           aria-expanded="false"
           class="euiAccordion__button"
+          type="button"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

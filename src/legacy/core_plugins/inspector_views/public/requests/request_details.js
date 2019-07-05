@@ -29,11 +29,30 @@ import {
   RequestDetailsResponse,
   RequestDetailsStats,
 } from './details';
+import { i18n } from '@kbn/i18n';
 
 const DETAILS = [
-  { name: 'Statistics', component: RequestDetailsStats },
-  { name: 'Request', component: RequestDetailsRequest },
-  { name: 'Response', component: RequestDetailsResponse },
+  {
+    name: 'Statistics',
+    label: i18n.translate('inspectorViews.requests.statisticsTabLabel', {
+      defaultMessage: 'Statistics'
+    }),
+    component: RequestDetailsStats
+  },
+  {
+    name: 'Request',
+    label: i18n.translate('inspectorViews.requests.requestTabLabel', {
+      defaultMessage: 'Request'
+    }),
+    component: RequestDetailsRequest
+  },
+  {
+    name: 'Response',
+    label: i18n.translate('inspectorViews.requests.responseTabLabel', {
+      defaultMessage: 'Response'
+    }),
+    component: RequestDetailsResponse
+  },
 ];
 
 class RequestDetails extends Component {
@@ -76,7 +95,7 @@ class RequestDetails extends Component {
         onClick={() => this.selectDetailsTab(detail)}
         data-test-subj={`inspectorRequestDetail${detail.name}`}
       >
-        {detail.name}
+        {detail.label}
       </EuiTab>
     );
   }

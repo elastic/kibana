@@ -72,7 +72,7 @@ describe('RequestAdapter', () => {
       expect(spy).toHaveBeenCalledTimes(1);
       req.json({ my: 'request' });
       expect(spy).toHaveBeenCalledTimes(2);
-      req.stats({ foo: 42, bar: 'test' });
+      req.stats({ foo: { label: 'Foo', value: 42 }, bar: { label: 'Bar', value: 'test' } });
       expect(spy).toHaveBeenCalledTimes(3);
       req.ok({ json: {} });
       expect(spy).toHaveBeenCalledTimes(4);

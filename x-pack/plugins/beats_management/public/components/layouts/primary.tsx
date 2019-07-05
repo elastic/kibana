@@ -16,14 +16,13 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Component, ReactNode } from 'react';
 import styled from 'styled-components';
 import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
 type RenderCallback = ((component: () => JSX.Element) => void);
 interface PrimaryLayoutProps {
-  title: string;
+  title: string | React.ReactNode;
   actionSection?: React.ReactNode;
   hideBreadcrumbs?: boolean;
 }
@@ -42,23 +41,7 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
             {({ breadcrumbs }) => (
               <HeaderWrapper>
                 <EuiHeaderSection>
-                  <EuiHeaderBreadcrumbs
-                    breadcrumbs={[
-                      {
-                        href: '#/management',
-                        text: i18n.translate('xpack.beatsManagement.breadcrumb.managementTitle', {
-                          defaultMessage: 'Management',
-                        }),
-                      },
-                      {
-                        href: '#/management/beats_management',
-                        text: i18n.translate('xpack.beatsManagement.breadcrumb.beatsTitle', {
-                          defaultMessage: 'Beats',
-                        }),
-                      },
-                      ...breadcrumbs,
-                    ]}
-                  />
+                  <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />
                 </EuiHeaderSection>
               </HeaderWrapper>
             )}

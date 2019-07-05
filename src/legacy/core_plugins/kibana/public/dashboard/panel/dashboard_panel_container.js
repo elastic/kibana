@@ -48,13 +48,15 @@ const mapStateToProps = ({ dashboard }, { embeddableFactory, panelId }) => {
   } else {
     error = (embeddable && getEmbeddableError(dashboard, panelId)) || '';
   }
+  const lastReloadRequestTime = embeddable ? embeddable.lastReloadRequestTime : 0;
   const initialized = embeddable ? getEmbeddableInitialized(dashboard, panelId) : false;
   return {
     error,
     viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     containerState: getContainerState(dashboard, panelId),
     initialized,
-    panel: getPanel(dashboard, panelId)
+    panel: getPanel(dashboard, panelId),
+    lastReloadRequestTime,
   };
 };
 

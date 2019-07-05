@@ -1,0 +1,68 @@
+// Overwrites ui-select classes that are loaded through NPM dependencies.
+// Must use important tags here because those files are loaded later.
+
+/**
+ * 1. Override Bootstrap ui-select component styles. If side padding is > 5px, the component breaks.
+ */
+.ui-select-multiple.ui-select-bootstrap {
+  padding: 3px 5px 2px !important; // 1
+  border: $euiBorderThin; // 1
+  background-color: $euiColorEmptyShade; // 1
+
+  &.kuiInputError {
+    border-color: $euiColorDanger; // 1
+  }
+}
+
+.ui-select-bootstrap .ui-select-choices-row.active > span {
+  background-color: $euiColorPrimary !important;
+}
+
+.ui-select-bootstrap > .ui-select-choices, .ui-select-bootstrap > .ui-select-no-choice {
+  margin-top: $euiSizeXS / 2 !important;
+}
+
+/**
+ * 1. Fix appearance of ui-select in the Filtering UI.
+ */
+.btn-default .ui-select-placeholder {
+  color: tint($euiColorPrimary, 70%); /* 1 */
+}
+
+/**
+* 1. Make ui-select input match other inputs.
+*/
+.ui-select-match {
+  .btn {
+    border: $euiBorderThin; /* 1 */
+    background-color: $euiColorEmptyShade; /* 1 */
+    color: $euiColorDarkestShade; /* 1 */
+
+    .ui-select-placeholder {
+      color: $euiColorMediumShade; /* 1 */
+      padding-right: 1em; /* 1 */
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:active {
+      background-color: $euiColorEmptyShade; /* 1 */
+      color: $euiColorDarkestShade; /* 1 */
+    }
+  }
+
+  &.btn-default-focus {
+    box-shadow: none;
+    outline: none;
+
+    .btn {
+      border-color: $euiColorPrimary;
+    }
+  }
+}
+
+.uiSelectMatch--ellipsis {
+  @include euiTextTruncate;
+}

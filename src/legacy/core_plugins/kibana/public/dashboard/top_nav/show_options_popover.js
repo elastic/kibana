@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { OptionsMenu } from './options';
 
@@ -54,9 +54,10 @@ export function showOptionsPopover({
 
   document.body.appendChild(container);
   const element = (
-    <I18nProvider>
+    <I18nContext>
       <EuiWrappingPopover
-        className="navbar__popover"
+        className="kuiLocalNav__popover"
+        anchorClassName="kuiLocalNav__popoverAnchor"
         id="popover"
         button={anchorElement}
         isOpen={true}
@@ -71,7 +72,7 @@ export function showOptionsPopover({
           onHidePanelTitlesChange={onHidePanelTitlesChange}
         />
       </EuiWrappingPopover>
-    </I18nProvider>
+    </I18nContext>
   );
   ReactDOM.render(element, container);
 }

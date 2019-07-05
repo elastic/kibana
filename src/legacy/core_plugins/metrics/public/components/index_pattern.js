@@ -44,6 +44,7 @@ export const IndexPattern = props => {
   const dropBucketName = `${prefix}drop_last_bucket`;
 
   const defaults = {
+    default_index_pattern: '',
     [indexPatternName]: '*',
     [intervalName]: 'auto',
     [dropBucketName]: 1
@@ -62,11 +63,16 @@ export const IndexPattern = props => {
               id="tsvb.indexPatternLabel"
               defaultMessage="Index pattern"
             />)}
+            helpText={(model.default_index_pattern && !model[indexPatternName] && <FormattedMessage
+              id="tsvb.indexPattern.searchByDefaultIndex"
+              defaultMessage="Default index pattern is used. To query all indexes use *"
+            />)}
             fullWidth
           >
             <EuiFieldText
               data-test-subj="metricsIndexPatternInput"
               disabled={props.disabled}
+              placeholder={model.default_index_pattern}
               onChange={handleTextChange(indexPatternName, '*')}
               value={model[indexPatternName]}
               fullWidth

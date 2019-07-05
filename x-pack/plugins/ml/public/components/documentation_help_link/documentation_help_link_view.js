@@ -12,7 +12,7 @@ export function DocumentationHelpLink({ fullUrl, label }) {
   return (
     <a
       href={fullUrl}
-      rel="noopener noreferrer"
+      rel="noopener"
       target="_blank"
       className="documentation-help-link"
     >

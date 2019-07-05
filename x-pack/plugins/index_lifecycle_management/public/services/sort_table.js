@@ -12,7 +12,7 @@ const arraySort = (fieldName) => (item) => (item[fieldName] || []).length;
 const sorters = {
   version: stringSort('version'),
   name: stringSort('name'),
-  coveredIndices: arraySort('coveredIndices'),
+  linkedIndices: arraySort('linkedIndices'),
   modified_date: stringSort('modified_date')
 
 };

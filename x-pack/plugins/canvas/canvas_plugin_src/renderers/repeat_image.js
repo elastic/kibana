@@ -24,8 +24,11 @@ export const repeatImage = () => ({
     const container = $('<div class="repeatImage" style="pointer-events: none;">');
 
     function setSize(img) {
-      if (img.naturalHeight > img.naturalWidth) img.height = settings.size;
-      else img.width = settings.size;
+      if (img.naturalHeight > img.naturalWidth) {
+        img.height = settings.size;
+      } else {
+        img.width = settings.size;
+      }
     }
 
     function finish() {
@@ -36,11 +39,15 @@ export const repeatImage = () => ({
     const img = new Image();
     img.onload = function() {
       setSize(img);
-      if (settings.max && settings.count > settings.max) settings.count = settings.max;
+      if (settings.max && settings.count > settings.max) {
+        settings.count = settings.max;
+      }
       times(settings.count, () => container.append(img.cloneNode(true)));
 
       if (isValidUrl(settings.emptyImage)) {
-        if (settings.max == null) throw new Error('max must be set if using an emptyImage');
+        if (settings.max == null) {
+          throw new Error('max must be set if using an emptyImage');
+        }
 
         const emptyImage = new Image();
         emptyImage.onload = function() {

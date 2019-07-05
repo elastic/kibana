@@ -1,3 +1,7 @@
+discover-app {
+  background-color: $euiColorEmptyShade;
+}
+
 // SASSTODO: replace the margin-top value with a variable
 .dscSidebar__listHeader {
   margin-top: 5px;
@@ -58,6 +62,7 @@
   // SASSTODO: add a monospace modifier to the doc-table component
   .kbnDocTable__row {
     font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeXS;
   }
 }
 
@@ -174,6 +179,7 @@
 }
 
 .dscResults {
+
   h3 {
     margin: -20px 0 10px 0;
     text-align: center;

@@ -19,9 +19,16 @@ import {
   keyCodes,
 } from '@elastic/eui';
 
+import { injectI18n } from '@kbn/i18n/react';
+
 import { validateGroupNames } from '../../../validate_job';
 
-export class NewGroupInput extends Component {
+export const NewGroupInput = injectI18n(class NewGroupInput extends Component {
+  static propTypes = {
+    addNewGroup: PropTypes.func.isRequired,
+    allJobIds: PropTypes.array.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
@@ -38,7 +45,10 @@ export class NewGroupInput extends Component {
     if (tempNewGroupName === '') {
       groupsValidationError = '';
     } else if (this.props.allJobIds.includes(tempNewGroupName)) {
-      groupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same ID.';
+      groupsValidationError = this.props.intl.formatMessage({
+        id: 'xpack.ml.jobsList.multiJobActions.groupSelector.groupsAndJobsCanNotUseSameIdErrorMessage',
+        defaultMessage: 'A job with this ID already exists. Groups and jobs cannot use the same ID.'
+      });
     } else {
       groupsValidationError =  validateGroupNames([tempNewGroupName]).message;
     }
@@ -65,6 +75,7 @@ export class NewGroupInput extends Component {
   }
 
   render() {
+    const { intl } = this.props;
     const {
       tempNewGroupName,
       groupsValidationError,
@@ -82,7 +93,10 @@ export class NewGroupInput extends Component {
             >
               <EuiFieldText
                 compressed
-                placeholder="Add new group"
+                placeholder={intl.formatMessage({
+                  id: 'xpack.ml.jobsList.multiJobActions.groupSelector.addNewGroupPlaceholder',
+                  defaultMessage: 'Add new group'
+                })}
                 value={tempNewGroupName}
                 onChange={this.changeTempNewGroup}
                 onKeyDown={this.newGroupKeyPress}
@@ -96,7 +110,10 @@ export class NewGroupInput extends Component {
               <EuiButtonIcon
                 onClick={this.addNewGroup}
                 iconType="plusInCircle"
-                aria-label="Add"
+                aria-label={intl.formatMessage({
+                  id: 'xpack.ml.jobsList.multiJobActions.groupSelector.addButtonAriaLabel',
+                  defaultMessage: 'Add'
+                })}
                 disabled={(tempNewGroupName === '' || groupsValidationError !== '')}
               />
             </EuiFormRow>
@@ -105,9 +122,4 @@ export class NewGroupInput extends Component {
       </div>
     );
   }
-}
-
-NewGroupInput.propTypes = {
-  addNewGroup: PropTypes.func.isRequired,
-  allJobIds: PropTypes.array.isRequired,
-};
+});

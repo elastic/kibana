@@ -59,6 +59,7 @@ export default class Worker extends EventEmitter {
     this.processBinder = new BinderFor(process);
 
     this.env = {
+      NODE_OPTIONS: process.env.NODE_OPTIONS || '',
       kbnWorkerType: this.type,
       kbnWorkerArgv: JSON.stringify([
         ...(opts.baseArgv || baseArgv),

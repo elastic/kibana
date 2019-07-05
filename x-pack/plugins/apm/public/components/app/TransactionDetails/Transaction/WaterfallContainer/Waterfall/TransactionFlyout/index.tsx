@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,12 +16,14 @@ import {
   EuiPortal,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { DiscoverTransactionButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverTransactionButton';
+import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { APM_AGENT_DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/agents';
+import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
@@ -32,7 +33,7 @@ import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  location: any; // TODO: import location type from react router or history types?
+  location: Location;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
 }
@@ -72,20 +73,25 @@ function DroppedSpansWarning({
     return null;
   }
 
-  const url =
-    APM_AGENT_DROPPED_SPANS_DOCS[transactionDoc.context.service.agent.name];
-
-  const docsLink = url ? (
-    <EuiLink href={url} target="_blank">
-      Learn more.
-    </EuiLink>
-  ) : null;
-
   return (
     <React.Fragment>
       <EuiCallOut size="s">
-        The APM agent that reported this transaction dropped {dropped} spans or
-        more based on its configuration. {docsLink}
+        {i18n.translate(
+          'xpack.apm.transactionDetails.transFlyout.callout.agentDroppedSpansMessage',
+          {
+            defaultMessage:
+              'The APM agent that reported this transaction dropped {dropped} spans or more based on its configuration.',
+            values: { dropped }
+          }
+        )}{' '}
+        <EuiLink href={DROPPED_SPANS_DOCS} target="_blank">
+          {i18n.translate(
+            'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
+            {
+              defaultMessage: 'Learn more about dropped spans.'
+            }
+          )}
+        </EuiLink>
       </EuiCallOut>
       <EuiHorizontalRule />
     </React.Fragment>
@@ -110,16 +116,22 @@ export function TransactionFlyout({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h4>Transaction details</h4>
+                <h4>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
+                    {
+                      defaultMessage: 'Transaction details'
+                    }
+                  )}
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverTransactionButton transaction={transactionDoc}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  View transaction in Discover
-                </EuiButtonEmpty>
-              </DiscoverTransactionButton>
+              <TransactionActionMenu
+                transaction={transactionDoc}
+                location={location}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>

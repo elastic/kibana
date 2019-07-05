@@ -4,8 +4,10 @@
     <!-- Filters -->
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
       <div class="kbn-timepicker-title">
-        <h2 class="kuiLocalDropdownTitle kbn-timepicker-title__text">
-          Time Range
+        <h2 class="kuiLocalDropdownTitle kbn-timepicker-title__text"
+          i18n-id="common.ui.timepicker.timerange"
+          i18n-default-message="Time Range"
+        >
         </h2>
       </div>
 
@@ -19,8 +21,9 @@
             ng-click="setMode('quick')"
             aria-selected="{{mode === 'quick'}}"
             data-test-subj="timepicker-quick-button"
+            i18n-id="common.ui.timepicker.categoryquick"
+            i18n-default-message="Quick"
           >
-            Quick
           </button>
 
           <button
@@ -31,8 +34,9 @@
             ng-click="setMode('relative')"
             aria-selected="{{mode === 'relative'}}"
             data-test-subj="timepicker-relative-button"
+            i18n-id="common.ui.timepicker.categoryrelative"
+            i18n-default-message="Relative"
           >
-            Relative
           </button>
 
           <button
@@ -43,8 +47,9 @@
             ng-click="setMode('absolute')"
             aria-selected="{{mode === 'absolute'}}"
             data-test-subj="timepicker-absolute-button"
+            i18n-id="common.ui.timepicker.categoryabsolute"
+            i18n-default-message="Absolute"
           >
-            Absolute
           </button>
 
           <button
@@ -55,8 +60,9 @@
             ng-click="setMode('recent')"
             aria-selected="{{mode === 'recent'}}"
             data-test-subj="timepicker-recent-button"
+            i18n-id="common.ui.timepicker.categoryrecent"
+            i18n-default-message="Recent"
           >
-            Recent
           </button>
         </div>
       </div>
@@ -109,8 +115,11 @@
 
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
-      <h2 class="kuiLocalDropdownTitle">
-        Refresh Interval
+      <h2 
+      class="kuiLocalDropdownTitle"
+      i18n-id="common.ui.timepicker.refreshInterval"
+      i18n-default-message="Refresh Interval">
+        
       </h2>
 
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">

@@ -18,7 +18,6 @@ import {
   EuiTitle,
   EuiButton,
   EuiText,
-  EuiTextColor,
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
@@ -62,17 +61,15 @@ function AlertsPanelUi({ alerts, changeUrl, intl }) {
           changeUrl={changeUrl}
         />
         <EuiText size="xs">
-          <p data-test-subj="alertMeta">
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
-                defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
-                values={{
-                  updateDateTime: formatDateTimeLocal(item.update_timestamp),
-                  duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE)
-                }}
-              />
-            </EuiTextColor>
+          <p data-test-subj="alertMeta" className="monCallout--meta">
+            <FormattedMessage
+              id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
+              defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
+              values={{
+                updateDateTime: formatDateTimeLocal(item.update_timestamp),
+                duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE)
+              }}
+            />
           </p>
         </EuiText>
       </EuiCallOut>
@@ -85,13 +82,13 @@ function AlertsPanelUi({ alerts, changeUrl, intl }) {
     <div data-test-subj="clusterAlertsContainer">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
+          <EuiTitle size="s">
+            <h4>
               <FormattedMessage
                 id="xpack.monitoring.cluster.overview.alertsPanel.topClusterTitle"
                 defaultMessage="Top cluster alerts"
               />
-            </h2>
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

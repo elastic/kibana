@@ -5,14 +5,14 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
   className="reactSuggestionTypeahead"
 >
   <div
-    className="typeahead"
+    className="kbnTypeahead"
   >
     <div
-      className="typeahead-popover"
+      className="kbnTypeahead__popover"
     >
       <div
-        className="typeahead-items"
-        id="typeahead-items"
+        className="kbnTypeahead__items"
+        id="kbnTypeahead__items"
         onScroll={[Function]}
         role="listbox"
       >
@@ -61,14 +61,14 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
   className="reactSuggestionTypeahead"
 >
   <div
-    className="typeahead"
+    className="kbnTypeahead"
   >
     <div
-      className="typeahead-popover"
+      className="kbnTypeahead__popover"
     >
       <div
-        className="typeahead-items"
-        id="typeahead-items"
+        className="kbnTypeahead__items"
+        id="kbnTypeahead__items"
         onScroll={[Function]}
         role="listbox"
       >

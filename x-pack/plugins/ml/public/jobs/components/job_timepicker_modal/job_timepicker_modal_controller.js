@@ -21,7 +21,8 @@ module.controller('MlJobTimepickerModal', function (
   $rootScope,
   $modalInstance,
   params,
-  Private) {
+  Private,
+  i18n) {
   const msgs = mlMessageBarService;
   $scope.saveLock = false;
   const xpackFeature = Private(xpackFeatureProvider);
@@ -42,6 +43,26 @@ module.controller('MlJobTimepickerModal', function (
   }
 
   $scope.isNew = (job.data_counts && job.data_counts.input_record_count > 0) ? false : true;
+
+  $scope.startAtBeginningOfDataLabel = i18n('xpack.ml.jobTimePickerModal.startAtBeginningOfDataLabel', {
+    defaultMessage: 'Start at beginning of data'
+  });
+  $scope.continueFromLastTime = i18n('xpack.ml.jobTimePickerModal.continueFromLastTimeLabel', {
+    defaultMessage: 'Continue from {lastTime}',
+    values: { lastTime }
+  });
+  $scope.startNowLabel = i18n('xpack.ml.jobTimePickerModal.startNowLabel', {
+    defaultMessage: 'Start now'
+  });
+  $scope.continueFromNowLabel = i18n('xpack.ml.jobTimePickerModal.continueFromNowLabel', {
+    defaultMessage: 'Continue from now'
+  });
+  $scope.specifyStartTimeLabel = i18n('xpack.ml.jobTimePickerModal.specifyStartTimeLabel', {
+    defaultMessage: 'Specify start time'
+  });
+  $scope.continueFromSpecifiedTimeLabel = i18n('xpack.ml.jobTimePickerModal.continueFromSpecifiedTimeLabel', {
+    defaultMessage: 'Continue from specified time'
+  });
 
   $scope.ui = {
     lastTime: lastTime,
@@ -95,6 +116,10 @@ module.controller('MlJobTimepickerModal', function (
         doStart();
       })
       .catch((resp) => {
+        const couldNotOpenJobErrorMessage = i18n('xpack.ml.jobTimePickerModal.couldNotOpenJobErrorMessage', {
+          defaultMessage: 'Could not open {jobId}',
+          values: { jobId: $scope.jobId }
+        });
         if (resp.statusCode === 409) {
           doStart();
         } else {
@@ -102,11 +127,11 @@ module.controller('MlJobTimepickerModal', function (
             if (doStartCalled === false) {
             // doStart hasn't been called yet, this 500 has returned before 10s,
             // so it's not due to a timeout
-              msgs.error(`Could not open ${$scope.jobId}`, resp);
+              msgs.error(couldNotOpenJobErrorMessage, resp);
             }
           } else {
             // console.log(resp);
-            msgs.error(`Could not open ${$scope.jobId}`, resp);
+            msgs.error(couldNotOpenJobErrorMessage, resp);
           }
           $scope.saveLock = false;
         }

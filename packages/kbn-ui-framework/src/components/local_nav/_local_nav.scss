@@ -1,4 +1,3 @@
-
 /**
  * 1. Match height of logo in side bar, but allow it to expand to accommodate
  *    dropdown.
@@ -47,3 +46,12 @@
   padding: 0 $localNavSideSpacing; /* 1 */
   align-items: flex-start; /* 1 */
 }
+
+.kuiLocalNav__popover {
+  height: 100%;
+
+  .kuiLocalNav__popoverAnchor {
+    height: 100%;
+  }
+}
+

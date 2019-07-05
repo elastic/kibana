@@ -25,6 +25,8 @@ import { NotificationsStartContract } from '../notifications';
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 
+import { i18n } from '@kbn/i18n';
+
 interface Deps {
   notifications: NotificationsStartContract;
   loadingCount: LoadingCountStartContract;
@@ -47,7 +49,9 @@ export class UiSettingsService {
       api: this.uiSettingsApi,
       onUpdateError: error => {
         notifications.toasts.addDanger({
-          title: 'Unable to update UI setting',
+          title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
+            defaultMessage: 'Unable to update UI setting',
+          }),
           text: error.message,
         });
       },

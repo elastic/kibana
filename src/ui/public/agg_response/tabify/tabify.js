@@ -21,6 +21,16 @@ import _ from 'lodash';
 import { TabbedAggResponseWriter } from './_response_writer';
 import { TabifyBuckets } from './_buckets';
 
+/**
+ * Sets up the ResponseWriter and kicks off bucket collection.
+ *
+ * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
+ * @param {Object} esResponse - response that came back from Elasticsearch
+ * @param {Object} respOpts - options object for the ResponseWriter with params set by Courier
+ * @param {boolean} respOpts.minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
+ * @param {boolean} respOpts.partialRows - vis.params.showPartialRows: determines whether to return rows with incomplete data
+ * @param {Object} respOpts.timeRange - time range object, if provided
+ */
 export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
   const write = new TabbedAggResponseWriter(aggs, respOpts);
 
@@ -34,7 +44,7 @@ export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
 }
 
 /**
- * read an aggregation from a bucket, which is *might* be found at key (if
+ * read an aggregation from a bucket, which *might* be found at key (if
  * the response came in object form), and will recurse down the aggregation
  * tree and will pass the read values to the ResponseWriter.
  *

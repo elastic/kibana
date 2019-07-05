@@ -26,7 +26,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
-import { KuiCodeEditor } from '@kbn/ui-framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
@@ -36,6 +35,7 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiTitle,
+  EuiCodeEditor,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -137,7 +137,7 @@ class MarkdownEditor extends Component {
     return (
       <div className="tvbMarkdownEditor">
         <div className="tvbMarkdownEditor__editor">
-          <KuiCodeEditor
+          <EuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
             theme="github"

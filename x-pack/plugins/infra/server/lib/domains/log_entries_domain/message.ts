@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraLogMessageSegment } from '../../../../common/graphql/types';
+import stringify from 'json-stable-stringify';
+
+import { InfraLogMessageSegment } from '../../../graphql/types';
+import {
+  LogMessageFormattingCondition,
+  LogMessageFormattingInstruction,
+  LogMessageFormattingRule,
+} from './rule_types';
 
 export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
   const compiledRules = rules.map(compileRule);
@@ -125,13 +132,16 @@ const compileFieldReferenceFormattingInstruction = (
   'field' in formattingInstruction
     ? {
         formattingFields: [formattingInstruction.field],
-        format: (fields: Fields) => [
-          {
-            field: formattingInstruction.field,
-            value: `${fields[formattingInstruction.field]}`,
-            highlights: [],
-          },
-        ],
+        format: (fields: Fields) => {
+          const value = fields[formattingInstruction.field];
+          return [
+            {
+              field: formattingInstruction.field,
+              value: typeof value === 'object' ? stringify(value) : `${value}`,
+              highlights: [],
+            },
+          ];
+        },
       }
     : null;
 
@@ -150,38 +160,7 @@ const compileConstantFormattingInstruction = (
     : null;
 
 interface Fields {
-  [fieldName: string]: string | number | boolean | null;
-}
-
-interface LogMessageFormattingRule {
-  when: LogMessageFormattingCondition;
-  format: LogMessageFormattingInstruction[];
-}
-
-type LogMessageFormattingCondition =
-  | LogMessageFormattingExistsCondition
-  | LogMessageFormattingFieldValueCondition;
-
-interface LogMessageFormattingExistsCondition {
-  exists: string[];
-}
-
-interface LogMessageFormattingFieldValueCondition {
-  values: {
-    [fieldName: string]: string | number | boolean | null;
-  };
-}
-
-type LogMessageFormattingInstruction =
-  | LogMessageFormattingFieldReference
-  | LogMessageFormattingConstant;
-
-interface LogMessageFormattingFieldReference {
-  field: string;
-}
-
-interface LogMessageFormattingConstant {
-  constant: string;
+  [fieldName: string]: string | number | object | boolean | null;
 }
 
 interface CompiledLogMessageFormattingRule {

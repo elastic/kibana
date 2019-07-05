@@ -14,8 +14,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
@@ -109,14 +107,12 @@ class ManageSpacePageUI extends Component<Props, State> {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
-      <EuiPage className="spcManagePage">
-        <EuiPageBody>
-          <EuiPageContent className="spcManagePage__content">
-            <EuiPageContentBody>{content}</EuiPageContentBody>
-          </EuiPageContent>
-          {this.maybeGetSecureSpacesMessage()}
-        </EuiPageBody>
-      </EuiPage>
+      <div className="spcManagePage">
+        <EuiPageContent className="spcManagePage__content">
+          <EuiPageContentBody>{content}</EuiPageContentBody>
+        </EuiPageContent>
+        {this.maybeGetSecureSpacesMessage()}
+      </div>
     );
   }
 
@@ -174,7 +170,14 @@ class ManageSpacePageUI extends Component<Props, State> {
           <Fragment>
             <EuiFlexGroup responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiFormRow label="Avatar">
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.spaces.management.manageSpacePage.avatarLabel"
+                      defaultMessage="Avatar"
+                    />
+                  }
+                >
                   <SpaceAvatar space={this.state.space} size="l" />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -224,7 +227,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   public getFormHeading = () => {
     return (
-      <EuiTitle size="l">
+      <EuiTitle size="m">
         <h1>
           {this.getTitle()} <ReservedSpaceBadge space={this.state.space as Space} />
         </h1>

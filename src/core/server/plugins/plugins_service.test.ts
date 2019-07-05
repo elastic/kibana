@@ -122,6 +122,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
           kibanaVersion: '7.0.0',
           requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
           optionalPlugins: ['some-optional-plugin'],
+          server: true,
           ui: true,
         },
         { logger } as any
@@ -135,6 +136,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
           kibanaVersion: '7.0.0',
           requiredPlugins: ['some-required-plugin'],
           optionalPlugins: [],
+          server: true,
           ui: false,
         },
         { logger } as any
@@ -169,6 +171,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           kibanaVersion: '7.0.0',
           requiredPlugins: [],
           optionalPlugins: [],
+          server: true,
           ui: true,
         },
         { logger } as any
@@ -182,6 +185,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           kibanaVersion: '7.0.0',
           requiredPlugins: ['missing-plugin'],
           optionalPlugins: [],
+          server: true,
           ui: true,
         },
         { logger } as any
@@ -195,6 +199,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           kibanaVersion: '7.0.0',
           requiredPlugins: ['another-explicitly-disabled-plugin'],
           optionalPlugins: [],
+          server: true,
           ui: true,
         },
         { logger } as any
@@ -208,6 +213,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           kibanaVersion: '7.0.0',
           requiredPlugins: [],
           optionalPlugins: [],
+          server: true,
           ui: true,
         },
         { logger } as any
@@ -247,6 +253,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
       kibanaVersion: '7.0.0',
       requiredPlugins: ['some-other-id'],
       optionalPlugins: ['missing-optional-dep'],
+      server: true,
       ui: true,
     },
     { logger } as any
@@ -261,6 +268,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
       kibanaVersion: '7.0.0',
       requiredPlugins: [],
       optionalPlugins: [],
+      server: true,
       ui: false,
     },
     { logger } as any

@@ -63,6 +63,7 @@ exports[`Field for array setting should render as read only with help text if ov
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -158,6 +159,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -231,6 +233,7 @@ exports[`Field for array setting should render default value if there is no user
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -327,6 +330,7 @@ exports[`Field for array setting should render user value if there is user value
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -442,6 +446,7 @@ exports[`Field for boolean setting should render as read only with help text if 
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -470,7 +475,13 @@ exports[`Field for boolean setting should render as read only with help text if 
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={true}
-          label="Off"
+          label={
+            <FormattedMessage
+              defaultMessage="Off"
+              id="kbn.management.settings.field.offLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -535,6 +546,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -552,7 +564,13 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label="On"
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="kbn.management.settings.field.onLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -606,6 +624,7 @@ exports[`Field for boolean setting should render default value if there is no us
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -623,7 +642,13 @@ exports[`Field for boolean setting should render default value if there is no us
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label="On"
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="kbn.management.settings.field.onLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -700,6 +725,7 @@ exports[`Field for boolean setting should render user value if there is user val
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -736,7 +762,13 @@ exports[`Field for boolean setting should render user value if there is user val
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label="Off"
+          label={
+            <FormattedMessage
+              defaultMessage="Off"
+              id="kbn.management.settings.field.offLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -813,6 +845,7 @@ exports[`Field for image setting should render as read only with help text if ov
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -905,6 +938,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -976,6 +1010,7 @@ exports[`Field for image setting should render default value if there is no user
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -1070,6 +1105,7 @@ exports[`Field for image setting should render user value if there is user value
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -1201,6 +1237,7 @@ exports[`Field for json setting should render as read only with help text if ove
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1312,6 +1349,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1428,6 +1466,7 @@ exports[`Field for json setting should render default value if there is no user 
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1563,6 +1602,7 @@ exports[`Field for json setting should render user value if there is user value 
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1694,6 +1734,7 @@ exports[`Field for markdown setting should render as read only with help text if
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -1805,6 +1846,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -1894,6 +1936,7 @@ exports[`Field for markdown setting should render default value if there is no u
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -2006,6 +2049,7 @@ exports[`Field for markdown setting should render user value if there is user va
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -2137,6 +2181,7 @@ exports[`Field for number setting should render as read only with help text if o
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2232,6 +2277,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2305,6 +2351,7 @@ exports[`Field for number setting should render default value if there is no use
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2401,6 +2448,7 @@ exports[`Field for number setting should render user value if there is user valu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2494,7 +2542,7 @@ exports[`Field for select setting should render as read only with help text if o
                   values={
                     Object {
                       "value": <EuiCode>
-                        orange
+                        Orange
                       </EuiCode>,
                     }
                   }
@@ -2516,6 +2564,7 @@ exports[`Field for select setting should render as read only with help text if o
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2552,11 +2601,11 @@ exports[`Field for select setting should render as read only with help text if o
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {
@@ -2628,6 +2677,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2653,11 +2703,11 @@ exports[`Field for select setting should render custom setting icon if it is cus
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {
@@ -2718,6 +2768,7 @@ exports[`Field for select setting should render default value if there is no use
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2743,11 +2794,11 @@ exports[`Field for select setting should render default value if there is no use
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {
@@ -2809,7 +2860,7 @@ exports[`Field for select setting should render user value if there is user valu
                   values={
                     Object {
                       "value": <EuiCode>
-                        orange
+                        Orange
                       </EuiCode>,
                     }
                   }
@@ -2831,6 +2882,7 @@ exports[`Field for select setting should render user value if there is user valu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2875,11 +2927,11 @@ exports[`Field for select setting should render user value if there is user valu
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {
@@ -2963,6 +3015,7 @@ exports[`Field for string setting should render as read only with help text if o
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",
@@ -3058,6 +3111,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",
@@ -3131,6 +3185,7 @@ exports[`Field for string setting should render default value if there is no use
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",
@@ -3227,6 +3282,7 @@ exports[`Field for string setting should render user value if there is user valu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",

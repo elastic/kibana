@@ -31,7 +31,9 @@ export class Popover extends Component {
   };
 
   componentDidMount() {
-    if (this.props.isOpen) this.setState({ isPopoverOpen: true });
+    if (this.props.isOpen) {
+      this.setState({ isPopoverOpen: true });
+    }
   }
 
   handleClick = () => {

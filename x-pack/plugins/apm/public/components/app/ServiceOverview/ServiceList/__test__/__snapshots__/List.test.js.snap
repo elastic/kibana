@@ -7,11 +7,11 @@ exports[`ErrorGroupOverview -> List should render columns correctly 1`] = `
   id="service-name-tooltip"
   position="top"
 >
-  <Styled(Connect(RelativeLinkComponent))
-    path="/opbeans-python/transactions"
+  <Styled(Connect(UnconnectedKibanaLink))
+    hash="/opbeans-python/transactions"
   >
     opbeans-python
-  </Styled(Connect(RelativeLinkComponent))>
+  </Styled(Connect(UnconnectedKibanaLink))>
 </EuiToolTip>
 `;
 

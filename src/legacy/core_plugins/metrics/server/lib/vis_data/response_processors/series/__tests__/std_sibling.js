@@ -35,7 +35,7 @@ describe('stdSibling(resp, panel, series)', () => {
       line_width: 1,
       point_size: 1,
       fill: 0,
-      color: '#F00',
+      color: 'rgb(255, 0, 0)',
       id: 'test',
       split_mode: 'everything',
       metrics: [
@@ -96,7 +96,7 @@ describe('stdSibling(resp, panel, series)', () => {
     expect(results[0]).to.eql({
       id: 'test',
       label: 'Overall Std. Deviation of Average of cpu',
-      color: '#FF0000',
+      color: 'rgb(255, 0, 0)',
       stack: false,
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
       points: { show: true, radius: 1, lineWidth: 1 },

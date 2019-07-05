@@ -28,7 +28,7 @@ export function kibanaMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.kibanaMetrics.nameTitle', {
       defaultMessage: 'Kibana metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Kibana.',

@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { FilterQuery } from './reducer';
+import { FilterQuery, SerializedFilterQuery } from './reducer';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_filter');
 
@@ -14,4 +14,6 @@ export const setWaffleFilterQueryDraft = actionCreator<FilterQuery>(
   'SET_WAFFLE_FILTER_QUERY_DRAFT'
 );
 
-export const applyWaffleFilterQuery = actionCreator<FilterQuery>('APPLY_WAFFLE_FILTER_QUERY');
+export const applyWaffleFilterQuery = actionCreator<SerializedFilterQuery>(
+  'APPLY_WAFFLE_FILTER_QUERY'
+);

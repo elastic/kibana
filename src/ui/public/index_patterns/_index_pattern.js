@@ -444,8 +444,14 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         await confirmModalPromise(
           i18n.translate('common.ui.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
             defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
-          { confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' })
-          });
+          {
+            title: i18n.translate('common.ui.indexPattern.confirmOverwriteTitle', {
+              defaultMessage: 'Overwrite {type}?',
+              values: { type },
+            }),
+            confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' }),
+          }
+        );
       } catch (err) {
         // They changed their mind
         return false;

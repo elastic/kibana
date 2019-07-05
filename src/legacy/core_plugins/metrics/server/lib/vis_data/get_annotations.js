@@ -19,6 +19,8 @@
 
 import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';
+import { getIndexPatternObject } from './helpers/get_index_pattern';
+import getEsShardTimeout from './helpers/get_es_shard_timeout';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
@@ -28,29 +30,23 @@ function validAnnotation(annotation) {
     annotation.template;
 }
 
-export default async (req, panel) => {
+export default async (req, panel, esQueryConfig) => {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const bodies = panel.annotations
+  const bodiesPromises = panel.annotations
     .filter(validAnnotation)
     .map(annotation => {
-
-      const indexPattern = annotation.index_pattern;
-      const bodies = [];
-
-      bodies.push({
-        index: indexPattern,
-        ignoreUnavailable: true,
-      });
-
-      const body = buildAnnotationRequest(req, panel, annotation);
-      body.timeout = '90s';
-      bodies.push(body);
-      return bodies;
+      return getAnnotationBody(req, panel, annotation, esQueryConfig);
     });
-
-  if (!bodies.length) return { responses: [] };
+  const bodies = await Promise.all(bodiesPromises);
+  if (!bodies.length) {
+    return {
+      responses: [],
+    };
+  }
   try {
+    const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
     const resp = await callWithRequest(req, 'msearch', {
+      ignore_throttled: !includeFrozen,
       rest_total_hits_as_int: true,
       body: bodies.reduce((acc, item) => acc.concat(item), [])
     });
@@ -66,6 +62,23 @@ export default async (req, panel) => {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;
   }
-
 };
 
+async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
+  const indexPattern = annotation.index_pattern;
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
+  const esShardTimeout = getEsShardTimeout(req);
+
+  if (esShardTimeout > 0) {
+    request.timeout = `${esShardTimeout}ms`;
+  }
+
+  return [
+    {
+      index: indexPatternString,
+      ignoreUnavailable: true,
+    },
+    request,
+  ];
+}

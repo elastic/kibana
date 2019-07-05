@@ -6,6 +6,7 @@
 
 import { globalizeSelectors } from '../../utils/typed_redux';
 import { logFilterSelectors as innerLogFilterSelectors } from './log_filter';
+import { flyoutOptionsSelectors as innerFlyoutOptionsSelectors } from './log_flyout';
 import { logMinimapSelectors as innerLogMinimapSelectors } from './log_minimap';
 import { logPositionSelectors as innerLogPositionSelectors } from './log_position';
 import { logTextviewSelectors as innerLogTextviewSelectors } from './log_textview';
@@ -53,4 +54,9 @@ export const waffleTimeSelectors = globalizeSelectors(
 export const waffleOptionsSelectors = globalizeSelectors(
   (state: LocalState) => state.waffleMetrics,
   innerWaffleOptionsSelectors
+);
+
+export const flyoutOptionsSelectors = globalizeSelectors(
+  (state: LocalState) => state.logFlyout,
+  innerFlyoutOptionsSelectors
 );

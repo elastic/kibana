@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ImportModal Renders import modal 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiModal
     maxWidth={true}
     onClose={[MockFunction]}
@@ -18,18 +18,26 @@ exports[`ImportModal Renders import modal 1`] = `
       >
         <EuiFlexItem
           component="div"
-          grow={true}
+          grow={false}
         >
           <EuiModalHeaderTitle>
-            Import events
+            <FormattedMessage
+              defaultMessage="Import events"
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
+              values={Object {}}
+            />
           </EuiModalHeaderTitle>
         </EuiFlexItem>
         <EuiFlexItem
           component="div"
-          grow={true}
+          grow={false}
         >
           <p>
-            Import events from an ICS file.
+            <FormattedMessage
+              defaultMessage="Import events from an ICS file."
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsDescription"
+              values={Object {}}
+            />
           </p>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -46,7 +54,7 @@ exports[`ImportModal Renders import modal 1`] = `
       >
         <EuiFlexItem
           component="div"
-          grow={true}
+          grow={false}
         >
           <EuiFilePicker
             compressed={true}
@@ -66,7 +74,11 @@ exports[`ImportModal Renders import modal 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Import
+        <FormattedMessage
+          defaultMessage="Import"
+          id="xpack.ml.calendarsEdit.eventsTable.importButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
       <EuiButtonEmpty
         color="primary"
@@ -74,9 +86,13 @@ exports[`ImportModal Renders import modal 1`] = `
         onClick={[MockFunction]}
         type="button"
       >
-        Cancel
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
+          values={Object {}}
+        />
       </EuiButtonEmpty>
     </EuiModalFooter>
   </EuiModal>
-</React.Fragment>
+</Fragment>
 `;

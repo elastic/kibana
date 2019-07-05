@@ -47,6 +47,7 @@ import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { documentationLinks } from 'ui/documentation_links';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -234,6 +235,14 @@ function VisEditor(
       vis.forceReload();
     },
     testId: 'visualizeRefreshButton',
+  }, {
+    key: i18n('kbn.topNavManu.documentationLabel', { defaultMessage: 'documentation' }),
+    description: i18n('kbn.visualize.topNavMenu.documentationButtonDescription', {
+      defaultMessage: 'Documentation',
+    }),
+    run() {
+      $window.open(documentationLinks.kibana.visualize);
+    },
   }];
 
   let stateMonitor;
@@ -300,7 +309,10 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', $scope.updateQueryAndFetch);
+    $scope.$watch('state.query', (newQuery) => {
+      const query = migrateLegacyQuery(newQuery);
+      $scope.updateQueryAndFetch({ query });
+    });
 
     $state.replace();
 
@@ -374,8 +386,8 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function (query) {
-    $state.query = migrateLegacyQuery(query);
+  $scope.updateQueryAndFetch = function ({ query }) {
+    $state.query = query;
     $scope.fetch();
   };
 

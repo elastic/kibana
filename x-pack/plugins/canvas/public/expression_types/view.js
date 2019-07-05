@@ -22,8 +22,9 @@ export class View extends FunctionForm {
 
     this.modelArgs = this.modelArgs || [];
 
-    if (!Array.isArray(this.modelArgs))
+    if (!Array.isArray(this.modelArgs)) {
       throw new Error(`${this.name} element is invalid, modelArgs must be an array`);
+    }
   }
 }
 

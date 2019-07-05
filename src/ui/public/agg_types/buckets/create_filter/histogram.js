@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { buildRangeFilter } from '../../../filter_manager/lib/range';
+import { buildRangeFilter } from '@kbn/es-query';
 
 export function createFilterHistogram(aggConfig, key) {
   const value = parseInt(key, 10);

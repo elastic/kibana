@@ -14,17 +14,17 @@ import { EditUser } from '../../components/management/users';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { createApiClient } from '../../lib/api';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 const renderReact = (elem, httpClient, changeUrl, username) => {
   render(
-    <I18nProvider>
+    <I18nContext>
       <EditUser
         changeUrl={changeUrl}
         apiClient={createApiClient(httpClient)}
         username={username}
       />
-    </I18nProvider>,
+    </I18nContext>,
     elem
   );
 };

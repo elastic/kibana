@@ -1,17 +1,19 @@
 // Edit role styles
 @import './edit_role/components/privileges/kibana/impacted_spaces_flyout';
 @import './edit_role/components/collapsible_panel';
-@import './edit_role/edit_role';
-
 
 $securityFormWidth: 460px;
 
 // Management styles
 .mgtForm__panel {
+  border: $euiBorderThin;
+  padding: $euiSizeM;
   max-width: $securityFormWidth;
 
   .mgtForm__subLabel {
     margin-bottom: $euiSizeS;
+    display: block;
+    font-weight: $euiFontWeightRegular;
   }
 }
 
@@ -23,11 +25,6 @@ $securityFormWidth: 460px;
   .kuiButton + .kuiButton {
     margin-left: $euiSizeS;
   }
-}
-
-.mgtUsersEditPage,
-.mgtUsersListingPage {
-  min-height: calc(100vh - 70px);
 }
 
 .mgtUsersListingPage__content {

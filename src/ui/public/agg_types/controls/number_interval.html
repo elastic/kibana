@@ -1,10 +1,17 @@
 <div class="form-group">
-  <label for="visEditorInterval{{agg.id}}">
-    Minimum Interval
+  <label
+    for="visEditorInterval{{agg.id}}"
+  >
+    <span
+      i18n-id="common.ui.aggTypes.minimumIntervalLabel"
+      i18n-default-message="Minimum Interval"
+    ></span>
     &nbsp;
     <icon-tip
       position="'right'"
-      content="'Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting\'s histogram:maxBars'"
+      content="::'common.ui.aggTypes.minimumIntervalTooltip' | i18n: {
+        defaultMessage: 'Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting\'s {histogramMaxBars}',
+        values: { histogramMaxBars: 'histogram:maxBars'} }"
     ></icon-tip>
   </label>
   <input

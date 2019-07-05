@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { find, get } from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import React, { Fragment } from 'react';
 
 import {
@@ -274,7 +274,6 @@ export const RangeDatePicker = injectI18n(
           <EuiDatePickerRange
             className="euiDatePickerRange--inGroup"
             iconType={false}
-            disabled={disabled}
             fullWidth
             startDateControl={
               <EuiDatePicker

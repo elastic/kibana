@@ -1,37 +1,38 @@
 <div
-  class="global-nav-link {{classes}}"
-  ng-class="{ active: isActive, 'is-global-nav-link-disabled': isDisabled }"
+  class="kbnGlobalNavLink {{classes}}"
+  ng-class="{ active: isActive, 'kbnGlobalNavLink-isDisabled': isDisabled }"
   tooltip="{{ tooltipContent }}"
   tooltip-placement="right"
   tooltip-popup-delay="0"
   tooltip-append-to-body="1"
 >
   <a
-    class="global-nav-link__anchor"
+    class="kbnGlobalNavLink__anchor"
     href="{{ getHref() }}"
     ng-click="onClick({ $event: $event })"
     data-test-subj="appLink"
     aria-label="{{::label}}"
   >
-    <div class="global-nav-link__icon">
+    <div class="kbnGlobalNavLink__icon">
+
+      <icon ng-if="euiIconType" type="'{{ euiIconType }}'" size="'l'" color="'ghost'" class="kbnGlobalNavLink__euiIcon"></icon>
+
       <img
-        ng-if="icon"
-        class="global-nav-link__icon-image"
+        ng-if="!euiIconType && icon"
+        class="kbnGlobalNavLink__iconImage"
         kbn-src="{{ '/' + icon }}"
         aria-hidden="true"
-      >
+      />
 
       <span
         ng-if="!icon"
-        class="global-nav-link__icon-placeholder"
+        class="kbnGlobalNavLink__iconPlaceholder"
         data-test-subj="appLinkIconPlaceholder"
       >
         {{ label[0] }}
       </span>
     </div>
 
-    <div class="global-nav-link__title">
-      {{ label }}
-    </div>
+    <div class="kbnGlobalNavLink__title">{{ label }}</div>
   </a>
 </div>

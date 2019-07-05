@@ -14,7 +14,7 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
     xpack: {
       monitoring: {
         elasticsearch: {
-          url: monitoringClusterUrl,
+          hosts: monitoringClusterUrl ? [monitoringClusterUrl] : [],
           username: 'monitoring-user-internal-test',
           password: 'monitoring-p@ssw0rd!-internal-test',
           ssl: {},
@@ -25,7 +25,7 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
       }
     },
     elasticsearch: {
-      url: 'http://localhost:9200',
+      hosts: ['http://localhost:9200'],
       username: 'user-internal-test',
       password: 'p@ssw0rd!-internal-test',
       ssl: {},
@@ -70,7 +70,7 @@ describe('Instantiate Client', () => {
 
       expect(server.log.getCall(0).args).to.eql([
         [ 'monitoring-ui', 'es-client' ],
-        'config sourced from: production cluster (http://localhost:9200)'
+        'config sourced from: production cluster'
       ]);
     });
 
@@ -80,7 +80,7 @@ describe('Instantiate Client', () => {
 
       expect(server.log.getCall(0).args).to.eql([
         [ 'monitoring-ui', 'es-client' ],
-        'config sourced from: monitoring cluster (monitoring-cluster.test:9200)'
+        'config sourced from: monitoring cluster'
       ]);
     });
   });
@@ -128,7 +128,7 @@ describe('Instantiate Client', () => {
 
       sinon.assert.calledOnce(createCluster);
       expect(createClusterCall.args[0]).to.be('monitoring');
-      expect(createClientOptions.url).to.eql('http://localhost:9200');
+      expect(createClientOptions.hosts[0]).to.eql('http://localhost:9200');
     });
   });
 
@@ -143,7 +143,7 @@ describe('Instantiate Client', () => {
 
       sinon.assert.calledOnce(createCluster);
       expect(createClusterCall.args[0]).to.be('monitoring');
-      expect(createClientOptions.url).to.eql('http://monitoring-cluster.test:9200');
+      expect(createClientOptions.hosts[0]).to.eql('http://monitoring-cluster.test:9200');
       expect(createClientOptions.username).to.eql('monitoring-user-internal-test');
       expect(createClientOptions.password).to.eql('monitoring-p@ssw0rd!-internal-test');
     });

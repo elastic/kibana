@@ -291,6 +291,7 @@ export class StepDateHistogramUi extends Component {
                 onChange={e => onFieldsChange({ dateHistogramInterval: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
                 fullWidth
+                data-test-subj="rollupJobInterval"
               />
             </EuiFormRow>
 

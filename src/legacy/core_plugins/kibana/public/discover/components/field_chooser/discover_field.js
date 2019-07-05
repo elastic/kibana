@@ -60,7 +60,9 @@ app.directive('discoverField', function ($compile, i18n) {
         let warnings = [];
 
         if (field.scripted) {
-          warnings.push('Scripted fields can take a long time to execute.');
+          warnings.push(i18n('kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription', {
+            defaultMessage: 'Scripted fields can take a long time to execute.',
+          }));
         }
 
         if (warnings.length > 1) {

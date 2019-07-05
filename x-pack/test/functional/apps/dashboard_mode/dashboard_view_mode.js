@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const log = getService('log');
   const find = getService('find');
+  const pieChart = getService('pieChart');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -33,7 +34,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Dashboard viewer', () => {
       before('Create logstash data role', async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickLinkText('Roles');
+        await testSubjects.click('roles');
         await PageObjects.security.clickCreateNewRole();
 
         await testSubjects.setValue('roleFormNameInput', 'logstash-data');
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
         const collapseLinkExists = await find.existsByLinkText('Collapse');
         expect(collapseLinkExists).to.be(true);
 
-        const navLinks = await find.allByCssSelector('.global-nav-link');
+        const navLinks = await find.allByCssSelector('.kbnGlobalNavLink');
         expect(navLinks.length).to.equal(5);
       });
 
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('can filter on a visualization', async () => {
         await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
-        await PageObjects.dashboard.filterOnPieSlice();
+        await pieChart.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
       });

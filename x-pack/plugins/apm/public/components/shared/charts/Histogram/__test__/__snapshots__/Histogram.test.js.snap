@@ -1410,7 +1410,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  border: 1px solid #d9d9d9;
+  border: 1px solid #D3DAE6;
   background: #ffffff;
   border-radius: 5px;
   font-size: 14px;
@@ -1418,11 +1418,11 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
 }
 
 .c1 {
-  background: #f5f5f5;
-  border-bottom: 1px solid #d9d9d9;
+  background: #F5F7FA;
+  border-bottom: 1px solid #D3DAE6;
   border-radius: 5px 5px 0 0;
   padding: 8px;
-  color: #999999;
+  color: #98A2B3;
 }
 
 .c2 {
@@ -1432,13 +1432,13 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
 }
 
 .c4 {
-  color: #999999;
+  color: #98A2B3;
   margin: 8px;
   font-size: 12px;
 }
 
 .c3 {
-  color: #666666;
+  color: #69707D;
   font-size: 14px;
 }
 

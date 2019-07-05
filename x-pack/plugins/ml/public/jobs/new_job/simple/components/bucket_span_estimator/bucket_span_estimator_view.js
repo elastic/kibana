@@ -11,12 +11,16 @@ import {
   EuiButton,
   EuiToolTip
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function BucketSpanEstimator({ buttonDisabled, buttonText, estimatorRunning, guessBucketSpan }) {
   return (
     <div className="bucket-span-estimator">
       <EuiToolTip
-        content="Experimental feature for estimating bucket span."
+        content={<FormattedMessage
+          id="xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonTooltip"
+          defaultMessage="Experimental feature for estimating bucket span."
+        />}
         position="bottom"
       >
         <EuiButton

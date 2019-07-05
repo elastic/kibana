@@ -73,7 +73,7 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 }}
               />
 
-              {traceRootDuration && (
+              {traceRootDuration > 0 && (
                 <LastTickValue
                   x={xScale(traceRootDuration)}
                   value={tickFormat(traceRootDuration)}

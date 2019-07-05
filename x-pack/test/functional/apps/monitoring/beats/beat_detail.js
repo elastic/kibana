@@ -36,17 +36,17 @@ export default function ({ getService, getPageObjects }) {
 
     it('cluster status bar shows correct information', async () => {
       expect(await detail.getSummary()).to.eql({
-        name: 'Name:\ntsullivan.local-1-17',
-        version: 'Version:\n7.0.0-alpha1',
-        type: 'Type:\nDuckbeat',
-        host: 'Host:\ntsullivan.local',
-        output: 'Output:\nElasticsearch',
-        configReloads: 'Config reloads:\n0',
-        uptime: 'Uptime:\n6 minutes',
-        eventsTotal: 'Events total:\n17',
-        eventsEmitted: 'Events emitted:\n17',
-        eventsDropped: 'Events dropped:\n0',
-        bytesWritten: 'Bytes sent:\n18.3 KB',
+        name: 'Name\ntsullivan.local-1-17',
+        version: 'Version\n7.0.0-alpha1',
+        type: 'Type\nDuckbeat',
+        host: 'Host\ntsullivan.local',
+        output: 'Output\nElasticsearch',
+        configReloads: 'Config reloads\n0',
+        uptime: 'Uptime\n6 minutes',
+        eventsTotal: 'Events total\n17',
+        eventsEmitted: 'Events emitted\n17',
+        eventsDropped: 'Events dropped\n0',
+        bytesWritten: 'Bytes sent\n18.3 KB',
       });
     });
 

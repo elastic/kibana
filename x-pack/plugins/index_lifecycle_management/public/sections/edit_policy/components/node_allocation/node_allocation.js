@@ -88,8 +88,8 @@ class NodeAllocationUi extends Component {
             id={`${phase}-${PHASE_NODE_ATTRS}`}
             value={phaseData[PHASE_NODE_ATTRS] || ' '}
             options={nodeOptions}
-            onChange={async e => {
-              await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+            onChange={e => {
+              setPhaseData(PHASE_NODE_ATTRS, e.target.value);
             }}
           />
 

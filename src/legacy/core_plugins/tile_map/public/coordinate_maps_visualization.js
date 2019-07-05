@@ -18,11 +18,9 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
-import { toastNotifications } from 'ui/notify';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -36,7 +34,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._geohashLayer = null;
       this._notify = new Notifier({ location: 'Coordinate Map' });
     }
-
 
     async _makeKibanaMap() {
 
@@ -161,7 +158,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     }
 
     _getGeohashOptions() {
-
       const newParams = this._getMapsParams();
       const metricAgg = this._getMetricAgg();
       const boundTooltipFormatter = tooltipFormatter.bind(null, this.vis.getAggConfig(), metricAgg);
@@ -172,7 +168,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         tooltipFormatter: this._geoJsonFeatureCollectionAndMeta ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
-        fetchBounds: this.getGeohashBounds.bind(this),
+        fetchBounds: () => this.vis.API.getGeohashBounds(), // TODO: Remove this (elastic/kibana#30593)
         colorRamp: newParams.colorSchema,
         heatmap: {
           heatClusterSize: newParams.heatClusterSize
@@ -196,46 +192,11 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this.vis.updateState();
     }
 
-    async getGeohashBounds() {
-      const agg = this._getGeoHashAgg();
-      if (agg) {
-        const searchSource = this.vis.searchSource.createChild();
-        searchSource.setField('size', 0);
-        searchSource.setField('aggs', () => {
-          const geoBoundsAgg = this.vis.getAggConfig().createAggConfig({
-            type: 'geo_bounds',
-            enabled: true,
-            params: {
-              field: agg.getField()
-            },
-            schema: 'metric',
-          }, { addToAggConfigs: false });
-          return {
-            '1': geoBoundsAgg.toDsl()
-          };
-        });
-        let esResp;
-        try {
-          esResp = await searchSource.fetch();
-        } catch(error) {
-          toastNotifications.addDanger({
-            title: i18n.translate('tileMap.coordinateMapsVisualization.unableToGetBoundErrorTitle', {
-              defaultMessage: 'Unable to get bounds',
-            }),
-            text: `${error.message}`,
-          });
-          return;
-        }
-        return _.get(esResp, 'aggregations.1.bounds');
-      }
-    }
-
     _getGeoHashAgg() {
       return this.vis.getAggConfig().find((agg) => {
         return _.get(agg, 'type.dslName') === 'geohash_grid';
       });
     }
-
 
     _getMetricAgg() {
       return this.vis.getAggConfig().find((agg) => {

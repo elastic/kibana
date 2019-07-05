@@ -22,28 +22,23 @@ describe('pie', () => {
 
   describe('data', () => {
     const result = fn(testPie).value.data;
-    it('is sorted by the series labels', () => {
-      expect(result.every((val, i) => (!!i ? val.label >= result[i - 1].label : true))).to.be(true);
-    });
 
     it('has one series per unique label', () => {
-      const uniqueLabels = testPie.rows
-        .reduce(
-          (unique, series) =>
-            !unique.includes(series.color) ? unique.concat([series.color]) : unique,
-          []
-        )
-        .sort();
+      const uniqueLabels = testPie.rows.reduce(
+        (unique, series) =>
+          !unique.includes(series.color) ? unique.concat([series.color]) : unique,
+        []
+      );
 
       expect(result).to.have.length(uniqueLabels.length);
       expect(result.every((series, i) => series.label === uniqueLabels[i])).to.be(true);
     });
 
     it('populates the data of the plot with points from the pointseries', () => {
-      expect(result[0].data).to.eql([536]);
-      expect(result[1].data).to.eql([202]);
-      expect(result[2].data).to.eql([67]);
-      expect(result[3].data).to.eql([311]);
+      expect(result[0].data).to.eql([202]);
+      expect(result[1].data).to.eql([67]);
+      expect(result[2].data).to.eql([311]);
+      expect(result[3].data).to.eql([536]);
       expect(result[4].data).to.eql([288]);
     });
   });

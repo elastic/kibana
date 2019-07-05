@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { buildPhraseFilter } from '../../../filter_manager/lib/phrase';
-import { buildPhrasesFilter } from '../../../filter_manager/lib/phrases';
-import { buildExistsFilter } from '../../../filter_manager/lib/exists';
+import { buildPhraseFilter, buildPhrasesFilter, buildExistsFilter } from '@kbn/es-query';
 
 export function createFilterTerms(aggConfig, key, params) {
   const field = aggConfig.params.field;

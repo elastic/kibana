@@ -35,6 +35,9 @@ import {
   DataTableFormat,
 } from './data_table';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 class DataViewComponent extends Component {
 
   _isMounted = false;
@@ -101,10 +104,22 @@ class DataViewComponent extends Component {
     return (
       <InspectorView useFlex={true}>
         <EuiEmptyPrompt
-          title={<h2>No data available</h2>}
+          title={
+            <h2>
+              <FormattedMessage
+                id="inspectorViews.data.noDataAvailableTitle"
+                defaultMessage="No data available"
+              />
+            </h2>
+          }
           body={
             <React.Fragment>
-              <p>The element did not provide any data.</p>
+              <p>
+                <FormattedMessage
+                  id="inspectorViews.data.noDataAvailableDescription"
+                  defaultMessage="The element did not provide any data."
+                />
+              </p>
             </React.Fragment>
           }
         />
@@ -124,7 +139,12 @@ class DataViewComponent extends Component {
               <EuiLoadingChart size="m" />
               <EuiSpacer size="s" />
               <EuiText>
-                <p>Gathering data</p>
+                <p>
+                  <FormattedMessage
+                    id="inspectorViews.data.gatheringDataLabel"
+                    defaultMessage="Gathering data"
+                  />
+                </p>
               </EuiText>
             </EuiPanel>
           </EuiFlexItem>
@@ -153,9 +173,13 @@ class DataViewComponent extends Component {
 }
 
 const DataView = {
-  title: 'Data',
+  title: i18n.translate('inspectorViews.data.dataTitle', {
+    defaultMessage: 'Data'
+  }),
   order: 10,
-  help: `View the data behind the visualization`,
+  help: i18n.translate('inspectorViews.data.dataDescriptionTooltip', {
+    defaultMessage: 'View the data behind the visualization'
+  }),
   shouldShow(adapters) {
     return Boolean(adapters.data);
   },

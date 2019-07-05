@@ -13,8 +13,6 @@ import { getEncodedEsQuery } from './apm';
 
 interface ErrorGroupListParams extends IUrlParams {
   size: number;
-  sortField: string;
-  sortDirection: string;
 }
 
 export async function loadErrorGroupList({
@@ -46,19 +44,14 @@ export async function loadErrorGroupDetails({
   kuery,
   errorGroupId
 }: IUrlParams) {
-  return callApi<ErrorGroupAPIResponse>(
-    {
-      pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
-      query: {
-        start,
-        end,
-        esFilterQuery: await getEncodedEsQuery(kuery)
-      }
-    },
-    {
-      camelcase: false
+  return callApi<ErrorGroupAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
+    query: {
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
-  );
+  });
 }
 
 export async function loadErrorDistribution({
@@ -68,8 +61,12 @@ export async function loadErrorDistribution({
   kuery,
   errorGroupId
 }: IUrlParams) {
+  const pathname = errorGroupId
+    ? `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`
+    : `/api/apm/services/${serviceName}/errors/distribution`;
+
   return callApi<ErrorDistributionAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`,
+    pathname,
     query: {
       start,
       end,

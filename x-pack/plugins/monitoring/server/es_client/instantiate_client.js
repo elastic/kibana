@@ -32,7 +32,7 @@ export function exposeClient(server) {
   };
   let configSource = 'monitoring';
 
-  if (!Boolean(config.url)) {
+  if (!Boolean(config.hosts && config.hosts.length)) {
     config = server.config().get('elasticsearch');
     configSource = 'production';
   }
@@ -44,7 +44,7 @@ export function exposeClient(server) {
   const cluster = esPlugin.createCluster('monitoring', config);
   server.events.on('stop', bindKey(cluster, 'close'));
 
-  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster (${config.url})`);
+  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
 }
 
 

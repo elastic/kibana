@@ -61,7 +61,6 @@ describe('plugins/elasticsearch', () => {
 
       cluster = { callWithInternalUser: sinon.stub() };
       cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
-      cluster.callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: '1', _version: 1 }));
       cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Promise.resolve({ ok: true }));
       cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
       cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
@@ -77,7 +76,7 @@ describe('plugins/elasticsearch', () => {
 
       // setup the config().get()/.set() stubs
       const get = sinon.stub();
-      get.withArgs('elasticsearch.url').returns(esUrl);
+      get.withArgs('elasticsearch.hosts').returns([esUrl]);
       get.withArgs('kibana.index').returns('.my-kibana');
       get.withArgs('pkg.version').returns('1.0.0');
 
@@ -85,7 +84,7 @@ describe('plugins/elasticsearch', () => {
 
       // Setup the server mock
       server = {
-        log: sinon.stub(),
+        logWithMetadata: sinon.stub(),
         info: { port: 5601 },
         config: function () { return { get, set }; },
         plugins: {
@@ -156,7 +155,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(plugin.status.red);
           sinon.assert.calledWithExactly(
             plugin.status.red,
-            `Unable to connect to Elasticsearch at http://localhost:9220/.`
+            `Unable to connect to Elasticsearch.`
           );
 
           sinon.assert.calledTwice(ping);

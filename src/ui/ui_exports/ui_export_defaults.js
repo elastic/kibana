@@ -35,8 +35,6 @@ export const UI_EXPORT_DEFAULTS = {
     'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone')
   },
 
-  translationPaths: [],
-
   styleSheetPaths: [],
 
   appExtensions: {

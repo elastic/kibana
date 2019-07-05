@@ -128,6 +128,16 @@ describe('Table Vis Legacy Response Handler', () => {
       expect(actual.map(i => i.title)).to.eql(expected);
     });
 
+    it('should return the correct rawData', () => {
+      const expected = {
+        table: { columns, rows },
+        column: 0,
+        row: -1,
+      };
+      const actual = splitTable(columns, rows, null);
+      expect(actual.map(i => i.$parent.rawData)).to.eql([expected, expected, expected]);
+    });
+
     it('should return nested split tables with the correct number of entries', () => {
       const expected = [2, 1, 3];
       const actual = splitTable(columns, rows, null);

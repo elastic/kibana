@@ -8,7 +8,7 @@ import { ascending, pairs } from 'd3-array';
 import expect from 'expect.js';
 import gql from 'graphql-tag';
 
-import { InfraTimeKey } from '../../../../plugins/infra/common/graphql/types';
+import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const KEY_WITHIN_DATA_RANGE = {
@@ -115,8 +115,8 @@ const logEntriesTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('log entry apis', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     describe('logEntriesAround', () => {
       it('should return newer and older log entries when present', async () => {

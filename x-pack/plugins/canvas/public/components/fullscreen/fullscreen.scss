@@ -1,8 +1,13 @@
 body.canvas-isFullscreen {
   // this is a hack that overwrites Kibana's core chrome
-  .global-nav.is-global-nav-open + .app-wrapper,
+  .kbnGlobalNav.kbnGlobalNav-isOpen + .app-wrapper,
   .app-wrapper {
     left: 0;
+  }
+
+  // hide global loading indicator
+  .kbnLoadingIndicator {
+    display: none;
   }
 
   // set the background color
@@ -11,7 +16,7 @@ body.canvas-isFullscreen {
   }
 
   // hide all the interface parts
-  nav.global-nav, // K6 global side nav
+  nav.kbnGlobalNav, // K6 global side nav
   .header-global-wrapper, // K7 global top nav
   .canvasLayout__stageHeader,
   .canvasLayout__sidebar,

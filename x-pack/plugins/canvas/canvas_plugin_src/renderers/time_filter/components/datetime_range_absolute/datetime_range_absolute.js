@@ -6,8 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { DatetimeCalendar } from '../datetime_calendar';
-import './datetime_range_absolute.scss';
 
 export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
   <div className="canvasDateTimeRangeAbsolute">
@@ -16,7 +16,16 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         value={from}
         startDate={from}
         endDate={to}
-        onSelect={val => onSelect(val, to)}
+        maxDate={to}
+        onValueChange={val => onSelect(val, to)}
+        onSelect={val => {
+          // sets the time to start of day if only the date was selected
+          if (moment(from).format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
+            onSelect(val.startOf('day'), to);
+          } else {
+            onSelect(val, to);
+          }
+        }}
       />
     </div>
     <div>
@@ -24,7 +33,16 @@ export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
         value={to}
         startDate={from}
         endDate={to}
-        onSelect={val => onSelect(from, val)}
+        minDate={from}
+        onValueChange={val => onSelect(from, val)}
+        onSelect={val => {
+          // set the time to end of day if only the date was selected
+          if (moment(to).format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
+            onSelect(from, moment(val).endOf('day'));
+          } else {
+            onSelect(from, val);
+          }
+        }}
       />
     </div>
   </div>

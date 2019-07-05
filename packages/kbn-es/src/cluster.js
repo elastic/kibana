@@ -19,9 +19,10 @@
 
 const execa = require('execa');
 const chalk = require('chalk');
+const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
+const { log: defaultLog, parseEsLog, extractConfigFiles, decompress } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
@@ -84,9 +85,16 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Installing from snapshot'));
     this._log.indent(4);
 
+    const version = process.env.ES_SNAPSHOT_VERSION || options.version;
+
+    if (version !== options.version) {
+      this._log.info(`Using Elasticearch version ${version} from env.ES_SNAPSHOT_VERSION`);
+    }
+
     const { installPath } = await installSnapshot({
       log: this._log,
       ...options,
+      version,
     });
 
     this._log.indent(-4);
@@ -114,6 +122,28 @@ exports.Cluster = class Cluster {
     this._log.indent(-4);
 
     return { installPath };
+  }
+
+  /**
+   * Unpakcs a tar or zip file containing the data directory for an
+   * ES cluster.
+   *
+   * @param {String} installPath
+   * @param {String} archivePath
+   */
+  async extractDataDirectory(installPath, archivePath) {
+    this._log.info(chalk.bold(`Extracting data directory`));
+    this._log.indent(4);
+
+    // decompress excludes the root directory as that is how our archives are
+    // structured. This works in our favor as we can explicitly extract into the data dir
+    const extractPath = path.resolve(installPath, 'data');
+    this._log.info(`Data archive: ${archivePath}`);
+    this._log.info(`Extract path: ${extractPath}`);
+
+    await decompress(archivePath, extractPath);
+
+    this._log.indent(-4);
   }
 
   /**

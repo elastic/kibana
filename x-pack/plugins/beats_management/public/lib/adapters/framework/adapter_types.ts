@@ -9,10 +9,15 @@ import { LICENSES } from './../../../../common/constants/security';
 export interface FrameworkAdapter {
   // Instance vars
   info: FrameworkInfo;
+  version: string;
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
-  renderUIAtPath(path: string, component: React.ReactElement<any>): void;
+  renderUIAtPath(
+    path: string,
+    component: React.ReactElement<any>,
+    toController: 'management' | 'self'
+  ): void;
   registerManagementSection(settings: {
     id?: string;
     name: string;
@@ -20,19 +25,18 @@ export interface FrameworkAdapter {
     order?: number;
   }): void;
   registerManagementUI(settings: {
-    id?: string;
+    sectionId?: string;
     name: string;
     basePath: string;
     visable?: boolean;
     order?: number;
   }): void;
   setUISettings(key: string, value: any): void;
-  getUISetting(key: 'k7design'): boolean;
+  getUISetting(key: string): boolean;
 }
 
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
-  k7Design: t.boolean,
   license: t.type({
     type: t.union(LICENSES.map(s => t.literal(s))),
     expired: t.boolean,

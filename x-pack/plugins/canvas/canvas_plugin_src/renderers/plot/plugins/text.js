@@ -30,7 +30,9 @@ function draw(plot, ctx) {
   $('.valueLabel', plot.getPlaceholder()).remove();
   plot.getData().forEach(function(series) {
     const show = get(series.numbers, 'show');
-    if (!show) return;
+    if (!show) {
+      return;
+    }
 
     let points = series.data;
 
@@ -54,7 +56,9 @@ function draw(plot, ctx) {
     ctx.textAlign = 'center';
 
     function writeText(text, x, y) {
-      if (typeof text === 'undefined') return;
+      if (typeof text === 'undefined') {
+        return;
+      }
       const textNode = $('<div/>')
         .text(String(text))
         .addClass('valueLabel')

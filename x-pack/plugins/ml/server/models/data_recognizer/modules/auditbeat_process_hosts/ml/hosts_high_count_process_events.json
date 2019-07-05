@@ -1,0 +1,41 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "Auditbeat Hosts: Detect Unusual Increases in Host Process Rate",
+  "groups": ["auditbeat"],
+  "analysis_config": {
+    "bucket_span": "1h",
+    "detectors": [
+      {
+        "detector_description": "high_count partitionfield=\"beat.name\"",
+        "function": "high_count",
+        "partition_field_name": "beat.name"
+      }
+    ],
+    "influencers": [
+      "beat.name",
+      "process.exe"
+    ]
+  },
+  "analysis_limits": {
+    "model_memory_limit": "256mb",
+    "categorization_examples_limit": 4
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "custom_settings": {
+    "custom_urls": [
+      {
+        "url_name": "Raw Data",
+        "time_range": "1h",
+        "url_value": "kibana#/discover?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:\u0027INDEX_PATTERN_ID\u0027,query:(language:lucene,query:\u0027beat.name:\u0022$beat.name$\u0022\u0027))"
+      },
+      {
+        "url_name": "Process Rate",
+        "time_range": "1h",
+        "url_value": "kibana#/dashboard/ml_auditbeat_hosts_process_event_rate?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(),query:(language:lucene,query:\u0027beat.name:\u0022$beat.name$\u0022\u0027))"
+      }
+    ]
+  }
+}

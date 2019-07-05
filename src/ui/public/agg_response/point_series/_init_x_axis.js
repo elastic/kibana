@@ -17,11 +17,15 @@
  * under the License.
  */
 
+import { uniq } from 'lodash';
 
-export function initXAxis(chart) {
+export function initXAxis(chart, table) {
   const x = chart.aspects.x;
   chart.xAxisFormatter = x.aggConfig ? x.aggConfig.fieldFormatter() : String;
   chart.xAxisLabel = x.title;
+  chart.xAxisOrderedValues = x.i === -1
+    ? [x.params.defaultValue]
+    : uniq(table.rows.map(r => r[x.i].value));
 
   if (!x.aggConfig || !x.aggConfig.type.ordered) return;
 

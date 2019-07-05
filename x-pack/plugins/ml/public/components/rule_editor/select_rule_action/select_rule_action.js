@@ -20,7 +20,7 @@ import {
 
 import { DetectorDescriptionList } from '../components/detector_description_list';
 import { RuleActionPanel } from './rule_action_panel';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function SelectRuleAction({
   job,
@@ -66,14 +66,20 @@ export function SelectRuleAction({
           {ruleActionPanels}
           <EuiSpacer size="m" />
           <EuiText style={{ display: 'inline' }}>
-            or&nbsp;
+            <FormattedMessage
+              id="xpack.ml.ruleEditor.selectRuleAction.orText"
+              defaultMessage="or&nbsp;"
+            />
           </EuiText>
         </React.Fragment>
       }
       <EuiLink
         onClick={() => setEditRuleIndex(rules.length)}
       >
-        create a rule
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.selectRuleAction.createRuleLinkText"
+          defaultMessage="create a rule"
+        />
       </EuiLink>
     </div>
   );

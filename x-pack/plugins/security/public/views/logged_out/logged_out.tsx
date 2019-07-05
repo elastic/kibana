@@ -10,6 +10,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 import './logged_out.less';
 
 import { LoggedOutPage } from './components';
@@ -20,6 +21,11 @@ chrome
   .setRootController('logout', ($scope: any) => {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('reactLoggedOutRoot');
-      render(<LoggedOutPage addBasePath={chrome.addBasePath} />, domNode);
+      render(
+        <I18nContext>
+          <LoggedOutPage addBasePath={chrome.addBasePath} />
+        </I18nContext>,
+        domNode
+      );
     });
   });

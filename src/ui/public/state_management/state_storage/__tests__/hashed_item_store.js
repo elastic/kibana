@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import StubBrowserStorage from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { HashedItemStore } from '../hashed_item_store';
 
 describe('hashedItemStore', () => {

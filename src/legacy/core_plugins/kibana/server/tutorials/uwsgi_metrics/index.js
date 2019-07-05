@@ -40,7 +40,7 @@ export function uwsgiMetricsSpecProvider(server, context) {
       },
     }),
     //euiIconType: 'logouWSGI',
-    isBeta: true,
+    isBeta: false,
     artifacts: {
       dashboards: [
         {

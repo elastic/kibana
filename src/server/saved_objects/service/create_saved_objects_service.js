@@ -38,8 +38,9 @@ export function createSavedObjectsService(server, schema, serializer, migrator) 
       const index = server.config().get('kibana.index');
       await adminCluster.callWithInternalUser('indices.putTemplate', {
         name: `kibana_index_template:${index}`,
+        include_type_name: true,
         body: {
-          template: index,
+          index_patterns: [index],
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
@@ -48,17 +49,20 @@ export function createSavedObjectsService(server, schema, serializer, migrator) 
         },
       });
     } catch (error) {
-      server.log(['debug', 'savedObjects'], {
-        tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
-        es: {
-          resp: error.body,
-          status: error.status,
-        },
-        err: {
-          message: error.message,
-          stack: error.stack,
-        },
-      });
+      server.logWithMetadata(
+        ['debug', 'savedObjects'],
+        `Attempt to write indexTemplate for SavedObjects index failed: ${error.message}`,
+        {
+          es: {
+            resp: error.body,
+            status: error.status,
+          },
+          err: {
+            message: error.message,
+            stack: error.stack,
+          },
+        }
+      );
 
       // We reject with `es.ServiceUnavailable` because writing an index
       // template is a very simple operation so if we get an error here

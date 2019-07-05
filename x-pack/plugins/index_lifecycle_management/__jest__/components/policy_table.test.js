@@ -24,7 +24,7 @@ for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
     modified_date: moment().subtract(i, 'days').valueOf(),
-    coveredIndices: i % 2 === 0 ? [`index${i}`] : null,
+    linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
     name: `testy${i}`
   });
 }
@@ -110,10 +110,10 @@ describe('policy table', () => {
   });
   test('should show more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
-    const perPageButton = rendered.find('span[children="Rows per page: 10"]');
+    const perPageButton = rendered.find('#customizablePagination').find('button');
     perPageButton.simulate('click');
     rendered.update();
-    const fiftyButton = rendered.find('span[children="50 rows"]');
+    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
     fiftyButton.simulate('click');
     rendered.update();
     expect(namesText(rendered).length).toBe(50);
@@ -135,10 +135,10 @@ describe('policy table', () => {
   test('should sort when modified date header is clicked', () => {
     testSort('modified_date');
   });
-  test('should sort when covered indices header is clicked', () => {
-    testSort('coveredIndices');
+  test('should sort when linked indices header is clicked', () => {
+    testSort('linkedIndices');
   });
-  test('should have proper actions in context menu when there are covered indices', () => {
+  test('should have proper actions in context menu when there are linked indices', () => {
     const rendered = openContextMenu(0);
     const buttons = rendered.find('button.euiContextMenuItem');
     expect(buttons.length).toBe(3);
@@ -147,7 +147,7 @@ describe('policy table', () => {
     expect(buttons.at(2).text()).toBe('Delete policy');
     expect(buttons.at(2).getDOMNode().disabled).toBeTruthy();
   });
-  test('should have proper actions in context menu when there are not covered indices', () => {
+  test('should have proper actions in context menu when there are not linked indices', () => {
     const rendered = openContextMenu(1);
     const buttons = rendered.find('button.euiContextMenuItem');
     expect(buttons.length).toBe(2);

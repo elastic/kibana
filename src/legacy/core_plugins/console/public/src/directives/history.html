@@ -19,7 +19,7 @@
       role="option"
       ng-repeat="req in history.reqs"
       id="historyReq{{$index}}"
-      ng-class="{ conHistory__req--selected: history.viewingReq === req }"
+      ng-class="{ 'conHistory__req-selected': history.viewingReq === req }"
       ng-click="history.selectedReq = req; history.viewingReq = req; history.selectedIndex = $index"
       ng-mouseenter="history.viewingReq = req"
       ng-mouseleave="history.viewingReq = history.selectedReq"

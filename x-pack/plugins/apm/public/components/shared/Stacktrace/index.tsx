@@ -4,95 +4,104 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import React, { PureComponent } from 'react';
-import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
-import { CodePreview } from '../../shared/CodePreview';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isEmpty, last } from 'lodash';
+import React, { Fragment } from 'react';
+import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
-import { FrameHeading } from './FrameHeading';
 import { LibraryStackFrames } from './LibraryStackFrames';
-import { getGroupedStackframes, hasSourceLines } from './stacktraceUtils';
+import { Stackframe } from './Stackframe';
 
 interface Props {
-  stackframes?: Stackframe[];
+  stackframes?: IStackframe[];
   codeLanguage?: string;
 }
 
-interface State {
-  visibilityMap: {
-    [i: number]: boolean;
-  };
-}
-
-export class Stacktrace extends PureComponent<Props, State> {
-  public state = {
-    visibilityMap: {}
-  };
-
-  public componentDidMount() {
-    if (!this.props.stackframes) {
-      // Don't do anything, if there are no stackframes
-      return false;
-    }
-
-    const hasAnyAppFrames = this.props.stackframes.some(
-      frame => !frame.library_frame
-    );
-
-    if (!hasAnyAppFrames) {
-      // If there are no app frames available, always show the only existing group
-      this.setState({ visibilityMap: { 0: true } });
-    }
-  }
-
-  public toggle = (i: number) =>
-    this.setState(({ visibilityMap }) => {
-      return { visibilityMap: { ...visibilityMap, [i]: !visibilityMap[i] } };
-    });
-
-  public render() {
-    const { stackframes = [], codeLanguage } = this.props;
-    const { visibilityMap } = this.state as State;
-
-    if (isEmpty(stackframes)) {
-      return <EmptyMessage heading="No stacktrace available." hideSubheading />;
-    }
-
+export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
+  if (isEmpty(stackframes)) {
     return (
-      <div>
-        <EuiTitle size="xs">
-          <h3>Stack traces</h3>
-        </EuiTitle>
-        {getGroupedStackframes(stackframes).map(
-          ({ isLibraryFrame, stackframes: groupedStackframes }, i) => {
-            if (isLibraryFrame) {
-              return (
-                <LibraryStackFrames
-                  key={i}
-                  visible={visibilityMap[i]}
-                  stackframes={groupedStackframes}
-                  codeLanguage={codeLanguage}
-                  onClick={() => this.toggle(i)}
-                />
-              );
-            }
-            return groupedStackframes.map((stackframe, idx) =>
-              hasSourceLines(stackframe) ? (
-                <CodePreview
-                  key={idx}
-                  stackframe={stackframe}
-                  codeLanguage={codeLanguage}
-                />
-              ) : (
-                <FrameHeading key={idx} stackframe={stackframe} />
-              )
-            );
+      <EmptyMessage
+        heading={i18n.translate(
+          'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
+          {
+            defaultMessage: 'No stacktrace available.'
           }
         )}
-      </div>
+        hideSubheading
+      />
     );
   }
+
+  const groups = getGroupedStackframes(stackframes);
+  return (
+    <Fragment>
+      {groups.map((group, i) => {
+        // library frame
+        if (group.isLibraryFrame) {
+          const hasMultipleStackframes = group.stackframes.length > 1;
+          const hasLeadingSpacer = hasMultipleStackframes && i !== 0;
+          const hasTrailingSpacer =
+            hasMultipleStackframes && i !== groups.length - 1;
+          return (
+            <Fragment key={i}>
+              {hasLeadingSpacer && <EuiSpacer size="m" />}
+              <LibraryStackFrames
+                initialVisiblity={!hasMultipleStackframes}
+                stackframes={group.stackframes}
+                codeLanguage={codeLanguage}
+              />
+              {hasTrailingSpacer && <EuiSpacer size="m" />}
+            </Fragment>
+          );
+        }
+
+        // non-library frame
+        return group.stackframes.map((stackframe, idx) => (
+          <Stackframe
+            key={`${i}-${idx}`}
+            codeLanguage={codeLanguage}
+            stackframe={stackframe}
+          />
+        ));
+      })}
+      <EuiSpacer size="m" />
+    </Fragment>
+  );
+}
+
+interface StackframesGroup {
+  isLibraryFrame: boolean;
+  excludeFromGrouping: boolean;
+  stackframes: IStackframe[];
+}
+
+export function getGroupedStackframes(stackframes: IStackframe[]) {
+  return stackframes.reduce(
+    (acc, stackframe) => {
+      const prevGroup = last(acc);
+      const shouldAppend =
+        prevGroup &&
+        prevGroup.isLibraryFrame === stackframe.library_frame &&
+        !prevGroup.excludeFromGrouping &&
+        !stackframe.exclude_from_grouping;
+
+      // append to group
+      if (shouldAppend) {
+        prevGroup.stackframes.push(stackframe);
+        return acc;
+      }
+
+      // create new group
+      acc.push({
+        isLibraryFrame: Boolean(stackframe.library_frame),
+        excludeFromGrouping: Boolean(stackframe.exclude_from_grouping),
+        stackframes: [stackframe]
+      });
+      return acc;
+    },
+    [] as StackframesGroup[]
+  );
 }

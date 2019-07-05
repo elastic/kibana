@@ -32,7 +32,7 @@ mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }
   this.element.html(contents);
 
   // side bar width
-  const navOffset = $('.global-nav').width();
+  const navOffset = $('.kbnGlobalNav').width();
   const contentWidth = $('body').width() - navOffset - 10;
   const tooltipWidth = this.element.width();
   const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);

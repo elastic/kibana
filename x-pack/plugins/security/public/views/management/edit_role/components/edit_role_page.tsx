@@ -13,8 +13,6 @@ import {
   // @ts-ignore
   EuiForm,
   EuiFormRow,
-  EuiPage,
-  EuiPageBody,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -83,43 +81,41 @@ class EditRolePageUI extends Component<Props, State> {
     );
 
     return (
-      <EuiPage className="editRolePage" restrictWidth>
-        <EuiPageBody>
-          <EuiForm {...this.state.formError}>
-            {this.getFormTitle()}
+      <div className="editRolePage">
+        <EuiForm {...this.state.formError}>
+          {this.getFormTitle()}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            <EuiText size="s">{description}</EuiText>
+          <EuiText size="s">{description}</EuiText>
 
-            {isReservedRole(this.props.role) && (
-              <Fragment>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <p id="reservedRoleDescription" tabIndex={0}>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.modifyingReversedRolesDescription"
-                      defaultMessage="Reserved roles are built-in and cannot be removed or modified."
-                    />
-                  </p>
-                </EuiText>
-              </Fragment>
-            )}
+          {isReservedRole(this.props.role) && (
+            <Fragment>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <p id="reservedRoleDescription" tabIndex={0}>
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.modifyingReversedRolesDescription"
+                    defaultMessage="Reserved roles are built-in and cannot be removed or modified."
+                  />
+                </p>
+              </EuiText>
+            </Fragment>
+          )}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            {this.getRoleName()}
+          {this.getRoleName()}
 
-            {this.getElasticsearchPrivileges()}
+          {this.getElasticsearchPrivileges()}
 
-            {this.getKibanaPrivileges()}
+          {this.getKibanaPrivileges()}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            {this.getFormButtons()}
-          </EuiForm>
-        </EuiPageBody>
-      </EuiPage>
+          {this.getFormButtons()}
+        </EuiForm>
+      </div>
     );
   }
 

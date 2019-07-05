@@ -21,10 +21,9 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
-export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
-  const buildEsQuery = Private(BuildESQueryProvider);
+export function VegaRequestHandlerProvider(es, serviceSettings, config) {
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
@@ -35,7 +34,8 @@ export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
 
     handler({ timeRange, filters, query, visParams }) {
       timeCache.setTimeRange(timeRange);
-      const filtersDsl = buildEsQuery(undefined, [query], filters);
+      const esQueryConfigs = getEsQueryConfig(config);
+      const filtersDsl = buildEsQuery(undefined, [query], filters, esQueryConfigs);
       const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
       return vp.parseAsync();
     }

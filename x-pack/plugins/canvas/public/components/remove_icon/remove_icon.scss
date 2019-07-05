@@ -3,7 +3,7 @@
   position: absolute;
   pointer-events: all;
   @include size($clearSize);
-  background-color: $euiColorSlightHue;
+  background-color: $euiColorLightShade;
   border-radius: $clearSize;
   line-height: $clearSize;
   top: -$euiSizeL;

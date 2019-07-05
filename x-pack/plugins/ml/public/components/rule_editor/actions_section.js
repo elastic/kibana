@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { ACTION } from '../../../common/constants/detector_rule';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ActionsSection({
   actions,
@@ -32,7 +33,10 @@ export function ActionsSection({
     <React.Fragment>
       <EuiText>
         <p>
-          Choose the action(s) to take when the rule matches an anomaly.
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
+            defaultMessage="Choose the action(s) to take when the rule matches an anomaly."
+          />
         </p>
       </EuiText>
       <EuiSpacer size="s" />
@@ -40,7 +44,10 @@ export function ActionsSection({
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id="skip_result_cb"
-            label="Skip result (recommended)"
+            label={<FormattedMessage
+              id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+              defaultMessage="Skip result (recommended)"
+            />}
             checked={actions.indexOf(ACTION.SKIP_RESULT) > -1}
             onChange={onSkipResultChange}
           />
@@ -48,7 +55,10 @@ export function ActionsSection({
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content="The result will not be created."
+            content={<FormattedMessage
+              id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
+              defaultMessage="The result will not be created."
+            />}
             size="s"
             position="right"
           />
@@ -61,7 +71,10 @@ export function ActionsSection({
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id="skip_model_update_cb"
-            label="Skip model update"
+            label={<FormattedMessage
+              id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+              defaultMessage="Skip model update"
+            />}
             checked={actions.indexOf(ACTION.SKIP_MODEL_UPDATE) > -1}
             onChange={onSkipModelUpdateChange}
           />
@@ -69,7 +82,10 @@ export function ActionsSection({
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content="The value for that series will not be used to update the model."
+            content={<FormattedMessage
+              id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
+              defaultMessage="The value for that series will not be used to update the model."
+            />}
             size="s"
             position="right"
           />

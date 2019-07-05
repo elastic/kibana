@@ -50,7 +50,10 @@ export const createListRoute = () => ({
           const dataIndexConfig = sampleDataset.dataIndices[i];
           const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
           try {
-            const indexExists = await callWithRequest(request, 'indices.exists', { index: index });
+            const indexExists = await callWithRequest(request, 'indices.exists', {
+              index: index,
+              include_type_name: false,
+            });
             if (!indexExists) {
               sampleDataset.status = NOT_INSTALLED;
               return;

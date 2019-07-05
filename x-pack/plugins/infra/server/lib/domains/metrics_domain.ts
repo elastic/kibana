@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricData } from '../../../common/graphql/types';
+import { InfraMetricData } from '../../graphql/types';
 import { InfraFrameworkRequest } from '../adapters/framework/adapter_types';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from '../adapters/metrics/adapter_types';
 

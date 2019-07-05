@@ -138,7 +138,7 @@ export class StepTimeFieldComponent extends Component {
               <EuiText>
                 <FormattedMessage
                   id="kbn.management.createIndexPattern.stepTime.creatingLabel"
-                  defaultMessage="Creating index pattern..."
+                  defaultMessage="Creating index pattern…"
                 />
               </EuiText>
             </EuiFlexItem>

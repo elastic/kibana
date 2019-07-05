@@ -16,7 +16,7 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
 
   public async getIndexFields(
     request: InfraFrameworkRequest,
-    indices: string[]
+    indices: string
   ): Promise<IndexFieldDescriptor[]> {
     const indexPatternsService = this.framework.getIndexPatternsService(request);
     const response = await indexPatternsService.getFieldsForWildcard({

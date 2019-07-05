@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start() returns \`Context\` component 1`] = `
+<MockI18nProvider>
+  <MockEuiContext
+    i18n={
+      Object {
+        "mapping": Object {
+          "euiTablePagination.rowsPerPage": "Rows per page",
+        },
+      }
+    }
+  >
+    content
+  </MockEuiContext>
+</MockI18nProvider>
+`;

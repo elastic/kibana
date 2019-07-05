@@ -185,4 +185,21 @@ export class AuthenticationResult {
       { redirectURL, state }
     );
   }
+
+  /**
+   * Checks whether authentication result implies state update.
+   * @returns {boolean}
+   */
+  shouldUpdateState() {
+    // State shouldn't be updated in case it wasn't set or was specifically set to `null`.
+    return this._state != null;
+  }
+
+  /**
+   * Checks whether authentication result implies state clearing.
+   * @returns {boolean}
+   */
+  shouldClearState() {
+    return this._state === null;
+  }
 }

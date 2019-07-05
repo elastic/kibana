@@ -12,25 +12,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiFormRow,
   EuiFieldNumber,
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
-  EuiButton,
+  EuiSwitch,
+  EuiTextColor,
 } from '@elastic/eui';
 import {
   PHASE_COLD,
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ALIAS,
-  PHASE_ROLLOVER_MINIMUM_AGE,
-  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
-  PHASE_NODE_ATTRS,
   PHASE_REPLICA_COUNT,
+  PHASE_FREEZE_ENABLED
 } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
-import { ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { NodeAllocation } from '../node_allocation';
+import { SetPriorityInput } from '../set_priority_input';
 
 class ColdPhaseUi extends PureComponent {
   static propTypes = {
@@ -39,146 +36,171 @@ class ColdPhaseUi extends PureComponent {
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-        .isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
-      [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
-      [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-    }).isRequired,
-    warmPhaseReplicaCount: PropTypes.number.isRequired,
   };
   render() {
     const {
       setPhaseData,
       showNodeDetailsFlyout,
       phaseData,
-      warmPhaseReplicaCount,
       errors,
       isShowingErrors,
+      intl,
+      hotPhaseRolloverEnabled
     } = this.props;
-
+    const freezeLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel',
+      defaultMessage: 'Freeze index',
+    });
     return (
-      <EuiDescribedFormGroup
-        title={
-          <div>
-            <span className="eui-displayInlineBlock eui-alignMiddle">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
-                defaultMessage="Cold phase"
-              />
-            </span>{' '}
-            {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
-          </div>
-        }
-        titleSize="s"
-        description={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
-                defaultMessage="You are querying your index less frequently, so you can allocate shards
+      <div id="coldPhaseContent" aria-live="polite" role="region">
+        <EuiDescribedFormGroup
+          title={
+            <div>
+              <span className="eui-displayInlineBlock eui-alignMiddle">
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
+                  defaultMessage="Cold phase"
+                />
+              </span>{' '}
+              {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
+              <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+            </div>
+          }
+          titleSize="s"
+          description={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
+                  defaultMessage="You are querying your index less frequently, so you can allocate shards
                   on significantly less performant hardware.
                   Because your queries are slower, you can reduce the number of replicas."
-              />
-            </p>
-            {phaseData[PHASE_ENABLED] ? (
-              <EuiButton
-                color="danger"
-                onClick={async () => {
-                  await setPhaseData(PHASE_ENABLED, false);
+                />
+              </p>
+              <EuiSwitch
+                data-test-subj="enablePhaseSwitch-cold"
+                label={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
+                    defaultMessage="Activate cold phase"
+                  />
+                }
+                id={`${PHASE_COLD}-${PHASE_ENABLED}`}
+                checked={phaseData[PHASE_ENABLED]}
+                onChange={e => {
+                  setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="coldPhaseContent"
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldhase.deactivateColdPhaseButton"
-                  defaultMessage="Deactivate cold phase"
-                />
-              </EuiButton>
-            ) : (
-              <EuiButton
-                data-test-subj="activatePhaseButton-cold"
-                onClick={async () => {
-                  await setPhaseData(PHASE_ENABLED, true);
-                }}
-                aria-controls="coldPhaseContent"
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
-                  defaultMessage="Activate cold phase"
-                />
-              </EuiButton>
-            )}
-          </Fragment>
-        }
-        fullWidth
-      >
-        <div id="coldPhaseContent" aria-live="polite" role="region">
-          {phaseData[PHASE_ENABLED] ? (
-            <Fragment>
-              <MinAgeInput
-                errors={errors}
-                phaseData={phaseData}
-                phase={PHASE_COLD}
-                isShowingErrors={isShowingErrors}
-                setPhaseData={setPhaseData}
               />
-              <EuiSpacer />
-
-              <NodeAllocation
-                phase={PHASE_COLD}
-                setPhaseData={setPhaseData}
-                showNodeDetailsFlyout={showNodeDetailsFlyout}
-                errors={errors}
-                phaseData={phaseData}
-                isShowingErrors={isShowingErrors}
-              />
-
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-                  <ErrableFormRow
-                    id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
-                    label={
-                      <Fragment>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel"
-                          defaultMessage="Number of replicas"
-                        />
-                        <OptionalLabel />
-                      </Fragment>
-                    }
-                    errorKey={PHASE_REPLICA_COUNT}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors}
-                  >
-                    <EuiFieldNumber
-                      id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
-                      value={phaseData[PHASE_REPLICA_COUNT]}
-                      onChange={async e => {
-                        await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
-                      }}
-                      min={0}
-                    />
-                  </ErrableFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiButtonEmpty
-                      flush="left"
-                      onClick={() => setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)}
-                    >
-                    Set to same number as warm phase
-                    </EuiButtonEmpty>
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
             </Fragment>
-          ) : <div />}
-        </div>
-      </EuiDescribedFormGroup>
+          }
+          fullWidth
+        >
+          <Fragment>
+            {phaseData[PHASE_ENABLED] ? (
+              <Fragment>
+                <MinAgeInput
+                  errors={errors}
+                  phaseData={phaseData}
+                  phase={PHASE_COLD}
+                  isShowingErrors={isShowingErrors}
+                  setPhaseData={setPhaseData}
+                  rolloverEnabled={hotPhaseRolloverEnabled}
+                />
+                <EuiSpacer />
+
+                <NodeAllocation
+                  phase={PHASE_COLD}
+                  setPhaseData={setPhaseData}
+                  showNodeDetailsFlyout={showNodeDetailsFlyout}
+                  errors={errors}
+                  phaseData={phaseData}
+                  isShowingErrors={isShowingErrors}
+                />
+
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
+                    <ErrableFormRow
+                      id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
+                      label={
+                        <Fragment>
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel"
+                            defaultMessage="Number of replicas"
+                          />
+                          <OptionalLabel />
+                        </Fragment>
+                      }
+                      errorKey={PHASE_REPLICA_COUNT}
+                      isShowingErrors={isShowingErrors}
+                      errors={errors}
+                      helpText={
+                        intl.formatMessage({
+                          id: 'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
+                          defaultMessage: 'By default, the number of replicas remains the same.'
+                        })
+                      }
+                    >
+                      <EuiFieldNumber
+                        id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
+                        value={phaseData[PHASE_REPLICA_COUNT]}
+                        onChange={e => {
+                          setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
+                        }}
+                        min={0}
+                      />
+                    </ErrableFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+              </Fragment>
+            ) : <div />}
+          </Fragment>
+        </EuiDescribedFormGroup>
+        {phaseData[PHASE_ENABLED] ? (
+          <Fragment>
+            <EuiDescribedFormGroup
+              title={
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
+                    defaultMessage="Freeze"
+                  />
+                </p>
+              }
+              description={
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
+                    defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
+                    You can search a frozen index, but expect queries to be slower."
+                  />{' '}
+                  <LearnMoreLink docPath="frozen-indices.html" />
+                </EuiTextColor>
+              }
+              fullWidth
+              titleSize="xs"
+            >
+              <EuiSwitch
+                data-test-subj="freezeSwitch"
+                checked={phaseData[PHASE_FREEZE_ENABLED]}
+                onChange={e => {
+                  setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
+                }}
+                label={freezeLabel}
+                aria-label={freezeLabel}
+              />
+            </EuiDescribedFormGroup>
+            <SetPriorityInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_COLD}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
+            />
+          </Fragment>
+        ) : null }
+      </div>
     );
   }
 }

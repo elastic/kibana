@@ -12,20 +12,24 @@ export async function validateMaxContentLength(server: any, log: (message: strin
   const config = server.config();
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
 
-  const elasticClusterSettingsResponse = await callWithInternalUser('cluster.getSettings', {
-    includeDefaults: true,
-  });
-  const { persistent, transient, defaults: defaultSettings } = elasticClusterSettingsResponse;
-  const elasticClusterSettings = defaults({}, persistent, transient, defaultSettings);
+  try {
+    const elasticClusterSettingsResponse = await callWithInternalUser('cluster.getSettings', {
+      includeDefaults: true,
+    });
+    const { persistent, transient, defaults: defaultSettings } = elasticClusterSettingsResponse;
+    const elasticClusterSettings = defaults({}, persistent, transient, defaultSettings);
 
-  const elasticSearchMaxContent = get(elasticClusterSettings, 'http.max_content_length', '100mb');
-  const elasticSearchMaxContentBytes = numeral().unformat(elasticSearchMaxContent.toUpperCase());
-  const kibanaMaxContentBytes = config.get(KIBANA_MAX_SIZE_BYTES_PATH);
+    const elasticSearchMaxContent = get(elasticClusterSettings, 'http.max_content_length', '100mb');
+    const elasticSearchMaxContentBytes = numeral().unformat(elasticSearchMaxContent.toUpperCase());
+    const kibanaMaxContentBytes = config.get(KIBANA_MAX_SIZE_BYTES_PATH);
 
-  if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
-    log(
-      `${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +
-        `Please set ${ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your ${KIBANA_MAX_SIZE_BYTES_PATH} in Kibana to avoid this warning.`
-    );
+    if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
+      log(
+        `${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +
+          `Please set ${ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your ${KIBANA_MAX_SIZE_BYTES_PATH} in Kibana to avoid this warning.`
+      );
+    }
+  } catch (e) {
+    log(`Could not retrieve cluster settings, because of ${e.message}`);
   }
 }

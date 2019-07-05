@@ -172,7 +172,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
-    scrollWheelZoom: true,
+    scrollWheelZoom: false,
   }, 0));
 
   it('filled', test({
@@ -181,7 +181,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
-    scrollWheelZoom: true,
+    scrollWheelZoom: false,
     maxBounds: [1, 2, 3, 4],
   }, {
     delayRepaint: true,
@@ -189,7 +189,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
-    scrollWheelZoom: true,
+    scrollWheelZoom: false,
     maxBounds: [1, 2, 3, 4],
   }, 0));
 
@@ -208,7 +208,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
-    scrollWheelZoom: true,
+    scrollWheelZoom: false,
   }, 5));
 });
 

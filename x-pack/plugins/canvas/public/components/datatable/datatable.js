@@ -11,7 +11,9 @@ import moment from 'moment';
 import { Paginate } from '../paginate';
 
 const getIcon = type => {
-  if (type === null) return;
+  if (type === null) {
+    return;
+  }
 
   let icon;
   switch (type) {
@@ -39,7 +41,9 @@ const getColumnName = col => (typeof col === 'string' ? col : col.name);
 const getColumnType = col => col.type || null;
 
 const getFormattedValue = (val, type) => {
-  if (type === 'date') return moment(val).format();
+  if (type === 'date') {
+    return moment(val).format();
+  }
   return String(val);
 };
 

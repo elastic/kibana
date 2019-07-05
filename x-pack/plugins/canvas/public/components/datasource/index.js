@@ -39,12 +39,16 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const datasourceAst = get(element, 'ast.chain', [])
     .map((astDef, i) => {
       // if it's not a function, it's can't be a datasource
-      if (astDef.type !== 'function') return;
+      if (astDef.type !== 'function') {
+        return;
+      }
       const args = astDef.arguments;
 
       // if there's no matching datasource in the registry, we're done
       const datasource = datasourceRegistry.get(astDef.function);
-      if (!datasource) return;
+      if (!datasource) {
+        return;
+      }
 
       const datasourceDef = getDataTableFunctionsByName(datasource.name);
 

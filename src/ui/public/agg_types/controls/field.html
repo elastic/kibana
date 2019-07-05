@@ -1,10 +1,11 @@
 <div class="form-group">
-  <label>
-    Field
-  </label>
+  <label
+    i18n-id="common.ui.aggTypes.field.fieldLabel"
+    i18n-default-message="Field"
+  ></label>
 
   <ui-select
-    title="Aggregation Field"
+    title="{{ ::'common.ui.aggTypes.field.aggregationFieldTitle' | i18n: { defaultMessage: 'Aggregation Field' } }}"
     name="field"
     required
     class="visEditorAggSelect__select field-select"
@@ -13,7 +14,9 @@
     on-select="aggParam.onChange(agg)"
     uis-open-close="limit = 100"
   >
-    <ui-select-match placeholder="Select a field">
+    <ui-select-match
+      placeholder="{{ ::'common.ui.aggTypes.field.selectFieldPlaceholder' | i18n: { defaultMessage: 'Select a field' } }}"
+    >
       {{$select.selected.displayName}}
     </ui-select-match>
     <ui-select-choices
@@ -33,7 +36,16 @@
   <div class="hintbox" ng-if="!indexedFields.length">
     <p>
       <i class="fa fa-danger text-danger"></i>
-      <strong>No Compatible Fields:</strong> The "{{ agg.getIndexPattern().title }}" index pattern does not contain any of the following field types: {{ agg.type.params.byName.field.filterFieldTypes | commaList:false }}
+      <strong
+        i18n-id="common.ui.aggTypes.dateRanges.noCompatibleFieldsLabel"
+        i18n-default-message="No Compatible Fields:"
+      ></strong>
+      <span
+        i18n-id="common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription"
+        i18n-default-message="The {indexPatternTitle} index pattern does not contain any of the following field types:"
+        i18n-values="{ indexPatternTitle: agg.getIndexPattern().title }"
+      ></span>
+      {{ agg.type.params.byName.field.filterFieldTypes | commaList:false }}
     </p>
   </div>
 

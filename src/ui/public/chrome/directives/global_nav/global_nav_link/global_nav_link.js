@@ -19,7 +19,6 @@
 
 
 import globalNavLinkTemplate from './global_nav_link.html';
-import './global_nav_link.less';
 import { uiModules } from '../../../../modules';
 
 const module = uiModules.get('kibana');
@@ -36,6 +35,7 @@ module.directive('globalNavLink', chrome => {
       url: '=',
       kbnRoute: '=',
       icon: '=',
+      euiIconType: '=',
       label: '=',
     },
     template: globalNavLinkTemplate,

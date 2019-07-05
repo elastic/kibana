@@ -28,13 +28,13 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
 import { getInAppUrl } from './lib/get_in_app_url';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, $injector) {
+function updateObjectsTable($scope, $injector, i18n) {
   const Private = $injector.get('Private');
   const indexPatterns = $injector.get('indexPatterns');
   const $http = $injector.get('$http');
@@ -55,7 +55,7 @@ function updateObjectsTable($scope, $injector) {
     }
 
     render(
-      <I18nProvider>
+      <I18nContext>
         <ObjectsTable
           savedObjectsClient={savedObjectsClient}
           services={services}
@@ -70,7 +70,10 @@ function updateObjectsTable($scope, $injector) {
             }
             const serviceName = typeToServiceName(type);
             if (!serviceName) {
-              toastNotifications.addWarning(`Unknown saved object type: ${type}`);
+              toastNotifications.addWarning(i18n('kbn.management.objects.unknownSavedObjectTypeNotificationMessage', {
+                defaultMessage: 'Unknown saved object type: {type}',
+                values: { type }
+              }));
               return null;
             }
 
@@ -81,7 +84,7 @@ function updateObjectsTable($scope, $injector) {
             $scope.$apply();
           }}
         />
-      </I18nProvider>,
+      </I18nContext>,
       node,
     );
   });
@@ -106,8 +109,8 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       controllerAs: 'managementObjectsController',
-      controller: function ($scope, $injector) {
-        updateObjectsTable($scope, $injector);
+      controller: function ($scope, $injector, i18n) {
+        updateObjectsTable($scope, $injector, i18n);
         $scope.$on('$destroy', destroyObjectsTable);
       }
     };

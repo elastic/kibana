@@ -2,6 +2,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      // Allows for importing from `kibana` package for the exported types.
+      "kibana": ["./kibana"],
       "ui/*": [
         "src/ui/public/*"
       ],
@@ -47,8 +49,10 @@
     "importHelpers": true
   },
   "include": [
+    "kibana.d.ts",
     "src/**/*",
-    "typings/**/*"
+    "typings/**/*",
+    "test_utils/**/*"
   ],
   "exclude": [
     "src/**/__fixtures__/**/*",

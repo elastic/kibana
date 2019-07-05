@@ -18,6 +18,7 @@ import { dashboardMode } from './plugins/dashboard_mode';
 import { logstash } from './plugins/logstash';
 import { beats } from './plugins/beats_management';
 import { apm } from './plugins/apm';
+import { maps } from './plugins/maps';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
@@ -28,7 +29,14 @@ import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
+import { taskManager } from './plugins/task_manager';
 import { rollup } from './plugins/rollup';
+import { remoteClusters } from './plugins/remote_clusters';
+import { crossClusterReplication } from './plugins/cross_cluster_replication';
+import { translations } from './plugins/translations';
+import { upgradeAssistant } from './plugins/upgrade_assistant';
+import { uptime } from './plugins/uptime';
+import { ossTelemetry } from './plugins/oss_telemetry';
 
 module.exports = function (kibana) {
   return [
@@ -47,6 +55,7 @@ module.exports = function (kibana) {
     logstash(kibana),
     beats(kibana),
     apm(kibana),
+    maps(kibana),
     canvas(kibana),
     licenseManagement(kibana),
     cloud(kibana),
@@ -56,6 +65,13 @@ module.exports = function (kibana) {
     indexLifecycleManagement(kibana),
     kueryAutocomplete(kibana),
     infra(kibana),
+    taskManager(kibana),
     rollup(kibana),
+    remoteClusters(kibana),
+    crossClusterReplication(kibana),
+    translations(kibana),
+    upgradeAssistant(kibana),
+    uptime(kibana),
+    ossTelemetry(kibana),
   ];
 };

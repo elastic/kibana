@@ -42,13 +42,13 @@ describe('Saved Object', function () {
    * that can be used to stub es calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
-   * @returns {{attributes: {}, type: string, id: *, _version: integer}}
+   * @returns {{attributes: {}, type: string, id: *, _version: string}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
     return {
       type: 'dashboard',
       id: indexPatternId,
-      _version: 2,
+      _version: 'foo',
       attributes: {},
       ...additionalOptions
     };
@@ -242,7 +242,11 @@ describe('Saved Object', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
         sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-          return BluebirdPromise.resolve({ type: 'dashboard', id: 'myId', _version: 2 });
+          return BluebirdPromise.resolve({
+            type: 'dashboard',
+            id: 'myId',
+            _version: 'foo'
+          });
         });
 
         stubESResponse(mockDocResponse);
@@ -261,7 +265,9 @@ describe('Saved Object', function () {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve({
-              type: 'dashboard', id, version: 2
+              type: 'dashboard',
+              id,
+              version: 'foo'
             });
           });
           expect(savedObject.isSaving).to.be(false);
@@ -451,7 +457,7 @@ describe('Saved Object', function () {
           attributes: {
             title: 'testIndexPattern'
           },
-          _version: 2
+          _version: 'foo'
         });
 
         const savedObject = new SavedObject(config);

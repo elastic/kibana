@@ -12,7 +12,7 @@ import {
   InfraNodesAggregations,
 } from './adapter_types';
 
-import { InfraNode } from '../../../../common/graphql/types';
+import { InfraNode } from '../../../graphql/types';
 import { calculateCardinalityOfNodeField } from './lib/calculate_cardinality';
 import { createPartitionBodies } from './lib/create_partition_bodies';
 import { processNodes } from './lib/process_nodes';

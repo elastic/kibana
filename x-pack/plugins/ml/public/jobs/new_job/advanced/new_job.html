@@ -28,31 +28,40 @@
           <div class="tab_contents">
             <!-- ID -->
             <div class="form-group">
-              <ml-form-label label-id="new_job_id" tooltip-append-to-body="true">Name</ml-form-label>
+              <ml-form-label label-id="new_job_id" tooltip-append-to-body="true">
+                {{ ::'xpack.ml.newJob.advanced.jobDetails.nameLabel' | i18n: {defaultMessage: 'Name'} }}
+              </ml-form-label>
               <input
                 aria-labelledby="ml_aria_label_new_job_id"
                 aria-describedby="ml_aria_description_new_job_id"
                 ng-model="job.job_id"
                 required
-                placeholder="Job ID"
+                placeholder="{{ ::'xpack.ml.newJob.advanced.jobDetails.jobIdPlaceholder' | i18n: {defaultMessage: 'Job ID'} }}"
                 ng-change="changeJobIDCase()"
                 input-focus
                 class="form-control lowercase" />
-              <div ng-hide="ui.validation.tabs[0].checks.jobId.valid" class="validation-error">{{ ( ui.validation.tabs[0].checks.jobId.message || "Enter a name for the job" ) }}</div>
+              <div
+                ng-hide="ui.validation.tabs[0].checks.jobId.valid"
+                class="validation-error"
+                >{{ ( ui.validation.tabs[0].checks.jobId.message || enterJobNameLabel ) }}</div>
             </div>
             <!-- description -->
             <div class="form-group">
-              <ml-form-label label-id="new_job_description">Description</ml-form-label>
+              <ml-form-label label-id="new_job_description">
+                  {{ ::'xpack.ml.newJob.advanced.jobDetails.descriptionLabel' | i18n: {defaultMessage: 'Description'} }}
+              </ml-form-label>
               <input
                 aria-labelledby="ml_aria_label_new_job_description"
                 aria-describedby="ml_aria_description_new_job_description"
                 ng-model="job.description"
-                placeholder="Job description"
+                placeholder="{{ ::'xpack.ml.newJob.advanced.jobDetails.jobDescriptionPlaceholder' | i18n: {defaultMessage: 'Job description'} }}"
                 class="form-control" />
             </div>
 
             <div class="form-group">
-              <ml-form-label label-id="new_job_group">Job Groups</ml-form-label>
+              <ml-form-label label-id="new_job_group">
+                {{ ::'xpack.ml.newJob.advanced.jobDetails.jobGroupsLabel' | i18n: {defaultMessage: 'Job Groups'} }}
+              </ml-form-label>
               <ml-job-group-select
                 aria-labelledby="ml_aria_label_new_job_group"
                 aria-describedby="ml_aria_description_new_job_group"
@@ -62,14 +71,23 @@
             </div>
 
             <div class="form-group">
-              <label class="kuiFormLabel">Custom URLs</label><i ml-info-icon="new_job_custom_urls" />
+              <label
+                class="kuiFormLabel"
+                i18n-id="xpack.ml.newJob.advanced.jobDetails.customUrlsLabel"
+                i18n-default-message="Custom URLs"
+              ></label><i ml-info-icon="new_job_custom_urls" />
               <div class="euiSpacer euiSpacer--s"></div>
               <div ng-if="job.custom_settings && job.custom_settings.custom_urls">
                 <div ng-repeat="item in job.custom_settings.custom_urls track by $index" class="custom-url">
                   <div class="field-cols">
 
                     <div class="form-group">
-                      <label class="kuiFormLabel" id="ml_aria_label_custom_url_label_{{$index}}">Label</label>
+                      <label
+                        class="kuiFormLabel"
+                        id="ml_aria_label_custom_url_label_{{$index}}"
+                        i18n-id="xpack.ml.newJob.advanced.jobDetails.labelLabel"
+                        i18n-default-message="Label"
+                      ></label>
                       <input
                         aria-labelledby="ml_aria_label_custom_url_label_{{$index}}"
                         ng-model="item.url_name"
@@ -80,7 +98,12 @@
 
                   <div class="field-cols">
                     <div class="form-group">
-                      <label class="kuiFormLabel" id="ml_aria_label_custom_url_{{$index}}">URL</label>
+                      <label
+                        class="kuiFormLabel"
+                        id="ml_aria_label_custom_url_{{$index}}"
+                        i18n-id="xpack.ml.newJob.advanced.jobDetails.urlLabel"
+                        i18n-default-message="URL"
+                      ></label>
                       <textarea
                         aria-labelledby="ml_aria_label_custom_url_{{$index}}"
                         ng-model="item.url_value"
@@ -90,7 +113,7 @@
                   </div>
 
                   <button
-                    aria-label="Remove Custom URL"
+                    aria-label="{{ ::'xpack.ml.newJob.advanced.jobDetails.removeCustomUrlButtonAriaLabel' | i18n: {defaultMessage: 'Remove Custom URL'} }}"
                     ng-click="removeCustomUrl($index)"
                     tooltip-append-to-body="true"
                     type="button"
@@ -107,7 +130,11 @@
                   type="button"
                   class="kuiButton kuiButton--primary kuiButton--small">
                   <i aria-hidden="true" class="fa fa-plus" />
-                  <span id="ml_aria_label_new_job_custom_urls">Add Custom URL</span>
+                  <span
+                    id="ml_aria_label_new_job_custom_urls"
+                    i18n-id="xpack.ml.newJob.advanced.jobDetails.addCustomUrlButtonLabel"
+                    i18n-default-message="Add Custom URL"
+                  ></span>
                 </button>
               </div>
 
@@ -120,16 +147,22 @@
                   aria-describedby="ml_aria_description_new_job_dedicated_index"
                   class='kuiCheckBox'
                   ng-change="setDedicatedIndex()"
-                  ng-model  ="ui.useDedicatedIndex" />
+                  ng-model ="ui.useDedicatedIndex" />
                 <span class='kuiCheckBoxLabel__text'>
-                  <span id="ml_aria_label_new_job_dedicated_index">Use dedicated index</span>
+                  <span
+                    id="ml_aria_label_new_job_dedicated_index"
+                    i18n-id="xpack.ml.newJob.advanced.jobDetails.useDedicatedIndexLabel"
+                    i18n-default-message="Use dedicated index"
+                  ></span>
                   <i ml-info-icon="new_job_dedicated_index" />
                 </span>
               </label>
             </div>
 
             <div class="form-group">
-              <ml-form-label label-id="new_job_model_memory_limit">Model memory limit</ml-form-label>
+              <ml-form-label label-id="new_job_model_memory_limit">
+                {{ ::'xpack.ml.newJob.advanced.jobDetails.modelMemoryLimitLabel' | i18n: {defaultMessage: 'Model memory limit'} }}
+              </ml-form-label>
               <input
                 aria-labelledby="ml_aria_label_new_job_model_memory_limit"
                 aria-describedby="ml_aria_description_new_job_model_memory_limit"
@@ -156,7 +189,7 @@
                 ng-change="calculateDatafeedFrequencyDefaultSeconds()"
                 class="form-control" />
               <div ng-hide="ui.validation.tabs[1].checks.bucketSpan.valid" class="validation-error">
-                {{ ( ui.validation.tabs[1].checks.bucketSpan.message || "bucket_span is not a valid time interval format" ) }}
+                {{ ( ui.validation.tabs[1].checks.bucketSpan.message || bucketSpanNotValidFormatLabel ) }}
               </div>
             </div>
             <div class="form-group">
@@ -184,7 +217,12 @@
               ng-show="(job.analysis_config.categorization_field_name !== undefined && job.analysis_config.categorization_field_name !== '') ||
                        (job.analysis_config.categorization_filters && job.analysis_config.categorization_filters.length)">
 
-              <label class="kuiFormLabel" aria-describedby="ml_aria_description_new_job_categorizationfilters">Categorization Filters</label>
+              <label
+                class="kuiFormLabel"
+                aria-describedby="ml_aria_description_new_job_categorizationfilters"
+                i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.categorizationFiltersLabel"
+                i18n-default-message="Categorization Filters"
+              ></label>
               <i ml-info-icon="new_job_categorizationfilters" />
               <div class="euiSpacer euiSpacer--s"></div>
               <div ng-if="job.analysis_config && job.analysis_config.categorization_filters">
@@ -193,7 +231,7 @@
 
                     <div class="form-group">
                       <input
-                        aria-label="Categorization filter regular expression"
+                        aria-label="{{ ::'xpack.ml.newJob.advanced.analysisConfiguration.categorizationFilterRegularExpressionAriaLabel' | i18n: {defaultMessage: 'Categorization filter regular expression'} }}"
                         ng-model="job.analysis_config.categorization_filters[$index]"
                         type="text"
                         class="form-control" />
@@ -201,7 +239,7 @@
                   </div>
 
                   <button
-                    aria-label="Remove categorization filter"
+                    aria-label="{{ ::'xpack.ml.newJob.advanced.analysisConfiguration.removeCategorizationFilterButtonAriaLabel' | i18n: {defaultMessage: 'Remove categorization filter'} }}"
                     ng-click="removeCategorizationFilter($index)"
                     tooltip-append-to-body="true"
                     type="button"
@@ -218,16 +256,25 @@
                   ng-disabled="job.analysis_config.categorization_field_name === undefined || job.analysis_config.categorization_field_name === ''"
                   class="kuiButton kuiButton--primary kuiButton--small">
                   <i aria-hidden="true" class="fa fa-plus" />
-                  <span id="ml_aria_label_add_categorization_filter">Add Categorization Filter</span>
+                  <span
+                    id="ml_aria_label_add_categorization_filter"
+                    i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.addCategorizationFilterButtonLabel"
+                    i18n-default-message="Add Categorization Filter"
+                  ></span>
                 </button>
               </div>
             </div>
             <div ng-hide="ui.validation.tabs[1].checks.categorizationFilters.valid" class="validation-error">
-              {{ ( ui.validation.tabs[1].checks.categorizationFilters.message || "Categorization filters must all be valid regular expressions" ) }}
+              {{ ( ui.validation.tabs[1].checks.categorizationFilters.message || categorizationFiltersNotValidLabel ) }}
             </div>
 
             <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
-            <label class="kuiFormLabel" aria-describedby="ml_aria_description_new_job_detectors">Detectors</label>
+            <label
+              class="kuiFormLabel"
+              aria-describedby="ml_aria_description_new_job_detectors"
+              i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.detectorsLabel"
+              i18n-default-message="Detectors"
+            ></label>
             <i ml-info-icon="new_job_detectors" />
 
             <div class="euiSpacer euiSpacer--s"></div>
@@ -241,12 +288,17 @@
               ml-on-detectors-update="onDetectorsUpdate"
               ></div>
             <div ng-hide="ui.validation.tabs[1].checks.detectors.valid" class="validation-error">
-              {{ ( ui.validation.tabs[1].checks.detectors.message || "At least one detector should be configured" ) }}
+              {{ ( ui.validation.tabs[1].checks.detectors.message || detectorNotConfiguredLabel ) }}
             </div>
 
             <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
 
-            <label class="kuiFormLabel" aria-describedby="ml_aria_description_new_job_influencers">Influencers</label>
+            <label
+              class="kuiFormLabel"
+              aria-describedby="ml_aria_description_new_job_influencers"
+              i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.influencersLabel"
+              i18n-default-message="Influencers"
+            ></label>
             <i ml-info-icon="new_job_influencers" />
             <div class="influencer-list-container">
 
@@ -261,20 +313,22 @@
                 <input
                   type="text"
                   ng-model="ui.tempCustomInfluencer"
-                  placeholder="Custom influencer"
+                  placeholder="{{ ::'xpack.ml.newJob.advanced.analysisConfiguration.customInfluencerPlaceholder' | i18n: {defaultMessage: 'Custom influencer'} }}"
                   class="form-control"  />
                 <button
-                  aria-label="Add Custom Influencer"
+                  aria-label="{{ ::'xpack.ml.newJob.advanced.analysisConfiguration.addCustomInfluencerButtonAriaLabel' | i18n: {defaultMessage: 'Add Custom Influencer'} }}"
                   ng-click="addCustomInfluencer()"
                   ng-disabled="ui.tempCustomInfluencer===''"
                   type="button"
-                  class="kuiButton kuiButton--primary kuiButton--small">
-                  <i aria-hidden="true" class="fa fa-plus" /> Add
-                </button>
+                  class="kuiButton kuiButton--primary kuiButton--small"
+                  i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.addLabel"
+                  i18n-default-message="{icon} Add"
+                  i18n-values="{ html_icon: '<i aria-hidden=\'true\' class=\'fa fa-plus\' />' }"
+                ></button>
               </div>
             </div>
             <div ng-hide="ui.validation.tabs[1].checks.influencers.valid" class="validation-error">
-              {{ ( ui.validation.tabs[1].checks.influencers.message || "At least one influencer should be selected" ) }}
+              {{ ( ui.validation.tabs[1].checks.influencers.message || influencerNotSelectedLabel ) }}
             </div>
 
             <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
@@ -290,7 +344,7 @@
                   ng-model="ui.enableModelPlot" />
                 <span class='kuiCheckBoxLabel__text'>
                   <span id="ml_aria_label_new_job_enable_model_plot">
-                    {{ ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.RUNNING ? 'Validating cardinality...' : 'Enable model plot' }}
+                    {{ ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.RUNNING ? validatingCardinalityLabel : enableModelPlotLabel }}
                   </span>
                   <i ml-info-icon="new_job_enable_model_plot" />
                 </span>
@@ -311,7 +365,9 @@
         <ml-job-tab-2 ng-show="ui.currentTab === 2">
           <div class="tab_contents">
             <div class="form-group">
-              <ml-form-label label-id="new_job_data_format">Data format</ml-form-label>
+              <ml-form-label label-id="new_job_data_format">
+                {{ ::'xpack.ml.newJob.advanced.dataDescription.dataFormatLabel' | i18n: {defaultMessage: 'Data format'} }}
+              </ml-form-label>
               <select
                 aria-labelledby="ml_aria_label_new_job_data_format"
                 aria-describedby="ml_aria_description_new_job_data_format"
@@ -323,7 +379,9 @@
             </div>
             <ml-job-delimited-options ng-show="job.data_description.format==='delimited'">
               <div class="form-group">
-                <ml-form-label label-id="new_job_delimiter">Delimiter</ml-form-label>
+                <ml-form-label label-id="new_job_delimiter">
+                  {{ ::'xpack.ml.newJob.advanced.dataDescription.delimiterLabel' | i18n: {defaultMessage: 'Delimiter'} }}
+                </ml-form-label>
                 <select
                   aria-labelledby="ml_aria_label_new_job_delimiter"
                   aria-describedby="ml_aria_description_new_job_delimiter"
@@ -339,7 +397,9 @@
                   class="form-control" />
               </div>
               <div class="form-group">
-                <ml-form-label label-id="new_job_quote_character">Quote character</ml-form-label>
+                <ml-form-label label-id="new_job_quote_character">
+                  {{ ::'xpack.ml.newJob.advanced.dataDescription.quoteCharacterLabel' | i18n: {defaultMessage: 'Quote character'} }}
+                </ml-form-label>
                 <input
                   aria-labelledby="ml_aria_label_new_job_quote_character"
                   aria-describedby="ml_aria_description_new_job_quote_character"
@@ -351,7 +411,9 @@
             </ml-job-delimited-options>
 
             <div class="form-group">
-              <ml-form-label label-id="new_job_time_field">Time field</ml-form-label>
+              <ml-form-label label-id="new_job_time_field">
+                {{ ::'xpack.ml.newJob.advanced.dataDescription.timeFieldLabel' | i18n: {defaultMessage: 'Time field'} }}
+              </ml-form-label>
               <input
                 aria-labelledby="ml_aria_label_new_job_time_field"
                 aria-describedby="ml_aria_description_new_job_time_field"
@@ -360,12 +422,14 @@
                 placeholder=""
                 class="form-control" />
               <div ng-hide="ui.validation.tabs[2].checks.timeField.valid" class="validation-error">
-                {{ ( ui.validation.tabs[2].checks.timeField.message || "Time field should be specified" ) }}
+                {{ ( ui.validation.tabs[2].checks.timeField.message || specifyTimeFieldLabel ) }}
               </div>
             </div>
 
             <div class="form-group">
-              <ml-form-label label-id="new_job_time_format">Time format</ml-form-label>
+              <ml-form-label label-id="new_job_time_format">
+                {{ ::'xpack.ml.newJob.advanced.dataDescription.timeFormatLabel' | i18n: {defaultMessage: 'Time format'} }}
+              </ml-form-label>
               <input
                 aria-labelledby="ml_aria_label_new_job_time_format"
                 aria-describedby="ml_aria_description_new_job_time_format"
@@ -374,9 +438,15 @@
                 placeholder=""
                 class="form-control" />
               <div ng-hide="ui.validation.tabs[2].checks.timeFormat.valid" class="validation-error">
-                {{ ( ui.validation.tabs[2].checks.timeFormat.message || "Time format should be specified" ) }}
+                {{ ( ui.validation.tabs[2].checks.timeFormat.message || specifyTimeFormatLabel ) }}
               </div>
-              <div class="time-example">{{ ((exampleTime)?"e.g. "+ exampleTime:"") }}</div>
+              <div
+                ng-if="exampleTime"
+                class="time-example"
+                i18n-id="xpack.ml.newJob.advanced.dataDescription.exampleTimeDescription"
+                i18n-default-message="e.g. {exampleTime}"
+                i18n-values="{ exampleTime }"
+              ></div>
             </div>
           </div>
         </ml-job-tab-2>
@@ -394,18 +464,28 @@
                 ng-disabled="job.data_description.format!=='json'"
                 type="checkbox" />
               <span class='kuiCheckBoxLabel__text'>
-                <span id="ml_aria_label_new_job_enable_datafeed_job">Datafeed job</span>
+                <span
+                  id="ml_aria_label_new_job_enable_datafeed_job"
+                  i18n-id="xpack.ml.newJob.advanced.datafeed.datafeedJobLabel"
+                  i18n-default-message="Datafeed job"
+                ></span>
                 <i ml-info-icon="new_job_enable_datafeed_job" />
               </span>
             </label>
             <div class="euiSpacer euiSpacer--s"></div>
             <div class="form-group help-pane" ng-show="job.data_description.format!=='json' && job.data_description.format!==undefined">
-              <small class="info">Data format must be set to 'JSON' to enable the datafeed.</small>
+              <small
+                class="info"
+                i18n-id="xpack.ml.newJob.advanced.datafeed.enableDatafeedDescription"
+                i18n-default-message="Data format must be set to 'JSON' to enable the datafeed."
+              ></small>
             </div>
 
             <div ng-if="ui.isDatafeed">
               <div class="form-group">
-                <ml-form-label label-id="new_job_datafeed_query" tooltip-append-to-body="true">Query</ml-form-label>
+                <ml-form-label label-id="new_job_datafeed_query" tooltip-append-to-body="true">
+                  {{ ::'xpack.ml.newJob.advanced.datafeed.queryLabel' | i18n: {defaultMessage: 'Query'} }}
+                </ml-form-label>
                 <input
                   aria-labelledby="ml_aria_label_new_job_datafeed_query"
                   aria-describedby="ml_aria_description_new_job_datafeed_query"
@@ -415,7 +495,9 @@
 
               </div>
               <div class="form-group" >
-                <ml-form-label label-id="new_job_datafeed_query_delay">Query delay</ml-form-label>
+                <ml-form-label label-id="new_job_datafeed_query_delay">
+                  {{ ::'xpack.ml.newJob.advanced.datafeed.queryDelayLabel' | i18n: {defaultMessage: 'Query delay'} }}
+                </ml-form-label>
                 <input
                   aria-labelledby="ml_aria_label_new_job_datafeed_query_delay"
                   aria-describedby="ml_aria_description_new_job_datafeed_query_delay"
@@ -426,7 +508,9 @@
 
               </div>
               <div class="form-group" >
-                <ml-form-label label-id="new_job_datafeed_frequency">Frequency</ml-form-label>
+                <ml-form-label label-id="new_job_datafeed_frequency">
+                  {{ ::'xpack.ml.newJob.advanced.datafeed.frequencyLabel' | i18n: {defaultMessage: 'Frequency'} }}
+                </ml-form-label>
                 <input
                   aria-labelledby="ml_aria_label_new_job_datafeed_frequency"
                   aria-describedby="ml_aria_description_new_job_datafeed_frequency"
@@ -450,7 +534,11 @@
               </div>
               <div class="form-group" >
                 <div class="form-group">
-                  <label class="kuiFormLabel">Index</label>
+                  <label
+                    class="kuiFormLabel"
+                    i18n-id="xpack.ml.newJob.advanced.datafeed.indexLabel"
+                    i18n-default-message="Index"
+                  ></label>
                   <div class="input-group">
                   <input
                     ng-model="ui.datafeed.indicesText"
@@ -472,12 +560,19 @@
                     type="button"
                     class="kuiButton kuiButton--primary kuiButton--small">
                     <i aria-hidden="true" class="fa fa-refresh"></i>
-                    <span>Reload index</span>
+                    <span
+                      i18n-id="xpack.ml.newJob.advanced.datafeed.reloadIndexButtonLabel"
+                      i18n-default-message="Reload index"
+                    ></span>
                   </button>
                 </div>
 
                 <div ng-show="ui.indexTextOk && ui.fieldsUpToDate === true" class="form-group">
-                  <label class="kuiFormLabel">Time-field name</label>
+                  <label
+                    class="kuiFormLabel"
+                    i18n-id="xpack.ml.newJob.advanced.datafeed.timeFieldNameLabel"
+                    i18n-default-message="Time-field name"
+                  ></label>
                   <select
                     ng-model="job.data_description.time_field"
                     class="form-control">
@@ -495,7 +590,12 @@
         <!-- tab 4 Edit JSON -->
         <ml-job-tab-4 ng-show="ui.currentTab === 4" class="ml_json_tab">
           <div class="tab_contents">
-            <label class="kuiFormLabel" id="ml_aria_label_new_job_json">JSON</label>
+            <label
+              class="kuiFormLabel"
+              id="ml_aria_label_new_job_json"
+              i18n-id="xpack.ml.newJob.advanced.json.jsonLabel"
+              i18n-default-message="JSON"
+            ></label>
             <div
               class="form-control json-textarea"
               ui-ace="{
@@ -510,9 +610,11 @@
         <!-- tab 5 Data preview -->
         <ml-job-tab-5 ng-show="ui.currentTab === 5" class="ml_data_preview_tab">
           <div class="tab_contents">
-            <ml-form-label label-id="new_job_data_preview">Data preview</ml-form-label>
+            <ml-form-label label-id="new_job_data_preview">
+              {{ ::'xpack.ml.newJob.advanced.dataPreview.dataPreviewLabel' | i18n: {defaultMessage: 'Data preview'} }}
+            </ml-form-label>
             <ml-loading-indicator
-              label="Loading data preview"
+              label="{{ ::'xpack.ml.newJob.advanced.dataPreview.loadingDataPreviewLabel' | i18n: {defaultMessage: 'Loading data preview'} }}"
               is-loading="(ui.dataPreview === '')"
             />
             <div ng-hide="(ui.dataPreview === '')">
@@ -525,9 +627,12 @@
                 }"
                 ng-model="ui.dataPreview"
                 ></div>
-                <div class="note">
-                  Preview returns the content of the _source field only.
-                </div>
+                <div
+                  class="note"
+                  i18n-id="xpack.ml.newJob.advanced.dataPreview.previewContentReturnedDescription"
+                  i18n-default-message="Preview returns the content of the {source} field only."
+                  i18n-values="{ source: '_source' }"
+                ></div>
             </div>
           </div>
         </ml-job-tab-5>
@@ -550,9 +655,12 @@
               ng-click="save()"
               ng-disabled="(saveLock === true)"
               class="euiButton euiButton--primary euiButton--small euiButton--fill"
-              aria-label="Save">
+              aria-label="{{ ::'xpack.ml.newJob.advanced.saveButtonAriaLabel' | i18n: {defaultMessage: 'Save'} }}">
               <span class="euiButton__content">
-                <span>Save</span>
+                <span
+                  i18n-id="xpack.ml.newJob.advanced.saveButtonLabel"
+                  i18n-default-message="Save"
+                ></span>
               </span>
             </button>
           </div>
@@ -561,9 +669,12 @@
               ng-click="cancel()"
               ng-disabled="(saveLock === true)"
               class="euiButton euiButton--primary euiButton--small euiButton--fill"
-              aria-label="Cancel">
+              aria-label="{{ ::'xpack.ml.newJob.advanced.cancelButtonAriaLabel' | i18n: {defaultMessage: 'Cancel'} }}">
               <span class="euiButton__content">
-                <span>Cancel</span>
+                <span
+                  i18n-id="xpack.ml.newJob.advanced.cancelButtonLabel"
+                  i18n-default-message="Cancel"
+                ></span>
               </span>
             </button>
           </div>

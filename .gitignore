@@ -9,7 +9,7 @@ node_modules
 !/src/dev/notice/__fixtures__/node_modules
 trash
 /optimize
-/dlls
+/built_assets
 target
 /build
 .jruby
@@ -43,4 +43,3 @@ package-lock.json
 .vscode
 npm-debug.log*
 .tern-project
-index.css

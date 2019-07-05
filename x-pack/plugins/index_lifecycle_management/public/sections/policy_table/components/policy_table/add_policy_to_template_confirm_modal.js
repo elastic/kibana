@@ -37,7 +37,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     const policyName = policy.name;
     if (!templateName) {
       this.setState({ templateError: i18n.translate(
-        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.noTemplateSelectedErrorMessage',
+        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.noTemplateSelectedErrorMessage',
         { defaultMessage: 'You must select an index template.' }) });
       return;
     }
@@ -48,14 +48,14 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
         aliasName
       });
       const message = intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.successMessage',
+        id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.successMessage',
         defaultMessage: 'Added policy {policyName} to index template {templateName}',
       }, { policyName, templateName });
       toastNotifications.addSuccess(message);
       onCancel();
     } catch (e) {
       const title = intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.errorMessage',
+        id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorMessage',
         defaultMessage: 'Error adding policy "{policyName}" to index template {templateName}',
       }, { policyName, templateName });
       showApiError(e, title);
@@ -76,14 +76,14 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
           style={{ maxWidth: 400 }}
           title={
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.templateHasPolicyWarningTitle"
+              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.templateHasPolicyWarningTitle"
               defaultMessage="Template already has policy"
             />
           }
           color="warning"
         >
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
+            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.indexHasNoAliasesWarningMessage"
             defaultMessage="This index template already has the policy {existingPolicyName} attached to it.
             Adding this policy will overwrite that configuration."
             values={{
@@ -110,7 +110,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     options.unshift({
       value: '',
       text: i18n.translate(
-        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.chooseTemplateMessage',
+        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateMessage',
         {
           defaultMessage: 'Select an index template',
         }
@@ -124,7 +124,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
           error={templateError}
           label={
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.chooseTemplateLabel"
+              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateLabel"
               defaultMessage="Index template"
             />
           }
@@ -153,7 +153,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.rolloverAliasLabel"
+            id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.rolloverAliasLabel"
             defaultMessage="Alias for rollover index"
           />
         }
@@ -170,7 +170,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
   render() {
     const { intl, policy, onCancel } = this.props;
     const title = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.title',
+      id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.title',
       defaultMessage: 'Add policy "{name}" to index template',
     }, { name: policy.name });
     return (
@@ -180,11 +180,11 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
           onCancel={onCancel}
           onConfirm={this.addPolicyToTemplate}
           cancelButtonText={intl.formatMessage({
-            id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.cancelButton',
+            id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.cancelButton',
             defaultMessage: 'Cancel',
           })}
           confirmButtonText={intl.formatMessage({
-            id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.confirmButton',
+            id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.confirmButton',
             defaultMessage: 'Add policy',
           })}
           onClose={onCancel}
@@ -192,7 +192,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.explanationText"
+                id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.explanationText"
                 defaultMessage="This will apply the lifecycle policy to
                   all indices which match the index template."
               />{' '}<LearnMoreLink

@@ -10,6 +10,7 @@ import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/component
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
+import { i18n } from '@kbn/i18n';
 
 export function createFields(scope, indexPattern) {
   const isPopulation = scope.formConfig.hasOwnProperty('overField');
@@ -31,7 +32,9 @@ export function createFields(scope, indexPattern) {
   const eventRateField = {
     id: EVENT_RATE_COUNT_FIELD,
     name: 'event rate',
-    tooltip: 'System defined field',
+    tooltip: i18n.translate('xpack.ml.newJob.simple.createFields.systemDefinedFieldTooltip', {
+      defaultMessage: 'System defined field'
+    }),
     isCountField: true,
     agg: countAgg,
     mlType: ML_JOB_FIELD_TYPES.NUMBER,

@@ -20,6 +20,7 @@
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
+import { I18nService } from './i18n';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
@@ -55,6 +56,15 @@ const MockFatalErrorsService = jest.fn<FatalErrorsService>(function _MockFatalEr
 });
 jest.mock('./fatal_errors', () => ({
   FatalErrorsService: MockFatalErrorsService,
+}));
+
+const mockI18nStartContract = {};
+const MockI18nService = jest.fn<I18nService>(function _MockI18nService(this: any) {
+  this.start = jest.fn().mockReturnValue(mockI18nStartContract);
+  this.stop = jest.fn();
+});
+jest.mock('./i18n', () => ({
+  I18nService: MockI18nService,
 }));
 
 const mockNotificationStartContract = {};
@@ -130,6 +140,7 @@ describe('constructor', () => {
 
     expect(MockInjectedMetadataService).toHaveBeenCalledTimes(1);
     expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
+    expect(MockI18nService).toHaveBeenCalledTimes(1);
     expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
     expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
@@ -265,6 +276,17 @@ describe('#stop', () => {
     expect(uiSettings.stop).toHaveBeenCalled();
   });
 
+  it('calls i18n.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [i18n] = MockI18nService.mock.instances;
+    expect(i18n.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(i18n.stop).toHaveBeenCalled();
+  });
+
   it('clears the rootDomElement', () => {
     const rootDomElement = document.createElement('div');
     const coreSystem = new CoreSystem({
@@ -286,7 +308,7 @@ describe('#start()', () => {
       rootDomElement,
     });
 
-    core.start();
+    return core.start();
   }
 
   it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', () => {
@@ -333,18 +355,25 @@ describe('#start()', () => {
     });
   });
 
+  it('calls i18n#start()', () => {
+    startCore();
+    const [mockInstance] = MockI18nService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith();
+  });
+
   it('calls fatalErrors#start()', () => {
     startCore();
     const [mockInstance] = MockFatalErrorsService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+    expect(mockInstance.start).toHaveBeenCalledWith({ i18n: mockI18nStartContract });
   });
 
   it('calls notifications#start()', () => {
     startCore();
     const [mockInstance] = MockNotificationsService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+    expect(mockInstance.start).toHaveBeenCalledWith({ i18n: mockI18nStartContract });
   });
 
   it('calls chrome#start()', () => {
@@ -352,6 +381,10 @@ describe('#start()', () => {
     const [mockInstance] = MockChromeService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith();
+  });
+
+  it('returns start contract', () => {
+    expect(startCore()).toEqual({ fatalErrors: mockFatalErrorsStartContract });
   });
 });
 

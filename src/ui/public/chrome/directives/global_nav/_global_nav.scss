@@ -1,0 +1,67 @@
+.kbnGlobalNav {
+  width: $kbnGlobalNavClosedWidth;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  background-color: $kbnChromeGlobalNavBackground;
+  overflow: hidden;
+  z-index: 5;
+
+  &.kbnGlobalNav-isOpen {
+    width: $kbnGlobalNavOpenWidth;
+
+    + .app-wrapper {
+      left: $kbnGlobalNavOpenWidth;
+    }
+  }
+
+  .kbnGlobalNav__smallLogoBrand,
+  .kbnGlobalNav__logoBrand {
+    height: $kbnGlobalNavLogoHeight;
+    width: $kbnGlobalNavOpenWidth;
+    list-style-type: none;
+  }
+}
+
+/**
+  * 1. Push main apps to the top and bottom buttons to the bottom.
+  * 2. Fill height of global nav, but respect the height of the logo.
+  * 3. Allow user to scroll to see clipped nav items when the nav is too short.
+  * 4. Style the scrollbar to look good in Chrome and Safari.
+  */
+.kbnGlobalNav__links {
+  @include euiScrollBar; /* 4 */
+
+  display: flex; /* 1 */
+  flex-direction: column; /* 1 */
+  justify-content: space-between; /* 1 */
+  height: calc(100% - #{$kbnGlobalNavLogoHeight}); /* 2 */
+  overflow-x: hidden; /* 3 */
+  overflow-y: auto; /* 3 */
+
+  &::-webkit-scrollbar { /* 4 */
+    @include size($euiSizeS);
+  }
+
+  &::-webkit-scrollbar-thumb { /* 4 */
+    background-color: tint($kbnChromeGlobalNavBackground, 50%);
+  }
+}
+
+/**
+  * 1. Prevent the top and bottom links from collapsing when the browser window is too short.
+  *    This problem is specific to Safari.
+  */
+.kbnGlobalNav__linksSection {
+  flex: 0 0 auto; /* 1 */
+}
+
+.kbnGlobalNav__logoLink {
+  display: inline-block;
+
+  &:hover {
+    background-color: darken($kbnChromeGlobalNavBackground, 4%);
+  }
+}

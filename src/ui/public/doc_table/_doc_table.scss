@@ -25,6 +25,19 @@ doc-table {
   opacity: 0.5;
 }
 
+.kbnDocTable {
+  font-size: $euiFontSizeXS;
+
+  th {
+    white-space: nowrap;
+    padding-right: $euiSizeS;
+
+    .fa {
+      font-size: 1.1em;
+    }
+  }
+}
+
 .kbnDocTable__row {
   td {
     position: relative;

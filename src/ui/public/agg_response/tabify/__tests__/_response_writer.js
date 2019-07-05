@@ -74,8 +74,8 @@ describe('TabbedAggResponseWriter class', function () {
       expect(responseWriter.columns.length).to.eql(3);
     });
 
-    it('correctly generates columns with metricsAtAllLevels set to true', () => {
-      const minimalColumnsResponseWriter = createResponseWritter(twoSplitsAggConfig, { metricsAtAllLevels: true });
+    it('correctly generates columns with minimalColumns set to false', () => {
+      const minimalColumnsResponseWriter = createResponseWritter(twoSplitsAggConfig, { minimalColumns: false });
       expect(minimalColumnsResponseWriter.columns.length).to.eql(4);
     });
 

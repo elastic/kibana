@@ -81,7 +81,7 @@ describe('Server logging configuration', function () {
     it('should be reloadable via SIGHUP process signaling', async function () {
       expect.assertions(3);
 
-      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile], {
+      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile, '--oss'], {
         stdio: 'pipe'
       });
 
@@ -172,6 +172,7 @@ describe('Server logging configuration', function () {
 
       child = spawn(process.execPath, [
         kibanaPath,
+        '--oss',
         '--config', testConfigFile,
         '--logging.dest', logPath,
         '--plugins.initialize', 'false',

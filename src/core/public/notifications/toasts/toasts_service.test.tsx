@@ -27,6 +27,12 @@ jest.mock('react-dom', () => ({
 import { ToastsService } from './toasts_service';
 import { ToastsStartContract } from './toasts_start_contract';
 
+const mockI18nContract: any = {
+  Context: function I18nContext() {
+    return '';
+  },
+};
+
 describe('#start()', () => {
   it('renders the GlobalToastList into the targetDomElement param', async () => {
     const targetDomElement = document.createElement('div');
@@ -34,7 +40,7 @@ describe('#start()', () => {
     const toasts = new ToastsService({ targetDomElement });
 
     expect(mockReactDomRender).not.toHaveBeenCalled();
-    toasts.start();
+    toasts.start({ i18n: mockI18nContract });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
 
@@ -43,7 +49,7 @@ describe('#start()', () => {
       targetDomElement: document.createElement('div'),
     });
 
-    expect(toasts.start()).toBeInstanceOf(ToastsStartContract);
+    expect(toasts.start({ i18n: mockI18nContract })).toBeInstanceOf(ToastsStartContract);
   });
 });
 
@@ -53,7 +59,7 @@ describe('#stop()', () => {
     targetDomElement.setAttribute('test', 'target-dom-element');
     const toasts = new ToastsService({ targetDomElement });
 
-    toasts.start();
+    toasts.start({ i18n: mockI18nContract });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
     toasts.stop();

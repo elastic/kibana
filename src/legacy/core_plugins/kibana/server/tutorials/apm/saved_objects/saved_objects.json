@@ -7,11 +7,11 @@
         "title": "Services [APM]",
         "uiStateJSON": "{\"vis\": {\"params\": {\"sort\": {\"direction\": null, \"columnIndex\": null}}}}",
         "version": 1,
-        "visState": "{\"type\": \"table\", \"title\": \"Services [APM]\", \"aggs\": [{\"id\": \"1\", \"type\": \"avg\", \"enabled\": true, \"params\": {\"customLabel\": \"Avg. Trans. Time\", \"field\": \"transaction.duration.us\"}, \"schema\": \"metric\"}, {\"id\": \"3\", \"type\": \"percentiles\", \"enabled\": true, \"params\": {\"customLabel\": \"Trans. Time\", \"field\": \"transaction.duration.us\", \"percents\": [95]}, \"schema\": \"metric\"}, {\"id\": \"4\", \"type\": \"cardinality\", \"enabled\": true, \"params\": {\"customLabel\": \"Total Transactions\", \"field\": \"transaction.id\"}, \"schema\": \"metric\"}, {\"id\": \"6\", \"type\": \"cardinality\", \"enabled\": true, \"params\": {\"customLabel\": \"Errors\", \"field\": \"error.id\"}, \"schema\": \"metric\"}, {\"id\": \"5\", \"type\": \"top_hits\", \"enabled\": true, \"params\": {\"sortOrder\": \"desc\", \"customLabel\": \"-\", \"size\": 1, \"field\": \"view errors\", \"aggregate\": \"concat\", \"sortField\": \"@timestamp\"}, \"schema\": \"metric\"}, {\"id\": \"2\", \"type\": \"terms\", \"enabled\": true, \"params\": {\"field\": \"context.service.name\", \"orderBy\": \"1\", \"size\": 1000, \"order\": \"desc\"}, \"schema\": \"bucket\"}], \"params\": {\"sort\": {\"direction\": null, \"columnIndex\": null}, \"showPartialRows\": false, \"showTotal\": false, \"totalFunc\": \"sum\", \"perPage\": 10, \"showMeticsAtAllLevels\": false}}"
+        "visState": "{\"type\": \"table\", \"title\": \"Services [APM]\", \"aggs\": [{\"id\": \"1\", \"type\": \"avg\", \"enabled\": true, \"params\": {\"customLabel\": \"Avg. Trans. Time (us)\", \"field\": \"transaction.duration.us\"}, \"schema\": \"metric\"}, {\"id\": \"3\", \"type\": \"percentiles\", \"enabled\": true, \"params\": {\"customLabel\": \"Trans. Time (us)\", \"field\": \"transaction.duration.us\", \"percents\": [95]}, \"schema\": \"metric\"}, {\"id\": \"4\", \"type\": \"cardinality\", \"enabled\": true, \"params\": {\"customLabel\": \"Total Transactions\", \"field\": \"transaction.id\"}, \"schema\": \"metric\"}, {\"id\": \"6\", \"type\": \"cardinality\", \"enabled\": true, \"params\": {\"customLabel\": \"Errors\", \"field\": \"error.id\"}, \"schema\": \"metric\"}, {\"id\": \"5\", \"type\": \"top_hits\", \"enabled\": true, \"params\": {\"sortOrder\": \"desc\", \"customLabel\": \"-\", \"size\": 1, \"field\": \"view errors\", \"aggregate\": \"concat\", \"sortField\": \"@timestamp\"}, \"schema\": \"metric\"}, {\"id\": \"2\", \"type\": \"terms\", \"enabled\": true, \"params\": {\"field\": \"context.service.name\", \"orderBy\": \"1\", \"size\": 1000, \"order\": \"desc\"}, \"schema\": \"bucket\"}], \"params\": {\"sort\": {\"direction\": null, \"columnIndex\": null}, \"showPartialRows\": false, \"showTotal\": false, \"totalFunc\": \"sum\", \"perPage\": 10, \"showMeticsAtAllLevels\": false}}"
     },
     "id": "1ffc5e20-7827-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -26,7 +26,7 @@
     },
     "id": "1bdca740-7828-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 2
+    "version": "2"
 },
 {
     "attributes": {
@@ -41,7 +41,7 @@
     },
     "id": "804ffc40-7828-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -59,7 +59,7 @@
     },
     "id": "8d3ed660-7828-11e7-8c47-65b845b5cfb3",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -74,7 +74,7 @@
     },
     "id": "c618e4e0-7c69-11e7-aa55-3b0d52c71c60",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -100,7 +100,7 @@
     },
     "id": "ceefd050-7c6a-11e7-aa55-3b0d52c71c60",
     "type": "search",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -118,7 +118,7 @@
     },
     "id": "5f08a870-7c6a-11e7-aa55-3b0d52c71c60",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -133,7 +133,7 @@
     },
     "id": "22518e70-7c69-11e7-aa55-3b0d52c71c60",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -151,7 +151,7 @@
     },
     "id": "37f6fac0-7c6a-11e7-aa55-3b0d52c71c60",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -162,11 +162,11 @@
         "title": "Top Transactions for Time Period [APM]",
         "uiStateJSON": "{\"vis\": {\"params\": {\"sort\": {\"direction\": null, \"columnIndex\": null}}}}",
         "version": 1,
-        "visState": "{\"type\": \"table\", \"title\": \"Top Transactions for Time Period [APM]\", \"aggs\": [{\"id\": \"2\", \"type\": \"terms\", \"enabled\": true, \"schema\": \"bucket\", \"params\": {\"customLabel\": \"Transaction\", \"field\": \"transaction.name.keyword\", \"orderBy\": \"1\", \"size\": 1000, \"order\": \"desc\"}}, {\"id\": \"5\", \"type\": \"top_hits\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"Type\", \"sortOrder\": \"desc\", \"size\": 1, \"field\": \"transaction.type\", \"aggregate\": \"concat\", \"sortField\": \"@timestamp\"}}, {\"id\": \"1\", \"type\": \"avg\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"Avg. Resp Time (ms)\", \"field\": \"transaction.duration.us\"}}, {\"id\": \"3\", \"type\": \"percentiles\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"Resp Time (ms)\", \"field\": \"transaction.duration.us\", \"percents\": [95]}}, {\"id\": \"4\", \"type\": \"top_hits\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"View Spans\", \"sortOrder\": \"desc\", \"size\": 1, \"field\": \"transaction.id\", \"aggregate\": \"concat\", \"sortField\": \"@timestamp\"}}], \"params\": {\"sort\": {\"direction\": null, \"columnIndex\": null}, \"showPartialRows\": false, \"showTotal\": false, \"totalFunc\": \"sum\", \"perPage\": 25, \"showMeticsAtAllLevels\": false}}"
+        "visState": "{\"type\": \"table\", \"title\": \"Top Transactions for Time Period [APM]\", \"aggs\": [{\"id\": \"2\", \"type\": \"terms\", \"enabled\": true, \"schema\": \"bucket\", \"params\": {\"customLabel\": \"Transaction\", \"field\": \"transaction.name.keyword\", \"orderBy\": \"1\", \"size\": 1000, \"order\": \"desc\"}}, {\"id\": \"5\", \"type\": \"top_hits\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"Type\", \"sortOrder\": \"desc\", \"size\": 1, \"field\": \"transaction.type\", \"aggregate\": \"concat\", \"sortField\": \"@timestamp\"}}, {\"id\": \"1\", \"type\": \"avg\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"Avg. Trans. Time (us)\", \"field\": \"transaction.duration.us\"}}, {\"id\": \"3\", \"type\": \"percentiles\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"Trans. Time (us)\", \"field\": \"transaction.duration.us\", \"percents\": [95]}}, {\"id\": \"4\", \"type\": \"top_hits\", \"enabled\": true, \"schema\": \"metric\", \"params\": {\"customLabel\": \"View Spans\", \"sortOrder\": \"desc\", \"size\": 1, \"field\": \"transaction.id\", \"aggregate\": \"concat\", \"sortField\": \"@timestamp\"}}], \"params\": {\"sort\": {\"direction\": null, \"columnIndex\": null}, \"showPartialRows\": false, \"showTotal\": false, \"totalFunc\": \"sum\", \"perPage\": 25, \"showMeticsAtAllLevels\": false}}"
     },
     "id": "a2e199b0-7820-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -181,7 +181,7 @@
     },
     "id": "09bcf890-7822-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 2
+    "version": "2"
 },
 {
     "attributes": {
@@ -196,7 +196,7 @@
     },
     "id": "55606a60-7823-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -214,7 +214,7 @@
     },
     "id": "41b5d920-7821-11e7-8c47-65b845b5cfb3",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -238,7 +238,7 @@
     },
     "id": "d7735b90-7ddf-11e7-b115-df9c90da2df1",
     "type": "search",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -256,5 +256,5 @@
     },
     "id": "3e3de700-7de0-11e7-b115-df9c90da2df1",
     "type": "dashboard",
-    "version": 2
+    "version": "2"
 }]

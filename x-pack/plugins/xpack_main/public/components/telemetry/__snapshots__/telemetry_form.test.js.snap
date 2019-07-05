@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TelemetryForm renders as expected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiPanel
     grow={true}
     hasShadow={false}
@@ -26,7 +26,11 @@ exports[`TelemetryForm renders as expected 1`] = `
             grow={false}
           >
             <h2>
-              Usage Data
+              <FormattedMessage
+                defaultMessage="Usage Data"
+                id="xpack.main.telemetry.usageDataTitle"
+                values={Object {}}
+              />
             </h2>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -50,7 +54,11 @@ exports[`TelemetryForm renders as expected 1`] = `
                   onClick={[Function]}
                   type="button"
                 >
-                  See an example of what we collect
+                  <FormattedMessage
+                    defaultMessage="See an example of what we collect"
+                    id="xpack.main.telemetry.seeExampleOfWhatWeCollectLinkText"
+                    values={Object {}}
+                  />
                 </EuiLink>
               </p>
               <p>
@@ -60,7 +68,11 @@ exports[`TelemetryForm renders as expected 1`] = `
                   target="_blank"
                   type="button"
                 >
-                  Read our usage data privacy statement
+                  <FormattedMessage
+                    defaultMessage="Read our usage data privacy statement"
+                    id="xpack.main.telemetry.readOurUsageDataPrivacyStatementLinkText"
+                    values={Object {}}
+                  />
                 </EuiLink>
               </p>
             </React.Fragment>,
@@ -71,5 +83,5 @@ exports[`TelemetryForm renders as expected 1`] = `
       />
     </EuiForm>
   </EuiPanel>
-</React.Fragment>
+</Fragment>
 `;

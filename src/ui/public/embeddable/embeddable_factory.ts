@@ -26,6 +26,17 @@ export type OnEmbeddableStateChanged = (embeddableStateChanges: EmbeddableState)
  * The EmbeddableFactory creates and initializes an embeddable instance
  */
 export abstract class EmbeddableFactory {
+  public readonly name: string;
+
+  /**
+   *
+   * @param name - a unique identified for this factory, which will be used to map an embeddable spec to
+   * a factory that can generate an instance of it.
+   */
+  constructor({ name }: { name: string }) {
+    this.name = name;
+  }
+
   /**
    *
    * @param {{ id: string }} containerMetadata. Currently just passing in panelState but it's more than we need, so we should

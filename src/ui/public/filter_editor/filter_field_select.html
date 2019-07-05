@@ -4,7 +4,7 @@
   on-select="onSelect({ field: field })"
   uis-open-close="resetLimit()"
 >
-  <ui-select-match placeholder="Fields...">
+  <ui-select-match placeholder="{{ ::'common.ui.filterEditor.fieldsPlaceholder' | i18n: { defaultMessage: 'Fields…' } }}">
     <span
       class="uiSelectMatch--ellipsis"
       tooltip="{{$select.selected.name}}"

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NumberFormatEditor should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFormRow
     describedByIds={Array []}
     error={null}
@@ -78,5 +78,5 @@ exports[`NumberFormatEditor should render normally 1`] = `
       ]
     }
   />
-</React.Fragment>
+</Fragment>
 `;

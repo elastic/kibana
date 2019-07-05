@@ -146,7 +146,6 @@ class DashboardAddPanelUi extends React.Component {
       <EuiFlyout
         ownFocus
         onClose={this.props.onClose}
-        size="s"
         data-test-subj="dashboardAddPanel"
       >
         <EuiFlyoutBody>

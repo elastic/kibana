@@ -20,7 +20,7 @@
 import React from 'react';
 import { DataView } from './data_view';
 import { DataAdapter } from 'ui/inspector/adapters';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('./lib/export_csv', () => ({
   exportAsCsv: jest.fn(),
@@ -43,7 +43,7 @@ describe('Inspector Data View', () => {
     });
 
     it('should render loading state', () => {
-      const component = mount(
+      const component = mountWithIntl(
         <DataView.component
           title="Test Data"
           adapters={adapters}
@@ -54,7 +54,7 @@ describe('Inspector Data View', () => {
     });
 
     it('should render empty state', async () => {
-      const component = mount(
+      const component = mountWithIntl(
         <DataView.component
           title="Test Data"
           adapters={adapters}

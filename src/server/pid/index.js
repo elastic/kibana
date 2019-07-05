@@ -33,24 +33,23 @@ export default Promise.method(function (kbnServer, server, config) {
     .catch(function (err) {
       if (err.code !== 'EEXIST') throw err;
 
-      const log = {
-        tmpl: 'pid file already exists at <%= path %>',
+      const message = `pid file already exists at ${path}`;
+      const metadata = {
         path: path,
         pid: pid
       };
 
       if (config.get('pid.exclusive')) {
-        throw Boom.internal(_.template(log.tmpl)(log), log);
+        throw Boom.internal(message, { message, ...metadata });
       } else {
-        server.log(['pid', 'warning'], log);
+        server.log(['pid', 'warning'], message, metadata);
       }
 
       return writeFile(path, pid);
     })
     .then(function () {
 
-      server.log(['pid', 'debug'], {
-        tmpl: 'wrote pid file to <%= path %>',
+      server.logWithMetadata(['pid', 'debug'], `wrote pid file to ${path}`, {
         path: path,
         pid: pid
       });

@@ -72,7 +72,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'globaltype',
           id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             name: 'My favorite global object',
           },
@@ -104,7 +104,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'visualization',
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             title: 'Count of requests',
           },

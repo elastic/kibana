@@ -7,7 +7,7 @@
 import { get, set, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createTypeFilter } from '../create_query';
-import { LOGGING_TAG } from '../../../common/constants';
+import { LOGGING_TAG, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
 async function findSupportedBasicLicenseCluster(req, clusters, kbnIndexPattern, kibanaUuid, serverLog) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in cluster/findSupportedBasicLicenseCluster');
@@ -51,11 +51,12 @@ async function findSupportedBasicLicenseCluster(req, clusters, kbnIndexPattern, 
  * Flag clusters as supported, which means their monitoring data can be seen in the UI.
  *
  * Flagging a Basic licensed cluster as supported when it is part of a multi-cluster environment:
- * 1. Detect if there are multiple clusters
- * 2. Detect if all of the different cluster licenses are basic
- * 3. Make a query to the monitored kibana data to find the "supported" cluster
- *    UUID, which is the cluster associated with *this* Kibana instance.
- * 4. Flag the cluster object with an `isSupported` boolean
+ * 1. Detect if there any standalone clusters and ignore those for these calculations as they are auto supported
+ * 2. Detect if there are multiple linked clusters
+ * 3. Detect if all of the different linked cluster licenses are basic
+ * 4. Make a query to the monitored kibana data to find the "supported" linked cluster
+ *    UUID, which is the linked cluster associated with *this* Kibana instance.
+ * 5. Flag the linked cluster object with an `isSupported` boolean
  *
  * Non-Basic license clusters and any cluster in a single-cluster environment
  * are also flagged as supported in this method.
@@ -75,8 +76,17 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
   };
 
   return async function (clusters) {
-    // if multi cluster
-    if (clusters.length > 1) {
+    // Standalone clusters are automatically supported in the UI so ignore those for
+    // our calculations here
+    let linkedClusterCount = 0;
+    for (const cluster of clusters) {
+      if (cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID) {
+        cluster.isSupported = true;
+      } else {
+        linkedClusterCount++;
+      }
+    }
+    if (linkedClusterCount > 1) {
       const basicLicenseCount = clusters.reduce((accumCount, cluster) => {
         if (cluster.license && cluster.license.type === 'basic') {
           accumCount++;
@@ -90,8 +100,8 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
         return flagAllSupported(clusters);
       }
 
-      // if all basic licenses
-      if (clusters.length === basicLicenseCount) {
+      // if all linked are basic licenses
+      if (linkedClusterCount === basicLicenseCount) {
         const kibanaUuid = config.get('server.uuid');
         return await findSupportedBasicLicenseCluster(req, clusters, kbnIndexPattern, kibanaUuid, serverLog);
       }

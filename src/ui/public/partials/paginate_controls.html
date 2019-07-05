@@ -3,9 +3,9 @@
   ng-if="linkToTop"
   ng-click="paginate.goToTop()"
   data-test-subj="paginateControlsLinkToTop"
->
-  Scroll to top
-</button>
+  i18n-id="common.ui.paginateControls.scrollTopButtonLabel"
+  i18n-default-message="Scroll to top"
+></button>
 
 <div
   class="pagination-other-pages"
@@ -85,7 +85,10 @@
 
 <form class="form-inline pagination-size" ng-if="showSelector">
   <div class="form-group">
-    <label>Page Size</label>
+    <label
+      i18n-id="common.ui.paginateControls.pageSizeLabel"
+      i18n-default-message="Page Size"
+    ></label>
     <select
       ng-model="paginate.perPage"
       ng-options="opt.value as opt.title for opt in paginate.sizeOptions"

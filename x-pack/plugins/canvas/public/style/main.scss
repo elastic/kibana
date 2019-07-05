@@ -1,7 +1,7 @@
 .canvas.canvasContainer {
   display: flex;
   flex-grow: 1;
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
 }
 
 .canvasContainer--loading {

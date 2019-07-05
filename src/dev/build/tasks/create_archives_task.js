@@ -18,20 +18,7 @@
  */
 
 import path from 'path';
-import { createWriteStream } from 'fs';
-import archiver from 'archiver';
-
-import { mkdirp } from '../lib';
-
-function compress(type, options = {}, source, destination) {
-  const output = createWriteStream(destination);
-  const archive = archiver(type, options);
-  const name = source.split(path.sep).slice(-1)[0];
-
-  archive.pipe(output);
-
-  return archive.directory(source, name).finalize();
-}
+import { mkdirp, compress } from '../lib';
 
 export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',

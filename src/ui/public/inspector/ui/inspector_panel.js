@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -32,6 +33,10 @@ function hasAdaptersChanged(oldAdapters, newAdapters) {
   return Object.keys(oldAdapters).length !== Object.keys(newAdapters).length
     || Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key]);
 }
+
+const inspectorTitle = i18n.translate('common.ui.inspector.title', {
+  defaultMessage: 'Inspector',
+});
 
 class InspectorPanel extends Component {
 
@@ -106,7 +111,7 @@ class InspectorPanel extends Component {
 }
 
 InspectorPanel.defaultProps = {
-  title: 'Inspector',
+  title: inspectorTitle,
 };
 
 InspectorPanel.propTypes = {

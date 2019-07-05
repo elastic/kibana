@@ -24,45 +24,43 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         />
       </h2>
     </EuiTitle>
-    <React.Fragment>
-      <EuiSpacer
-        size="s"
-      />
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        size="m"
-        title={
-          <FormattedMessage
-            defaultMessage="Index Pattern Conflicts"
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
-            values={Object {}}
-          />
-        }
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
-            values={
-              Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
-                  href=""
-                  type="button"
-                >
-                  <FormattedMessage
-                    defaultMessage="create a new index pattern"
-                    id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                    values={Object {}}
-                  />
-                </EuiLink>,
-              }
+    <EuiSpacer
+      size="s"
+    />
+    <EuiCallOut
+      color="warning"
+      iconType="help"
+      size="m"
+      title={
+        <FormattedMessage
+          defaultMessage="Index Pattern Conflicts"
+          id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+          values={Object {}}
+        />
+      }
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+          values={
+            Object {
+              "indexPatternLink": <EuiLink
+                color="primary"
+                href=""
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="create a new index pattern"
+                  id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
             }
-          />
-        </p>
-      </EuiCallOut>
-    </React.Fragment>
+          }
+        />
+      </p>
+    </EuiCallOut>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiInMemoryTable
@@ -93,6 +91,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      executeQueryOptions={Object {}}
       items={
         Array [
           Object {

@@ -96,23 +96,7 @@
     "source": {
       "type": "tag",
       "tag": {
-        "configuration_blocks": [
-          {
-            "type": "output",
-            "description": "some description",
-            "configs": [{ 
-              "hosts": ["localhost:9200"],
-              "username": "some-username"
-            }]
-          },
-          {
-            "type": "metricbeat.modules",
-            "configs": [{ 
-              "module": "memcached",
-              "hosts": ["localhost:11211"]
-            }]
-          }
-        ]
+        "color": "blue"
       }
     }
   }
@@ -127,7 +111,7 @@
     "source": {
       "type": "tag",
       "tag": {
-        "configuration_blocks": []
+        "color": "red"
       }
     }
   }
@@ -142,16 +126,62 @@
     "source": {
       "type": "tag",
       "tag": {
-        "configuration_blocks": [
-          {
-            "type": "metricbeat.modules",
-            "configs": [{ 
-              "module": "memcached",
-              "node.namespace": "node",
-              "hosts": ["localhost:4949"]
-            }]
-          }
-        ]
+        "color": "green"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "configuration_block:SDfsdfIBdsfsf50zbta",
+    "source": {
+      "type": "configuration_block",
+      "configuration_block": {
+        "type": "output",
+        "description": "some description",
+        "tag": "production",
+        "last_updated": "2018-05-15T16:25:38.924Z",
+        "config": "{ \"username\": \"some-username\",  \"hosts\": [\"localhost:11211\"] }"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "configuration_block:W0tpsmIBdsfsf50zbta",
+    "source": {
+      "type": "configuration_block",
+      "configuration_block": {
+        "type": "metricbeat.modules",
+        "tag": "production",
+        "last_updated": "2018-05-15T16:25:38.924Z",
+        "config": "{ \"module\": \"memcached\",  \"hosts\": [\"localhost:11211\"] }"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "configuration_block:W0tpsmIBdwcYyG50zbta",
+    "source": {
+      "type": "configuration_block",
+      "configuration_block": {
+        "type": "metricbeat.modules",
+        "tag": "qa",
+        "last_updated": "2018-05-15T16:25:38.924Z",
+        "config": "{\"module\": \"memcached\", \"node.namespace\": \"node\", \"hosts\": [\"localhost:4949\"] }"
       }
     }
   }

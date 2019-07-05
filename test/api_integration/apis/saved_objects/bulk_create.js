@@ -66,7 +66,7 @@ export default function ({ getService }) {
                   type: 'dashboard',
                   id: 'a01b2f57-fcfd-4864-b735-09e28f0d815e',
                   updated_at: resp.body.saved_objects[1].updated_at,
-                  version: 1,
+                  version: 'WzgsMV0=',
                   attributes: {
                     title: 'A great new dashboard'
                   }
@@ -98,7 +98,7 @@ export default function ({ getService }) {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   updated_at: resp.body.saved_objects[0].updated_at,
-                  version: 1,
+                  version: 'WzAsMV0=',
                   attributes: {
                     title: 'An existing visualization'
                   }
@@ -107,7 +107,7 @@ export default function ({ getService }) {
                   type: 'dashboard',
                   id: 'a01b2f57-fcfd-4864-b735-09e28f0d815e',
                   updated_at: resp.body.saved_objects[1].updated_at,
-                  version: 1,
+                  version: 'WzEsMV0=',
                   attributes: {
                     title: 'A great new dashboard'
                   }

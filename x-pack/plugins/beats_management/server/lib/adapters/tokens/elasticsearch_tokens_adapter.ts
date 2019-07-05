@@ -35,6 +35,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     };
 
     const response = await this.database.get(user, params);
+
     const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
       expires_on: '0',
       token: null,
@@ -50,7 +51,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     );
   }
 
-  public async upsertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
+  public async insertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
     const body = flatten(
       tokens.map(token => [
         { index: { _id: `enrollment_token:${token.token}` } },
@@ -61,12 +62,17 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       ])
     );
 
-    await this.database.bulk(user, {
+    const result = await this.database.bulk(user, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
     });
+
+    if (result.errors) {
+      throw new Error(result.items[0].result);
+    }
+
     return tokens;
   }
 }

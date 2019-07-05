@@ -16,13 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { uniq } from 'lodash';
+import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
 
 export async function getFields(req) {
+  const indexPattern = req.query.index;
   const { indexPatternsService } = req.pre;
-  const index = req.query.index || '*';
-  const resp = await indexPatternsService.getFieldsForWildcard({ pattern: index });
+  const { indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const resp = await indexPatternsService.getFieldsForWildcard({ pattern: indexPatternString });
   const fields = resp.filter(field => field.aggregatable);
+
   return uniq(fields, field => field.name);
 }
+

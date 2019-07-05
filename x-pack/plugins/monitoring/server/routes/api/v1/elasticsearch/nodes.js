@@ -42,7 +42,7 @@ export function esNodesRoute(server) {
         const clusterStatus = getClusterStatus(clusterStats, shardStats);
         const nodes = await getNodes(req, esIndexPattern, clusterStats, shardStats);
 
-        return { clusterStatus, nodes, };
+        return { clusterStatus, nodes };
       } catch(err) {
         throw handleError(err, req);
       }

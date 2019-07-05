@@ -1,0 +1,14 @@
+@include euiBreakpoint('xs', 's') {
+  .kbnQueryBar--withDatePicker {
+    > :last-child {
+      // EUI Flexbox adds too much margin between responded items, this just moves the last one up
+      margin-top: -$euiSize;
+    }
+  }
+}
+
+@include euiBreakpoint('m', 'l', 'xl') {
+  .kbnQueryBar__datePickerWrapper {
+    max-width: 40vw;
+  }
+}

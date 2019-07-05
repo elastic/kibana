@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { difference } from 'lodash';
+import { difference, get, set } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
 import { getTransform } from '../../deprecation';
 
-
-const getFlattenedKeys = object => (
-  Object.keys(getFlattenedObject(object))
-);
+const getFlattenedKeys = object => Object.keys(getFlattenedObject(object));
 
 async function getUnusedConfigKeys(
   coreHandledConfigPaths,
@@ -34,12 +31,23 @@ async function getUnusedConfigKeys(
   rawSettings,
   configValues
 ) {
-  // transform deprecated settings
-  const transforms = [
-    transformDeprecations,
-    ...await Promise.all(plugins.map(({ spec }) => getTransform(spec)))
-  ];
-  const settings = transforms.reduce((a, c) => c(a), rawSettings);
+  // transform deprecated core settings
+  const settings = transformDeprecations(rawSettings);
+
+  // transform deprecated plugin settings
+  for (let i = 0; i < plugins.length; i++) {
+    const { spec } = plugins[i];
+    const transform = await getTransform(spec);
+    const prefix = spec.getConfigPrefix();
+
+    // nested plugin prefixes (a.b) translate to nested objects
+    const pluginSettings = get(settings, prefix);
+    if (pluginSettings) {
+      // flattened settings are expected to be converted to nested objects
+      // a.b = true => { a: { b: true }}
+      set(settings, prefix, transform(pluginSettings));
+    }
+  }
 
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
@@ -58,14 +66,14 @@ async function getUnusedConfigKeys(
 
   // Filter out keys that are marked as used in the core (e.g. by new core plugins).
   return difference(inputKeys, appliedKeys).filter(
-    unusedConfigKey => !coreHandledConfigPaths.some(
-      usedInCoreConfigKey => unusedConfigKey.startsWith(usedInCoreConfigKey)
-    )
+    unusedConfigKey =>
+      !coreHandledConfigPaths.some(usedInCoreConfigKey =>
+        unusedConfigKey.startsWith(usedInCoreConfigKey)
+      )
   );
 }
 
 export default async function (kbnServer, server, config) {
-
   server.decorate('server', 'config', function () {
     return kbnServer.config;
   });
@@ -83,9 +91,7 @@ export default async function (kbnServer, server, config) {
   }
 
   const formattedUnusedKeys = unusedKeys.map(key => `"${key}"`);
-  const desc = formattedUnusedKeys.length === 1
-    ? 'setting was'
-    : 'settings were';
+  const desc = formattedUnusedKeys.length === 1 ? 'setting was' : 'settings were';
 
   const error = new Error(
     `${formatListAsProse(formattedUnusedKeys)} ${desc} not applied. ` +

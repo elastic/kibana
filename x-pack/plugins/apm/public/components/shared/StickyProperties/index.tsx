@@ -9,6 +9,7 @@ import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import {
   colors,
   fontFamilyCode,
@@ -20,7 +21,7 @@ import {
 } from '../../../style/variables';
 
 export interface IStickyProperty {
-  val: any;
+  val: JSX.Element | string | Date;
   label: string;
   fieldName?: string;
   width?: 0 | string;
@@ -40,6 +41,7 @@ const PropertyLabel = styled.div`
     cursor: help;
   }
 `;
+PropertyLabel.displayName = 'PropertyLabel';
 
 const PropertyValueDimmed = styled.span`
   color: ${colors.gray3};
@@ -49,6 +51,7 @@ const PropertyValue = styled.div`
   display: inline-block;
   line-height: ${px(unit)};
 `;
+PropertyValue.displayName = 'PropertyValue';
 
 const PropertyValueTruncated = styled.span`
   display: inline-block;
@@ -58,10 +61,10 @@ const PropertyValueTruncated = styled.span`
 
 function TimestampValue({ timestamp }: { timestamp: Date }) {
   const time = moment(timestamp);
-  const timeAgo = timestamp ? time.fromNow() : 'N/A';
+  const timeAgo = timestamp ? time.fromNow() : NOT_AVAILABLE_LABEL;
   const timestampFull = timestamp
     ? time.format('MMMM Do YYYY, HH:mm:ss.SSS')
-    : 'N/A';
+    : NOT_AVAILABLE_LABEL;
 
   return (
     <PropertyValue>
@@ -90,7 +93,7 @@ function getPropertyValue({
   truncated = false
 }: Partial<IStickyProperty>) {
   if (fieldName === '@timestamp') {
-    return <TimestampValue timestamp={val} />;
+    return <TimestampValue timestamp={val as Date} />;
   }
 
   if (truncated) {

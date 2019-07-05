@@ -1,3 +1,5 @@
+import { i18n } from '@kbn/i18n';
+
 angular.module('ui.bootstrap.pagination', [])
 
 .controller('PaginationController', ['$scope', '$attrs', '$parse', function ($scope, $attrs, $parse) {
@@ -68,10 +70,18 @@ angular.module('ui.bootstrap.pagination', [])
   itemsPerPage: 10,
   boundaryLinks: false,
   directionLinks: true,
-  firstText: 'First',
-  previousText: 'Previous',
-  nextText: 'Next',
-  lastText: 'Last',
+  firstText: i18n.translate('common.ui.angularBootstrap.pagination.paginationConfig.firstLabel', {
+    defaultMessage: 'First'
+  }),
+  previousText: i18n.translate('common.ui.angularBootstrap.pagination.paginationConfig.previousLabel', {
+    defaultMessage: 'Previous'
+  }),
+  nextText: i18n.translate('common.ui.angularBootstrap.pagination.paginationConfig.nextLabel', {
+    defaultMessage: 'Next'
+  }),
+  lastText: i18n.translate('common.ui.angularBootstrap.pagination.paginationConfig.lastLabel', {
+    defaultMessage: 'Last'
+  }),
   rotate: true
 })
 
@@ -183,8 +193,12 @@ angular.module('ui.bootstrap.pagination', [])
 
 .constant('pagerConfig', {
   itemsPerPage: 10,
-  previousText: '« Previous',
-  nextText: 'Next »',
+  previousText: i18n.translate('common.ui.angularBootstrap.pagination.pagerConfig.previousLabel', {
+    defaultMessage: '« Previous'
+  }),
+  nextText: i18n.translate('common.ui.angularBootstrap.pagination.pagerConfig.nextLabel', {
+    defaultMessage: 'Next »'
+  }),
   align: true
 })
 

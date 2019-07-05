@@ -17,13 +17,12 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../legend`);
 
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
-describe(filename, () => {
+describe('legend.js', () => {
 
   let seriesList;
   beforeEach(() => {

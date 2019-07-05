@@ -22,7 +22,9 @@ export const rounddate = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args.format) return context;
+    if (!args.format) {
+      return context;
+    }
     return moment.utc(moment.utc(context).format(args.format), args.format).valueOf();
   },
 });

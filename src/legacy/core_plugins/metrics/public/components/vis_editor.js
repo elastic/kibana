@@ -30,7 +30,6 @@ import { get } from 'lodash';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 import { fetchFields } from '../lib/fetch_fields';
 import chrome from 'ui/chrome';
-import { I18nProvider } from '@kbn/i18n/react';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -48,9 +47,13 @@ class VisEditor extends Component {
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
-    this.getConfig = (...args) => props.config.get(...args);
+    this.getConfig = this.getConfig.bind(this);
     this.visDataSubject = new Rx.Subject();
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
+  }
+
+  getConfig(...args) {
+    return this.props.config.get(...args);
   }
 
   handleUiState(vis, ...args) {
@@ -90,13 +93,12 @@ class VisEditor extends Component {
   }
 
   setDefaultIndexPattern = async () => {
-    if (this.props.vis.params.index_pattern === '') {
-      // set the default index pattern if none is defined.
-      const savedObjectsClient = chrome.getSavedObjectsClient();
-      const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
-      const defaultIndexPattern = indexPattern.attributes.title;
-      this.props.vis.params.index_pattern = defaultIndexPattern;
-    }
+    const savedObjectsClient = chrome.getSavedObjectsClient();
+    const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
+
+    this.handleChange({
+      default_index_pattern: indexPattern.attributes.title
+    });
   }
 
   handleChange = async (partialModel) => {
@@ -132,19 +134,17 @@ class VisEditor extends Component {
       }
       const reversed = this.state.reversed;
       return (
-        <I18nProvider>
-          <Visualization
-            dateFormat={this.props.config.get('dateFormat')}
-            reversed={reversed}
-            onBrush={this.onBrush}
-            onUiState={this.handleUiState}
-            uiState={this.props.vis.getUiState()}
-            fields={this.state.visFields}
-            model={this.props.vis.params}
-            visData={this.props.visData}
-            getConfig={this.getConfig}
-          />
-        </I18nProvider>
+        <Visualization
+          dateFormat={this.props.config.get('dateFormat')}
+          reversed={reversed}
+          onBrush={this.onBrush}
+          onUiState={this.handleUiState}
+          uiState={this.props.vis.getUiState()}
+          fields={this.state.visFields}
+          model={this.props.vis.params}
+          visData={this.props.visData}
+          getConfig={this.getConfig}
+        />
       );
     }
 

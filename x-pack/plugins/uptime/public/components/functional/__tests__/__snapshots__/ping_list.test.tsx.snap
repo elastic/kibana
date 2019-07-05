@@ -1,0 +1,610 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PingList component renders sorted list without errors 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="xs"
+        textTransform="none"
+      >
+        <h4>
+          <FormattedMessage
+            defaultMessage="Check History"
+            id="xpack.uptime.pingList.checkHistoryTitle"
+            values={Object {}}
+          />
+        </h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiBadge
+        color="primary"
+        iconSide="left"
+      >
+        798
+      </EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Status"
+        >
+          <EuiComboBox
+            compressed={false}
+            fullWidth={false}
+            isClearable={false}
+            onChange={[MockFunction]}
+            options={
+              Array [
+                Object {
+                  "label": "All",
+                  "value": "",
+                },
+              ]
+            }
+            selectedOptions={
+              Array [
+                Object {
+                  "label": "All",
+                  "value": "",
+                },
+              ]
+            }
+            singleSelection={
+              Object {
+                "asPlainText": true,
+              }
+            }
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "monitor.status",
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "field": "timestamp",
+            "name": "Timestamp",
+            "render": [Function],
+          },
+          Object {
+            "field": "monitor.ip",
+            "name": "IP",
+          },
+          Object {
+            "dataType": "string",
+            "field": "monitor.id",
+            "name": "Id",
+            "width": "20%",
+          },
+          Object {
+            "field": "monitor.duration.us",
+            "name": "Duration ms",
+            "render": [Function],
+          },
+          Object {
+            "field": "error.type",
+            "name": "Error type",
+          },
+          Object {
+            "field": "error.message",
+            "name": "Error message",
+            "render": [Function],
+          },
+          Object {
+            "field": "http.response.status_code",
+            "name": "Response code",
+          },
+        ]
+      }
+      executeQueryOptions={Object {}}
+      items={
+        Array [
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 925862,
+              },
+              "id": "http@https://www.elastic.co",
+              "ip": "151.101.202.217",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:02:31.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 738176,
+              },
+              "id": "http@https://www.elastic.co",
+              "ip": "151.101.202.217",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:02:34.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 684949,
+              },
+              "id": "http@https://www.elastic.co",
+              "ip": "151.101.202.217",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:02:37.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 773959,
+              },
+              "id": "http@https://www.elastic.co",
+              "ip": "151.101.202.217",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:02:40.384Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 483803,
+              },
+              "id": "http@https://www.elastic.co",
+              "ip": "151.101.202.217",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:02:43.385Z",
+          },
+        ]
+      }
+      loading={false}
+      pagination={
+        Object {
+          "initialPageSize": 10,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            20,
+            100,
+          ],
+        }
+      }
+      responsive={true}
+      sorting={false}
+    />
+  </EuiPanel>
+</Fragment>
+`;
+
+exports[`PingList component renders unsorted list of many monitors without errors 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="xs"
+        textTransform="none"
+      >
+        <h4>
+          <FormattedMessage
+            defaultMessage="Check History"
+            id="xpack.uptime.pingList.checkHistoryTitle"
+            values={Object {}}
+          />
+        </h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiBadge
+        color="primary"
+        iconSide="left"
+      >
+        5834
+      </EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Status"
+        >
+          <EuiComboBox
+            compressed={false}
+            fullWidth={false}
+            isClearable={false}
+            onChange={[MockFunction]}
+            options={
+              Array [
+                Object {
+                  "label": "All",
+                  "value": "",
+                },
+              ]
+            }
+            selectedOptions={
+              Array [
+                Object {
+                  "label": "All",
+                  "value": "",
+                },
+              ]
+            }
+            singleSelection={
+              Object {
+                "asPlainText": true,
+              }
+            }
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "monitor.status",
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "field": "timestamp",
+            "name": "Timestamp",
+            "render": [Function],
+          },
+          Object {
+            "field": "monitor.ip",
+            "name": "IP",
+          },
+          Object {
+            "dataType": "string",
+            "field": "monitor.id",
+            "name": "Id",
+            "width": "20%",
+          },
+          Object {
+            "field": "monitor.duration.us",
+            "name": "Duration ms",
+            "render": [Function],
+          },
+          Object {
+            "field": "error.type",
+            "name": "Error type",
+          },
+          Object {
+            "field": "error.message",
+            "name": "Error message",
+            "render": [Function],
+          },
+          Object {
+            "field": "http.response.status_code",
+            "name": "Response code",
+          },
+        ]
+      }
+      executeQueryOptions={Object {}}
+      items={
+        Array [
+          Object {
+            "error": Object {
+              "message": "received status code 301 expecting 200",
+              "type": "validate",
+            },
+            "http": Object {
+              "response": Object {
+                "status_code": 301,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 1350724,
+              },
+              "id": "http@http://www.example.com",
+              "ip": "198.71.248.67",
+              "name": "http",
+              "scheme": "http",
+              "status": "down",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:03:03.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 567900,
+              },
+              "id": "http@https://www.elastic.co",
+              "ip": "151.101.210.217",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:03:04.383Z",
+          },
+          Object {
+            "error": null,
+            "http": null,
+            "monitor": Object {
+              "duration": Object {
+                "us": 1022,
+              },
+              "id": "tcp-tcp@localhost:9200",
+              "ip": "127.0.0.1",
+              "name": "tcp",
+              "scheme": "tcp",
+              "status": "up",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-18T22:03:05.384Z",
+          },
+          Object {
+            "error": null,
+            "http": null,
+            "monitor": Object {
+              "duration": Object {
+                "us": 1351,
+              },
+              "id": "tcp-tcp@localhost:9200",
+              "ip": "127.0.0.1",
+              "name": "tcp",
+              "scheme": "tcp",
+              "status": "up",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-18T22:03:06.384Z",
+          },
+          Object {
+            "error": null,
+            "http": null,
+            "monitor": Object {
+              "duration": Object {
+                "us": 1123,
+              },
+              "id": "tcp-tcp@localhost:9200",
+              "ip": "127.0.0.1",
+              "name": "tcp",
+              "scheme": "tcp",
+              "status": "up",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-18T22:03:07.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 872441,
+              },
+              "id": "http@https://www.elastic.co",
+              "ip": "151.101.210.217",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:03:07.383Z",
+          },
+          Object {
+            "error": null,
+            "http": null,
+            "monitor": Object {
+              "duration": Object {
+                "us": 2775,
+              },
+              "id": "tcp-tcp@localhost:9200",
+              "ip": "127.0.0.1",
+              "name": "tcp",
+              "scheme": "tcp",
+              "status": "up",
+              "type": "tcp",
+            },
+            "timestamp": "2019-01-18T22:03:08.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 3590,
+              },
+              "id": "http@http://localhost:12349/",
+              "ip": "127.0.0.1",
+              "name": "http",
+              "scheme": "http",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:03:08.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 94613,
+              },
+              "id": "http@http://www.google.com/",
+              "ip": "172.217.11.36",
+              "name": "http",
+              "scheme": "http",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:03:08.383Z",
+          },
+          Object {
+            "error": null,
+            "http": Object {
+              "response": Object {
+                "status_code": 200,
+              },
+            },
+            "monitor": Object {
+              "duration": Object {
+                "us": 120698,
+              },
+              "id": "http@https://www.google.com/",
+              "ip": "172.217.11.36",
+              "name": "http",
+              "scheme": "https",
+              "status": "up",
+              "type": "http",
+            },
+            "timestamp": "2019-01-18T22:03:08.383Z",
+          },
+        ]
+      }
+      loading={false}
+      pagination={
+        Object {
+          "initialPageSize": 10,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            20,
+            100,
+          ],
+        }
+      }
+      responsive={true}
+      sorting={false}
+    />
+  </EuiPanel>
+</Fragment>
+`;

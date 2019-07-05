@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CalendarsListTable renders the table with all calendars 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiInMemoryTable
     columns={
       Array [
@@ -21,10 +21,12 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         Object {
           "field": "events_length",
           "name": "Events",
+          "render": [Function],
           "sortable": true,
         },
       ]
     }
+    executeQueryOptions={Object {}}
     isSelectable={true}
     itemId="calendar_id"
     items={
@@ -75,7 +77,11 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             size="s"
             type="button"
           >
-            New
+            <FormattedMessage
+              defaultMessage="New"
+              id="xpack.ml.calendarsList.table.newButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>,
           <EuiButton
             color="danger"
@@ -87,7 +93,11 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             size="s"
             type="button"
           >
-            Delete
+            <FormattedMessage
+              defaultMessage="Delete"
+              id="xpack.ml.calendarsList.table.deleteButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>,
         ],
       }
@@ -106,5 +116,5 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;

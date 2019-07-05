@@ -40,5 +40,6 @@ describe('makeFakeXAspect', function () {
       .and.to.have.property('title', 'All docs')
       .and.to.have.property('hasNoDsl', true);
 
+    expect(aspect.params).to.have.property('defaultValue', '_all');
   });
 });

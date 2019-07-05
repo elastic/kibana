@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TruncateFormatEditor should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFormRow
     describedByIds={Array []}
     error={null}
@@ -34,5 +34,5 @@ exports[`TruncateFormatEditor should render normally 1`] = `
       ]
     }
   />
-</React.Fragment>
+</Fragment>
 `;

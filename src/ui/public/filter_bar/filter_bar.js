@@ -37,7 +37,7 @@ export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable
 
 const module = uiModules.get('kibana');
 
-module.directive('filterBar', function (Private, Promise, getAppState) {
+module.directive('filterBar', function (Private, Promise, getAppState, i18n) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
   const mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
@@ -74,20 +74,25 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         return pill[pill.length - 1].offsetTop > 10;
       };
 
+      const collapseFilterTooltip = i18n('common.ui.filterBar.collapseFilterTooltip', {
+        defaultMessage: 'Collapse filter bar \n to show less'
+      });
+      const expandFilterTooltip = i18n('common.ui.filterBar.expandFilterTooltip', { defaultMessage: 'Expand filter bar \n to show more' });
+
       $scope.filterNavToggle = {
         isOpen: true,
-        tooltipContent: 'Collapse filter bar \n to show less'
+        tooltipContent: collapseFilterTooltip
       };
 
       $scope.toggleFilterShown = () => {
         const collapser = $elem.find('.filter-nav-link__collapser');
         const filterPanelPill = $elem.find('.filter-panel__pill');
         if ($scope.filterNavToggle.isOpen) {
-          $scope.filterNavToggle.tooltipContent = 'Expand filter bar \n to show more';
+          $scope.filterNavToggle.tooltipContent = expandFilterTooltip;
           collapser.attr('aria-expanded', 'false');
           filterPanelPill.attr('style', 'width: calc(100% - 80px)');
         } else {
-          $scope.filterNavToggle.tooltipContent = 'Collapse filter bar \n to show less';
+          $scope.filterNavToggle.tooltipContent = collapseFilterTooltip;
           collapser.attr('aria-expanded', 'true');
           filterPanelPill.attr('style', 'width: auto');
         }

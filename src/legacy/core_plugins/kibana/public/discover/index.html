@@ -116,10 +116,18 @@
               </span>
             </button>
 
-            <section aria-label="Histogram of found documents" class="dscTimechart" ng-if="opts.timefield">
+            <section
+              aria-label="{{::'kbn.discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
+              class="dscTimechart"
+              ng-if="opts.timefield"
+            >
               <header class="dscTimechart__header">
                 <div class="small">
-                  <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
+                  <span
+                    tooltip="{{::'kbn.discover.howToChangeTheTimeTooltip' | i18n: {defaultMessage: 'To change the time, click the clock icon in the navigation bar'} }}"
+                  >
+                    {{timeRange.from | moment}} - {{timeRange.to | moment}}
+                  </span>
 
                   &mdash;
 
@@ -157,7 +165,11 @@
               </div>
             </section>
 
-            <section class="dscTable" fixed-scroll aria-label="Documents">
+            <section
+              class="dscTable"
+              fixed-scroll
+              aria-label="{{::'kbn.discover.documentsAriaLabel' | i18n: {defaultMessage: 'Documents'} }}"
+            >
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"

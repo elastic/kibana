@@ -5,30 +5,28 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLink, EuiFlexGroup, EuiFlexItem, } from '@elastic/eui';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
+import { EuiIcon, EuiLink, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { SourceTooltip } from './source_tooltip';
 
 export const SourceDestination = (props) => {
   const { sourceName, targetName, targetTransportAddress } = props;
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
       <EuiFlexItem grow={false}>
         <SourceTooltip {...props}>
           {sourceName}
         </SourceTooltip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="arrowRight" />
+        <EuiIcon type="arrowRight" size="s" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Tooltip
-          text={targetTransportAddress}
-          placement="bottom"
-          trigger="hover"
+        <EuiToolTip
+          content={targetTransportAddress}
+          position="bottom"
         >
           <EuiLink>{targetName}</EuiLink>
-        </Tooltip>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

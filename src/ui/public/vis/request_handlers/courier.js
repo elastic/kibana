@@ -38,8 +38,9 @@ const CourierRequestHandlerProvider = function () {
       filters,
       forceFetch,
       partialRows,
-      isHierarchical,
+      metricsAtAllLevels,
       inspectorAdapters,
+      minimalColumns,
       queryFilter
     }) {
 
@@ -67,7 +68,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl(isHierarchical);
+        return aggs.toDsl(metricsAtAllLevels);
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
@@ -101,19 +102,26 @@ const CourierRequestHandlerProvider = function () {
         );
         request.stats(getRequestInspectorStats(requestSearchSource));
 
-        const response = await requestSearchSource.fetch();
+        try {
+          const response = await requestSearchSource.fetch();
 
-        searchSource.lastQuery = queryHash;
+          searchSource.lastQuery = queryHash;
 
-        request
-          .stats(getResponseInspectorStats(searchSource, response))
-          .ok({ json: response });
+          request
+            .stats(getResponseInspectorStats(searchSource, response))
+            .ok({ json: response });
 
-        searchSource.rawResponse = response;
-
-        requestSearchSource.getSearchRequestBody().then(req => {
-          request.json(req);
-        });
+          searchSource.rawResponse = response;
+        } catch(e) {
+          // Log any error during request to the inspector
+          request.error({ json: e });
+          throw e;
+        } finally {
+          // Add the request body no matter if things went fine or not
+          requestSearchSource.getSearchRequestBody().then(req => {
+            request.json(req);
+          });
+        }
       }
 
       let resp = cloneDeep(searchSource.rawResponse);
@@ -133,7 +141,7 @@ const CourierRequestHandlerProvider = function () {
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
       const tabifyParams = {
-        metricsAtAllLevels: isHierarchical,
+        minimalColumns,
         partialRows,
         timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
       };

@@ -39,6 +39,7 @@ import {
   updateFilters,
   updateQuery,
   closeContextMenu,
+  requestReload,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -220,6 +221,10 @@ export class DashboardStateManager {
     )) {
       store.dispatch(updateFilters(dashboardFilters));
     }
+  }
+
+  requestReload() {
+    store.dispatch(requestReload());
   }
 
   _handleStoreChanges() {
@@ -477,7 +482,7 @@ export class DashboardStateManager {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
-    return this.isDirty || hasTimeFilterChanged;
+    return this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged);
   }
 
   getPanels() {

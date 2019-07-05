@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -78,7 +79,9 @@ class CalendarService {
           resolve({ calendars });
         })
         .catch((err) => {
-          msgs.error('Calendars list could not be retrieved');
+          msgs.error(i18n.translate('xpack.ml.calendarService.calendarsListCouldNotBeRetrievedErrorMessage', {
+            defaultMessage: 'Calendars list could not be retrieved'
+          }));
           msgs.error('', err);
           reject({ calendars, err });
         });

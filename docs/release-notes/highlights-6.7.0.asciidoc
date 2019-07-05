@@ -1,0 +1,153 @@
+[[release-highlights-6.7.0]]
+== 6.7.0 release highlights
+++++
+<titleabbrev>6.7.0</titleabbrev>
+++++
+
+Each release of {kib} brings new features and product improvements. 
+Here are the highlights of the feature and user experience changes in 6.7.0.
+
+Refer to the <<release-notes-6.7.0, {kib} 6.7.0 Release Notes>> for a list of
+bug fixes and other changes.
+
+[float]
+=== {kib} localization and support for Simplified Chinese
+
+{kib} now supports Simplified Chinese, in addition to English. With 6.7, 
+{kib} introduces a new localization framework to support localized text. 
+If you’d like to use {kib} with Simplified Chinese, set `i18n.locale` to 
+`zh-CN` in the `kibana.yml` file.
+
+[role="screenshot"]
+image::images/highlights-6.7.0-localization.png[Kibana in Simplified Chinese]
+
+[float]
+=== Maps for geospatial analysis
+
+beta[] {kib} has a new application built for geospatial analysis: *Maps*.  “Where” is 
+a critical question for most data points, and *Maps* enables you to ask 
+(and answer) meaningful questions for your location-based data. *Maps*
+doubles down on geo and introduces all new features, such as support for 
+multiple layers and data sources, mapping individual geo points and shapes, 
+dynamic client-side styling, and global search for ad-hoc analysis. 
+To get started, check out this <<maps-getting-started, Maps tutorial>>. 
+
+[role="screenshot"]
+image::images/highlights-6.7.0-maps.png[Kibana Maps user interface]
+
+[float]
+=== Follower indices in Cross-Cluster Replication
+
+{es} has the ability to follow an index in cross-cluster replication (CCR), 
+and {kib} supports this feature with *Add Follower Index*.  With this new UI, 
+you can replicate data from existing indices, or set up local followers on 
+a case-by-case basis. CCR is a https://www.elastic.co/subscriptions[Platinum feature]
+and is ready for production use in 6.7. CCR is available through a 30-day trial license,
+which you can <<managing-licenses, activate in {kib} License Management>>.
+
+[role="screenshot"]
+image::images/highlights-6.7.0-add-follower.png[Add Follower Index UI]
+
+[float]
+=== New actions in Index Lifecycle Management
+
+{kib} has a number of improvements in *Index Lifecycle Management* (ILM). Building 
+on the support for {ref}/frozen-indices.html[frozen indices] in {es} 6.7, {kib} 
+adds the ability to freeze and 
+unfreeze indices in the cold phase. Freezing an index keeps it searchable for a longer 
+period and reduces the hardware requirements. {kib} also now allows you to 
+{ref}/recovery-prioritization.html[set a priority for recovering an index]
+after node restart. 
+
+In 6.7, ILM officially moves out of beta and into production use.
+
+[role="screenshot"]
+image::images/highlights-6.7.0-ilm.png[Cold phase in Index Lifecycle Management]
+
+[float]
+=== Frozen indices in Index Management
+
+{kib} has several enhancements in *Index Management* related to frozen indices  
+You can now freeze and unfreeze indices from the *Manage* menu. {kib} also now
+marks frozen indices, follower indices, and rollup indices with badges, 
+so you can easily distinguish them at-a-glance. 
+
+[role="screenshot"]
+image::images/highlights-6.7.0-index-management.png[Badges in Index Management]
+
+[float]
+=== Canvas is now GA
+
+Many performance and stability improvements went into Canvas, which is production 
+ready for 6.7. To find out more about what's in Canvas and how to use it,
+go to the <<canvas, Canvas documentation>>.
+
+Starting in 6.7, you can upload images in bulk to your workpad. Simply click 
+*Manage assets* at the top of your workpad and select the file picker. You can 
+load your workpad with all of the images (SVGs, GIFs, etc.) you want and then 
+easily access them from the asset picker when you add image elements.
+
+[role="screenshot"]
+image::images/highlights-6.7.0-canvas.png[Canvas in 6.7]
+
+Also in 6.7, you can download the workpad directly from the *Edit* view. 
+Simply click the link in the workpad header to download a JSON file.  
+
+
+[float]
+=== Infrastructure is now GA
+
+The *Infrastructure* app is ready for production use in 6.7. This app 
+is a turnkey solution for monitoring infrastructure metrics using the Elastic Stack. 
+You can configure indices and fields associated with *Infrastructure*
+via *Source Configuration*, specify a neutral color gradient, group the *Map* 
+view by any field, and switch to an alternative *Table* view. For more information 
+about this app, check out the <<xpack-infra, Infrastructure documentation>>.
+
+[role="screenshot"]
+image::images/highlights-6.7.0-infrastructure.png[Infrastructure app]
+
+[float]
+=== Logs is now GA
+
+The Kibana *Logs* app is GA in 6.7. This app is a console-like experience 
+for working with logs using the Elastic Stack. You can configure indices and 
+fields associated with *Logs* via *Source Configuration* and view 
+metadata and structured fields associated with each log line via the *Log* event 
+details. For more information about this app, see the
+<<xpack-logs, Logs documentation.>>
+
+[role="screenshot"]
+image::images/highlights-6.7.0-logs.png[Logs app]
+
+
+
+[float]
+===  Introducing Uptime
+
+This release introduces *Uptime*, which enables you to easily navigate the 
+status of your active application checks powered by 
+https://www.elastic.co/products/beats/heartbeat[Heartbeat]. See the 
+<<xpack-uptime, Uptime documentation>> for details.
+
+
+[role="screenshot"]
+image::images/highlights-6.7.0-uptime.png[Uptime]
+
+
+[float]
+=== Upgrade Assistant reintroduced
+
+The <<upgrade-assistant, Upgrade Assistant>> available in {kib} 5.6 has been reintroduced in 6.7 to assist 
+with your upgrade to {es} 7.0. The reindex feature is enhanced in two important ways. 
+When you initiate a reindex through the Upgrade Assistant, the process is now 
+managed in the background. You can navigate away from the page and get an 
+updated status for the reindex when you return. When reindexing, {kib} also now 
+fixes commonly used settings that were removed in 7.0. If 
+reindexing fails, the tool reverts any changes back to the initial state.
+
+
+[role="screenshot"]
+image::images/highlights-6.7.0-ua.png[Upgrade Assistant]
+
+

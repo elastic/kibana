@@ -5,12 +5,10 @@
  */
 
 import { createSelector } from 'reselect';
-
-import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
-
 import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
 import {
+  flyoutOptionsSelectors as localFlyoutOptionsSelectors,
   logFilterSelectors as localLogFilterSelectors,
   logMinimapSelectors as localLogMinimapSelectors,
   logPositionSelectors as localLogPositionSelectors,
@@ -24,7 +22,6 @@ import { State } from './reducer';
 import {
   logEntriesSelectors as remoteLogEntriesSelectors,
   logSummarySelectors as remoteLogSummarySelectors,
-  sourceSelectors as remoteSourceSelectors,
 } from './remote';
 
 /**
@@ -41,6 +38,7 @@ export const metricTimeSelectors = globalizeSelectors(selectLocal, localMetricTi
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffleOptionsSelectors);
+export const flyoutOptionsSelectors = globalizeSelectors(selectLocal, localFlyoutOptionsSelectors);
 
 /**
  * remote selectors
@@ -50,7 +48,6 @@ const selectRemote = (state: State) => state.remote;
 
 export const logEntriesSelectors = globalizeSelectors(selectRemote, remoteLogEntriesSelectors);
 export const logSummarySelectors = globalizeSelectors(selectRemote, remoteLogSummarySelectors);
-export const sourceSelectors = globalizeSelectors(selectRemote, remoteSourceSelectors);
 
 /**
  * shared selectors
@@ -74,35 +71,5 @@ export const sharedSelectors = {
     logPositionSelectors.selectLastVisiblePosition,
     (entries, lastVisiblePosition) =>
       lastVisiblePosition ? getLogEntryAtTime(entries, lastVisiblePosition) : null
-  ),
-  selectLogFilterQueryAsJson: createSelector(
-    logFilterSelectors.selectLogFilterQuery,
-    sourceSelectors.selectDerivedIndexPattern,
-    (filterQuery, indexPattern) => {
-      try {
-        return filterQuery
-          ? JSON.stringify(
-              toElasticsearchQuery(fromKueryExpression(filterQuery.expression), indexPattern)
-            )
-          : null;
-      } catch (err) {
-        return null;
-      }
-    }
-  ),
-  selectWaffleFilterQueryAsJson: createSelector(
-    waffleFilterSelectors.selectWaffleFilterQuery,
-    sourceSelectors.selectDerivedIndexPattern,
-    (filterQuery, indexPattern) => {
-      try {
-        return filterQuery
-          ? JSON.stringify(
-              toElasticsearchQuery(fromKueryExpression(filterQuery.expression), indexPattern)
-            )
-          : null;
-      } catch (err) {
-        return null;
-      }
-    }
   ),
 };

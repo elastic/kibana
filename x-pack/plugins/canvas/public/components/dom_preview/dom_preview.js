@@ -9,40 +9,53 @@ import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 
 export class DomPreview extends React.Component {
-  static container = null;
-  static content = null;
-  static observer = null;
-
   static propTypes = {
     elementId: PropTypes.string.isRequired,
     height: PropTypes.number.isRequired,
   };
 
+  constructor(props) {
+    super(props);
+    this.container = null;
+    this.content = null;
+    this.observer = null;
+    this.original = null;
+    this.updateTimeout = null;
+  }
+
   componentDidMount() {
-    const original = document.querySelector(`#${this.props.elementId}`);
-
-    const update = this.update(original);
-    update();
-
-    const slowUpdate = debounce(update, 250);
-
-    this.observer = new MutationObserver(slowUpdate);
-    // configuration of the observer
-    const config = { attributes: true, childList: true, subtree: true };
-    // pass in the target node, as well as the observer options
-    this.observer.observe(original, config);
+    this.update();
   }
 
   componentWillUnmount() {
-    this.observer.disconnect();
+    clearTimeout(this.updateTimeout);
+    this.observer && this.observer.disconnect(); // observer not guaranteed to exist
   }
 
-  update = original => () => {
-    if (!this.content || !this.container) return;
+  update = () => {
+    if (!this.content || !this.container) {
+      return;
+    }
 
-    const thumb = original.cloneNode(true);
+    if (!this.observer) {
+      this.original = this.original || document.querySelector(`#${this.props.elementId}`);
+      if (this.original) {
+        const slowUpdate = debounce(this.update, 100);
+        this.observer = new MutationObserver(slowUpdate);
+        // configuration of the observer
+        const config = { attributes: true, childList: true, subtree: true };
+        // pass in the target node, as well as the observer options
+        this.observer.observe(this.original, config);
+      } else {
+        clearTimeout(this.updateTimeout); // to avoid the assumption that we fully control when `update` is called
+        this.updateTimeout = setTimeout(this.update, 30);
+        return;
+      }
+    }
 
-    const originalStyle = window.getComputedStyle(original, null);
+    const thumb = this.original.cloneNode(true);
+
+    const originalStyle = window.getComputedStyle(this.original, null);
     const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
     const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
 
@@ -50,14 +63,16 @@ export class DomPreview extends React.Component {
     const scale = thumbHeight / originalHeight;
     const thumbWidth = originalWidth * scale;
 
-    if (this.content.hasChildNodes()) this.content.removeChild(this.content.firstChild);
+    if (this.content.hasChildNodes()) {
+      this.content.removeChild(this.content.firstChild);
+    }
     this.content.appendChild(thumb);
 
     this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
     this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
 
     // Copy canvas data
-    const originalCanvas = original.querySelectorAll('canvas');
+    const originalCanvas = this.original.querySelectorAll('canvas');
     const thumbCanvas = thumb.querySelectorAll('canvas');
 
     // Cloned canvas elements are blank and need to be explicitly redrawn

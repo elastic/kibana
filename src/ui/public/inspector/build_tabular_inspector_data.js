@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { set } from 'lodash';
+import { createFilter } from '../vis/vis_filters';
 import { FormattedData } from './adapters/data';
 
 /**
@@ -24,33 +26,41 @@ import { FormattedData } from './adapters/data';
  * inspector. It will only be called when the data view in the inspector is opened.
  */
 export async function buildTabularInspectorData(table, queryFilter) {
-  const columns = table.columns.map((col, index) => {
+  const rows = table.rows.map(row => {
+    return table.columns.reduce((prev, cur, colIndex) => {
+      const value = row[cur.id];
+      const fieldFormatter = cur.aggConfig.fieldFormatter('text');
+      prev[`col-${colIndex}-${cur.aggConfig.id}`] = new FormattedData(value, fieldFormatter(value));
+      return prev;
+    }, {});
+  });
+
+  const columns = table.columns.map((col, colIndex) => {
     const field = col.aggConfig.getField();
     const isCellContentFilterable =
       col.aggConfig.isFilterable()
       && (!field || field.filterable);
     return ({
       name: col.name,
-      field: `col${index}`,
-      filter: isCellContentFilterable && ((value) => {
-        const filter = col.aggConfig.createFilter(value.raw);
+      field: `col-${colIndex}-${col.aggConfig.id}`,
+      filter: isCellContentFilterable && (value => {
+        const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
+        const filter = createFilter(table, colIndex, rowIndex, value.raw);
         queryFilter.addFilters(filter);
       }),
-      filterOut: isCellContentFilterable && ((value) => {
-        const filter = col.aggConfig.createFilter(value.raw);
-        filter.meta = filter.meta || {};
-        filter.meta.negate = true;
+      filterOut: isCellContentFilterable && (value => {
+        const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
+        const filter = createFilter(table, colIndex, rowIndex, value.raw);
+        const notOther = value.raw !== '__other__';
+        const notMissing = value.raw !== '__missing__';
+        if (Array.isArray(filter)) {
+          filter.forEach(f => set(f, 'meta.negate', (notOther && notMissing)));
+        } else {
+          set(filter, 'meta.negate', (notOther && notMissing));
+        }
         queryFilter.addFilters(filter);
       }),
     });
-  });
-  const rows = table.rows.map(row => {
-    return table.columns.reduce((prev, cur, index) => {
-      const value = row[cur.id];
-      const fieldFormatter = cur.aggConfig.fieldFormatter('text');
-      prev[`col${index}`] = new FormattedData(value, fieldFormatter(value));
-      return prev;
-    }, {});
   });
 
   return { columns, rows };

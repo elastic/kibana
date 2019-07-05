@@ -110,7 +110,7 @@ export const createInstallRoute = () => ({
               settings: {
                 index: {
                   number_of_shards: 1,
-                  number_of_replicas: 0
+                  auto_expand_replicas: '0-1'
                 }
               },
               mappings: {
@@ -118,7 +118,8 @@ export const createInstallRoute = () => ({
                   properties: dataIndexConfig.fields
                 }
               }
-            }
+            },
+            include_type_name: true
           };
           await callWithRequest(request, 'indices.create', createIndexParams);
         } catch (err) {

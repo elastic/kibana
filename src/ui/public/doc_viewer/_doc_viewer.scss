@@ -18,10 +18,19 @@
 }
 
 .kbnDocViewer__content {
-  margin: $euiSizeS 0 0 0;
+  background-color: $euiColorEmptyShade;
+  padding: $euiSizeS 0 0 0;
 }
 
 .kbnDocViewer__buttons,
 .kbnDocViewer__field {
   white-space: nowrap;
+}
+
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
+
+  .kbnDocViewer__content {
+    background-color: $euiColorEmptyShade;
+  }
 }

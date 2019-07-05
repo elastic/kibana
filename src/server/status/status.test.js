@@ -27,7 +27,7 @@ describe('Status class', function () {
   let serverStatus;
 
   beforeEach(function () {
-    server = { expose: sinon.stub(), log: sinon.stub() };
+    server = { expose: sinon.stub(), logWithMetadata: sinon.stub() };
     serverStatus = new ServerStatus(server);
   });
 

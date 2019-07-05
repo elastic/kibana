@@ -7,10 +7,8 @@
 import React from 'react';
 import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';
 import { flatten, capitalize } from 'lodash';
-
 import chrome from 'ui/chrome';
-
-import { toQuery } from '../../../utils/url';
+import { toQuery } from '../../shared/Links/url_helpers';
 import { routes } from './routeConfig';
 
 class Breadcrumbs extends React.Component {

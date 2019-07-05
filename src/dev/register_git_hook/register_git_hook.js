@@ -21,6 +21,7 @@ import chalk from 'chalk';
 import { chmod, unlink, writeFile } from 'fs';
 import dedent from 'dedent';
 import normalizePath from 'normalize-path';
+import os from 'os';
 import { resolve } from 'path';
 import { promisify } from 'util';
 import SimpleGit from 'simple-git';
@@ -128,7 +129,7 @@ export async function registerPrecommitGitHook(log) {
       await getPrecommitGitHookScriptPath(REPO_ROOT),
       getKbnPrecommitGitHookScript(
         REPO_ROOT,
-        normalizePath(process.env.HOME.replace(/'/g, '\'')),
+        normalizePath(os.homedir()),
         process.platform
       )
     );

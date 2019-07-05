@@ -19,6 +19,7 @@ import { reportingClient } from '../lib/reporting_client';
 
 interface Props {
   reportType: string;
+  layoutId: string | undefined;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
@@ -31,9 +32,27 @@ interface Props {
 interface State {
   isStale: boolean;
   absoluteUrl: string;
+  layoutId: string;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
+  public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    if (nextProps.layoutId !== prevState.layoutId) {
+      return {
+        ...prevState,
+        absoluteUrl: ReportingPanelContentUi.getAbsoluteReportGenerationUrl(nextProps),
+      };
+    }
+    return prevState;
+  }
+
+  private static getAbsoluteReportGenerationUrl = (props: Props) => {
+    const relativePath = reportingClient.getReportingJobPath(
+      props.reportType,
+      props.getJobParams()
+    );
+    return url.resolve(window.location.href, relativePath);
+  };
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -42,6 +61,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.state = {
       isStale: false,
       absoluteUrl: '',
+      layoutId: '',
     };
   }
 
@@ -54,7 +74,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    this.setAbsoluteReportGenerationUrl();
 
     window.addEventListener('hashchange', this.markAsStale, false);
     window.addEventListener('resize', this.setAbsoluteReportGenerationUrl);
@@ -174,12 +193,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     if (!this.mounted) {
       return;
     }
-
-    const relativePath = reportingClient.getReportingJobPath(
-      this.props.reportType,
-      this.props.getJobParams()
-    );
-    const absoluteUrl = url.resolve(window.location.href, relativePath);
+    const absoluteUrl = ReportingPanelContentUi.getAbsoluteReportGenerationUrl(this.props);
     this.setState({ absoluteUrl });
   };
 

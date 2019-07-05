@@ -3,17 +3,40 @@
 exports[`#add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen component 1`] = `
 Array [
   Array [
-    <FatalErrorsScreen
-      buildNumber="kibanaBuildNumber"
-      errorInfo$={Rx.Observable}
-      kibanaVersion="kibanaVersion"
-    />,
+    <React.Fragment>
+      <FatalErrorsScreen
+        buildNumber="kibanaBuildNumber"
+        errorInfo$={Rx.Observable}
+        kibanaVersion="kibanaVersion"
+      />
+    </React.Fragment>,
     <div />,
   ],
 ]
 `;
 
 exports[`#add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen container 1`] = `
+<div>
+  <div />
+</div>
+`;
+
+exports[`start.add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen component 1`] = `
+Array [
+  Array [
+    <I18nContext>
+      <FatalErrorsScreen
+        buildNumber="kibanaBuildNumber"
+        errorInfo$={Rx.Observable}
+        kibanaVersion="kibanaVersion"
+      />
+    </I18nContext>,
+    <div />,
+  ],
+]
+`;
+
+exports[`start.add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen container 1`] = `
 <div>
   <div />
 </div>

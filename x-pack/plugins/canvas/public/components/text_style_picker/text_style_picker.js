@@ -64,6 +64,11 @@ export const TextStylePicker = ({
     ['underline']: Boolean(underline),
   };
 
+  if (!isNaN(size) && fontSizes.indexOf(Number(size)) === -1) {
+    fontSizes.push(Number(size));
+    fontSizes.sort((a, b) => a - b);
+  }
+
   const doChange = (propName, value) => {
     onChange({
       family,

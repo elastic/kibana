@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
 
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         defaultIndex: 'logstash-*',
       });
 

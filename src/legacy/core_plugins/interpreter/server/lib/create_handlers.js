@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import boom from 'boom';
-import { isSecurityEnabled } from './feature_check';
-import { SECURITY_AUTH_MESSAGE } from '../../common/constants';
-
 export const createHandlers = (request, server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const config = server.config();
@@ -31,28 +27,6 @@ export const createHandlers = (request, server) => {
       config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
         ? `${server.info.uri}${config.get('server.basePath')}`
         : server.info.uri,
-    httpHeaders: request.headers,
-    elasticsearchClient: async (...args) => {
-      // check if the session is valid because continuing to use it
-      if (isSecurityEnabled(server)) {
-        try {
-          const authenticationResult = await server.plugins.security.authenticate(request);
-          if (!authenticationResult.succeeded()) {
-            throw boom.unauthorized(authenticationResult.error);
-          }
-        } catch (e) {
-          // if authenticate throws, show error in development
-          if (process.env.NODE_ENV !== 'production') {
-            e.message = `elasticsearchClient failed: ${e.message}`;
-            console.error(e);
-          }
-
-          // hide all failure information from the user
-          throw boom.unauthorized(SECURITY_AUTH_MESSAGE);
-        }
-      }
-
-      return callWithRequest(request, ...args);
-    },
+    elasticsearchClient: async (...args) => callWithRequest(request, ...args),
   };
 };

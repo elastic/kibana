@@ -8,10 +8,26 @@
  * Contains values for ML anomaly explorer.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const DRAG_SELECT_ACTION = {
   NEW_SELECTION: 'newSelection',
   ELEMENT_SELECT: 'elementSelect',
   DRAG_START: 'dragStart'
+};
+
+export const EXPLORER_ACTION = {
+  INITIALIZE: 'initialize',
+  JOB_SELECTION_CHANGE: 'jobSelectionChange',
+  LOAD_JOBS: 'loadJobs',
+  REDRAW: 'redraw',
+  RELOAD: 'reload',
+};
+
+export const APP_STATE_ACTION = {
+  CLEAR_SELECTION: 'clearSelection',
+  SAVE_SELECTION: 'saveSelection',
+  SAVE_SWIMLANE_VIEW_BY_FIELD_NAME: 'saveSwimlaneViewByFieldName',
 };
 
 export const SWIMLANE_DEFAULT_LIMIT = 10;
@@ -26,3 +42,8 @@ export const CHART_TYPE = {
   POPULATION_DISTRIBUTION: 'population_distribution',
   SINGLE_METRIC: 'single_metric',
 };
+
+export const MAX_CATEGORY_EXAMPLES = 10;
+export const MAX_INFLUENCER_FIELD_VALUES = 10;
+
+export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', { defaultMessage: 'job ID' });

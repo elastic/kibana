@@ -22,14 +22,17 @@ import angular from 'angular';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
-import { decorateQuery, luceneStringToDsl } from '../../courier';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import filtersTemplate from '../controls/filters.html';
 import { i18n } from '@kbn/i18n';
+
+import chrome from 'ui/chrome';
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
   title: i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
     defaultMessage: 'Filters',
+    description: 'The name of an aggregation, that allows to specify multiple individual filters to group data by.'
   }),
   createFilter: createFilterFilters,
   customLabels: false,
@@ -55,8 +58,10 @@ export const filtersBucketAgg = new BucketAggType({
             console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
             return;
           }
+          const config = chrome.getUiSettingsClient();
+          const queryStringOptions = config.get('query:queryString:options');
 
-          decorateQuery(query);
+          decorateQuery(query, queryStringOptions);
 
           const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
           const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);

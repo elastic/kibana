@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { Popover } from '../../../../../public/components/popover';
 import { PrettyDuration } from '../pretty_duration';
 import { TimePicker } from '../time_picker';
-import './time_picker_mini.scss';
 
 export const TimePickerMini = ({ from, to, onSelect }) => {
   const button = handleClick => (
@@ -19,7 +18,12 @@ export const TimePickerMini = ({ from, to, onSelect }) => {
   );
 
   return (
-    <Popover id="timefilter-popover-trigger-click" className="canvasTimePickerMini" button={button}>
+    <Popover
+      id="timefilter-popover-trigger-click"
+      className="canvasTimePickerMini"
+      anchorClassName="canvasTimePickerMini__anchor"
+      button={button}
+    >
       {() => <TimePicker from={from} to={to} onSelect={onSelect} />}
     </Popover>
   );

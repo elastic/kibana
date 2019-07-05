@@ -46,11 +46,12 @@ TimeRuler.displayName = 'TimeRuler';
 const TimeRulerTickLabel = styled.text`
   font-size: ${props => props.theme.eui.euiFontSizeXs};
   line-height: ${props => props.theme.eui.euiLineHeight};
-  color: ${props => props.theme.eui.euiTextColor};
+  fill: ${props => props.theme.eui.textColors.subdued};
 `;
 
 const TimeRulerGridLine = styled.line`
-  stroke: ${props => props.theme.eui.euiColorMediumShade};
+  stroke: ${props =>
+    props.theme.darkMode ? props.theme.eui.euiColorDarkShade : props.theme.eui.euiColorMediumShade};
   stroke-dasharray: 2, 2;
   stroke-opacity: 0.5;
   stroke-width: 1px;

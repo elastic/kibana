@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import { constant } from 'lodash';
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
@@ -17,6 +16,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import ReactDOM from 'react-dom';
 import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
+import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 // @ts-ignore
@@ -60,7 +60,7 @@ module.controller(
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
       if (isVisible && !mounted && !pathProvider.isUnauthenticated()) {
         render(
-          <I18nProvider>
+          <I18nContext>
             <NavControlPopover
               spacesManager={spacesManager}
               activeSpace={activeSpace}
@@ -68,7 +68,7 @@ module.controller(
               anchorPosition={'rightCenter'}
               buttonClass={SpacesGlobalNavButton}
             />
-          </I18nProvider>,
+          </I18nContext>,
           domNode
         );
         mounted = true;
@@ -116,7 +116,7 @@ chromeHeaderNavControlsRegistry.register(
       spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           <NavControlPopover
             spacesManager={spacesManager}
             activeSpace={activeSpace}
@@ -124,7 +124,7 @@ chromeHeaderNavControlsRegistry.register(
             anchorPosition="downLeft"
             buttonClass={SpacesHeaderNavButton}
           />
-        </I18nProvider>,
+        </I18nContext>,
         el
       );
     },

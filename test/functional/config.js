@@ -32,7 +32,8 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
-  SharePageProvider
+  SharePageProvider,
+  TimePickerPageProvider,
 } from './page_objects';
 
 import {
@@ -55,6 +56,8 @@ import {
   RenderableProvider,
   TableProvider,
   BrowserProvider,
+  InspectorProvider,
+  PieChartProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -90,6 +93,7 @@ export default async function ({ readConfigFile }) {
       visualBuilder: VisualBuilderPageProvider,
       timelion: TimelionPageProvider,
       share: SharePageProvider,
+      timePicker: TimePickerPageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),
@@ -115,6 +119,8 @@ export default async function ({ readConfigFile }) {
       renderable: RenderableProvider,
       table: TableProvider,
       browser: BrowserProvider,
+      pieChart: PieChartProvider,
+      inspector: InspectorProvider,
     },
     servers: commonConfig.get('servers'),
 
@@ -131,6 +137,8 @@ export default async function ({ readConfigFile }) {
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false
       },
     },
 

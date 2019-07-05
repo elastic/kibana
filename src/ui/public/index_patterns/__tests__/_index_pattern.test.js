@@ -86,7 +86,7 @@ jest.mock('../unsupported_time_patterns', () => ({
 
 jest.mock('../../saved_objects', () => {
   const object = {
-    _version: 1,
+    _version: 'foo',
     _id: 'foo',
     attributes: {
       title: 'something'
@@ -106,10 +106,11 @@ jest.mock('../../saved_objects', () => {
         }
 
         object.attributes.title = body.title;
+        object._version += 'a';
 
         return {
           id: object._id,
-          _version: ++object._version,
+          _version: object._version,
         };
       }
     },
@@ -137,13 +138,13 @@ describe('IndexPattern', () => {
     const pattern = new IndexPattern('foo');
     await pattern.init();
 
-    expect(pattern.version).toBe(2);
+    expect(pattern.version).toBe('fooa');
 
     // Create the same one - we're going to handle concurrency
     const samePattern = new IndexPattern('foo');
     await samePattern.init();
 
-    expect(samePattern.version).toBe(3);
+    expect(samePattern.version).toBe('fooaa');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine

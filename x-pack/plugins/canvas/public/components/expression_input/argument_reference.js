@@ -32,9 +32,15 @@ function getHelp(argDef) {
 function getArgListItems(argDef) {
   const { aliases, types, default: def, required } = argDef;
   const items = [];
-  if (aliases.length) items.push({ title: 'Aliases', description: aliases.join(', ') });
-  if (types.length) items.push({ title: 'Types', description: types.join(', ') });
-  if (def != null) items.push({ title: 'Default', description: def });
+  if (aliases.length) {
+    items.push({ title: 'Aliases', description: aliases.join(', ') });
+  }
+  if (types.length) {
+    items.push({ title: 'Types', description: types.join(', ') });
+  }
+  if (def != null) {
+    items.push({ title: 'Default', description: def });
+  }
   items.push({ title: 'Required', description: String(Boolean(required)) });
   return items;
 }

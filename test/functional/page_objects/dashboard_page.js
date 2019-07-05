@@ -52,9 +52,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       ]);
 
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': defaultIndex,
-        'telemetry:optIn': false
       });
       await this.selectDefaultIndex(defaultIndex);
       await kibanaServer.uiSettings.disableToastAutohide();
@@ -125,7 +123,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      */
     async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      return await testSubjects.exists('dashboardLandingPage', 5000);
+      return await testSubjects.exists('dashboardLandingPage', {
+        timeout: 5000
+      });
     }
 
     async expectExistsDashboardLandingPage() {
@@ -558,28 +558,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         '.filter-bar > .filter > .filter-description',
         timeout);
       return _.map(filters, async (filter) => await filter.getVisibleText());
-    }
-
-    async getPieSliceCount(timeout) {
-      log.debug('getPieSliceCount');
-      return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', timeout);
-        return slices.length;
-      });
-    }
-
-    async filterOnPieSlice(sliceValue) {
-      log.debug(`Filtering on a pie slice with optional value ${sliceValue}`);
-      if (sliceValue) {
-        await testSubjects.click(`pieSlice-${sliceValue}`);
-      } else {
-        // If no pie slice has been provided, find the first one available.
-        await retry.try(async () => {
-          const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-          log.debug('Slices found:' + slices.length);
-          return slices[0].click();
-        });
-      }
     }
 
     async getSharedItemsCount() {

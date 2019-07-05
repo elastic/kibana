@@ -1,53 +1,56 @@
 <nav
-  class="global-nav"
-  ng-class="{'is-global-nav-open': isGlobalNavOpen}"
+  class="kbnGlobalNav"
+  ng-class="{'kbnGlobalNav-isOpen': isGlobalNavOpen}"
   ng-show="isVisible"
   data-test-subj="globalNav"
 >
-
   <!-- Logo -->
-  <div class="global-nav__logo">
+  <div class="kbnGlobalNav__logo">
     <a
-      class="global_nav_logo"
-      ng-class="{ active: isHomeActive() }"
+      class="kbnGlobalNav__logoLink"
       href="{{ getHref('/app/kibana#/home') }}"
       data-test-subj="kibanaLogo"
     >
       <ul>
         <li
           ng-if="!logoBrand && !smallLogoBrand"
-          aria-label="{{ appTitle }} home"
-          class="logo kibana"
+          aria-label="{{ 'common.ui.chrome.globalNav.logoAriaLabel' | i18n: {
+            defaultMessage: '{appTitle} home',
+            values: {appTitle}
+          } }}"
+          class="kbnGlobalNav__logoBrand kibana"
         ></li>
 
         <li
           ng-if="logoBrand"
           ng-style="{ 'background': logoBrand }"
-          aria-label="{{ appTitle }} home"
-          class="logo hidden-sm"
+          aria-label="{{ 'common.ui.chrome.globalNav.logoAriaLabel' | i18n: {
+            defaultMessage: '{appTitle} home',
+            values: {appTitle}
+          } }}"
+          class="kbnGlobalNav__logoBrand hidden-sm"
         ></li>
 
         <li
           ng-if="smallLogoBrand"
           ng-style="{ 'background': smallLogoBrand }"
-          aria-label="{{ appTitle }} home"
-          class="logo-small visible-sm hidden-xs"
+          aria-label="{{ 'common.ui.chrome.globalNav.logoAriaLabel' | i18n: {
+            defaultMessage: '{appTitle} home',
+            values: {appTitle}
+          } }}"
+          class="kbnGlobalNav__smallLogoBrand visible-sm hidden-xs"
         ></li>
       </ul>
     </a>
   </div>
 
   <!-- Links -->
-  <div class="global-nav__links">
+  <div class="kbnGlobalNav__links">
     <!-- Main apps -->
-    <div class="global-nav__links-section">
-      <app-switcher
-        chrome="chrome"
-      ></app-switcher>
-    </div>
+    <div class="kbnGlobalNav__linksSection"><app-switcher chrome="chrome"></app-switcher></div>
 
     <!-- Bottom button -->
-    <div class="global-nav__links-section">
+    <div class="kbnGlobalNav__linksSection">
       <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
 
       <!-- Open/close sidebar -->
@@ -56,9 +59,9 @@
         tooltip-content="globalNavToggleButton.tooltipContent"
         on-click="toggleGlobalNav($event)"
         icon="'plugins/kibana/assets/play-circle.svg'"
+        eui-icon-type="'sortRight'"
         label="globalNavToggleButton.title"
       ></global-nav-link>
     </div>
   </div>
-
 </nav>

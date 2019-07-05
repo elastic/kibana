@@ -6,6 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import { SavedObjectProvider } from 'ui/courier';
+import { i18n } from '@kbn/i18n';
 
 const module = uiModules.get('app/dashboard');
 
@@ -26,7 +27,9 @@ export function SavedWorkspaceProvider(Private) {
 
         // default values that will get assigned if the doc is new
         defaults: {
-          title: 'New Graph Workspace',
+          title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
+            defaultMessage: 'New Graph Workspace'
+          }),
           numLinks: 0,
           numVertices: 0,
           wsState: '{}',

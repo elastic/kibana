@@ -8,19 +8,25 @@
     tagging='mlGroupSelect.createNewItem'
     append-to-body=true
   >
-    <ui-select-match placeholder="Job Group">
+    <ui-select-match
+      placeholder="{{:: 'xpack.ml.jobGroupSelect.jobGroupPlaceholder' | i18n: { defaultMessage: 'Job Group' } }}"
+    >
       {{$item.id}}
     </ui-select-match>
     <ui-select-choices
       repeat="group in mlGroupSelect.groups | filter: { id: $select.search }"
       group-by="mlGroupSelect.groupTypes"
     >
-      <div ng-if="group.isTag"  class="select-item" ng-bind-html="(group.id | highlight: $select.search) +' <small>(new group)</small>'"></div>
+      <div ng-if="group.isTag" class="select-item" ng-bind-html="(group.id | highlight: $select.search) +' <small>' + newGroupLabel + '</small>'"></div>
       <div ng-if="!group.isTag" class="select-item" >
         <div ng-bind-html="group.id | highlight: $select.search"></div>
-        <small>
-          Other jobs in this group: {{group.count}}
-        </small>
+        <small
+          i18n-id="xpack.ml.jobGroupSelect.otherJobsInGroupLabel"
+          i18n-default-message="Other jobs in this group: {groupCount}"
+          i18n-values="{
+            groupCount: group.count,
+          }"
+        ></small>
       </div>
     </ui-select-choices>
   </ui-select>

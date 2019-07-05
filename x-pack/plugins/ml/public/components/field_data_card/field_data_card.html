@@ -3,17 +3,21 @@
 
   <div ng-if="card.loading === true" class="card-contents">
     <ml-loading-indicator
-      label="Loading"
+      label="{{:: 'xpack.ml.fieldDataCard.loadingLabel' | i18n: { defaultMessage: 'Loading' } }}"
       is-loading="card.loading"
       height="200"
     />
   </div>
 
   <div ng-if="card.existsInDocs === false" class="card-contents">
-    <div class="not-exist-message">
-      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-      This field does not appear in any documents for the selected time range
-    </div>
+    <div
+      class="not-exist-message"
+      i18n-id="xpack.ml.fieldDataCard.fieldDoesNotAppearInDocumentsDescription"
+      i18n-default-message="{icon} This field does not appear in any documents for the selected time range"
+      i18n-values="{
+        html_icon: '<i class=\'fa fa-exclamation-triangle\' aria-hidden=\'true\'></i>',
+      }"
+    ></div>
   </div>
 
   <ng-include ng-if="card.loading === false" src="getCardUrl()"></ng-include>

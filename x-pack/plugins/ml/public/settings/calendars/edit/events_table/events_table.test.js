@@ -11,11 +11,12 @@ jest.mock('ui/chrome', () => ({
 }));
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { EventsTable } from './events_table';
 
 const testProps = {
+  canCreateCalendar: true,
   eventsList: [{
     calendar_id: 'test-calendar',
     description: 'test description',
@@ -32,8 +33,8 @@ const testProps = {
 describe('EventsTable', () => {
 
   test('Renders events table with no search bar', () => {
-    const wrapper = shallow(
-      <EventsTable {...testProps}/>
+    const wrapper = shallowWithIntl(
+      <EventsTable.WrappedComponent {...testProps}/>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -45,8 +46,8 @@ describe('EventsTable', () => {
       showSearchBar: true,
     };
 
-    const wrapper = shallow(
-      <EventsTable {...showSearchBarProps} />
+    const wrapper = shallowWithIntl(
+      <EventsTable.WrappedComponent {...showSearchBarProps} />
     );
 
     expect(wrapper).toMatchSnapshot();

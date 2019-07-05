@@ -8,6 +8,4 @@ import styled from 'styled-components';
 
 export const Background = styled.div`
   flex-grow: 1;
-  height: 100vh;
-  background: #f5f5f5;
 `;

@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
 import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -166,7 +167,17 @@ export class Typeahead extends Component {
             style={{
               backgroundImage: 'none'
             }}
-            placeholder="Search transactions and errors... (E.g. transaction.duration.us > 300000 AND context.response.status_code >= 400)"
+            placeholder={i18n.translate(
+              'xpack.apm.kueryBar.searchPlaceholder',
+              {
+                defaultMessage:
+                  'Search transactions and errors… (E.g. {queryExample})',
+                values: {
+                  queryExample:
+                    'transaction.duration.us > 300000 AND context.response.status_code >= 400'
+                }
+              }
+            )}
             inputRef={node => {
               if (node) {
                 this.inputRef = node;

@@ -24,7 +24,7 @@ export const pointseries = () => ({
       return {
         type: 'pointseries',
         rows: [],
-        columns: [],
+        columns: {},
       };
     },
   },

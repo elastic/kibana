@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import * as React from 'react';
 
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
+import { NoData } from '../../empty_states';
 import { InfraLoadingPanel } from '../../loading';
-import { LogTextStreamEmptyView } from './empty_view';
 import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogTextStreamItemView } from './item_view';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
@@ -41,6 +42,9 @@ interface ScrollableLogTextStreamViewProps {
     }
   ) => any;
   loadNewerItems: () => void;
+  setFlyoutItem: (id: string) => void;
+  showFlyout: () => void;
+  intl: InjectedIntl;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -48,7 +52,7 @@ interface ScrollableLogTextStreamViewState {
   targetId: string | null;
 }
 
-export class ScrollableLogTextStreamView extends React.PureComponent<
+class ScrollableLogTextStreamViewClass extends React.PureComponent<
   ScrollableLogTextStreamViewProps,
   ScrollableLogTextStreamViewState
 > {
@@ -97,13 +101,42 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       hasMoreAfterEnd,
       isStreaming,
       lastLoadedTime,
+      intl,
     } = this.props;
     const { targetId } = this.state;
     const hasItems = items.length > 0;
     if (isReloading && !hasItems) {
-      return <InfraLoadingPanel height={height} width={width} text="Loading entries" />;
+      return (
+        <InfraLoadingPanel
+          height={height}
+          width={width}
+          text={
+            <FormattedMessage
+              id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
+              defaultMessage="Loading entries"
+            />
+          }
+        />
+      );
     } else if (!hasItems) {
-      return <LogTextStreamEmptyView reload={this.handleReload} />;
+      return (
+        <NoData
+          titleText={intl.formatMessage({
+            id: 'xpack.infra.logs.emptyView.noLogMessageTitle',
+            defaultMessage: 'There are no log messages to display.',
+          })}
+          bodyText={intl.formatMessage({
+            id: 'xpack.infra.logs.emptyView.noLogMessageDescription',
+            defaultMessage: 'Try adjusting your filter.',
+          })}
+          refetchText={intl.formatMessage({
+            id: 'xpack.infra.logs.emptyView.checkForNewDataButtonLabel',
+            defaultMessage: 'Check for new data',
+          })}
+          onRefetch={this.handleReload}
+          testString="logsNoDataPrompt"
+        />
+      );
     } else {
       return (
         <VerticalScrollPanel
@@ -129,7 +162,13 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                   key={getStreamItemId(item)}
                 >
                   {measureRef => (
-                    <LogTextStreamItemView ref={measureRef} item={item} scale={scale} wrap={wrap} />
+                    <LogTextStreamItemView
+                      openFlyoutWithItem={this.handleOpenFlyout}
+                      ref={measureRef}
+                      item={item}
+                      scale={scale}
+                      wrap={wrap}
+                    />
                   )}
                 </MeasurableItemView>
               ))}
@@ -147,6 +186,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       );
     }
   }
+
+  private handleOpenFlyout = (id: string) => {
+    this.props.setFlyoutItem(id);
+    this.props.showFlyout();
+  };
 
   private handleReload = () => {
     const { jumpToTarget, target } = this.props;
@@ -190,3 +234,5 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     }
   );
 }
+
+export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamViewClass);

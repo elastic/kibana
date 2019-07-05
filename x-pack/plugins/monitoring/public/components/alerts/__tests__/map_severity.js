@@ -13,7 +13,7 @@ describe('mapSeverity', () => {
     const low = {
       value: 'low',
       color: 'warning',
-      iconType: 'dot',
+      iconType: 'iInCircle',
       title: 'Low severity alert',
     };
 
@@ -30,7 +30,7 @@ describe('mapSeverity', () => {
     const medium = {
       value: 'medium',
       color: 'warning',
-      iconType: 'dot',
+      iconType: 'alert',
       title: 'Medium severity alert',
     };
 
@@ -47,7 +47,7 @@ describe('mapSeverity', () => {
     const high = {
       value: 'high',
       color: 'danger',
-      iconType: 'dot',
+      iconType: 'bell',
       title: 'High severity alert',
     };
 

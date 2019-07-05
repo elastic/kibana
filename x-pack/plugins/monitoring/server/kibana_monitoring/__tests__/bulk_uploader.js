@@ -17,6 +17,9 @@ class MockCollectorSet {
     this.mockServer = _mockServer;
     this.mockCollectors = mockCollectors;
   }
+  isUsageCollector(x) {
+    return !!x.isUsageCollector;
+  }
   getCollectorByType(type) {
     return this.mockCollectors.find(collector => collector.type === type) || this.mockCollectors[0];
   }
@@ -35,11 +38,16 @@ describe('BulkUploader', () => {
       server = {
         log: sinon.spy(),
         plugins: {
+          xpack_main: {
+            telemetryCollectionInterval: 3000,
+          },
           elasticsearch: {
             getCluster: () => ({
               createClient: () => ({
                 monitoring: {
-                  bulk: sinon.spy(),
+                  bulk: function () {
+                    return new Promise(resolve => setTimeout(resolve, CHECK_DELAY + 1));
+                  }
                 },
               }),
               callWithInternalUser: sinon.spy(), // this tests internal collection and bulk upload, not HTTP API
@@ -106,7 +114,9 @@ describe('BulkUploader', () => {
         uploader.stop();
 
         const loggingCalls = server.log.getCalls();
-        expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, upload, fetch, upload
+        // If we are properly awaiting the bulk upload call, we shouldn't see
+        // the last 2 logs as the call takes longer than this timeout (see the above mock)
+        expect(loggingCalls.length).to.be(4);
         expect(loggingCalls[0].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Starting monitoring stats collection',
@@ -116,6 +126,68 @@ describe('BulkUploader', () => {
           'Uploading bulk stats payload to the local cluster',
         ]);
 
+        done();
+      }, CHECK_DELAY);
+    });
+
+    it('does not call UsageCollectors if last reported is within the usageInterval', done => {
+      const usageCollectorFetch = sinon.stub();
+      const collectorFetch = sinon.stub().returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+
+      const collectors = new MockCollectorSet(server, [
+        {
+          fetch: usageCollectorFetch,
+          formatForBulkUpload: result => result,
+          isUsageCollector: true,
+        },
+        {
+          fetch: collectorFetch,
+          formatForBulkUpload: result => result,
+          isUsageCollector: false,
+        }
+      ]);
+
+      const uploader = new BulkUploader(server, {
+        interval: FETCH_INTERVAL
+      });
+      uploader._lastFetchUsageTime = Date.now();
+
+      uploader.start(collectors);
+      setTimeout(() => {
+        uploader.stop();
+        expect(collectorFetch.callCount).to.be.greaterThan(0);
+        expect(usageCollectorFetch.callCount).to.eql(0);
+        done();
+      }, CHECK_DELAY);
+    });
+
+    it('calls UsageCollectors if last reported exceeds during a _usageInterval', done => {
+      const usageCollectorFetch = sinon.stub();
+      const collectorFetch = sinon.stub().returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+
+      const collectors = new MockCollectorSet(server, [
+        {
+          fetch: usageCollectorFetch,
+          formatForBulkUpload: result => result,
+          isUsageCollector: true,
+        },
+        {
+          fetch: collectorFetch,
+          formatForBulkUpload: result => result,
+          isUsageCollector: false,
+        }
+      ]);
+
+      const uploader = new BulkUploader(server, {
+        interval: FETCH_INTERVAL
+      });
+      uploader._lastFetchUsageTime = Date.now() - uploader._usageInterval;
+
+      uploader.start(collectors);
+      setTimeout(() => {
+        uploader.stop();
+        expect(collectorFetch.callCount).to.be.greaterThan(0);
+        expect(usageCollectorFetch.callCount).to.be.greaterThan(0);
         done();
       }, CHECK_DELAY);
     });

@@ -18,12 +18,11 @@
  */
 
 import _ from 'lodash';
-import { BuildESQueryProvider } from 'ui/courier';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
+const TimelionRequestHandlerProvider = function (Private, Notifier, $http, config) {
   const timezone = Private(timezoneProvider)();
-  const buildEsQuery = Private(BuildESQueryProvider);
 
   const notify = new Notifier({
     location: 'Timelion'
@@ -36,12 +35,12 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
       return new Promise((resolve, reject) => {
         const expression = visParams.expression;
         if (!expression) return;
-
+        const esQueryConfigs = getEsQueryConfig(config);
         const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
             es: {
-              filter: buildEsQuery(undefined, [query], filters)
+              filter: buildEsQuery(undefined, [query], filters, esQueryConfigs)
             }
           },
           time: _.extend(timeRange, {

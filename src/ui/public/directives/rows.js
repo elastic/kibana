@@ -39,7 +39,7 @@ module.directive('kbnRows', function ($compile, Private) {
 
         function createFilterableCell(aggConfigResult) {
           const $template = $(tableCellFilterHtml);
-          $template.addClass('cell-hover');
+          $template.addClass('kbnTableCellFilter__hover');
 
           const scope = $scope.$new();
 

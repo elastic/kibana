@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 import { flushContext, flushContextAfterIndex } from '../actions/elements';
+import { setWorkpad } from '../actions/workpad';
 
 /*
   Resolved args are a way to handle async values. They track the status, value, and error
@@ -30,17 +31,24 @@ import { flushContext, flushContextAfterIndex } from '../actions/elements';
 */
 
 function _getState(hasError, loading) {
-  if (hasError) return 'error';
-  if (Boolean(loading)) return 'pending';
+  if (hasError) {
+    return 'error';
+  }
+  if (Boolean(loading)) {
+    return 'pending';
+  }
   return 'ready';
 }
 
 function _getValue(hasError, value, oldVal) {
-  if (hasError || value == null) return oldVal && oldVal.value;
+  if (hasError || value == null) {
+    return oldVal && oldVal.value;
+  }
   return value;
 }
 
 function getContext(value, loading = false, oldVal = null) {
+  // TODO: this is no longer correct.
   const hasError = value instanceof Error;
   return {
     state: _getState(hasError, loading),
@@ -52,7 +60,9 @@ function getContext(value, loading = false, oldVal = null) {
 function getFullPath(path) {
   const isArray = Array.isArray(path);
   const isString = typeof path === 'string';
-  if (!isArray && !isString) throw new Error(`Resolved argument path is invalid: ${path}`);
+  if (!isArray && !isString) {
+    throw new Error(`Resolved argument path is invalid: ${path}`);
+  }
   return prepend(path, 'resolvedArgs');
 }
 
@@ -80,9 +90,15 @@ export const resolvedArgsReducer = handleActions(
       }, transientState);
     },
 
-    [actions.clear]: (transientState, { payload }) => {
+    [actions.clearValue]: (transientState, { payload }) => {
       const { path } = payload;
       return del(transientState, getFullPath(path));
+    },
+
+    [actions.clearValues]: (transientState, { payload }) => {
+      return payload.reduce((transientState, path) => {
+        return del(transientState, getFullPath(path));
+      }, transientState);
     },
 
     [actions.inFlightActive]: transientState => {
@@ -108,15 +124,21 @@ export const resolvedArgsReducer = handleActions(
       const expressionContext = get(transientState, getFullPath([elementId, 'expressionContext']));
 
       // if there is not existing context, there's nothing to do here
-      if (!expressionContext) return transientState;
+      if (!expressionContext) {
+        return transientState;
+      }
 
       return Object.keys(expressionContext).reduce((state, indexKey) => {
         const indexAsNum = parseInt(indexKey, 10);
-        if (indexAsNum >= index)
+        if (indexAsNum >= index) {
           return del(state, getFullPath([elementId, 'expressionContext', indexKey]));
+        }
 
         return state;
       }, transientState);
+    },
+    [setWorkpad]: (transientState, {}) => {
+      return set(transientState, 'resolvedArgs', {});
     },
   },
   {}

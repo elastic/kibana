@@ -22,8 +22,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function elasticsearchLogsSpecProvider() {
   const moduleName = 'elasticsearch';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'elasticsearchLogs',
@@ -45,7 +43,7 @@ export function elasticsearchLogsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

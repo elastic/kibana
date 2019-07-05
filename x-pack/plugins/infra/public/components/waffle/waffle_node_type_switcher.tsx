@@ -12,7 +12,7 @@ import {
   InfraMetricType,
   InfraNodeType,
   InfraPathInput,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 
 interface Props {
   nodeType: InfraNodeType;
@@ -37,6 +37,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           <img
             src="../plugins/infra/images/hosts.svg"
             role="presentation"
+            alt=""
             className="euiIcon euiIcon--large"
           />
         </EuiKeyPadMenuItem>
@@ -44,6 +45,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           <img
             src="../plugins/infra/images/k8.svg"
             role="presentation"
+            alt=""
             className="euiIcon euiIcon--large"
           />
         </EuiKeyPadMenuItem>
@@ -51,6 +53,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           <img
             src="../plugins/infra/images/docker.svg"
             role="presentation"
+            alt=""
             className="euiIcon euiIcon--large"
           />
         </EuiKeyPadMenuItem>

@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
@@ -70,8 +71,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it('should show correct data', async function () {
@@ -91,12 +91,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
+        await PageObjects.visualize.waitForVisualization();
         const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
@@ -114,6 +114,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should verify gauge label and count display', async function () {
         await retry.try(async () => {
+          await PageObjects.visualize.waitForVisualization();
           const labelString = await PageObjects.visualBuilder.getGaugeLabel();
           expect(labelString).to.be('Count');
           const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -131,6 +132,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should verify topN label and count display', async function () {
+        await PageObjects.visualize.waitForVisualization();
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();

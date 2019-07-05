@@ -31,12 +31,11 @@ export default function ({ getService, getPageObjects }) {
 
     beforeEach(async function () {
       await browser.setWindowSize(1200, 800);
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();
-      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.update({});
     });
 
     const scriptedExpressionFieldName = 'ram_expr1';

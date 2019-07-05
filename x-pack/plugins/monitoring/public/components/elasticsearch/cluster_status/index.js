@@ -30,7 +30,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Nodes',
       }),
       value: nodesCount,
-      dataTestSubj: 'nodesCount'
+      'data-test-subj': 'nodesCount'
     },
     {
       label: intl.formatMessage({
@@ -38,7 +38,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Indices',
       }),
       value: indicesCount,
-      dataTestSubj: 'indicesCount'
+      'data-test-subj': 'indicesCount'
     },
     {
       label: intl.formatMessage({
@@ -46,7 +46,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Memory',
       }),
       value: formatMetric(memUsed, 'byte') + ' / ' + formatMetric(memMax, 'byte'),
-      dataTestSubj: 'memory'
+      'data-test-subj': 'memory'
     },
     {
       label: intl.formatMessage({
@@ -54,7 +54,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Total Shards',
       }),
       value: totalShards,
-      dataTestSubj: 'totalShards'
+      'data-test-subj': 'totalShards'
     },
     {
       label: intl.formatMessage({
@@ -62,7 +62,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Unassigned Shards',
       }),
       value: unassignedShards,
-      dataTestSubj: 'unassignedShards'
+      'data-test-subj': 'unassignedShards'
     },
     {
       label: intl.formatMessage({
@@ -70,7 +70,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Documents',
       }),
       value: formatMetric(documentCount, 'int_commas'),
-      dataTestSubj: 'documentCount'
+      'data-test-subj': 'documentCount'
     },
     {
       label: intl.formatMessage({
@@ -78,7 +78,7 @@ function ClusterStatusUI({ stats, intl }) {
         defaultMessage: 'Data',
       }),
       value: formatMetric(dataSize, 'byte'),
-      dataTestSubj: 'dataSize'
+      'data-test-subj': 'dataSize'
     }
   ];
 

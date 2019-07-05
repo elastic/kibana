@@ -16,7 +16,7 @@ import {
 import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
 import styled from 'styled-components';
-import { InfraMetricData } from '../../../../common/graphql/types';
+import { InfraMetricData } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
 import { createFormatter } from '../../../utils/formatters';

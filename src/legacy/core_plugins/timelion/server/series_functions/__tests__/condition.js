@@ -17,15 +17,14 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../condition`);
 import moment from 'moment';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 import getSeriesList from './helpers/get_single_series_list';
 import _ from 'lodash';
 
-describe(filename, function () {
+describe('condition.js', function () {
 
   let comparable;
   let seriesList;

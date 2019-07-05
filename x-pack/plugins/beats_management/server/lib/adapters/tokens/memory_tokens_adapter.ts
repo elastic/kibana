@@ -31,7 +31,7 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
     });
   }
 
-  public async upsertTokens(user: FrameworkAuthenticatedUser, tokens: TokenEnrollmentData[]) {
+  public async insertTokens(user: FrameworkAuthenticatedUser, tokens: TokenEnrollmentData[]) {
     tokens.forEach(token => {
       const existingIndex = this.tokenDB.findIndex(t => t.token === token.token);
       if (existingIndex !== -1) {

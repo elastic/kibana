@@ -2,7 +2,7 @@
 .visualize {
   display: flex;
   flex: 1 1 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 // SASSTODO: Too risky to change to BEM naming
@@ -21,6 +21,7 @@
    *    that it disappears entirely.
    */
   .visChart__container {
+    min-height: 0;
     flex: 1 1 0; /* 1 */
     display: flex;
     flex-direction: row;

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-import { getPhraseScript } from './lib/phrase';
+import { getPhraseScript } from '@kbn/es-query';
 
 // Adds a filter to a passed state
 export function FilterManagerProvider(Private) {

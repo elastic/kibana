@@ -27,7 +27,7 @@ export async function getDistribution({
   setup
 }: {
   serviceName: string;
-  groupId: string;
+  groupId?: string;
   setup: Setup;
 }): Promise<ErrorDistributionAPIResponse> {
   const bucketSize = getBucketSize(setup);

@@ -14,7 +14,9 @@ export const Paginate = compose(
     totalPages: Math.ceil(rows.length / (perPage || 10)),
   })),
   withState('currentPage', 'setPage', ({ startPage, totalPages }) => {
-    if (totalPages > 0) return Math.min(startPage, totalPages - 1);
+    if (totalPages > 0) {
+      return Math.min(startPage, totalPages - 1);
+    }
     return 0;
   }),
   withProps(({ rows, totalPages, currentPage, perPage }) => {
@@ -36,7 +38,9 @@ export const Paginate = compose(
   }),
   lifecycle({
     componentDidUpdate(prevProps) {
-      if (prevProps.perPage !== this.props.perPage) this.props.setPage(0);
+      if (prevProps.perPage !== this.props.perPage) {
+        this.props.setPage(0);
+      }
     },
   })
 )(Component);

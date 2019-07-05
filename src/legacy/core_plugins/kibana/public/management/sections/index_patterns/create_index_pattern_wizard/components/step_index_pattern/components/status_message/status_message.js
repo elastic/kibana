@@ -161,7 +161,7 @@ export const StatusMessage = ({
   }
 
   return (
-    <EuiText size="s">
+    <EuiText size="s" data-test-subj="createIndexPatternStatusMessage">
       <EuiTextColor color={statusColor}>
         { statusIcon ? <EuiIcon type={statusIcon}/> : null }
         {statusMessage}

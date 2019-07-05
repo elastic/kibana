@@ -30,23 +30,32 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
     keepAlive: true,
     ...pick(serverConfig, [
       'plugins', 'apiVersion', 'keepAlive', 'pingTimeout',
-      'requestTimeout', 'log', 'logQueries'
+      'requestTimeout', 'log', 'logQueries', 'sniffOnStart',
+      'sniffInterval', 'sniffOnConnectionFault', 'hosts'
     ])
   };
 
-  const uri = url.parse(serverConfig.url);
-  config.host = {
-    host: uri.hostname,
-    port: uri.port,
-    protocol: uri.protocol,
-    path: uri.pathname,
-    query: uri.query,
-    headers: serverConfig.customHeaders
+  const mapHost = nodeUrl => {
+    const uri = url.parse(nodeUrl);
+    return {
+      host: uri.hostname,
+      port: uri.port,
+      protocol: uri.protocol,
+      path: uri.pathname,
+      query: uri.query,
+      headers: serverConfig.customHeaders
+    };
   };
+
+  if (serverConfig.hosts) {
+    config.hosts = serverConfig.hosts.map(mapHost);
+  }
 
   // Auth
   if (serverConfig.auth !== false && serverConfig.username && serverConfig.password) {
-    config.host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
+    config.hosts.forEach(host => {
+      host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
+    });
   }
 
   // SSL

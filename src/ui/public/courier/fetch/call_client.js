@@ -36,6 +36,7 @@ export function CallClientProvider(Private, Promise, es, config) {
 
   function callClient(searchRequests) {
     const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
+    const includeFrozen = config.get('search:includeFrozen');
 
     // merging docs can change status to DUPLICATE, capture new statuses
     const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
@@ -143,7 +144,7 @@ export function CallClientProvider(Private, Promise, es, config) {
           searching,
           abort,
           failedSearchRequests,
-        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, maxConcurrentShardRequests });
+        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, includeFrozen, maxConcurrentShardRequests });
 
         // Collect searchRequests which have successfully been sent.
         searchRequests.forEach(searchRequest => {

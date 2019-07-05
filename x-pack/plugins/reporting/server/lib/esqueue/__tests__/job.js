@@ -135,7 +135,8 @@ describe('Job Class', function () {
           expect(jobDoc).to.have.property('id');
           expect(jobDoc).to.have.property('index');
           expect(jobDoc).to.have.property('type');
-          expect(jobDoc).to.have.property('version');
+          expect(jobDoc).to.have.property('_seq_no');
+          expect(jobDoc).to.have.property('_primary_term');
           done();
         } catch (e) {
           done(e);
@@ -383,7 +384,8 @@ describe('Job Class', function () {
           expect(doc).to.have.property('index', index);
           expect(doc).to.have.property('type', jobDoc.type);
           expect(doc).to.have.property('id', jobDoc.id);
-          expect(doc).to.have.property('version', jobDoc.version);
+          expect(doc).to.have.property('_seq_no', jobDoc._seq_no);
+          expect(doc).to.have.property('_primary_term', jobDoc._primary_term);
           expect(doc).to.have.property('created_by', defaultCreatedBy);
 
           expect(doc).to.have.property('payload');

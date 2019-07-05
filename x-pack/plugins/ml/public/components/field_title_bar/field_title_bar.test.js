@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { FieldTitleBar } from './field_title_bar';
@@ -27,7 +27,7 @@ describe('FieldTitleBar', () => {
   test(`card prop is an empty object`, () => {
     const props = { card: {} };
 
-    const wrapper = mount(<FieldTitleBar {...props} />);
+    const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
 
     const fieldName = wrapper.find({ className: 'field-name' }).text();
     expect(fieldName).toEqual('document count');
@@ -40,7 +40,7 @@ describe('FieldTitleBar', () => {
     const testFieldName = 'foo';
     const props = { card: { fieldName: testFieldName, isUnsupportedType: true } };
 
-    const wrapper = mount(<FieldTitleBar {...props} />);
+    const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
 
     const fieldName = wrapper.find({ className: 'field-name' }).text();
     expect(fieldName).toEqual(testFieldName);
@@ -54,7 +54,7 @@ describe('FieldTitleBar', () => {
     const testType = 'bar';
     const props = { card: { fieldName: testFieldName, type: testType } };
 
-    const wrapper = mount(<FieldTitleBar {...props} />);
+    const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
 
     const fieldName = wrapper.find({ className: 'field-name' }).text();
     expect(fieldName).toEqual(testFieldName);
@@ -65,7 +65,7 @@ describe('FieldTitleBar', () => {
 
   test(`tooltip hovering`, () => {
     const props = { card: { fieldName: 'foo', type: 'bar' } };
-    const wrapper = mount(<FieldTitleBar {...props} />);
+    const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
     const container = wrapper.find({ className: 'field-name' });
 
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);

@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
 import fs from 'fs';
 import getPort from 'get-port';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { LevelLogger } from '../../../server/lib/level_logger';
 import { i18n } from '@kbn/i18n';
 
@@ -266,11 +266,6 @@ export function screenshotsObservableFactory(server) {
             browser => openUrl(browser, url, conditionalHeaders),
             browser => browser
           ),
-          tap(() => logger.debug('injecting custom css')),
-          mergeMap(
-            browser => injectCustomCss(browser, layout),
-            browser => browser
-          ),
           tap(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt')),
           mergeMap(
             browser => Rx.race(
@@ -293,6 +288,13 @@ export function screenshotsObservableFactory(server) {
           mergeMap(
             ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
+          ),
+          // Waiting till _after_ elements have rendered before injecting our CSS
+          // allows for them to be displayed properly in many cases
+          tap(() => logger.debug('injecting custom css')),
+          mergeMap(
+            ({ browser }) => injectCustomCss(browser, layout),
+            ({ browser }) => ({ browser })
           ),
           tap(() => logger.debug('positioning elements')),
           mergeMap(
@@ -329,3 +331,4 @@ export function screenshotsObservableFactory(server) {
     );
   };
 }
+

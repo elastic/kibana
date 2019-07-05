@@ -10,18 +10,27 @@ block content
       width: 100%;
       height: 100%;
       margin: 0;
-      background-color: #F5F5F5;
+      background-color: #F5F7FA;
     }
     .kibanaWelcomeView {
-      background-color: #F5F5F5;
+      background-color: #F5F7FA;
+    }
+
+    .kibanaWelcomeTitle {
+      color: #000;
+      font-size: 20px;
+      font-family: Sans-serif;
+      margin-top: 20px;
+      animation: fadeIn 1s ease-in-out;
+      animation-fill-mode: forwards;
+      opacity: 0;
+      animation-delay: 1.0s;
     }
 
     .kibanaWelcomeText {
-      color: #222;
       font-size: 14px;
       font-family: Sans-serif;
-      margin-top: 20px;
-      color: #666;
+      color: #343741;
       animation: fadeIn 1s ease-in-out;
       animation-fill-mode: forwards;
       opacity: 0;
@@ -35,13 +44,17 @@ block content
       margin-top: 40px;
     }
 
+    .kibanaLoaderWrap + * {
+      margin-top: 24px;
+    }
+
     .kibanaLoader {
       height: 128px;
       width: 128px;
       margin: 0 auto;
       position: relative;
       border: 2px solid transparent;
-      border-top: 2px solid #00A69B;
+      border-top: 2px solid #017D73;
       border-radius: 100%;
       display: block;
       opacity: 0;
@@ -101,13 +114,27 @@ block content
       }
     }
 
-
-  .kibanaWelcomeView
+  .kibanaWelcomeView(id="kbn_loading_message", style="display: none;")
     .kibanaLoaderWrap
       .kibanaLoader
       .kibanaWelcomeLogoCircle
         .kibanaWelcomeLogo
-    .kibanaWelcomeText
+    .kibanaWelcomeText(data-error-message=i18n('common.ui.welcomeErrorMessage', { defaultMessage: 'Kibana did not load properly. Check the server output for more information.' }))
       | #{i18n('common.ui.welcomeMessage', { defaultMessage: 'Loading Kibana' })}
 
-  script(src=bootstrapScriptUrl)
+  .kibanaWelcomeView(id="kbn_legacy_browser_error", style="display: none;")
+    .kibanaLoaderWrap
+      .kibanaWelcomeLogoCircle
+        .kibanaWelcomeLogo
+    h2.kibanaWelcomeTitle
+      | #{i18n('common.ui.legacyBrowserTitle', { defaultMessage: 'Please upgrade your browser' })}
+    .kibanaWelcomeText
+      | #{i18n('common.ui.legacyBrowserMessage', { defaultMessage: 'This Kibana installation has strict security requirements enabled that your current browser does not meet.' })}
+
+  script.
+    // Since this script tag does not contain a nonce, this code will not run
+    // in browsers that support content security policy(CSP). This is
+    // intentional as we check for the existence of __kbnCspNotEnforced__ in
+    // bootstrap.
+    window.__kbnCspNotEnforced__ = true;
+  script(src=bootstrapScriptUrl, nonce=nonce)

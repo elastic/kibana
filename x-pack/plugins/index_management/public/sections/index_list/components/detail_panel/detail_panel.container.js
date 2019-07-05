@@ -9,7 +9,7 @@ import { DetailPanel as PresentationComponent } from './detail_panel';
 import {
   getDetailPanelType,
   getDetailPanelIndexName,
-  getIndexStatusByIndexName
+  getIndexByIndexName
 } from '../../../../store/selectors';
 import {
   openDetailPanel,
@@ -28,7 +28,7 @@ const mapStateToProps = (state) => {
   return {
     panelType: getDetailPanelType(state),
     indexName,
-    indexStatus: getIndexStatusByIndexName(state, indexName)
+    index: getIndexByIndexName(state, indexName)
   };
 };
 

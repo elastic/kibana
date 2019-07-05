@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BucketAgg } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
 import { oc } from 'ts-optchain';
-import { BucketAgg } from 'x-pack/plugins/apm/typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
@@ -29,8 +30,34 @@ export async function getServices(
 ): Promise<ServiceListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
+  const filter: ESFilter[] = [
+    {
+      bool: {
+        should: [
+          { term: { [PROCESSOR_EVENT]: 'metric' } },
+          { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          { term: { [PROCESSOR_EVENT]: 'error' } }
+        ]
+      }
+    },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
   const params = {
     index: [
+      config.get<string>('apm_oss.metricsIndices'),
       config.get<string>('apm_oss.errorIndices'),
       config.get<string>('apm_oss.transactionIndices')
     ],
@@ -38,25 +65,7 @@ export async function getServices(
       size: 0,
       query: {
         bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
-                  { term: { [PROCESSOR_EVENT]: 'error' } }
-                ]
-              }
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       aggs: {
@@ -80,10 +89,6 @@ export async function getServices(
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   interface ServiceBucket extends BucketAgg {
     avg: {

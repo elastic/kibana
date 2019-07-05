@@ -28,7 +28,9 @@ exports[`it renders without crashing 1`] = `
         size="l"
         textTransform="none"
       >
-        <h1>
+        <h1
+          tabIndex={0}
+        >
           <FormattedMessage
             defaultMessage="Select your space"
             id="xpack.spaces.spaceSelector.selectSpacesTitle"
@@ -70,23 +72,21 @@ exports[`it renders without crashing 1`] = `
         onSpaceSelect={[Function]}
         spaces={Array []}
       />
-      <React.Fragment>
-        <EuiSpacer
-          size="l"
+      <EuiSpacer
+        size="l"
+      />
+      <EuiText
+        color="subdued"
+        grow={true}
+        size="m"
+        textAlign="center"
+      >
+        <FormattedMessage
+          defaultMessage="No spaces match search criteria"
+          id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
+          values={Object {}}
         />
-        <EuiText
-          color="subdued"
-          grow={true}
-          size="m"
-          textAlign="center"
-        >
-          <FormattedMessage
-            defaultMessage="No spaces match search criteria"
-            id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
-            values={Object {}}
-          />
-        </EuiText>
-      </React.Fragment>
+      </EuiText>
     </EuiPageContent>
   </EuiPageBody>
 </EuiPage>

@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { NoDataLayout } from '../../../components/layouts/no_data';
@@ -23,7 +24,18 @@ class InitialWalkthroughPageComponent extends Component<
     if (this.props.location.pathname === '/walkthrough/initial') {
       return (
         <NoDataLayout
-          title="Beats central management"
+          title={
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false}>{'Beats central management '}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.beatsManagement.walkthrough.initial.betaBadgeText', {
+                    defaultMessage: 'Beta',
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           actionSection={
             <ConnectedLink path="/walkthrough/initial/beat">
               <EuiButton color="primary" fill>

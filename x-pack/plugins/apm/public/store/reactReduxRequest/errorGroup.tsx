@@ -14,7 +14,7 @@ import { IUrlParams } from '../urlParams';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'errorGroupDetails';
-const INITIAL_DATA: ErrorGroupAPIResponse = {};
+const INITIAL_DATA: ErrorGroupAPIResponse = { occurrencesCount: 0 };
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getErrorGroupDetails(state: IReduxState) {

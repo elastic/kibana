@@ -7,6 +7,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+/**
+ * NOTE: The margin props in this component are being magically
+ * set from react-vis by way of the makeFlexibleWidth helper,
+ * unless specifically set and overridden from above.
+ */
+
 function StatusText({
   marginLeft,
   marginRight,

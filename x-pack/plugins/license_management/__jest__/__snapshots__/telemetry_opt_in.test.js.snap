@@ -4,7 +4,16 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
 <TelemetryOptIn
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -36,6 +45,26 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -60,15 +89,6 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -85,24 +105,29 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
     }
   }
 >
-  <EuiText
-    grow={true}
-    size="m"
+  <EuiSpacer
+    size="s"
   >
     <div
-      className="euiText euiText--medium"
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiTitle
+    size="s"
+    textTransform="none"
+  >
+    <h4
+      className="euiTitle euiTitle--small"
     >
-      <p>
-        <FormattedMessage
-          defaultMessage="Gold and platinum customers: help support give you better service."
-          id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
-          values={Object {}}
-        >
-          Gold and platinum customers: help support give you better service.
-        </FormattedMessage>
-      </p>
-    </div>
-  </EuiText>
+      <FormattedMessage
+        defaultMessage="Help Elastic support provide better service"
+        id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
+        values={Object {}}
+      >
+        Help Elastic support provide better service
+      </FormattedMessage>
+    </h4>
+  </EuiTitle>
   <EuiSpacer
     size="s"
   >
@@ -308,13 +333,17 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               panelPaddingSize="m"
             >
               <EuiOutsideClickDetector
+                isDisabled={true}
                 onOutsideClick={[Function]}
               >
                 <div
                   className="euiPopover euiPopover--anchorDownCenter eui-AlignBaseline"
                   id="readMorePopover"
-                  onClick={[Function]}
                   onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
                 >
                   <div
                     className="euiPopover__anchor"
@@ -354,7 +383,16 @@ exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `
 <TelemetryOptIn
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -386,6 +424,26 @@ exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -410,15 +468,6 @@ exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],

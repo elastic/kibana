@@ -23,7 +23,9 @@ export const timefilterControl = () => ({
     },
   ],
   resolve({ context }) {
-    if (getState(context) !== 'ready') return { columns: [] };
+    if (getState(context) !== 'ready') {
+      return { columns: [] };
+    }
     return { columns: get(getValue(context), 'columns', []) };
   },
 });

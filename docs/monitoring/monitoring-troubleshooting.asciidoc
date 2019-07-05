@@ -32,10 +32,15 @@ The *Monitoring* page in {kib} is empty.
 
 *Resolution:*
 
+. Confirm that you are not using {kib} 6.7.0 or 6.7.1. If you have a version 7.0
+monitoring cluster, a version 6.7 production cluster and {kib} version 6.7.0 or
+6.7.1, you cannot see the monitoring data in {kib}. For more information, see
+https://github.com/elastic/kibana/issues/34357
+
 . Confirm that {kib} is seeking monitoring data from the appropriate {es} URL.
 By default, data is retrieved from the cluster specified in the 
-`elasticsearch.url` setting in the `kibana.yml` file. If you want to retrieve it
-from a different monitoring cluster, set `xpack.monitoring.elasticsearch.url`.
+`elasticsearch.hosts` setting in the `kibana.yml` file. If you want to retrieve it
+from a different monitoring cluster, set `xpack.monitoring.elasticsearch.hosts`.
 See <<monitoring-settings-kb>>.
 
 . Confirm that there is monitoring data available at that URL. It is stored in

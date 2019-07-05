@@ -134,4 +134,18 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/api/ml/jobs/deleting_jobs_tasks',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { deletingJobTasks } = jobServiceProvider(callWithRequest);
+      return deletingJobTasks()
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

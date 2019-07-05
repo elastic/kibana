@@ -9,6 +9,7 @@
 import React, {
   Component
 } from 'react';
+import { PropTypes } from 'prop-types';
 
 import {
   EuiConfirmModal,
@@ -21,11 +22,16 @@ import {
 import { CalendarsListTable } from './table/';
 import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
-import { checkPermission } from '../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class CalendarsList extends Component {
+export const CalendarsList = injectI18n(class CalendarsList extends Component {
+  static propTypes = {
+    canCreateCalendar: PropTypes.bool.isRequired,
+    canDeleteCalendar: PropTypes.bool.isRequired,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -34,8 +40,6 @@ export class CalendarsList extends Component {
       isDestroyModalVisible: false,
       calendarId: null,
       selectedForDeletion: [],
-      canCreateCalendar: checkPermission('canCreateCalendar'),
-      canDeleteCalendar: checkPermission('canDeleteCalendar'),
       nodesAvailable: mlNodesAvailable()
     };
   }
@@ -52,7 +56,12 @@ export class CalendarsList extends Component {
     } catch (error) {
       console.log(error);
       this.setState({ loading: false });
-      toastNotifications.addDanger('An error occurred loading the list of calendars.');
+      toastNotifications.addDanger(
+        this.props.intl.formatMessage({
+          id: 'xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage',
+          defaultMessage: 'An error occurred loading the list of calendars.'
+        })
+      );
     }
   }
 
@@ -77,9 +86,8 @@ export class CalendarsList extends Component {
 
   addRequiredFieldsToList = (calendarsList = []) => {
     for (let i = 0; i < calendarsList.length; i++) {
-      const eventLength = calendarsList[i].events.length;
       calendarsList[i].job_ids_string = calendarsList[i].job_ids.join(', ');
-      calendarsList[i].events_length = `${eventLength} ${eventLength === 1 ? 'event' : 'events'}`;
+      calendarsList[i].events_length = calendarsList[i].events.length;
     }
 
     return calendarsList;
@@ -94,30 +102,41 @@ export class CalendarsList extends Component {
       calendars,
       selectedForDeletion,
       loading,
-      canCreateCalendar,
-      canDeleteCalendar,
       nodesAvailable
     } = this.state;
+    const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
     if (this.state.isDestroyModalVisible) {
       destroyModal = (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title="Delete calendar"
+            title={<FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarTitle"
+              defaultMessage="Delete calendar"
+            />}
             onCancel={this.closeDestroyModal}
             onConfirm={this.deleteCalendars}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={<FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />}
+            confirmButtonText={<FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />}
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
             <p>
-              {
-                `Delete ${selectedForDeletion.length === 1 ? 'this' : 'these'}
-                calendar${selectedForDeletion.length === 1 ? '' : 's'}?
-                ${selectedForDeletion.map((c) => c.calendar_id).join(', ')}`
-              }
+              <FormattedMessage
+                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarsDescription"
+                defaultMessage="Delete {calendarsCount, plural, one {this calendar} other {these calendars}}? {calendarsList}"
+                values={{
+                  calendarsCount: selectedForDeletion.length,
+                  calendarsList: (selectedForDeletion.map((c) => c.calendar_id).join(', '))
+                }}
+              />
             </p>
           </EuiConfirmModal>
         </EuiOverlayMask>
@@ -146,4 +165,4 @@ export class CalendarsList extends Component {
       </EuiPage>
     );
   }
-}
+});

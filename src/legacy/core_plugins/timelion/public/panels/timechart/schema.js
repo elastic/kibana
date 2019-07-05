@@ -81,7 +81,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
             autoHighlight: false
           },
           legend: {
-            backgroundColor: null,
+            backgroundColor: 'rgb(255,255,255,0)',
             position: 'nw',
             labelBoxBorderColor: 'rgb(255,255,255,0)',
             labelFormatter: function (label, series) {

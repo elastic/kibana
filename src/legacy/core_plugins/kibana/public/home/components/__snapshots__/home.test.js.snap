@@ -1012,22 +1012,20 @@ exports[`home should render home component 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <React.Fragment>
-      <RecentlyAccessed
-        recentlyAccessed={
-          Array [
-            Object {
-              "id": "1",
-              "label": "my vis",
-              "link": "link_to_my_vis",
-            },
-          ]
-        }
-      />
-      <EuiSpacer
-        size="l"
-      />
-    </React.Fragment>
+    <RecentlyAccessed
+      recentlyAccessed={
+        Array [
+          Object {
+            "id": "1",
+            "label": "my vis",
+            "link": "link_to_my_vis",
+          },
+        ]
+      }
+    />
+    <EuiSpacer
+      size="l"
+    />
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}

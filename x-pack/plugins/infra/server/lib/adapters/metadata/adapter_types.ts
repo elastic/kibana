@@ -7,17 +7,23 @@
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../framework';
 
+export interface InfraMetricsAdapterResponse {
+  id: string;
+  name?: string;
+  buckets: InfraMetadataAggregationBucket[];
+}
+
 export interface InfraMetadataAdapter {
   getMetricMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: string
-  ): Promise<InfraMetadataAggregationBucket[]>;
+  ): Promise<InfraMetricsAdapterResponse>;
   getLogMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: string
-  ): Promise<InfraMetadataAggregationBucket[]>;
+  ): Promise<InfraMetricsAdapterResponse>;
 }

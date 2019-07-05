@@ -1,8 +1,8 @@
 [role="xpack"]
 [[monitoring-settings-kb]]
-=== Monitoring Settings in Kibana
+=== Monitoring settings in Kibana
 ++++
-<titleabbrev>Monitoring Settings</titleabbrev>
+<titleabbrev>Monitoring settings</titleabbrev>
 ++++
 
 By default, the Monitoring application is enabled, but data collection
@@ -37,12 +37,19 @@ Set to `true` (default) to enable {monitoring} in {kib}. Unlike the
 monitoring back-end does not run and {kib} stats are not sent to the monitoring
 cluster.
 
+`xpack.monitoring.elasticsearch.hosts`::
+Specifies the location of the {es} cluster where your monitoring data is stored.
+By default, this is the same as `elasticsearch.hosts`. This setting enables
+you to use a single {kib} instance to search and visualize data in your
+production cluster as well as monitor data sent to a dedicated monitoring
+cluster.
+
 `xpack.monitoring.elasticsearch.url`::
 Specifies the location of the {es} cluster where your monitoring data is stored.
 By default, this is the same as the `elasticsearch.url`. This setting enables
 you to use a single {kib} instance to search and visualize data in your
 production cluster as well as monitor data sent to a dedicated monitoring
-cluster.
+cluster. deprecated[6.6.0,Replaced by `xpack.monitoring.elasticsearch.hosts`]
 
 `xpack.monitoring.elasticsearch.username`::
 Specifies the user ID that {kib} uses for authentication when it retrieves data

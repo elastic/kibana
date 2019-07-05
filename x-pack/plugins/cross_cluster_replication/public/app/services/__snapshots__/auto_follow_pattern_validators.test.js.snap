@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Auto-follow pattern validators validateAutoFollowPattern() returns empty object when autoFollowPattern is undefined 1`] = `Object {}`;
+
+exports[`Auto-follow pattern validators validateAutoFollowPattern() should validate all props from auto-follow patten 1`] = `
+Object {
+  "followIndexPatternPrefix": <FormattedMessage
+    defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the prefix."
+    id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.illegalCharacters"
+    values={
+      Object {
+        "characterList": <strong>
+          ?
+        </strong>,
+        "characterListLength": 1,
+      }
+    }
+  />,
+  "followIndexPatternSuffix": <FormattedMessage
+    defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the suffix."
+    id="xpack.crossClusterReplication.autoFollowPattern.suffixValidation.illegalCharacters"
+    values={
+      Object {
+        "characterList": <strong>
+          ?
+        </strong>,
+        "characterListLength": 1,
+      }
+    }
+  />,
+  "leaderIndexPatterns": null,
+  "name": "Name can't begin with an underscore.",
+  "otherProp": null,
+}
+`;

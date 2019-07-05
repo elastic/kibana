@@ -15,7 +15,7 @@
             type="button"
             class="kuiDatePickerNavigationButton"
             ng-click="move(-1)"
-            aria-label="Previous month"
+            aria-label="{{ ::'common.ui.angularBootstrap.datepicker.previousMonthButtonAriaLabel' | i18n: {defaultMessage: 'Previous month'} }}"
           >
             <span class="kuiIcon fa-chevron-left"></span>
           </button>
@@ -36,7 +36,7 @@
             type="button"
             class="kuiDatePickerNavigationButton"
             ng-click="move(1)"
-            aria-label="Next month"
+            aria-label="{{ ::'common.ui.angularBootstrap.datepicker.nextMonthButtonAriaLabel' | i18n: {defaultMessage: 'Next month'} }}"
           >
             <span class="kuiIcon fa-chevron-right"></span>
           </button>

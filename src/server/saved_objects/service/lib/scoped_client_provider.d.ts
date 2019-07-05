@@ -35,4 +35,5 @@ export interface ScopedSavedObjectsClientProvider<Request = any> {
     priority: number,
     wrapperFactory: SavedObjectsClientWrapperFactory<Request>
   ): void;
+  getClient(request: Request): SavedObjectsClient;
 }

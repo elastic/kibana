@@ -46,10 +46,11 @@ export class RequestResponder {
     };
 
     const startDate = new Date(this.request.startTime);
-    const timestampKey = i18n.translate('common.ui.inspector.reqTimestampKey', {
-      defaultMessage: 'Request timestamp',
-    });
-    this.request.stats[timestampKey] = {
+
+    this.request.stats.requestTimestamp = {
+      label: i18n.translate('common.ui.inspector.reqTimestampKey', {
+        defaultMessage: 'Request timestamp',
+      }),
       value: startDate.toISOString(),
       description: i18n.translate('common.ui.inspector.reqTimestampDescription', {
         defaultMessage: 'Time when the start of the request has been logged',

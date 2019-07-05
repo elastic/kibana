@@ -9,13 +9,15 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { I18nContext } from 'ui/i18n';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { checkFullLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
+import { EditFilterList } from './edit_filter_list';
 
 import uiRoutes from 'ui/routes';
 
@@ -33,7 +35,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(false)
     }
   })
   .when('/settings/filter_lists/edit_filter_list/:filterId', {
@@ -42,12 +43,8 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(false)
     }
   });
-
-
-import { EditFilterList } from './edit_filter_list';
 
 module.directive('mlEditFilterList', function ($route) {
   return {
@@ -56,11 +53,15 @@ module.directive('mlEditFilterList', function ($route) {
     scope: {},
     link: function (scope, element) {
       const props = {
-        filterId: $route.current.params.filterId
+        filterId: $route.current.params.filterId,
+        canCreateFilter: checkPermission('canCreateFilter'),
+        canDeleteFilter: checkPermission('canDeleteFilter'),
       };
 
       ReactDOM.render(
-        React.createElement(EditFilterList, props),
+        <I18nContext>
+          {React.createElement(EditFilterList, props)}
+        </I18nContext>,
         element[0]
       );
     }

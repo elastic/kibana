@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
+  const pieChart = getService('pieChart');
   const browser = getService('browser');
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -67,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
@@ -83,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });

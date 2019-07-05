@@ -18,6 +18,7 @@
  */
 
 import $ from 'jquery';
+import { template } from 'lodash';
 import '../filters/short_dots';
 import booleanFieldNameIcon from './field_name_icons/boolean_field_name_icon.html';
 import conflictFieldNameIcon from './field_name_icons/conflict_field_name_icon.html';
@@ -33,7 +34,18 @@ import unknownFieldNameIcon from './field_name_icons/unknown_field_name_icon.htm
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana');
 
-module.directive('fieldName', function ($compile, $rootScope, $filter) {
+const compiledBooleanFieldNameIcon = template(booleanFieldNameIcon);
+const compiledConflictFieldNameIcon = template(conflictFieldNameIcon);
+const compiledDateFieldNameIcon = template(dateFieldNameIcon);
+const compiledGeoPointFieldNameIcon = template(geoPointFieldNameIcon);
+const compiledIpFieldNameIcon = template(ipFieldNameIcon);
+const compiledMurmur3FieldNameIcon = template(murmur3FieldNameIcon);
+const compiledNumberFieldNameIcon = template(numberFieldNameIcon);
+const compiledSourceFieldNameIcon = template(sourceFieldNameIcon);
+const compiledStringFieldNameIcon = template(stringFieldNameIcon);
+const compiledUnknownFieldNameIcon = template(unknownFieldNameIcon);
+
+module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
   return {
     restrict: 'AE',
     scope: {
@@ -43,15 +55,51 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
     },
     link: function ($scope, $el) {
       const typeToIconMap = {
-        boolean: booleanFieldNameIcon,
-        conflict: conflictFieldNameIcon,
-        date: dateFieldNameIcon,
-        geo_point: geoPointFieldNameIcon,
-        ip: ipFieldNameIcon,
-        murmur3: murmur3FieldNameIcon,
-        number: numberFieldNameIcon,
-        source: sourceFieldNameIcon,
-        string: stringFieldNameIcon,
+        boolean: compiledBooleanFieldNameIcon({
+          booleanFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.booleanAriaLabel', {
+            defaultMessage: 'Boolean field'
+          }),
+        }),
+        conflict: compiledConflictFieldNameIcon({
+          conflictingFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.conflictFieldAriaLabel', {
+            defaultMessage: 'Conflicting field'
+          }),
+        }),
+        date: compiledDateFieldNameIcon({
+          dateFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.dateFieldAriaLabel', {
+            defaultMessage: 'Date field'
+          }),
+        }),
+        geo_point: compiledGeoPointFieldNameIcon({
+          geoPointFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.geoPointFieldAriaLabel', {
+            defaultMessage: 'Date field'
+          }),
+        }),
+        ip: compiledIpFieldNameIcon({
+          ipAddressFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.ipAddressFieldAriaLabel', {
+            defaultMessage: 'IP address field'
+          }),
+        }),
+        murmur3: compiledMurmur3FieldNameIcon({
+          murmur3FieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.murmur3FieldAriaLabel', {
+            defaultMessage: 'Murmur3 field'
+          }),
+        }),
+        number: compiledNumberFieldNameIcon({
+          numberFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.numberFieldAriaLabel', {
+            defaultMessage: 'Number field'
+          }),
+        }),
+        source: compiledSourceFieldNameIcon({
+          sourceFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.sourceFieldAriaLabel', {
+            defaultMessage: 'Source field'
+          }),
+        }),
+        string: compiledStringFieldNameIcon({
+          stringFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.stringFieldAriaLabel', {
+            defaultMessage: 'String field'
+          }),
+        }),
       };
 
       function typeIcon(fieldType) {
@@ -59,7 +107,11 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
           return typeToIconMap[fieldType];
         }
 
-        return unknownFieldNameIcon;
+        return compiledUnknownFieldNameIcon({
+          unknownFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.unknownFieldAriaLabel', {
+            defaultMessage: 'Unknown field'
+          }),
+        });
       }
 
       $rootScope.$watchMulti.call($scope, [

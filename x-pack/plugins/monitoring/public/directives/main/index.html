@@ -64,7 +64,7 @@
             i18n-default-message="Jobs"
           ></a>
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="(monitoringMain.isCcrEnabled || monitoringMain.isActiveTab('ccr')) && !monitoringMain.instance"
             kbn-href="#/elasticsearch/ccr"
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ccr')}"
@@ -194,11 +194,11 @@
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
           >
-            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
             <span
               i18n-id="xpack.monitoring.logstashNavigation.pipelinesLinkText"
               i18n-default-message="Pipelines"
             ></span>
+            <span class="kuiIcon fa-flask monTabs--icon" tooltip="Beta feature" />
           </a>
           <a
             ng-if="monitoringMain.instance"
@@ -215,11 +215,11 @@
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'pipelines'}"
           >
-            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
             <span
               i18n-id="xpack.monitoring.logstashNavigation.instance.pipelinesLinkText"
               i18n-default-message="Pipelines"
             ></span>
+            <span class="kuiIcon fa-flask fa-sm monTabs--icon" tooltip="Beta feature" />
           </a>
           <a
             ng-if="monitoringMain.instance"
@@ -232,12 +232,12 @@
           </a>
           <div
             ng-if="monitoringMain.pipelineVersions"
-            class="kuiFlexGroup kuiFlexGroup--gutterMedium"
+            class="euiFlexGroup euiFlexGroup--gutterMedium"
           >
-            <h1 class="kuiTitle kuiFlexItem">{{ monitoringMain.pipelineId }}</h1>
+            <h1 class="kuiTitle euiFlexItem">{{ monitoringMain.pipelineId }}</h1>
             <select
               ng-model="monitoringMain.pipelineHash"
-              class="kuiSelect kuiFlexItem"
+              class="kuiSelect euiFlexItem"
               ng-change="monitoringMain.onChangePipelineHash()"
             >
               <option
@@ -253,7 +253,7 @@
         </div>
 
         <div ng-if="monitoringMain.inOverview" class="kuiLocalTabs" role="navigation">
-          <a class="kuiLocalTab" data-test-subj="clusterName">{{ cluster.cluster_name }}</a>
+          <a class="kuiLocalTab" data-test-subj="clusterName">{{ pageData.cluster_name }}</a>
         </div>
 
         <div ng-if="monitoringMain.inAlerts" class="kuiLocalTabs" role="navigation">

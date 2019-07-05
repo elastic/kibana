@@ -53,16 +53,20 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
         await client.indices.create({
           method: 'PUT',
           index,
+          include_type_name: true,
           body: { settings, mappings },
         });
 
-        if (index.startsWith('.kibana') && await isSpacesEnabled({ kibanaUrl })) {
+        if (index.startsWith('.kibana') && (await isSpacesEnabled({ kibanaUrl }))) {
           await createDefaultSpace({ index, client });
         }
 
         stats.createdIndex(index, { settings });
       } catch (err) {
-        if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        if (
+          get(err, 'body.error.type') !== 'resource_already_exists_exception' ||
+          attemptNumber >= 3
+        ) {
           throw err;
         }
 
@@ -104,6 +108,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log, kiba
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

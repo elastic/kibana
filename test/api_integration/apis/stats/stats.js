@@ -118,6 +118,18 @@ export default function ({ getService }) {
             });
         });
       });
+
+      describe('exclude usage', () => {
+        it('should exclude usage from the API response', () => {
+          return supertest
+            .get('/api/stats?extended&exclude_usage')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).to.not.have.property('usage');
+            });
+        });
+      });
     });
   });
 }

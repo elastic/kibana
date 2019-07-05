@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
+  const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
@@ -51,13 +52,11 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.visualize.selectOrderBy('_key');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct tag cloud data', async function () {
@@ -99,10 +98,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
@@ -127,11 +123,9 @@ export default function ({ getService, getPageObjects }) {
         [ '18,253,611,008', '679' ]
       ];
 
-      await PageObjects.visualize.openInspector();
-      await await PageObjects.visualize.setInspectorTablePageSize('50');
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedTableData);
+      await inspector.open();
+      await await inspector.setTablePageSize('50');
+      await inspector.expectTableData(expectedTableData);
     });
 
     describe('formatted field', function () {

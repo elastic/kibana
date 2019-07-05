@@ -71,7 +71,7 @@ export class MonitoringMainController {
 }
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
-uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
+uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config, $injector) => {
   return {
     restrict: 'E',
     transclude: true,
@@ -82,25 +82,42 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
     link(scope, _element, attributes, controller) {
       config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
 
-      controller.setup({
-        licenseService: license,
-        breadcrumbsService: breadcrumbs,
-        kbnUrlService: kbnUrl,
-        attributes: {
-          name: attributes.name,
-          product: attributes.product,
-          instance: attributes.instance,
-          resolver: attributes.resolver,
-          page: attributes.page,
-          tabIconClass: attributes.tabIconClass,
-          tabIconLabel: attributes.tabIconLabel,
-          pipelineId: attributes.pipelineId,
-          pipelineHash: attributes.pipelineHash,
-          pipelineVersions: get(scope, 'pageData.versions')
-        },
-        clusterName: get(scope, 'cluster.cluster_name')
-      });
+      if (!scope.cluster) {
+        const $route = $injector.get('$route');
+        const globalState = $injector.get('globalState');
+        scope.cluster = ($route.current.locals.clusters || []).find(cluster => cluster.cluster_uuid === globalState.cluster_uuid);
+      }
 
+      function getSetupObj() {
+        return {
+          licenseService: license,
+          breadcrumbsService: breadcrumbs,
+          kbnUrlService: kbnUrl,
+          attributes: {
+            name: attributes.name,
+            product: attributes.product,
+            instance: attributes.instance,
+            resolver: attributes.resolver,
+            page: attributes.page,
+            tabIconClass: attributes.tabIconClass,
+            tabIconLabel: attributes.tabIconLabel,
+            pipelineId: attributes.pipelineId,
+            pipelineHash: attributes.pipelineHash,
+            pipelineVersions: get(scope, 'pageData.versions'),
+            isCcrEnabled: attributes.isCcrEnabled
+          },
+          clusterName: get(scope, 'cluster.cluster_name')
+        };
+      }
+
+      const setupObj = getSetupObj();
+      controller.setup(setupObj);
+      Object.keys(setupObj.attributes).forEach(key => {
+        attributes.$observe(key, () => controller.setup(getSetupObj()));
+      });
+      scope.$watch('pageData.versions', versions => {
+        controller.pipelineVersions = versions;
+      });
     }
   };
 });

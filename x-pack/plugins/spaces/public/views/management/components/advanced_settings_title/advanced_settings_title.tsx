@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Space } from '../../../../../common/model/space';
@@ -20,14 +20,14 @@ export const AdvancedSettingsTitle = (props: Props) => (
       <SpaceAvatar space={props.space} />
     </EuiFlexItem>
     <EuiFlexItem style={{ marginLeft: '10px' }}>
-      <EuiText>
+      <EuiTitle size="m">
         <h1 data-test-subj="managementSettingsTitle">
           <FormattedMessage
             id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
             defaultMessage="Settings"
           />
         </h1>
-      </EuiText>
+      </EuiTitle>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

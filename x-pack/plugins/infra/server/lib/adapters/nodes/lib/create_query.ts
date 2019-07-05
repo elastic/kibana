@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraPathFilterInput, InfraPathInput } from '../../../../../common/graphql/types';
+import { InfraPathFilterInput, InfraPathInput } from '../../../../graphql/types';
 
 import {
   InfraESBoolQuery,

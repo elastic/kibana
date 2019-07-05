@@ -9,9 +9,9 @@ import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
+import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -22,7 +22,7 @@ uiRoutes.when('/elasticsearch/nodes', {
     }
   },
   controllerAs: 'elasticsearchNodes',
-  controller: class ElasticsearchNodesController extends MonitoringViewBaseTableController {
+  controller: class ElasticsearchNodesController extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
@@ -44,19 +44,24 @@ uiRoutes.when('/elasticsearch/nodes', {
         $injector
       });
 
+      this.isCcrEnabled = $scope.cluster.isCcrEnabled;
+
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
       });
 
       this.renderReact = ({ clusterStatus, nodes }) => {
         super.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <ElasticsearchNodes
               clusterStatus={clusterStatus}
               nodes={nodes}
               showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+              sorting={this.sorting}
+              pagination={this.pagination}
+              onTableChange={this.onTableChange}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       };
     }

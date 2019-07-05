@@ -20,6 +20,7 @@ export const deprecations = ({ rename }) => {
   return [
     rename('elasticsearch.ssl.ca', 'elasticsearch.ssl.certificateAuthorities'),
     rename('elasticsearch.ssl.cert', 'elasticsearch.ssl.certificate'),
+    rename('elasticsearch.url', 'elasticsearch.hosts'),
     (settings, log) => {
       if (!has(settings, 'elasticsearch.ssl.verify')) {
         return;
@@ -50,6 +51,6 @@ export const deprecations = ({ rename }) => {
       if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
         log(`Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`);
       }
-    },
+    }
   ];
 };

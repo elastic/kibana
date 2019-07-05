@@ -229,17 +229,57 @@ describe('server/config completeMixin()', function () {
     it('should transform deprecated plugin settings', async () => {
       const { callCompleteMixin } = setup({
         settings: {
-          foo1: 'bar'
+          foo: {
+            foo1: 'bar'
+          }
         },
         configValues: {
-          foo2: 'bar'
+          foo: {
+            foo2: 'bar'
+          }
         },
         plugins: [
           {
             spec: {
               getDeprecationsProvider() {
                 return async ({ rename }) => [rename('foo1', 'foo2')];
+              },
+              getConfigPrefix: () => 'foo'
+            }
+          }
+        ],
+      });
+
+      await expect(callCompleteMixin()).resolves.toBe(undefined);
+    });
+
+    it('should transform deeply nested deprecated plugin settings', async () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          xpack: {
+            monitoring: {
+              elasticsearch: {
+                url: 'http://localhost:9200'
               }
+            }
+          }
+        },
+        configValues: {
+          xpack: {
+            monitoring: {
+              elasticsearch: {
+                hosts: 'http://localhost:9200'
+              }
+            }
+          }
+        },
+        plugins: [
+          {
+            spec: {
+              getDeprecationsProvider() {
+                return async ({ rename }) => [rename('elasticsearch.url', 'elasticsearch.hosts')];
+              },
+              getConfigPrefix: () => 'xpack.monitoring'
             }
           }
         ],

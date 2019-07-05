@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import { mapColumn } from '../mapColumn';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from './fixtures/test_tables';
+import { testTable, emptyTable } from './fixtures/test_tables';
 
 const pricePlusTwo = datatable => Promise.resolve(datatable.rows[0].price + 2);
 
@@ -39,6 +39,16 @@ describe('mapColumn', () => {
         .to.have.property('name', 'name')
         .and.to.have.property('type', 'number');
       expect(result.rows[arbitraryRowIndex]).to.have.property('name', 202);
+    });
+  });
+
+  it('adds a column to empty tables', () => {
+    return fn(emptyTable, { name: 'name', expression: pricePlusTwo }).then(result => {
+      expect(result.type).to.be('datatable');
+      expect(result.columns).to.have.length(1);
+      expect(result.columns[0])
+        .to.have.property('name', 'name')
+        .and.to.have.property('type', 'null');
     });
   });
 

@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import errors from './errors';
+
+export { errors };
+
+export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
+
 export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,

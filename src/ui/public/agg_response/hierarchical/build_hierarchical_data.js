@@ -46,7 +46,7 @@ export function BuildHierarchicalDataProvider(Private) {
 
           let slice  = dataLevel.find(slice => slice.name === name);
           if (!slice) {
-            slice = { name, size, parent, aggConfig, aggConfigResult: metricColumn, children: [] };
+            slice = { name, size, parent, aggConfig, aggConfigResult: bucketColumn, children: [] };
             dataLevel.push(slice);
           }
           parent = slice;

@@ -50,7 +50,9 @@ window.canvasInitErrorHandler = () => {
     const isKnownError = Object.keys(knownErrors).find(errorName => {
       return err.constructor.name === errorName || message.indexOf(errorName) >= 0;
     });
-    if (isKnownError) return;
+    if (isKnownError) {
+      return;
+    }
 
     // uncaught errors are silenced in dev mode
     // NOTE: react provides no way I can tell to distingish that an error came from react, it just

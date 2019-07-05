@@ -36,10 +36,11 @@ export function visWithSplits(WrappedComponent) {
       const metric = last(seriesModel.metrics);
       const label = calculateLabel(metric, seriesModel.metrics);
       if (!acc[splitId]) acc[splitId] = { series: [], label: series.label };
+
       acc[splitId].series.push({
         ...series,
         id: seriesId,
-        color: seriesModel.color,
+        color: series.color || seriesModel.color,
         label: seriesModel.label || label
       });
       return acc;
@@ -72,6 +73,7 @@ export function visWithSplits(WrappedComponent) {
             onBrush={props.onBrush}
             additionalLabel={label}
             backgroundColor={props.backgroundColor}
+            getConfig={props.getConfig}
           />
         </div>
       );

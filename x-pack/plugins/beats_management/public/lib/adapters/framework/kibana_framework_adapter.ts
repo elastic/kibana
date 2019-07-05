@@ -45,22 +45,15 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
     private readonly XPackInfoProvider: unknown,
-    private readonly uiSettings: any
+    private readonly uiSettings: any,
+    public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
-
-    this.settingSubscription = uiSettings.getUpdate$().subscribe({
-      next: ({ key, newValue }: { key: string; newValue: boolean }) => {
-        if (key === 'k7design' && this.xpackInfo) {
-          this.xpackInfo.k7Design = newValue;
-        }
-      },
-    });
   }
 
   // We dont really want to have this, but it's needed to conditionaly render for k7 due to
   // when that data is needed.
-  public getUISetting(key: 'k7design'): boolean {
+  public getUISetting(key: string): boolean {
     return this.uiSettings.get(key);
   }
 
@@ -85,11 +78,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     try {
       xpackInfoUnpacked = {
         basePath: this.getBasePath(),
-        k7Design: this.uiSettings.get('k7design'),
         license: {
           type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
           expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
-          expiry_date_in_millis: xpackInfo ? xpackInfo.getLicense().expiryDateInMillis : 0,
+          expiry_date_in_millis:
+            xpackInfo.getLicense().expiryDateInMillis !== undefined
+              ? xpackInfo.getLicense().expiryDateInMillis
+              : -1,
         },
         security: {
           enabled: xpackInfo
@@ -132,22 +127,22 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     component: React.ReactElement<any>,
     toController: 'management' | 'self' = 'self'
   ) {
-    const DOM_ELEMENT_NAME = this.PLUGIN_ID.replace('_', '-');
     const adapter = this;
     this.routes.when(
       `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
         template:
           toController === 'self'
-            ? `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`
+            ? `<${this.PLUGIN_ID}><div id="${this.PLUGIN_ID}ReactRoot"></div></${this.PLUGIN_ID}>`
             : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
-                <div id="${DOM_ELEMENT_NAME}ReactRoot" />
+                <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
+                <div id="${this.PLUGIN_ID}ReactRoot" />
                </kbn-management-app>`,
         // tslint:disable-next-line: max-classes-per-file
         controller: ($scope: any, $route: any) => {
           try {
             $scope.$$postDigest(() => {
-              const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
+              const elem = document.getElementById(`${this.PLUGIN_ID}ReactRoot`);
               ReactDOM.render(component, elem);
               adapter.manageAngularLifecycle($scope, $route, elem);
             });

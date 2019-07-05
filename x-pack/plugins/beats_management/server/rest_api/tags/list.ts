@@ -5,7 +5,7 @@
  */
 
 import * as Joi from 'joi';
-import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
@@ -29,8 +29,8 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     let tags: BeatTag[];
     try {
       tags = await libs.tags.getAll(
-        request.user
-        // request.query ? JSON.parse(request.query.ESQuery) : undefined
+        request.user,
+        request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
       );
     } catch (err) {
       return wrapEsError(err);

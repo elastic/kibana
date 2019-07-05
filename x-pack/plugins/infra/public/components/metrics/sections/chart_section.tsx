@@ -21,7 +21,7 @@ import Color from 'color';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ReactText } from 'react';
-import { InfraDataSeries, InfraMetricData } from '../../../../common/graphql/types';
+import { InfraDataSeries, InfraMetricData } from '../../../graphql/types';
 import { InfraFormatter, InfraFormatterType } from '../../../lib/lib';
 import {
   InfraMetricLayoutSection,
@@ -43,6 +43,8 @@ interface Props {
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
+  isLiveStreaming?: boolean;
+  stopLiveStreaming?: () => void;
   intl: InjectedIntl;
 }
 
@@ -174,6 +176,7 @@ export const ChartSection = injectI18n(
               <EuiXAxis marginLeft={MARGIN_LEFT} />
               <EuiYAxis tickFormat={formatterFunction} marginLeft={MARGIN_LEFT} />
               <EuiCrosshairX
+                marginLeft={MARGIN_LEFT}
                 seriesNames={seriesLabels}
                 itemsFormat={itemsFormatter}
                 titleFormat={titleFormatter}
@@ -214,9 +217,12 @@ export const ChartSection = injectI18n(
     }
 
     private handleSelectionBrushEnd = (area: Area) => {
-      const { onChangeRangeTime } = this.props;
+      const { onChangeRangeTime, isLiveStreaming, stopLiveStreaming } = this.props;
       const { startX, endX } = area.domainArea;
       if (onChangeRangeTime) {
+        if (isLiveStreaming && stopLiveStreaming) {
+          stopLiveStreaming();
+        }
         onChangeRangeTime({
           to: endX.valueOf(),
           from: startX.valueOf(),

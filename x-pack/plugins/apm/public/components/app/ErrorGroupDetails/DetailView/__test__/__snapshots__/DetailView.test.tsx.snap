@@ -1,0 +1,172 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailView should render Discover button 1`] = `
+<DiscoverErrorLink
+  error={
+    Object {
+      "@timestamp": "myTimestamp",
+      "context": Object {
+        "request": Object {
+          "method": "GET",
+          "url": Object {
+            "full": "myUrl",
+          },
+        },
+        "service": Object {
+          "name": "myService",
+        },
+        "user": Object {
+          "id": "myUserId",
+        },
+      },
+      "error": Object {
+        "exception": Object {
+          "handled": true,
+        },
+      },
+      "transaction": Object {
+        "id": "myTransactionId",
+        "sampled": true,
+      },
+    }
+  }
+>
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="discoverApp"
+    type="button"
+  >
+    View 10 occurrences in Discover
+  </EuiButtonEmpty>
+</DiscoverErrorLink>
+`;
+
+exports[`DetailView should render StickyProperties 1`] = `
+<StickyProperties
+  stickyProperties={
+    Array [
+      Object {
+        "fieldName": "@timestamp",
+        "label": "Timestamp",
+        "val": "myTimestamp",
+        "width": "50%",
+      },
+      Object {
+        "fieldName": "context.request.url.full",
+        "label": "URL",
+        "truncated": true,
+        "val": "myUrl",
+        "width": "50%",
+      },
+      Object {
+        "fieldName": "context.request.method",
+        "label": "Request method",
+        "val": "GET",
+        "width": "25%",
+      },
+      Object {
+        "fieldName": "error.exception.handled",
+        "label": "Handled",
+        "val": "true",
+        "width": "25%",
+      },
+      Object {
+        "fieldName": "transaction.id",
+        "label": "Transaction sample ID",
+        "val": <Connect(UnconnectedKibanaLink)
+          hash="/myService/transactions/myTransactionType/myTransactionName"
+          query={
+            Object {
+              "traceId": "traceId",
+              "transactionId": "myTransactionName",
+            }
+          }
+        >
+          myTransactionName
+        </Connect(UnconnectedKibanaLink)>,
+        "width": "25%",
+      },
+      Object {
+        "fieldName": "context.user.id",
+        "label": "User ID",
+        "val": "myUserId",
+        "width": "25%",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`DetailView should render TabContent 1`] = `
+<TabContent
+  currentTab={
+    Object {
+      "key": "exception_stacktrace",
+      "label": "Exception stacktrace",
+    }
+  }
+  error={
+    Object {
+      "@timestamp": "myTimestamp",
+      "context": Object {},
+    }
+  }
+/>
+`;
+
+exports[`DetailView should render tabs 1`] = `
+<EuiTabs
+  expand={false}
+  size="m"
+>
+  <EuiTab
+    disabled={false}
+    isSelected={true}
+    key="exception_stacktrace"
+    onClick={[Function]}
+  >
+    Exception stacktrace
+  </EuiTab>
+  <EuiTab
+    disabled={false}
+    isSelected={false}
+    key="request"
+    onClick={[Function]}
+  >
+    Request
+  </EuiTab>
+  <EuiTab
+    disabled={false}
+    isSelected={false}
+    key="service"
+    onClick={[Function]}
+  >
+    Service
+  </EuiTab>
+  <EuiTab
+    disabled={false}
+    isSelected={false}
+    key="user"
+    onClick={[Function]}
+  >
+    User
+  </EuiTab>
+  <EuiTab
+    disabled={false}
+    isSelected={false}
+    key="tags"
+    onClick={[Function]}
+  >
+    Tags
+  </EuiTab>
+  <EuiTab
+    disabled={false}
+    isSelected={false}
+    key="custom"
+    onClick={[Function]}
+  >
+    Custom
+  </EuiTab>
+</EuiTabs>
+`;

@@ -14,7 +14,7 @@ export const timeFilter = () => ({
   name: 'time_filter',
   displayName: 'Time filter',
   help: 'Set a time window',
-  reuseDomNode: true,
+  reuseDomNode: true, // must be true, otherwise filters get reset when re-rendered
   render(domNode, config, handlers) {
     const ast = fromExpression(handlers.getFilter());
 
@@ -37,7 +37,6 @@ export const timeFilter = () => ({
     );
 
     handlers.onDestroy(() => {
-      handlers.setFilter('');
       ReactDOM.unmountComponentAtNode(domNode);
     });
   },

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map, zipObject } from 'lodash';
+import { map, pick, zipObject } from 'lodash';
 
 export const datatable = () => ({
   name: 'datatable',
@@ -76,6 +76,33 @@ export const datatable = () => ({
           perPage: 10,
           showHeader: true,
         },
+      };
+    },
+    pointseries: datatable => {
+      // datatable columns are an array that looks like [{ name: "one", type: "string" }, { name: "two", type: "string" }]
+      // rows look like [{ one: 1, two: 2}, { one: 3, two: 4}, ...]
+      const validFields = ['x', 'y', 'color', 'size', 'text'];
+      const columns = datatable.columns.filter(column => validFields.includes(column.name));
+      const rows = datatable.rows.map(row => pick(row, validFields));
+
+      return {
+        type: 'pointseries',
+        columns: columns.reduce((acc, column) => {
+          /* pointseries columns are an object that looks like this
+           * {
+           *   x: { type: "string", expression: "x", role: "dimension" },
+           *   y: { type: "string", expression: "y", role: "dimension" }
+           * }
+           */
+          acc[column.name] = {
+            type: column.type,
+            expression: column.name,
+            role: 'dimension',
+          };
+
+          return acc;
+        }, {}),
+        rows,
       };
     },
   },

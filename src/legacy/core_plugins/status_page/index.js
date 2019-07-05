@@ -26,7 +26,6 @@ export default function (kibana) {
         hidden: true,
         url: '/status',
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
     }
   });
 }

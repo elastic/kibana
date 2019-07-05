@@ -23,7 +23,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiPage,
   EuiPageContent,
   EuiSelect,
   EuiSpacer,
@@ -43,8 +42,8 @@ class PipelineEditorUi extends React.Component {
       username,
     } = this.props;
 
-    const pipelineWorkers = settings['pipeline.workers'] ? settings['pipeline.workers'] : 1;
-
+    const pipelineWorkersSet = typeof settings['pipeline.workers'] === 'number';
+    const pipelineWorkers = pipelineWorkersSet ? settings['pipeline.workers'] : 1;
     this.state = {
       maxBytesNumber: settings['queue.max_bytes.number'],
       maxBytesUnit: settings['queue.max_bytes.units'],
@@ -256,7 +255,7 @@ class PipelineEditorUi extends React.Component {
     const { intl } = this.props;
 
     return (
-      <EuiPage data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}>
+      <div data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}>
         <EuiPageContent
           style={{
             width: 1100,
@@ -467,7 +466,7 @@ class PipelineEditorUi extends React.Component {
             confirmDeletePipeline={this.deletePipeline}
           />
         )}
-      </EuiPage>
+      </div>
     );
   }
 }

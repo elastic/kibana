@@ -4,16 +4,16 @@ exports[`GlobalBannerList is rendered 1`] = `null`;
 
 exports[`GlobalBannerList props banners is rendered 1`] = `
 <div
-  class="globalBanner__list"
+  class="kbnGlobalBannerList"
 >
   <div
-    class="globalBanner__item"
+    class="kbnGlobalBannerList__item"
     data-test-priority="1"
   >
     a component
   </div>
   <div
-    class="globalBanner__item"
+    class="kbnGlobalBannerList__item"
     data-test-subj="b"
   >
     b good

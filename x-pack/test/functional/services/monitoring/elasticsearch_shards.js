@@ -65,7 +65,7 @@ export function MonitoringElasticsearchShardsProvider({ getService }) {
 
     async showSystemIndices() {
       const checkboxEl = await testSubjects.find(SUBJ_SHOW_SYSTEM_INDICES);
-      const isChecked = await checkboxEl.getSpecAttribute('selected');
+      const isChecked = await checkboxEl.getAttribute('selected');
 
       if (!isChecked) {
         await testSubjects.click(SUBJ_SHOW_SYSTEM_INDICES);

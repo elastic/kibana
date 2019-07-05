@@ -393,29 +393,29 @@ For example, there is a component that is wrapped by `injectI18n`, like in the `
 
 ```js
 // ...
-class AddFilterUi extends Component {
+export const AddFilter = injectI18n(
+  class AddFilterUi extends Component {
   // ...
-  render() {
-    const { filter } = this.state;
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={10}>
-          <EuiFieldText
-            fullWidth
-            value={filter}
-            onChange={e => this.setState({ filter: e.target.value.trim() })}
-            placeholder={this.props.intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.source.placeholder',
-              defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
-            })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    render() {
+      const { filter } = this.state;
+      return (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={10}>
+            <EuiFieldText
+              fullWidth
+              value={filter}
+              onChange={e => this.setState({ filter: e.target.value.trim() })}
+              placeholder={this.props.intl.formatMessage({
+                id: 'kbn.management.indexPattern.edit.source.placeholder',
+                defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
   }
-}
-
-export const AddFilter = injectI18n(AddFilterUi);
+);
 ```
 
 To test the `AddFilter` component it is needed to render its `WrappedComponent` property using `shallowWithIntl` function to pass `intl` object into the `props`.
@@ -440,9 +440,10 @@ it('should render normally', async () => {
 
 3. Check functionality of an element (button is clicked, checkbox is checked/unchecked, etc.).
 
-4. Run i18n validation tool and skim through created `en.json`:
-    ```js
-      node scripts/i18n_check --output ./
+4. Run i18n validation/extraction tools and skim through created `en.json`:
+    ```bash
+    $ node scripts/i18n_check --ignore-missing
+    $ node scripts/i18n_extract --output-dir ./
     ```
 
 5. Run linters and type checker as you normally do.

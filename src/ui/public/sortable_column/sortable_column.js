@@ -22,7 +22,7 @@ import template from './sortable_column.html';
 
 const app = uiModules.get('kibana');
 
-app.directive('sortableColumn', function () {
+app.directive('sortableColumn', function (i18n) {
   return {
     restrict: 'E',
     transclude: true,
@@ -45,8 +45,17 @@ app.directive('sortableColumn', function () {
       }
 
       getAriaLabel() {
-        const direction = this.isSortedAscending() ? 'descending' : 'ascending';
-        return `Sort ${this.field} ${direction}`;
+        const isAscending = this.isSortedAscending();
+        if(isAscending) {
+          return i18n('common.ui.sortableColumn.sortAscendingAriaLabel', {
+            defaultMessage: 'Sort {field} ascending',
+            values: { field: this.field },
+          });
+        }
+        return i18n('common.ui.sortableColumn.sortDescendingAriaLabel', {
+          defaultMessage: 'Sort {field} descending',
+          values: { field: this.field },
+        });
       }
 
       isSorted() {

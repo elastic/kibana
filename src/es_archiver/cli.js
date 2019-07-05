@@ -42,7 +42,7 @@ const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 cmd
   .description(`CLI to manage archiving/restoring data in elasticsearch`)
   .option('--es-url [url]', 'url for elasticsearch')
-  .option('--kibana-url [url]', 'url for kibana (only necessary if using "load" method)')
+  .option('--kibana-url [url]', 'url for kibana (only necessary if using "load" or "unload" methods)')
   .option(`--dir [path]`, 'where archives are stored')
   .option('--verbose', 'turn on verbose logging')
   .option('--config [path]', 'path to a functional test config file to use for default values', resolveConfigPath, defaultConfigPath)

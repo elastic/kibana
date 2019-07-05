@@ -18,6 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
+import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
@@ -345,11 +346,11 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  getZoomLevel() {
+  getZoomLevel = () => {
     return this._leafletMap.getZoom();
   }
 
-  getMaxZoomLevel() {
+  getMaxZoomLevel = () => {
     return this._leafletMap.getMaxZoom();
   }
 
@@ -438,7 +439,9 @@ export class KibanaMap extends EventEmitter {
     }
     this._baseLayerIsDesaturated = isDesaturated;
     this._updateDesaturation();
-    this._leafletBaseLayer.redraw();
+    if (this._leafletBaseLayer) {
+      this._leafletBaseLayer.redraw();
+    }
   }
 
   addDrawControl() {
@@ -481,6 +484,18 @@ export class KibanaMap extends EventEmitter {
       return;
     }
     this._updateLegend();
+  }
+
+  _addMaxZoomMessage = layer => {
+    const zoomWarningMsg = createZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
+
+    this._leafletMap.on('zoomend', zoomWarningMsg);
+    this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
+
+    layer.on('remove', () => {
+      this._leafletMap.off('zoomend', zoomWarningMsg);
+      this._containerNode.removeAttribute('data-test-subj');
+    });
   }
 
   setLegendPosition(position) {
@@ -562,6 +577,11 @@ export class KibanaMap extends EventEmitter {
       });
 
       this._leafletBaseLayer = baseLayer;
+      if (settings.options.showZoomMessage) {
+        baseLayer.on('add', () => {
+          this._addMaxZoomMessage(baseLayer);
+        });
+      }
       this._leafletBaseLayer.addTo(this._leafletMap);
       this._leafletBaseLayer.bringToBack();
       if (settings.options.minZoom > this._leafletMap.getZoom()) {

@@ -18,6 +18,7 @@
  */
 
 import dragula from 'dragula';
+import 'dragula/dist/dragula.css';
 import { uiModules } from '../modules';
 import { move } from '../utils/collection';
 

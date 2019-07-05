@@ -31,7 +31,7 @@ function stubClientErrorEvent(errorMeta) {
   };
 }
 
-const stubEconnresetEvent = () => stubClientErrorEvent({ errno: 'ECONNRESET' });
+const stubEconnresetEvent = () => stubClientErrorEvent({ code: 'ECONNRESET' });
 const stubEpipeEvent = () => stubClientErrorEvent({ errno: 'EPIPE' });
 const stubEcanceledEvent = () => stubClientErrorEvent({ errno: 'ECANCELED' });
 

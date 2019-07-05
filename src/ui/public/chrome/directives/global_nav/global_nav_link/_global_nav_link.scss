@@ -1,0 +1,111 @@
+.kbnGlobalNavLink {
+  &:hover {
+    background-color: darken($kbnChromeGlobalNavBackground, 4%);
+  }
+
+  &.active {
+    background-color: lighten($kbnChromeGlobalNavBackground, 10%);
+  }
+
+  &:focus {
+    box-shadow: none !important;
+    background-color: darken($euiColorPrimary, 2%);
+  }
+}
+
+.kbnGlobalNavLink {
+  position: relative;
+  width: $kbnGlobalNavClosedWidth;
+  height: $kbnGlobalNavAppIconHeight;
+  line-height: $euiSizeL;
+
+  &.kbnGlobalNavLink-isDisabled {
+    opacity: 0.5;
+
+    .kbnGlobalNavLink__anchor {
+      cursor: default;
+    }
+  }
+
+  &.active {
+    .kbnGlobalNavLink__anchor {
+      color: $euiColorEmptyShade;
+      text-decoration: none;
+    }
+  }
+}
+
+.kbnGlobalNav-isOpen {
+  .kbnGlobalNavLink {
+    width: $kbnGlobalNavOpenWidth;
+  }
+}
+
+.kbnGlobalNavLink__anchor {
+  display: block;
+  height: 100%;
+  color: $euiColorEmptyShade;
+  width: 100%;
+  line-height: inherit;
+}
+
+.kbnGlobalNavLink__icon {
+  display: inline-block;
+  width: $kbnGlobalNavClosedWidth;
+  height: $kbnGlobalNavAppIconHeight;
+  line-height: $kbnGlobalNavAppIconHeight - 2px;
+  text-align: center;
+}
+
+/**
+  * This image is used to display the icon.
+  */
+.kbnGlobalNavLink__iconImage {
+  height: 18px;
+  margin-top: $euiSizeS;
+}
+
+.kbnGlobalNavLink__euiIcon {
+  svg {
+    @include size($euiSize + $euiSizeXS);
+  }
+
+  .euiIcon--app .euiIcon__fillSecondary {
+    fill: $euiColorGhost;
+  }
+}
+
+/**
+  * This placeholder text gets shown if there is no specified icon.
+  */
+.kbnGlobalNavLink__iconPlaceholder {
+  line-height: $kbnGlobalNavAppIconHeight;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.kbnGlobalNavLink__title {
+  @include euiTextTruncate;
+  display: none;
+  width: $kbnGlobalNavOpenWidth - $kbnGlobalNavClosedWidth - 3px;
+  float: right;
+  font-size: 0.9em;
+  text-align: left;
+  padding-left: 3px;
+  padding-right: 3px;
+  line-height: $kbnGlobalNavAppIconHeight;
+
+  .kbnGlobalNav-isOpen & {
+    display: inline-block;
+  }
+}
+
+.kbnGlobalNavLink--close {
+  /**
+   * 1. Translation accounts for the icon image being slightly off-center.
+   */
+  .kbnGlobalNavLink__icon {
+    transform: translateX(1px) scaleX(-1); /* 1 */
+  }
+}

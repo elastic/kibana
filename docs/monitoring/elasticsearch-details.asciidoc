@@ -1,6 +1,7 @@
 [role="xpack"]
 [[elasticsearch-metrics]]
 == {es} Monitoring Metrics
+[subs="attributes"]
 ++++
 <titleabbrev>{es} Metrics</titleabbrev>
 ++++
@@ -112,8 +113,6 @@ image::monitoring/images/monitoring-jobs.png["Machine learning jobs",link="image
 [float]
 [[ccr-overview-page]]
 ==== CCR
-
-beta[]
 
 To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
 shows information such as the leader index, an indication of how much the

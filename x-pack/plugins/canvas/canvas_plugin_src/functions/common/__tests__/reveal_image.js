@@ -29,7 +29,7 @@ describe('revealImage', () => {
           origin: 'top',
         })
         .to.throwException(e => {
-          expect(e.message).to.be.equal('input must be between 0 and 1');
+          expect(e.message).to.be.equal(`Invalid value: '10'. Percentage must be between 0 and 1`);
         });
 
       expect(fn)
@@ -39,7 +39,9 @@ describe('revealImage', () => {
           origin: 'top',
         })
         .to.throwException(e => {
-          expect(e.message).to.be.equal('input must be between 0 and 1');
+          expect(e.message).to.be.equal(
+            `Invalid value: '-0.1'. Percentage must be between 0 and 1`
+          );
         });
     });
   });

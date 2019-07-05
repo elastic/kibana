@@ -20,12 +20,14 @@
 import { uiModules } from '../modules';
 uiModules
   .get('kibana')
-  .directive('confirmClick', function ($window) {
+  .directive('confirmClick', function ($window, i18n) {
     return {
       restrict: 'A',
       link: function ($scope, $elem, attrs) {
         $elem.bind('click', function () {
-          const message = attrs.confirmation || 'Are you sure?';
+          const message = attrs.confirmation || i18n('common.ui.directives.confirmClickButtonLabel', {
+            defaultMessage: 'Are you sure?'
+          });
           if ($window.confirm(message)) { // eslint-disable-line no-alert
             const action = attrs.confirmClick;
             if (action) {

@@ -29,6 +29,7 @@ export function addToSiri(series, point, id, label, agg) {
     label: label == null ? id : label,
     aggLabel: agg.type ? agg.type.makeLabel(agg) : label,
     aggId: agg.parentId ? agg.parentId : agg.id,
+    aggConfigResult: point.seriesRow,
     count: 0,
     values: [point]
   });

@@ -5,16 +5,16 @@
       data-test-subj="docTableRowAction"
       ng-href="{{ getContextAppHref() }}"
       ng-if="indexPattern.isTimeBased()"
-    >
-      View surrounding documents
-    </a>
+      i18n-id="common.ui.docTable.tableRow.viewSurroundingDocumentsLinkText"
+      i18n-default-message="View surrounding documents"
+    ></a>
     <a
       class="kuiButton kuiButton--small kuiButton--secondary"
       data-test-subj="docTableRowAction"
       ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}"
-    >
-      View single document
-    </a>
+      i18n-id="common.ui.docTable.tableRow.viewSingleDocumentLinkText"
+      i18n-default-message="View single document"
+    ></a>
   </div>
   <doc-viewer
     columns="columns"

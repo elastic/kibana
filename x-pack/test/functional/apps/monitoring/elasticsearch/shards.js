@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('Shard Allocation Per Index', () => {
+    describe('Shard Allocation Per Index', () => {
       before(async () => {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');

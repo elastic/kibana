@@ -20,15 +20,7 @@
 import './courier';
 
 export { SavedObjectProvider } from './saved_object';
-
-export {
-  SearchSourceProvider,
-  migrateFilter,
-  decorateQuery,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  BuildESQueryProvider
-} from './search_source';
+export { SearchSourceProvider } from './search_source';
 
 export {
   addSearchStrategy,

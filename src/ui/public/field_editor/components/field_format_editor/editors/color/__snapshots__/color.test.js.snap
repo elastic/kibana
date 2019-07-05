@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ColorFormatEditorComponent should render multiple colors 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiBasicTable
     columns={
       Array [
@@ -81,11 +81,11 @@ exports[`ColorFormatEditorComponent should render multiple colors 1`] = `
   <EuiSpacer
     size="l"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ColorFormatEditorComponent should render other type normally (range field) 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiBasicTable
     columns={
       Array [
@@ -158,11 +158,11 @@ exports[`ColorFormatEditorComponent should render other type normally (range fie
   <EuiSpacer
     size="l"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ColorFormatEditorComponent should render string type normally (regex field) 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiBasicTable
     columns={
       Array [
@@ -235,5 +235,5 @@ exports[`ColorFormatEditorComponent should render string type normally (regex fi
   <EuiSpacer
     size="l"
   />
-</React.Fragment>
+</Fragment>
 `;

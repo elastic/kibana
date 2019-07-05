@@ -17,7 +17,7 @@ Set to `true` (default) to enable the <<xpack-grokdebugger,Grok Debugger>>.
 
 [float]
 [[profiler-settings]]
-==== Search Profiler Settings
+==== {searchprofiler} Settings
 
 `xpack.searchprofiler.enabled`::
-Set to `true` (default) to enable the <<xpack-profiler,Search Profiler>>.
+Set to `true` (default) to enable the <<xpack-profiler,{searchprofiler}>>.

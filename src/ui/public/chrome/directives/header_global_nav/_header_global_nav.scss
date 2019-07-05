@@ -1,0 +1,28 @@
+.header-global-wrapper {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 10;
+}
+
+.header-global-wrapper + .app-wrapper {
+  top: 65px;
+  left: 0;
+
+  // HOTFIX: Temporary fix for flyouts not inside portals
+  // SASSTODO: Find an actual solution
+  .euiFlyout {
+    top: 65px;
+  }
+}
+
+// Mobile header is smaller
+@include euiBreakpoint('xs','s') {
+  .header-global-wrapper + .app-wrapper {
+    top: 50px;
+
+    .euiFlyout {
+      top: 50px;
+    }
+  }
+}

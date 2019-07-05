@@ -10,8 +10,8 @@ import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
-import { MonitoringViewBaseTableController } from '../../base_table_controller';
-import { I18nProvider } from '@kbn/i18n/react';
+import { MonitoringViewBaseEuiTableController } from '../..';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/apm/instances', {
   template,
@@ -21,7 +21,7 @@ uiRoutes.when('/apm/instances', {
       return routeInit();
     },
   },
-  controller: class extends MonitoringViewBaseTableController {
+  controller: class extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
@@ -51,26 +51,22 @@ uiRoutes.when('/apm/instances', {
 
     renderReact(data) {
       const {
-        pageIndex,
-        filterText,
-        sortKey,
-        sortOrder,
-        onNewState,
+        pagination,
+        sorting,
+        onTableChange,
       } = this;
 
       const component = (
-        <I18nProvider>
+        <I18nContext>
           <ApmServerInstances
             apms={{
-              pageIndex,
-              filterText,
-              sortKey,
-              sortOrder,
-              onNewState,
+              pagination,
+              sorting,
+              onTableChange,
               data,
             }}
           />
-        </I18nProvider>
+        </I18nContext>
       );
       super.renderReact(component);
     }

@@ -6,13 +6,6 @@
   margin-bottom: $euiSize;
 }
 
-.monChart__tooltipTrigger {
-  float: right;
-  position: relative;
-  top: $euiSizeXS;
-  right: $euiSize;
-}
-
 .monChart__tooltipLabel,
 .monChart__tooltipValue {
   text-align: left;

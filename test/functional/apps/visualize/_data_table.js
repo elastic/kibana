@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
@@ -67,18 +68,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct data', function () {
@@ -96,11 +93,9 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       return retry.try(async function () {
-        await PageObjects.visualize.openInspector();
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await PageObjects.visualize.closeInspector();
-        log.debug(data);
-        expect(data).to.eql(expectedChartData);
+        await inspector.open();
+        await inspector.expectTableData(expectedChartData);
+        await inspector.close();
       });
     });
 
@@ -186,7 +181,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
-      await PageObjects.visualize.selectField('_source', 'metrics');
+      await PageObjects.visualize.selectField('agent.raw', 'metrics');
       await PageObjects.visualize.clickGo();
       const data = await PageObjects.visualize.getTableVisData();
       log.debug(data);
@@ -252,6 +247,25 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data without showMetricsAtAllLevels', async () => {
+        const data = await PageObjects.visualize.getTableVisContent();
+        expect(data).to.be.eql([
+          [ 'jpg', 'CN', '1,718' ],
+          [ 'jpg', 'IN', '1,511' ],
+          [ 'jpg', 'US', '770' ],
+          [ 'jpg', 'ID', '314' ],
+          [ 'jpg', 'PK', '244' ],
+          [ 'css', 'CN', '422' ],
+          [ 'css', 'IN', '346' ],
+          [ 'css', 'US', '189' ],
+          [ 'css', 'ID', '68' ],
+          [ 'css', 'BR', '58' ],
+        ]);
+      });
+
+      it('should show correct data without showMetricsAtAllLevels even if showPartialRows is selected', async () => {
+        await PageObjects.visualize.clickOptionsTab();
+        await PageObjects.visualize.checkCheckbox('showPartialRows');
+        await PageObjects.visualize.clickGo();
         const data = await PageObjects.visualize.getTableVisContent();
         expect(data).to.be.eql([
           [ 'jpg', 'CN', '1,718' ],
@@ -364,7 +378,7 @@ export default function ({ getService, getPageObjects }) {
         ]);
       });
 
-      it('should not show metrics for split bucket when using showMetricsAtAllLevels', async () => {
+      it('should show metrics for split bucket when using showMetricsAtAllLevels', async () => {
         await PageObjects.visualize.clickOptionsTab();
         await PageObjects.visualize.checkCheckbox('showMetricsAtAllLevels');
         await PageObjects.visualize.clickGo();

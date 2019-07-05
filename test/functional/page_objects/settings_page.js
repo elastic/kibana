@@ -38,19 +38,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByDisplayedLinkText(text);
     }
     async clickKibanaSettings() {
-      await find.clickByDisplayedLinkText('Advanced Settings');
+      await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      // Verify navigation is successful.
       await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickKibanaSavedObjects() {
-      await find.clickByDisplayedLinkText('Saved Objects');
+      await testSubjects.click('objects');
     }
 
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      await find.clickByDisplayedLinkText('Index Patterns');
+      await testSubjects.click('indices');
     }
 
     async getAdvancedSettings(propertyName) {
@@ -250,7 +249,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async increasePopularity() {
       const field = await testSubjects.find('editorFieldCount');
-      await field.clearValue();
+      await field.click();
+      await field.clearValueWithKeyboard({ charByChar: true });
       await field.type('1');
     }
 
@@ -277,7 +277,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField(indexPatternName);
+          await this.setIndexPatternField({ indexPatternName });
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -317,14 +317,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(indexPatternName = 'logstash-') {
+    async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName);
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
-      expect(currentName).to.eql(`${indexPatternName}*`);
+      expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
@@ -421,7 +421,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldName(name) {
       log.debug('set scripted field name = ' + name);
       const field = await testSubjects.find('editorFieldName');
-      await field.clearValue();
+      await field.click();
+      await field.clearValueWithKeyboard({ charByChar: true });
       await field.type(name);
     }
 
@@ -474,7 +475,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const datePatternField = await find.byCssSelector(
         'input[data-test-subj="dateEditorPattern"]'
       );
-      await datePatternField.clearValue();
+      // Both clearValue & clearValueWithKeyboard does not work here
+      // Using retry to clear input in 2 attempts
+      await retry.waitFor('clear date', async () => {
+        await datePatternField.click();
+        await datePatternField.clearValueWithKeyboard({ charByChar: true });
+        const value = await datePatternField.getProperty('value');
+        return value.length === 0;
+      });
       await datePatternField.type(datePattern);
     }
 
@@ -495,7 +503,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
       const field = await testSubjects.find('editorFieldScript');
-      await field.clearValue();
+      const currentValue = await field.getAttribute('value');
+      if (script === currentValue) {
+        return;
+      }
+      await field.click();
+      await field.clearValueWithKeyboard({ charByChar: true });
       await field.type(script);
     }
 
@@ -538,7 +551,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.openScriptedFieldHelp('testTab');
       if (additionalField) {
         await comboBox.set('additionalFieldsSelect', additionalField);
+        await testSubjects.find('scriptedFieldPreview');
         await testSubjects.click('runScriptButton');
+        await testSubjects.waitForDeleted('.euiLoadingSpinner');
       }
       let scriptResults;
       await retry.try(async () => {

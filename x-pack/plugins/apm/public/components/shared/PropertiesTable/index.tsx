@@ -5,10 +5,11 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import _ from 'lodash';
+import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-
 import { StringMap } from '../../../../typings/common';
 import {
   colors,
@@ -19,12 +20,8 @@ import {
   units
 } from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-// @ts-ignore
-import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
-import PROPERTY_CONFIG from './propertyConfig.json';
-
-const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
+import { PROPERTY_CONFIG } from './propertyConfig';
 
 const TableContainer = styled.div`
   padding-bottom: ${px(units.double)};
@@ -47,21 +44,43 @@ const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export function getPropertyTabNames(selected: string[]): string[] {
+export interface Tab {
+  key: string;
+  label: string;
+}
+
+export function getPropertyTabNames(selected: string[]): Tab[] {
   return PROPERTY_CONFIG.filter(
-    ({ key, required }: { key: string; required: boolean }) =>
-      required || selected.includes(key)
-  ).map(({ key }: { key: string }) => key);
+    ({ key, required }) => required || selected.includes(key)
+  ).map(({ key, label }) => ({ key, label }));
 }
 
 function getAgentFeatureText(featureName: string) {
   switch (featureName) {
     case 'user':
-      return 'You can configure your agent to add contextual information about your users.';
+      return i18n.translate(
+        'xpack.apm.propertiesTable.userTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add contextual information about your users.'
+        }
+      );
     case 'tags':
-      return 'You can configure your agent to add filterable tags on transactions.';
+      return i18n.translate(
+        'xpack.apm.propertiesTable.tagsTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add filterable tags on transactions.'
+        }
+      );
     case 'custom':
-      return 'You can configure your agent to add custom contextual information on transactions.';
+      return i18n.translate(
+        'xpack.apm.propertiesTable.customTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add custom contextual information on transactions.'
+        }
+      );
   }
 }
 
@@ -81,20 +100,24 @@ export function AgentFeatureTipMessage({
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
       {getAgentFeatureText(featureName)}{' '}
-      <ExternalLink href={docsUrl}>
-        Learn more in the documentation.
-      </ExternalLink>
+      <EuiLink target="_blank" rel="noopener" href={docsUrl}>
+        {i18n.translate(
+          'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
+          { defaultMessage: 'Learn more in the documentation.' }
+        )}
+      </EuiLink>
     </TableInfo>
   );
 }
 
 export const sortKeysByConfig: KeySorter = (object, currentKey) => {
-  const presorted = _.get(
+  const indexedPropertyConfig = indexBy(PROPERTY_CONFIG, 'key');
+  const presorted = get(
     indexedPropertyConfig,
     `${currentKey}.presortedKeys`,
     []
   );
-  return _.uniq([...presorted, ...Object.keys(object).sort()]);
+  return uniq([...presorted, ...Object.keys(object).sort()]);
 };
 
 export function PropertiesTable({
@@ -102,15 +125,13 @@ export function PropertiesTable({
   propKey,
   agentName
 }: {
-  propData: StringMap<any>;
+  propData?: StringMap<any>;
   propKey: string;
   agentName?: string;
 }) {
-  const hasPropData = !_.isEmpty(propData);
-
   return (
     <TableContainer>
-      {hasPropData ? (
+      {propData ? (
         <NestedKeyValueTable
           data={propData}
           parentKey={propKey}
@@ -118,7 +139,12 @@ export function PropertiesTable({
           depth={1}
         />
       ) : (
-        <TableInfoHeader>No data available</TableInfoHeader>
+        <TableInfoHeader>
+          {i18n.translate(
+            'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
+            { defaultMessage: 'No data available' }
+          )}
+        </TableInfoHeader>
       )}
       <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
     </TableContainer>

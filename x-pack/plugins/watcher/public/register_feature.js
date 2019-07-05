@@ -7,12 +7,15 @@
 
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { i18n } from '@kbn/i18n';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'watcher',
     title: 'Watcher',
-    description: 'Detect changes in your data by creating, managing, and monitoring alerts.',
+    description: i18n.translate('xpack.watcher.watcherDescription', {
+      defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.'
+    }),
     icon: 'watchesApp',
     path: '/app/kibana#/management/elasticsearch/watcher/watches',
     showOnHomePage: true,

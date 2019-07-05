@@ -6,3 +6,4 @@
 
 export { MonitoringViewBaseController } from './base_controller';
 export { MonitoringViewBaseTableController } from './base_table_controller';
+export { MonitoringViewBaseEuiTableController } from './base_eui_table_controller';

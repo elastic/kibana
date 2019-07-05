@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { InfraPathInput, InfraPathType } from '../../../../common/graphql/types';
+import { InfraPathInput, InfraPathType } from '../../../graphql/types';
 import { InfraNodeType } from './adapter_types';
 
 const getNodeType = (type: InfraPathType): InfraNodeType => {

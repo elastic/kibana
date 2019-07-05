@@ -45,7 +45,7 @@ export async function comparePngs(sessionPath, baselinePath, diffPath, sessionDi
   // some the diffCount to be lower than our own threshold value.
   const THRESHOLD = .1;
   const { image, percent } = Jimp.diff(session, baseline, THRESHOLD);
-  log.debug(`percentSimilar: ${percent}`);
+  log.debug(`percent different: ${percent}`);
   if (percent > 0) {
     image.write(diffPath);
 

@@ -52,6 +52,7 @@ const NavigationUi = ({
         <EuiButtonEmpty
           iconType="arrowLeft"
           onClick={goToPreviousStep}
+          data-test-subj="rollupJobBackButton"
         >
           <FormattedMessage
             id="xpack.rollupJobs.create.backButton.label"
@@ -72,6 +73,7 @@ const NavigationUi = ({
           onClick={goToNextStep}
           isDisabled={!canGoToNextStep}
           fill
+          data-test-subj="rollupJobNextButton"
         >
           <FormattedMessage
             id="xpack.rollupJobs.create.nextButton.label"
@@ -88,6 +90,7 @@ const NavigationUi = ({
           iconType="check"
           onClick={save}
           fill
+          data-test-subj="rollupJobSaveButton"
         >
           <FormattedMessage
             id="xpack.rollupJobs.create.saveButton.label"

@@ -21,6 +21,8 @@ import moment from 'moment';
 import uiChrome from 'ui/chrome';
 import { ml } from '../../../services/ml_api_service';
 import { isFullLicense } from '../../../license/check_license';
+import { checkPermission } from '../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 
 const RECHECK_DELAY_MS = 3000;
 
@@ -34,9 +36,11 @@ export class ResultsLinks extends Component {
     };
 
     this.recheckTimeout = null;
+    this.showCreateJobLink = true;
   }
 
   componentDidMount() {
+    this.showCreateJobLink = (checkPermission('canCreateJob') && mlNodesAvailable());
     // if this data has a time field,
     // find the start and end times
     if (this.props.timeFieldName !== undefined) {
@@ -77,6 +81,7 @@ export class ResultsLinks extends Component {
     const {
       indexPatternId,
       timeFieldName,
+      createIndexPattern,
     } = this.props;
 
     const {
@@ -88,21 +93,23 @@ export class ResultsLinks extends Component {
 
     return (
       <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type={`discoverApp`} />}
-            title={
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.viewIndexInDiscoverTitle"
-                defaultMessage="View index in Discover"
-              />
-            }
-            description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
-          />
-        </EuiFlexItem>
+        {createIndexPattern &&
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={`discoverApp`} />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.resultsLinks.viewIndexInDiscoverTitle"
+                  defaultMessage="View index in Discover"
+                />
+              }
+              description=""
+              href={`${uiChrome.getBasePath()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
+            />
+          </EuiFlexItem>
+        }
 
-        {(isFullLicense() === true && timeFieldName !== undefined) &&
+        {(isFullLicense() === true && timeFieldName !== undefined && this.showCreateJobLink && createIndexPattern) &&
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
@@ -118,19 +125,21 @@ export class ResultsLinks extends Component {
           </EuiFlexItem>
         }
 
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
-            title={
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.openInDataVisualizerTitle"
-                defaultMessage="Open in Data Visualizer"
-              />
-            }
-            description=""
-            href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
-          />
-        </EuiFlexItem>
+        {createIndexPattern &&
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.resultsLinks.openInDataVisualizerTitle"
+                  defaultMessage="Open in Data Visualizer"
+                />
+              }
+              description=""
+              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
+            />
+          </EuiFlexItem>
+        }
 
         <EuiFlexItem>
           <EuiCard
@@ -142,7 +151,7 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/home`}
+            href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/indices`}
           />
         </EuiFlexItem>
 
@@ -156,7 +165,10 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/management/kibana/indices/${indexPatternId}`}
+            href={
+              `${uiChrome.getBasePath()}/app/kibana#/management/kibana/indices/${(
+                createIndexPattern ? indexPatternId : '')}`
+            }
           />
         </EuiFlexItem>
 

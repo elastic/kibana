@@ -59,7 +59,7 @@ export function createBundlesRoute({ regularBundlesPath, dllBundlesPath, basePub
 
   return [
     buildRouteForBundles(basePublicPath, '/bundles/', regularBundlesPath, fileHashCache),
-    buildRouteForBundles(basePublicPath, '/dlls/', dllBundlesPath, fileHashCache),
+    buildRouteForBundles(basePublicPath, '/built_assets/dlls/', dllBundlesPath, fileHashCache),
   ];
 }
 

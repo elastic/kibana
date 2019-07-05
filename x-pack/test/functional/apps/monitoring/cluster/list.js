@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', 2000)).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
         });
 
         /*
@@ -87,7 +87,10 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      describe('cluster row content', () => {
+      describe('cluster row content', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
+        this.tags(['skipCloud']);
+
         it('non-primary basic cluster shows NA for everything', async () => {
           expect(await clusterList.getClusterName(UNSUPPORTED_CLUSTER_UUID)).to.be('staging');
           expect(await clusterList.getClusterStatus(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
@@ -111,14 +114,17 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('cluster row actions', () => {
+      describe('cluster row actions', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
+        this.tags(['skipCloud']);
+
         it('clicking the non-primary basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', 2000)).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
         });
 
-        it('clicking the primary basic cluster goes to overview', async () => {
+        it('clicking the primary basic cluster goes to overview', async function () {
           const primaryBasicClusterLink = await clusterList.getClusterLink(SUPPORTED_CLUSTER_UUID);
           await primaryBasicClusterLink.click();
 

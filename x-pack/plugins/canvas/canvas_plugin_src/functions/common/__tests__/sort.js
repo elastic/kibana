@@ -13,7 +13,9 @@ describe('sort', () => {
   const fn = functionWrapper(sort);
 
   const isSorted = (rows, column, reverse) => {
-    if (reverse) return !rows.some((row, i) => rows[i + 1] && row[column] < rows[i + 1][column]);
+    if (reverse) {
+      return !rows.some((row, i) => rows[i + 1] && row[column] < rows[i + 1][column]);
+    }
     return !rows.some((row, i) => rows[i + 1] && row[column] > rows[i + 1][column]);
   };
 

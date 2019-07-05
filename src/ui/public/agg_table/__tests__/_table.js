@@ -57,7 +57,9 @@ describe('AggTable Directive', function () {
     vis2.aggs.forEach(function (agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets, {
+      minimalColumns: false,
+    });
 
     const vis3 = new Vis(indexPattern, {
       type: 'table',

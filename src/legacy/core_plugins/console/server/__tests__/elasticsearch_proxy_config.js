@@ -42,7 +42,7 @@ describe('plugins/console', function () {
         }
       };
 
-      server.config().get.withArgs('elasticsearch.url').returns('http://localhost:9200');
+      server.config().get.withArgs('elasticsearch.hosts').returns(['http://localhost:9200']);
       server.config().get.withArgs('elasticsearch.ssl.verificationMode').returns('full');
     });
 
@@ -58,20 +58,20 @@ describe('plugins/console', function () {
     });
 
     it(`uses https.Agent when url's protocol is https`, function () {
-      setElasticsearchConfig('url', 'https://localhost:9200');
+      setElasticsearchConfig('hosts', ['https://localhost:9200']);
       const { agent } = getElasticsearchProxyConfig(server);
       expect(agent).to.be.a(https.Agent);
     });
 
     it(`uses http.Agent when url's protocol is http`, function () {
-      setElasticsearchConfig('url', 'http://localhost:9200');
+      setElasticsearchConfig('hosts', ['http://localhost:9200']);
       const { agent } = getElasticsearchProxyConfig(server);
       expect(agent).to.be.a(http.Agent);
     });
 
     describe('ssl', function () {
       beforeEach(function () {
-        setElasticsearchConfig('url', 'https://localhost:9200');
+        setElasticsearchConfig('hosts', ['https://localhost:9200']);
       });
 
       it('sets rejectUnauthorized to false when verificationMode is none', function () {

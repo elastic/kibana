@@ -22,6 +22,7 @@ import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
+import { I18nStartContract } from '../i18n';
 import { InjectedMetadataService } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { ErrorInfo, getErrorInfo } from './get_error_info';
@@ -32,8 +33,13 @@ export interface FatalErrorsParams {
   stopCoreSystem: () => void;
 }
 
+interface Deps {
+  i18n: I18nStartContract;
+}
+
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
+  private i18n?: I18nStartContract;
 
   constructor(private params: FatalErrorsParams) {
     this.errorInfo$
@@ -63,7 +69,9 @@ export class FatalErrorsService {
     throw error;
   };
 
-  public start() {
+  public start({ i18n }: Deps) {
+    this.i18n = i18n;
+
     return {
       add: this.add,
       get$: () => {
@@ -84,12 +92,18 @@ export class FatalErrorsService {
     const container = document.createElement('div');
     this.params.rootDomElement.appendChild(container);
 
+    // If error occurred before I18nService has been started we don't have any
+    // i18n context to provide.
+    const I18nContext = this.i18n ? this.i18n.Context : React.Fragment;
+
     render(
-      <FatalErrorsScreen
-        buildNumber={this.params.injectedMetadata.getKibanaBuildNumber()}
-        kibanaVersion={this.params.injectedMetadata.getKibanaVersion()}
-        errorInfo$={this.errorInfo$}
-      />,
+      <I18nContext>
+        <FatalErrorsScreen
+          buildNumber={this.params.injectedMetadata.getKibanaBuildNumber()}
+          kibanaVersion={this.params.injectedMetadata.getKibanaVersion()}
+          errorInfo$={this.errorInfo$}
+        />
+      </I18nContext>,
       container
     );
   }

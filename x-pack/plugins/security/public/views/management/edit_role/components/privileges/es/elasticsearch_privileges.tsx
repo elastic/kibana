@@ -16,7 +16,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, I18nProvider, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Role } from '../../../../../../../common/model/role';
 // @ts-ignore
@@ -37,17 +38,14 @@ interface Props {
   indexPatterns: string[];
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  intl: InjectedIntl;
 }
 
-class ElasticsearchPrivilegesUI extends Component<Props, {}> {
+export class ElasticsearchPrivileges extends Component<Props, {}> {
   public render() {
     return (
-      <I18nProvider>
-        <CollapsiblePanel iconType={'logoElasticsearch'} title={'Elasticsearch'}>
-          {this.getForm()}
-        </CollapsiblePanel>
-      </I18nProvider>
+      <CollapsiblePanel iconType={'logoElasticsearch'} title={'Elasticsearch'}>
+        {this.getForm()}
+      </CollapsiblePanel>
     );
   }
 
@@ -60,7 +58,6 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
       indexPatterns,
       allowDocumentLevelSecurity,
       allowFieldLevelSecurity,
-      intl,
     } = this.props;
 
     const indexProps = {
@@ -124,11 +121,10 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
             <EuiComboBox
               placeholder={
                 this.props.editable
-                  ? intl.formatMessage({
-                      id:
-                        'xpack.security.management.editRoles.elasticSearchPrivileges.addUserTitle',
-                      defaultMessage: 'Add a user…',
-                    })
+                  ? i18n.translate(
+                      'xpack.security.management.editRoles.elasticSearchPrivileges.addUserTitle',
+                      { defaultMessage: 'Add a user…' }
+                    )
                   : undefined
               }
               options={this.props.runAsUsers.map(username => ({
@@ -137,6 +133,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
                 isGroupLabelOption: false,
               }))}
               selectedOptions={this.props.role.elasticsearch.run_as.map(u => ({ label: u }))}
+              onCreateOption={this.onCreateRunAsOption}
               onChange={this.onRunAsUserChange}
               isDisabled={!this.props.editable}
             />
@@ -235,6 +232,17 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
 
     this.props.onChange(role);
   };
-}
 
-export const ElasticsearchPrivileges = injectI18n(ElasticsearchPrivilegesUI);
+  public onCreateRunAsOption = (option: any) => {
+    const newRunAsUsers = this.props.role.elasticsearch.run_as.concat(option);
+
+    const role = {
+      ...this.props.role,
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        run_as: newRunAsUsers,
+      },
+    };
+    this.props.onChange(role);
+  };
+}

@@ -33,6 +33,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import { RequestStatus } from 'ui/inspector/adapters';
 
 class RequestSelector extends Component {
@@ -66,14 +69,20 @@ class RequestSelector extends Component {
         }}
         toolTipContent={request.description}
         toolTipPosition="left"
+        data-test-subj={`inspectorRequestChooser${request.name}`}
       >
         <EuiTextColor color={hasFailed ? 'danger' : 'default'}>
           {request.name}
-          { hasFailed && ' (failed)' }
+          { hasFailed && <FormattedMessage
+            id="inspectorViews.requests.failedLabel"
+            defaultMessage=" (failed)"
+          />}
           { inProgress &&
             <EuiLoadingSpinner
               size="s"
-              aria-label="Request in progress"
+              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
+                defaultMessage: 'Request in progress'
+              })}
               className="insRequestSelector__menuSpinner"
             />
           }
@@ -89,6 +98,7 @@ class RequestSelector extends Component {
         iconSide="right"
         size="s"
         onClick={this.togglePopover}
+        data-test-subj="inspectorRequestChooser"
       >
         {this.props.selectedRequest.name}
       </EuiButtonEmpty>
@@ -105,7 +115,6 @@ class RequestSelector extends Component {
         repositionOnScroll
       >
         <EuiContextMenuPanel
-          className="insRequestSelector__menuPanel"
           items={this.props.requests.map(this.renderRequestDropdownItem)}
         />
       </EuiPopover>
@@ -122,7 +131,12 @@ class RequestSelector extends Component {
         <EuiFlexItem
           grow={false}
         >
-          <strong>Request:</strong>
+          <strong>
+            <FormattedMessage
+              id="inspectorViews.requests.requestLabel"
+              defaultMessage="Request:"
+            />
+          </strong>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           {requests.length <= 1 &&
@@ -136,21 +150,40 @@ class RequestSelector extends Component {
           { selectedRequest.status !== RequestStatus.PENDING &&
             <EuiToolTip
               position="left"
-              title={selectedRequest.status === RequestStatus.OK ? 'Request succeeded' : 'Request failed'}
-              content="The total time the request took."
+              title={selectedRequest.status === RequestStatus.OK ?
+                <FormattedMessage
+                  id="inspectorViews.requests.requestSucceededTooltipTitle"
+                  defaultMessage="Request succeeded"
+                /> :
+                <FormattedMessage
+                  id="inspectorViews.requests.requestFailedTooltipTitle"
+                  defaultMessage="Request failed"
+                />
+              }
+              content={<FormattedMessage
+                id="inspectorViews.requests.requestTooltipDescription"
+                defaultMessage="The total time the request took."
+              />}
             >
               <EuiBadge
                 color={selectedRequest.status === RequestStatus.OK ? 'secondary' : 'danger'}
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
-                {selectedRequest.time}ms
+
+                <FormattedMessage
+                  id="inspectorViews.requests.requestTimeLabel"
+                  defaultMessage="{requestTime}ms"
+                  values={{ requestTime: selectedRequest.time }}
+                />
               </EuiBadge>
             </EuiToolTip>
           }
           { selectedRequest.status === RequestStatus.PENDING &&
             <EuiLoadingSpinner
               size="m"
-              aria-label="Request in progress"
+              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
+                defaultMessage: 'Request in progress'
+              })}
             />
           }
         </EuiFlexItem>

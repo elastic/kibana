@@ -24,11 +24,6 @@ import React, {
 import classNames from 'classnames';
 
 import {
-  KuiButton,
-  KuiButtonIcon,
-  KuiPopover,
-  KuiContextMenuPanel,
-  KuiContextMenuItem,
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
@@ -173,57 +168,6 @@ export class Table extends Component {
           <KuiTableRowCell>
             {item.dateCreated}
           </KuiTableRowCell>
-
-          <KuiTableRowCell textOnly={false}>
-            <KuiPopover
-              button={(
-                <KuiButton
-                  buttonType="basic"
-                  onClick={() => this.togglePopover(item)}
-                  icon={<KuiButtonIcon className="fa-angle-down" />}
-                  iconPosition="right"
-                >
-                  Actions
-                </KuiButton>
-              )}
-              isOpen={this.isPopoverOpen(item)}
-              closePopover={() => this.closePopover(item)}
-              panelPaddingSize="none"
-              withTitle
-              anchorPosition="right"
-            >
-              <KuiContextMenuPanel
-                style={{ width: '100px' }}
-                items={[
-                  (
-                    <KuiContextMenuItem
-                      key="A"
-                      icon={<span className="kuiIcon fa-pencil" />}
-                      onClick={() => { this.closePopover(item); window.alert('Edit'); }}
-                    >
-                    Edit
-                    </KuiContextMenuItem>
-                  ), (
-                    <KuiContextMenuItem
-                      key="B"
-                      icon={<span className="kuiIcon fa-share" />}
-                      onClick={() => { this.closePopover(item); window.alert('Share'); }}
-                    >
-                    Share
-                    </KuiContextMenuItem>
-                  ), (
-                    <KuiContextMenuItem
-                      key="C"
-                      icon={<span className="kuiIcon fa-trash-o" />}
-                      onClick={() => { this.closePopover(item); window.alert('Delete'); }}
-                    >
-                    Delete
-                    </KuiContextMenuItem>
-                  )
-                ]}
-              />
-            </KuiPopover>
-          </KuiTableRowCell>
         </KuiTableRow>
       );
 
@@ -273,10 +217,6 @@ export class Table extends Component {
 
           <KuiTableHeaderCell>
             Date created
-          </KuiTableHeaderCell>
-
-          <KuiTableHeaderCell width="110px">
-            Actions
           </KuiTableHeaderCell>
         </KuiTableHeader>
 

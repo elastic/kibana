@@ -17,29 +17,52 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 const MS_IN_SECOND = 1000;
 const MS_IN_MINUTE = 60 * MS_IN_SECOND;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 const MS_IN_DAY = 24 * MS_IN_HOUR;
 
 export function prettyInterval(intervalInMs) {
+  let interval;
   if (intervalInMs === 0) {
-    return 'Off';
+    return i18n.translate('common.ui.timepicker.off', { defaultMessage: 'Off' });
   } else if (intervalInMs < MS_IN_MINUTE) {
-    const intervalInSeconds = Math.round(intervalInMs / MS_IN_SECOND);
-    const units = intervalInSeconds > 1 ? 'seconds' : 'second';
-    return `${intervalInSeconds} ${units}`;
+    interval = Math.round(intervalInMs / MS_IN_SECOND);
+    return i18n.translate('common.ui.timepicker.totalSeconds', {
+      defaultMessage: `{interval} {interval, plural,
+        one {second}
+        other {seconds}
+      }`,
+      values: { interval },
+    });
   } else if (intervalInMs < MS_IN_HOUR) {
-    const intervalInMinutes = Math.round(intervalInMs / MS_IN_MINUTE);
-    const units = intervalInMinutes > 1 ? 'minutes' : 'minute';
-    return `${intervalInMinutes} ${units}`;
+    interval = Math.round(intervalInMs / MS_IN_MINUTE);
+    return i18n.translate('common.ui.timepicker.totalMinutes', {
+      defaultMessage: `{interval} {interval, plural,
+        one {minute}
+        other {minutes}
+      }`,
+      values: { interval },
+    });
   } else if (intervalInMs < MS_IN_DAY) {
-    const intervalInHours = Math.round(intervalInMs / MS_IN_HOUR);
-    const units = intervalInHours > 1 ? 'hours' : 'hour';
-    return `${intervalInHours} ${units}`;
+    interval = Math.round(intervalInMs / MS_IN_HOUR);
+    return i18n.translate('common.ui.timepicker.totalHours', {
+      defaultMessage: `{interval} {interval, plural,
+        one {hour}
+        other {hours}
+      }`,
+      values: { interval },
+    });
+  } else {
+    interval = Math.round(intervalInMs / MS_IN_DAY);
+    return i18n.translate('common.ui.timepicker.totalDays', {
+      defaultMessage: `{interval} {interval, plural,
+        one {day}
+        other {days}
+      }`,
+      values: { interval },
+    });
   }
-
-  const intervalInDays = Math.round(intervalInMs / MS_IN_DAY);
-  const units = intervalInDays > 1 ? 'days' : 'day';
-  return `${intervalInDays} ${units}`;
 }

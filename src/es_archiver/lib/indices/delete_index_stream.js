@@ -20,15 +20,21 @@
 import { Transform } from 'stream';
 
 import { deleteIndex } from './delete_index';
+import { cleanKibanaIndices } from './kibana_index';
 
-export function createDeleteIndexStream(client, stats, log) {
+export function createDeleteIndexStream(client, stats, log, kibanaUrl) {
   return new Transform({
     readableObjectMode: true,
     writableObjectMode: true,
     async transform(record, enc, callback) {
       try {
         if (!record || record.type === 'index') {
-          await deleteIndex({ client, stats, log, index: record.value.index });
+          const { index } = record.value;
+          if (index.startsWith('.kibana')) {
+            await cleanKibanaIndices({ client, stats, log, kibanaUrl });
+          } else {
+            await deleteIndex({ client, stats, log, index });
+          }
         } else {
           this.push(record);
         }

@@ -21,8 +21,54 @@ import Joi from 'joi';
 import { constants as cryptoConstants } from 'crypto';
 import os from 'os';
 
-import { fromRoot } from '../../utils';
-import { getData } from '../path';
+import {
+  fromRoot
+} from '../../utils';
+import {
+  getData
+} from '../path';
+import { DEFAULT_CSP_RULES } from '../csp';
+
+const tilemapSchema = Joi.object({
+  url: Joi.string(),
+  options: Joi.object({
+    attribution: Joi.string(),
+    minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
+    maxZoom: Joi.number().default(10),
+    tileSize: Joi.number(),
+    subdomains: Joi.array().items(Joi.string()).single(),
+    errorTileUrl: Joi.string().uri(),
+    tms: Joi.boolean(),
+    reuseTiles: Joi.boolean(),
+    bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2),
+    default: Joi.boolean()
+  }).default({
+    default: true
+  })
+}).default();
+
+const regionmapSchema = Joi.object({
+  includeElasticMapsService: Joi.boolean().default(true),
+  layers: Joi.array().items(Joi.object({
+    url: Joi.string(),
+    format: Joi.object({
+      type: Joi.string().default('geojson')
+    }).default({
+      type: 'geojson'
+    }),
+    meta: Joi.object({
+      feature_collection_path: Joi.string().default('data')
+    }).default({
+      feature_collection_path: 'data'
+    }),
+    attribution: Joi.string(),
+    name: Joi.string(),
+    fields: Joi.array().items(Joi.object({
+      name: Joi.string(),
+      description: Joi.string()
+    }))
+  })).default([])
+}).default();
 
 export default () => Joi.object({
   pkg: Joi.object({
@@ -45,6 +91,11 @@ export default () => Joi.object({
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
+  }).default(),
+
+  csp: Joi.object({
+    rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
+    strict: Joi.boolean().default(false),
   }).default(),
 
   cpu: Joi.object({
@@ -191,46 +242,14 @@ export default () => Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
   map: Joi.object({
-    manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v2'),
-    includeElasticMapsService: Joi.boolean().default(true)
-  }).default(),
-  tilemap: Joi.object({
-    url: Joi.string(),
-    options: Joi.object({
-      attribution: Joi.string(),
-      minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
-      maxZoom: Joi.number().default(10),
-      tileSize: Joi.number(),
-      subdomains: Joi.array().items(Joi.string()).single(),
-      errorTileUrl: Joi.string().uri(),
-      tms: Joi.boolean(),
-      reuseTiles: Joi.boolean(),
-      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
-    }).default()
-  }).default(),
-  regionmap: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
-    layers: Joi.array().items(Joi.object({
-      url: Joi.string(),
-      format: Joi.object({
-        type: Joi.string().default('geojson')
-      }).default({
-        type: 'geojson'
-      }),
-      meta: Joi.object({
-        feature_collection_path: Joi.string().default('data')
-      }).default({
-        feature_collection_path: 'data'
-      }),
-      attribution: Joi.string(),
-      name: Joi.string(),
-      fields: Joi.array().items(Joi.object({
-        name: Joi.string(),
-        description: Joi.string()
-      }))
-    }))
+    tilemap: tilemapSchema,
+    regionmap: regionmapSchema,
+    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v6.6/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v6.7'),
   }).default(),
+  tilemap: tilemapSchema.notes('Deprecated'),
+  regionmap: regionmapSchema.notes('Deprecated'),
 
   i18n: Joi.object({
     locale: Joi.string().default('en'),

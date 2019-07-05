@@ -2,7 +2,16 @@
 
 set -e
 
-source src/dev/ci_setup/checkout_sibling_es.sh
+function report {
+  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
+    cd "$KIBANA_DIR"
+    node src/dev/failed_tests/cli
+  else
+    echo "Failure issues not created on pull requests"
+  fi
+}
+
+trap report EXIT
 
 export TEST_BROWSER_HEADLESS=1
 
@@ -24,7 +33,6 @@ installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
 node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"

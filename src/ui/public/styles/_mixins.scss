@@ -26,7 +26,7 @@
 @mixin kibana-resizer($size: ($euiSizeM + 2px), $direction: horizontal) {
   display: flex;
   flex: 0 0 $size;
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
   align-items: center;
   justify-content: center;
   margin: 0;

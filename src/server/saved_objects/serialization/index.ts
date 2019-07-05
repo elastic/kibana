@@ -24,6 +24,7 @@
 
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
+import { decodeVersion, encodeVersion } from '../version';
 
 /**
  * The root document type. In 7.0, this needs to change to '_doc'.
@@ -37,7 +38,8 @@ export interface RawDoc {
   _id: string;
   _source: any;
   _type?: string;
-  _version?: number;
+  _seq_no?: number;
+  _primary_term?: number;
 }
 
 /**
@@ -60,7 +62,7 @@ export interface SavedObjectDoc {
   type: string;
   namespace?: string;
   migrationVersion?: MigrationVersion;
-  version?: number;
+  version?: string;
   updated_at?: Date;
 
   [rootProp: string]: any;
@@ -99,8 +101,14 @@ export class SavedObjectsSerializer {
    *
    *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
    */
-  public rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
+  public rawToSavedObject({ _id, _source, _seq_no, _primary_term }: RawDoc): SavedObjectDoc {
     const { type, namespace } = _source;
+
+    const version =
+      _seq_no != null || _primary_term != null
+        ? encodeVersion(_seq_no!, _primary_term!)
+        : undefined;
+
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
@@ -108,7 +116,7 @@ export class SavedObjectsSerializer {
       attributes: _source[type],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
-      ...(_version != null && { version: _version }),
+      ...(version && { version }),
     };
   }
 
@@ -131,7 +139,7 @@ export class SavedObjectsSerializer {
       _id: this.generateRawId(namespace, type, id),
       _source: source,
       _type: ROOT_TYPE,
-      ...(version != null && { _version: version }),
+      ...(version != null && decodeVersion(version)),
     };
   }
 

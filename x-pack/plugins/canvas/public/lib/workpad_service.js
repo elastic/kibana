@@ -5,11 +5,17 @@
  */
 
 import chrome from 'ui/chrome';
-import { API_ROUTE_WORKPAD } from '../../common/lib/constants';
+import {
+  API_ROUTE_WORKPAD,
+  API_ROUTE_WORKPAD_ASSETS,
+  API_ROUTE_WORKPAD_STRUCTURES,
+} from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 
 const basePath = chrome.getBasePath();
 const apiPath = `${basePath}${API_ROUTE_WORKPAD}`;
+const apiPathAssets = `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
+const apiPathStructures = `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
 
 export function create(workpad) {
   return fetch.post(apiPath, { ...workpad, assets: workpad.assets || {} });
@@ -21,6 +27,14 @@ export function get(workpadId) {
 
 export function update(id, workpad) {
   return fetch.put(`${apiPath}/${id}`, workpad);
+}
+
+export function updateWorkpad(id, workpad) {
+  return fetch.put(`${apiPathStructures}/${id}`, workpad);
+}
+
+export function updateAssets(id, workpadAssets) {
+  return fetch.put(`${apiPathAssets}/${id}`, workpadAssets);
 }
 
 export function remove(id) {

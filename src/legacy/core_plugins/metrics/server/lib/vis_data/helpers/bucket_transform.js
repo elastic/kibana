@@ -252,7 +252,7 @@ export default {
           value: getBucketsPath(bucket.field, metrics),
         },
         script: {
-          source: 'params.value > 0 ? params.value : 0',
+          source: 'params.value > 0.0 ? params.value : 0.0',
           lang: 'painless',
         },
         gap_policy: 'skip', // seems sane

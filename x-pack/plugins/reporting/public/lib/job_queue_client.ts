@@ -21,6 +21,8 @@ export interface JobContent {
 }
 
 export interface JobInfo {
+  kibana_name: string;
+  kibana_id: string;
   browser_type: string;
   created_at: string;
   priority: number;

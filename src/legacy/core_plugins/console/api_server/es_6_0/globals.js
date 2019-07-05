@@ -62,9 +62,9 @@ export default function (api) {
 
   api.addGlobalAutocompleteRules('script', {
     __template: {
-      inline: 'SCRIPT'
+      source: 'SCRIPT'
     },
-    inline: 'SCRIPT',
+    source: 'SCRIPT',
     file: 'FILE_SCRIPT_NAME',
     id: 'SCRIPT_ID',
     lang: '',

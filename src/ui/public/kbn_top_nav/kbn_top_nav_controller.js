@@ -22,6 +22,7 @@ import { capitalize, isArray, isFunction, get } from 'lodash';
 import chrome from '../chrome';
 import filterTemplate from '../chrome/config/filter.html';
 import intervalTemplate from '../chrome/config/interval.html';
+import { i18n } from '@kbn/i18n';
 
 export function KbnTopNavControllerProvider($compile) {
   return class KbnTopNavController {
@@ -88,10 +89,14 @@ export function KbnTopNavControllerProvider($compile) {
     };
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
+      const optLabel = opt.label ? opt.label : capitalize(opt.key);
       const defaultedOpt = {
-        label: capitalize(opt.key),
+        label: optLabel,
         hasFunction: !!opt.run,
-        description: opt.run ? opt.key : `Toggle ${opt.key} view`,
+        description: opt.run ? optLabel : i18n.translate('common.ui.topNav.toggleViewAriaLabel', {
+          defaultMessage: 'Toggle {optLabel} view',
+          values: { optLabel }
+        }),
         run: (item) => this.toggle(item.key),
         ...opt
       };

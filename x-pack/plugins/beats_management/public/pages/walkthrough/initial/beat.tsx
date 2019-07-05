@@ -27,9 +27,9 @@ export class BeatsInitialEnrollmentPage extends Component<AppPageProps, Componen
   };
 
   public createEnrollmentToken = async () => {
-    const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
+    const enrollmentToken = await this.props.libs.tokens.createEnrollmentTokens();
     this.props.setUrlState({
-      enrollmentToken,
+      enrollmentToken: enrollmentToken[0],
     });
   };
 

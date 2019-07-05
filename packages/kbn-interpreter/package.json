@@ -11,8 +11,6 @@
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
-    "scriptjs": "^2.5.8",
-    "socket.io-client": "^2.1.1",
     "uuid": "3.0.1"
   },
   "devDependencies": {
@@ -23,6 +21,7 @@
     "babel-loader": "7.1.5",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "6.20.0",
+    "copy-webpack-plugin": "^4.6.0",
     "css-loader": "1.0.0",
     "del": "^3.0.0",
     "getopts": "^2.2.3",

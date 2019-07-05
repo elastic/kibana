@@ -1,3 +1,5 @@
+import { i18n } from '@kbn/i18n';
+
 angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootstrap.position'])
 
 .constant('datepickerConfig', {
@@ -400,9 +402,15 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
 
 .constant('datepickerPopupConfig', {
   datepickerPopup: 'yyyy-MM-dd',
-  currentText: 'Today',
-  clearText: 'Clear',
-  closeText: 'Done',
+  currentText: i18n.translate('common.ui.angularBootstrap.datepicker.datepickerPopupConfig.todayLabel', {
+    defaultMessage: 'Today'
+  }),
+  clearText: i18n.translate('common.ui.angularBootstrap.datepicker.datepickerPopupConfig.clearLabel', {
+    defaultMessage: 'Clear'
+  }),
+  closeText: i18n.translate('common.ui.angularBootstrap.datepicker.datepickerPopupConfig.doneLabel', {
+    defaultMessage: 'Done'
+  }),
   closeOnDateSelection: true,
   appendToBody: false,
   showButtonBar: true

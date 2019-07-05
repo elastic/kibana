@@ -11,16 +11,21 @@ import '../../lib/flot-charts';
 import { debounce, includes } from 'lodash';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
-import './plot.scss';
 
 const render = (domNode, config, handlers) => {
   // TODO: OH NOES
-  if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);
-  if (!includes($.plot.plugins, text)) $.plot.plugins.push(text);
+  if (!includes($.plot.plugins, size)) {
+    $.plot.plugins.push(size);
+  }
+  if (!includes($.plot.plugins, text)) {
+    $.plot.plugins.push(text);
+  }
 
   let plot;
   function draw() {
-    if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
+    if (domNode.clientHeight < 1 || domNode.clientWidth < 1) {
+      return;
+    }
 
     if (config.font) {
       const legendFormatter = label => {
@@ -46,7 +51,9 @@ const render = (domNode, config, handlers) => {
   }
 
   function destroy() {
-    if (plot) plot.shutdown();
+    if (plot) {
+      plot.shutdown();
+    }
   }
 
   handlers.onDestroy(destroy);

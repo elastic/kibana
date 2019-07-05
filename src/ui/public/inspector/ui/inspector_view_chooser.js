@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -72,7 +73,11 @@ class InspectorViewChooser extends Component {
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"
       >
-        View: { this.props.selectedView.title }
+        <FormattedMessage
+          id="common.ui.inspector.view"
+          defaultMessage="View: {viewName}"
+          values={{ viewName: this.props.selectedView.title }}
+        />
       </EuiButtonEmpty>
     );
   }
@@ -83,7 +88,11 @@ class InspectorViewChooser extends Component {
         position="bottom"
         content={this.props.selectedView.help}
       >
-        <span>View: { this.props.selectedView.title }</span>
+        <FormattedMessage
+          id="common.ui.inspector.view"
+          defaultMessage="View: {viewName}"
+          values={{ viewName: this.props.selectedView.title }}
+        />
       </EuiToolTip>
     );
   }

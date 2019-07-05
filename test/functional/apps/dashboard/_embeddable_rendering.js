@@ -30,12 +30,13 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
+  const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
   const expectAllDataRenders = async () => {
-    await dashboardExpect.pieSliceCount(16);
+    await pieChart.expectPieSliceCount(16);
     await dashboardExpect.seriesElementCount(19);
     await dashboardExpect.dataTableRowCount(5);
     await dashboardExpect.savedSearchRowCount(50);
@@ -57,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
   };
 
   const expectNoDataRenders = async () => {
-    await dashboardExpect.pieSliceCount(0);
+    await pieChart.expectPieSliceCount(0);
     await dashboardExpect.seriesElementCount(0);
     await dashboardExpect.dataTableRowCount(0);
     await dashboardExpect.savedSearchRowCount(0);
@@ -117,7 +118,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
     });
 
-    it('initial render test', async () => {
+    it.skip('initial render test', async () => {
       await expectAllDataRenders();
     });
 

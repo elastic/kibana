@@ -19,13 +19,15 @@ export function normalizeType(type) {
       'token_count',
       '_version',
     ],
-    date: ['date'],
+    date: ['date', 'datetime'],
     boolean: ['boolean'],
     null: ['null'],
   };
 
   const normalizedType = Object.keys(normalTypes).find(t => normalTypes[t].includes(type));
 
-  if (normalizedType) return normalizedType;
+  if (normalizedType) {
+    return normalizedType;
+  }
   throw new Error(`Canvas does not yet support type: ${type}`);
 }

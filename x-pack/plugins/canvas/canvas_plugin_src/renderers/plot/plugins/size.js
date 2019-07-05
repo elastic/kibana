@@ -53,7 +53,9 @@ const options = {
 
 function drawbubbleDefault(ctx, series, x, y, radius, c) {
   ctx.fillStyle = c;
-  if (series.bubbles.fill) ctx.globalAlpha = series.bubbles.fill;
+  if (series.bubbles.fill) {
+    ctx.globalAlpha = series.bubbles.fill;
+  }
   ctx.strokeStyle = c;
 
   ctx.lineWidth = Math.round(radius / 3);
@@ -61,15 +63,20 @@ function drawbubbleDefault(ctx, series, x, y, radius, c) {
 
   ctx.arc(x, y, radius, 0, Math.PI * 2, true);
   ctx.closePath();
-  if (series.bubbles.fill) ctx.fill();
-  else ctx.stroke();
+  if (series.bubbles.fill) {
+    ctx.fill();
+  } else {
+    ctx.stroke();
+  }
 }
 
 function init(plot) {
   plot.hooks.processOptions.push(processOptions);
 
   function processOptions(plot, options) {
-    if (options.series.bubbles.active) plot.hooks.drawSeries.push(drawSeries);
+    if (options.series.bubbles.active) {
+      plot.hooks.drawSeries.push(drawSeries);
+    }
   }
 
   function drawSeries(plot, ctx, series) {
@@ -88,8 +95,12 @@ function init(plot) {
 
         const delta = maxPoint - minPoint;
         const radius = (function() {
-          if (size == null) return 0; // If there is no size, draw nothing
-          if (delta === 0) return series.bubbles.size.min; // If there is no difference between the min and the max, draw the minimum bubble.
+          if (size == null) {
+            return 0;
+          } // If there is no size, draw nothing
+          if (delta === 0) {
+            return series.bubbles.size.min;
+          } // If there is no difference between the min and the max, draw the minimum bubble.
 
           // Otherwise draw something between the min and max acceptable radius.
           return (

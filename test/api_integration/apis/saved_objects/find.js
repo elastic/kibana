@@ -42,7 +42,7 @@ export default function ({ getService }) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 1,
+                  version: 'WzIsMV0=',
                   attributes: {
                     'title': 'Count of requests'
                   }

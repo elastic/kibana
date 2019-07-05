@@ -5,7 +5,13 @@ exports[`BucketSpanEstimator renders the button 1`] = `
   className="bucket-span-estimator"
 >
   <EuiToolTip
-    content="Experimental feature for estimating bucket span."
+    content={
+      <FormattedMessage
+        defaultMessage="Experimental feature for estimating bucket span."
+        id="xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonTooltip"
+        values={Object {}}
+      />
+    }
     delay="regular"
     position="bottom"
   >
@@ -30,7 +36,13 @@ exports[`BucketSpanEstimator renders the loading button 1`] = `
   className="bucket-span-estimator"
 >
   <EuiToolTip
-    content="Experimental feature for estimating bucket span."
+    content={
+      <FormattedMessage
+        defaultMessage="Experimental feature for estimating bucket span."
+        id="xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonTooltip"
+        values={Object {}}
+      />
+    }
     delay="regular"
     position="bottom"
   >

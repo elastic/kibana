@@ -22,19 +22,25 @@ import { Storage } from 'ui/storage';
 
 const localStorage = new Storage(window.localStorage);
 
-const defaultIsDuplicate = (oldItem: string, newItem: string) => {
+const defaultIsDuplicate = (oldItem: any, newItem: any) => {
   return _.isEqual(oldItem, newItem);
 };
 
-export class PersistedLog {
+interface PersistedLogOptions<T = any> {
+  maxLength?: number | string;
+  filterDuplicates?: boolean;
+  isDuplicate?: (oldItem: T, newItem: T) => boolean;
+}
+
+export class PersistedLog<T = any> {
   public name: string;
   public maxLength?: number;
   public filterDuplicates?: boolean;
-  public isDuplicate: (oldItem: any, newItem: any) => boolean;
+  public isDuplicate: (oldItem: T, newItem: T) => boolean;
   public storage: Storage;
-  public items: any[];
+  public items: T[];
 
-  constructor(name: string, options: PersistedLogOptions = {}, storage = localStorage) {
+  constructor(name: string, options: PersistedLogOptions<T> = {}, storage = localStorage) {
     this.name = name;
     this.maxLength =
       typeof options.maxLength === 'string'
@@ -76,10 +82,4 @@ export class PersistedLog {
   public get() {
     return _.cloneDeep(this.items);
   }
-}
-
-interface PersistedLogOptions {
-  maxLength?: number | string;
-  filterDuplicates?: boolean;
-  isDuplicate?: (oldItem: string, newItem: string) => boolean;
 }

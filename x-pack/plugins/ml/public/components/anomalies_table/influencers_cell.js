@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 
 /*
  * Component for rendering a list of record influencers inside a cell in the anomalies table.
@@ -60,7 +62,13 @@ export class InfluencersCell extends Component {
           <EuiLink
             onClick={() => this.toggleAllInfluencers()}
           >
-          and {othersCount} more
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.influencersCell.moreInfluencersLinkText"
+              defaultMessage="and {othersCount} more"
+              values={{
+                othersCount,
+              }}
+            />
           </EuiLink>
         </div>
       );
@@ -70,7 +78,10 @@ export class InfluencersCell extends Component {
           <EuiLink
             onClick={() => this.toggleAllInfluencers()}
           >
-          show less
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.influencersCell.showLessInfluencersLinkText"
+              defaultMessage="show less"
+            />
           </EuiLink>
         </div>
       );

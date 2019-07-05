@@ -23,6 +23,7 @@ import { registerStatusPage, registerStatusApi, registerStatsApi } from './route
 import { getOpsStatsCollector } from './collectors';
 import Oppsy from 'oppsy';
 import { cloneDeep } from 'lodash';
+import { getOSInfo } from './lib/get_os_info';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -53,4 +54,7 @@ export function statusMixin(kbnServer, server, config) {
   registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);
   registerStatsApi(kbnServer, server, config);
+
+  // expore shared functionality
+  server.decorate('server', 'getOSInfo', getOSInfo);
 }

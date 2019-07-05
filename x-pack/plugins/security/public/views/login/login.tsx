@@ -14,6 +14,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 import { parse } from 'url';
 import { LoginState } from '../../../common/login_state';
 import './login.less';
@@ -49,15 +50,17 @@ interface AnyObject {
         const msgQueryParam = parse($window.location.href, true).query.msg || '';
 
         render(
-          <LoginPage
-            http={$http}
-            window={$window}
-            infoMessage={get(messageMap, msgQueryParam)}
-            loginState={loginState}
-            isSecureConnection={isSecure}
-            requiresSecureConnection={secureCookies}
-            next={next}
-          />,
+          <I18nContext>
+            <LoginPage
+              http={$http}
+              window={$window}
+              infoMessage={get(messageMap, msgQueryParam)}
+              loginState={loginState}
+              isSecureConnection={isSecure}
+              requiresSecureConnection={secureCookies}
+              next={next}
+            />
+          </I18nContext>,
           domNode
         );
       });

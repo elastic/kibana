@@ -34,7 +34,8 @@ function getColors(props) {
   if (model.gauge_color_rules) {
     model.gauge_color_rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
-        const value = series[0] && getLastValue(series[0].data) || 0;
+        const value = (series[0] && getLastValue(series[0].data)) ||
+          series[1] && getLastValue(series[1].data) || 0;
         if (_[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
@@ -97,7 +98,8 @@ GaugeVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  getConfig: PropTypes.func
 };
 
 export default visWithSplits(GaugeVisualization);

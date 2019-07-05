@@ -22,7 +22,7 @@ import expect from 'expect.js';
 import Chance from 'chance';
 
 import { Storage } from '../../storage';
-import StubBrowserStorage from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
 

@@ -51,6 +51,8 @@ export const NORMALIZED_DERIVATIVE_UNIT = '1s';
  * Values for column sorting in table options
  * @type {number} 1 or -1
  */
+export const EUI_SORT_ASCENDING = 'asc';
+export const EUI_SORT_DESCENDING = 'desc';
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
 
@@ -148,3 +150,5 @@ export const DEBOUNCE_FAST_MS = 10; // roughly how long it takes to render a fra
  * Configuration key for setting the email address used for cluster alert notifications.
  */
 export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notifications.email_address';
+
+export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';

@@ -17,7 +17,7 @@ describe('field format map', function () {
   const indexPatternSavedObject = {
     id: 'logstash-*',
     type: 'index-pattern',
-    version: 4,
+    version: 'abc',
     attributes: {
       title: 'logstash-*',
       timeFieldName: '@timestamp',

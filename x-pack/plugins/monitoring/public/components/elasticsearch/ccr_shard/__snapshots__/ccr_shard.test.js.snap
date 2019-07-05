@@ -115,44 +115,42 @@ exports[`CcrShard that it renders normally 1`] = `
       responsive={true}
       wrap={true}
     >
-      <React.Fragment>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-          key="0"
-          style={
-            Object {
-              "minWidth": "45%",
-            }
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        key="0"
+        style={
+          Object {
+            "minWidth": "45%",
           }
-        >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
-          >
-            <InjectIntl(MonitoringTimeseriesContainerUI) />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
+        }
+      >
+        <EuiPanel
           grow={true}
-          key="1"
-          style={
-            Object {
-              "minWidth": "45%",
-            }
-          }
+          hasShadow={false}
+          paddingSize="m"
         >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
-          >
-            <InjectIntl(MonitoringTimeseriesContainerUI) />
-          </EuiPanel>
-        </EuiFlexItem>
-      </React.Fragment>
+          <InjectIntl(MonitoringTimeseriesContainerUI) />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        key="1"
+        style={
+          Object {
+            "minWidth": "45%",
+          }
+        }
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <InjectIntl(MonitoringTimeseriesContainerUI) />
+        </EuiPanel>
+      </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule
       margin="l"
@@ -177,23 +175,22 @@ exports[`CcrShard that it renders normally 1`] = `
       initialIsOpen={false}
       paddingSize="l"
     >
-      <React.Fragment>
-        <EuiTitle
-          size="s"
-          textTransform="none"
-        >
-          <h4>
-            September 27, 2018 9:32:09 AM
-          </h4>
-        </EuiTitle>
-        <EuiHorizontalRule
-          margin="l"
-          size="full"
-        />
-        <EuiCodeBlock
-          language="json"
-        >
-          {
+      <EuiTitle
+        size="s"
+        textTransform="none"
+      >
+        <h4>
+          September 27, 2018 9:32:09 AM
+        </h4>
+      </EuiTitle>
+      <EuiHorizontalRule
+        margin="l"
+        size="full"
+      />
+      <EuiCodeBlock
+        language="json"
+      >
+        {
   "read_exceptions": [],
   "follower_global_checkpoint": 3049,
   "follower_index": "follower",
@@ -218,8 +215,7 @@ exports[`CcrShard that it renders normally 1`] = `
   "total_index_time_millis": 41827,
   "total_transferred_bytes": 234156
 }
-        </EuiCodeBlock>
-      </React.Fragment>
+      </EuiCodeBlock>
     </EuiAccordion>
   </EuiPageBody>
 </EuiPage>

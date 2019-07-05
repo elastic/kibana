@@ -16,6 +16,7 @@ import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
 import { validateConfig } from './server/lib/validate_config';
 import { validateMaxContentLength } from './server/lib/validate_max_content_length';
+import { validateBrowser } from './server/lib/validate_browser';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
 import { PHANTOM, createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
@@ -95,10 +96,10 @@ export const reporting = (kibana) => {
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
             type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: make chromium the only valid option in 7.0
-            autoDownload: Joi.boolean().when('$dev', {
+            autoDownload: Joi.boolean().when('$dist', {
               is: true,
-              then: Joi.default(true),
-              otherwise: Joi.default(false),
+              then: Joi.default(false),
+              otherwise: Joi.default(true),
             }),
             chromium: Joi.object({
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
@@ -146,6 +147,7 @@ export const reporting = (kibana) => {
 
     init: async function (server) {
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
+      const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
@@ -153,6 +155,7 @@ export const reporting = (kibana) => {
 
       validateConfig(config, logWarning);
       validateMaxContentLength(server, logWarning);
+      validateBrowser(browserFactory, logWarning);
       logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
@@ -168,7 +171,7 @@ export const reporting = (kibana) => {
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getReportingUsageCollector(server));
 
-      server.expose('browserDriverFactory', await createBrowserDriverFactory(server));
+      server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes

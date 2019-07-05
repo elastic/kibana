@@ -6,10 +6,9 @@
 
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { FrameworkUser } from '../framework/adapter_types';
-
-import { BeatTag, CMBeat } from '../../../../common/domain_types';
+import { BeatTag } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
 
 export class ElasticsearchTagsAdapter implements CMTagsAdapter {
@@ -19,7 +18,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     this.database = database;
   }
 
-  public async getAll(user: FrameworkUser, ESQuery?: any) {
+  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]> {
     const params = {
       ignore: [404],
       _source: true,
@@ -47,10 +46,10 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     const response = await this.database.search(user, params);
     const tags = get<any>(response, 'hits.hits', []);
 
-    return tags.map((tag: any) => tag._source.tag);
+    return tags.map((tag: any) => ({ hasConfigurationBlocksTypes: [], ...tag._source.tag }));
   }
 
-  public async delete(user: FrameworkUser, tagIds: string[]) {
+  public async delete(user: FrameworkUser, tagIds: string[]): Promise<boolean> {
     const ids = tagIds.map(tag => tag);
 
     const params = {
@@ -66,7 +65,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
     const beatsResponse = await this.database.search(user, params);
 
-    const beats = get<CMBeat[]>(beatsResponse, 'hits.hits', []).map(
+    const beats = get<BeatTag[]>(beatsResponse, 'hits.hits', []).map(
       (beat: any) => beat._source.beat
     );
 
@@ -75,9 +74,10 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     if (activeBeats.length !== 0) {
       return false;
     }
-    const beatIds = inactiveBeats.map((beat: CMBeat) => beat.id);
+    const beatIds = inactiveBeats.map((beat: BeatTag) => beat.id);
 
-    const bulkBeatsUpdates = flatten(
+    // While we block tag deletion when on an active beat, we should remove from inactive
+    const bulkInactiveBeatsUpdates = flatten(
       beatIds.map(beatId => {
         const script = `
         def beat = ctx._source.beat;
@@ -97,7 +97,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     const bulkTagsDelete = ids.map(tagId => ({ delete: { _id: `tag:${tagId}` } }));
 
     await this.database.bulk(user, {
-      body: flatten([...bulkBeatsUpdates, ...bulkTagsDelete]),
+      body: flatten([...bulkInactiveBeatsUpdates, ...bulkTagsDelete]),
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
@@ -106,7 +106,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     return true;
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
+  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]> {
     if (tagIds.length === 0) {
       return [];
     }
@@ -126,12 +126,13 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     return get(response, 'docs', [])
       .filter((b: any) => b.found)
       .map((b: any) => ({
+        hasConfigurationBlocksTypes: [],
         ...b._source.tag,
         id: b._id.replace('tag:', ''),
       }));
   }
 
-  public async upsertTag(user: FrameworkUser, tag: BeatTag) {
+  public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string> {
     const body = {
       tag,
       type: 'tag',
@@ -146,6 +147,39 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     };
     const response = await this.database.index(user, params);
 
-    return get(response, 'result');
+    return get<string>(response, 'result');
+  }
+
+  public async getWithoutConfigTypes(
+    user: FrameworkUser,
+    blockTypes: string[]
+  ): Promise<BeatTag[]> {
+    const body = {
+      query: {
+        bool: {
+          filter: {
+            match: {
+              type: 'tag',
+            },
+          },
+          must_not: {
+            terms: { 'tag.hasConfigurationBlocksTypes': blockTypes },
+          },
+        },
+      },
+    };
+
+    const params = {
+      body,
+      index: INDEX_NAMES.BEATS,
+      ignore: [404],
+      _source: true,
+      size: 10000,
+      type: '_doc',
+    };
+    const response = await this.database.search(user, params);
+    const tags = get<any>(response, 'hits.hits', []);
+
+    return tags.map((tag: any) => ({ hasConfigurationBlocksTypes: [], ...tag._source.tag }));
   }
 }

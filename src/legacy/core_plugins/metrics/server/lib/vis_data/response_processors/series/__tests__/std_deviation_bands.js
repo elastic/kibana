@@ -35,7 +35,7 @@ describe('stdDeviationBands(resp, panel, series)', () => {
       line_width: 1,
       point_size: 1,
       fill: 0,
-      color: '#F00',
+      color: 'rgb(255, 0, 0)',
       id: 'test',
       split_mode: 'everything',
       metrics: [{
@@ -91,7 +91,7 @@ describe('stdDeviationBands(resp, panel, series)', () => {
     expect(results[0]).to.eql({
       id: 'test:upper',
       label: 'Std. Deviation of cpu',
-      color: '#FF0000',
+      color: 'rgb(255, 0, 0)',
       lines: { show: true, fill: 0.5, lineWidth: 0 },
       points: { show: false },
       fillBetween: 'test:lower',
@@ -103,7 +103,7 @@ describe('stdDeviationBands(resp, panel, series)', () => {
 
     expect(results[1]).to.eql({
       id: 'test:lower',
-      color: '#FF0000',
+      color: 'rgb(255, 0, 0)',
       lines: { show: true, fill: false, lineWidth: 0 },
       points: { show: false },
       data: [

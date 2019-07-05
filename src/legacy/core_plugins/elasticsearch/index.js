@@ -25,11 +25,10 @@ import { createDataCluster } from './lib/create_data_cluster';
 import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
+import { createProxy } from './lib/create_proxy';
 import filterHeaders from './lib/filter_headers';
 
-import { createProxy } from './lib/create_proxy';
-
-const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
+const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -46,7 +45,10 @@ export default function (kibana) {
 
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        sniffOnStart: Joi.boolean().default(false),
+        sniffInterval: Joi.number().allow(false).default(false),
+        sniffOnConnectionFault: Joi.boolean().default(false),
+        hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single().default('http://localhost:9200'),
         preserveHost: Joi.boolean().default(true),
         username: Joi.string(),
         password: Joi.string(),
@@ -58,12 +60,15 @@ export default function (kibana) {
         startupTimeout: Joi.number().default(5000),
         logQueries: Joi.boolean().default(false),
         ssl: sslSchema,
-        apiVersion: Joi.string().default('6.x'),
+        apiVersion: Joi.string().default('6.7'),
         healthCheck: Joi.object({
           delay: Joi.number().default(2500)
         }).default(),
         tribe: Joi.object({
-          url: Joi.string().uri({ scheme: ['http', 'https'] }),
+          sniffOnStart: Joi.boolean().default(false),
+          sniffInterval: Joi.number().allow(false).default(false),
+          sniffOnConnectionFault: Joi.boolean().default(false),
+          hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single(),
           preserveHost: Joi.boolean().default(true),
           username: Joi.string(),
           password: Joi.string(),
@@ -104,6 +109,7 @@ export default function (kibana) {
       return [
         rename('ssl.ca', 'ssl.certificateAuthorities'),
         rename('ssl.cert', 'ssl.certificate'),
+        rename('url', 'hosts'),
         sslVerify(),
         rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'),
         rename('tribe.ssl.cert', 'tribe.ssl.certificate'),
@@ -113,12 +119,16 @@ export default function (kibana) {
           if (!tribe) {
             return;
           }
-
+          const deprecatedUrl = get(settings, 'tribe.url');
+          if (deprecatedUrl) {
+            set(settings, 'tribe.hosts', [deprecatedUrl]);
+            unset(settings(tribe.url));
+          }
           const tribeKeys = Object.keys(tribe);
           if (tribeKeys.length > 0) {
             const keyList = tribeKeys.map(k => `"elasticsearch.tribe.${k}"`).join(',');
             log(`Config keys [${keyList}] are deprecated. Tribe nodes will be removed in 7.0 and should be replaced ` +
-                `with Cross-Cluster-Search.`);
+              `with Cross-Cluster-Search.`);
           }
         }
       ];
@@ -130,7 +140,7 @@ export default function (kibana) {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
           esApiVersion: options.apiVersion,
-          esDataIsTribe: get(options, 'tribe.url') ? true : false,
+          esDataIsTribe: get(options, 'tribe.hosts.length') ? true : false,
         };
       }
     },
@@ -147,8 +157,7 @@ export default function (kibana) {
       createDataCluster(server);
       createAdminCluster(server);
 
-      createProxy(server, 'POST', '/{index}/_search');
-      createProxy(server, 'POST', '/_msearch');
+      createProxy(server);
 
       // Set up the health check service and start it.
       const { start, waitUntilReady } = healthCheck(this, server);

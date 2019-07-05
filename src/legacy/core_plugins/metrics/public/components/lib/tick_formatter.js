@@ -29,7 +29,7 @@ const durationsLookup = durationInputOptions.reduce((acc, row) => {
 
 export default (format = '0,0.[00]', template, getConfig = null) => {
   if (!template) template = '{{value}}';
-  const render = handlebars.compile(template);
+  const render = handlebars.compile(template, { knownHelpersOnly: true });
   const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
   let formatter;
   if (durationFormatTest.test(format)) {

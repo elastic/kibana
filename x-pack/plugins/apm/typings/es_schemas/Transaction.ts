@@ -4,39 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2, ContextService } from './APMDoc';
+import { APMDocV1, APMDocV2 } from './APMDoc';
+import {
+  ContextProcess,
+  ContextRequest,
+  ContextService,
+  ContextSystem
+} from './Context';
 
 interface Processor {
   name: 'transaction';
   event: 'transaction';
 }
 
-interface ContextSystem {
-  architecture?: string;
-  hostname?: string;
-  ip?: string;
-  platform?: string;
-}
-
 interface Context {
-  process?: {
-    pid: number;
-    [key: string]: unknown;
-  };
+  process?: ContextProcess;
   service: ContextService;
   system?: ContextSystem;
-  request: {
-    url: {
-      full: string;
-      [key: string]: string;
-    };
-    method: string;
-    [key: string]: unknown;
-  };
+  request: ContextRequest;
   user?: {
     id: string;
     username?: string;
     email?: string;
+  };
+  page?: {
+    url: string;
   };
   [key: string]: unknown;
 }
@@ -90,6 +82,19 @@ export interface TransactionV2 extends APMDocV2 {
       };
     };
     type: string;
+  };
+  kubernetes?: {
+    pod: {
+      uid: string;
+    };
+  };
+  docker?: {
+    container: {
+      id: string;
+    };
+  };
+  container: {
+    id: string;
   };
 }
 

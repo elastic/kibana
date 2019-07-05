@@ -20,6 +20,7 @@
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { I18nContext } from 'ui/i18n';
 import indexTemplate from './index.html';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
@@ -39,10 +40,12 @@ function updateAdvancedSettings($scope, config, query) {
     }
 
     render(
-      <AdvancedSettings
-        config={config}
-        query={query}
-      />,
+      <I18nContext>
+        <AdvancedSettings
+          config={config}
+          query={query}
+        />
+      </I18nContext>,
       node,
     );
   });
@@ -85,11 +88,15 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings'
 });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'advanced_settings',
-    title: 'Advanced Settings',
-    description: 'Directly edit settings that control behavior in Kibana.',
+    title: i18n('kbn.management.settings.advancedSettingsLabel', {
+      defaultMessage: 'Advanced Settings',
+    }),
+    description: i18n('kbn.management.settings.advancedSettingsDescription', {
+      defaultMessage: 'Directly edit settings that control behavior in Kibana.',
+    }),
     icon: 'advancedSettingsApp',
     path: '/app/kibana#/management/kibana/settings',
     showOnHomePage: false,

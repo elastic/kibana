@@ -1,6 +1,10 @@
 <div class="visEditorAgg__formRow--flex" ng-controller="agg.type.params.byName.precision.controller">
   <div ng-if="!agg.params.autoPrecision" class="form-group">
-    <label for="visEditorMapPrecision{{agg.id}}">Precision</label>
+    <label
+      for="visEditorMapPrecision{{agg.id}}"
+      i18n-id="common.ui.aggTypes.precisionLabel"
+      i18n-default-message="Precision"
+    ></label>
     <div class="visEditorAgg__formRow--flex">
       <input
         id="visEditorMapPrecision{{agg.id}}"
@@ -21,19 +25,29 @@
 
 <div>
   <label>
-    <input type="checkbox"
-    name="autoPrecision"
-    ng-model="agg.params.autoPrecision">
-    Change precision on map zoom
+    <input
+      type="checkbox"
+      name="autoPrecision"
+      ng-model="agg.params.autoPrecision"
+    >
+    <span
+      i18n-id="common.ui.aggTypes.changePrecisionLabel"
+      i18n-default-message="Change precision on map zoom"
+    ></span>
   </label>
 </div>
 
 <div>
   <label>
-    <input type="checkbox"
-           name="useGeocentroid"
-           ng-model="agg.params.useGeocentroid">
-    Place markers off grid (use geocentroid)
+    <input
+      type="checkbox"
+      name="useGeocentroid"
+      ng-model="agg.params.useGeocentroid"
+    >
+    <span
+      i18n-id="common.ui.aggTypes.placeMarkersOffGridLabel"
+      i18n-default-message="Place markers off grid (use geocentroid)"
+    ></span>
   </label>
 </div>
 
@@ -45,12 +59,13 @@
       name="isFilteredByCollar"
       ng-model="agg.params.isFilteredByCollar"
     >
-
-    Only request data around map extent
-
+    <span
+      i18n-id="common.ui.aggTypes.onlyRequestDataAroundMapExtentLabel"
+      i18n-default-message="Only request data around map extent"
+    ></span>
     <icon-tip
       position="'right'"
-      content="'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar'"
+      content="::'common.ui.aggTypes.onlyRequestDataAroundMapExtentTooltip' | i18n: { defaultMessage: 'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar' }"
     ></icon-tip>
   </label>
 </div>

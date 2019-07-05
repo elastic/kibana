@@ -71,6 +71,26 @@ describe('ML - chart utils', () => {
       expect(limits.max).to.be(105);
     });
 
+    it('returns minimum of 0 when data includes an anomaly for missing data', () => {
+      const data = [
+        { date: new Date('2017-02-23T09:00:00.000Z'), value: 22.2 },
+        { date: new Date('2017-02-23T10:00:00.000Z'), value: 23.3 },
+        { date: new Date('2017-02-23T11:00:00.000Z'), value: 24.4 },
+        {
+          date: new Date('2017-02-23T12:00:00.000Z'),
+          value: null, anomalyScore: 97.32085,
+          actual: [0], typical: [22.2]
+        },
+        { date: new Date('2017-02-23T13:00:00.000Z'), value: 21.3 },
+        { date: new Date('2017-02-23T14:00:00.000Z'), value: 21.2 },
+        { date: new Date('2017-02-23T15:00:00.000Z'), value: 21.1 }
+      ];
+
+      const limits = chartLimits(data);
+      expect(limits.min).to.be(0);
+      expect(limits.max).to.be(24.4);
+    });
+
   });
 
   describe('filterAxisLabels', () => {

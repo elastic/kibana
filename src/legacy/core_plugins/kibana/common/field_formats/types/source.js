@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { noWhiteSpace } from '../../utils/no_white_space';
-import { toJson } from '../../utils/aggressive_parse';
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
 const templateHtml = `
@@ -46,7 +45,7 @@ export function createSourceFormat(FieldFormat) {
   }
 
   SourceFormat.prototype._convert = {
-    text: (value) => toJson(value),
+    text: (value) => JSON.stringify(value),
     html: function sourceToHtml(source, field, hit) {
       if (!field) return _.escape(this.getConverterFor('text')(source));
 

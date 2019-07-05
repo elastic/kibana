@@ -8,16 +8,16 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
   EuiInMemoryTable,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 // @ts-ignore
@@ -28,6 +28,7 @@ import { UserProfile } from '../../../../../xpack_main/public/services/user_prof
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
+import { getSpacesFeatureDescription } from '../../../lib/constants';
 import { SpacesManager } from '../../../lib/spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
@@ -66,13 +67,11 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage restrictWidth className="spcGridPage">
-        <EuiPageBody>
-          <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-          <SecureSpaceMessage userProfile={this.props.userProfile} />
-        </EuiPageBody>
+      <div className="spcGridPage">
+        <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
+        <SecureSpaceMessage userProfile={this.props.userProfile} />
         {this.getConfirmDeleteModal()}
-      </EuiPage>
+      </div>
     );
   }
 
@@ -86,18 +85,21 @@ class SpacesGridPageUI extends Component<Props, State> {
       <Fragment>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem grow={false}>
-            <EuiText>
+            <EuiTitle size="m">
               <h1>
                 <FormattedMessage
                   id="xpack.spaces.management.spacesGridPage.spacesTitle"
                   defaultMessage="Spaces"
                 />
               </h1>
+            </EuiTitle>
+            <EuiText color="subdued">
+              <p>{getSpacesFeatureDescription()}</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size={'xl'} />
+        <EuiSpacer size="l" />
 
         <EuiInMemoryTable
           itemId={'id'}
@@ -306,33 +308,45 @@ class SpacesGridPageUI extends Component<Props, State> {
         }),
         actions: [
           {
-            name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
-              defaultMessage: 'Edit',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionDescription',
-              defaultMessage: 'Edit this space.',
-            }),
-            onClick: this.onEditSpaceClick,
-            type: 'icon',
-            icon: 'pencil',
-            color: 'primary',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
+                      defaultMessage: `Edit {spaceName}.`,
+                    },
+                    {
+                      spaceName: record.name,
+                    }
+                  )}
+                  color={'primary'}
+                  iconType={'pencil'}
+                  onClick={() => this.onEditSpaceClick(record)}
+                />
+              );
+            },
           },
           {
             available: (record: Space) => !isReservedSpace(record),
-            name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
-              defaultMessage: 'Delete',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.deleteThisSpaceActionDescription',
-              defaultMessage: 'Delete this space.',
-            }),
-            onClick: this.onDeleteSpaceClick,
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
+                      defaultMessage: `Delete {spaceName}.`,
+                    },
+                    {
+                      spaceName: record.name,
+                    }
+                  )}
+                  color={'danger'}
+                  iconType={'trash'}
+                  onClick={() => this.onDeleteSpaceClick(record)}
+                />
+              );
+            },
           },
         ],
       },

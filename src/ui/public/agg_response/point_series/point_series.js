@@ -34,7 +34,7 @@ export function AggResponsePointSeriesProvider(Private) {
 
     chart.tooltipFormatter = tooltipFormatter;
 
-    initXAxis(chart);
+    initXAxis(chart, table);
     initYAxis(chart);
 
     const datedX = aspects.x.aggConfig.type.ordered && aspects.x.aggConfig.type.ordered.date;

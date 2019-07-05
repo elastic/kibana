@@ -10,6 +10,7 @@ import {
   EuiCheckbox,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiPopover
 } from '@elastic/eui';
 import { showTelemetryOptIn, getTelemetryFetcher, PRIVACY_STATEMENT_URL, OptInExampleFlyout } from '../../lib/telemetry';
@@ -60,14 +61,15 @@ export class TelemetryOptIn extends React.Component {
     if (!isStartTrial) {
       toCurrentCustomers = (
         <Fragment>
-          <EuiText>
-            <p>
+          <EuiSpacer  size="s"/>
+          <EuiTitle size="s">
+            <h4>
               <FormattedMessage
                 id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
-                defaultMessage="Gold and platinum customers: help support give you better service."
+                defaultMessage="Help Elastic support provide better service"
               />
-            </p>
-          </EuiText>
+            </h4>
+          </EuiTitle>
           <EuiSpacer  size="s"/>
         </Fragment>
       );

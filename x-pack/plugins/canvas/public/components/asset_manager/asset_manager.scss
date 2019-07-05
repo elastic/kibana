@@ -1,5 +1,4 @@
 .canvasAssetManager {
-
   .canvasAssetManager__modalHeader {
     flex-wrap: wrap;
   }
@@ -15,8 +14,6 @@
     flex-grow: 0;
     min-width: 40%;
     align-items: center;
-    justify-content: flex-end;
-    padding-right: $euiSize;
 
     @include euiBreakpoint('xs', 's') {
       flex-grow: 1;
@@ -27,11 +24,21 @@
     margin: 0;
   }
 
+  .canvasAssetManager__fileUploadWrapper {
+    justify-content: flex-end;
+    padding-right: $euiSize;
+  }
+
   // ASSETS LIST
 
   .canvasAssetManager__asset {
     text-align: center;
     overflow: hidden; // hides image from outer panel boundaries
+  }
+
+  .canvasAssetManager__emptyPanel {
+    max-width: 400px;
+    margin: 0 auto;
   }
 
   .canvasAssetManager__thumb {
@@ -51,5 +58,9 @@
       height: 164px; // nice default proportions for typical 4x3 images
       opacity: 0; // only show the background image (which will properly keep proportions)
     }
+  }
+
+  .canvasAssetManager__modalFooter {
+    justify-content: space-between;
   }
 }

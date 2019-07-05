@@ -93,6 +93,12 @@ describe('Top hit metric', function () {
     expect(aggDsl.top_hits.docvalue_fields).to.eql([ { field: 'bytes', format: 'use_field_mapping' } ]);
   });
 
+  it('requests both source and docvalues_fields for date aggregatable fields', function () {
+    init({ field: '@timestamp' });
+    expect(aggDsl.top_hits._source).to.be('@timestamp');
+    expect(aggDsl.top_hits.docvalue_fields).to.eql([ { field: '@timestamp', format: 'date_time' } ]);
+  });
+
   it('requests just source for aggregatable text fields', function () {
     init({ field: 'machine.os' });
     expect(aggDsl.top_hits._source).to.be('machine.os');

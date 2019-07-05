@@ -34,8 +34,8 @@ export function registerDeleteRoute(server) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/watcher/watches',
-    method: 'DELETE',
+    path: '/api/watcher/watches/delete',
+    method: 'POST',
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 

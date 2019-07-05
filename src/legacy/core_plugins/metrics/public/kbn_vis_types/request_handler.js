@@ -20,11 +20,9 @@
 import { validateInterval } from '../lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
   const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
-  const buildEsQuery = Private(BuildESQueryProvider);
 
   return {
     name: 'metrics',
@@ -39,7 +37,8 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [buildEsQuery(undefined, [query], filters)],
+            query: Array.isArray(query) ? query : [query],
+            filters,
             panels: [panel],
             state: uiStateObj
           };

@@ -62,6 +62,15 @@ export function initErrorsApi(server) {
     }
   });
 
+  const distributionHandler = req => {
+    const setup = setupRequest(req);
+    const { serviceName, groupId } = req.params;
+
+    return getDistribution({ serviceName, groupId, setup }).catch(
+      defaultErrorHandler
+    );
+  };
+
   server.route({
     method: 'GET',
     path: `${ROOT}/{groupId}/distribution`,
@@ -70,13 +79,17 @@ export function initErrorsApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName, groupId } = req.params;
+    handler: distributionHandler
+  });
 
-      return getDistribution({ serviceName, groupId, setup }).catch(
-        defaultErrorHandler
-      );
-    }
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/distribution`,
+    config: {
+      validate: {
+        query: withDefaultValidators()
+      }
+    },
+    handler: distributionHandler
   });
 }

@@ -14,10 +14,13 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
-        defaultMessage: `You cannot use {pluginName} because license information is not available at this time.`,
-        values: { pluginName }
-      })
+      message: i18n.translate(
+        'xpack.indexLifecycleMgmt.checkLicense.errorUnavailableMessage',
+        {
+          defaultMessage: 'You cannot use {pluginName} because license information is not available at this time.',
+          values: { pluginName },
+        },
+      ),
     };
   }
 
@@ -38,10 +41,13 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       isAvailable: false,
       showLinks: false,
-      message: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
-        defaultMessage: `Your {licenseType} license does not support ${pluginName}. Please upgrade your license.`,
-        values: { licenseType }
-      })
+      message: i18n.translate(
+        'xpack.indexLifecycleMgmt.checkLicense.errorUnsupportedMessage',
+        {
+          defaultMessage: 'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
+          values: { licenseType, pluginName },
+        },
+      ),
     };
   }
 
@@ -51,10 +57,13 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
-        defaultMessage: `You cannot use {pluginName} because your {licenseType} license has expired.`,
-        values: { pluginName, licenseType }
-      })
+      message: i18n.translate(
+        'xpack.indexLifecycleMgmt.checkLicense.errorExpiredMessage',
+        {
+          defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired.',
+          values: { pluginName, licenseType },
+        },
+      ),
     };
   }
 

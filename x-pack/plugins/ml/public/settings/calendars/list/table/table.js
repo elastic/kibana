@@ -17,8 +17,10 @@ import {
 
 import chrome from 'ui/chrome';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function CalendarsListTable({
+
+export const CalendarsListTable = injectI18n(function CalendarsListTable({
   calendarsList,
   onDeleteClick,
   setSelectedCalendarList,
@@ -26,7 +28,8 @@ export function CalendarsListTable({
   canCreateCalendar,
   canDeleteCalendar,
   mlNodesAvailable,
-  itemsSelected
+  itemsSelected,
+  intl
 }) {
 
   const sorting = {
@@ -44,7 +47,10 @@ export function CalendarsListTable({
   const columns = [
     {
       field: 'calendar_id',
-      name: 'ID',
+      name: intl.formatMessage({
+        id: 'xpack.ml.calendarsList.table.idColumnName',
+        defaultMessage: 'ID'
+      }),
       sortable: true,
       truncateText: true,
       render: (id) => (
@@ -57,14 +63,27 @@ export function CalendarsListTable({
     },
     {
       field: 'job_ids_string',
-      name: 'Jobs',
+      name: intl.formatMessage({
+        id: 'xpack.ml.calendarsList.table.jobsColumnName',
+        defaultMessage: 'Jobs'
+      }),
       sortable: true,
       truncateText: true,
     },
     {
       field: 'events_length',
-      name: 'Events',
-      sortable: true
+      name: intl.formatMessage({
+        id: 'xpack.ml.calendarsList.table.eventsColumnName',
+        defaultMessage: 'Events'
+      }),
+      sortable: true,
+      render: (eventsLength) => intl.formatMessage(
+        {
+          id: 'xpack.ml.calendarsList.table.eventsCountLabel',
+          defaultMessage: '{eventsLength, plural, one {# event} other {# events}}'
+        },
+        { eventsLength }
+      )
     }
   ];
 
@@ -82,7 +101,10 @@ export function CalendarsListTable({
           href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
           isDisabled={(canCreateCalendar === false || mlNodesAvailable === false)}
         >
-          New
+          <FormattedMessage
+            id="xpack.ml.calendarsList.table.newButtonLabel"
+            defaultMessage="New"
+          />
         </EuiButton>
       ),
       (
@@ -93,7 +115,10 @@ export function CalendarsListTable({
           onClick={onDeleteClick}
           isDisabled={(canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false)}
         >
-          Delete
+          <FormattedMessage
+            id="xpack.ml.calendarsList.table.deleteButtonLabel"
+            defaultMessage="Delete"
+          />
         </EuiButton>
       )
     ],
@@ -118,9 +143,9 @@ export function CalendarsListTable({
       />
     </React.Fragment>
   );
-}
+});
 
-CalendarsListTable.propTypes = {
+CalendarsListTable.WrappedComponent.propTypes = {
   calendarsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,

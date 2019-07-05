@@ -46,9 +46,12 @@ export default function ({ getService }) {
 
             expect(resp.body).to.eql({
               id: resp.body.id,
+              migrationVersion: {
+                visualization: '6.7.2',
+              },
               type: 'visualization',
               updated_at: resp.body.updated_at,
-              version: 1,
+              version: 'WzgsMV0=',
               attributes: {
                 title: 'My favorite vis'
               }
@@ -84,9 +87,12 @@ export default function ({ getService }) {
 
             expect(resp.body).to.eql({
               id: resp.body.id,
+              migrationVersion: {
+                visualization: '6.7.2',
+              },
               type: 'visualization',
               updated_at: resp.body.updated_at,
-              version: 1,
+              version: 'WzAsMV0=',
               attributes: {
                 title: 'My favorite vis'
               }

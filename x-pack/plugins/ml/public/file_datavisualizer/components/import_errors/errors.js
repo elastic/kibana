@@ -41,6 +41,13 @@ function title(statuses) {
           defaultMessage="Error reading file"
         />
       );
+    case statuses.parseJSONStatus:
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.parsingJSONErrorMessage"
+          defaultMessage="Error parsing JSON"
+        />
+      );
     case statuses.indexCreatedStatus:
       return (
         <FormattedMessage
@@ -67,6 +74,13 @@ function title(statuses) {
         <FormattedMessage
           id="xpack.ml.fileDatavisualizer.importErrors.creatingIndexPatternErrorMessage"
           defaultMessage="Error creating index pattern"
+        />
+      );
+    case statuses.permissionCheckStatus:
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.checkingPermissionErrorMessage"
+          defaultMessage="Import permissions error"
         />
       );
     default:
@@ -123,7 +137,11 @@ function toString(error) {
             errorObj.more = error.error.response;
           }
           return errorObj;
+        }
 
+        if (error.error.message !== undefined) {
+          // this will catch javascript errors such as JSON parsing issues
+          return { msg: error.error.message };
         }
       } else {
         return { msg: error.error };

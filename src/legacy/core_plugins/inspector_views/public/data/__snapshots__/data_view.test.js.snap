@@ -15,6 +15,108 @@ exports[`Inspector Data View component should render empty state 1`] = `
       },
     }
   }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   title="Test Data"
 >
   <InspectorView
@@ -30,14 +132,22 @@ exports[`Inspector Data View component should render empty state 1`] = `
           body={
             <React.Fragment>
               <p>
-                The element did not provide any data.
+                <FormattedMessage
+                  defaultMessage="The element did not provide any data."
+                  id="inspectorViews.data.noDataAvailableDescription"
+                  values={Object {}}
+                />
               </p>
             </React.Fragment>
           }
           iconColor="subdued"
           title={
             <h2>
-              No data available
+              <FormattedMessage
+                defaultMessage="No data available"
+                id="inspectorViews.data.noDataAvailableTitle"
+                values={Object {}}
+              />
             </h2>
           }
         >
@@ -58,7 +168,13 @@ exports[`Inspector Data View component should render empty state 1`] = `
                   <h2
                     className="euiTitle euiTitle--medium"
                   >
-                    No data available
+                    <FormattedMessage
+                      defaultMessage="No data available"
+                      id="inspectorViews.data.noDataAvailableTitle"
+                      values={Object {}}
+                    >
+                      No data available
+                    </FormattedMessage>
                   </h2>
                 </EuiTitle>
                 <EuiSpacer
@@ -76,7 +192,13 @@ exports[`Inspector Data View component should render empty state 1`] = `
                     className="euiText euiText--medium"
                   >
                     <p>
-                      The element did not provide any data.
+                      <FormattedMessage
+                        defaultMessage="The element did not provide any data."
+                        id="inspectorViews.data.noDataAvailableDescription"
+                        values={Object {}}
+                      >
+                        The element did not provide any data.
+                      </FormattedMessage>
                     </p>
                   </div>
                 </EuiText>
@@ -101,6 +223,108 @@ exports[`Inspector Data View component should render loading state 1`] = `
         "_eventsCount": 1,
         "_maxListeners": undefined,
       },
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
     }
   }
   title="Test Data"
@@ -178,7 +402,13 @@ exports[`Inspector Data View component should render loading state 1`] = `
                         className="euiText euiText--medium"
                       >
                         <p>
-                          Gathering data
+                          <FormattedMessage
+                            defaultMessage="Gathering data"
+                            id="inspectorViews.data.gatheringDataLabel"
+                            values={Object {}}
+                          >
+                            Gathering data
+                          </FormattedMessage>
                         </p>
                       </div>
                     </EuiText>
