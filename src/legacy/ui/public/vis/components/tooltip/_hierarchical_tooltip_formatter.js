@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import collectBranch from './_collect_branch';
+import { collectBranch } from './_collect_branch';
 import numeral from 'numeral';
 
 export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce) {
