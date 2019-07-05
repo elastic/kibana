@@ -98,9 +98,9 @@ export class WebElementWrapper {
     try {
       return await fn(this);
     } catch (err) {
-      this.logger.info(`${fn.name}: ${err.message}`);
+      this.logger.debug(`${fn.name}: ${err.message}`);
       if (this.locator === null || n === 1) throw err;
-      this.logger.info(
+      this.logger.debug(
         `WebElementWrapper: searching element '${this.locator.toString()}', ${n - 1} attempts left`
       );
       await delay(200);
@@ -125,7 +125,7 @@ export class WebElementWrapper {
    */
   public async isDisplayed(): Promise<boolean> {
     return await this.retryCall(async function isDisplayed(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.isEnabled();
+      await wrapper._webElement.isEnabled();
     });
   }
 
@@ -137,7 +137,7 @@ export class WebElementWrapper {
    */
   public async isEnabled(): Promise<boolean> {
     return await this.retryCall(async function isEnabled(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.isEnabled();
+      await wrapper._webElement.isEnabled();
     });
   }
 
@@ -149,7 +149,7 @@ export class WebElementWrapper {
    */
   public async isSelected(): Promise<boolean> {
     return await this.retryCall(async function isSelected(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.isSelected();
+      await wrapper._webElement.isSelected();
     });
   }
 
