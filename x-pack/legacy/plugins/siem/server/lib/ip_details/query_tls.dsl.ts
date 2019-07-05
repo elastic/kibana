@@ -69,7 +69,6 @@ export const buildTlsQuery = ({
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
     { term: { [`${flowTarget}.ip`]: ip } },
-    { term: { 'network.protocol': 'tls' } },
   ];
 
   const dslQuery = {

@@ -55,14 +55,6 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
         ],
       };
 
-const getDnsFilter = () => ({
-  term: {
-    'network.protocol': {
-      value: 'dns',
-    },
-  },
-});
-
 export const buildDnsQuery = ({
   filterQuery,
   isPtrIncluded,
@@ -84,7 +76,6 @@ export const buildDnsQuery = ({
         },
       },
     },
-    getDnsFilter(),
   ];
 
   const dslQuery = {
