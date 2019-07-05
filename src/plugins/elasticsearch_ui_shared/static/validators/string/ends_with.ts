@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const endsWith = (char: string) => (value: string) => value[value.length - 1] === char;
+export const endsWith = (char: string) => (value: string) => value.endsWith(char);

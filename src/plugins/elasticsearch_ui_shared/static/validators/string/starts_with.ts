@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const startsWith = (char: string) => (value: string) => value[0] === char;
+export const startsWith = (char: string) => (value: string) => value.startsWith(char);

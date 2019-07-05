@@ -14,7 +14,7 @@ import { multiSelectOptionsToSelectedValue } from '../../../../../../../src/plug
 import {
   FormSchema,
   FIELD_TYPES,
-  ERROR_TYPES,
+  VALIDATION_TYPES,
 } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 import { MyForm } from './types';
 
@@ -78,10 +78,10 @@ export const formSchema: FormSchema<MyForm> = {
             return {
               code: 'ERR_INDEX_NAME',
               message: 'The only valid index name you can introduce is "good".',
-              type: ERROR_TYPES.ASYNC,
             };
           }
         },
+        type: VALIDATION_TYPES.ASYNC,
       },
     ],
   },
@@ -131,10 +131,10 @@ export const formSchema: FormSchema<MyForm> = {
             return {
               code: 'ERR_WRONG_FIRST_CHAR',
               message: 'The value cannot start witht the letter "a"',
-              type: ERROR_TYPES.ARRAY_ITEM,
             };
           }
         },
+        type: VALIDATION_TYPES.ARRAY_ITEM,
       },
     ],
   },
@@ -144,7 +144,7 @@ export const formSchema: FormSchema<MyForm> = {
     type: FIELD_TYPES.MULTI_SELECT,
     errorDisplayDelay: 0,
     validations: [{ validator: minSelectionField(2) }],
-    inputTransform: multiSelectSelectedValueToOptions,
-    outputTransform: multiSelectOptionsToSelectedValue,
+    inputSerializer: multiSelectSelectedValueToOptions,
+    outputSerializer: multiSelectOptionsToSelectedValue,
   },
 };

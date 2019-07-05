@@ -28,7 +28,7 @@ export const FIELD_TYPES = {
 };
 
 // Error types
-export const ERROR_TYPES = {
+export const VALIDATION_TYPES = {
   FIELD: 'field', // Default validation error (on the field value)
   ASYNC: 'async', // Throw from asynchronous validations
   ARRAY_ITEM: 'arrayItem', // If the field value is an Array, this error would be thrown if an _item_ of the array is invalid

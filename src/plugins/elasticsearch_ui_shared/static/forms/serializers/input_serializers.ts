@@ -26,6 +26,7 @@ export const multiSelectSelectedValueToOptions: InputSerializerFunc = (
   if (!defaultFormValue) {
     return defaultValue;
   }
+
   return (defaultValue as Option[]).map(option => ({
     ...option,
     checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,

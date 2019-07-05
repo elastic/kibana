@@ -32,7 +32,7 @@ import {
 import {
   Field as FieldType,
   FIELD_TYPES,
-  ERROR_TYPES,
+  VALIDATION_TYPES,
   FieldValidateResponse,
 } from '../hook_form_lib';
 
@@ -50,7 +50,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
     const errorMessageField = field.form.isSubmitted ? field.getErrorsMessages() : '';
 
     // Errors for comboBox option added (the array "item")
-    const errorMessageArrayItem = field.getErrorsMessages(ERROR_TYPES.ARRAY_ITEM);
+    const errorMessageArrayItem = field.getErrorsMessages(VALIDATION_TYPES.ARRAY_ITEM);
 
     isInvalid = field.errors.length
       ? field.form.isSubmitted || errorMessageArrayItem !== null
@@ -113,7 +113,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
 
   const onSearchComboChange = (value: string) => {
     if (value) {
-      field.clearErrors(ERROR_TYPES.ARRAY_ITEM);
+      field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
     }
   };
 

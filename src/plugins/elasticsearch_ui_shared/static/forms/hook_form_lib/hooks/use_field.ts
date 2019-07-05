@@ -28,7 +28,7 @@ import {
   ValidationError,
 } from '../types';
 import { toInt } from '../field_formatters';
-import { FIELD_TYPES, ERROR_TYPES } from '../constants';
+import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
 /**
  * Helpers to decide which message to output from a validation.
@@ -94,22 +94,36 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
   // -- HELPERS
   // ----------------------------------
+
+  /**
+   * Filter an array of errors with specific validation type on them
+   *
+   * @param _errors The array of errors to filter
+   * @param validationType The validation type to filter out
+   */
   const filterErrors = (
     _errors: ValidationError[],
-    errorType: string | string[] = ERROR_TYPES.FIELD
+    validationType: string | string[] = VALIDATION_TYPES.FIELD
   ): ValidationError[] => {
-    const errorTypeToArray = Array.isArray(errorType) ? errorType : [errorType];
-    const isFilteringOutFieldErrors = errorTypeToArray.some(_type => _type === ERROR_TYPES.FIELD);
+    const validationTypeToArray = Array.isArray(validationType)
+      ? (validationType as string[])
+      : ([validationType] as string[]);
+
+    const doWeFilterOutFieldValidationType = validationTypeToArray.some(
+      _type => _type === VALIDATION_TYPES.FIELD
+    );
 
     return _errors.filter(error => {
-      const hasErrorTypeDefined = {}.hasOwnProperty.call(error, 'type');
+      const doesNotHaveValidationTypeDefined =
+        {}.hasOwnProperty.call(error, 'validationType') === false;
 
-      // If no type defined for the error (the default type is "field")
-      // then we filter out the error _if_ we are filtering out field errors
-      if (!hasErrorTypeDefined) {
-        return !isFilteringOutFieldErrors;
+      // If no validation type set for the error (the default type is "field")
+      // we filter out the error _if_ we are filtering out field errors
+      if (doesNotHaveValidationTypeDefined) {
+        return !doWeFilterOutFieldValidationType;
       }
-      return errorTypeToArray.every(_type => error.type !== _type);
+
+      return validationTypeToArray.every(_type => error.validationType !== _type);
     });
   };
 
@@ -179,7 +193,10 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
       if (validationResult) {
         const error = getValidationErrorWithMessage(validation, validationResult);
-        validationErrors.push(error);
+        validationErrors.push({
+          ...error,
+          validationType: validation.type || VALIDATION_TYPES.FIELD,
+        });
       }
     });
 
@@ -198,7 +215,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     // By default, for fields that have an asynchronous validation
     // we will clear the errors as soon as the field value changes.
-    clearErrors([ERROR_TYPES.FIELD, ERROR_TYPES.ASYNC]);
+    clearErrors([VALIDATION_TYPES.FIELD, VALIDATION_TYPES.ASYNC]);
 
     const doValidate = async ({ validator, exitOnFail }: ValidationConfig) => {
       if (skip) {
@@ -234,7 +251,10 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
           if (validationResult) {
             const error = getValidationErrorWithMessage(validation, validationResult);
-            validationErrors.push(error);
+            validationErrors.push({
+              ...error,
+              validationType: validation.type || VALIDATION_TYPES.FIELD,
+            });
           }
         }),
       Promise.resolve()
@@ -245,8 +265,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
   // -- API
   // ----------------------------------
-  const clearErrors: Field['clearErrors'] = (errorType = ERROR_TYPES.FIELD) => {
-    setErrors(previousErrors => filterErrors(previousErrors, errorType));
+  const clearErrors: Field['clearErrors'] = (validationType = VALIDATION_TYPES.FIELD) => {
+    setErrors(previousErrors => filterErrors(previousErrors, validationType));
   };
 
   const validate: Field['validate'] = (validationData = {}) => {
@@ -313,11 +333,23 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const getOutputValue: Field['getOutputValue'] = () =>
     outputSerializer ? outputSerializer(value) : value;
 
-  const getErrorsMessages: Field['getErrorsMessages'] = (errorType = ERROR_TYPES.FIELD) => {
+  /**
+   * As we can have multiple validation types (FIELD, ASYNC, ARRAY_ITEM), this
+   * method allows us to retrieve error messages for certain types of validation.
+   *
+   * For example, if we want to validation error messages to be displayed when the user clicks the "save" button
+   * _but_ in caase of an asynchronous validation (for ex. an HTTP request that would validate an index name) we
+   * want to immediately display the error message, we would have 2 types of validation: FIELD & ASYNC
+   *
+   * @param validationType The validation type to return error messages from
+   */
+  const getErrorsMessages: Field['getErrorsMessages'] = (
+    validationType = VALIDATION_TYPES.FIELD
+  ) => {
     const errorMessages = errors.reduce((messages, error) => {
       if (
-        error.type === errorType ||
-        (errorType === ERROR_TYPES.FIELD && !{}.hasOwnProperty.call(error, 'type'))
+        error.validationType === validationType ||
+        (validationType === VALIDATION_TYPES.FIELD && !{}.hasOwnProperty.call(error, 'type'))
       ) {
         return messages ? `${messages}, ${error.message}` : (error.message as string);
       }

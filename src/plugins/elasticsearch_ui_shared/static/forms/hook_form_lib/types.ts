@@ -107,7 +107,7 @@ export type FormSubmitHandler<T> = (formData: T, isValid: boolean) => Promise<vo
 export interface ValidationError {
   code: string;
   message: string | ((error: ValidationError) => string);
-  type?: string;
+  validationType?: string;
   [key: string]: any;
 }
 
@@ -141,5 +141,6 @@ type FieldValue = unknown;
 export interface ValidationConfig<T = any> {
   validator: ValidationFunc<T>;
   message?: string | ((error: ValidationError) => string);
+  type?: string;
   exitOnFail?: boolean;
 }
