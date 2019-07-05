@@ -27,7 +27,7 @@ pipeline {
     // PR_AUTHOR = "${ghprbPullAuthorLogin}"
     CREDENTIALS_ID ='kibana-ci-gcs-plugin'
     BUCKET = "gs://kibana-ci-artifacts/jobs/${JOB_NAME}/${BUILD_NUMBER}"
-    PATTERN = "${FULL_WORKSPACE_CACHE_PATH"}"
+    PATTERN = "${FULL_WORKSPACE_CACHE_PATH}"
   }
   stages {
     stage('Install All-The-Things') {
