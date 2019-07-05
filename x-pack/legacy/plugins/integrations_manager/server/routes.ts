@@ -67,7 +67,13 @@ export const routes: ServerRoute[] = [
         getArchiveInfo(`${pkgkey}.tar.gz`),
       ]);
 
-      const savedObject = await getClient(req).get(SAVED_OBJECT_TYPE, pkgkey);
+      const savedObject = await getClient(req)
+        .get(SAVED_OBJECT_TYPE, pkgkey)
+        .catch(err => {
+          /* swallow errors for now */
+        });
+
+      const status = savedObject && !savedObject.error ? 'installed' : 'not_installed';
 
       // map over paths and test types from https://github.com/elastic/integrations-registry/blob/master/ASSETS.md
       const features = ['injest-pipeline', 'visualization', 'dashboard', 'index-pattern'];
@@ -76,7 +82,7 @@ export const routes: ServerRoute[] = [
         ...info,
         paths,
         features,
-        status: savedObject.error ? 'not_installed' : 'installed',
+        status,
         savedObject,
       };
     },
