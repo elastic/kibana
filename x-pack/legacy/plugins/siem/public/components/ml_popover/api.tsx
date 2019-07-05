@@ -14,6 +14,17 @@ import {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
+import { throwIfNotOk } from '../ml/api/throw_if_not_ok';
+
+const emptyGroup: Group[] = [];
+
+const emptyMlResponse: SetupMlResponse = { jobs: [], datafeeds: [], kibana: {} };
+
+const emptyStartDatafeedResponse: StartDatafeedResponse = {};
+
+const emptyStopDatafeeds: [StopDatafeedResponse, CloseJobsResponse] = [{}, {}];
+
+const emptyJob: Job[] = [];
 
 /**
  * Fetches ML Groups Data
@@ -32,10 +43,11 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [];
+    return emptyGroup;
   }
 };
 
@@ -73,10 +85,11 @@ export const setupMlJob = async ({
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return { jobs: [], datafeeds: [], kibana: {} };
+    return emptyMlResponse;
   }
 };
 
@@ -104,10 +117,11 @@ export const startDatafeeds = async (
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return {};
+    return emptyStartDatafeedResponse;
   }
 };
 
@@ -136,6 +150,7 @@ export const stopDatafeeds = async (
       },
     });
 
+    await throwIfNotOk(stopDatafeedsResponse);
     const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
 
     const datafeedPrefix = 'datafeed-';
@@ -157,10 +172,11 @@ export const stopDatafeeds = async (
       },
     });
 
+    await throwIfNotOk(stopDatafeedsResponseJson);
     return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [{}, {}];
+    return emptyStopDatafeeds;
   }
 };
 
@@ -186,9 +202,10 @@ export const jobsSummary = async (
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [];
+    return emptyJob;
   }
 };

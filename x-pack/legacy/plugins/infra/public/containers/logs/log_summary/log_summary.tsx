@@ -24,20 +24,17 @@ export const useLogSummary = (
   const [logSummaryBetween, setLogSummaryBetween] = useState<LogSummaryBetween>({ buckets: [] });
   const apolloClient = useApolloClient();
 
-  const [bufferStart, bufferEnd] = useMemo(
-    () => {
-      if (midpointTime === null || intervalSize <= 0) {
-        return [null, null];
-      }
+  const [bufferStart, bufferEnd] = useMemo(() => {
+    if (midpointTime === null || intervalSize <= 0) {
+      return [null, null];
+    }
 
-      const halfIntervalSize = intervalSize / 2;
-      return [
-        (Math.floor((midpointTime - halfIntervalSize) / intervalSize) - 0.5) * intervalSize,
-        (Math.ceil((midpointTime + halfIntervalSize) / intervalSize) + 0.5) * intervalSize,
-      ];
-    },
-    [midpointTime, intervalSize]
-  );
+    const halfIntervalSize = intervalSize / 2;
+    return [
+      (Math.floor((midpointTime - halfIntervalSize) / intervalSize) - 0.5) * intervalSize,
+      (Math.ceil((midpointTime + halfIntervalSize) / intervalSize) + 0.5) * intervalSize,
+    ];
+  }, [midpointTime, intervalSize]);
 
   useCancellableEffect(
     getIsCancelled => {
