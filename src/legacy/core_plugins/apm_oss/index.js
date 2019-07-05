@@ -38,7 +38,7 @@ export default function apmOss(kibana) {
         spanIndices: Joi.string().default('apm-*'),
         metricsIndices: Joi.string().default('apm-*'),
         onboardingIndices: Joi.string().default('apm-*'),
-        cmIndex: Joi.string().default('.apm-ac')
+        apmAgentConfigurationIndex: Joi.string().default('.apm-agent-configuration')
       }).default();
     },
 
