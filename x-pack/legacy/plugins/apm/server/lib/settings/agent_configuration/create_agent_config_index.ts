@@ -7,8 +7,10 @@
 import { Server } from 'hapi';
 import Boom from 'boom';
 
-export async function createCmIndex(server: Server) {
-  const index = server.config().get<string>('apm_oss.cmIndex');
+export async function createApmAgentConfigurationIndex(server: Server) {
+  const index = server
+    .config()
+    .get<string>('apm_oss.apmAgentConfigurationIndex');
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'
   );
@@ -47,7 +49,9 @@ export async function createCmIndex(server: Server) {
     });
 
     if (!result.acknowledged) {
-      const err = new Error(`Unable to create apm settings index '${index}'`);
+      const err = new Error(
+        `Unable to create APM Agent Configuration index '${index}'`
+      );
       // eslint-disable-next-line
       console.error(err.stack);
       throw Boom.boomify(err, { statusCode: 500 });

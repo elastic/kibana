@@ -53,7 +53,7 @@ export const GO: LanguageServerDefinition = {
   installationPluginName: 'goLanguageServer',
 };
 export const CTAGS: LanguageServerDefinition = {
-  name: 'ctags',
+  name: 'Ctags',
   builtinWorkspaceFolders: true,
   languages: [
     'ant',

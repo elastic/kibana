@@ -9,7 +9,7 @@ import { Setup } from '../../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../../typings/common';
 import { getUnavailableEnvironments } from './get_unavailable_environments';
 
-export type CMEnvironmentsAPIResponse = PromiseReturnType<
+export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<
   typeof getEnvironments
 >;
 

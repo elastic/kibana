@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface CentralConfigurationIntake {
+export interface AgentConfigurationIntake {
   settings: {
     sample_rate: string;
   };
@@ -14,6 +14,6 @@ export interface CentralConfigurationIntake {
   };
 }
 
-export interface CentralConfiguration extends CentralConfigurationIntake {
+export interface AgentConfiguration extends AgentConfigurationIntake {
   '@timestamp': number;
 }
