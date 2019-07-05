@@ -26,13 +26,17 @@ import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
+import sizeMe from 'react-sizeme';
 import { ViewMode, EmbeddableChildPanel } from '../../embeddable_api';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT, DashboardConstants } from '../dashboard_constants';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_HEIGHT,
+  DashboardConstants,
+} from '../dashboard_constants';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardPanelState, GridData } from '../types';
 
 // @ts-ignore
-import sizeMe from 'react-sizeme';
 
 let lastValidGridSize = 0;
 
@@ -118,7 +122,7 @@ interface State {
   focusedPanelIndex?: string;
   isLayoutInvalid: boolean;
   layout?: GridData[];
-  panels: { [key: string]: DashboardPanelState };
+  panels: { [key: string]: any }; // DashboardPanelState };
   viewMode: ViewMode;
   useMargins: boolean;
   expandedPanelId?: string;

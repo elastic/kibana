@@ -33,7 +33,6 @@ import {
   EmbeddableFactory,
   IEmbeddable,
   GetEmbeddableFactory,
-  PanelState,
 } from '../../../../../../embeddable_api/public/shim/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
 import { createPanelState } from './panel';
@@ -53,8 +52,8 @@ export interface DashboardContainerInput extends ContainerInput {
   description?: string;
   isFullScreenMode: boolean;
   panels: {
-    [panelId: string]: PanelState<DashboardPanelState & { id: string }>;
-  }
+    [panelId: string]: DashboardPanelState;
+  };
 }
 
 interface IndexSignature {

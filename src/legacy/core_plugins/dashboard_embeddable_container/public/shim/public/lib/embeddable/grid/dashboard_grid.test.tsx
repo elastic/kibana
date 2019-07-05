@@ -17,39 +17,44 @@
  * under the License.
  */
 
- // @ts-ignore
+// @ts-ignore
 import sizeMe from 'react-sizeme';
 
 import React from 'react';
 import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
-import { EmbeddableFactory } from '../../embeddable_api';
+import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_api';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import { CONTACT_CARD_EMBEDDABLE, ContactCardEmbeddableFactory } from 'src/legacy/core_plugins/embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import {
+  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
+} from '../../../../../../../embeddable_api/public/shim/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 
 let dashboardContainer: DashboardContainer | undefined;
 
 function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  const __embeddableFactories = new Map<string, EmbeddableFactory>();
+  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+
   dashboardContainer = new DashboardContainer(
     getSampleDashboardInput({
       panels: {
         '1': {
           gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
           type: CONTACT_CARD_EMBEDDABLE,
-          explicitInput: { firstName: 'Bob', id: '1' },
+          explicitInput: { id: '1' },
         },
         '2': {
           gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
           type: CONTACT_CARD_EMBEDDABLE,
-          explicitInput: { firstName: 'Stacey', id: '2' },
+          explicitInput: { id: '2' },
         },
       },
     }),
-    embeddableFactories
+    getFactory
   );
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
