@@ -8,19 +8,12 @@ import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
-import { throttle } from 'lodash';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
-
-function useThrottle(fn: Function, wait = 500) {
-  const newFn = throttle(fn, wait);
-
-  return newFn();
-}
 
 export interface WorkspacePanelProps {
   activeDatasource: Datasource;
@@ -85,40 +78,32 @@ export function WorkspacePanel({
     const activeVisualization = activeVisualizationId
       ? visualizationMap[activeVisualizationId]
       : null;
-    const expression = useThrottle(() =>
-      useMemo(
-        () => {
-          try {
-            return buildExpression(
-              activeVisualization,
-              visualizationState,
-              activeDatasource,
-              datasourceState,
-              datasourcePublicAPI
-            );
-          } catch (e) {
-            setExpressionError(e.toString());
-          }
-        },
-        [
+    const expression = useMemo(() => {
+      try {
+        return buildExpression(
           activeVisualization,
           visualizationState,
           activeDatasource,
           datasourceState,
-          datasourcePublicAPI,
-        ]
-      )
-    );
+          datasourcePublicAPI
+        );
+      } catch (e) {
+        setExpressionError(e.toString());
+      }
+    }, [
+      activeVisualization,
+      visualizationState,
+      activeDatasource,
+      datasourceState,
+      datasourcePublicAPI,
+    ]);
 
-    useEffect(
-      () => {
-        // reset expression error if component attempts to run it again
-        if (expressionError) {
-          setExpressionError(undefined);
-        }
-      },
-      [expression]
-    );
+    useEffect(() => {
+      // reset expression error if component attempts to run it again
+      if (expressionError) {
+        setExpressionError(undefined);
+      }
+    }, [expression]);
 
     if (expression === null) {
       return renderEmptyWorkspace();

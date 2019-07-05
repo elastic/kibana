@@ -61,8 +61,6 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
-    // const localStorage = new Storage(window.localStorage);
-
     if (!dataPlugin || !storage) {
       return null;
     }

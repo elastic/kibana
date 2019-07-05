@@ -6,19 +6,14 @@
 
 import React from 'react';
 import { filterRatioOperation } from './filter_ratio';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
-import { data as dataMock } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
-import { localStorage as storageMock } from 'ui/storage/storage_service';
-
-jest.mock('../loader');
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome');
-jest.mock('ui/storage/storage_service');
-jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
+import { act } from 'react-dom/test-utils';
 
 describe('filter_ratio', () => {
   let state: IndexPatternPrivateState;
+  let storageMock: any;
+  let dataMock: any;
   const InlineOptions = filterRatioOperation.paramEditor!;
 
   beforeEach(() => {
@@ -47,6 +42,23 @@ describe('filter_ratio', () => {
           },
         },
       },
+    };
+
+    class QueryBarInput {
+      props: any;
+      constructor(props: any) {
+        this.props = props;
+      }
+      render() {
+        return <></>;
+      }
+    }
+
+    storageMock = {
+      getItem() {},
+    };
+    dataMock = {
+      query: { ui: { QueryBarInput } },
     };
   });
 
@@ -86,7 +98,7 @@ describe('filter_ratio', () => {
   describe('param editor', () => {
     it('should render current value', () => {
       expect(() => {
-        shallow(
+        shallowWithIntl(
           <InlineOptions
             state={state}
             setState={jest.fn()}
@@ -96,6 +108,20 @@ describe('filter_ratio', () => {
           />
         );
       }).not.toThrow();
+    });
+
+    it('should call the query bar properly', () => {
+      const wrapper = shallowWithIntl(
+        <InlineOptions
+          state={state}
+          setState={jest.fn()}
+          columnId="col1"
+          storage={storageMock}
+          dataPlugin={dataMock}
+        />
+      );
+
+      expect(wrapper.find('QueryBarInput').prop('indexPatterns')).toEqual(['1']);
     });
   });
 });
