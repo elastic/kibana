@@ -20,10 +20,11 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
+import chrome from 'ui/chrome';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
 
-export function createEditorController(config, savedObjectsClient) {
-  return class EditorController {
+function ReactEditorControllerProvider(config) {
+  class ReactEditorController {
     constructor(el, savedObj) {
       this.el = el;
 
@@ -35,6 +36,7 @@ export function createEditorController(config, savedObjectsClient) {
     }
 
     fetchDefaultIndexPattern = async () => {
+      const savedObjectsClient = chrome.getSavedObjectsClient();
       const indexPattern = await savedObjectsClient.get(
         'index-pattern',
         config.get('defaultIndex')
@@ -83,5 +85,12 @@ export function createEditorController(config, savedObjectsClient) {
     destroy() {
       unmountComponentAtNode(this.el);
     }
+  }
+
+  return {
+    name: 'react_editor',
+    handler: ReactEditorController,
   };
 }
+
+export { ReactEditorControllerProvider };

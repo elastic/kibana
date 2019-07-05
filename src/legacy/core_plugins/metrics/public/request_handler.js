@@ -22,45 +22,51 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
 
-export const createMetricsRequestHandler = function(config) {
-  const timezone = timezoneProvider(config)();
+const MetricsRequestHandlerProvider = function(Private, config) {
+  const timezone = Private(timezoneProvider)();
 
-  return async ({ uiState, timeRange, filters, query, visParams }) => {
-    const uiStateObj = uiState.get(visParams.type, {});
-    const parsedTimeRange = timefilter.calculateBounds(timeRange);
-    const scaledDataFormat = config.get('dateFormat:scaled');
-    const dateFormat = config.get('dateFormat');
+  return {
+    name: 'metrics',
 
-    if (visParams && visParams.id) {
-      try {
-        const maxBuckets = config.get('metrics:max_buckets');
+    handler: async ({ uiState, timeRange, filters, query, visParams }) => {
+      const uiStateObj = uiState.get(visParams.type, {});
+      const parsedTimeRange = timefilter.calculateBounds(timeRange);
+      const scaledDataFormat = config.get('dateFormat:scaled');
+      const dateFormat = config.get('dateFormat');
 
-        validateInterval(parsedTimeRange, visParams, maxBuckets);
+      if (visParams && visParams.id) {
+        try {
+          const maxBuckets = config.get('metrics:max_buckets');
 
-        const resp = await kfetch({
-          pathname: '/api/metrics/vis/data',
-          method: 'POST',
-          body: JSON.stringify({
-            timerange: {
-              timezone,
-              ...parsedTimeRange,
-            },
-            query,
-            filters,
-            panels: [visParams],
-            state: uiStateObj,
-          }),
-        });
+          validateInterval(parsedTimeRange, visParams, maxBuckets);
 
-        return {
-          dateFormat,
-          scaledDataFormat,
-          timezone,
-          ...resp,
-        };
-      } catch (error) {
-        return Promise.reject(error);
+          const resp = await kfetch({
+            pathname: '/api/metrics/vis/data',
+            method: 'POST',
+            body: JSON.stringify({
+              timerange: {
+                timezone,
+                ...parsedTimeRange,
+              },
+              query,
+              filters,
+              panels: [visParams],
+              state: uiStateObj,
+            }),
+          });
+
+          return {
+            dateFormat,
+            scaledDataFormat,
+            timezone,
+            ...resp,
+          };
+        } catch (error) {
+          return Promise.reject(error);
+        }
       }
-    }
+    },
   };
 };
+
+export { MetricsRequestHandlerProvider };
