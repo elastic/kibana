@@ -161,12 +161,6 @@ export class AutocompleteField extends React.Component<
       case 'End':
         this.updateSuggestions();
         break;
-      case 'Backspace':
-        // if the user has just deleted everything, submit to reset
-        if (this.props.value === '') {
-          this.submit();
-        }
-        break;
     }
   };
 

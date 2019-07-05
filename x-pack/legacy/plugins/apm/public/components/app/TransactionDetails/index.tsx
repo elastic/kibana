@@ -19,6 +19,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useTrackVisit } from '../../../../../infra/public';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -34,6 +35,9 @@ export function TransactionDetails() {
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
   const { transactionName } = urlParams;
+
+  useTrackVisit({ app: 'apm', path: 'transaction_details' });
+  useTrackVisit({ app: 'apm', path: 'transaction_details', delay: 15000 });
 
   return (
     <div>

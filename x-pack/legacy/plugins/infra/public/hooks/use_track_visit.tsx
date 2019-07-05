@@ -7,22 +7,24 @@
 import { useEffect } from 'react';
 import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
-interface Props {
-  app: 'infra_metrics' | 'infra_logs'; // eventually can be apm | infra | uptime | logs?
+/**
+ * Note: The UI Metric plugin will take care of sending this data to the telemetry server.
+ * You can find this data at stack_stats.kibana.plugins.ui_metric.{app} which will be an array
+ * of objects containing a key, representing the visit/path, and a value, which will be a counter
+ */
+
+type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
+
+interface TrackVisitProps {
+  app: ObservabilityApp;
   path: string;
   delay?: number;
 }
 
-export function useTrackVisit({ app, path, delay = 0 }: Props) {
+export function useTrackVisit({ app, path, delay = 0 }: TrackVisitProps) {
   useEffect(() => {
     const prefix = delay ? `visit_delay_${delay}ms` : 'visit';
     const id = setTimeout(() => trackUiMetric(app, `${prefix}__${path}`), delay);
     return () => clearTimeout(id);
   }, []);
-}
-
-export function TrackVisit(props: Props) {
-  useTrackVisit(props);
-
-  return null;
 }
