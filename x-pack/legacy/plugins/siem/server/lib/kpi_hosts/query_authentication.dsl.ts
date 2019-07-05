@@ -6,30 +6,6 @@
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { KpiHostsESMSearchBody } from './types';
 import { RequestBasicOptions } from '../framework';
-const getAuthQueryFilter = () => [
-  {
-    bool: {
-      should: [
-        {
-          match: {
-            'event.type': 'authentication_success',
-          },
-        },
-        {
-          match: {
-            'event.type': 'authentication_failure',
-          },
-        },
-        {
-          match: {
-            'event.category': 'authentication',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  },
-];
 
 export const buildAuthQuery = ({
   filterQuery,
@@ -41,7 +17,17 @@ export const buildAuthQuery = ({
 }: RequestBasicOptions): KpiHostsESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...getAuthQueryFilter(),
+    {
+      bool: {
+        filter: [
+          {
+            term: {
+              'event.category': 'authentication',
+            },
+          },
+        ],
+      },
+    },
     {
       range: {
         [timestamp]: {
