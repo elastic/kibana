@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
-export { createReport, ReportTypes, Reports } from './report';
+import { BaseReport, ReportTypes } from './report';
+
+type StatsReport = Extract<ReportTypes, 'click' | 'load'>
+
+interface Stats {
+  sum: number;
+  avg: number;
+  min: number;
+  max: number;
+}
+
+interface StatsMetric<ReportType extends StatsReport, AllowedStats extends keyof Stats> extends BaseReport<ReportType> {
+  stats: Pick<Stats, AllowedStats>;
+}
+
+export type ClickReport = StatsMetric<'click', 'sum'>;
+export function createClickReport(appName: string, eventName: string): ClickReport {
+  return { appName, eventName, type: 'click', stats: { sum: 1 }}
+}
+
+export type LoadReport = StatsMetric<'load', 'sum'>;
+export function createLoadReport(appName: string, eventName: string): LoadReport {
+  return { appName, eventName, type: 'load', stats: { sum: 1 }}
+}
+

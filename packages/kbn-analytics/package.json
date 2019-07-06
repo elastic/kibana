@@ -7,7 +7,15 @@
   "types": "./lib/index.d.ts",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "Apache-2.0",
+  "scripts": {
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build --quiet",
+    "kbn:watch": "yarn build --watch"
+  },
   "devDependencies": {
+    "@babel/cli": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "babel-plugin-add-module-exports": "1.0.2",
     "typescript": "^3.3.3333"
   },
   "dependencies": {

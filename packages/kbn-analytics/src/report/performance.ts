@@ -17,5 +17,19 @@
  * under the License.
  */
 
-export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
-export { createReport, ReportTypes, Reports } from './report';
+import { BaseReport } from './report';
+
+export interface NagivationReport extends BaseReport<'navigation'> {
+  navigavtionEntries:  PerformanceEntry[]
+}
+
+export function createNavigationReport(appName: string, eventName: string): NagivationReport {
+  const navigavtionEntries = performance.getEntriesByType("navigation");
+
+  return {
+    type: 'navigation',
+    appName,
+    eventName,
+    navigavtionEntries,
+  }
+}

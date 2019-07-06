@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
-export { createReport, ReportTypes, Reports } from './report';
+export { createReport, Reports, ReportTypes } from './report';
