@@ -113,7 +113,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async filterElementIsDisplayed(elements: any[]) {
+    public async filterElementIsDisplayed(elements: WebElementWrapper[]) {
       if (elements.length === 0) {
         return [];
       } else {

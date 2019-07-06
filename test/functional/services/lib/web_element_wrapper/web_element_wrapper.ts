@@ -127,7 +127,7 @@ export class WebElementWrapper {
    */
   public async isDisplayed(): Promise<boolean> {
     return await this.retryCall(async function isDisplayed(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.isEnabled();
+      return await wrapper._webElement.isDisplayed();
     });
   }
 
