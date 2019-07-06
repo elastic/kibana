@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { Refetch } from './model';
+import { InspectQuery, Refetch } from './model';
 import { InputsModelId } from './constants';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
@@ -41,7 +41,15 @@ export const setQuery = actionCreator<{
   id: string;
   loading: boolean;
   refetch: Refetch;
+  inspect: InspectQuery | null;
 }>('SET_QUERY');
+
+export const setInspectionParameter = actionCreator<{
+  id: string;
+  inputId: InputsModelId;
+  isInspected: boolean;
+  selectedInspectIndex: number;
+}>('SET_INSPECTION_PARAMETER');
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');
 

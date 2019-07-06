@@ -45,14 +45,11 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   );
 
   // Update repository state when data is loaded
-  useEffect(
-    () => {
-      if (snapshotData) {
-        setSnapshotDetails(snapshotData);
-      }
-    },
-    [snapshotData]
-  );
+  useEffect(() => {
+    if (snapshotData) {
+      setSnapshotDetails(snapshotData);
+    }
+  }, [snapshotData]);
 
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);
