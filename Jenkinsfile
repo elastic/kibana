@@ -105,9 +105,7 @@ def tarAll(){
   }
 }
 def createWorkspaceCache(){
-  script {
-    sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
-  }
+  sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
 }
 def dumpSizes(xs){
      xs.each { dumpSize(it) }
