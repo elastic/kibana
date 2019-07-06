@@ -23,4 +23,5 @@ export { CodeHomePageProvider } from './code_page';
 export { RollupPageProvider } from './rollup_page';
 export { UptimePageProvider } from './uptime_page';
 export { LicenseManagementPageProvider } from './license_management_page';
+export { IndexManagementPageProvider } from './index_management_page';
 export { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
