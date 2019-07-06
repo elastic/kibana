@@ -23,7 +23,8 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', () => {
+  describe('Explore Repository', function() {
+    this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 

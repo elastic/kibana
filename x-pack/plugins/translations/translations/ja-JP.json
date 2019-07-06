@@ -6641,7 +6641,6 @@
     "xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage": "{successesJobsCount, plural, one{{successJob}} other{# 件のジョブ}} {actionTextPT}成功",
     "xpack.ml.jobsList.actionFailedNotificationMessage": "{failureId} が {actionText} に失敗しました",
     "xpack.ml.jobsList.actionsLabel": "アクション",
-    "xpack.ml.jobsList.cannotSelectJobTooltip": "ジョブを選択できません",
     "xpack.ml.jobsList.cloneJobErrorMessage": "{jobId} のクローンを作成できませんでした。ジョブが見つかりませんでした",
     "xpack.ml.jobsList.closeActionStatusText": "閉じる",
     "xpack.ml.jobsList.closedActionStatusText": "クローズ済み",
