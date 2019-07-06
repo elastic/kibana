@@ -34,7 +34,7 @@ const sorting = {
 };
 
 export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
-  ({ startDate, endDate, narrowDateRange, skip }): JSX.Element | null => {
+  ({ startDate, endDate, narrowDateRange, skip, ip }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({
       influencers: [],
@@ -44,7 +44,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
       skip,
     });
 
-    const networks = convertAnomaliesToNetwork(tableData);
+    const networks = convertAnomaliesToNetwork(tableData, ip);
     const interval = getIntervalFromAnomalies(tableData);
     const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
     const pagination = {

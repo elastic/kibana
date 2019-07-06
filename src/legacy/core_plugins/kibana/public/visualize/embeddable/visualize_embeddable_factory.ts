@@ -59,9 +59,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
           );
         },
         getTooltipForSavedObject: savedObject => {
-          return `${savedObject.attributes.title} (${
-            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title
-          })`;
+          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
         },
         showSavedObject: savedObject => {
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;

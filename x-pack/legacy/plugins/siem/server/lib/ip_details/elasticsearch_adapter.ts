@@ -20,6 +20,7 @@ import {
   UsersData,
   UsersEdges,
 } from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { SearchHit, TermAggregation } from '../types';
 
@@ -55,12 +56,20 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: IpOverviewRequestOptions
   ): Promise<IpOverviewData> {
+    const dsl = buildOverviewQuery(options);
     const response = await this.framework.callWithRequest<IpOverviewHit, TermAggregation>(
       request,
       'search',
-      buildOverviewQuery(options)
+      dsl
     );
+
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
     return {
+      inspect,
       ...getIpOverviewAgg('source', getOr({}, 'aggregations.source', response)),
       ...getIpOverviewAgg('destination', getOr({}, 'aggregations.destination', response)),
       ...getIpOverviewHostAgg(getOr({}, 'aggregations.host', response)),
@@ -71,10 +80,11 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: DomainsRequestOptions
   ): Promise<DomainsData> {
+    const dsl = buildDomainsQuery(options);
     const response = await this.framework.callWithRequest<DomainsData, TermAggregation>(
       request,
       'search',
-      buildDomainsQuery(options)
+      dsl
     );
 
     const { cursor, limit } = options.pagination;
@@ -83,10 +93,14 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     const hasNextPage = domainsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = domainsEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         hasNextPage,
         endCursor: {
@@ -94,14 +108,16 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
           tiebreaker: null,
         },
       },
+      totalCount,
     };
   }
 
   public async getTls(request: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
+    const dsl = buildTlsQuery(options);
     const response = await this.framework.callWithRequest<TlsData, TermAggregation>(
       request,
       'search',
-      buildTlsQuery(options)
+      dsl
     );
 
     const { cursor, limit } = options.pagination;
@@ -110,10 +126,14 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     const hasNextPage = tlsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = tlsEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         hasNextPage,
         endCursor: {
@@ -121,6 +141,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
           tiebreaker: null,
         },
       },
+      totalCount,
     };
   }
 
@@ -128,6 +149,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: DomainFirstLastSeenRequestOptions
   ): Promise<FirstLastSeenDomain> {
+    const dsl = buildFirstLastSeenDomainQuery(options);
     const response = await this.framework.callWithRequest<SearchHit, TermAggregation>(
       request,
       'search',
@@ -135,7 +157,13 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     );
 
     const aggregations: DomainFirstLastSeenItem = get('aggregations', response) || {};
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
     return {
+      inspect,
       firstSeen: get('firstSeen.value_as_string', aggregations),
       lastSeen: get('lastSeen.value_as_string', aggregations),
     };
@@ -145,10 +173,11 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: UsersRequestOptions
   ): Promise<UsersData> {
+    const dsl = buildUsersQuery(options);
     const response = await this.framework.callWithRequest<UsersData, TermAggregation>(
       request,
       'search',
-      buildUsersQuery(options)
+      dsl
     );
 
     const { cursor, limit } = options.pagination;
@@ -157,10 +186,14 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     const hasNextPage = usersEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = usersEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         endCursor: {
           value: String(limit),
@@ -168,6 +201,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
         },
         hasNextPage,
       },
+      totalCount,
     };
   }
 }
