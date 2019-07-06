@@ -40,11 +40,28 @@ export const getTimeZone = (config: Partial<AppKibanaFrameworkAdapter>): string 
   }
 };
 
+export const getThreshold = (
+  config: Partial<AppKibanaFrameworkAdapter>,
+  threshold: number
+): number => {
+  if (threshold !== -1) {
+    return threshold;
+  } else if (config.anomalyScore == null) {
+    return 50;
+  } else if (config.anomalyScore < 0) {
+    return 0;
+  } else if (config.anomalyScore > 100) {
+    return 100;
+  } else {
+    return Math.ceil(config.anomalyScore);
+  }
+};
+
 export const useAnomaliesTableData = ({
   influencers,
   startDate,
   endDate,
-  threshold = 0,
+  threshold = -1,
   skip = false,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
@@ -52,6 +69,7 @@ export const useAnomaliesTableData = ({
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
+
   const fetchFunc = async (
     influencersInput: InfluencerInput[] | null,
     earliestMs: number,
@@ -63,7 +81,7 @@ export const useAnomaliesTableData = ({
           jobIds: [],
           criteriaFields: [],
           aggregationInterval: 'auto',
-          threshold,
+          threshold: getThreshold(config, threshold),
           earliestMs,
           latestMs,
           influencers: influencersInput,

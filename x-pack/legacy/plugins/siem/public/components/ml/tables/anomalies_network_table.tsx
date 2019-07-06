@@ -36,7 +36,6 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       influencers: [],
       startDate,
       endDate,
-      threshold: 0,
       skip,
     });
 
