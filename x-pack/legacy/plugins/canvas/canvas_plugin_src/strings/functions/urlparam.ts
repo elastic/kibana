@@ -31,7 +31,7 @@ export const help: FunctionHelp<FunctionFactory<typeof urlparam>> = {
       },
     }),
     default: i18n.translate('xpack.canvas.functions.urlparam.args.defaultHelpText', {
-      defaultMessage: 'The string returned when the URL parameter is unspecified.',
+      defaultMessage: 'The string returned when the {url} parameter is unspecified.',
       values: {
         url: 'URL',
       },

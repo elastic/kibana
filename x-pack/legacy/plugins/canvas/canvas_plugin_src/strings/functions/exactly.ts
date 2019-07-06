@@ -20,8 +20,8 @@ export const help: FunctionHelp<FunctionFactory<typeof exactly>> = {
     value: i18n.translate('xpack.canvas.functions.exactly.args.valueHelpText', {
       defaultMessage: 'The value to match exactly, including white space and capitalization.',
     }),
-    filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
-      defaultMessage: 'The group name for the filter',
+    filterGroup: i18n.translate('xpack.canvas.functions.exactly.args.filterGroupHelpText', {
+      defaultMessage: 'The group name for the filter.',
     }),
   },
 };

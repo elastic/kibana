@@ -33,7 +33,7 @@ export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
     }),
     label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
       defaultMessage:
-        'To show or hide labels, use `true` or `false`. Alternatively, provide a string to display as a label.',
+        'To show or hide labels, use `{true}` or `{false}`. Alternatively, provide a string to display as a label.',
       values: {
         true: 'true',
         false: 'false',
