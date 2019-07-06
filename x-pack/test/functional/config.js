@@ -183,8 +183,8 @@ export default async function ({ readConfigFile }) {
       uptime: UptimePageProvider,
       rollup: RollupPageProvider,
       licenseManagement: LicenseManagementPageProvider,
-      indexLifecycleManagement: IndexLifecycleManagementPageProvider,
-      snapshotRestore: SnapshotRestorePageProvider
+      snapshotRestore: SnapshotRestorePageProvider,
+      indexLifecycleManagement: IndexLifecycleManagementPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
