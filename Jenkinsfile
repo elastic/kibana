@@ -53,8 +53,11 @@ pipeline {
         script {
           createWorkspaceCache()
         }
-        step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID,  bucketUri: "gs://kibana-ci-artifacts/jobs/kibana-automation-pipeline/${BUILD_ID}/var/lib/jenkins/.kibana/workspace_cache/JOB_NAME-kibana-automation-pipeline-BUILD_ID-${BUILD_ID}.tgz", localDirectory: "${WORKSPACE_CACHE_DIR}"])
-        sh './test/scripts/jenkins_unit.sh'
+        step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID,  bucketUri: "gs://kibana-ci-artifacts/jobs/${JOB_NAME}/${BUILD_ID}/var/lib/jenkins/.kibana/workspace_cache/JOB_NAME-kibana-automation-pipeline-BUILD_ID-${BUILD_ID}.tgz", localDirectory: "${WORKSPACE_CACHE_DIR}"])
+        unTar()
+        dir("${WORKSPACE}"){
+          sh './test/scripts/jenkins_unit.sh'
+        }
       }
     }
     stage('Component Integration Tests') {
@@ -80,11 +83,22 @@ pipeline {
     }
   }
 }
+def clearDir(String x){
+  dir(x){
+    sh 'rm -rf ./*'
+  }
+}
+def unTar(){
+  clearDir(env.WORKSPACE_DIR)
+  dir(env.WORKSPACE_CACHE_DIR){
+    sh "tar xfz JOB_NAME-${JOB_NAME}-BUILD_ID-${BUILD_ID}.tgz --strip-components=4 -C ${WORKSPACE_DIR}"
+  }
+}
 def tarGlobs(){
   return "${WORKSPACE_DIR}/elasticsearch/* ${WORKSPACE_DIR}/${JOB_NAME}/*"
 }
 def tarAll(){
-  dir("${env.WORKSPACE_CACHE_DIR}"){
+  dir(env.WORKSPACE_CACHE_DIR}){
     script {
       sh "tar -czf ${WORKSPACE_CACHE_NAME} ${tarGlobs()}"
     }
