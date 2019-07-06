@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PLUGIN_ID, SAVED_OBJECT_TYPE } from '../common/constants';
-import { Request, ServerRoute } from '../common/types';
+import { Request, ServerRoute, IntegrationListItem, IntegrationList } from '../common/types';
 import {
   API_LIST_PATTERN,
   API_INFO_PATTERN,
@@ -42,18 +42,26 @@ export const routes: ServerRoute[] = [
       const client = getClient(req);
       const results = await client.bulkGet(searchObjects);
       const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
-
+      const integrationList: IntegrationList = [];
       for (const item of registryItems) {
-        const installedObject = savedObjects.find(o => o.id === `${item.name}-${item.version}`);
-        if (installedObject) {
-          item.status = 'installed';
-          item.savedObject = installedObject;
-        } else {
-          item.status = 'not_installed';
-        }
+        const installedObject: InstallationSavedObject | undefined = savedObjects.find(
+          ({ id }) => id === `${item.name}-${item.version}`
+        );
+        const integration: IntegrationListItem = installedObject
+          ? {
+              ...item,
+              status: 'installed',
+              savedObject: installedObject,
+            }
+          : {
+              ...item,
+              status: 'not_installed',
+            };
+
+        integrationList.push(integration);
       }
 
-      return registryItems;
+      return integrationList;
     },
   },
   {

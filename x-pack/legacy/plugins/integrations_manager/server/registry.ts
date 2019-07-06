@@ -5,7 +5,7 @@
  */
 
 import { SavedObject } from 'src/core/server/saved_objects';
-import { IntegrationInfo, IntegrationList } from '../common/types';
+import { RegistryList, RegistryPackage } from '../common/types';
 import { cacheGet, cacheSet, cacheHas } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
@@ -13,11 +13,11 @@ import { streamToBuffer } from './streams';
 
 const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 
-export async function fetchList(): Promise<IntegrationList> {
+export async function fetchList(): Promise<RegistryList> {
   return fetchUrl(`${REGISTRY}/list`).then(JSON.parse);
 }
 
-export async function fetchInfo(key: string): Promise<IntegrationInfo> {
+export async function fetchInfo(key: string): Promise<RegistryPackage> {
   return fetchUrl(`${REGISTRY}/package/${key}`).then(JSON.parse);
 }
 
