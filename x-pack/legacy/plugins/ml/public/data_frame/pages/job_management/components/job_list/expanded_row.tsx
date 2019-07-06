@@ -26,10 +26,9 @@ function getItemDescription(value: any) {
 
 interface Props {
   item: DataFrameJobListRow;
-  lastUpdate: number;
 }
 
-export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
+export const ExpandedRow: SFC<Props> = ({ item }) => {
   const state: SectionConfig = {
     title: 'State',
     items: Object.entries(item.state).map(s => {
@@ -58,7 +57,7 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
     {
       id: 'job-details',
       name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobSettingsLabel', {
-        defaultMessage: 'Job details',
+        defaultMessage: 'Transform details',
       }),
       content: <JobDetailsPane sections={[state, checkpointing, stats]} />,
     },
@@ -72,14 +71,14 @@ export const ExpandedRow: SFC<Props> = ({ item, lastUpdate }) => {
       name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobMessagesLabel', {
         defaultMessage: 'Messages',
       }),
-      content: <TransformMessagesPane transformId={item.id} lastUpdate={lastUpdate} />,
+      content: <TransformMessagesPane transformId={item.id} />,
     },
     {
       id: 'job-preview',
       name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobPreviewLabel', {
         defaultMessage: 'Preview',
       }),
-      content: <PreviewPane transformConfig={item.config} lastUpdate={lastUpdate} />,
+      content: <PreviewPane transformConfig={item.config} />,
     },
   ];
   return (

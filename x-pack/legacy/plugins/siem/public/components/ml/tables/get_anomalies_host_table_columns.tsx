@@ -15,6 +15,7 @@ import { HostDetailsLink } from '../../links';
 
 import * as i18n from './translations';
 import { AnomalyScore } from '../score/anomaly_score';
+import { getEntries } from '../get_entries';
 
 export const getAnomaliesHostTableColumns = (
   startDate: number,
@@ -77,8 +78,9 @@ export const getAnomaliesHostTableColumns = (
     render: (influencers, anomaliesByHost) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {influencers.map(influencer => {
-          const entityName = Object.keys(influencer)[0];
-          const entityValue = Object.values(influencer)[0];
+          const [key, value] = getEntries(influencer);
+          const entityName = key != null ? key : '';
+          const entityValue = value != null ? value : '';
           return (
             <EuiFlexItem
               key={`${entityName}-${entityValue}-${createCompoundHostKey(anomaliesByHost)}`}

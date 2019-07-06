@@ -41,13 +41,10 @@ export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false):
     setLoading(false);
   };
 
-  useEffect(
-    () => {
-      setLoading(true);
-      fetchFunc();
-    },
-    [jobIds.join(','), refetchSummaryData]
-  );
+  useEffect(() => {
+    setLoading(true);
+    fetchFunc();
+  }, [jobIds.join(','), refetchSummaryData]);
 
   return [loading, jobSummaryData];
 };

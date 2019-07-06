@@ -32,7 +32,10 @@ exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
       ],
     }
   }
+  from={1560578400000}
+  id="kpiNetwork"
   loading={true}
+  to={1560837600000}
 />
 `;
 
@@ -68,6 +71,9 @@ exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
       ],
     }
   }
+  from={1560578400000}
+  id="kpiNetwork"
   loading={false}
+  to={1560837600000}
 />
 `;

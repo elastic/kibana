@@ -379,12 +379,10 @@ describe('Notifications targetDomElement', () => {
     });
 
     let targetDomElementParentInStart: HTMLElement | null;
-    MockNotificationsService.start.mockImplementation(
-      ({ targetDomElement }): any => {
-        expect(targetDomElement.parentElement).not.toBeNull();
-        targetDomElementParentInStart = targetDomElement.parentElement;
-      }
-    );
+    MockNotificationsService.start.mockImplementation(({ targetDomElement }): any => {
+      expect(targetDomElement.parentElement).not.toBeNull();
+      targetDomElementParentInStart = targetDomElement.parentElement;
+    });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();

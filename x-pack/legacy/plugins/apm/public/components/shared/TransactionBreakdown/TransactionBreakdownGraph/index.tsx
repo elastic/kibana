@@ -25,20 +25,17 @@ const TransactionBreakdownGraph: React.FC<Props> = props => {
 
   const series: React.ComponentProps<
     typeof TransactionLineChart
-  >['series'] = useMemo(
-    () => {
-      return timeseries.map(timeseriesConfig => {
-        return {
-          title: timeseriesConfig.name,
-          color: timeseriesConfig.color,
-          data: timeseriesConfig.values,
-          type: 'area',
-          hideLegend: true
-        };
-      }, {});
-    },
-    [timeseries]
-  );
+  >['series'] = useMemo(() => {
+    return timeseries.map(timeseriesConfig => {
+      return {
+        title: timeseriesConfig.name,
+        color: timeseriesConfig.color,
+        data: timeseriesConfig.values,
+        type: 'area',
+        hideLegend: true
+      };
+    }, {});
+  }, [timeseries]);
 
   const tickFormatY = useCallback((y: number | null) => {
     return numeral(y || 0).format('0 %');

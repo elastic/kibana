@@ -571,8 +571,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getNumericInterval(agg = 2) {
-      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
-      return await intervalElement.getProperty('value');
+      return await testSubjects.getAttribute(`visEditorInterval${agg}`, 'value');
     }
 
     async setNumericInterval(newValue, { append } = {}, agg = 2) {
@@ -1214,7 +1213,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async getBucketErrorMessage() {
       const error = await find.byCssSelector('[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText');
-      const errorMessage = await error.getProperty('innerText');
+      const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
       return errorMessage;
     }

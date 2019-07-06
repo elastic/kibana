@@ -22,20 +22,17 @@ export function useServiceMetricCharts(
   const uiFilters = useUiFilters(urlParams);
   const { data = INITIAL_DATA, error, status } = useFetcher<
     MetricsChartsByAgentAPIResponse
-  >(
-    () => {
-      if (serviceName && start && end && agentName) {
-        return loadMetricsChartData({
-          serviceName,
-          start,
-          end,
-          agentName,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, agentName, uiFilters]
-  );
+  >(() => {
+    if (serviceName && start && end && agentName) {
+      return loadMetricsChartData({
+        serviceName,
+        start,
+        end,
+        agentName,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, agentName, uiFilters]);
 
   return {
     data,
