@@ -91,7 +91,9 @@ def clearDir(String x){
 def unTar(){
   clearDir(env.WORKSPACE_DIR)
   dir(env.WORKSPACE_CACHE_DIR){
-    sh "tar xfz JOB_NAME-${JOB_NAME}-BUILD_ID-${BUILD_ID}.tgz --strip-components=4 -C ${WORKSPACE_DIR}"
+    sh 'pwd'
+    sh 'ls -la'
+    // sh "tar xfz JOB_NAME-${JOB_NAME}-BUILD_ID-${BUILD_ID}.tgz --strip-components=4 -C ${WORKSPACE_DIR}"
   }
 }
 def tarGlobs(){
