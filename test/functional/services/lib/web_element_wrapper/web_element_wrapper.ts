@@ -95,20 +95,20 @@ export class WebElementWrapper {
   private retryCount: number = 3;
 
   private async retryCall(fn: Function, n: number = this.retryCount): Promise<any> {
-    try {
-      return await fn(this);
-    } catch (err) {
-      this.logger.info(`${fn.name}: ${err.message}`);
-      if (this.locator === null || n === 1) throw err;
-      this.logger.info(
-        `WebElementWrapper: searching element '${this.locator.toString()}', ${n - 1} attempts left`
-      );
-      await delay(200);
-      const element = await this.driver.findElement(this.locator);
-      this._webElement = element;
-      this.webElement = element;
-      return await this.retryCall(fn, n - 1);
-    }
+    return await fn(this);
+    // try {
+    //   return await fn(this);
+    // } catch (err) {
+    //   this.logger.info(`${fn.name}: ${err.message}`);
+    //   if (this.locator === null || n === 1) throw err;
+    //   this.logger.info(
+    //     `WebElementWrapper: searching element '${this.locator.toString()}', ${n - 1} attempts left`
+    //   );
+    //   await delay(200);
+    //   const element = await this.driver.findElement(this.locator);
+    //   this.webElement = element;
+    //   return await this.retryCall(fn, n - 1);
+    // }
   }
 
   /**
