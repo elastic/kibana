@@ -62,7 +62,7 @@ export function siem(kibana: any) {
           }),
           value: 50,
           type: 'number',
-          description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
+          description: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreDescription', {
             defaultMessage:
               'Default anomaly score threshold to exceed before showing anomalies. Valid values are between 0 and 100',
           }),
