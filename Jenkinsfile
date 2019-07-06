@@ -83,7 +83,7 @@ pipeline {
 def tarGlobs(){
   return "${WORKSPACE_DIR}/elasticsearch/* ${WORKSPACE_DIR}/${JOB_NAME}/*"
 }
-def tarAll(xs){
+def tarAll(){
   dir("${env.WORKSPACE_CACHE_DIR}"){
     script {
       sh "tar -czvf ${WORKSPACE_CACHE_NAME} ${tarGlobs()}"
