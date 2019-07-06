@@ -27,7 +27,7 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-} from '../../server';
+} from '../../server/types';
 // TODO: Migrate to an error modal powered by the NP?
 import {
   isAutoCreateIndexError,
@@ -44,7 +44,7 @@ export {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-} from '../../server';
+} from '../../server/types';
 
 interface RequestParams {
   method: 'POST' | 'GET' | 'PUT' | 'DELETE';
