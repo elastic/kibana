@@ -26,6 +26,8 @@ import { VisResponseData } from './types';
 import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 
+jest.mock('ui/new_platform');
+
 describe('EmbeddedVisualizeHandler', () => {
   let handler: any;
   let div: HTMLElement;

@@ -17,7 +17,7 @@ import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import { closeToast, importRepo } from '../../actions';
 import { RootState } from '../../reducers';
-import { ToastType } from '../../reducers/repository';
+import { ToastType } from '../../reducers/repository_management';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 
 class CodeImportProject extends React.PureComponent<
@@ -108,10 +108,10 @@ class CodeImportProject extends React.PureComponent<
 }
 
 const mapStateToProps = (state: RootState) => ({
-  importLoading: state.repository.importLoading,
-  toastMessage: state.repository.toastMessage,
-  toastType: state.repository.toastType,
-  showToast: state.repository.showToast,
+  importLoading: state.repositoryManagement.importLoading,
+  toastMessage: state.repositoryManagement.toastMessage,
+  toastType: state.repositoryManagement.toastType,
+  showToast: state.repositoryManagement.showToast,
 });
 
 const mapDispatchToProps = {

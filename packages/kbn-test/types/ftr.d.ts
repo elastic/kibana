@@ -43,7 +43,7 @@ type MaybeAsyncInstance<T> = T extends Promise<infer X> ? AsyncInstance<X> & X :
 type ProvidedTypeMap<T extends {}> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? MaybeAsyncInstance<ReturnType<T[K]>>
-    : unknown
+    : unknown;
 };
 
 export interface GenericFtrProviderContext<

@@ -34,12 +34,13 @@ describe('Authentication Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <AuthenticationTable
-            loading={false}
             data={mockData.Authentications.edges}
-            totalCount={mockData.Authentications.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Authentications.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)}
+            id="authentication"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)}
+            totalCount={mockData.Authentications.totalCount}
             type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>
