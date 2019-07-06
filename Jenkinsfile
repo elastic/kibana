@@ -86,7 +86,7 @@ def tarGlobs(){
 def tarAll(){
   dir("${env.WORKSPACE_CACHE_DIR}"){
     script {
-      sh "tar -czvf ${WORKSPACE_CACHE_NAME} ${tarGlobs()}"
+      sh "tar -czf ${WORKSPACE_CACHE_NAME} ${tarGlobs()}"
     }
   }
 }
