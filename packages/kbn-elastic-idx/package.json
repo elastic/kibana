@@ -19,7 +19,7 @@
   "devDependencies": {
     "@babel/core": "7.4.5",
     "@babel/plugin-transform-async-to-generator": "7.4.4",
-    "jest": "^24.1.0",
+    "jest": "^24.8.0",
     "typescript": "^3.3.3333"
   },
   "jest": {
