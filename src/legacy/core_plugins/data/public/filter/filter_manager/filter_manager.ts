@@ -84,21 +84,14 @@ export class FilterManager {
 
   private handleStateUpdate(newFilters: Filter[]) {
     // global filters should always be first
-    newFilters.sort((a: Filter, b: Filter): number => {
-      // TypeScript, this shouldn't happen
-      if (!a.$state || !b.$state) return 0;
-      if (
-        a.$state.store === FilterStateStore.GLOBAL_STATE &&
-        b.$state.store !== FilterStateStore.GLOBAL_STATE
-      ) {
-        return -1;
-      } else if (
-        a.$state.store !== FilterStateStore.GLOBAL_STATE &&
-        b.$state.store === FilterStateStore.GLOBAL_STATE
-      ) {
-        return 1;
-      } else {
+    newFilters.sort(({ $state: a }: Filter, { $state: b }: Filter): number => {
+      if (a!.store === b!.store) {
         return 0;
+      } else {
+        return a!.store === FilterStateStore.GLOBAL_STATE &&
+          b!.store !== FilterStateStore.GLOBAL_STATE
+          ? -1
+          : 1;
       }
     });
 
