@@ -351,8 +351,10 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.showTimePickerInline = () => {
-      return $scope.showQueryBarTimePicker() &&
+    $scope.showSearchBarInline = () => {
+      // Show inline with menu, if it's only the timepicker \ autorefresh component
+      return ($scope.showQueryBarTimePicker() ||
+              $scope.showAutoRefreshOnly()) &&
         !$scope.showQueryInput() &&
         !$scope.showFilterBar();
     };
@@ -362,7 +364,10 @@ function VisEditor(
     };
 
     $scope.showQueryBar = () => {
-      return $scope.showQueryInput() || vis.type.options.showTimePicker;
+      // Show querybar if input or timepicker are required.
+      return $scope.showQueryInput() ||
+            $scope.showQueryBarTimePicker() ||
+            $scope.showAutoRefreshOnly();
     };
 
     $scope.showQueryInput = () => {
@@ -371,6 +376,10 @@ function VisEditor(
 
     $scope.showQueryBarTimePicker = () => {
       return vis.type.options.showTimePicker;
+    };
+
+    $scope.showAutoRefreshOnly = () => {
+      return !$scope.showQueryBarTimePicker();
     };
 
     $scope.timeRange = timefilter.getTime();
@@ -387,30 +396,6 @@ function VisEditor(
     });
 
     $state.replace();
-
-    $scope.$watchMulti([
-      'searchSource.getField("index")',
-      'vis.type.options.showTimePicker',
-      $scope.showQueryBar,
-    ], function ([index, requiresTimePicker, showQueryBar]) {
-      const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
-
-      if (showQueryBar) {
-        timefilter.disableTimeRangeSelector();
-        timefilter.disableAutoRefreshSelector();
-        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
-      }
-      else if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
-        $scope.showAutoRefreshOnlyInQueryBar = false;
-      }
-      else {
-        timefilter.disableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
-        $scope.showAutoRefreshOnlyInQueryBar = false;
-      }
-    });
 
     const updateTimeRange = () => {
       $scope.timeRange = timefilter.getTime();

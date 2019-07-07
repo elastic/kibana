@@ -280,6 +280,10 @@ export class QueryBarUI extends Component<Props, State> {
     );
   }
 
+  private shouldRenderDatePicker() {
+    return this.props.showDatePicker || this.props.showAutoRefreshOnly;
+  }
+
   private renderUpdateButton() {
     const button = this.props.customSubmitButton ? (
       React.cloneElement(this.props.customSubmitButton, { onClick: this.onClickSubmitButton })
@@ -292,7 +296,7 @@ export class QueryBarUI extends Component<Props, State> {
       />
     );
 
-    if (!this.props.showDatePicker) {
+    if (!this.shouldRenderDatePicker()) {
       return button;
     }
 
@@ -305,7 +309,7 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderDatePicker() {
-    if (!this.props.showDatePicker) {
+    if (!this.shouldRenderDatePicker()) {
       return null;
     }
 
