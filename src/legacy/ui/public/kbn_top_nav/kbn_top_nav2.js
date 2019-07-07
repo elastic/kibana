@@ -89,7 +89,7 @@ module.directive('kbnTopNav2Helper', (reactDirective) => {
       'showQueryInput',
       'showDatePicker',
 
-      'showSearchBarInline', // temp solution for timelion app
+      'showSearchBarInline',
 
       'appName',
       'screenTitle',
