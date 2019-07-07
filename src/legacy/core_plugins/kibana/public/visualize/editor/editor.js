@@ -351,8 +351,26 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
+    $scope.showTimePickerInline = () => {
+      return $scope.showQueryBarTimePicker() &&
+        !$scope.showQueryInput() &&
+        !$scope.showFilterBar();
+    };
+
+    $scope.showFilterBar = () => {
+      return vis.type.options.showFilterBar;
+    };
+
     $scope.showQueryBar = () => {
+      return $scope.showQueryInput() || vis.type.options.showTimePicker;
+    };
+
+    $scope.showQueryInput = () => {
       return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
+    $scope.showQueryBarTimePicker = () => {
+      return vis.type.options.showTimePicker;
     };
 
     $scope.timeRange = timefilter.getTime();
@@ -380,19 +398,16 @@ function VisEditor(
       if (showQueryBar) {
         timefilter.disableTimeRangeSelector();
         timefilter.disableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = true;
         $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
       }
       else if (showTimeFilter) {
         timefilter.enableTimeRangeSelector();
         timefilter.enableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = false;
         $scope.showAutoRefreshOnlyInQueryBar = false;
       }
       else {
         timefilter.disableTimeRangeSelector();
         timefilter.enableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = false;
         $scope.showAutoRefreshOnlyInQueryBar = false;
       }
     });
