@@ -423,11 +423,13 @@ export class DashboardAppController {
 
     $scope.showAddPanel = () => {
       dashboardStateManager.setFullScreenMode(false);
-      $scope.kbnTopNav.click(TopNavIds.ADD);
+      // Temp solution for triggering menu click.
+      navActions[TopNavIds.ADD](null, null, null);
     };
     $scope.enterEditMode = () => {
       dashboardStateManager.setFullScreenMode(false);
-      $scope.kbnTopNav.click('edit');
+      // Temp solution for triggering menu click.
+      navActions[TopNavIds.ENTER_EDIT_MODE](null, null, null);
     };
     const navActions: {
       [key: string]: NavAction;

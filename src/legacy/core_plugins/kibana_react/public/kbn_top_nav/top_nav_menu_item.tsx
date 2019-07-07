@@ -17,28 +17,20 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { TopNavMenuData, CloseHandler, TopNavMenuAction } from './top_nav_menu_data';
+import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
 
 interface Props {
   data: TopNavMenuData;
   onClick: (key: string, action: TopNavMenuAction, target?: any) => void;
 }
 
-interface State {
-  isDisabled: boolean;
-  closeHandler: CloseHandler;
-}
+export function TopNavMenuItem(props: Props) {
+  const menuData = props.data;
 
-export class TopNavMenuItem extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-  }
-
-  private isDisabled(): boolean {
-    const menuData = this.props.data;
+  function isDisabled(): boolean {
     const val =
       typeof menuData.disableButton === 'function'
         ? menuData.disableButton()
@@ -46,22 +38,18 @@ export class TopNavMenuItem extends Component<Props, State> {
     return val || false;
   }
 
-  private handleClick() {
-    const menuData = this.props.data;
-    this.props.onClick(menuData.key, menuData.run, arguments[0].currentTarget);
+  function handleClick(e: MouseEvent) {
+    props.onClick(menuData.key, menuData.run, e.currentTarget);
   }
 
-  public render() {
-    const menuData = this.props.data;
-    return (
-      <EuiButtonEmpty
-        size="xs"
-        isDisabled={this.isDisabled()}
-        onClick={this.handleClick.bind(this)}
-        data-test-subj={menuData.testId}
-      >
-        {_.capitalize(menuData.label || menuData.key)}
-      </EuiButtonEmpty>
-    );
-  }
+  return (
+    <EuiButtonEmpty
+      size="xs"
+      isDisabled={isDisabled()}
+      onClick={handleClick}
+      data-test-subj={menuData.testId}
+    >
+      {_.capitalize(menuData.label || menuData.key)}
+    </EuiButtonEmpty>
+  );
 }
