@@ -48,6 +48,29 @@ export class MonacoHelper {
       if (chrome.getInjected('enableLangserversDeveloping', false) === true) {
         this.monaco.languages.registerDefinitionProvider('go', definitionProvider);
       }
+      const langsSupportedByCtags = [
+        'c',
+        'clojure',
+        'cpp',
+        'csharp',
+        'kotlin',
+        'lua',
+        'pascal',
+        'perl',
+        'php',
+        'powershell',
+        'python',
+        'ruby',
+        'rust',
+        'scheme',
+        'shell',
+        'sql',
+        'swift',
+        'tcl',
+      ];
+      langsSupportedByCtags.forEach(language =>
+        this.monaco.languages.registerDefinitionProvider(language, definitionProvider)
+      );
       const codeEditorService = new EditorService(this.getUrlQuery);
       codeEditorService.setMonacoHelper(this);
       this.editor = monaco.editor.create(
