@@ -226,7 +226,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           fullname: await fullnameElement.getVisibleText(),
           email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
+          reserved: (await isReservedElementVisible.getAttribute('innerHTML')).includes('reservedUser')
         };
       });
     }

@@ -6,17 +6,19 @@
 
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
-import { CentralConfiguration } from './configuration';
+import { AgentConfiguration } from './configuration_types';
 
-export type CMListAPIResponse = PromiseReturnType<typeof listConfigurations>;
+export type AgentConfigurationListAPIResponse = PromiseReturnType<
+  typeof listConfigurations
+>;
 export async function listConfigurations({ setup }: { setup: Setup }) {
   const { client, config } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.cmIndex')
+    index: config.get<string>('apm_oss.apmAgentConfigurationIndex')
   };
 
-  const resp = await client.search<CentralConfiguration>(params);
+  const resp = await client.search<AgentConfiguration>(params);
   return resp.hits.hits.map(item => ({
     id: item._id,
     ...item._source

@@ -21,7 +21,7 @@ export async function getUnavailableEnvironments({
   const { client, config } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.cmIndex'),
+    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
       size: 0,
       query: {
