@@ -5,7 +5,18 @@
  */
 
 export { Request, ServerRoute } from 'hapi';
-import { SavedObject } from 'src/core/server/saved_objects';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from 'src/core/server/saved_objects';
+
+type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+export interface Installation extends SavedObjectAttributes {
+  installed: AssetReference[];
+}
+
+export type InstallationSavedObject = SavedObject<Installation>;
 
 // the contract with the registry
 export type RegistryList = RegistryListItem[];
@@ -38,24 +49,15 @@ export interface RegistryPackage {
 // the public HTTP response types
 export type IntegrationList = IntegrationListItem[];
 
-export interface IntegrationItemNotInstalled extends RegistryListItem {
-  status: 'not_installed';
-}
+export type IntegrationListItem = Installed<RegistryListItem> | NotInstalled<RegistryListItem>;
 
-export interface IntegrationItemInstalled extends RegistryListItem {
+export type IntegrationInfo = Installed<RegistryPackage> | NotInstalled<RegistryPackage>;
+
+type Installed<T = {}> = T & {
   status: 'installed';
-  savedObject: SavedObject;
-}
+  savedObject: InstallationSavedObject;
+};
 
-export type IntegrationListItem = IntegrationItemInstalled | IntegrationItemNotInstalled;
-
-export interface IntegrationInfoNotInstalled extends RegistryListItem {
+type NotInstalled<T = {}> = T & {
   status: 'not_installed';
-}
-
-export interface IntegrationInfoInstalled extends RegistryListItem {
-  status: 'installed';
-  savedObject: SavedObject;
-}
-
-export type IntegrationInfo = IntegrationInfoInstalled | IntegrationInfoNotInstalled;
+};

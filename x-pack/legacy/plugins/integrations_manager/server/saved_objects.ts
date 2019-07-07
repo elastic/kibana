@@ -4,20 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from 'src/core/server/saved_objects';
 import { SAVED_OBJECT_TYPE } from '../common/constants';
 import { Request } from '../common/types';
-
-type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
-export interface Installation extends SavedObjectAttributes {
-  installed: AssetReference[];
-}
-
-export type InstallationSavedObject = SavedObject<Installation>;
 
 export const getClient = (req: Request) => req.getSavedObjectsClient();
 

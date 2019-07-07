@@ -4,12 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'src/core/server/saved_objects';
+import {
+  SavedObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsClientContract,
+} from 'src/core/server/saved_objects';
 import { SAVED_OBJECT_TYPE } from '../common/constants';
-import { Request, IntegrationListItem, IntegrationList } from '../common/types';
+import {
+  Request,
+  InstallationSavedObject,
+  IntegrationInfo,
+  IntegrationListItem,
+  IntegrationList,
+  RegistryList,
+  RegistryListItem,
+  RegistryPackage,
+} from '../common/types';
 import { cacheGet } from './cache';
 import * as Registry from './registry';
-import { getClient, InstallationSavedObject } from './saved_objects';
+import { getClient } from './saved_objects';
 
 interface PackageRequest extends Request {
   params: {
@@ -26,68 +39,25 @@ interface InstallFeatureRequest extends PackageRequest {
 
 export async function handleGetList(req: Request) {
   const registryItems = await Registry.fetchList();
-  const searchObjects = registryItems.map(({ name, version }) => ({
+  const searchObjects: SavedObjectsBulkGetObject[] = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,
   }));
   const client = getClient(req);
   const results = await client.bulkGet(searchObjects);
-  const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
-  const integrationList: IntegrationList = [];
-  for (const item of registryItems) {
-    const installedObject: InstallationSavedObject | undefined = savedObjects.find(
-      ({ id }) => id === `${item.name}-${item.version}`
-    );
-    const integration: IntegrationListItem = installedObject
-      ? {
-          ...item,
-          status: 'installed',
-          savedObject: installedObject,
-        }
-      : {
-          ...item,
-          status: 'not_installed',
-        };
+  const savedObjects: InstallationSavedObject[] = results.saved_objects.filter(o => !o.error); // ignore errors for now
+  const integrationList: IntegrationList = createIntegrationList(registryItems, savedObjects);
 
-    integrationList.push(integration);
-  }
-
-  return integrationList.sort((a, b) => {
-    if (a.name > b.name) {
-      return 1;
-    } else if (a.name < b.name) {
-      return -1;
-    } else {
-      return 0;
-    }
-  });
+  return integrationList;
 }
 
 export async function handleGetInfo(req: PackageRequest) {
   const { pkgkey } = req.params;
-  const [info, paths] = await Promise.all([
-    Registry.fetchInfo(pkgkey),
-    Registry.getArchiveInfo(`${pkgkey}.tar.gz`),
-  ]);
+  const item = await Registry.fetchInfo(pkgkey);
+  const savedObject = await getInstallationObject(getClient(req), pkgkey);
+  const installation = createInstallationObject(item, savedObject);
 
-  const savedObject = await getClient(req)
-    .get(SAVED_OBJECT_TYPE, pkgkey)
-    .catch(err => {
-      /* swallow errors for now */
-    });
-
-  const status = savedObject && !savedObject.error ? 'installed' : 'not_installed';
-
-  // map over paths and test types from https://github.com/elastic/integrations-registry/blob/master/ASSETS.md
-  const features = ['injest-pipeline', 'visualization', 'dashboard', 'index-pattern'];
-
-  return {
-    ...info,
-    paths,
-    features,
-    status,
-    savedObject,
-  };
+  return installation;
 }
 
 export async function handleRequestInstall(req: InstallFeatureRequest) {
@@ -118,8 +88,8 @@ export async function handleRequestDelete(req: InstallFeatureRequest) {
   const { pkgkey, feature } = req.params;
   const client = getClient(req);
 
-  const installation: InstallationSavedObject = await client.get(SAVED_OBJECT_TYPE, pkgkey);
-  const installedObjects = installation.attributes.installed;
+  const installation = await getInstallationObject(client, pkgkey);
+  const installedObjects = (installation && installation.attributes.installed) || [];
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -136,7 +106,7 @@ export async function handleRequestDelete(req: InstallFeatureRequest) {
   return {
     pkgkey,
     feature,
-    deleted: installedObjects || [],
+    deleted: installedObjects,
   };
 }
 
@@ -199,4 +169,63 @@ function ensureJsonValues(obj: SavedObject) {
     .filter(key => typeof attributes[key] !== 'string')
     .forEach(key => (attributes[key] = JSON.stringify(attributes[key])));
   return obj;
+}
+
+function createIntegrationList(
+  registryItems: RegistryList,
+  integrationObjects: InstallationSavedObject[]
+) {
+  const integrationList: IntegrationList = [];
+
+  for (const item of registryItems) {
+    const installedObject: InstallationSavedObject | undefined = integrationObjects.find(
+      ({ id }) => id === `${item.name}-${item.version}`
+    );
+
+    const integration = createInstallationObject(item, installedObject);
+    integrationList.push(integration);
+  }
+
+  return integrationList.sort(sortByName);
+}
+
+function createInstallationObject(
+  item: RegistryPackage,
+  savedObject?: InstallationSavedObject
+): IntegrationInfo;
+function createInstallationObject(
+  item: RegistryListItem,
+  savedObject?: InstallationSavedObject
+): IntegrationListItem;
+function createInstallationObject(
+  obj: RegistryPackage | RegistryListItem,
+  savedObject?: InstallationSavedObject
+) {
+  return savedObject
+    ? {
+        ...obj,
+        status: 'installed',
+        savedObject,
+      }
+    : {
+        ...obj,
+        status: 'not_installed',
+      };
+}
+
+function sortByName(a: { name: string }, b: { name: string }) {
+  if (a.name > b.name) {
+    return 1;
+  } else if (a.name < b.name) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+async function getInstallationObject(
+  client: SavedObjectsClientContract,
+  pkgkey: string
+): Promise<InstallationSavedObject | undefined> {
+  return client.get(SAVED_OBJECT_TYPE, pkgkey).catch(e => undefined);
 }
