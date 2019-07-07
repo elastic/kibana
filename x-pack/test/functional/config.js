@@ -29,6 +29,7 @@ import {
   UptimePageProvider,
   LicenseManagementPageProvider,
   IndexLifecycleManagementPageProvider,
+  SnapshotRestorePageProvider
 } from './page_objects';
 
 import {
@@ -114,6 +115,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/license_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/snapshot_restore')
     ],
 
     // define the name and providers for services that should be
@@ -181,6 +183,7 @@ export default async function ({ readConfigFile }) {
       uptime: UptimePageProvider,
       rollup: RollupPageProvider,
       licenseManagement: LicenseManagementPageProvider,
+      snapshotRestore: SnapshotRestorePageProvider,
       indexLifecycleManagement: IndexLifecycleManagementPageProvider
     },
 
@@ -286,6 +289,10 @@ export default async function ({ readConfigFile }) {
       indexLifecycleManagement: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/index_lifecycle_management',
+      },
+      snapshotRestore: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/snapshot_restore',
       },
       apm: {
         pathname: '/app/apm',
