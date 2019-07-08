@@ -52,6 +52,39 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
   const [copyResult, setCopyResult] = useState<Record<string, ProcessedImportResponse>>({});
   const [retries, setRetries] = useState<Record<string, SavedObjectsImportRetry[]>>({});
 
+  let actionButton = (
+    <EuiButton
+      fill
+      isLoading={copyInProgress}
+      onClick={() => startCopy()}
+      data-test-subj="initiateCopyToSpacesButton"
+      disabled={selectedSpaceIds.length === 0 || copyInProgress}
+    >
+      {selectedSpaceIds.length > 0 ? (
+        <FormattedMessage
+          id="xpack.spaces.management.copyToSpace.copyToSpacesButton"
+          defaultMessage="Copy to {spaceCount} {spaceCount, plural, one {space} other {spaces}}"
+          values={{ spaceCount: selectedSpaceIds.length }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.spaces.management.copyToSpace.disabledCopyToSpacesButton"
+          defaultMessage="Copy"
+        />
+      )}
+    </EuiButton>
+  );
+  if (Object.values(copyResult).length > 0) {
+    actionButton = (
+      <EuiButton fill onClick={() => startCopy()} data-test-subj="finishCopyToSpacesButton">
+        <FormattedMessage
+          id="xpack.spaces.management.copyToSpace.finishCopyToSpacesButton"
+          defaultMessage="Finish"
+        />
+      </EuiButton>
+    );
+  }
+
   useEffect(
     () => {
       if (copyInProgress) {
@@ -187,28 +220,7 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={copyInProgress}
-              onClick={() => startCopy()}
-              data-test-subj="initiateCopyToSpacesButton"
-              disabled={selectedSpaceIds.length === 0 || copyInProgress}
-            >
-              {selectedSpaceIds.length > 0 ? (
-                <FormattedMessage
-                  id="xpack.spaces.management.copyToSpace.copyToSpacesButton"
-                  defaultMessage="Copy to {spaceCount} {spaceCount, plural, one {space} other {spaces}}"
-                  values={{ spaceCount: selectedSpaceIds.length }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.spaces.management.copyToSpace.disabledCopyToSpacesButton"
-                  defaultMessage="Copy"
-                />
-              )}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

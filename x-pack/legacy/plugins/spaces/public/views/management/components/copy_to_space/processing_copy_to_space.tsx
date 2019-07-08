@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 import { SpaceAvatar } from 'plugins/spaces/components';
 import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/types';
+import { EuiSpacer } from '@elastic/eui';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
 import { CopyResultDetails } from './copy_result_details';
@@ -36,18 +37,21 @@ export const ProcessingCopyToSpace = (props: Props) => {
           const space = props.spaces.find(s => s.id === id) as Space;
           const result = props.copyResult[space.id];
           return (
-            <li key={id} style={{ margin: '5px 0' }}>
+            <li key={id} style={{ margin: '10px 0' }}>
               <div>
                 <SpaceAvatar space={space} /> {space.name}:{' '}
                 <CopyStatusIndicator copyResult={result} />
               </div>
               {result && (
-                <CopyResultDetails
-                  copyResult={result}
-                  space={space}
-                  retries={props.retries[space.id] || []}
-                  onRetriesChange={updatedRetries => updateRetries(space.id, updatedRetries)}
-                />
+                <>
+                  <EuiSpacer size="s" />
+                  <CopyResultDetails
+                    copyResult={result}
+                    space={space}
+                    retries={props.retries[space.id] || []}
+                    onRetriesChange={updatedRetries => updateRetries(space.id, updatedRetries)}
+                  />
+                </>
               )}
             </li>
           );

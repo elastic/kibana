@@ -7,7 +7,7 @@
 import React from 'react';
 import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 import { summarizeCopyResult } from 'plugins/spaces/lib/copy_to_space';
-import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiButtonGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/types';
@@ -60,11 +60,11 @@ export const CopyResultDetails = (props: Props) => {
             />
           }
         />
+        <EuiSpacer size="s" />
         {conflicts.map(({ obj }) => {
           const retry = props.retries.find(r => r.id === obj.id);
           return (
             <EuiFormRow
-              compressed
               label={
                 <span>
                   {obj.title || obj.id} ({obj.type})
