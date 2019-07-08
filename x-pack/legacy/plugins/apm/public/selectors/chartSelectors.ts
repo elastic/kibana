@@ -162,7 +162,9 @@ export function getTpmSeries(
   const { avg } = apmTimeseries.responseTimes;
 
   if (!tpmBuckets.length && avg.length) {
-    return getEmptySeries(avg[0].x, avg[avg.length - 1].x);
+    const start = avg[0].x;
+    const end = avg[avg.length - 1].x;
+    return getEmptySeries(start, end);
   }
 
   return tpmBuckets.map(bucket => {

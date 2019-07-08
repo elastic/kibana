@@ -146,17 +146,7 @@ class StaticPlot extends PureComponent {
 
     return (
       <SharedPlot plotValues={plotValues}>
-        <HorizontalGridLines key="grid-lines" tickValues={yTickValues} />
         <XAxis tickSize={0} tickTotal={X_TICK_TOTAL} tickFormat={tickFormatX} />
-        <YAxis
-          key="y-axis"
-          tickSize={0}
-          tickValues={yTickValues}
-          tickFormat={tickFormatY}
-          style={{
-            line: { stroke: 'none', fill: 'none' }
-          }}
-        />
         {noHits ? (
           <StatusText
             marginLeft={30}
@@ -165,7 +155,19 @@ class StaticPlot extends PureComponent {
             })}
           />
         ) : (
-          this.getVisSeries(series, plotValues)
+          [
+            <HorizontalGridLines key="grid-lines" tickValues={yTickValues} />,
+            <YAxis
+              key="y-axis"
+              tickSize={0}
+              tickValues={yTickValues}
+              tickFormat={tickFormatY}
+              style={{
+                line: { stroke: 'none', fill: 'none' }
+              }}
+            />,
+            this.getVisSeries(series, plotValues)
+          ]
         )}
       </SharedPlot>
     );

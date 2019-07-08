@@ -139,18 +139,18 @@ export class InnerCustomPlot extends PureComponent {
     });
     const options = this.getOptions(this.props);
 
+    const coordinates = flatten(enabledSeries.map(s => s.data));
+    const noHits = coordinates.every(coord => !isValidCoordinateValue(coord.y));
+
     const plotValues = this.getPlotValues({
       visibleSeries,
-      enabledSeries,
+      enabledSeries: enabledSeries,
       options
     });
 
     if (isEmpty(plotValues)) {
       return null;
     }
-
-    const coordinates = flatten(enabledSeries.map(s => s.data));
-    const noHits = coordinates.every(coord => !isValidCoordinateValue(coord.y));
 
     return (
       <Fragment>

@@ -71,9 +71,7 @@ export function getPlotValues(
   const yScale = getYScale(yMin, yMax);
 
   const yMaxNice = yScale.domain()[1];
-  const yTickValues = !isNaN(yMaxNice)
-    ? [0, yMaxNice / 2, yMaxNice]
-    : [0, 0.5, 1];
+  const yTickValues = [0, yMaxNice / 2, yMaxNice];
 
   return {
     x: xScale,
