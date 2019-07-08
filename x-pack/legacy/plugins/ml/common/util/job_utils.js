@@ -515,12 +515,9 @@ export function validateGroupNames(job) {
 // as used for example in setting the end time of results views for cases where
 // anomalies might have been raised after the point at which data ingest has stopped.
 export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucketTimestamp) {
-  let latest = undefined;
   if (latestDataTimestamp !== undefined && latestBucketTimestamp !== undefined) {
-    latest = Math.max(latestDataTimestamp, latestBucketTimestamp);
+    return Math.max(latestDataTimestamp, latestBucketTimestamp);
   } else {
-    latest = (latestDataTimestamp !== undefined) ? latestDataTimestamp : latestBucketTimestamp;
+    return (latestDataTimestamp !== undefined) ? latestDataTimestamp : latestBucketTimestamp;
   }
-
-  return latest;
 }

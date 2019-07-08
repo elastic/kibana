@@ -203,7 +203,7 @@ export function resultsServiceProvider(callWithRequest) {
   // Obtains the latest bucket result timestamp by job ID.
   // Returns data over all jobs unless an optional list of job IDs of interest is supplied.
   // Returned response consists of latest bucket timestamps (ms since Jan 1 1970) against job ID
-  async function getLatestBucketTimestampByJob(jobIds) {
+  async function getLatestBucketTimestampByJob(jobIds = []) {
     const filter = [
       {
         term: {
@@ -212,7 +212,7 @@ export function resultsServiceProvider(callWithRequest) {
       }
     ];
 
-    if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
+    if (jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
       jobIds.forEach((jobId, i) => {
         if (i > 0) {
