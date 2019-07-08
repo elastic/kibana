@@ -24,8 +24,8 @@ import { Field as FieldType } from '../hook_form_lib';
 import { Field } from './field';
 
 interface Props {
-  title: string;
-  description?: string;
+  title: string | JSX.Element;
+  description?: string | JSX.Element;
   field?: FieldType;
   fieldProps?: Record<string, any>;
   children?: React.ReactNode;
