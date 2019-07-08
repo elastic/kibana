@@ -63,7 +63,7 @@ function RawJsonParamEditor({
       label={label}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}

@@ -121,7 +121,7 @@ function TimeIntervalParamEditor({
 
   return (
     <EuiFormRow
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       error={errors}
       fullWidth={true}
       helpText={helpText}
