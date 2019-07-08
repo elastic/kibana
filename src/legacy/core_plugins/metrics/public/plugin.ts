@@ -23,7 +23,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 // @ts-ignore
 import { tsvb } from './tsvb_fn';
 // @ts-ignore
-import { MetricsVisProvider } from './kbn_vis_type';
+import { MetricsVis } from './kbn_vis_type';
 
 export interface TsvbSetupPlugins {
   // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
@@ -35,7 +35,7 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: TsvbSetupPlugins) {
     plugins.data.expressions.functionsRegistry.register(tsvb);
     // register the provider with the visTypes registry so that other know it exists
-    plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVisProvider);
+    plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVis);
   }
 
   public start() {}
