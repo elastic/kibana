@@ -72,7 +72,7 @@ describe('dateHistogram(req, panel, series)', () => {
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                interval: '10s',
+                fixed_interval: '10s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
                 extended_bounds: {
@@ -106,7 +106,7 @@ describe('dateHistogram(req, panel, series)', () => {
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                interval: '10s',
+                fixed_interval: '10s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
                 extended_bounds: {
@@ -143,7 +143,7 @@ describe('dateHistogram(req, panel, series)', () => {
             timeseries: {
               date_histogram: {
                 field: 'timestamp',
-                interval: '20s',
+                fixed_interval: '20s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
                 extended_bounds: {

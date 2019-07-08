@@ -32,18 +32,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            type: 'action',
             id: resp.body.id,
-            attributes: {
-              description: 'My action',
-              actionTypeId: 'test.index-record',
-              actionTypeConfig: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-            },
-            references: [],
-            updated_at: resp.body.updated_at,
-            version: resp.body.version,
           });
           expect(typeof resp.body.id).to.be('string');
         });

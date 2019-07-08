@@ -10,6 +10,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 
 import chrome from 'ui/chrome';
+import { connect } from 'react-redux';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
@@ -18,7 +19,7 @@ import {
   TimelineEdges,
   TimelineItem,
 } from '../../graphql/types';
-import { inputsModel } from '../../store';
+import { inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
@@ -27,6 +28,7 @@ import { timelineQuery } from './index.gql_query';
 export interface TimelineArgs {
   events: TimelineItem[];
   id: string;
+  inspect: inputsModel.InspectQuery;
   loading: boolean;
   loadMore: (cursor: string, tieBreaker: string) => void;
   pageInfo: PageInfo;
@@ -35,22 +37,28 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
+export interface TimelineQueryReduxProps {
+  isInspected: boolean;
+}
+
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
+  id: string;
   limit: number;
   sortField: SortField;
   fields: string[];
 }
+type TimelineQueryProps = OwnProps & TimelineQueryReduxProps;
 
-export class TimelineQuery extends QueryTemplate<
-  OwnProps,
+class TimelineQueryComponent extends QueryTemplate<
+  TimelineQueryProps,
   GetTimelineQuery.Query,
   GetTimelineQuery.Variables
 > {
   private updatedDate: number = Date.now();
   private memoizedTimelineEvents: (variables: string, events: TimelineEdges[]) => TimelineItem[];
 
-  constructor(props: OwnProps) {
+  constructor(props: TimelineQueryProps) {
     super(props);
     this.memoizedTimelineEvents = memoizeOne(this.getTimelineEvents);
   }
@@ -58,7 +66,8 @@ export class TimelineQuery extends QueryTemplate<
   public render() {
     const {
       children,
-      id = 'timelineQuery',
+      id,
+      isInspected,
       limit,
       fields,
       filterQuery,
@@ -72,6 +81,7 @@ export class TimelineQuery extends QueryTemplate<
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
     };
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
@@ -113,6 +123,7 @@ export class TimelineQuery extends QueryTemplate<
           this.updatedDate = Date.now();
           return children!({
             id,
+            inspect: getOr(null, 'source.Timeline.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Timeline.totalCount', data),
@@ -131,3 +142,16 @@ export class TimelineQuery extends QueryTemplate<
   private getTimelineEvents = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
     timelineEdges.map((e: TimelineEdges) => e.node);
 }
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.timelineQueryByIdSelector();
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const TimelineQuery = connect(makeMapStateToProps)(TimelineQueryComponent);

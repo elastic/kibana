@@ -13,9 +13,10 @@ import { http } from '../../services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const dataFrame = {
-  getDataFrameTransforms() {
+  getDataFrameTransforms(jobId) {
+    const jobIdString = jobId !== undefined ? `/${jobId}` : '';
     return http({
-      url: `${basePath}/_data_frame/transforms`,
+      url: `${basePath}/_data_frame/transforms${jobIdString}`,
       method: 'GET'
     });
   },

@@ -13,6 +13,7 @@ import {
   EuiExpression,
   EuiFormRow,
   EuiComboBox,
+  EuiFormHelpText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
@@ -88,11 +89,12 @@ export class JoinExpression extends Component {
 
     return (
       <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.layerPanel.joinExpression.leftFieldLabel', {
-            defaultMessage: 'Left field'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.joinExpression.leftFieldLabel', {
+          defaultMessage: 'Left field'
+        })}
+        helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabelHelpText', {
+          defaultMessage: 'Left source field that contains the shared key.'
+        })}
       >
         <EuiComboBox
           placeholder={getSelectFieldPlaceholder()}
@@ -144,11 +146,12 @@ export class JoinExpression extends Component {
 
     return (
       <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.layerPanel.joinExpression.rightFieldLabel', {
-            defaultMessage: 'Right field'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightFieldLabel', {
+          defaultMessage: 'Right field'
+        })}
+        helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabelHelpText', {
+          defaultMessage: 'Right source field that contains the shared key.'
+        })}
       >
         <SingleFieldSelect
           placeholder={getSelectFieldPlaceholder()}
@@ -205,12 +208,16 @@ export class JoinExpression extends Component {
               defaultMessage="Join"
             />
           </EuiPopoverTitle>
+          <EuiFormHelpText className="mapJoinExpressionHelpText">
+            <FormattedMessage
+              id="xpack.maps.layerPanel.joinExpression.helpText"
+              defaultMessage="Configure the shared key."
+            />
+          </EuiFormHelpText>
           <EuiFormRow
-            label={
-              i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabel', {
-                defaultMessage: 'Left source'
-              })
-            }
+            label={i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabel', {
+              defaultMessage: 'Left source'
+            })}
           >
             <EuiComboBox
               selectedOptions={[{ value: leftSourceName, label: leftSourceName }]}
