@@ -58,6 +58,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
                 },
               },
             ],
+            enabled: true,
             alertTypeId: 'test.noop',
             alertTypeParams: {},
             interval: 10000,
@@ -72,6 +73,15 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
             basePath: '',
           });
         });
+    });
+
+    it('should not schedule a task when creating a disabled alert', async () => {
+      const { body: createdAlert } = await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ enabled: false }))
+        .expect(200);
+      expect(createdAlert.scheduledTaskId).to.eql(undefined);
     });
 
     it(`should return 400 when alert type isn't registered`, async () => {

@@ -44,6 +44,7 @@ interface CreateOptions {
 interface UpdateOptions {
   id: string;
   data: {
+    enabled: boolean;
     interval: number;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
@@ -84,31 +85,33 @@ export class AlertsClient {
       ...options,
       references,
     });
-    let scheduledTask;
-    try {
-      scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert, this.basePath);
-    } catch (e) {
-      // Cleanup data, something went wrong scheduling the task
+    if (data.enabled) {
+      let scheduledTask;
       try {
-        await this.savedObjectsClient.delete('alert', createdAlert.id);
-      } catch (err) {
-        // Skip the cleanup error and throw the task manager error to avoid confusion
-        this.log(
-          ['alerting', 'error'],
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
-        );
+        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert, this.basePath);
+      } catch (e) {
+        // Cleanup data, something went wrong scheduling the task
+        try {
+          await this.savedObjectsClient.delete('alert', createdAlert.id);
+        } catch (err) {
+          // Skip the cleanup error and throw the task manager error to avoid confusion
+          this.log(
+            ['alerting', 'error'],
+            `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
+          );
+        }
+        throw e;
       }
-      throw e;
+      await this.savedObjectsClient.update(
+        'alert',
+        createdAlert.id,
+        {
+          scheduledTaskId: scheduledTask.id,
+        },
+        { references }
+      );
+      createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    await this.savedObjectsClient.update(
-      'alert',
-      createdAlert.id,
-      {
-        scheduledTaskId: scheduledTask.id,
-      },
-      { references }
-    );
-    createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
   }
 
@@ -130,7 +133,9 @@ export class AlertsClient {
   public async delete({ id }: { id: string }) {
     const alertSavedObject = await this.savedObjectsClient.get('alert', id);
     const removeResult = await this.savedObjectsClient.delete('alert', id);
-    await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    if (alertSavedObject.attributes.scheduledTaskId) {
+      await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    }
     return removeResult;
   }
 
@@ -138,9 +143,15 @@ export class AlertsClient {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     const { alertTypeId } = existingObject.attributes;
     const alertType = this.alertTypeRegistry.get(alertTypeId);
+    let scheduledTaskId = existingObject.attributes.scheduledTaskId;
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
+
+    if (existingObject.attributes.enabled === true && data.enabled === false) {
+      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
+      scheduledTaskId = null;
+    }
 
     const { actions, references } = this.extractReferences(data.actions);
     const updatedObject = await this.savedObjectsClient.update(
@@ -148,6 +159,7 @@ export class AlertsClient {
       id,
       {
         ...data,
+        scheduledTaskId,
         alertTypeParams: validatedAlertTypeParams,
         actions,
       },

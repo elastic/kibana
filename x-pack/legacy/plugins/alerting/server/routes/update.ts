@@ -13,6 +13,7 @@ interface UpdateRequest extends Hapi.Request {
     id: string;
   };
   payload: {
+    enabled: boolean;
     alertTypeId: string;
     interval: number;
     actions: AlertAction[];
@@ -31,6 +32,7 @@ export function updateAlertRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
+            enabled: Joi.boolean().required(),
             interval: Joi.number().required(),
             alertTypeParams: Joi.object().required(),
             actions: Joi.array()

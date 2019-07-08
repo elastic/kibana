@@ -41,6 +41,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         .put(`/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
+          enabled: true,
           alertTypeParams: {
             foo: true,
           },
@@ -64,6 +65,8 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
               foo: true,
             },
             interval: 12000,
+            enabled: true,
+            scheduledTaskId: resp.body.scheduledTaskId,
             actions: [
               {
                 group: 'default',
@@ -78,11 +81,36 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
+    it('should be able to disable an alert', async () => {
+      await supertest
+        .put(`/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          enabled: false,
+          alertTypeParams: {
+            foo: true,
+          },
+          interval: 12000,
+          actions: [
+            {
+              group: 'default',
+              id: ES_ARCHIVER_ACTION_ID,
+              params: {
+                message:
+                  'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+              },
+            },
+          ],
+        })
+        .expect(200);
+    });
+
     it('should return 400 when attempting to change alert type', async () => {
       await supertest
         .put(`/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
+          enabled: true,
           alertTypeId: '1',
           alertTypeParams: {
             foo: true,
@@ -124,10 +152,10 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+              'child "enabled" fails because ["enabled" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
             validation: {
               source: 'payload',
-              keys: ['interval', 'alertTypeParams', 'actions'],
+              keys: ['enabled', 'interval', 'alertTypeParams', 'actions'],
             },
           });
         });
@@ -150,6 +178,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         .put(`/api/alert/${customAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
+          enabled: true,
           interval: 10000,
           alertTypeParams: {},
           actions: [],

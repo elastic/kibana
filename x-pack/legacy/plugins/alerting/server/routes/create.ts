@@ -10,6 +10,7 @@ import { AlertAction } from '../types';
 
 interface ScheduleRequest extends Hapi.Request {
   payload: {
+    enabled: boolean;
     alertTypeId: string;
     interval: number;
     actions: AlertAction[];
@@ -28,6 +29,7 @@ export function createAlertRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
+            enabled: Joi.boolean().default(true),
             alertTypeId: Joi.string().required(),
             interval: Joi.number().required(),
             alertTypeParams: Joi.object().required(),
