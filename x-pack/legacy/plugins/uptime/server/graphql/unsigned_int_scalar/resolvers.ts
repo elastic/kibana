@@ -21,7 +21,7 @@ export const parseValue = (value: any) => {
   if (parsed < 0) {
     return null;
   }
-  return parseInt(value, 10);
+  return parsed;
 };
 
 export const parseLiteral = (ast: ValueNode) => {
