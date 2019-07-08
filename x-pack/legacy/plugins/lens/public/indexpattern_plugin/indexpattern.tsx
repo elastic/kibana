@@ -100,15 +100,12 @@ export interface IndexPattern {
   timeFieldName?: string | null;
 }
 
-// Represents the computed field information for use by Lens
-// Filterable should be computed based on logic in index_patterns/_field.js
 export interface IndexPatternField {
   name: string;
   type: string;
   esTypes?: string[];
   aggregatable: boolean;
   searchable: boolean;
-  filterable: boolean;
   aggregationRestrictions?: Partial<
     Record<
       string,

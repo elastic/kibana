@@ -36,9 +36,6 @@ export function toExpression(state: IndexPatternPrivateState) {
       return getEsAggsConfig(col, colId);
     });
 
-    // TODO: The filters will generate extra columns which are actually going to affect the aggregation order. They need
-    // to be added right before all the metrics, and then removed
-
     const idMap = columnEntries.reduce(
       (currentIdMap, [colId], index) => {
         return {
@@ -48,14 +45,6 @@ export function toExpression(state: IndexPatternPrivateState) {
       },
       {} as Record<string, string>
     );
-
-    const expression = `esaggs
-      index="${state.currentIndexPatternId}"
-      metricsAtAllLevels=false
-      partialRows=false
-      aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
-      idMap
-    )}' | clog`;
 
     const filterRatios = columnEntries.filter(
       ([colId, col]) => col.operationType === 'filter_ratio'
@@ -71,12 +60,14 @@ export function toExpression(state: IndexPatternPrivateState) {
         partialRows=false
         aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
         idMap
-      )}' | ${filterRatios
-        .map(([id]) => `lens_calculate_filter_ratio id=${id}`)
-        .join(' | ')} | clog`;
+      )}' | ${filterRatios.map(([id]) => `lens_calculate_filter_ratio id=${id}`).join(' | ')}`;
     }
 
-    return expression;
+    return `esaggs
+      index="${state.currentIndexPatternId}"
+      metricsAtAllLevels=false
+      partialRows=false
+      aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 
   return null;

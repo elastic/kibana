@@ -27,7 +27,6 @@ describe('date_histogram', () => {
               esTypes: ['date'],
               aggregatable: true,
               searchable: true,
-              filterable: true,
             },
           ],
         },
@@ -60,7 +59,6 @@ describe('date_histogram', () => {
         esTypes: ['date'],
         aggregatable: true,
         searchable: true,
-        filterable: true,
       });
       expect(column.params.interval).toEqual('h');
     });
@@ -72,7 +70,6 @@ describe('date_histogram', () => {
         esTypes: ['date'],
         aggregatable: true,
         searchable: true,
-        filterable: true,
         aggregationRestrictions: {
           date_histogram: {
             agg: 'date_histogram',

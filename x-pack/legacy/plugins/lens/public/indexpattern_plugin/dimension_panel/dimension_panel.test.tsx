@@ -19,13 +19,15 @@ import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 
 jest.mock('../loader');
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome');
-jest.mock('ui/storage/storage_service');
-jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
-
 jest.mock('../state_helpers');
 jest.mock('../operations');
+
+// Used by indexpattern plugin, which is a dependency of a dependency
+jest.mock('ui/chrome');
+jest.mock('ui/storage/storage_service');
+// Contains old and new platform data plugins, used for interpreter and filter ratio
+jest.mock('ui/new_platform');
+jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
@@ -38,28 +40,24 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
       {
         name: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
     ],
   },
@@ -692,7 +690,6 @@ describe('IndexPatternDimensionPanel', () => {
                 aggregatable: true,
                 name: 'bar',
                 searchable: true,
-                filterable: true,
                 type: 'number',
               },
             ],

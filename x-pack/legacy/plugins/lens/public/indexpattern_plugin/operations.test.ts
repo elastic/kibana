@@ -9,9 +9,6 @@ import { IndexPatternPrivateState } from './indexpattern';
 import { hasField } from './state_helpers';
 
 jest.mock('./loader');
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome');
-jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
@@ -24,21 +21,18 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
     ],
   },
@@ -53,7 +47,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          filterable: true,
         })
       ).toEqual(expect.arrayContaining(['terms']));
     });
@@ -65,7 +58,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          filterable: true,
         })
       ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
     });
@@ -77,7 +69,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          filterable: true,
         })
       ).toEqual(expect.arrayContaining(['date_histogram']));
     });
@@ -89,7 +80,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          filterable: true,
         })
       ).toEqual([]);
     });
@@ -103,7 +93,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          filterable: true,
           aggregationRestrictions: {
             terms: {
               agg: 'terms',
@@ -120,7 +109,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          filterable: true,
           aggregationRestrictions: {
             min: {
               agg: 'min',
@@ -140,7 +128,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          filterable: true,
           aggregationRestrictions: {
             date_histogram: {
               agg: 'date_histogram',

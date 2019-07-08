@@ -45,7 +45,6 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
         value={
           Object {
             "aggregatable": true,
-            "filterable": true,
             "name": "timestamp",
             "searchable": true,
             "type": "date",
@@ -60,7 +59,6 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
         value={
           Object {
             "aggregatable": true,
-            "filterable": true,
             "name": "bytes",
             "searchable": true,
             "type": "number",
@@ -75,7 +73,6 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
         value={
           Object {
             "aggregatable": true,
-            "filterable": true,
             "name": "source",
             "searchable": true,
             "type": "string",

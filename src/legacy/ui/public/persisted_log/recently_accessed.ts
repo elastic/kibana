@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { npStart } from '../new_platform';
 
 export const recentlyAccessed = npStart.core.chrome.recentlyAccessed;

@@ -22,10 +22,12 @@ import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { createMockedDragDropContext } from './mocks';
 
 jest.mock('./loader');
-jest.mock('ui/new_platform');
+// chrome, notify, storage are used by ./plugin
 jest.mock('ui/chrome');
 jest.mock('ui/notify');
 jest.mock('ui/storage/storage_service');
+// Contains old and new platform data plugins, used for interpreter and filter ratio
+jest.mock('ui/new_platform');
 jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
@@ -39,21 +41,18 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
-        filterable: true,
       },
     ],
   },
@@ -67,7 +66,6 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
-        filterable: true,
         aggregationRestrictions: {
           date_histogram: {
             agg: 'date_histogram',
@@ -82,7 +80,6 @@ const expectedIndexPatterns = {
         type: 'number',
         aggregatable: true,
         searchable: true,
-        filterable: true,
         aggregationRestrictions: {
           // Ignored in the UI
           histogram: {
@@ -108,7 +105,6 @@ const expectedIndexPatterns = {
         type: 'string',
         aggregatable: true,
         searchable: true,
-        filterable: true,
         aggregationRestrictions: {
           terms: {
             agg: 'terms',
@@ -268,7 +264,7 @@ describe('IndexPattern Data Source', () => {
       index=\\"1\\"
       metricsAtAllLevels=false
       partialRows=false
-      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"timeRange\\":{\\"from\\":\\"now-1d\\",\\"to\\":\\"now\\"},\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}' | clog"
+      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"timeRange\\":{\\"from\\":\\"now-1d\\",\\"to\\":\\"now\\"},\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
 `);
     });
   });
@@ -412,7 +408,6 @@ describe('IndexPattern Data Source', () => {
                   type: 'number',
                   aggregatable: true,
                   searchable: true,
-                  filterable: true,
                 },
               ],
             },
