@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import util from 'util';
+import path from 'path';
 
 import { ProgressReporter } from '.';
 import { Diff, DiffKind } from '../../common/git_diff';
@@ -124,11 +125,10 @@ export class LspIncrementalIndexer extends LspIndexer {
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
     try {
-      const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
+      const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
         this.repoUri,
         HEAD
       );
-      const workspaceDir = workspaceRepo.workdir();
       if (this.diff) {
         for (const f of this.diff.files) {
           yield {
@@ -208,7 +208,7 @@ export class LspIncrementalIndexer extends LspIndexer {
       this.log.error(error);
     }
 
-    const localFilePath = `${localRepoPath}${filePath}`;
+    const localFilePath = path.join(localRepoPath, filePath);
     const lstat = util.promisify(fs.lstat);
     const stat = await lstat(localFilePath);
 

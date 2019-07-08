@@ -58,7 +58,7 @@ export function timeseriesFetcher({
         response_times: {
           date_histogram: {
             field: '@timestamp',
-            interval: intervalString,
+            fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end }
           },
@@ -76,7 +76,7 @@ export function timeseriesFetcher({
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                interval: intervalString,
+                fixed_interval: intervalString,
                 min_doc_count: 0,
                 extended_bounds: { min: start, max: end }
               }
