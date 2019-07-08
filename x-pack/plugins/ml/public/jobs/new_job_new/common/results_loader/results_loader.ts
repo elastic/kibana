@@ -5,13 +5,20 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { JobCreator } from '../job_creator';
+import {
+  SingleMetricJobCreator,
+  MultiMetricJobCreator,
+  isMultiMetricJobCreator,
+  PopulationJobCreator,
+  isPopulationJobCreator,
+} from '../job_creator';
 import { mlResultsService } from '../../../../services/results_service';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { ANOMALY_SEVERITY } from '../../../../../common/constants/anomalies';
 import { getScoresByRecord } from './searches';
 import { JOB_TYPE } from '../job_creator/util/constants';
+import { ChartLoader } from '../chart_loader';
 
 export interface Results {
   progress: number;
@@ -39,17 +46,26 @@ const emptyModelItem = {
   modelLower: 0,
 };
 
+interface SplitFieldWithValue {
+  name: string;
+  value: string;
+}
+
 const LAST_UPDATE_DELAY_MS = 500;
 
 export type ResultsSubscriber = (results: Results) => void;
 
+type AnyJobCreator = SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
+
 export class ResultsLoader {
   private _results$: BehaviorSubject<Results>;
   private _resultsSearchRunning = false;
-  private _jobCreator: JobCreator;
+  private _jobCreator: AnyJobCreator;
   private _chartInterval: MlTimeBuckets;
   private _lastModelTimeStamp: number = 0;
   private _lastResultsTimeout: any = null;
+  private _chartLoader: ChartLoader;
+  // private _detectorSplitFieldWithValue: DetectorSplitFieldFilter;
 
   private _results: Results = {
     progress: 0,
@@ -57,10 +73,14 @@ export class ResultsLoader {
     anomalies: [],
   };
 
-  constructor(jobCreator: JobCreator, chartInterval: MlTimeBuckets) {
+  private _detectorSplitFieldFilters: SplitFieldWithValue | null = null;
+  private _splitFieldFiltersLoaded: boolean = false;
+
+  constructor(jobCreator: AnyJobCreator, chartInterval: MlTimeBuckets, chartLoader: ChartLoader) {
     this._jobCreator = jobCreator;
     this._chartInterval = chartInterval;
     this._results$ = new BehaviorSubject(this._results);
+    this._chartLoader = chartLoader;
 
     jobCreator.subscribeToProgress(this.progressSubscriber);
   }
@@ -68,6 +88,12 @@ export class ResultsLoader {
   progressSubscriber = async (progress: number) => {
     if (this._resultsSearchRunning === false) {
       if (progress - this._results.progress > 5 || progress === 100) {
+        if (this._splitFieldFiltersLoaded === false) {
+          this._splitFieldFiltersLoaded = true;
+          // load detector field filters if this is the first run.
+          await this._populateDetectorSplitFieldFilters();
+        }
+
         this._updateData(progress, false);
 
         if (progress === 100) {
@@ -122,6 +148,10 @@ export class ResultsLoader {
   }
 
   private async _loadModelData(dtrIndex: number): Promise<Record<number, ModelItem[]>> {
+    if (this._jobCreator.modelPlot === false) {
+      return [];
+    }
+
     const agg = this._jobCreator.getAggregation(dtrIndex);
     if (agg === null) {
       return { [dtrIndex]: [emptyModelItem] };
@@ -195,7 +225,7 @@ export class ResultsLoader {
       this._jobCreator.start,
       this._jobCreator.end,
       `${this._chartInterval.getInterval().asMilliseconds()}ms`,
-      null
+      this._detectorSplitFieldFilters
     );
 
     const anomalies: Record<number, Anomaly[]> = {};
@@ -205,5 +235,23 @@ export class ResultsLoader {
       );
     });
     return anomalies;
+  }
+
+  private async _populateDetectorSplitFieldFilters() {
+    if (isMultiMetricJobCreator(this._jobCreator) || isPopulationJobCreator(this._jobCreator)) {
+      if (this._jobCreator.splitField !== null) {
+        const fieldValues = await this._chartLoader.loadFieldExampleValues(
+          this._jobCreator.splitField
+        );
+        if (fieldValues.length > 0) {
+          this._detectorSplitFieldFilters = {
+            name: this._jobCreator.splitField.name,
+            value: fieldValues[0],
+          };
+        }
+        return;
+      }
+    }
+    this._detectorSplitFieldFilters = null;
   }
 }

@@ -10,7 +10,7 @@ import { ML_RESULTS_INDEX_PATTERN } from './../../../../../common/constants/inde
 import { escapeForElasticsearchQuery } from '../../../../util/string_utils';
 import { ml } from '../../../../services/ml_api_service';
 
-interface SplitField {
+interface SplitFieldWithValue {
   name: string;
   value: string;
 }
@@ -34,7 +34,7 @@ export function getScoresByRecord(
   earliestMs: number,
   latestMs: number,
   interval: string,
-  firstSplitField: SplitField | null
+  firstSplitField: SplitFieldWithValue | null
 ): Promise<ProcessedResults> {
   return new Promise((resolve, reject) => {
     const obj: ProcessedResults = {

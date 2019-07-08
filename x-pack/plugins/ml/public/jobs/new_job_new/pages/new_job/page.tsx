@@ -55,7 +55,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     kibanaContext.combinedQuery
   );
 
-  const resultsLoader = new ResultsLoader(jobCreator, chartInterval);
+  const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
 
   useEffect(() => {
     return () => {
