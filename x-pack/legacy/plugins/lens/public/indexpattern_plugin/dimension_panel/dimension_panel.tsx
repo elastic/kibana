@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DatasourceDimensionPanelProps } from '../../types';
@@ -27,8 +27,17 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   dragDropContext: DragContextState;
 };
 
-export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
-  const columns = getPotentialColumns(props.state, props.suggestedPriority);
+export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
+  props: IndexPatternDimensionPanelProps
+) {
+  const columns = useMemo(
+    () =>
+      getPotentialColumns(
+        props.state.indexPatterns[props.state.currentIndexPatternId].fields,
+        props.suggestedPriority
+      ),
+    [props.state.indexPatterns[props.state.currentIndexPatternId].fields, props.suggestedPriority]
+  );
 
   const filteredColumns = columns.filter(col => {
     return props.filterOperations(columnToOperation(col));
@@ -94,4 +103,4 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
       </DragDrop>
     </ChildDragDropProvider>
   );
-}
+});

@@ -107,11 +107,9 @@ export function buildColumnForOperationType<T extends OperationType>(
 }
 
 export function getPotentialColumns(
-  state: IndexPatternPrivateState,
+  fields: IndexPatternField[],
   suggestedOrder?: DimensionPriority
 ): IndexPatternColumn[] {
-  const fields = state.indexPatterns[state.currentIndexPatternId].fields;
-
   const columns: IndexPatternColumn[] = fields
     .map((field, index) => {
       const validOperations = getOperationTypesForField(field);

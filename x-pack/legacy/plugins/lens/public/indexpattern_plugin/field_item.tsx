@@ -5,55 +5,36 @@
  */
 
 import React from 'react';
-import {
-  // @ts-ignore
-  EuiHighlight,
-} from '@elastic/eui';
 import { IndexPatternField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon } from './field_icon';
-import { DataType } from '../types';
+import { DataType } from '..';
 
 export interface FieldItemProps {
   field: IndexPatternField;
   highlight?: string;
 }
 
-function highglightedPart(completeHighlight: string | undefined, part: string) {
-  if (!completeHighlight) {
-    return '';
-  }
-
-  if (completeHighlight.includes(part)) {
-    return part;
-  }
-
-  const highlightParts = completeHighlight.split('.').filter(highlightPart => highlightPart !== '');
-
-  const lastHighlightPart = highlightParts[highlightParts.length - 1];
-  if (part.startsWith(lastHighlightPart)) {
-    return lastHighlightPart;
-  }
-
-  const firstHighlightPart = highlightParts[0];
-  if (part.endsWith(firstHighlightPart)) {
-    return firstHighlightPart;
-  }
-
-  return completeHighlight;
+function wrapOnDot(str?: string) {
+  return str ? str.replace(/\./g, '.\u200B') : undefined;
 }
 
 export function FieldItem({ field, highlight }: FieldItemProps) {
-  const fieldParts = field.name.split('.');
-  const wrappableHighlightableFieldName = _.flatten(
-    fieldParts.map((part, index) => [
-      <span key={index}>
-        <EuiHighlight search={highglightedPart(highlight, part)}>{part}</EuiHighlight>
-        {index !== fieldParts.length - 1 ? '.' : ''}
-      </span>,
-      index !== fieldParts.length - 1 ? <wbr key={`${index}-wbr`} /> : null,
-    ])
-  );
+  const wrappableName = wrapOnDot(field.name)!;
+  const wrappableHighlight = wrapOnDot(highlight);
+  const highlightIndex = wrappableHighlight
+    ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
+    : -1;
+  const wrappableHighlightableFieldName =
+    highlightIndex < 0 ? (
+      wrappableName
+    ) : (
+      <span>
+        <span>{wrappableName.substr(0, highlightIndex)}</span>
+        <strong>{wrappableName.substr(highlightIndex, wrappableHighlight!.length)}</strong>
+        <span>{wrappableName.substr(highlightIndex + wrappableHighlight!.length)}</span>
+      </span>
+    );
 
   return (
     <DragDrop

@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiComboBox,
   EuiFieldSearch,
@@ -41,6 +41,7 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
 }
 
 const supportedFieldTypes = ['string', 'number', 'boolean', 'date'];
+const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
   string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
@@ -52,9 +53,31 @@ const fieldTypeNames: Record<DataType, string> = {
 export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   const [nameFilter, setNameFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState<DataType[]>([]);
-
+  const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
   const [isTypeFilterOpen, setTypeFilterOpen] = useState(false);
+  const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
+
+  const lazyScroll = () => {
+    if (scrollContainer) {
+      const nearBottom =
+        scrollContainer.scrollTop + scrollContainer.clientHeight > scrollContainer.scrollHeight * 0.9;
+      if (nearBottom) {
+        setPageSize(Math.min(pageSize * 1.5, allFields.length));
+      }
+    }
+  };
+
+  useEffect(
+    () => {
+      if (scrollContainer) {
+        scrollContainer.scrollTop = 0;
+        setPageSize(PAGINATION_SIZE);
+        lazyScroll();
+      }
+    },
+    [nameFilter, typeFilter, props.state.currentIndexPatternId]
+  );
 
   if (Object.keys(props.state.indexPatterns).length === 0) {
     return (
@@ -80,11 +103,14 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
     );
   }
 
-  const filteredFields = props.state.indexPatterns[props.state.currentIndexPatternId].fields.filter(
-    (field: IndexPatternField) =>
-      field.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
-      supportedFieldTypes.includes(field.type)
-  );
+  const allFields = props.state.indexPatterns[props.state.currentIndexPatternId].fields;
+  const filteredFields = allFields
+    .filter(
+      (field: IndexPatternField) =>
+        field.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
+        supportedFieldTypes.includes(field.type)
+    )
+    .slice(0, pageSize);
 
   const availableFieldTypes = _.uniq(filteredFields.map(({ type }) => type));
   const availableFilteredTypes = typeFilter.filter(type => availableFieldTypes.includes(type));
@@ -219,7 +245,16 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
             </EuiFlexItem>
           </EuiFlexGroup>
           <div className="lnsFieldListPanel__list">
-            <div className="lnsFieldListPanel__overflow">
+            <div
+              className="lnsFieldListPanel__overflow"
+              ref={el => {
+                if (el && !el.dataset.dynamicScroll) {
+                  el.dataset.dynamicScroll = 'true';
+                  setScrollContainer(el);
+                }
+              }}
+              onScroll={lazyScroll}
+            >
               {filteredFields
                 .filter(
                   field => typeFilter.length === 0 || typeFilter.includes(field.type as DataType)

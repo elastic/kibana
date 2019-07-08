@@ -6,10 +6,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
+import { throttle } from 'lodash';
 import { Action } from './state_management';
 import { Datasource, Visualization } from '../../types';
 import { getSuggestions, toSwitchAction, Suggestion } from './suggestion_helpers';
@@ -90,7 +90,12 @@ const SuggestionPreview = ({
   );
 };
 
-export function SuggestionPanel({
+export const SuggestionPanel = throttle(
+  (props: SuggestionPanelProps) => <InnerSuggestionPanel {...props} />,
+  2000
+);
+
+function InnerSuggestionPanel({
   activeDatasource,
   datasourceState,
   activeVisualizationId,
