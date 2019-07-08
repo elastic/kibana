@@ -62,12 +62,19 @@ const BASES = {
   [InfraWaffleMapDataFormat.abbreviatedNumber]: 1000,
 };
 
-export const createDataFormatter = (format: InfraWaffleMapDataFormat) => (val: number) => {
+const BIT_BASES = [
+  InfraWaffleMapDataFormat.bitsBinaryJEDEC,
+  InfraWaffleMapDataFormat.bitsBinaryIEC,
+  InfraWaffleMapDataFormat.bitsDecimal,
+];
+
+export const createDataFormatter = (format: InfraWaffleMapDataFormat) => (bytes: number) => {
   const labels = LABELS[format];
   const base = BASES[format];
-  const power = Math.min(Math.floor(Math.log(Math.abs(val)) / Math.log(base)), labels.length - 1);
+  const value = BIT_BASES.includes(format) ? bytes * 8 : bytes;
+  const power = Math.min(Math.floor(Math.log(Math.abs(value)) / Math.log(base)), labels.length - 1);
   if (power < 0) {
-    return `${formatNumber(val)}${labels[0]}`;
+    return `${formatNumber(value)}${labels[0]}`;
   }
-  return `${formatNumber(val / Math.pow(base, power))}${labels[power]}`;
+  return `${formatNumber(value / Math.pow(base, power))}${labels[power]}`;
 };
