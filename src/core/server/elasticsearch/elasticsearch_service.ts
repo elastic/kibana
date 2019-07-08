@@ -45,10 +45,25 @@ export interface ElasticsearchServiceSetup {
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
-
+  /**
+   * Create application specific Elasticsearch cluster API client with customized config.
+   *
+   * @param type Unique identifier of the client
+   * @param config Valid sub-set of default Elasticsearch config.
+   * We fill all the missing properties in the `clientConfig` using the default
+   * Elasticsearch config so that we don't depend on default values set and
+   * controlled by underlying Elasticsearch JS client.
+   * We don't run validation against passed config expect it to be valid.
+   *
+   * @example
+   * ```
+   * const client = elasticsearch.createCluster('my-app-name', config);
+   * const data = await client.callAsInternalUser();
+   * ```
+   */
   readonly createClient: (
     type: string,
-    config: Partial<ElasticsearchClientConfig>
+    config?: Partial<ElasticsearchClientConfig>
   ) => ClusterClient;
   readonly adminClient$: Observable<ClusterClient>;
   readonly dataClient$: Observable<ClusterClient>;
@@ -104,14 +119,16 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     ) as ConnectableObservable<CoreClusterClients>;
 
     this.subscription = clients$.connect();
+
     const config = await this.config$.pipe(first()).toPromise();
+
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
       adminClient$: clients$.pipe(map(clients => clients.adminClient)),
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
-      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig>) => {
+      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
         const finalConfig = merge({}, config, clientConfig);
         return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
       },
