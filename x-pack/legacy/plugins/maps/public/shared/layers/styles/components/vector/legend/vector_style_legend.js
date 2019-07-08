@@ -26,7 +26,7 @@ export function VectorStyleLegend({ styleProperties }) {
 
 const stylePropertyShape = PropTypes.shape({
   name: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
   options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
 });
