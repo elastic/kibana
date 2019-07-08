@@ -16,17 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DashboardDoc } from './types';
+import { Logger } from 'target/types/server/saved_objects/migrations/core/migration_logger';
+import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
+import { migratePanelsTo730 } from './migrate_to_730_panels';
 
 export function migrations730(
   doc:
     | {
         [key: string]: unknown;
       }
-    | DashboardDoc
-): DashboardDoc | { [key: string]: unknown } {
+    | DashboardDoc700To720,
+  logger: Logger
+): DashboardDoc730ToLatest | { [key: string]: unknown } {
   if (!isDashboardDoc(doc)) {
     // NOTE: we should probably throw an error here... but for now following suit and in the
     // case of errors, just returning the same document.
@@ -38,8 +41,28 @@ export function migrations730(
     doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
       moveFiltersToQuery(searchSource)
     );
-    return doc;
   } catch (e) {
+    logger.warning(`Exception @ migrations730 while trying to migrate query filters! ${e}`);
     return doc;
   }
+
+  let uiState = {};
+  // Ignore errors, at some point uiStateJSON stopped being used, so it may not exist.
+  if (doc.attributes.uiStateJSON && doc.attributes.uiStateJSON !== '') {
+    uiState = JSON.parse(doc.attributes.uiStateJSON);
+  }
+
+  try {
+    const panels = JSON.parse(doc.attributes.panelsJSON);
+    doc.attributes.panelsJSON = JSON.stringify(
+      migratePanelsTo730(panels, '7.3.0', doc.attributes.useMargins, uiState)
+    );
+
+    delete doc.attributes.uiStateJSON;
+  } catch (e) {
+    logger.warning(`Exception @ migrations730 while trying to migrate dashboard panels! ${e}`);
+    return doc;
+  }
+
+  return doc as DashboardDoc730ToLatest;
 }

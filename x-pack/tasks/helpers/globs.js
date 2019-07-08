@@ -16,6 +16,7 @@ function getPluginPaths(plugins, opts = {}) {
 
   return plugins.reduce((paths, pluginName) => {
     const plugin = pluginName.trim();
+
     const commonPath = `${plugin}/common`;
     const serverPath = `${plugin}/**/server`;
     const publicPath = `${plugin}/**/public`;
@@ -27,8 +28,7 @@ function getPluginPaths(plugins, opts = {}) {
 
     paths = paths.concat([indexPaths, commonPaths, serverPaths]);
     if (plugin === 'code') {
-      // TODO: Fix and reenable Code test
-      // paths.push(`legacy/plugins/${serverPath}/**/${testPath}/*.ts`);
+      paths.push(`legacy/plugins/${serverPath}/**/${testPath}/*.ts`);
     }
     if (opts.browser) {
       paths = paths.concat(publicPaths);

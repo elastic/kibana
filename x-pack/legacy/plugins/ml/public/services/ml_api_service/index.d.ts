@@ -22,7 +22,7 @@ declare interface Ml {
   };
 
   dataFrame: {
-    getDataFrameTransforms(): Promise<any>;
+    getDataFrameTransforms(jobId?: string): Promise<any>;
     getDataFrameTransformsStats(jobId?: string): Promise<any>;
     createDataFrameTransformsJob(jobId: string, jobConfig: any): Promise<any>;
     deleteDataFrameTransformsJob(jobId: string): Promise<any>;
@@ -33,7 +33,7 @@ declare interface Ml {
   };
 
   hasPrivileges(obj: object): Promise<any>;
-  checkMlPrivileges(): Promise<{ privileges: Privileges; upgradeInProgress: boolean }>;
+  checkMlPrivileges(): Promise<{ capabilities: Privileges; upgradeInProgress: boolean }>;
   esSearch: any;
   getIndices(): Promise<EsIndex[]>;
 
