@@ -19,22 +19,21 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { getOr } from 'lodash/fp';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
-  ${({ theme }) => `
-    dt {
-      font-size: ${getOr('12px', 'eui.euiFontSizeXS', theme)} !important;
-    }
-    dt .euiToolTipAnchor {
-      vertical-align: text-bottom;
-      padding-right: 5px;
-    }
-  `}
+  dt .euiToolTipAnchor {
+    padding-left: 5px;
+  }
+  dt.euiDescriptionList__title {
+    width: 30% !important;
+  }
+  dd.euiDescriptionList__description {
+    width: 70% !important;
+  }
 `;
 
 interface ModalInspectProps {
@@ -69,16 +68,7 @@ const MyEuiModal = styled(EuiModal)`
     max-width: 718px;
   }
 `;
-
-const parseRequest = (objectStringify: string): Request | null => {
-  try {
-    return JSON.parse(objectStringify);
-  } catch {
-    return null;
-  }
-};
-
-const parseResponse = (objectStringify: string): Response | null => {
+const parseInspectString = function<T>(objectStringify: string): T | null {
   try {
     return JSON.parse(objectStringify);
   } catch {
@@ -104,8 +94,8 @@ export const ModalInspectQuery = ({
   if (!isShowing || request == null || response == null) {
     return null;
   }
-  const inspectRequest: Request | null = parseRequest(request);
-  const inspectResponse: Response | null = parseResponse(response);
+  const inspectRequest: Request | null = parseInspectString(request);
+  const inspectResponse: Response | null = parseInspectString(response);
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
     description: NonNullable<ReactNode | string>;
@@ -113,8 +103,8 @@ export const ModalInspectQuery = ({
     {
       title: (
         <>
-          <EuiIconTip content={i18n.INDEX_PATTERN_DESC} position="top" />
           {i18n.INDEX_PATTERN}
+          <EuiIconTip content={i18n.INDEX_PATTERN_DESC} position="top" type="iInCircle" />
         </>
       ),
       description:
@@ -124,8 +114,8 @@ export const ModalInspectQuery = ({
     {
       title: (
         <>
-          <EuiIconTip content={i18n.QUERY_TIME_DESC} position="top" />
           {i18n.QUERY_TIME}
+          <EuiIconTip content={i18n.QUERY_TIME_DESC} position="top" type="iInCircle" />
         </>
       ),
       description:
@@ -136,8 +126,8 @@ export const ModalInspectQuery = ({
     {
       title: (
         <>
-          <EuiIconTip content={i18n.REQUEST_TIMESTAMP_DESC} position="top" />
           {i18n.REQUEST_TIMESTAMP}
+          <EuiIconTip content={i18n.REQUEST_TIMESTAMP_DESC} position="top" type="iInCircle" />
         </>
       ),
       description: new Date().toISOString(),
