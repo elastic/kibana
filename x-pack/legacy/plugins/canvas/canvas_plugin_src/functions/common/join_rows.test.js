@@ -5,7 +5,7 @@
  */
 
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../strings/functions';
+import { getFunctionErrors } from '../../strings';
 import { testTable } from './__tests__/fixtures/test_tables';
 import { joinRows } from './join_rows';
 
