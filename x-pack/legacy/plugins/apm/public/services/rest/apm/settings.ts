@@ -4,60 +4,60 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMUpdateConfigurationAPIResponse } from '../../../../server/lib/settings/cm/update_configuration';
+import { UpdateAgentConfigurationAPIResponse } from '../../../../server/lib/settings/agent_configuration/update_configuration';
 import { callApi } from '../callApi';
-import { CentralConfigurationIntake } from '../../../../server/lib/settings/cm/configuration';
-import { CMServicesAPIResponse } from '../../../../server/lib/settings/cm/get_service_names';
-import { CMCreateConfigurationAPIResponse } from '../../../../server/lib/settings/cm/create_configuration';
-import { CMListAPIResponse } from '../../../../server/lib/settings/cm/list_configurations';
-import { CMEnvironmentsAPIResponse } from '../../../../server/lib/settings/cm/get_environments';
+import { AgentConfigurationIntake } from '../../../../server/lib/settings/agent_configuration/configuration_types';
+import { AgentConfigurationServicesAPIResponse } from '../../../../server/lib/settings/agent_configuration/get_service_names';
+import { CreateAgentConfigurationAPIResponse } from '../../../../server/lib/settings/agent_configuration/create_configuration';
+import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
+import { AgentConfigurationEnvironmentsAPIResponse } from '../../../../server/lib/settings/agent_configuration/get_environments';
 
-export async function loadCMServices() {
-  return callApi<CMServicesAPIResponse>({
-    pathname: `/api/apm/settings/cm/services`
+export async function loadAgentConfigurationServices() {
+  return callApi<AgentConfigurationServicesAPIResponse>({
+    pathname: `/api/apm/settings/agent-configuration/services`
   });
 }
 
-export async function loadCMEnvironments({
+export async function loadAgentConfigurationEnvironments({
   serviceName
 }: {
   serviceName: string;
 }) {
-  return callApi<CMEnvironmentsAPIResponse>({
-    pathname: `/api/apm/settings/cm/services/${serviceName}/environments`
+  return callApi<AgentConfigurationEnvironmentsAPIResponse>({
+    pathname: `/api/apm/settings/agent-configuration/services/${serviceName}/environments`
   });
 }
 
-export async function createCMConfiguration(
-  configuration: CentralConfigurationIntake
+export async function createAgentConfiguration(
+  configuration: AgentConfigurationIntake
 ) {
-  return callApi<CMCreateConfigurationAPIResponse>({
-    pathname: `/api/apm/settings/cm/new`,
+  return callApi<CreateAgentConfigurationAPIResponse>({
+    pathname: `/api/apm/settings/agent-configuration/new`,
     method: 'POST',
     body: JSON.stringify(configuration)
   });
 }
 
-export async function updateCMConfiguration(
+export async function updateAgentConfiguration(
   configurationId: string,
-  configuration: CentralConfigurationIntake
+  configuration: AgentConfigurationIntake
 ) {
-  return callApi<CMUpdateConfigurationAPIResponse>({
-    pathname: `/api/apm/settings/cm/${configurationId}`,
+  return callApi<UpdateAgentConfigurationAPIResponse>({
+    pathname: `/api/apm/settings/agent-configuration/${configurationId}`,
     method: 'PUT',
     body: JSON.stringify(configuration)
   });
 }
 
-export async function deleteCMConfiguration(configId: string) {
+export async function deleteAgentConfiguration(configId: string) {
   return callApi({
-    pathname: `/api/apm/settings/cm/${configId}`,
+    pathname: `/api/apm/settings/agent-configuration/${configId}`,
     method: 'DELETE'
   });
 }
 
-export async function loadCMList() {
-  return callApi<CMListAPIResponse>({
-    pathname: `/api/apm/settings/cm`
+export async function loadAgentConfigurationList() {
+  return callApi<AgentConfigurationListAPIResponse>({
+    pathname: `/api/apm/settings/agent-configuration`
   });
 }

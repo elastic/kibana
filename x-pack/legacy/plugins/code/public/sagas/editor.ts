@@ -44,6 +44,7 @@ import {
   repoScopeSelector,
   urlQueryStringSelector,
   createTreeSelector,
+  getTreeRevision,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -189,8 +190,9 @@ function* handleMainRouteChange(action: Action<Match>) {
   }
   const lastRequestPath = yield select(lastRequestPathSelector);
   const currentTree: FileTree = yield select(getTree);
+  const currentTreeRevision: string = yield select(getTreeRevision);
   // repo changed
-  if (currentTree.repoUri !== repoUri) {
+  if (currentTree.repoUri !== repoUri || revision !== currentTreeRevision) {
     yield put(resetRepoTree());
     yield put(fetchRepoCommits({ uri: repoUri, revision }));
     yield put(fetchRootRepoTree({ uri: repoUri, revision }));
