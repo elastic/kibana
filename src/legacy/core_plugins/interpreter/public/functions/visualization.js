@@ -116,17 +116,21 @@ export const visualization = () => ({
       if (context.columns) {
         // assign schemas to aggConfigs
         context.columns.forEach(column => {
-          column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+          if (column.aggConfig) {
+            column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+          }
         });
 
         Object.keys(schemas).forEach(key => {
           schemas[key].forEach(i => {
-            context.columns[i].aggConfig.schema = key;
+            if (context.columns[i] && context.columns[i].aggConfig) {
+              context.columns[i].aggConfig.schema = key;
+            }
           });
         });
       }
 
-      context = await responseHandler(context);
+      context = await responseHandler(context, visConfigParams.dimensions);
     }
 
     return {

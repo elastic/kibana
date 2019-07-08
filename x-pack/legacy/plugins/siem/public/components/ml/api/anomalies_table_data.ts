@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import { Anomalies, InfluencerInput } from '../types';
+import { throwIfNotOk } from './throw_if_not_ok';
 
 export interface Body {
   jobIds: string[];
@@ -19,6 +20,11 @@ export interface Body {
   maxRecords: number;
   maxExamples: number;
 }
+
+const empty: Anomalies = {
+  anomalies: [],
+  interval: 'second',
+};
 
 export const anomaliesTableData = async (
   body: Body,
@@ -36,13 +42,10 @@ export const anomaliesTableData = async (
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    const empty: Anomalies = {
-      anomalies: [],
-      interval: 'second',
-    };
     return empty;
   }
 };

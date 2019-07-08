@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       const actionElement = await testSubjects.find('dashboardPanelAction-samplePanelLink');
       const actionElementTag = await actionElement.getTagName();
       expect(actionElementTag).to.be('a');
-      const actionElementLink = await actionElement.getProperty('href');
+      const actionElementLink = await actionElement.getAttribute('href');
       expect(actionElementLink).to.be('https://example.com/kibana/test');
     });
 

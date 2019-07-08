@@ -29,7 +29,7 @@ export function init(server: Legacy.Server) {
       getBasePath: () => basePath,
     };
     return {
-      log: server.log,
+      log: server.log.bind(server),
       callCluster: callWithInternalUser,
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
     };
@@ -56,7 +56,7 @@ export function init(server: Legacy.Server) {
     const request = this;
     const savedObjectsClient = request.getSavedObjectsClient();
     const alertsClient = new AlertsClient({
-      log: server.log,
+      log: server.log.bind(server),
       savedObjectsClient,
       alertTypeRegistry,
       taskManager: taskManager!,

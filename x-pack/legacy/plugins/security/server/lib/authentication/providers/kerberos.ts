@@ -10,37 +10,13 @@ import { Legacy } from 'kibana';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
 
 /**
  * The state supported by the provider.
  */
-interface ProviderState {
-  /**
-   * Access token users get in exchange for SPNEGO token and that should be provided with every
-   * request to Elasticsearch on behalf of the authenticated user. This token will eventually expire.
-   */
-  accessToken: string;
-}
-
-/**
- * If request with access token fails with `401 Unauthorized` then this token is no
- * longer valid and we should try to refresh it. Another use case that we should
- * temporarily support (until elastic/elasticsearch#38866 is fixed) is when token
- * document has been removed and ES responds with `500 Internal Server Error`.
- * @param err Error returned from Elasticsearch.
- */
-function isAccessTokenExpiredError(err?: any) {
-  const errorStatusCode = getErrorStatusCode(err);
-  return (
-    errorStatusCode === 401 ||
-    (errorStatusCode === 500 &&
-      err &&
-      err.body &&
-      err.body.error &&
-      err.body.error.reason === 'token document is missing and must be present')
-  );
-}
+type ProviderState = TokenPair;
 
 /**
  * Parses request's `Authorization` HTTP header if present and extracts authentication scheme.
@@ -92,8 +68,11 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this.authenticateViaState(request, state);
-      if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
-        authenticationResult = AuthenticationResult.notHandled();
+      if (
+        authenticationResult.failed() &&
+        Tokens.isAccessTokenExpiredError(authenticationResult.error)
+      ) {
+        authenticationResult = await this.authenticateViaRefreshToken(request, state);
       }
     }
 
@@ -109,32 +88,18 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: Legacy.Request, state?: ProviderState) {
+  public async deauthenticate(request: Legacy.Request, state?: ProviderState | null) {
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
-    if (!state || !state.accessToken) {
+    if (!state) {
       this.debug('There is no access token invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
     try {
-      const {
-        invalidated_tokens: invalidatedAccessTokensCount,
-      } = await this.options.client.callWithInternalUser('shield.deleteAccessToken', {
-        body: { token: state.accessToken },
-      });
-
-      if (invalidatedAccessTokensCount === 0) {
-        this.debug('User access token was already invalidated.');
-      } else if (invalidatedAccessTokensCount === 1) {
-        this.debug('User access token has been successfully invalidated.');
-      } else {
-        this.debug(
-          `${invalidatedAccessTokensCount} user access tokens were invalidated, this is unexpected.`
-        );
-      }
+      await this.options.tokens.invalidate(state);
     } catch (err) {
-      this.debug(`Failed invalidating user's access token: ${err.message}`);
+      this.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
       return DeauthenticationResult.failed(err);
     }
 
@@ -149,12 +114,14 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   private async authenticateWithNegotiateScheme(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate request using "Negotiate" authentication scheme.');
 
+    const [, kerberosTicket] = request.headers.authorization.split(/\s+/);
+
     // First attempt to exchange SPNEGO token for an access token.
-    let accessToken: string;
+    let tokens: { access_token: string; refresh_token: string };
     try {
-      accessToken = (await this.options.client.callWithRequest(request, 'shield.getAccessToken', {
-        body: { grant_type: 'client_credentials' },
-      })).access_token;
+      tokens = await this.options.client.callWithInternalUser('shield.getAccessToken', {
+        body: { grant_type: '_kerberos', kerberos_ticket: kerberosTicket },
+      });
     } catch (err) {
       this.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -164,14 +131,17 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // Then attempt to query for the user details using the new token
     const originalAuthorizationHeader = request.headers.authorization;
-    request.headers.authorization = `Bearer ${accessToken}`;
+    request.headers.authorization = `Bearer ${tokens.access_token}`;
 
     try {
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('User has been authenticated with new access token');
 
-      return AuthenticationResult.succeeded(user, { accessToken });
+      return AuthenticationResult.succeeded(user, {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+      });
     } catch (err) {
       this.debug(`Failed to authenticate request via access token: ${err.message}`);
 
@@ -233,6 +203,53 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user);
     } catch (err) {
       this.debug(`Failed to authenticate request via state: ${err.message}`);
+
+      // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
+      // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
+      // We can't just set `authorization` to `undefined` or `null`, we should remove this property
+      // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
+      // it's called with this request once again down the line (e.g. in the next authentication provider).
+      delete request.headers.authorization;
+
+      return AuthenticationResult.failed(err);
+    }
+  }
+
+  /**
+   * This method is only called when authentication via access token stored in the state failed because of expired
+   * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
+   * authenticate user with it.
+   * @param request Request instance.
+   * @param state State value previously stored by the provider.
+   */
+  private async authenticateViaRefreshToken(
+    request: RequestWithLoginAttempt,
+    state: ProviderState
+  ) {
+    this.debug('Trying to refresh access token.');
+
+    let refreshedTokenPair: TokenPair | null;
+    try {
+      refreshedTokenPair = await this.options.tokens.refresh(state.refreshToken);
+    } catch (err) {
+      return AuthenticationResult.failed(err);
+    }
+
+    // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
+    if (refreshedTokenPair === null) {
+      this.debug('Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.');
+      return this.authenticateViaSPNEGO(request, state);
+    }
+
+    try {
+      request.headers.authorization = `Bearer ${refreshedTokenPair.accessToken}`;
+
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+
+      this.debug('Request has been authenticated via refreshed token.');
+      return AuthenticationResult.succeeded(user, refreshedTokenPair);
+    } catch (err) {
+      this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.

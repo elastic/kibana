@@ -11,6 +11,7 @@ import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
+import { EuiFormRow } from '@elastic/eui';
 
 export class UpdateSourceEditor extends Component {
 
@@ -67,13 +68,21 @@ export class UpdateSourceEditor extends Component {
     }) : null;
     const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
     return (
-      <MetricsEditor
-        allowMultipleMetrics={allowMultipleMetrics}
-        metricsFilter={metricsFilter}
-        fields={this.state.fields}
-        metrics={this.props.metrics}
-        onChange={this._onMetricsChange}
-      />
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.esGrid.metricsLabel', {
+          defaultMessage: 'Metrics'
+        })}
+      >
+        <div>
+          <MetricsEditor
+            allowMultipleMetrics={allowMultipleMetrics}
+            metricsFilter={metricsFilter}
+            fields={this.state.fields}
+            metrics={this.props.metrics}
+            onChange={this._onMetricsChange}
+          />
+        </div>
+      </EuiFormRow>
     );
   }
 
