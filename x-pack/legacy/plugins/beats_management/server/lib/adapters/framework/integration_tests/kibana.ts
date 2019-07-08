@@ -15,22 +15,24 @@ import { PLUGIN } from './../../../../../common/constants/plugin';
 import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';
 import { contractTests } from './test_contract';
 
-let servers: any;
+let kbnServer: any;
+let kbnRootServer: any;
+let esServer: any;
 contractTests('Kibana  Framework Adapter', {
   async before() {
-    servers = await kbnTestServer.startTestServers({
+    const servers = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: TestKbnServerConfig,
     });
+    esServer = await servers.startES();
+    kbnRootServer = await servers.startKibana();
+    kbnServer = kbnRootServer.kbnServer;
   },
   async after() {
-    await servers.stop();
+    await kbnRootServer.stop();
+    await esServer.stop();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(
-      camelCase(PLUGIN.ID),
-      servers.kbnServer.server,
-      CONFIG_PREFIX
-    );
+    return new KibanaBackendFrameworkAdapter(camelCase(PLUGIN.ID), kbnServer.server, CONFIG_PREFIX);
   },
 });
