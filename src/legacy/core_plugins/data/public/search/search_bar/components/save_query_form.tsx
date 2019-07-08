@@ -38,6 +38,8 @@ interface Props {
   savedQuery?: SavedQueryAttributes;
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
+  showFilterOption: boolean;
+  showTimeFilterOption: boolean;
 }
 
 export interface SavedQueryMeta {
@@ -47,7 +49,13 @@ export interface SavedQueryMeta {
   shouldIncludeTimefilter: boolean;
 }
 
-export const SaveQueryForm: FunctionComponent<Props> = ({ savedQuery, onSave, onClose }) => {
+export const SaveQueryForm: FunctionComponent<Props> = ({
+  savedQuery,
+  onSave,
+  onClose,
+  showFilterOption,
+  showTimeFilterOption,
+}) => {
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
@@ -56,6 +64,8 @@ export const SaveQueryForm: FunctionComponent<Props> = ({ savedQuery, onSave, on
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
     !!(savedQuery && savedQuery.timefilter)
   );
+  const [shouldShowFiltersOption] = useState(!!showFilterOption);
+  const [shouldShowTimeFilterOption] = useState(!!showTimeFilterOption);
 
   const saveQueryForm = (
     <EuiForm>
@@ -78,28 +88,31 @@ export const SaveQueryForm: FunctionComponent<Props> = ({ savedQuery, onSave, on
           }}
         />
       </EuiFormRow>
+      {shouldShowFiltersOption && (
+        <EuiFormRow>
+          <EuiSwitch
+            name="shouldIncludeFilters"
+            label="Include filters"
+            checked={shouldIncludeFilters}
+            onChange={() => {
+              setShouldIncludeFilters(!shouldIncludeFilters);
+            }}
+          />
+        </EuiFormRow>
+      )}
 
-      <EuiFormRow>
-        <EuiSwitch
-          name="shouldIncludeFilters"
-          label="Include filters"
-          checked={shouldIncludeFilters}
-          onChange={() => {
-            setShouldIncludeFilters(!shouldIncludeFilters);
-          }}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow>
-        <EuiSwitch
-          name="shouldIncludeTimefilter"
-          label="Include time filter"
-          checked={shouldIncludeTimefilter}
-          onChange={() => {
-            setIncludeTimefilter(!shouldIncludeTimefilter);
-          }}
-        />
-      </EuiFormRow>
+      {shouldShowTimeFilterOption && (
+        <EuiFormRow>
+          <EuiSwitch
+            name="shouldIncludeTimefilter"
+            label="Include time filter"
+            checked={shouldIncludeTimefilter}
+            onChange={() => {
+              setIncludeTimefilter(!shouldIncludeTimefilter);
+            }}
+          />
+        </EuiFormRow>
+      )}
     </EuiForm>
   );
 

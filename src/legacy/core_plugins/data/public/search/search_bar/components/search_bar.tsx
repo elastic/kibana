@@ -496,12 +496,16 @@ class SearchBarUI extends Component<Props, State> {
             savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
+            showFilterOption={this.props.showFilterBar}
+            showTimeFilterOption={this.props.showDatePicker}
           />
         ) : null}
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
             onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
+            showFilterOption={this.props.showFilterBar}
+            showTimeFilterOption={this.props.showDatePicker}
           />
         ) : null}
       </div>
