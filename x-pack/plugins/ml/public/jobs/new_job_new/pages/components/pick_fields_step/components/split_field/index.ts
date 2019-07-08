@@ -3,5 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+export { ByFieldSelector } from './by_field';
 export { SplitFieldSelector } from './split_field';
-export { SplitFieldSelect } from './split_field_select';
