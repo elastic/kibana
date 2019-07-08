@@ -18,7 +18,7 @@
  */
 import { Request, ResponseToolkit } from 'hapi';
 import { merge } from 'lodash';
-import url from 'url';
+
 import querystring from 'querystring';
 
 import { schema } from '@kbn/config-schema';
