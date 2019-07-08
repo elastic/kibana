@@ -98,7 +98,7 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
 
 StylePropertyLegendRow.propTypes = {
   name: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
   options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
 };
