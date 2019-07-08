@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiSpacer, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
 import { TemplatesTable } from './templates_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
+import { trackUiMetric } from '../../../services/track_ui_metric';
+import { UIM_TEMPLATES_LIST_LOAD } from '../../../../common/constants';
 
 export const TemplatesList: React.FunctionComponent = () => {
   const { error, isLoading, data: templates, createRequest: reload } = loadIndexTemplates();
@@ -18,6 +20,11 @@ export const TemplatesList: React.FunctionComponent = () => {
   let content;
 
   const [showSystemTemplates, setShowSystemTemplates] = useState<boolean>(false);
+
+  // Track component loaded
+  useEffect(() => {
+    trackUiMetric(UIM_TEMPLATES_LIST_LOAD);
+  }, []);
 
   if (isLoading) {
     content = (

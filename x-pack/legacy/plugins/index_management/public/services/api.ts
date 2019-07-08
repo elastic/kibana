@@ -58,7 +58,7 @@ export async function reloadIndices(indexNames: string[]) {
   return response.data;
 }
 
-export async function closeIndices(indices: any) {
+export async function closeIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -69,7 +69,7 @@ export async function closeIndices(indices: any) {
   return response.data;
 }
 
-export async function deleteIndices(indices: any) {
+export async function deleteIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -80,7 +80,7 @@ export async function deleteIndices(indices: any) {
   return response.data;
 }
 
-export async function openIndices(indices: any) {
+export async function openIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -91,7 +91,7 @@ export async function openIndices(indices: any) {
   return response.data;
 }
 
-export async function refreshIndices(indices: any) {
+export async function refreshIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -102,7 +102,7 @@ export async function refreshIndices(indices: any) {
   return response.data;
 }
 
-export async function flushIndices(indices: any) {
+export async function flushIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -113,7 +113,7 @@ export async function flushIndices(indices: any) {
   return response.data;
 }
 
-export async function forcemergeIndices(indices: any, maxNumSegments: any) {
+export async function forcemergeIndices(indices: string[], maxNumSegments: string) {
   const body = {
     indices,
     maxNumSegments,
@@ -125,7 +125,7 @@ export async function forcemergeIndices(indices: any, maxNumSegments: any) {
   return response.data;
 }
 
-export async function clearCacheIndices(indices: any) {
+export async function clearCacheIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -135,7 +135,7 @@ export async function clearCacheIndices(indices: any) {
   trackUiMetric(actionType);
   return response.data;
 }
-export async function freezeIndices(indices: any) {
+export async function freezeIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -145,7 +145,7 @@ export async function freezeIndices(indices: any) {
   trackUiMetric(actionType);
   return response.data;
 }
-export async function unfreezeIndices(indices: any) {
+export async function unfreezeIndices(indices: string[]) {
   const body = {
     indices,
   };
@@ -161,7 +161,7 @@ export async function loadIndexSettings(indexName: string) {
   return response.data;
 }
 
-export async function updateIndexSettings(indexName: string, settings: any) {
+export async function updateIndexSettings(indexName: string, settings: object) {
   const response = await httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
   // Only track successful requests.
   trackUiMetric(UIM_UPDATE_SETTINGS);
