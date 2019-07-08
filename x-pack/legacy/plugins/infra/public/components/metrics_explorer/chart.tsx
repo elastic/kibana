@@ -67,7 +67,7 @@ export const MetricsExplorerChart = injectUICapabilities(
       );
       const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
       return (
-        <div style={{ padding: 16 }}>
+        <div style={{ padding: 24 }}>
           {options.groupBy ? (
             <EuiTitle size="xs">
               <EuiFlexGroup alignItems="center">
