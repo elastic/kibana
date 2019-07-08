@@ -7,11 +7,12 @@
 import React, { FC, Fragment } from 'react';
 import { Axis, getAxisId, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
 import { getYRange } from './utils';
+import { LineChartPoint } from '../../../../common/chart_loader';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(3));
 
 interface Props {
-  chartData?: any[];
+  chartData?: LineChartPoint[];
 }
 
 // round to 2dp

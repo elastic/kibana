@@ -153,6 +153,16 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     [jobCreatorUpdated]
   );
 
+  // watch for changes in split field or by fields.
+  // load example field values
+  // changes to fieldValues here will trigger the card effect via setFieldValuesPerDetector
+  useEffect(
+    () => {
+      loadFieldExamples();
+    },
+    [splitField, byFieldsUpdated]
+  );
+
   function getChartSettings(): ChartSettings {
     const interval = new MlTimeBuckets();
     interval.setInterval('auto');
@@ -190,15 +200,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       setLineChartsData(resp);
     }
   }
-
-  // watch for changes in split field or by fields.
-  // load example field values
-  useEffect(
-    () => {
-      loadFieldExamples();
-    },
-    [splitField, byFieldsUpdated]
-  );
 
   async function loadFieldExamples() {
     const promises: any[] = [];

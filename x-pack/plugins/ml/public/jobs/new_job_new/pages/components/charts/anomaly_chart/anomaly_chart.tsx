@@ -13,6 +13,7 @@ import { Line } from './line';
 import { Scatter } from './scatter';
 import { Axes } from '../common/axes';
 import { getXRange } from '../common/utils';
+import { LineChartPoint } from '../../../../common/chart_loader';
 
 export enum CHART_TYPE {
   LINE,
@@ -21,7 +22,7 @@ export enum CHART_TYPE {
 
 interface Props {
   chartType: CHART_TYPE;
-  chartData: any[];
+  chartData: LineChartPoint[];
   modelData: ModelItem[];
   anomalyData: Anomaly[];
   height: string;
@@ -52,10 +53,8 @@ export const AnomalyChart: FC<Props> = ({
   );
 };
 
-function flattenData(data: any) {
+function flattenData(data: any): LineChartPoint[] {
   const chartData = data.reduce((p: any[], c: any) => {
-    // TODO - use real results types here
-    // p.push({ time: c.time, value: c.values[0].value });
     p.push(...c.values.map((v: any) => ({ time: c.time, value: v.value })));
     return p;
   }, []);

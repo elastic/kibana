@@ -10,7 +10,7 @@ import moment from 'moment';
 // import dateMath from '@elastic/datemath';
 import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
-import { TestInputs } from './test_inputs';
+// import { TestInputs } from './test_inputs';
 import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
 import {
@@ -18,6 +18,7 @@ import {
   getTimeFilterRange,
 } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
+import { LineChartPoint } from '../../../common/chart_loader';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const kibanaContext = useContext(KibanaContext);
@@ -35,7 +36,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const [eventRateChartData, setEventRateChartData] = useState([]);
+  const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
 
   async function loadChart() {
     const resp = await chartLoader.loadEventRateChart(

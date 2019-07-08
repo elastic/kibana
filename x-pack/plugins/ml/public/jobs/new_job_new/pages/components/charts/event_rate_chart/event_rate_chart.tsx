@@ -8,9 +8,10 @@ import React, { FC } from 'react';
 import { BarSeries, Chart, getSpecId, ScaleType, Settings, TooltipType } from '@elastic/charts';
 import { Axes } from '../common/axes';
 import { getCustomColor } from '../common/utils';
+import { LineChartPoint } from '../../../../common/chart_loader';
 
 interface Props {
-  eventRateChartData: any[];
+  eventRateChartData: LineChartPoint[];
   height: string;
   width: string;
   showAxis?: boolean;

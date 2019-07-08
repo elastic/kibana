@@ -103,8 +103,11 @@ export class ChartLoader {
     return {};
   }
 
-  async loadEventRateChart(start: number, end: number, intervalMs: number): Promise<any> {
-    // TODO change to proper interface for return type
+  async loadEventRateChart(
+    start: number,
+    end: number,
+    intervalMs: number
+  ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
       const resp = await mlResultsService.getEventRateData(
         this._indexPatternTitle,
@@ -114,12 +117,15 @@ export class ChartLoader {
         end,
         intervalMs * 3
       );
-      return Object.entries(resp.results).map(([time, value]) => ({ time: +time, value }));
+      return Object.entries(resp.results).map(([time, value]) => ({
+        time: +time,
+        value: value as number,
+      }));
     }
-    return {};
+    return [];
   }
 
-  async loadFieldExampleValues(field: Field) {
+  async loadFieldExampleValues(field: Field): Promise<string[]> {
     const { results } = await getCategoryFields(
       this._indexPatternTitle,
       field.name,

@@ -91,6 +91,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     resultsLoader.subscribeToResults(setResultsWrapper);
   }, []);
 
+  // watch for changes in detector list length
   useEffect(
     () => {
       jobCreator.removeAllDetectors();
@@ -104,6 +105,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     [aggFieldPairList.length]
   );
 
+  // watch for change in jobCreator
   useEffect(
     () => {
       if (jobCreator.start !== start || jobCreator.end !== end) {
@@ -114,6 +116,32 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       setSplitField(jobCreator.splitField);
     },
     [jobCreatorUpdated]
+  );
+
+  // watch for changes in split field.
+  // load example field values
+  // changes to fieldValues here will trigger the card effect
+  useEffect(
+    () => {
+      if (splitField !== null) {
+        chartLoader
+          .loadFieldExampleValues(splitField)
+          .then(setFieldValues)
+          .catch(() => {});
+      } else {
+        setFieldValues([]);
+      }
+    },
+    [splitField]
+  );
+
+  // watch for changes in the split field values
+  // reload the charts
+  useEffect(
+    () => {
+      loadCharts();
+    },
+    [fieldValues]
   );
 
   function getChartSettings(): ChartSettings {
@@ -150,27 +178,6 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       setLineChartsData(resp);
     }
   }
-
-  useEffect(
-    () => {
-      if (splitField !== null) {
-        chartLoader
-          .loadFieldExampleValues(splitField)
-          .then(setFieldValues)
-          .catch(() => {});
-      } else {
-        setFieldValues([]);
-      }
-    },
-    [splitField]
-  );
-
-  useEffect(
-    () => {
-      loadCharts();
-    },
-    [fieldValues]
-  );
 
   return (
     <Fragment>
