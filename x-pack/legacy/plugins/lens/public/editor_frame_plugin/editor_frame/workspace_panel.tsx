@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo, useContext, memo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useContext, memo } from 'react';
 import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
@@ -33,12 +33,9 @@ export function WorkspacePanel(props: WorkspacePanelProps) {
   const [rendered, setRendered] = useState(props);
   const delayRender = useMemo(() => debounce(setRendered, 256), []);
 
-  useEffect(
-    () => {
-      delayRender(props);
-    },
-    [props.activeVisualizationId, props.datasourceState, props.visualizationState]
-  );
+  useEffect(() => {
+    delayRender(props);
+  }, [props.activeVisualizationId, props.datasourceState, props.visualizationState]);
 
   return <MemoizedWorkspacePanel {...rendered} />;
 }
