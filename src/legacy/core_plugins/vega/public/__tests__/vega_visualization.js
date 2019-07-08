@@ -41,14 +41,13 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
+import { visualizations } from '../../../visualizations/public';
+import { createVegaTypeDefinition } from '../vega_type';
+
 const THRESHOLD = 0.10;
-const PIXEL_DIFF = 10;
+const PIXEL_DIFF = 30;
 
-
-// This tests are not executing at all. Will be refactored after migrating to Rect
-// Mocha tests disabled for 'public' folder in run_mocha_cli.js
 describe('VegaVisualizations', () => {
-
   let domNode;
   let VegaVisualization;
   let Vis;
@@ -58,24 +57,28 @@ describe('VegaVisualizations', () => {
   let vegaVisualizationDependencies;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject((Private) => {
+  beforeEach(ngMock.inject((Private, $injector) => {
     vegaVisualizationDependencies = {
-      es: {},
-      serviceSettings: {},
-      uiSettings: {},
+      es: $injector.get('es'),
+      serviceSettings: $injector.get('serviceSettings'),
+      uiSettings: $injector.get('config'),
     };
+
+    visualizations.types.VisTypesRegistryProvider.register(() =>
+      createVegaTypeDefinition(vegaVisualizationDependencies)
+    );
+
     Vis = Private(visModule.VisProvider);
+
     VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
     indexPattern = Private(LogstashIndexPatternStubProvider);
-
   }));
 
-
   describe('VegaVisualization - basics', () => {
-
     beforeEach(async function () {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
+
       vis = new Vis(indexPattern, { type: 'vega' });
     });
 
@@ -85,10 +88,10 @@ describe('VegaVisualizations', () => {
     });
 
     it('should show vegalite graph and update on resize', async function () {
-
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
+
         const vegaParser = new VegaParser(vegaliteGraph, new SearchCache());
         await vegaParser.parseAsync();
 
@@ -113,15 +116,14 @@ describe('VegaVisualizations', () => {
 
       let vegaVis;
       try {
-
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(vegaGraph, new SearchCache());
         await vegaParser.parseAsync();
 
         await vegaVis.render(vegaParser, vis.params, { data: true });
         const mismatchedPixels = await compareImage(vegaImage512);
-        expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
+        expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
       } finally {
         vegaVis.destroy();
       }

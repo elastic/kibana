@@ -43,6 +43,7 @@ export class VegaPlugin implements Plugin<any, any> {
     } as VegaVisualizationDependencies;
 
     data.expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+
     visualizations.types.VisTypesRegistryProvider.register(() =>
       createVegaTypeDefinition(visualizationDependencies)
     );
