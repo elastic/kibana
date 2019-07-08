@@ -24,7 +24,7 @@ export default function manageRepositoriesFunctionalTests({
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/36495
-  describe.skip('History', () => {
+  describe('History', () => {
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
@@ -130,7 +130,8 @@ export default function manageRepositoriesFunctionalTests({
         });
       });
 
-      it('in search page, change language filters can go back and forward', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/39163
+      it.skip('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
         const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
         await browser.get(url);
@@ -223,22 +224,22 @@ export default function manageRepositoriesFunctionalTests({
         await PageObjects.common.sleep(5000);
         await testSubjects.click('codeStructureTreeTab');
         await retry.try(async () => {
-          const tabText = await (await find.byCssSelector('.euiTab-isSelected')).getVisibleText();
-          expect(tabText).to.equal('Structure');
+          // if structure tree tab is active, file tree tab's `data-test-subj` would be `codeFileTreeTab`
+          expect(testSubjects.exists('codeFileTreeTab')).to.be.ok();
         });
 
         await browser.goBack();
 
         await retry.try(async () => {
-          const tabText = await (await find.byCssSelector('.euiTab-isSelected')).getVisibleText();
-          expect(tabText).to.equal('File');
+          // if file tree tab is active, file tree tab's `data-test-subj` would be `codeFileTreeTabActive`
+          expect(testSubjects.exists('codeFileTreeTabActive')).to.be.ok();
         });
 
         await driver.navigate().forward();
 
         await retry.try(async () => {
-          const tabText = await (await find.byCssSelector('.euiTab-isSelected')).getVisibleText();
-          expect(tabText).to.equal('Structure');
+          // if structure tree tab is active, file tree tab's `data-test-subj` would be `codeFileTreeTab`
+          expect(testSubjects.exists('codeFileTreeTab')).to.be.ok();
         });
       });
     });

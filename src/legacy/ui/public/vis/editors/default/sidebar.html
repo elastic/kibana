@@ -71,14 +71,14 @@
           <li
             ng-if="visualizeEditor.errorCount() > 0 && visualizeEditor.errorCount() === visualizeEditor.softErrorCount()"
             disabled
-            tooltip="{{ visualizeEditor.describeErrors() }}"
+            tooltip="{{::'common.ui.vis.editors.sidebar.errorButtonTooltip' | i18n: { defaultMessage: 'Errors in the highlighted fields need to be resolved.' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
           >
             <div
               class="kuiButton kuiButton--danger navbar-btn-link visEditorSidebar__navButtonLink"
-              aria-label="{{ visualizeEditor.describeErrors() }}"
+              aria-label="{{::'common.ui.vis.editors.sidebar.errorButtonAriaLabel' | i18n: { defaultMessage: 'Errors in the highlighted fields need to be resolved.' } }}"
             >
               <icon aria-hidden="true" type="'alert'" color="'danger'"></icon>
             </div>

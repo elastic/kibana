@@ -14,14 +14,11 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
-  const { status, data = [] } = useFetcher(
-    () => {
-      if (start && end) {
-        return loadTraceList({ start, end, uiFilters });
-      }
-    },
-    [start, end, uiFilters]
-  );
+  const { status, data = [] } = useFetcher(() => {
+    if (start && end) {
+      return loadTraceList({ start, end, uiFilters });
+    }
+  }, [start, end, uiFilters]);
 
   return (
     <EuiPanel>

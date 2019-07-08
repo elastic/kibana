@@ -49,21 +49,18 @@ export const WatchDetail = () => {
 
   const hasActionErrors = actionErrors && Object.keys(actionErrors).length > 0;
 
-  useEffect(
-    () => {
-      const actionStatusesWithErrors =
-        currentActionStatuses &&
-        currentActionStatuses.map((currentActionStatus: ActionStatus) => {
-          const errors = actionErrors && actionErrors[currentActionStatus.id];
-          return {
-            ...currentActionStatus,
-            errors: errors || [],
-          };
-        });
-      setActionStatuses(actionStatusesWithErrors);
-    },
-    [watchDetail]
-  );
+  useEffect(() => {
+    const actionStatusesWithErrors =
+      currentActionStatuses &&
+      currentActionStatuses.map((currentActionStatus: ActionStatus) => {
+        const errors = actionErrors && actionErrors[currentActionStatus.id];
+        return {
+          ...currentActionStatus,
+          errors: errors || [],
+        };
+      });
+    setActionStatuses(actionStatusesWithErrors);
+  }, [watchDetail]);
 
   const baseColumns = [
     {

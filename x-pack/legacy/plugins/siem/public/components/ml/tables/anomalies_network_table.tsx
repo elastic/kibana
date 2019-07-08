@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { EuiInMemoryTable, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
@@ -19,6 +19,8 @@ import { getAnomaliesNetworkTableColumns } from './get_anomalies_network_table_c
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
 import { dateTimesAreEqual } from './date_time_equality';
+import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 
 const BasicTableContainer = styled.div`
   position: relative;
@@ -32,7 +34,8 @@ const sorting = {
 };
 
 export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
-  ({ startDate, endDate, narrowDateRange, skip }): JSX.Element => {
+  ({ startDate, endDate, narrowDateRange, skip, ip }): JSX.Element | null => {
+    const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({
       influencers: [],
       startDate,
@@ -41,7 +44,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
       skip,
     });
 
-    const networks = convertAnomaliesToNetwork(tableData);
+    const networks = convertAnomaliesToNetwork(tableData, ip);
     const interval = getIntervalFromAnomalies(tableData);
     const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
     const pagination = {
@@ -51,35 +54,39 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesTableProps>(
       pageSizeOptions: [5, 10, 20, 50],
       hidePerPageOptions: false,
     };
-    return (
-      <EuiPanel>
-        <BasicTableContainer>
-          {loading && (
-            <>
-              <BackgroundRefetch />
-              <LoadingPanel
-                height="100%"
-                width="100%"
-                text={`${i18n.LOADING} ${i18n.ANOMALIES}`}
-                position="absolute"
-                zIndex={3}
-                data-test-subj="anomalies-network-table-loading-panel"
-              />
-            </>
-          )}
-          <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${networks.length.toLocaleString()} ${i18n.ANOMALIES}`}
-            title={i18n.ANOMALIES}
-          />
-          <EuiInMemoryTable
-            items={networks}
-            columns={columns}
-            pagination={pagination}
-            sorting={sorting}
-          />
-        </BasicTableContainer>
-      </EuiPanel>
-    );
+    if (!hasMlUserPermissions(capabilities)) {
+      return null;
+    } else {
+      return (
+        <EuiPanel>
+          <BasicTableContainer>
+            {loading && (
+              <>
+                <BackgroundRefetch />
+                <LoadingPanel
+                  height="100%"
+                  width="100%"
+                  text={`${i18n.LOADING} ${i18n.ANOMALIES}`}
+                  position="absolute"
+                  zIndex={3}
+                  data-test-subj="anomalies-network-table-loading-panel"
+                />
+              </>
+            )}
+            <HeaderPanel
+              subtitle={`${i18n.SHOWING}: ${networks.length.toLocaleString()} ${i18n.ANOMALIES}`}
+              title={i18n.ANOMALIES}
+            />
+            <EuiInMemoryTable
+              items={networks}
+              columns={columns}
+              pagination={pagination}
+              sorting={sorting}
+            />
+          </BasicTableContainer>
+        </EuiPanel>
+      );
+    }
   },
   dateTimesAreEqual
 );

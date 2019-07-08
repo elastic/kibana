@@ -58,9 +58,12 @@ const getInitialSorting = (columns: any, sorting: any) => {
 
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
-  itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
-  isExpandable: boolean;
+  itemIdToExpandedRowMap?: ItemIdToExpandedRowMap;
+  isExpandable?: boolean;
   onChange({ page }: { page?: {} | undefined }): void;
+  loading?: boolean;
+  compressed?: boolean;
+  error?: string;
 }
 interface ComponentWithConstructor<T> extends Component {
   new (): Component<T>;
