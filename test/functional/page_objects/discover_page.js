@@ -161,7 +161,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartInterval() {
-      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
+      const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
       return selectedOption.getVisibleText();
     }
@@ -217,7 +217,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getSidebarWidth() {
       const sidebar = await find.byCssSelector('.sidebar-list');
-      return await sidebar.getProperty('clientWidth');
+      return await sidebar.getAttribute('clientWidth');
     }
 
     async hasNoResults() {
