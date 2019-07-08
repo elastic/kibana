@@ -73,7 +73,7 @@ export class IndexSettings extends Component {
       );
     }
 
-    const indexPatternValid = await checkIndexPatternValid(name);
+    const indexPatternValid = checkIndexPatternValid(name);
     if (!indexPatternValid) {
       return (
         <FormattedMessage
