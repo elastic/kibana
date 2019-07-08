@@ -86,7 +86,7 @@ export const buildExpression = (
           },
         ],
         splitSeriesAccessors: state.splitSeriesAccessors,
-        stackAccessors: state.stackAccessors,
+        isStacked: [state.isStacked],
       },
     },
   ],

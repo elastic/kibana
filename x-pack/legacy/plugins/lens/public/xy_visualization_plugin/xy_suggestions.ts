@@ -80,7 +80,7 @@ function getSuggestion(
     legend: { isVisible: true, position: Position.Right },
     seriesType: isDate ? 'line' : 'bar',
     splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
-    stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
+    isStacked: !!(splitBy && !isDate),
     x: {
       accessor: xValue.columnId,
       position: Position.Bottom,

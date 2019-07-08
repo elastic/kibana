@@ -33,7 +33,6 @@ describe('XYConfigPanel', () => {
       legend: { isVisible: true, position: Position.Right },
       seriesType: 'bar',
       splitSeriesAccessors: [],
-      stackAccessors: [],
       x: {
         accessor: 'foo',
         position: Position.Bottom,
@@ -46,6 +45,7 @@ describe('XYConfigPanel', () => {
         showGridlines: true,
         title: 'Y',
       },
+      isStacked: true,
     };
   }
 
@@ -55,6 +55,29 @@ describe('XYConfigPanel', () => {
       .first()
       .props();
   }
+
+  test('allows toggling of stacking', () => {
+    const toggleStacked = (isStacked: boolean) => {
+      const setState = jest.fn();
+      const state = testState();
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          datasource={mockDatasource()}
+          setState={setState}
+          state={{ ...state, isStacked }}
+        />
+      );
+
+      (testSubj(component, 'lnsXY_isStacked').onChange as Function)();
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      return setState.mock.calls[0][0];
+    };
+
+    expect(toggleStacked(false)).toMatchObject({ isStacked: true });
+    expect(toggleStacked(true)).toMatchObject({ isStacked: false });
+  });
 
   test('toggles axis position when going from horizontal bar to any other type', () => {
     const changeSeriesType = (fromSeriesType: SeriesType, toSeriesType: SeriesType) => {

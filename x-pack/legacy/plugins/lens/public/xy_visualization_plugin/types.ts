@@ -154,7 +154,7 @@ export interface XYArgs {
   y: YConfig;
   x: XConfig;
   splitSeriesAccessors: string[];
-  stackAccessors: string[];
+  isStacked: boolean;
 }
 
 export interface XYState {
@@ -163,7 +163,7 @@ export interface XYState {
   y: YState;
   x: XConfig;
   splitSeriesAccessors: string[];
-  stackAccessors: string[];
+  isStacked: boolean;
 }
 
 export type State = XYState;

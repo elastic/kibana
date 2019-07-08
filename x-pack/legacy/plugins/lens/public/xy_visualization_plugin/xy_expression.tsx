@@ -59,10 +59,13 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
       multi: true,
       help: 'The columns used to split the series.',
     },
-    stackAccessors: {
-      types: ['string'],
-      multi: true,
-      help: 'The columns used to stack the series.',
+    isStacked: {
+      types: ['boolean'],
+      help: 'Whether to display the series as stacked along the X dimension',
+    },
+    isStackedPercentage: {
+      types: ['boolean'],
+      help: 'If stacked, whether to convert each Y axis into a percentage of the total',
     },
   },
   context: {
@@ -98,12 +101,12 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 };
 
 export function XYChart({ data, args }: XYChartProps) {
-  const { legend, x, y, splitSeriesAccessors, stackAccessors, seriesType } = args;
+  const { legend, x, y, splitSeriesAccessors, isStacked, seriesType } = args;
   // TODO: Stop mapping data once elastic-charts allows axis naming
   // https://github.com/elastic/elastic-charts/issues/245
   const seriesProps = {
     splitSeriesAccessors,
-    stackAccessors,
+    stackAccessors: isStacked ? [x.accessor] : [],
     id: getSpecId(y.labels.join(',')),
     xAccessor: x.accessor,
     yAccessors: y.labels,

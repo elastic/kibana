@@ -39,7 +39,11 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
     id="Label A,Label B"
     splitSeriesAccessors={Array []}
-    stackAccessors={Array []}
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
     xAccessor="c"
     yAccessors={
       Array [
@@ -90,7 +94,11 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     id="Label A,Label B"
     splitSeriesAccessors={Array []}
-    stackAccessors={Array []}
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
     xAccessor="c"
     yAccessors={
       Array [
@@ -141,7 +149,11 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
     id="Label A,Label B"
     splitSeriesAccessors={Array []}
-    stackAccessors={Array []}
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
     xAccessor="c"
     yAccessors={
       Array [

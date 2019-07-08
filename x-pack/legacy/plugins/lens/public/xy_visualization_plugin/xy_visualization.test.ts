@@ -46,31 +46,31 @@ describe('xy_visualization', () => {
       expect(initialState.x.accessor).not.toEqual(initialState.y.accessors[0]);
 
       expect(initialState).toMatchInlineSnapshot(`
-Object {
-  "legend": Object {
-    "isVisible": true,
-    "position": "right",
-  },
-  "seriesType": "line",
-  "splitSeriesAccessors": Array [],
-  "stackAccessors": Array [],
-  "title": "Empty XY Chart",
-  "x": Object {
-    "accessor": "test-id2",
-    "position": "bottom",
-    "showGridlines": false,
-    "title": "X",
-  },
-  "y": Object {
-    "accessors": Array [
-      "test-id1",
-    ],
-    "position": "left",
-    "showGridlines": false,
-    "title": "Y",
-  },
-}
-`);
+        Object {
+          "isStacked": true,
+          "legend": Object {
+            "isVisible": true,
+            "position": "right",
+          },
+          "seriesType": "bar",
+          "splitSeriesAccessors": Array [],
+          "title": "Empty XY Chart",
+          "x": Object {
+            "accessor": "test-id2",
+            "position": "bottom",
+            "showGridlines": false,
+            "title": "X",
+          },
+          "y": Object {
+            "accessors": Array [
+              "test-id1",
+            ],
+            "position": "left",
+            "showGridlines": false,
+            "title": "Y",
+          },
+        }
+      `);
     });
 
     it('loads from persisted state', () => {

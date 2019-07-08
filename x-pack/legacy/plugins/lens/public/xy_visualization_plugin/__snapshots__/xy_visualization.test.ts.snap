@@ -5,6 +5,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "isStacked": Array [
+          undefined,
+        ],
         "legend": Array [
           Object {
             "chain": Array [
@@ -28,7 +31,6 @@ Object {
           "area",
         ],
         "splitSeriesAccessors": Array [],
-        "stackAccessors": Array [],
         "x": Array [
           Object {
             "chain": Array [

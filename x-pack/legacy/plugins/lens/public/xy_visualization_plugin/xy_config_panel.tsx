@@ -107,6 +107,22 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
 
       <EuiFormRow>
         <EuiSwitch
+          label={i18n.translate('xpack.lens.xyChart.showStackedLabel', {
+            defaultMessage: 'Display as stacked chart',
+          })}
+          checked={state.isStacked}
+          data-test-subj="lnsXY_isStacked"
+          onChange={() =>
+            setState({
+              ...state,
+              isStacked: !state.isStacked,
+            })
+          }
+        />
+      </EuiFormRow>
+
+      <EuiFormRow>
+        <EuiSwitch
           label={i18n.translate('xpack.lens.xyChart.showLegendLabel', {
             defaultMessage: 'Show legend',
           })}

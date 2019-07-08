@@ -38,7 +38,7 @@ function sampleArgs() {
       title: 'C',
     },
     splitSeriesAccessors: [],
-    stackAccessors: [],
+    isStacked: true,
   };
 
   return { data, args };
