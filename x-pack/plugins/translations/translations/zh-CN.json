@@ -6219,7 +6219,6 @@
     "xpack.ml.dataframe.jobDetailsForm.errorGettingDataFrameJobsList": "获取现有数据帧作业 ID 时发生错误：{error}",
     "xpack.ml.dataframe.jobDetailsForm.errorGettingIndexPatternTitles": "获取现有索引名称时发生错误：{error}",
     "xpack.ml.dataframe.jobDetailsForm.indexPatternTitleError": "具有此名称的索引模式已存在。",
-    "xpack.ml.dataframe.jobDetailsForm.jobIdError": "已存在具有此 ID 的作业。",
     "xpack.ml.dataframe.jobDetailsForm.jobIdInputAriaLabel": "选择唯一的作业 ID。",
     "xpack.ml.dataframe.jobDetailsForm.jobIdLabel": "作业 ID",
     "xpack.ml.dataframe.jobDetailsSummary.createIndexPatternMessage": "将为此作业创建 Kibana 索引模式。",

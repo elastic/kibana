@@ -34,15 +34,12 @@ export const MetricsExplorerMetrics = injectI18n(
     const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
     const [focusOnce, setFocusState] = useState<boolean>(false);
 
-    useEffect(
-      () => {
-        if (inputRef && autoFocus && !focusOnce) {
-          inputRef.focus();
-          setFocusState(true);
-        }
-      },
-      [inputRef]
-    );
+    useEffect(() => {
+      if (inputRef && autoFocus && !focusOnce) {
+        inputRef.focus();
+        setFocusState(true);
+      }
+    }, [inputRef]);
 
     // I tried to use useRef originally but the EUIComboBox component's type definition
     // would only accept an actual input element or a callback function (with the same type).

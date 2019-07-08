@@ -23,6 +23,7 @@ import { IsRequestProvider } from './is_request';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 import { i18n } from '@kbn/i18n';
+import { createDefer } from 'ui/promises';
 
 export function CallClientProvider(Private, Promise, es, config) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
@@ -45,7 +46,7 @@ export function CallClientProvider(Private, Promise, es, config) {
 
     // This is how we'll provide the consumer with search responses. Resolved by
     // respondToSearchRequests.
-    const defer = Promise.defer();
+    const defer = createDefer(Promise);
 
     const abortableSearches = [];
     let areAllSearchRequestsAborted = false;
