@@ -40,7 +40,7 @@ declare module '@elastic/eui' {
 
   export const EuiDescribedFormGroup: React.ComponentClass<{
     title: JSX.Element;
-    description?: string;
+    description?: string | JSX.Element;
     [key: string]: any;
   }>;
 }
