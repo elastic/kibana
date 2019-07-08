@@ -23,7 +23,7 @@ export const App = () => {
 // Exoprt this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route path={`${BASE_PATH}:section(indices|index_templates)`} component={IndexManagementHome} />
+    <Route path={`${BASE_PATH}:section(indices|templates)`} component={IndexManagementHome} />
     <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}indices`}/>
   </Switch>
 );

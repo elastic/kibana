@@ -18,7 +18,7 @@ export function IndexList({
   }
 }) {
   return (
-    <div className="im-snapshotTestSubject">
+    <div className="im-snapshotTestSubject" data-test-subj="indicesList" >
       <EuiTitle size="s">
         <EuiText color="subdued">
           <FormattedMessage

@@ -19,13 +19,6 @@ export const TemplatesList: React.FunctionComponent = () => {
 
   const [showSystemTemplates, setShowSystemTemplates] = useState<boolean>(false);
 
-  // Filter out system index templates
-  const filteredTemplates =
-    templates &&
-    templates.filter((template: Template) => {
-      return !template.name.startsWith('.');
-    });
-
   if (isLoading) {
     content = (
       <SectionLoading>
@@ -47,7 +40,7 @@ export const TemplatesList: React.FunctionComponent = () => {
         error={error}
       />
     );
-  } else if (templates && templates.length === 0) {
+  } else if (Array.isArray(templates) && templates.length === 0) {
     content = (
       <EuiEmptyPrompt
         iconType="managementApp"
@@ -62,7 +55,12 @@ export const TemplatesList: React.FunctionComponent = () => {
         data-test-subj="emptyPrompt"
       />
     );
-  } else if (templates && templates.length > 0) {
+  } else if (Array.isArray(templates) && templates.length > 0) {
+    // Filter out system index templates
+    const filteredTemplates = templates.filter(
+      (template: Template) => !template.name.startsWith('.')
+    );
+
     content = (
       <Fragment>
         <EuiTitle size="s">
@@ -94,5 +92,5 @@ export const TemplatesList: React.FunctionComponent = () => {
     );
   }
 
-  return <section data-test-subj="indexTemplatesList">{content}</section>;
+  return <section data-test-subj="templatesList">{content}</section>;
 };

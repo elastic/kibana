@@ -23,7 +23,7 @@ import { idxMgmtDocumentationLink } from '../../lib/documentation_links';
 import { IndexList } from './index_list';
 import { TemplatesList } from './templates_list';
 
-type Section = 'indices' | 'index_templates';
+type Section = 'indices' | 'templates';
 
 interface MatchParams {
   section: Section;
@@ -41,7 +41,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
     },
     {
-      id: 'index_templates' as Section,
+      id: 'templates' as Section,
       name: (
         <FormattedMessage
           id="xpack.idxMgmt.home.indexTemplatesTabTitle"
@@ -104,7 +104,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <Switch>
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
           <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}index_templates`} component={TemplatesList} />
+          <Route exact path={`${BASE_PATH}templates`} component={TemplatesList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
