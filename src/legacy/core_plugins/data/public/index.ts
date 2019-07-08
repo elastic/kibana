@@ -45,11 +45,13 @@ export class DataPlugin {
     this.expressions = new ExpressionsService();
   }
 
-  public setup(): DataSetup {
+  public setup(core: any, setup: any): DataSetup {
+    const { __LEGACY } = setup;
+    const { IndexPatterns } = __LEGACY;
     // TODO: this is imported here to avoid circular imports.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getInterpreter } = require('plugins/interpreter/interpreter');
-    const indexPatternsService = this.indexPatterns.setup();
+    const indexPatternsService = this.indexPatterns.setup({ IndexPatterns });
     return {
       expressions: this.expressions.setup({
         interpreter: {

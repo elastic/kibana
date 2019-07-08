@@ -17,11 +17,21 @@
  * under the License.
  */
 
+import { npSetup } from 'ui/new_platform';
 import { DataPlugin } from './index';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { IndexPatterns } = require('ui/index_patterns/index');
 
 /**
  * We export data here so that users importing from 'plugins/data'
  * will automatically receive the response value of the `setup` contract, mimicking
  * the data that will eventually be injected by the new platform.
  */
-export const data = new DataPlugin().setup();
+
+const setupPlugins = {
+  ...npSetup.plugins,
+  __LEGACY: {
+    IndexPatterns,
+  },
+};
+export const data = new DataPlugin().setup(npSetup.core, setupPlugins);

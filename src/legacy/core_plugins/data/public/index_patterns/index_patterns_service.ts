@@ -27,8 +27,6 @@ import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns/inde
 // @ts-ignore
 import { IndexPatternSelect } from 'ui/index_patterns/index';
 // @ts-ignore
-import { IndexPatterns } from 'ui/index_patterns/index';
-// @ts-ignore
 import { validateIndexPattern } from 'ui/index_patterns/index';
 
 // IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
@@ -48,7 +46,7 @@ const savedObjectsClient = chrome.getSavedObjectsClient();
  * @internal
  */
 export class IndexPatternsService {
-  public setup() {
+  public setup({ IndexPatterns }: any) {
     return {
       indexPatterns: new IndexPatterns(config, savedObjectsClient),
     };
@@ -60,7 +58,6 @@ export class IndexPatternsService {
 }
 
 // static exports
-
 const constants = {
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
@@ -75,7 +72,7 @@ const ui = {
   IndexPatternSelect,
 };
 
-export { validateIndexPattern, constants, fixtures, ui, IndexPatterns };
+export { validateIndexPattern, constants, fixtures, ui };
 
 /** @public */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
