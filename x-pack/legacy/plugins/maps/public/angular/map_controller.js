@@ -157,10 +157,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   const updateStateFromSavedQuery = (savedQuery) => {
     $scope.query = savedQuery.attributes.query;
     if (savedQuery.attributes.timefilter) {
-      $scope.time.setTime({
+      $scope.time = {
         from: savedQuery.attributes.timefilter.timeFrom,
         to: savedQuery.attributes.timefilter.timeTo,
-      });
+      };
       if (savedQuery.attributes.timefilter.refreshInterval) {
         $scope.refreshInterval = savedQuery.attributes.timefilter.refreshInterval;
       }
