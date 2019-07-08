@@ -52,7 +52,7 @@ export interface RoutingTable {
 export class ClusterDocClient {
   public nodeName: string;
   private elasticsearch$?: Observable<ClusterClient>;
-  private updateInterval? = 15 * 1000;
+  private updateInterval: number = 15 * 1000;
   private updateTimer: null | NodeJS.Timer = null;
   private maxRetry: number = 0;
   private runCull: boolean = false;
@@ -167,7 +167,7 @@ export class ClusterDocClient {
   private setTimer() {
     if (this.updateTimer) return;
     this.log.debug('Set timer to updateNodeMap');
-    this.updateTimer = setTimeout(() => {
+    this.updateTimer = global.setTimeout(() => {
       this.log.debug('Updating heartbeat');
       this.mainLoop();
     }, this.updateInterval);

@@ -28,6 +28,9 @@ import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 
+// `crypto` type definitions doesn't currently include `crypto.constants`, see
+// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
+const cryptoConstants = (crypto as any).constants;
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
 
@@ -145,32 +148,39 @@ test('creates and sets up second http server', async () => {
 
   const service = new HttpService({ configService, env, logger });
   const serverSetup = await service.setup();
-  const cfg = { port: 2345 };
-  await serverSetup.createNewServer(cfg);
+  const port = 2345;
+  const ssl = {
+    enabled: true,
+    redirectHttpFromPort: port,
+    certificate: '',
+    key: '',
+    certificateAuthorities: [''],
+    cipherSuites: cryptoConstants.defaultCoreCipherList.split(':'),
+    keyPassphrase: undefined,
+    supportedProtocols: ['TLSv1.1', 'TLSv1.2'],
+    requestCert: true,
+  };
+
+  await serverSetup.createNewServer(port, ssl);
   const server = await service.start();
   expect(server.isListening()).toBeTruthy();
-  expect(server.isListening(cfg.port)).toBeTruthy();
+  expect(server.isListening(port)).toBeTruthy();
 
   try {
-    await serverSetup.createNewServer(cfg);
+    await serverSetup.createNewServer(port, ssl);
   } catch (err) {
     expect(err.message).toBe('port 2345 is already in use');
   }
 
   try {
-    await serverSetup.createNewServer({ port: 1234 });
+    await serverSetup.createNewServer(1234, ssl);
   } catch (err) {
     expect(err.message).toBe('port 1234 is already in use');
   }
 
-  try {
-    await serverSetup.createNewServer({ host: 'example.org' });
-  } catch (err) {
-    expect(err.message).toBe('port must be defined');
-  }
   await service.stop();
   expect(server.isListening()).toBeFalsy();
-  expect(server.isListening(cfg.port)).toBeFalsy();
+  expect(server.isListening(port)).toBeFalsy();
 });
 
 test('logs error if already set up', async () => {

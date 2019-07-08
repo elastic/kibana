@@ -33,6 +33,9 @@ import {
 
 import { RouteState, RoutingTable, ClusterDocClient } from './cluster_doc';
 
+// When we upgrade to typescript 3.5 we can remove this
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
 export interface ProxyServiceSetup {
   httpSetup: Omit<HttpServiceSetup, 'createNewServer'>;
 }
@@ -220,9 +223,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
       const data = Wreck.read(res, {});
       return data;
     } catch (err) {
-      const msg = `Unable to complete request to ${node.node} for ${resource} because ${
-        err.message
-      }`;
+      const msg = `Unable to complete request to ${node.node} for ${resource} because ${err.message}`;
       this.log.warn(msg);
       throw new Error(msg);
     }
