@@ -25,6 +25,7 @@ import {
 import { PivotAggDict, PivotAggsConfig } from './pivot_aggs';
 import { DateHistogramAgg, HistogramAgg, PivotGroupByDict, TermsAgg } from './pivot_group_by';
 import { SavedSearchQuery } from './kibana_context';
+import { IndexPattern as Index } from './job';
 
 export interface DataFramePreviewRequest {
   pivot: {
@@ -32,7 +33,7 @@ export interface DataFramePreviewRequest {
     aggregations: PivotAggDict;
   };
   source: {
-    index: string[];
+    index: Index | Index[];
     query?: any;
   };
 }
