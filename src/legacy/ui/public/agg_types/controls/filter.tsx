@@ -100,7 +100,7 @@ function FilterRow({
         label={`${filterLabel}${customLabel ? ` - ${customLabel}` : ''}`}
         labelAppend={FilterControl}
         fullWidth={true}
-        className="visEditorSidebar__aggParamFormRow"
+        compressed
       >
         <QueryBarInput
           query={value}
@@ -125,7 +125,7 @@ function FilterRow({
             },
           })}
           fullWidth={true}
-          className="visEditorSidebar__aggParamFormRow"
+          compressed
         >
           <EuiFieldText
             value={customLabel}
