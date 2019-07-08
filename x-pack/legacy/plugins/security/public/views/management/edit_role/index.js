@@ -10,8 +10,6 @@ import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 import { fatalError, toastNotifications } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'ui/angular_ui_select';
-import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
@@ -91,7 +89,7 @@ const routeDefinition = (action) => ({
       return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
     },
     builtinESPrivileges() {
-      return kfetch({ method: 'get', pathname: '/api/security/v1/privileges/builtin' });
+      return kfetch({ method: 'get', pathname: '/api/security/v1/esPrivileges/builtin' });
     },
     features() {
       return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {

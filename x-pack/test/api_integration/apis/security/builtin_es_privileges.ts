@@ -12,10 +12,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
 
   describe('Builtin ES Privileges', () => {
-    describe('GET /api/security/v1/privileges/builtin', () => {
+    describe('GET /api/security/v1/esPrivileges/builtin', () => {
       it('should return a list of available builtin privileges', async () => {
         await supertest
-          .get('/api/security/v1/privileges/builtin')
+          .get('/api/security/v1/esPrivileges/builtin')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)

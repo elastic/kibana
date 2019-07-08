@@ -11,7 +11,7 @@ import { getClient } from '../../../../../../server/lib/get_client_shield';
 export function initGetBuiltinPrivilegesApi(server: Legacy.Server) {
   server.route({
     method: 'GET',
-    path: '/api/security/v1/privileges/builtin',
+    path: '/api/security/v1/esPrivileges/builtin',
     async handler(req: Legacy.Request) {
       const callWithRequest = getClient(server).callWithRequest;
       const privileges = await callWithRequest<BuiltinESPrivileges>(
