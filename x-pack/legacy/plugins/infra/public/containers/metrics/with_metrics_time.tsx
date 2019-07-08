@@ -31,29 +31,23 @@ export const useMetricsTime = () => {
     interval: '>=1m',
   });
 
-  const setTimeRangeToNow = useCallback(
-    () => {
-      const range = timeRange.to - timeRange.from;
-      const nowInMs = moment().valueOf();
-      setTimeRange({
-        from: nowInMs - range,
-        to: nowInMs,
-        interval: '>=1m',
-      });
-    },
-    [timeRange.from, timeRange.to]
-  );
+  const setTimeRangeToNow = useCallback(() => {
+    const range = timeRange.to - timeRange.from;
+    const nowInMs = moment().valueOf();
+    setTimeRange({
+      from: nowInMs - range,
+      to: nowInMs,
+      interval: '>=1m',
+    });
+  }, [timeRange.from, timeRange.to]);
 
   useInterval(setTimeRangeToNow, isAutoReloading ? refreshInterval : null);
 
-  useEffect(
-    () => {
-      if (isAutoReloading) {
-        setTimeRangeToNow();
-      }
-    },
-    [isAutoReloading]
-  );
+  useEffect(() => {
+    if (isAutoReloading) {
+      setTimeRangeToNow();
+    }
+  }, [isAutoReloading]);
 
   return {
     timeRange,

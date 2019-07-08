@@ -17,7 +17,7 @@ export const startJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListR
     await ml.dataFrame.startDataFrameTransformsJob(d.config.id);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.jobsList.startJobSuccessMessage', {
-        defaultMessage: 'Data frame job {jobId} started successfully.',
+        defaultMessage: 'Data frame transform {jobId} started successfully.',
         values: { jobId: d.config.id },
       })
     );
@@ -25,7 +25,7 @@ export const startJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListR
   } catch (e) {
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.jobsList.startJobErrorMessage', {
-        defaultMessage: 'An error occurred starting the data frame job {jobId}: {error}',
+        defaultMessage: 'An error occurred starting the data frame transform {jobId}: {error}',
         values: { jobId: d.config.id, error: JSON.stringify(e) },
       })
     );
