@@ -53,7 +53,7 @@ export const getThreshold = (
   } else if (config.anomalyScore > 100) {
     return 100;
   } else {
-    return Math.ceil(config.anomalyScore);
+    return Math.floor(config.anomalyScore);
   }
 };
 

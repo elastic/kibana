@@ -80,11 +80,11 @@ describe('use_anomalies_table_data', () => {
       expect(getThreshold(config, -1)).toEqual(75);
     });
 
-    test('should round a value up if sent in a floating point number', () => {
+    test('should round down a value up if sent in a floating point number', () => {
       const config: Partial<AppKibanaFrameworkAdapter> = {
         anomalyScore: 75.01,
       };
-      expect(getThreshold(config, -1)).toEqual(76);
+      expect(getThreshold(config, -1)).toEqual(75);
     });
   });
 });
