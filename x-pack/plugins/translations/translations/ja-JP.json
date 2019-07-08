@@ -6249,7 +6249,6 @@
     "xpack.ml.dataframe.jobDetailsForm.errorGettingDataFrameJobsList": "既存のデータフレームジョブIDの取得中にエラーが発生しました：{error}",
     "xpack.ml.dataframe.jobDetailsForm.errorGettingIndexPatternTitles": "既存のインデックスパターンのタイトルの取得中にエラーが発生しました: {error}",
     "xpack.ml.dataframe.jobDetailsForm.indexPatternTitleError": "このタイトルのインデックスパターンが既に存在します。",
-    "xpack.ml.dataframe.jobDetailsForm.jobIdError": "この ID のジョブが既に存在します。",
     "xpack.ml.dataframe.jobDetailsForm.jobIdInputAriaLabel": "固有のジョブ ID を選択してください。",
     "xpack.ml.dataframe.jobDetailsForm.jobIdLabel": "ジョブ ID",
     "xpack.ml.dataframe.jobDetailsSummary.createIndexPatternMessage": "このジョブの Kibana インデックスパターンが作成されます。",
