@@ -181,48 +181,30 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   return (
     <Fragment>
+      {lineChartsData && (
+        <ChartGrid
+          aggFieldPairList={aggFieldPairList}
+          chartSettings={chartSettings}
+          splitField={splitField}
+          fieldValues={fieldValues}
+          lineChartsData={lineChartsData}
+          modelData={modelData}
+          anomalyData={anomalyData}
+          deleteDetector={isActive ? deleteDetector : undefined}
+          jobType={jobCreator.type}
+        />
+      )}
       {isActive && (
-        <Fragment>
-          {lineChartsData && (
-            <ChartGrid
-              aggFieldPairList={aggFieldPairList}
-              chartSettings={chartSettings}
-              splitField={splitField}
-              fieldValues={fieldValues}
-              lineChartsData={lineChartsData}
-              modelData={modelData}
-              anomalyData={anomalyData}
-              deleteDetector={deleteDetector}
-              jobType={jobCreator.type}
-            />
-          )}
-          <MetricSelector
-            fields={fields}
-            detectorChangeHandler={detectorChangeHandler}
-            selectedOptions={selectedOptions}
-            maxWidth={560}
-            removeOptions={aggFieldPairList}
-          />
-        </Fragment>
+        <MetricSelector
+          fields={fields}
+          detectorChangeHandler={detectorChangeHandler}
+          selectedOptions={selectedOptions}
+          maxWidth={560}
+          removeOptions={aggFieldPairList}
+        />
       )}
       {isActive === false && (
-        <Fragment>
-          {lineChartsData && (
-            <Fragment>
-              <ChartGrid
-                aggFieldPairList={aggFieldPairList}
-                chartSettings={chartSettings}
-                splitField={splitField}
-                fieldValues={fieldValues}
-                lineChartsData={lineChartsData}
-                modelData={modelData}
-                anomalyData={anomalyData}
-                jobType={jobCreator.type}
-              />
-              <JobProgress progress={progress} />
-            </Fragment>
-          )}
-        </Fragment>
+        <Fragment>{lineChartsData && <JobProgress progress={progress} />}</Fragment>
       )}
     </Fragment>
   );

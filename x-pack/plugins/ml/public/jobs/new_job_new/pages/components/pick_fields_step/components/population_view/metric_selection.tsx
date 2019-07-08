@@ -241,52 +241,41 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       {isActive === true && (
         <Fragment>
           <SplitFieldSelector />
-          {splitField !== null && (
-            <Fragment>
-              <EuiHorizontalRule margin="l" />
-
-              {lineChartsData && (
-                <ChartGrid
-                  aggFieldPairList={aggFieldPairList}
-                  chartSettings={chartSettings}
-                  splitField={splitField}
-                  lineChartsData={lineChartsData}
-                  modelData={modelData}
-                  anomalyData={anomalyData}
-                  deleteDetector={deleteDetector}
-                  jobType={jobCreator.type}
-                  fieldValuesPerDetector={fieldValuesPerDetector}
-                />
-              )}
-              <MetricSelector
-                fields={fields}
-                detectorChangeHandler={detectorChangeHandler}
-                selectedOptions={selectedOptions}
-                maxWidth={560}
-                removeOptions={aggFieldPairList}
-              />
-            </Fragment>
-          )}
+          {splitField !== null && <EuiHorizontalRule margin="l" />}
         </Fragment>
       )}
-      {isActive === false && (
+
+      {isActive === false && splitField === null && (
         <Fragment>
-          {lineChartsData && (
-            <Fragment>
-              <ChartGrid
-                aggFieldPairList={aggFieldPairList}
-                chartSettings={chartSettings}
-                splitField={splitField}
-                lineChartsData={lineChartsData}
-                modelData={modelData}
-                anomalyData={anomalyData}
-                jobType={jobCreator.type}
-                fieldValuesPerDetector={fieldValuesPerDetector}
-              />
-              <JobProgress progress={progress} />
-            </Fragment>
-          )}
+          Population label TODO
+          {splitField !== null && <EuiHorizontalRule margin="l" />}
         </Fragment>
+      )}
+
+      {lineChartsData && splitField !== null && (
+        <ChartGrid
+          aggFieldPairList={aggFieldPairList}
+          chartSettings={chartSettings}
+          splitField={splitField}
+          lineChartsData={lineChartsData}
+          modelData={modelData}
+          anomalyData={anomalyData}
+          deleteDetector={isActive ? deleteDetector : undefined}
+          jobType={jobCreator.type}
+          fieldValuesPerDetector={fieldValuesPerDetector}
+        />
+      )}
+      {isActive === true && splitField !== null && (
+        <MetricSelector
+          fields={fields}
+          detectorChangeHandler={detectorChangeHandler}
+          selectedOptions={selectedOptions}
+          maxWidth={560}
+          removeOptions={aggFieldPairList}
+        />
+      )}
+      {isActive === false && (
+        <Fragment>{lineChartsData && <JobProgress progress={progress} />}</Fragment>
       )}
     </Fragment>
   );
@@ -332,7 +321,7 @@ const ChartGrid: FC<ChartGridProps> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ByFieldSelector detectorIndex={i} />
+                  {deleteDetector !== undefined && <ByFieldSelector detectorIndex={i} />}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <SplitCards
