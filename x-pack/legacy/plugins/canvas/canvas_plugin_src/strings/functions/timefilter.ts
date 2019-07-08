@@ -33,7 +33,7 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
         dm: 'datemath',
       },
     }),
-    filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
+    filterGroup: i18n.translate('xpack.canvas.functions.timefilter.args.filterGroupHelpText', {
       defaultMessage: 'The group name for the filter',
     }),
   },
