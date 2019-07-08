@@ -31,3 +31,9 @@ test('throws error when the format is invalid', () => {
     `"Invalid duration \\"10x\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
   );
 });
+
+test('throws error when suffix is missing', () => {
+  expect(() => parseDuration('1000')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"1000\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+});
