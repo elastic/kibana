@@ -34,6 +34,7 @@ import { ApplicationService } from './application';
 import { mapToObject } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
+import { ContextService } from './context';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -69,6 +70,7 @@ export class CoreSystem {
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
+  private readonly context: ContextService;
 
   private readonly rootDomElement: HTMLElement;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -103,6 +105,7 @@ export class CoreSystem {
     this.chrome = new ChromeService({ browserSupportsCsp });
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
+    this.context = new ContextService();
 
     const core: CoreContext = {};
     this.plugins = new PluginsService(core);
@@ -157,6 +160,7 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const context = this.context.start({ injectedMetadata });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
 
@@ -190,6 +194,7 @@ export class CoreSystem {
       const core: InternalCoreStart = {
         application,
         chrome,
+        context,
         docLinks,
         http,
         i18n,

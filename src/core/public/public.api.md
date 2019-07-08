@@ -166,6 +166,17 @@ export interface ChromeStart {
     setIsVisible(isVisible: boolean): void;
 }
 
+// @public
+export interface ContextContainer<TContext extends {}, TProviderParameters extends any[] = []> {
+    createContext(plugin: PluginName, baseContext: Partial<TContext>, ...contextArgs: TProviderParameters): Promise<TContext>;
+    // Warning: (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "TContext"
+    register<TContextName extends keyof TContext>(contextName: TContextName, provider: ContextProvider<TContext, TContextName, TProviderParameters>, plugin?: PluginName): this;
+}
+
+// @public
+export type ContextProvider<TContext extends {}, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+
 // @internal (undocumented)
 export interface CoreContext {
 }
@@ -414,6 +425,10 @@ export interface InternalCoreSetup extends CoreSetup {
 export interface InternalCoreStart extends CoreStart {
     // (undocumented)
     application: ApplicationStart;
+    // Warning: (ae-forgotten-export) The symbol "ContextStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    context: ContextStart;
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)

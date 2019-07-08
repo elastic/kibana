@@ -66,6 +66,7 @@ import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
+import { ContextContainer, ContextProvider, ContextStart } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -127,6 +128,7 @@ export interface InternalCoreSetup extends CoreSetup {
 /** @internal */
 export interface InternalCoreStart extends CoreStart {
   application: ApplicationStart;
+  context: ContextStart;
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -146,6 +148,8 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
+  ContextContainer,
+  ContextProvider,
   DocLinksStart,
   ErrorToastOptions,
   FatalErrorInfo,

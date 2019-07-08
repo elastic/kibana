@@ -41,6 +41,7 @@ import {
   MockDocLinksService,
   MockRenderingService,
   RenderingServiceConstructor,
+  MockContextService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -214,6 +215,11 @@ describe('#start()', () => {
   it('calls application#start()', async () => {
     await startCore();
     expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls context#start()', async () => {
+    await startCore();
+    expect(MockContextService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls docLinks#start()', async () => {
