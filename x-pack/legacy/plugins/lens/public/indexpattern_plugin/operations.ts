@@ -49,7 +49,6 @@ export const operationDefinitionMap: AllOperationDefinitions = {
   avg: averageOperation,
   sum: sumOperation,
   count: countOperation,
-  // TODO: Inject into this
   filter_ratio: filterRatioOperation,
 };
 const operationDefinitions: PossibleOperationDefinitions[] = Object.values(operationDefinitionMap);
