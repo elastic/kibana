@@ -68,31 +68,41 @@ uiRoutes
       clusters(Private) {
         const routeInit = Private(routeInitProvider);
         return routeInit();
-      },
-      pageData: getPageData
+      }
     },
     controller: class extends MonitoringViewBaseEuiTableController {
       constructor($injector, $scope) {
+        let lastPromise;
+        const getPageDataNoRefresh = () => {
+          if (!lastPromise) {
+            lastPromise = getPageData($injector);
+          }
+          return lastPromise;
+        };
+
+        const updateHandler = () => (lastPromise = null);
+        timefilter.on('timeUpdate', updateHandler);
+        timefilter.on('refreshIntervalUpdate', updateHandler);
+
         const kbnUrl = $injector.get('kbnUrl');
         const config = $injector.get('config');
 
         super({
-          defaultData: {},
-          getPageData,
+          getPageData: getPageDataNoRefresh,
           reactNodeId: 'monitoringLogstashNodePipelinesApp',
           $scope,
           $injector
         });
 
-        $scope.$watch(() => this.data, data => {
-          if (!data || !data.nodeSummary) {
+        const render = () => {
+          if (!this.data || !this.data.nodeSummary) {
             return;
           }
 
           this.setTitle(i18n.translate('xpack.monitoring.logstash.node.pipelines.routeTitle', {
             defaultMessage: 'Logstash - {nodeName} - Pipelines',
             values: {
-              nodeName: data.nodeSummary.name
+              nodeName: this.data.nodeSummary.name
             }
           }));
 
@@ -100,15 +110,15 @@ uiRoutes
             <I18nContext>
               <PipelineListing
                 className="monitoringLogstashPipelinesTable"
-                onBrush={this.onBrush}
-                stats={data.nodeSummary}
+                onBrush={(xaxis) => this.onBrush({ xaxis })}
+                stats={this.data.nodeSummary}
                 statusComponent={DetailStatus}
-                data={data.pipelines}
+                data={this.data.pipelines}
                 sorting={this.sorting}
                 pagination={this.pagination}
                 onTableChange={this.onTableChange}
                 dateFormat={config.get('dateFormat')}
-                upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
+                upgradeMessage={makeUpgradeMessage(this.data.nodeSummary.version)}
                 angular={{
                   kbnUrl,
                   scope: $scope,
@@ -116,7 +126,14 @@ uiRoutes
               />
             </I18nContext>
           );
-        });
+        };
+
+        const removeWatcher = $scope.$watch(() => this.data, render);
+        this.$onDestroy = () => {
+          timefilter.off('timeUpdate', updateHandler);
+          timefilter.off('refreshIntervalUpdate', updateHandler);
+          removeWatcher && removeWatcher();
+        };
       }
     }
   });

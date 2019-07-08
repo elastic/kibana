@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { render } from 'react-dom';
 import uiRoutes from 'ui/routes';
-import moment from 'moment';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import {
@@ -64,15 +61,26 @@ uiRoutes
       clusters(Private) {
         const routeInit = Private(routeInitProvider);
         return routeInit();
-      },
-      pageData: getPageData
+      }
     },
     controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
       constructor($injector, $scope) {
+        let lastPromise;
+        const getPageDataNoRefresh = () => {
+          if (!lastPromise) {
+            lastPromise = getPageData($injector);
+          }
+          return lastPromise;
+        };
+
+        const updateHandler = () => (lastPromise = null);
+        timefilter.on('timeUpdate', updateHandler);
+        timefilter.on('refreshIntervalUpdate', updateHandler);
+
         super({
           title: 'Logstash Pipelines',
           storageKey: 'logstash.pipelines',
-          getPageData,
+          getPageData: getPageDataNoRefresh,
           reactNodeId: 'monitoringLogstashPipelinesApp',
           $scope,
           $injector
@@ -81,52 +89,41 @@ uiRoutes
         const $route = $injector.get('$route');
         const kbnUrl = $injector.get('kbnUrl');
         const config = $injector.get('config');
-        this.data = $route.current.locals.pageData;
         const globalState = $injector.get('globalState');
         $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
-        function onBrush(xaxis) {
-          timefilter.setTime({
-            from: moment(xaxis.from),
-            to: moment(xaxis.to),
-            mode: 'absolute'
-          });
-        }
-
-        const renderReact = (pageData) => {
-          if (!pageData) {
+        const render = () => {
+          if (!this.data || !this.data.clusterStatus) {
             return;
           }
 
-          const upgradeMessage = pageData
-            ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
-            : null;
-
-          render(
+          super.renderReact(
             <I18nContext>
               <PipelineListing
                 className="monitoringLogstashPipelinesTable"
-                onBrush={onBrush}
-                stats={pageData.clusterStatus}
-                data={pageData.pipelines}
+                onBrush={(xaxis) => this.onBrush({ xaxis })}
+                stats={this.data.clusterStatus}
+                data={this.data.pipelines}
                 sorting={this.sorting}
                 pagination={this.pagination}
                 onTableChange={this.onTableChange}
-                upgradeMessage={upgradeMessage}
+                upgradeMessage={makeUpgradeMessage(this.data.clusterStatus.versions)}
                 dateFormat={config.get('dateFormat')}
                 angular={{
                   kbnUrl,
                   scope: $scope,
                 }}
               />
-            </I18nContext>,
-            document.getElementById('monitoringLogstashPipelinesApp')
+            </I18nContext>
           );
         };
 
-        $scope.$watch(() => this.data, pageData => {
-          renderReact(pageData);
-        });
+        const removeWatcher = $scope.$watch(() => this.data, render);
+        this.$onDestroy = () => {
+          timefilter.off('timeUpdate', updateHandler);
+          timefilter.off('refreshIntervalUpdate', updateHandler);
+          removeWatcher && removeWatcher();
+        };
       }
     }
   });
