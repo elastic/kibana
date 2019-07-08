@@ -97,7 +97,7 @@ uiModules
         };
 
         $scope.$watchMulti(
-          ['table', 'exportTitle', 'percentageCol', 'totalFunc'],
+          ['table', 'exportTitle', 'percentageCol', 'totalFunc', '=scope.dimensions'],
           function () {
             const { table, exportTitle, percentageCol } = $scope;
             const showPercentage = percentageCol !== '';
@@ -110,6 +110,10 @@ uiModules
 
             self.csv.filename = (exportTitle || table.title || 'table') + '.csv';
             $scope.rows = table.rows;
+            $scope.formattedColumns = [];
+
+            if (_.isUndefined($scope.dimensions)) return;
+
             const { buckets, metrics } = $scope.dimensions;
 
             $scope.formattedColumns = table.columns
