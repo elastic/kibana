@@ -41,16 +41,15 @@ interface DateRange {
  */
 export interface SearchBarProps {
   appName: string;
-  screenTitle?: string;
-  store: Storage;
   intl: InjectedIntl;
   indexPatterns: IndexPattern[];
-  disableAutoFocus?: boolean;
   // Query bar
   showQueryBar?: boolean;
   showQueryInput?: boolean;
-  query: Query;
-  onQuerySubmit: (payload: { dateRange: DateRange; query?: Query }) => void;
+  screenTitle?: string;
+  store?: Storage;
+  query?: Query;
+  onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
   // Filter bar
   showFilterBar?: boolean;
   filters?: Filter[];
@@ -166,54 +165,59 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
     });
 
+    let queryBar;
+    if (this.props.showQueryBar && this.props.onQuerySubmit && this.props.store) {
+      queryBar = (
+        <QueryBar
+          query={this.props.query}
+          screenTitle={this.props.screenTitle}
+          onSubmit={this.props.onQuerySubmit}
+          appName={this.props.appName}
+          indexPatterns={this.props.indexPatterns}
+          store={this.props.store}
+          prepend={this.props.showFilterBar ? filterTriggerButton : ''}
+          showDatePicker={this.props.showDatePicker}
+          showQueryInput={this.props.showQueryInput}
+          dateRangeFrom={this.props.dateRangeFrom}
+          dateRangeTo={this.props.dateRangeTo}
+          isRefreshPaused={this.props.isRefreshPaused}
+          refreshInterval={this.props.refreshInterval}
+          showAutoRefreshOnly={this.props.showAutoRefreshOnly}
+          onRefreshChange={this.props.onRefreshChange}
+        />
+      );
+    }
+
+    let filterBar;
+    if (this.props.showFilterBar && this.props.filters) {
+      filterBar = (
+        <div
+          id="GlobalFilterGroup"
+          ref={node => {
+            this.filterBarWrapperRef = node;
+          }}
+          className={classes}
+        >
+          <div
+            ref={node => {
+              this.filterBarRef = node;
+            }}
+          >
+            <FilterBar
+              className="globalFilterGroup__filterBar"
+              filters={this.props.filters}
+              onFiltersUpdated={this.getFilterUpdateFunction()}
+              indexPatterns={this.props.indexPatterns}
+            />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="globalQueryBar">
-        {this.props.showQueryBar ? (
-          <QueryBar
-            query={this.props.query}
-            screenTitle={this.props.screenTitle}
-            onSubmit={this.props.onQuerySubmit}
-            appName={this.props.appName}
-            indexPatterns={this.props.indexPatterns}
-            store={this.props.store}
-            prepend={this.props.showFilterBar ? filterTriggerButton : ''}
-            showDatePicker={this.props.showDatePicker}
-            showQueryInput={this.props.showQueryInput}
-            dateRangeFrom={this.props.dateRangeFrom}
-            dateRangeTo={this.props.dateRangeTo}
-            isRefreshPaused={this.props.isRefreshPaused}
-            refreshInterval={this.props.refreshInterval}
-            showAutoRefreshOnly={this.props.showAutoRefreshOnly}
-            onRefreshChange={this.props.onRefreshChange}
-          />
-        ) : (
-          ''
-        )}
-
-        {this.props.showFilterBar && this.props.filters ? (
-          <div
-            id="GlobalFilterGroup"
-            ref={node => {
-              this.filterBarWrapperRef = node;
-            }}
-            className={classes}
-          >
-            <div
-              ref={node => {
-                this.filterBarRef = node;
-              }}
-            >
-              <FilterBar
-                className="globalFilterGroup__filterBar"
-                filters={this.props.filters}
-                onFiltersUpdated={this.getFilterUpdateFunction()}
-                indexPatterns={this.props.indexPatterns}
-              />
-            </div>
-          </div>
-        ) : (
-          ''
-        )}
+        {queryBar}
+        {filterBar}
       </div>
     );
   }

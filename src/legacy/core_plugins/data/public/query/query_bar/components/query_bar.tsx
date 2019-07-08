@@ -18,7 +18,6 @@
  */
 
 import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
-import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
 import _ from 'lodash';
@@ -37,6 +36,7 @@ import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { PersistedLog } from 'ui/persisted_log';
+import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';

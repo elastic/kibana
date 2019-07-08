@@ -19,27 +19,22 @@
 
 import React from 'react';
 
-import { Storage } from 'ui/storage';
-
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 
-const localStorage = new Storage(window.localStorage);
-
-interface Props extends SearchBarProps {
-  config: TopNavMenuData[];
+type Props = Partial<SearchBarProps> & {
   name: string;
-  showBorder?: boolean;
-  activeItem: string;
-  showSearchBar: boolean;
+  config?: TopNavMenuData[];
+  showSearchBar?: boolean;
   showSearchBarInline?: boolean;
-}
+};
 
 export function TopNavMenu(props: Props) {
   function renderItems() {
+    if (!props.config) return;
     return props.config.map((menuItem, i) => (
       <EuiFlexItem grow={false} key={i}>
         <TopNavMenuItem data={menuItem} onClick={menuItemClickHandler} />
@@ -53,6 +48,19 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     if (!props.showSearchBar) return;
+
+    // Validate presense of all required fields
+    if (
+      !props.appName ||
+      !props.query ||
+      !props.screenTitle ||
+      !props.onQuerySubmit ||
+      !props.indexPatterns ||
+      !props.store
+    ) {
+      throw 'Missing attributes to initialize search bar';
+    }
+
     return (
       <SearchBar
         query={props.query}
@@ -72,7 +80,7 @@ export function TopNavMenu(props: Props) {
         onRefreshChange={props.onRefreshChange}
         refreshInterval={props.refreshInterval}
         indexPatterns={props.indexPatterns}
-        store={localStorage}
+        store={props.store}
       />
     );
   }
@@ -122,4 +130,5 @@ TopNavMenu.defaultProps = {
   showQueryInput: true,
   showDatePicker: true,
   showFilterBar: true,
+  screenTitle: '',
 };

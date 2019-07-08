@@ -21,6 +21,7 @@ import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
+import { Storage } from 'ui/storage';
 
 const module = uiModules.get('kibana');
 
@@ -39,9 +40,17 @@ module.directive('kbnTopNav2', () => {
       // Add a special attribute that will change every time that one
       // of the config array's disableButton function return value changes.
       child.setAttribute('disabled-buttons', 'disabledButtons');
+
+      // Pass in storage
+      const localStorage = new Storage(window.localStorage);
+      child.setAttribute('storage', 'storage');
+
+      // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
+        $scope.storage = localStorage;
+
         // Watch the disableButton functions
         $scope.$watch(() => {
           const config = $scope.$eval($attr.config);
