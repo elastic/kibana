@@ -156,6 +156,19 @@ module.exports = {
                 ],
                 allowSameFolder: true,
               },
+              {
+                from: ['src/legacy/ui/**/*', 'ui/**/*'],
+                target: [
+                  'src/legacy/core_plugins/**/public/shim/**/*',
+                  'src/legacy/core_plugins/**/server/shim/**/*',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'Shim should not import from /src/legacy/ui/** folder. ' +
+                  'Instead of importing from /src/legacy/ui/** deeply withing a shim, ' +
+                  'import those things once at the top level of your shim and pass those down, just ' +
+                  'like you pass down `core` and `plugins` objects.',
+              },
             ],
           },
         ],

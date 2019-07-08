@@ -97,11 +97,16 @@ module.exports = {
     }
 
     function checkForRestrictedImportPath(importPath, node) {
-      const absoluteImportPath = resolve(importPath, context);
-      if (!absoluteImportPath) return;
+      let absoluteImportPath;
+      if (importPath.indexOf('ui/') === 0) {
+        absoluteImportPath = importPath;
+      } else {
+        absoluteImportPath = resolve(importPath, context);
+        if (!absoluteImportPath) return;
+      }
 
       const currentFilename = context.getFilename();
-      for (const { target, from, allowSameFolder } of zones) {
+      for (const { target, from, allowSameFolder, errorMessage = '' } of zones) {
         const srcFilePath = resolve(currentFilename, context);
 
         const relativeSrcFile = path.relative(basePath, srcFilePath);
@@ -116,7 +121,9 @@ module.exports = {
 
         context.report({
           node,
-          message: `Unexpected path "${importPath}" imported in restricted zone.`,
+          message: `Unexpected path "${importPath}" imported in restricted zone.${
+            errorMessage ? ' ' + errorMessage : ''
+          }`,
         });
       }
     }
