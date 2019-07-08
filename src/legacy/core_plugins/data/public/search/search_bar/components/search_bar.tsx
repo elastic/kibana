@@ -24,9 +24,9 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 
+import { IndexPattern } from '../../../index_patterns';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
 
