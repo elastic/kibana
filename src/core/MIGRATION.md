@@ -830,8 +830,10 @@ The packages directory should have the least amount of code in Kibana. Just beca
 
 Many of the utilities you're using to build your plugins are available in the New Platform or in New Platform plugins. To help you build the shim for these new services, use the tables below to find where the New Platform equivalent lives.
 
+
 #### Client-side
 
+##### Core Services
 In client code, `core` can be imported in legacy plugins via the `ui/new_platform` module.
 
 ```ts
@@ -856,8 +858,37 @@ import { npStart: { core } } from 'ui/new_platform';
 
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
+##### Application Services
+In client code, we have a series of shared application services that are being built in the shape of the new platform, but still technically reside in the legacy world. To expose these "shim plugin" contracts for you to consume in your own plugin's shim, we are creating dedicated exports for the `setup` and `start` contracts, which export APIs in the shape you will receive them in the new platform.
+
+```ts
+import { data as dataSetup } from '../core_plugins/data/public/setup';
+import { embeddables as embeddablesSetup } from '../core_plugins/embeddables/public/setup';
+import { visualizations as visualizationsSetup } from '../core_plugins/visualizations/public/setup';
+```
+
+| Legacy Platform                                        | New Platform                               | Notes                                                                                                                              |
+|--------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `core_plugins/interpreter`                             | `data.expressions`                         | still in progress                                                                                                                  |
+| `import 'ui/apply_filters'`                            | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import 'ui/filter_bar'`                               | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import 'ui/query_bar'`                                | `data.query.loadLegacyDirectives`          | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import 'ui/search_bar'`                               | `data.search.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import { QueryBar } from 'ui/query_bar'`              | `data.query.ui.QueryBar`                   | --                                                                                                                                 |
+| `import { SearchBar } from 'ui/search_bar'`            | `data.search.ui.SearchBar`                 | --                                                                                                                                 |
+| `ui/courier`                                           | `data.search`                              | still in progress                                                                                                                  |
+| `ui/embeddable`                                        | `embeddables`                              | still in progress                                                                                                                  |
+| `ui/filter_manager`                                    | `data.filter`                              | --                                                                                                                                 |
+| `ui/index_patterns`                                    | `data.indexPatterns`                       | still in progress                                                                                                                  |
+| `ui/registry/vis_types`                                | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis`                                               | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis/vis_factory`                                   | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis/vis_filters`                                   | `visualizations.filters`                   | --                                                                                                                                 |
+
+
 #### Server-side
 
+##### Core Services
 In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
 
 | Legacy Platform                                   | New Platform                     | Notes                                              |
