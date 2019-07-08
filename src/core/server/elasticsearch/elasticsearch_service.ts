@@ -49,21 +49,22 @@ export interface ElasticsearchServiceSetup {
    * Create application specific Elasticsearch cluster API client with customized config.
    *
    * @param type Unique identifier of the client
-   * @param config Valid sub-set of default Elasticsearch config.
+   * @param clientConfig A config consists of Elasticsearch JS client options and
+   * valid sub-set of Elasticsearch service config.
    * We fill all the missing properties in the `clientConfig` using the default
    * Elasticsearch config so that we don't depend on default values set and
    * controlled by underlying Elasticsearch JS client.
    * We don't run validation against passed config expect it to be valid.
    *
    * @example
-   * ```
+   * ```js
    * const client = elasticsearch.createCluster('my-app-name', config);
    * const data = await client.callAsInternalUser();
    * ```
    */
   readonly createClient: (
     type: string,
-    config?: Partial<ElasticsearchClientConfig>
+    clientConfig?: Partial<ElasticsearchClientConfig>
   ) => ClusterClient;
   readonly adminClient$: Observable<ClusterClient>;
   readonly dataClient$: Observable<ClusterClient>;
