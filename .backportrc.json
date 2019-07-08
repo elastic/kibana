@@ -1,5 +1,5 @@
 {
   "upstream": "elastic/kibana",
-  "branches": [{ "name": "7.x", "checked": true }, "7.2", "6.8"],
+  "branches": [{ "name": "7.x", "checked": true }, "7.3", "7.2", "6.8"],
   "labels": ["backport"]
 }

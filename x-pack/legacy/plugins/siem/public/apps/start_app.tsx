@@ -22,6 +22,7 @@ import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store/store';
+import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
 export const startApp = async (libs: AppFrontendLibs) => {
   const history = createHashHistory();
@@ -42,7 +43,9 @@ export const startApp = async (libs: AppFrontendLibs) => {
               })}
             >
               <KibanaConfigContext.Provider value={libs.framework}>
-                <PageRouter history={history} />
+                <MlCapabilitiesProvider>
+                  <PageRouter history={history} />
+                </MlCapabilitiesProvider>
               </KibanaConfigContext.Provider>
             </ThemeProvider>
             <ErrorToast />

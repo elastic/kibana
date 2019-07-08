@@ -16,13 +16,9 @@ import {
   loadStructureSuccess,
   openSymbolPath,
   SymbolsPayload,
+  SymbolWithMembers,
 } from '../actions';
 import { languageServerInitializing } from '../actions/language_server';
-
-export interface SymbolWithMembers extends SymbolInformation {
-  members?: SymbolWithMembers[];
-  path?: string;
-}
 
 export interface SymbolState {
   symbols: { [key: string]: SymbolInformation[] };
@@ -42,18 +38,22 @@ const initialState: SymbolState = {
   languageServerInitializing: false,
 };
 
-export const symbol = handleActions(
+type SymbolPayload = string & SymbolsPayload & Error;
+
+export const symbol = handleActions<SymbolState, SymbolPayload>(
   {
-    [String(loadStructure)]: (state: SymbolState, action: Action<any>) =>
+    [String(loadStructure)]: (state, action: Action<string>) =>
       produce<SymbolState>(state, draft => {
         draft.loading = true;
         draft.lastRequestPath = action.payload || '';
       }),
-    [String(loadStructureSuccess)]: (state: SymbolState, action: Action<SymbolsPayload>) =>
-      produce<SymbolState>(state, (draft: SymbolState) => {
+    [String(loadStructureSuccess)]: (state, action: Action<SymbolsPayload>) =>
+      produce<SymbolState>(state, draft => {
         draft.loading = false;
         const { path, data, structureTree } = action.payload!;
+        // @ts-ignore
         draft.structureTree[path] = structureTree;
+        // @ts-ignore
         draft.symbols = {
           ...state.symbols,
           [path]: data,
@@ -61,7 +61,7 @@ export const symbol = handleActions(
         draft.languageServerInitializing = false;
         draft.error = undefined;
       }),
-    [String(loadStructureFailed)]: (state: SymbolState, action: Action<any>) =>
+    [String(loadStructureFailed)]: (state, action: Action<Error>) =>
       produce<SymbolState>(state, draft => {
         if (action.payload) {
           draft.loading = false;
@@ -69,21 +69,22 @@ export const symbol = handleActions(
         }
         draft.languageServerInitializing = false;
       }),
-    [String(closeSymbolPath)]: (state: SymbolState, action: Action<any>) =>
-      produce<SymbolState>(state, (draft: SymbolState) => {
+    [String(closeSymbolPath)]: (state, action: Action<string>) =>
+      produce<SymbolState>(state, draft => {
         const path = action.payload!;
         if (!state.closedPaths.includes(path)) {
+          // @ts-ignore
           draft.closedPaths.push(path);
         }
       }),
-    [String(openSymbolPath)]: (state: SymbolState, action: any) =>
+    [String(openSymbolPath)]: (state, action: Action<string>) =>
       produce<SymbolState>(state, draft => {
         const idx = state.closedPaths.indexOf(action.payload!);
         if (idx >= 0) {
           draft.closedPaths.splice(idx, 1);
         }
       }),
-    [String(languageServerInitializing)]: (state: SymbolState) =>
+    [String(languageServerInitializing)]: state =>
       produce<SymbolState>(state, draft => {
         draft.languageServerInitializing = true;
       }),

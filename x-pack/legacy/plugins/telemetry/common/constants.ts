@@ -75,3 +75,9 @@ export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-pri
  * @type {string}
  */
 export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';
+
+/**
+ * The header sent by telemetry service when hitting Elasticsearch to identify query source
+ * @type {string}
+ */
+export const TELEMETRY_QUERY_SOURCE = 'TELEMETRY';

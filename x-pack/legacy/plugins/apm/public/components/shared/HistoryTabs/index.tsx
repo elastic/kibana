@@ -13,7 +13,8 @@ import { history } from '../../../utils/history';
 export interface IHistoryTab {
   path: string;
   routePath?: string;
-  name: React.ReactNode;
+  title: React.ReactNode;
+  name: string;
   render?: (props: RouteComponentProps) => React.ReactNode;
 }
 
@@ -37,9 +38,9 @@ export function HistoryTabs({ tabs }: HistoryTabsProps) {
           <EuiTab
             onClick={() => history.push({ ...location, pathname: tab.path })}
             isSelected={isTabSelected(tab, location.pathname)}
-            key={`${tab.path}--${i}`}
+            key={tab.name}
           >
-            {tab.name}
+            {tab.title}
           </EuiTab>
         ))}
       </EuiTabs>
@@ -49,7 +50,7 @@ export function HistoryTabs({ tabs }: HistoryTabsProps) {
           <Route
             path={tab.routePath || tab.path}
             render={tab.render}
-            key={tab.path}
+            key={tab.name}
           />
         ) : null
       )}

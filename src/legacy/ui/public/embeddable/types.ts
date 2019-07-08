@@ -23,7 +23,7 @@ import { TimeRange } from 'ui/timefilter/time_history';
 import { Query } from 'src/legacy/core_plugins/data/public';
 
 export interface EmbeddableCustomization {
-  [key: string]: object | string;
+  [key: string]: unknown;
 }
 
 export interface ContainerState {
@@ -65,7 +65,7 @@ export interface EmbeddableState {
    * Any customization data that should be stored at the panel level. For
    * example, pie slice colors, or custom per panel sort order or columns.
    */
-  customization?: object;
+  customization?: { [key: string]: unknown };
   /**
    * A possible filter the embeddable wishes dashboard to apply.
    */

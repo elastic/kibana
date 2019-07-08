@@ -16,13 +16,14 @@ import moment from 'moment';
 import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
-import { JobIcon } from '../job_message_icon';
+import { JobIcon } from '../../../../components/job_message_icon';
 
 import {
   EuiBasicTable,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -102,10 +103,27 @@ class JobsListUI extends Component {
     const { intl, loading } = this.props;
     const selectionControls = {
       selectable: job => (job.deleting !== true),
-      selectableMessage: (selectable) => (!selectable) ? intl.formatMessage({
-        id: 'xpack.ml.jobsList.cannotSelectJobTooltip',
-        defaultMessage: 'Cannot select job' })
-        : undefined,
+      selectableMessage: (selectable, rowItem) => (
+        (selectable === false)
+          ? i18n.translate(
+            'xpack.ml.jobsList.cannotSelectRowForJobMessage',
+            {
+              defaultMessage: 'Cannot select job ID {jobId}',
+              values: {
+                jobId: rowItem.id,
+              }
+            }
+          )
+          : i18n.translate(
+            'xpack.ml.jobsList.selectRowForJobMessage',
+            {
+              defaultMessage: 'Select the row for job ID {jobId}',
+              values: {
+                jobId: rowItem.id,
+              }
+            }
+          )
+      ),
       onSelectionChange: this.props.selectJobChange
     };
 

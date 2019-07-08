@@ -23,7 +23,6 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -391,14 +390,6 @@ export class MapListing extends React.Component {
                 <FormattedMessage
                   id="xpack.maps.mapListing.listingTableTitle"
                   defaultMessage="Maps"
-                />{' '}
-                &nbsp;
-                <EuiBetaBadge
-                  label="Beta"
-                  tooltipContent={i18n.translate('xpack.maps.mapListing.betaMessageBadge', {
-                    defaultMessage:
-                      'Maps is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
-                  })}
                 />
               </h1>
             </EuiTitle>
