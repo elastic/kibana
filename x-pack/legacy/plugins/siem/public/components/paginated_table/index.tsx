@@ -88,6 +88,7 @@ export interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA
   onChange?: (criteria: Criteria) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
+  showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
   totalCount: number;
   updateActivePage: (activePage: number) => void;
@@ -125,6 +126,7 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
     loadPage,
     onChange = noop,
     pageOfItems,
+    showMorePagesIndicator,
     sorting = null,
     totalCount,
     updateActivePage,
@@ -200,6 +202,7 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
           {item.text}
         </EuiContextMenuItem>
       ));
+    const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
     return (
       <EuiPanel
         data-test-subj={dataTestSubj}
@@ -274,14 +277,14 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
                   justifyContent="flexEnd"
                   direction="row"
                 >
-                  <EuiFlexItem grow={false}>
+                  <PaginationWrapper grow={false}>
                     <EuiPagination
                       data-test-subj="numberedPagination"
                       pageCount={pageCount}
                       activePage={activePage}
                       onPageClick={goToPage}
                     />
-                  </EuiFlexItem>
+                  </PaginationWrapper>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -326,5 +329,19 @@ const BasicTable = styled(EuiBasicTable)`
     td {
       vertical-align: top;
     }
+  }
+`;
+
+const PaginationEuiFlexItem = styled(EuiFlexItem)`
+  button.euiButtonIcon.euiButtonIcon--text {
+    margin-left: 20px;
+  }
+  .euiPagination::before {
+    content: '...';
+    bottom: 13px;
+    color: #c2c3c6;
+    font-size: 14px;
+    position: absolute;
+    right: 30px;
   }
 `;

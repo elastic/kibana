@@ -325,6 +325,8 @@ export interface PageInfoPaginated {
   activePage: number;
 
   fakeTotalCount: number;
+
+  showMorePagesIndicator: boolean;
 }
 
 export interface Inspect {
@@ -2297,6 +2299,8 @@ export namespace GetAuthenticationsQuery {
     activePage: number;
 
     fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {

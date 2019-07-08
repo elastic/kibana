@@ -11,7 +11,11 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
+import {
+  AuthenticationsEdges,
+  GetAuthenticationsQuery,
+  PageInfoPaginated,
+} from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
@@ -26,7 +30,7 @@ export interface AuthenticationArgs {
   inspect: inputsModel.InspectQuery;
   authentications: AuthenticationsEdges[];
   totalCount: number;
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   refetch: inputsModel.Refetch;

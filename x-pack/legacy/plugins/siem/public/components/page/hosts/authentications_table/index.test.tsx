@@ -39,6 +39,11 @@ describe('Authentication Table Component', () => {
             id="authentication"
             loading={false}
             loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.Authentications.pageInfo
+            )}
             totalCount={mockData.Authentications.totalCount}
             type={hostsModel.HostsType.page}
           />

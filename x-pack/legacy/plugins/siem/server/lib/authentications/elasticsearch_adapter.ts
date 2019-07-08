@@ -58,6 +58,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
     return {
       inspect,
       edges,
@@ -65,6 +66,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       pageInfo: {
         activePage: activePage ? activePage : 0,
         fakeTotalCount,
+        showMorePagesIndicator,
       },
     };
   }

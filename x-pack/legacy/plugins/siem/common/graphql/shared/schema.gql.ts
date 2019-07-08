@@ -76,5 +76,6 @@ export const sharedSchema = gql`
   type PageInfoPaginated {
     activePage: Float!
     fakeTotalCount: Float!
+    showMorePagesIndicator: Boolean!
   }
 `;

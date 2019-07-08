@@ -164,6 +164,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                           loading={loading}
                           loadPage={loadPage}
                           refetch={refetch}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           setQuery={setQuery}
                           totalCount={totalCount}
                           type={hostsModel.HostsType.page}

@@ -181,6 +181,11 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             loading={loading}
                             loadPage={loadPage}
                             refetch={refetch}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             setQuery={setQuery}
                             totalCount={totalCount}
                             type={type}

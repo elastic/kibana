@@ -60,6 +60,7 @@ export const authenticationsQuery = gql`
         pageInfo {
           activePage
           fakeTotalCount
+          showMorePagesIndicator
         }
         inspect @include(if: $inspect) {
           dsl

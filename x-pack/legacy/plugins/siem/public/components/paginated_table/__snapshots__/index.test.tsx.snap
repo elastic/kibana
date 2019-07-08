@@ -99,6 +99,7 @@ exports[`Load More Table Component rendering it renders the default load more ta
       },
     ]
   }
+  showMorePagesIndicator={true}
   totalCount={10}
   updateActivePage={[Function]}
   updateLimitPagination={[Function]}

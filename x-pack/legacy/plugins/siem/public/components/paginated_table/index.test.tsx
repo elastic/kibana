@@ -49,6 +49,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -75,6 +76,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={[]}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -103,6 +105,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -129,6 +132,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -165,6 +169,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -195,6 +200,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -223,6 +229,7 @@ describe('Load More Table Component', () => {
             loadPage={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
@@ -252,6 +259,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -281,6 +289,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -319,6 +328,7 @@ describe('Load More Table Component', () => {
         loadingTitle: 'Hosts',
         loadPage: newActivePage => loadPage(newActivePage),
         pageOfItems: mockData.Hosts.edges,
+        showMorePagesIndicator: true,
         totalCount: 10,
         updateActivePage: activePage => updateActivePage(activePage),
         updateLimitPagination: limit => updateLimitPagination({ limit }),
@@ -363,6 +373,7 @@ describe('Load More Table Component', () => {
             loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -400,6 +411,7 @@ describe('Load More Table Component', () => {
             loadPage={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
