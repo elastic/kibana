@@ -17,13 +17,7 @@
  * under the License.
  */
 
-export type CloseHandler = (() => void) | undefined;
-
-export type TopNavMenuAction = (
-  menuItem: any,
-  navController: any,
-  anchorElement: any
-) => CloseHandler;
+export type TopNavMenuAction = (menuItem: any, navController: any, anchorElement: any) => void;
 
 export interface TopNavMenuData {
   key: string;

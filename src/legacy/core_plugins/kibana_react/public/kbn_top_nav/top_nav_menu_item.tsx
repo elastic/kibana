@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
@@ -39,6 +40,7 @@ export function TopNavMenuItem(props: Props) {
   }
 
   function handleClick(e: MouseEvent) {
+    if (isDisabled()) return;
     props.onClick(menuData.key, menuData.run, e.currentTarget);
   }
 

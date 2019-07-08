@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TopNavMenu Should render and click an item 1`] = `
+<EuiButtonEmpty
+  color="primary"
+  iconSide="left"
+  isDisabled={false}
+  onClick={[Function]}
+  size="xs"
+  type="button"
+>
+  Test
+</EuiButtonEmpty>
+`;
+
+exports[`TopNavMenu Should render disabled item and it shouldnt be clickable 1`] = `
+<EuiButtonEmpty
+  color="primary"
+  iconSide="left"
+  isDisabled={true}
+  onClick={[Function]}
+  size="xs"
+  type="button"
+>
+  Test
+</EuiButtonEmpty>
+`;
+
+exports[`TopNavMenu Should render item with all attributes 1`] = `
+<EuiButtonEmpty
+  color="primary"
+  data-test-subj="test-class-name"
+  iconSide="left"
+  isDisabled={false}
+  onClick={[Function]}
+  size="xs"
+  type="button"
+>
+  Test
+</EuiButtonEmpty>
+`;
+
+exports[`TopNavMenu Should render item with disable function and it shouldnt be clickable 1`] = `
+<EuiButtonEmpty
+  color="primary"
+  iconSide="left"
+  isDisabled={true}
+  onClick={[Function]}
+  size="xs"
+  type="button"
+>
+  Test
+</EuiButtonEmpty>
+`;
