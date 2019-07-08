@@ -40,10 +40,8 @@ const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
   const conf = Object.assign(
     {
       updateInterval: 0,
-      timeoutThreshold: 0,
       port: 0,
       maxRetry: 1,
-      requestBackoff: 0,
       cert: '',
       key: '',
       ca: '',
