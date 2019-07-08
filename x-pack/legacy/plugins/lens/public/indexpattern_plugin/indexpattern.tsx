@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import uuid from 'uuid';
-import { I18nProvider } from '@kbn/i18n/target/types/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
