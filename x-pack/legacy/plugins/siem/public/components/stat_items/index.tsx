@@ -141,25 +141,22 @@ export const useKpiMatrixStatus = (
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
-  useEffect(
-    () => {
-      setStatItemsProps(
-        mappings.map(stat => {
-          return {
-            ...stat,
-            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
-            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
-            fields: addValueToFields(stat.fields, data),
-            id,
-            key: `kpi-summary-${stat.key}`,
-            from,
-            to,
-          };
-        })
-      );
-    },
-    [data]
-  );
+  useEffect(() => {
+    setStatItemsProps(
+      mappings.map(stat => {
+        return {
+          ...stat,
+          areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
+          barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
+          fields: addValueToFields(stat.fields, data),
+          id,
+          key: `kpi-summary-${stat.key}`,
+          from,
+          to,
+        };
+      })
+    );
+  }, [data]);
 
   return statItemsProps;
 };

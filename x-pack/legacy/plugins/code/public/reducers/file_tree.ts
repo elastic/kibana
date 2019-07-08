@@ -63,6 +63,7 @@ export interface FileTreeState {
   fileTreeLoadingPaths: string[];
   // store not found directory as an array to calculate `notFound` flag by finding whether path is in this array
   notFoundDirs: string[];
+  revision: string;
 }
 
 const initialState: FileTreeState = {
@@ -74,6 +75,7 @@ const initialState: FileTreeState = {
   openedPaths: [],
   fileTreeLoadingPaths: [''],
   notFoundDirs: [],
+  revision: '',
 };
 
 type FileTreePayload = FetchRepoTreePayload & RepoTreePayload & FileTree & string;
@@ -86,6 +88,7 @@ export const fileTree = handleActions<FileTreeState, FileTreePayload>(
       }),
     [String(fetchRepoTreeSuccess)]: (state, action: Action<RepoTreePayload>) =>
       produce<FileTreeState>(state, draft => {
+        draft.revision = action.payload!.revision;
         draft.notFoundDirs = draft.notFoundDirs.filter(dir => dir !== action.payload!.path);
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(
           p => p !== action.payload!.path && p !== ''
@@ -108,10 +111,14 @@ export const fileTree = handleActions<FileTreeState, FileTreePayload>(
           }
         }
       }),
-    [String(fetchRootRepoTreeSuccess)]: (state, action: Action<FileTree>) =>
+    [String(fetchRootRepoTreeSuccess)]: (
+      state,
+      action: Action<{ revision: string; tree: FileTree }>
+    ) =>
       produce<FileTreeState>(state, draft => {
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(p => p !== '/' && p !== '');
-        draft.tree = mergeNode(draft.tree, action.payload!);
+        draft.tree = mergeNode(draft.tree, action.payload!.tree);
+        draft.revision = action.payload!.revision;
       }),
     [String(fetchRootRepoTreeFailed)]: state =>
       produce<FileTreeState>(state, draft => {

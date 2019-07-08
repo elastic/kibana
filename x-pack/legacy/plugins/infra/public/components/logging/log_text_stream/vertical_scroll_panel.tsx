@@ -16,15 +16,13 @@ interface VerticalScrollPanelProps<Child> {
   children?: (
     registerChild: (key: Child, element: MeasurableChild | null) => void
   ) => React.ReactNode;
-  onVisibleChildrenChange?: (
-    visibleChildren: {
-      topChild: Child;
-      middleChild: Child;
-      bottomChild: Child;
-      pagesAbove: number;
-      pagesBelow: number;
-    }
-  ) => void;
+  onVisibleChildrenChange?: (visibleChildren: {
+    topChild: Child;
+    middleChild: Child;
+    bottomChild: Child;
+    pagesAbove: number;
+    pagesBelow: number;
+  }) => void;
   target: Child | undefined;
   height: number;
   width: number;

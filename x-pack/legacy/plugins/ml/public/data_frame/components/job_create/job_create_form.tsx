@@ -75,12 +75,9 @@ export const JobCreateForm: SFC<Props> = React.memo(
       return null;
     }
 
-    useEffect(
-      () => {
-        onChange({ created, started, indexPatternId });
-      },
-      [created, started, indexPatternId]
-    );
+    useEffect(() => {
+      onChange({ created, started, indexPatternId });
+    }, [created, started, indexPatternId]);
 
     async function createDataFrame() {
       setCreated(true);
