@@ -117,9 +117,192 @@ exports[`EmptyState component does not render empty state with appropriate base 
   }
   loading={false}
 >
-  <div>
-    If this is in the snapshot the test should fail
-  </div>
+  <DataMissing
+    basePath="foo"
+    headingMessage="No uptime data found"
+  >
+    <EuiFlexGroup
+      justifyContent="center"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <EuiSpacer
+              size="xs"
+            >
+              <div
+                className="euiSpacer euiSpacer--xs"
+              />
+            </EuiSpacer>
+            <EuiPanel
+              grow={true}
+              hasShadow={false}
+              paddingSize="m"
+            >
+              <div
+                className="euiPanel euiPanel--paddingMedium"
+              >
+                <EuiEmptyPrompt
+                  body={
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
+                        id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                        values={
+                          Object {
+                            "configureHeartbeatLink": <EuiLink
+                              color="primary"
+                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                              target="_blank"
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Configure Heartbeat"
+                                id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                values={Object {}}
+                              />
+                            </EuiLink>,
+                          }
+                        }
+                      />
+                    </p>
+                  }
+                  iconColor="subdued"
+                  iconType="uptimeApp"
+                  title={
+                    <EuiTitle
+                      size="l"
+                    >
+                      <h3>
+                        No uptime data found
+                      </h3>
+                    </EuiTitle>
+                  }
+                >
+                  <div
+                    className="euiEmptyPrompt"
+                  >
+                    <EuiIcon
+                      color="subdued"
+                      size="xxl"
+                      type="uptimeApp"
+                    >
+                      <EuiIconEmpty
+                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                        focusable="false"
+                        style={null}
+                      >
+                        <svg
+                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                          focusable="false"
+                          height={16}
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                      </EuiIconEmpty>
+                    </EuiIcon>
+                    <EuiSpacer
+                      size="s"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--s"
+                      />
+                    </EuiSpacer>
+                    <EuiTextColor
+                      color="subdued"
+                    >
+                      <span
+                        className="euiTextColor euiTextColor--subdued"
+                      >
+                        <EuiTitle>
+                          <EuiTitle
+                            className="euiTitle euiTitle--medium"
+                            size="l"
+                          >
+                            <h3
+                              className="euiTitle euiTitle--large euiTitle euiTitle--medium"
+                            >
+                              No uptime data found
+                            </h3>
+                          </EuiTitle>
+                        </EuiTitle>
+                        <EuiSpacer
+                          size="m"
+                        >
+                          <div
+                            className="euiSpacer euiSpacer--m"
+                          />
+                        </EuiSpacer>
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
+                          >
+                            <p>
+                              <FormattedMessage
+                                defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
+                                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                                values={
+                                  Object {
+                                    "configureHeartbeatLink": <EuiLink
+                                      color="primary"
+                                      href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                      target="_blank"
+                                      type="button"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Configure Heartbeat"
+                                        id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                        values={Object {}}
+                                      />
+                                    </EuiLink>,
+                                  }
+                                }
+                              >
+                                <EuiLink
+                                  color="primary"
+                                  href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                  target="_blank"
+                                  type="button"
+                                >
+                                  <a
+                                    className="euiLink euiLink--primary"
+                                    href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                    rel="noopener noreferrer"
+                                    target="_blank"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="Configure Heartbeat"
+                                      id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                      values={Object {}}
+                                    >
+                                      Configure Heartbeat
+                                    </FormattedMessage>
+                                  </a>
+                                </EuiLink>
+                                 to start collecting uptime data.
+                              </FormattedMessage>
+                            </p>
+                          </div>
+                        </EuiText>
+                      </span>
+                    </EuiTextColor>
+                  </div>
+                </EuiEmptyPrompt>
+              </div>
+            </EuiPanel>
+          </div>
+        </EuiFlexItem>
+      </div>
+    </EuiFlexGroup>
+  </DataMissing>
 </EmptyStateComponent>
 `;
 
@@ -736,8 +919,21 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
   loading={false}
 >
   <EmptyStateError
-    errorMessage="Error: An error occurred
-"
+    errors={
+      Array [
+        Object {
+          "extensions": undefined,
+          "locations": undefined,
+          "message": "An error occurred",
+          "name": "foo",
+          "nodes": undefined,
+          "originalError": undefined,
+          "path": undefined,
+          "positions": undefined,
+          "source": undefined,
+        },
+      ]
+    }
   >
     <EuiPanel
       grow={true}
@@ -749,10 +945,11 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
       >
         <EuiEmptyPrompt
           body={
-            <p>
-              Error: An error occurred
-
-            </p>
+            <React.Fragment>
+              <p>
+                An error occurred
+              </p>
+            </React.Fragment>
           }
           iconColor="subdued"
           title={
@@ -797,9 +994,10 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                   <div
                     className="euiText euiText--medium"
                   >
-                    <p>
-                      Error: An error occurred
-
+                    <p
+                      key="An error occurred"
+                    >
+                      An error occurred
                     </p>
                   </div>
                 </EuiText>
