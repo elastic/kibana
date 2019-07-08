@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// Note: note importing from ui/indices as the Type definition don't exist
+// Note: we can't import from "ui/indices" as the TS Type definition don't exist
 // import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { ValidationFunc } from '../hook_form_lib';
 import { startsWith, containsChars } from '../../validators/string';
