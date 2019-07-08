@@ -18,10 +18,11 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { pluck, get, clone, isString } from 'lodash';
+import { pluck, get, clone } from 'lodash';
 import { relativeOptions } from '../../../../../ui/public/timepicker/relative_options';
 
-import { GTE_INTERVAL_RE, INTERVAL_STRING_RE } from '../../../common/interval_regexp';
+import { GTE_INTERVAL_RE } from '../../../common/interval_regexp';
+import { parseEsInterval } from '../../../../data/common/parse_es_interval';
 
 export const AUTO_INTERVAL = 'auto';
 
@@ -50,13 +51,22 @@ export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true)
     }
   }
 };
-export const isGteInterval = interval => GTE_INTERVAL_RE.test(interval);
 
-export const isIntervalValid = interval => {
-  return (
-    isString(interval) &&
-    (interval === AUTO_INTERVAL || INTERVAL_STRING_RE.test(interval) || isGteInterval(interval))
-  );
+export const isGteInterval = interval => GTE_INTERVAL_RE.test(interval);
+export const isAutoInterval = interval => !interval || interval === AUTO_INTERVAL;
+
+export const validateReInterval = intervalValue => {
+  const validationResult = {};
+
+  try {
+    parseEsInterval(intervalValue);
+  } catch ({ message }) {
+    validationResult.errorMessage = message;
+  } finally {
+    validationResult.isValid = !validationResult.errorMessage;
+  }
+
+  return validationResult;
 };
 
 export const getInterval = (visData, model) => {

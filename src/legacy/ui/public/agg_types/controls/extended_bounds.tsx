@@ -75,7 +75,12 @@ function ExtendedBoundsParamEditor({
   };
 
   return (
-    <EuiFormRow fullWidth={true} isInvalid={showValidation ? !isValid : false} error={error}>
+    <EuiFormRow
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      error={error}
+      compressed
+    >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldNumber
@@ -90,6 +95,7 @@ function ExtendedBoundsParamEditor({
                 <strong>{minLabel}</strong>
               </EuiText>
             }
+            compressed
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -105,6 +111,7 @@ function ExtendedBoundsParamEditor({
                 <strong>{maxLabel}</strong>
               </EuiText>
             }
+            compressed
           />
         </EuiFlexItem>
       </EuiFlexGroup>
