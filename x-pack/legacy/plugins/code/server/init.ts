@@ -34,6 +34,7 @@ import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
 import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
 import { checkCodeNode, checkRoute } from './routes/check';
+import { statusRoute } from './routes/status';
 
 async function retryUntilAvailable<T>(
   func: () => Promise<T>,
@@ -255,6 +256,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   installRoute(codeServerRouter, lspService);
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
+  statusRoute(codeServerRouter, gitOps, lspService);
 
   server.events.on('stop', () => {
     gitOps.cleanAllRepo();

@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_KIBANA, INDEX_PATTERN_BEATS, INDEX_PATTERN_LOGSTASH } from '../../../../monitoring/common/constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, APM_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../common/constants';
+import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, APM_SYSTEM_ID, LOGSTASH_SYSTEM_ID, TELEMETRY_QUERY_SOURCE } from '../../../common/constants';
 
 /**
  * Update a counter associated with the {@code key}.
@@ -206,6 +206,9 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
   const params = {
     index: getIndexPatternForStackProduct(product),
     size: config.get('xpack.monitoring.max_bucket_size'),
+    headers: {
+      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
+    },
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useEffect, useState } from 'react';
+import React, { SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
 import { JobId, moveToDataFrameWizard, useRefreshTransformList } from '../../../../common';
+import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
@@ -43,15 +44,14 @@ export const DataFrameJobList: SFC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>(DataFrameJobListColumn.id);
   const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const disabled =
+    !checkPermission('canCreateDataFrameJob') ||
+    !checkPermission('canPreviewDataFrameJob') ||
+    !checkPermission('canStartStopDataFrameJob');
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
   // Subscribe to the refresh observable to trigger reloading the jobs list.
-  const { isRefresh } = useRefreshTransformList();
-  useEffect(() => {
-    if (isRefresh) {
-      getJobs(true);
-    }
-  });
+  useRefreshTransformList({ onRefresh: () => getJobs(true) });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
 
@@ -66,7 +66,7 @@ export const DataFrameJobList: SFC = () => {
           </h2>
         }
         actions={[
-          <EuiButtonEmpty onClick={moveToDataFrameWizard}>
+          <EuiButtonEmpty onClick={moveToDataFrameWizard} isDisabled={disabled}>
             {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
               defaultMessage: 'Create your first data frame transform',
             })}
@@ -114,6 +114,7 @@ export const DataFrameJobList: SFC = () => {
 
   return (
     <TransformTable
+      className="mlTransformTable"
       columns={columns}
       hasActions={false}
       isExpandable={true}
