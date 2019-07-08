@@ -11,84 +11,96 @@ import { TimeKey } from '../../../../common/time';
 import { getLogEntryIndexAtTime } from '../../../utils/log_entry';
 import { LogEntryHighlights } from './data_fetching';
 
-export const useNextAndPrevious = (
-  visibleMidpoint: TimeKey | null,
-  logEntryHighlights: LogEntryHighlights | undefined,
-  highlightTerms: string[]
-) => {
-  const [shouldJumpToHighlight, setShouldJumpToHighlight] = useState<boolean>(false);
+export const useNextAndPrevious = ({
+  highlightTerms,
+  jumpToTarget,
+  logEntryHighlights,
+  visibleMidpoint,
+}: {
+  highlightTerms: string[];
+  jumpToTarget: (target: TimeKey) => void;
+  logEntryHighlights: LogEntryHighlights | undefined;
+  visibleMidpoint: TimeKey | null;
+}) => {
   const [currentTimeKey, setCurrentTimeKey] = useState<TimeKey | null>(null);
+
+  const entries = useMemo(
+    // simplification, because we only support one highlight phrase for now
+    () =>
+      logEntryHighlights && logEntryHighlights.length > 0 ? logEntryHighlights[0].entries : [],
+    [logEntryHighlights]
+  );
 
   useEffect(
     () => {
-      setShouldJumpToHighlight(true);
+      setCurrentTimeKey(null);
     },
     [highlightTerms]
   );
 
   useEffect(
     () => {
-      if (shouldJumpToHighlight && logEntryHighlights) {
-        setShouldJumpToHighlight(false);
-        if (logEntryHighlights.length) {
-          const entryTimeKey = logEntryHighlights[0].entries[0].key;
-          setCurrentTimeKey(entryTimeKey);
-        }
+      if (currentTimeKey) {
+        jumpToTarget(currentTimeKey);
       }
     },
-    [shouldJumpToHighlight, setShouldJumpToHighlight, logEntryHighlights, setCurrentTimeKey]
+    [currentTimeKey, jumpToTarget]
+  );
+
+  useEffect(
+    () => {
+      if (currentTimeKey === null && entries.length > 0) {
+        const initialTimeKey = entries[0].key;
+        setCurrentTimeKey(initialTimeKey);
+      }
+    },
+    [currentTimeKey, entries, setCurrentTimeKey]
   );
 
   const indexOfCurrentTimeKey = useMemo(
     () => {
-      if (currentTimeKey && logEntryHighlights && logEntryHighlights.length) {
-        return getLogEntryIndexAtTime(logEntryHighlights[0].entries, currentTimeKey);
+      if (currentTimeKey && entries.length > 0) {
+        return getLogEntryIndexAtTime(entries, currentTimeKey);
       } else {
         return null;
       }
     },
-    [currentTimeKey, logEntryHighlights]
+    [currentTimeKey, entries]
   );
 
   const hasPreviousHighlight = useMemo(
-    () => {
-      return isNumber(indexOfCurrentTimeKey) && indexOfCurrentTimeKey !== 0;
-    },
+    () => isNumber(indexOfCurrentTimeKey) && indexOfCurrentTimeKey > 0,
     [indexOfCurrentTimeKey]
   );
 
   const hasNextHighlight = useMemo(
-    () => {
-      return (
-        !!logEntryHighlights &&
-        logEntryHighlights.length > 0 &&
-        isNumber(indexOfCurrentTimeKey) &&
-        indexOfCurrentTimeKey !== logEntryHighlights[0].entries.length - 1
-      );
-    },
-    [indexOfCurrentTimeKey, logEntryHighlights]
+    () =>
+      entries.length > 0 &&
+      isNumber(indexOfCurrentTimeKey) &&
+      indexOfCurrentTimeKey < entries.length - 1,
+    [indexOfCurrentTimeKey, entries]
   );
 
   const goToPreviousHighlight = useCallback(
     () => {
-      if (logEntryHighlights && logEntryHighlights.length > 0 && isNumber(indexOfCurrentTimeKey)) {
+      if (entries.length && isNumber(indexOfCurrentTimeKey)) {
         const previousIndex = indexOfCurrentTimeKey - 1;
-        const entryTimeKey = logEntryHighlights[0].entries[previousIndex].key;
+        const entryTimeKey = entries[previousIndex].key;
         setCurrentTimeKey(entryTimeKey);
       }
     },
-    [indexOfCurrentTimeKey, logEntryHighlights]
+    [indexOfCurrentTimeKey, entries]
   );
 
   const goToNextHighlight = useCallback(
     () => {
-      if (logEntryHighlights && logEntryHighlights.length > 0 && isNumber(indexOfCurrentTimeKey)) {
+      if (entries.length > 0 && isNumber(indexOfCurrentTimeKey)) {
         const nextIndex = indexOfCurrentTimeKey + 1;
-        const entryTimeKey = logEntryHighlights[0].entries[nextIndex].key;
+        const entryTimeKey = entries[nextIndex].key;
         setCurrentTimeKey(entryTimeKey);
       }
     },
-    [indexOfCurrentTimeKey, logEntryHighlights]
+    [indexOfCurrentTimeKey, entries]
   );
 
   return {
@@ -96,6 +108,8 @@ export const useNextAndPrevious = (
     hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
-    currentTimeKey,
   };
 };
+
+const clampValue = (value: number, minValue: number, maxValue: number) =>
+  Math.min(Math.max(value, minValue), maxValue);

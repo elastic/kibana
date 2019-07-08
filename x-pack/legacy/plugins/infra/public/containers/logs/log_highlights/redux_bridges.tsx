@@ -37,7 +37,7 @@ export const LogHighlightsPositionBridge = withLogPosition(
     visibleMidpoint: TimeKey | null;
     jumpToTargetPosition: (target: TimeKey) => void;
   }) => {
-    const { setVisibleMidpoint, currentTimeKey } = useContext(LogHighlightsState.Context);
+    const { setJumpToTarget, setVisibleMidpoint } = useContext(LogHighlightsState.Context);
     useEffect(
       () => {
         setVisibleMidpoint(visibleMidpoint);
@@ -47,11 +47,9 @@ export const LogHighlightsPositionBridge = withLogPosition(
 
     useEffect(
       () => {
-        if (currentTimeKey) {
-          jumpToTargetPosition(currentTimeKey);
-        }
+        setJumpToTarget(() => jumpToTargetPosition);
       },
-      [currentTimeKey]
+      [jumpToTargetPosition]
     );
 
     return null;

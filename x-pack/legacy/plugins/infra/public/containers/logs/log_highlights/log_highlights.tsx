@@ -29,6 +29,8 @@ export const useLogHighlightsState = ({
     setEndKey,
     setFilterQuery,
     setVisibleMidpoint,
+    jumpToTarget,
+    setJumpToTarget,
   } = useReduxBridgeSetters();
 
   const {
@@ -42,8 +44,12 @@ export const useLogHighlightsState = ({
     hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
-    currentTimeKey,
-  } = useNextAndPrevious(visibleMidpoint, logEntryHighlights, highlightTerms);
+  } = useNextAndPrevious({
+    visibleMidpoint,
+    logEntryHighlights,
+    highlightTerms,
+    jumpToTarget,
+  });
 
   return {
     highlightTerms,
@@ -59,7 +65,7 @@ export const useLogHighlightsState = ({
     hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
-    currentTimeKey,
+    setJumpToTarget,
   };
 };
 
