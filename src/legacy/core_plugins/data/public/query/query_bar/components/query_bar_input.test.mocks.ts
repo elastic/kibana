@@ -42,6 +42,16 @@ const mockChromeFactory = jest.fn(() => {
       return {
         get: (key: string) => {
           switch (key) {
+            case 'timepicker:quickRanges':
+              return [
+                {
+                  from: 'now/d',
+                  to: 'now/d',
+                  display: 'Today',
+                },
+              ];
+            case 'dateFormat':
+              return 'YY';
             case 'history:limit':
               return 10;
             default:

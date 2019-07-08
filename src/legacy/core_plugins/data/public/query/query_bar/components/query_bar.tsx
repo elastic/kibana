@@ -287,7 +287,9 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private shouldRenderDatePicker() {
-    return this.props.showDatePicker || this.props.showAutoRefreshOnly;
+    return (
+      (this.props.showDatePicker && this.props.dateRangeFrom) || this.props.showAutoRefreshOnly
+    );
   }
 
   private renderUpdateButton() {

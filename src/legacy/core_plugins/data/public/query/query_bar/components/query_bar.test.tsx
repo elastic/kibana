@@ -66,6 +66,8 @@ const mockIndexPattern = {
 };
 
 describe('QueryBar', () => {
+  const QUERY_BAR_SELECTOR = 'InjectIntl(QueryBarInputUI)';
+  const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -101,5 +103,107 @@ describe('QueryBar', () => {
     );
 
     expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
+  });
+
+  it('Should render empty', () => {
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
+        onSubmit={noop}
+        appName={'discover'}
+        screenTitle={'Another Screen'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        intl={null as any}
+      />
+    );
+
+    expect(component.find(QUERY_BAR_SELECTOR).length).toBe(0);
+  });
+
+  it('Should render query input bar', () => {
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
+        query={kqlQuery}
+        onSubmit={noop}
+        appName={'discover'}
+        screenTitle={'Another Screen'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        intl={null as any}
+      />
+    );
+
+    expect(component.find(QUERY_BAR_SELECTOR).length).toBe(1);
+  });
+
+  it('Should NOT render query input bar if disabled', () => {
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
+        query={kqlQuery}
+        onSubmit={noop}
+        appName={'discover'}
+        screenTitle={'Another Screen'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        intl={null as any}
+        showQueryInput={false}
+      />
+    );
+
+    expect(component.find(QUERY_BAR_SELECTOR).length).toBe(0);
+  });
+
+  it('Should NOT render timepicker, if options not provided', () => {
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
+        onSubmit={noop}
+        appName={'discover'}
+        screenTitle={'Another Screen'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        intl={null as any}
+        showDatePicker={true}
+      />
+    );
+
+    expect(component.find(QUERY_BAR_SELECTOR).length).toBe(0);
+    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
+  });
+
+  it('Should NOT render timepicker, if options are provided, but showDatePicker is not specified', () => {
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
+        onSubmit={noop}
+        appName={'discover'}
+        screenTitle={'Another Screen'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        intl={null as any}
+        dateRangeFrom={'now-7d'}
+        dateRangeTo={'now'}
+      />
+    );
+
+    expect(component.find(QUERY_BAR_SELECTOR).length).toBe(0);
+    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
+  });
+
+  it('Should render timepicker', () => {
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
+        onSubmit={noop}
+        appName={'discover'}
+        screenTitle={'Another Screen'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        intl={null as any}
+        showDatePicker={true}
+        dateRangeFrom={'now-7d'}
+        dateRangeTo={'now'}
+      />
+    );
+
+    expect(component.find(QUERY_BAR_SELECTOR).length).toBe(0);
+    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 });
