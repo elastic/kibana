@@ -48,17 +48,6 @@ export const getAnomaliesNetworkTableColumns = (
       }),
   },
   {
-    name: i18n.SCORE,
-    field: 'anomaly.severity',
-    sortable: true,
-    render: (_, anomaliesByNetwork) => (
-      <DraggableScore
-        id={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
-        score={anomaliesByNetwork.anomaly}
-      />
-    ),
-  },
-  {
     name: i18n.DETECTOR,
     field: 'anomaly.jobId',
     sortable: true,
@@ -69,6 +58,17 @@ export const getAnomaliesNetworkTableColumns = (
       >
         {jobId}
       </EuiLink>
+    ),
+  },
+  {
+    name: i18n.SCORE,
+    field: 'anomaly.severity',
+    sortable: true,
+    render: (_, anomaliesByNetwork) => (
+      <DraggableScore
+        id={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
+        score={anomaliesByNetwork.anomaly}
+      />
     ),
   },
   {

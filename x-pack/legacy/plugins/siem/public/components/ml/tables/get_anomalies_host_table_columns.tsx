@@ -50,17 +50,6 @@ export const getAnomaliesHostTableColumns = (
       }),
   },
   {
-    name: i18n.SCORE,
-    field: 'anomaly.severity',
-    sortable: true,
-    render: (_, anomaliesByHost) => (
-      <DraggableScore
-        id={`anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`}
-        score={anomaliesByHost.anomaly}
-      />
-    ),
-  },
-  {
     name: i18n.DETECTOR,
     field: 'anomaly.jobId',
     sortable: true,
@@ -71,6 +60,17 @@ export const getAnomaliesHostTableColumns = (
       >
         {jobId}
       </EuiLink>
+    ),
+  },
+  {
+    name: i18n.SCORE,
+    field: 'anomaly.severity',
+    sortable: true,
+    render: (_, anomaliesByHost) => (
+      <DraggableScore
+        id={`anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`}
+        score={anomaliesByHost.anomaly}
+      />
     ),
   },
   {
