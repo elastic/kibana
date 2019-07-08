@@ -61,23 +61,21 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   const lazyScroll = () => {
     if (scrollContainer) {
       const nearBottom =
-        scrollContainer.scrollTop + scrollContainer.clientHeight > scrollContainer.scrollHeight * 0.9;
+        scrollContainer.scrollTop + scrollContainer.clientHeight >
+        scrollContainer.scrollHeight * 0.9;
       if (nearBottom) {
         setPageSize(Math.min(pageSize * 1.5, allFields.length));
       }
     }
   };
 
-  useEffect(
-    () => {
-      if (scrollContainer) {
-        scrollContainer.scrollTop = 0;
-        setPageSize(PAGINATION_SIZE);
-        lazyScroll();
-      }
-    },
-    [nameFilter, typeFilter, props.state.currentIndexPatternId]
-  );
+  useEffect(() => {
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0;
+      setPageSize(PAGINATION_SIZE);
+      lazyScroll();
+    }
+  }, [nameFilter, typeFilter, props.state.currentIndexPatternId]);
 
   if (Object.keys(props.state.indexPatterns).length === 0) {
     return (
@@ -180,7 +178,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="m">
+          <EuiFlexGroup gutterSize="m" className="lnsIndexPatternDataPanel__filter-wrapper">
             <EuiFlexItem grow={true}>
               <EuiFieldSearch
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {

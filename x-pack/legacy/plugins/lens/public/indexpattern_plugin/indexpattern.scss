@@ -25,16 +25,24 @@
   padding: $euiSize $euiSize 0;
 }
 
+.lnsIndexPatternDataPanel__filter-wrapper {
+  flex: 0 0 auto;
+}
+
 .lnsFieldListPanel__list {
   @include euiOverflowShadow($euiPageBackgroundColor);
-  height: 100%;
   margin-top: 2px; // form control shadow
+  flex: 1 0 auto;
 }
 
 .lnsFieldListPanel__overflow {
   padding-top: $euiSizeS;
-  height: 100%;
   overflow: visible auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   @include euiScrollBar;
 }
 
