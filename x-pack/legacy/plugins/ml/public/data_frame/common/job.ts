@@ -22,7 +22,7 @@ export interface DataFrameJob {
     index: IndexName;
   };
   source: {
-    index: IndexPattern;
+    index: IndexPattern[];
   };
   sync?: {
     time: {
