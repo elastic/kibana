@@ -5,9 +5,15 @@
  */
 
 import path from 'path';
+import moment from 'moment';
+import 'moment-timezone';
+
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
+
+// Set our default timezone to UTC for tests so we can generate predictable snapshots
+moment.tz.setDefault('UTC');
 
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
@@ -30,7 +36,7 @@ jest.mock('@elastic/datemath', () => {
   return {
     parse: (d, opts) => {
       const dateMath = jest.requireActual('@elastic/datemath'); 
-      return dateMath.parse(d, {...opts, forceNow: new Date('June 1, 2019')});
+      return dateMath.parse(d, {...opts, forceNow: new Date(Date.UTC(2019, 5, 1))}); // June 1 2019
     }
   }
 });
