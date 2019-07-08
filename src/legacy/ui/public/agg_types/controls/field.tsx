@@ -61,11 +61,7 @@ function FieldParamEditor({
       aggParam.onChange(agg);
     }
   };
-  const errors = [];
-
-  if (customError) {
-    errors.push(customError);
-  }
+  const errors = customError ? [customError] : [];
 
   if (!indexedFields.length) {
     errors.push(
@@ -78,17 +74,17 @@ function FieldParamEditor({
         },
       })
     );
-    setTouched();
   }
 
   const isValid = !!value && !errors.length;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+
+    if (!!errors.length) {
+      setTouched();
+    }
+  }, [isValid]);
 
   useEffect(() => {
     // set field if only one available
@@ -111,7 +107,7 @@ function FieldParamEditor({
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {

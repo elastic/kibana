@@ -13,6 +13,7 @@ import {
   NetworkTopNFlowData,
   NetworkTopNFlowEdges,
 } from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
@@ -28,10 +29,11 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     request: FrameworkRequest,
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
+    const dsl = buildTopNFlowQuery(options);
     const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
       request,
       'search',
-      buildTopNFlowQuery(options)
+      dsl
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
@@ -39,10 +41,14 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     const hasNextPage = networkTopNFlowEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         hasNextPage,
         endCursor: {
@@ -50,6 +56,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
           tiebreaker: null,
         },
       },
+      totalCount,
     };
   }
 
@@ -57,10 +64,11 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     request: FrameworkRequest,
     options: NetworkDnsRequestOptions
   ): Promise<NetworkTopNFlowData> {
+    const dsl = buildDnsQuery(options);
     const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
       request,
       'search',
-      buildDnsQuery(options)
+      dsl
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response);
@@ -70,10 +78,14 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     const hasNextPage = networkDnsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = networkDnsEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         hasNextPage,
         endCursor: {
@@ -81,6 +93,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
           tiebreaker: null,
         },
       },
+      totalCount,
     };
   }
 }

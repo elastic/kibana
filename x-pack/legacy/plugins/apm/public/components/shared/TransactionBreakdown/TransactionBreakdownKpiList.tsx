@@ -19,7 +19,6 @@ import { FORMATTERS } from '../../../../../infra/public/utils/formatters';
 interface TransactionBreakdownKpi {
   name: string;
   percentage: number;
-  count: number;
   color: string;
 }
 

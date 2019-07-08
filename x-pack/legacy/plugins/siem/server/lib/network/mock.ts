@@ -476,7 +476,15 @@ export const mockResponse = {
   },
 };
 
+export const mockTopNFlowQueryDsl = {
+  mockTopNFlowQueryDsl: 'mockTopNFlowQueryDsl',
+};
+
 export const mockResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockTopNFlowQueryDsl, null, 2)],
+    response: [JSON.stringify(mockResponse, null, 2)],
+  },
   edges: [
     {
       cursor: {
