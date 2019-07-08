@@ -61,7 +61,7 @@ export interface RawAlertAction extends SavedObjectAttributes {
 
 export interface Alert {
   alertTypeId: string;
-  interval: number;
+  interval: string;
   actions: AlertAction[];
   alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
@@ -69,7 +69,7 @@ export interface Alert {
 
 export interface RawAlert extends SavedObjectAttributes {
   alertTypeId: string;
-  interval: number;
+  interval: string;
   actions: RawAlertAction[];
   alertTypeParams: SavedObjectAttributes;
   scheduledTaskId?: string;
