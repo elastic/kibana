@@ -23,7 +23,7 @@ export interface CustomRoleSpecification {
   name: string;
   elasticsearch?: {
     cluster?: string[];
-    indices: CustomRoleSpecificationElasticsearchIndices[];
+    indices?: CustomRoleSpecificationElasticsearchIndices[];
   };
   kibana?: RoleKibanaPrivilege[];
 }
