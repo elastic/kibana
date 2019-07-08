@@ -31,17 +31,14 @@ function SubAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  useEffect(
-    () => {
-      // we aren't creating a custom aggConfig
-      if (agg.params.metricAgg !== 'custom') {
-        setValue(null);
-      } else if (!agg.params.customMetric) {
-        setValue(agg.type.params.byName.customMetric.makeAgg(agg));
-      }
-    },
-    [value, responseValueAggs]
-  );
+  useEffect(() => {
+    // we aren't creating a custom aggConfig
+    if (agg.params.metricAgg !== 'custom') {
+      setValue(null);
+    } else if (!agg.params.customMetric) {
+      setValue(agg.type.params.byName.customMetric.makeAgg(agg));
+    }
+  }, [value, responseValueAggs]);
 
   const [innerState, setInnerState] = useState(true);
 

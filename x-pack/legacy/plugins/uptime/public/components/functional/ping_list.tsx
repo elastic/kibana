@@ -163,12 +163,9 @@ export const PingListComponent = ({
         ),
     },
   ];
-  useEffect(
-    () => {
-      onUpdateApp();
-    },
-    [selectedOption]
-  );
+  useEffect(() => {
+    onUpdateApp();
+  }, [selectedOption]);
   let pings: Ping[] = [];
   let total: number = 0;
   if (data && data.allPings && data.allPings.pings) {

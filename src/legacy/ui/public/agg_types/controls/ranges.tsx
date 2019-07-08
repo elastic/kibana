@@ -58,18 +58,15 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
     }
   }, []);
 
-  useEffect(
-    () => {
-      // responsible for discarding changes
-      if (
-        value.length !== ranges.length ||
-        value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
-      ) {
-        setRanges(value.map(range => ({ ...range, id: generateId() })));
-      }
-    },
-    [value]
-  );
+  useEffect(() => {
+    // responsible for discarding changes
+    if (
+      value.length !== ranges.length ||
+      value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
+    ) {
+      setRanges(value.map(range => ({ ...range, id: generateId() })));
+    }
+  }, [value]);
 
   const updateRanges = (rangeValues: RangeValuesModel[]) => {
     // do not set internal id parameter into saved object
