@@ -17,6 +17,7 @@ import { monaco } from './monaco';
 import { registerReferencesAction } from './references/references_action';
 import { registerEditor } from './single_selection_helper';
 import { TextModelResolverService } from './textmodel_resolver';
+import { CTAGS_SUPPORT_LANGS } from '../../common/language_server';
 
 export class MonacoHelper {
   public get initialized() {
@@ -48,27 +49,7 @@ export class MonacoHelper {
       if (chrome.getInjected('enableLangserversDeveloping', false) === true) {
         this.monaco.languages.registerDefinitionProvider('go', definitionProvider);
       }
-      const langsSupportedByCtags = [
-        'c',
-        'clojure',
-        'cpp',
-        'csharp',
-        'kotlin',
-        'lua',
-        'pascal',
-        'perl',
-        'php',
-        'powershell',
-        'python',
-        'ruby',
-        'rust',
-        'scheme',
-        'shell',
-        'sql',
-        'swift',
-        'tcl',
-      ];
-      langsSupportedByCtags.forEach(language =>
+      CTAGS_SUPPORT_LANGS.forEach(language =>
         this.monaco.languages.registerDefinitionProvider(language, definitionProvider)
       );
       const codeEditorService = new EditorService(this.getUrlQuery);
