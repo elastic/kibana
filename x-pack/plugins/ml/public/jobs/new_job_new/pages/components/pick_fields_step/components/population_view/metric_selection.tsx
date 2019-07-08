@@ -44,7 +44,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     return <Fragment />;
   }
   const jobCreator = jc as PopulationJobCreator;
-  const { categoryFields } = newJobCapsService;
 
   const { fields } = newJobCapsService;
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
@@ -77,17 +76,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     }
   }
 
-  function setDetectorByField(sf: SplitField, index: number) {
-    const pair = aggFieldPairList[index];
-    if (pair !== undefined && pair.by !== undefined) {
-      pair.by.field = sf;
-      const newList = [...aggFieldPairList];
-      newList.splice(index, 1, pair);
-      setAggFieldPairList(newList);
-      setByFieldsUpdated(0);
-    }
-  }
-
   function deleteDetector(index: number) {
     aggFieldPairList.splice(index, 1);
     setAggFieldPairList([...aggFieldPairList]);
@@ -108,12 +96,14 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     resultsLoader.subscribeToResults(setResultsWrapper);
   }, []);
 
+  // watch for changes in detector list length
   useEffect(
     () => {
       jobCreator.removeAllDetectors();
       aggFieldPairList.forEach((pair, i) => {
         jobCreator.addDetector(pair.agg, pair.field);
         if (pair.by !== undefined) {
+          // re-add by fields
           jobCreator.setByField(pair.by.field, i);
         }
       });
@@ -124,6 +114,10 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     [aggFieldPairList.length]
   );
 
+  // watch for changes in by field values
+  // redraw the charts if they change.
+  // triggered when example fields have been loaded
+  // if the split field or by fields have changed
   useEffect(
     () => {
       loadCharts();
@@ -131,6 +125,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     [JSON.stringify(fieldValuesPerDetector)]
   );
 
+  // watch for change in jobCreator
   useEffect(
     () => {
       if (jobCreator.start !== start || jobCreator.end !== end) {
@@ -140,7 +135,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       }
       setSplitField(jobCreator.splitField);
 
-      // update by fields
+      // update by fields and their by fields
       let update = false;
       const newList = [...aggFieldPairList];
       newList.forEach((pair, i) => {
@@ -196,6 +191,8 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     }
   }
 
+  // watch for changes in split field or by fields.
+  // load example field values
   useEffect(
     () => {
       loadFieldExamples();
@@ -257,8 +254,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
                   anomalyData={anomalyData}
                   deleteDetector={deleteDetector}
                   jobType={jobCreator.type}
-                  categoryFields={categoryFields}
-                  setDetectorByField={setDetectorByField}
                   fieldValuesPerDetector={fieldValuesPerDetector}
                 />
               )}
@@ -285,8 +280,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
                 modelData={modelData}
                 anomalyData={anomalyData}
                 jobType={jobCreator.type}
-                categoryFields={categoryFields}
-                setDetectorByField={setDetectorByField}
                 fieldValuesPerDetector={fieldValuesPerDetector}
               />
               <JobProgress progress={progress} />
@@ -307,8 +300,6 @@ interface ChartGridProps {
   anomalyData: Record<number, Anomaly[]>;
   deleteDetector?: (index: number) => void;
   jobType: JOB_TYPE;
-  categoryFields: Field[];
-  setDetectorByField: (field: SplitField, index: number) => void;
   fieldValuesPerDetector: DetectorFieldValues;
 }
 
