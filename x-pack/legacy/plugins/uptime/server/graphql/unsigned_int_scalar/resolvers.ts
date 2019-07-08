@@ -11,7 +11,7 @@ import { CreateUMGraphQLResolvers } from '../types';
 export const serialize = (value: any): number => {
   // `parseInt` will yield `2019` for a value such as "2019-07-08T16:59:09.796Z"
   if (isNaN(Number(value))) {
-    return Date.parse(value).valueOf();
+    return Date.parse(value);
   }
   return parseInt(value, 10);
 };
