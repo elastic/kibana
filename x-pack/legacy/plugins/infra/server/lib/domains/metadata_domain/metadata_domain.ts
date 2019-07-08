@@ -22,22 +22,16 @@ export class InfraMetadataDomain {
   ) {
     const { configuration } = await this.libs.sources.getSourceConfiguration(req, sourceId);
     const metricsPromise = this.adapter.getMetricMetadata(req, configuration, nodeId, nodeType);
-    const logsPromise = this.adapter.getLogMetadata(req, configuration, nodeId, nodeType);
 
     const metrics = await metricsPromise;
-    const logs = await logsPromise;
 
     const metricMetadata = pickMetadata(metrics.buckets).map(entry => {
       return { name: entry, source: 'metrics' };
     });
 
-    const logMetadata = pickMetadata(logs.buckets).map(entry => {
-      return { name: entry, source: 'logs' };
-    });
-
-    const id = metrics.id || logs.id;
-    const name = metrics.name || logs.name || id;
-    return { id, name, features: metricMetadata.concat(logMetadata) };
+    const id = metrics.id;
+    const name = metrics.name || id;
+    return { id, name, features: metricMetadata };
   }
 }
 

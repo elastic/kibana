@@ -123,6 +123,22 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     ssl?: Partial<ElasticsearchConfig['ssl']>;
 };
 
+// Warning: (ae-missing-release-tag) "ElasticsearchError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface ElasticsearchError extends Boom {
+    // (undocumented)
+    [code]?: string;
+}
+
+// @public
+export class ElasticsearchErrorHelpers {
+    // (undocumented)
+    static decorateNotAuthorizedError(error: Error, reason?: string): ElasticsearchError;
+    // (undocumented)
+    static isNotAuthorizedError(error: any): error is ElasticsearchError;
+}
+
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
     // (undocumented)
@@ -139,7 +155,7 @@ export interface ElasticsearchServiceSetup {
 
 // @public
 export interface FakeRequest {
-    headers: Record<string, string>;
+    headers: Headers;
 }
 
 // @public

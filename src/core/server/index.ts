@@ -48,6 +48,8 @@ export {
   Headers,
   ScopedClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
   APICaller,
   FakeRequest,
   LegacyRequest,
