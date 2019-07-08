@@ -19,7 +19,7 @@ export function useTransactionBreakdown() {
     data = { kpis: [], timeseries: [] },
     error,
     status
-  } = useFetcher(async () => {
+  } = useFetcher(() => {
     if (serviceName && start && end) {
       return loadTransactionBreakdown({
         start,

@@ -40,12 +40,12 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
     stacked = false
   } = props;
 
-  const { hoverXHandlers } = useChartsSync();
+  const syncedChartsProps = useChartsSync();
 
   return (
     <CustomPlot
       series={series}
-      {...hoverXHandlers}
+      {...syncedChartsProps}
       tickFormatY={tickFormatY}
       formatTooltipValue={formatTooltipValue}
       yMax={yMax}

@@ -149,10 +149,8 @@ export class InnerCustomPlot extends PureComponent {
       return null;
     }
 
-    const noHits =
-      flatten(enabledSeries.map(s => s.data)).filter(coord =>
-        isValidCoordinateValue(coord.y)
-      ).length === 0;
+    const coordinates = flatten(enabledSeries.map(s => s.data));
+    const noHits = coordinates.every(coord => !isValidCoordinateValue(coord.y));
 
     return (
       <Fragment>

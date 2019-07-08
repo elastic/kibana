@@ -19,6 +19,7 @@ import {
 } from '../../typings/timeseries';
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 
 export interface ITpmBucket {
   title: string;
@@ -158,12 +159,18 @@ export function getTpmSeries(
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
 
+  const { avg } = apmTimeseries.responseTimes;
+
+  if (!tpmBuckets.length && avg.length) {
+    return getEmptySeries(avg[0].x, avg[avg.length - 1].x);
+  }
+
   return tpmBuckets.map(bucket => {
-    const avg = mean(bucket.dataPoints.map(p => p.y));
+    const average = mean(bucket.dataPoints.map(p => p.y));
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
+      legendValue: `${asDecimal(average)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',
       color: getColor(bucket.key)
     };

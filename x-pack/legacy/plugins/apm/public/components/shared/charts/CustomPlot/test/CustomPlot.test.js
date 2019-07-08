@@ -7,30 +7,13 @@
 import { mount } from 'enzyme';
 import moment from 'moment';
 import React from 'react';
-import d3 from 'd3';
 import { toJson } from '../../../../../utils/testHelpers';
 import { InnerCustomPlot } from '../index';
 import responseWithData from './responseWithData.json';
 import VoronoiPlot from '../VoronoiPlot';
 import InteractivePlot from '../InteractivePlot';
 import { getResponseTimeSeries } from '../../../../../selectors/chartSelectors';
-
-const getEmptySeries = (start = Date.now() - 3600000, end = Date.now()) => {
-  const dates = d3.time
-    .scale()
-    .domain([new Date(start), new Date(end)])
-    .ticks();
-
-  return [
-    {
-      type: 'line',
-      data: dates.map(x => ({
-        x: x.getTime(),
-        y: null
-      }))
-    }
-  ];
-};
+import { getEmptySeries } from '../getEmptySeries';
 
 function getXValueByIndex(index) {
   return responseWithData.responseTimes.avg[index].x;

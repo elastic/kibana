@@ -9,11 +9,10 @@ import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { history } from '../utils/history';
 
 const ChartsSyncContext = React.createContext<{
-  hoverXHandlers: {
-    onHover: (hoverX: number) => void;
-    onMouseLeave: () => void;
-    onSelectionEnd: (range: { start: number; end: number }) => void;
-  };
+  hoverX: number | null;
+  onHover: (hoverX: number) => void;
+  onMouseLeave: () => void;
+  onSelectionEnd: (range: { start: number; end: number }) => void;
 } | null>(null);
 
 const ChartsSyncContextProvider: React.FC = ({ children }) => {
@@ -47,7 +46,7 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
       hoverX: time
     };
 
-    return { hoverXHandlers };
+    return { ...hoverXHandlers };
   }, [time, setTime]);
 
   return <ChartsSyncContext.Provider value={value} children={children} />;

@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 // undefined values are converted by react-vis into NaN when stacking
+// see https://github.com/uber/react-vis/issues/1214
 const getNull = d => isValidCoordinateValue(d.y) && !isNaN(d.y);
 
 const X_TICK_TOTAL = 7;
@@ -64,14 +65,24 @@ class StaticPlot extends PureComponent {
           />
         );
 
-      case 'areaStacked':
+      case 'areaStacked': {
+        // convert null into undefined because of stack issues,
+        // see https://github.com/uber/react-vis/issues/1214
+        const data = serie.data.map(value => {
+          return 'y' in value && isValidCoordinateValue(value.y)
+            ? value
+            : {
+                ...value,
+                y: undefined
+              };
+        });
         return [
           <AreaSeries
             getNull={getNull}
             key={`${serie.title}-area`}
             xType="time"
             curve={'curveMonotoneX'}
-            data={serie.data}
+            data={data}
             color={serie.color}
             stroke={'rgba(0,0,0,0)'}
             fill={serie.areaColor || rgba(serie.color, 0.3)}
@@ -83,12 +94,13 @@ class StaticPlot extends PureComponent {
             key={`${serie.title}-line`}
             xType="time"
             curve={'curveMonotoneX'}
-            data={serie.data}
+            data={data}
             color={serie.color}
             stack={true}
             cluster="line"
           />
         ];
+      }
 
       case 'areaMaxHeight':
         const yMax = last(plotValues.yTickValues);
@@ -134,7 +146,17 @@ class StaticPlot extends PureComponent {
 
     return (
       <SharedPlot plotValues={plotValues}>
+        <HorizontalGridLines key="grid-lines" tickValues={yTickValues} />
         <XAxis tickSize={0} tickTotal={X_TICK_TOTAL} tickFormat={tickFormatX} />
+        <YAxis
+          key="y-axis"
+          tickSize={0}
+          tickValues={yTickValues}
+          tickFormat={tickFormatY}
+          style={{
+            line: { stroke: 'none', fill: 'none' }
+          }}
+        />
         {noHits ? (
           <StatusText
             marginLeft={30}
@@ -143,19 +165,7 @@ class StaticPlot extends PureComponent {
             })}
           />
         ) : (
-          [
-            <HorizontalGridLines key="grid-lines" tickValues={yTickValues} />,
-            <YAxis
-              key="y-axis"
-              tickSize={0}
-              tickValues={yTickValues}
-              tickFormat={tickFormatY}
-              style={{
-                line: { stroke: 'none', fill: 'none' }
-              }}
-            />,
-            this.getVisSeries(series, plotValues)
-          ]
+          this.getVisSeries(series, plotValues)
         )}
       </SharedPlot>
     );

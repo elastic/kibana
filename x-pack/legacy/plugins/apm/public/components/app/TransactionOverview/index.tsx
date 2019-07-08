@@ -16,7 +16,7 @@ import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
@@ -70,9 +70,7 @@ export function TransactionOverview({
     })
   );
 
-  const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
-    urlParams
-  );
+  const { data: transactionCharts } = useTransactionCharts();
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
@@ -122,7 +120,7 @@ export function TransactionOverview({
 
         <TransactionCharts
           hasMLJob={hasMLJob}
-          charts={transactionOverviewCharts}
+          charts={transactionCharts}
           location={location}
           urlParams={urlParams}
         />

@@ -7,7 +7,7 @@
 import { EuiPanel, EuiSpacer, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
-import { useTransactionDetailsCharts } from '../../../hooks/useTransactionDetailsCharts';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
@@ -27,9 +27,9 @@ export function TransactionDetails() {
     data: distributionData,
     status: distributionStatus
   } = useTransactionDistribution(urlParams);
-  const { data: transactionDetailsChartsData } = useTransactionDetailsCharts(
-    urlParams
-  );
+
+  const { data: transactionChartsData } = useTransactionCharts();
+
   const { data: waterfall } = useWaterfall(urlParams);
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
@@ -50,7 +50,7 @@ export function TransactionDetails() {
 
         <TransactionCharts
           hasMLJob={false}
-          charts={transactionDetailsChartsData}
+          charts={transactionChartsData}
           urlParams={urlParams}
           location={location}
         />

@@ -33,7 +33,7 @@ export function MetricsChart({ chart }: Props) {
     legendValue: formatYValue(series.overallValue)
   }));
 
-  const { hoverXHandlers } = useChartsSync();
+  const syncedChartProps = useChartsSync();
 
   return (
     <React.Fragment>
@@ -41,7 +41,7 @@ export function MetricsChart({ chart }: Props) {
         <span>{chart.title}</span>
       </EuiTitle>
       <CustomPlot
-        {...hoverXHandlers}
+        {...syncedChartProps}
         series={transformedSeries}
         tickFormatY={formatYValue}
         formatTooltipValue={formatTooltip}
