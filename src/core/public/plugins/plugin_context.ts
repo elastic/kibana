@@ -69,8 +69,9 @@ export function createPluginSetupContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
-    http: deps.http,
+    context: omit(deps.context, 'setCurrentPlugin'),
     fatalErrors: deps.fatalErrors,
+    http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
   };

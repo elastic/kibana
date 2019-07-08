@@ -17,10 +17,21 @@
  * under the License.
  */
 
-export function mapToObject<V = unknown>(map: ReadonlyMap<string, V>) {
-  const result: Record<string, V> = Object.create(null);
-  for (const [key, value] of map) {
-    result[key] = value;
-  }
-  return result;
-}
+import { ContextContainerImplementation } from './context';
+
+export type ContextContainerMock = jest.Mocked<
+  PublicMethodsOf<ContextContainerImplementation<any, any, any>>
+>;
+
+const createContextMock = () => {
+  const contextMock: ContextContainerMock = {
+    registerContext: jest.fn(),
+    createHandler: jest.fn(),
+    setCurrentPlugin: jest.fn(),
+  };
+  return contextMock;
+};
+
+export const contextMock = {
+  create: createContextMock,
+};

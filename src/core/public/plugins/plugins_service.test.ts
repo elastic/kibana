@@ -43,6 +43,7 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
+import { contextServiceMock } from '../context/context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -61,6 +62,9 @@ let mockStartContext: DeeplyMocked<CoreStart>;
 beforeEach(() => {
   mockSetupDeps = {
     application: applicationServiceMock.createSetupContract(),
+    context: contextServiceMock.createSetupContract(),
+    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
     injectedMetadata: (function() {
       const metadata = injectedMetadataServiceMock.createSetupContract();
       metadata.getPlugins.mockReturnValue([
@@ -73,14 +77,16 @@ beforeEach(() => {
       ]);
       return metadata;
     })(),
-    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
-  mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
+  mockSetupContext = {
+    ...omit(mockSetupDeps, 'application', 'injectedMetadata'),
+    context: omit(mockSetupDeps.context, 'setCurrentPlugin'),
+  };
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
+    context: contextServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
@@ -91,7 +97,7 @@ beforeEach(() => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
   mockStartContext = {
-    ...omit(mockStartDeps, 'injectedMetadata'),
+    ...omit(mockStartDeps, 'context', 'injectedMetadata'),
     application: {
       capabilities: mockStartDeps.application.capabilities,
     },

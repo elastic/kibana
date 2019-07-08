@@ -167,12 +167,31 @@ export interface ChromeStart {
     setIsVisible(isVisible: boolean): void;
 }
 
+// @public
+export interface ContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
+    // Warning: (ae-forgotten-export) The symbol "Promisify" needs to be exported by the entry point index.d.ts
+    createHandler(handler: Handler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+    registerContext<TContextName extends keyof TContext>(contextName: TContextName, provider: ContextProvider<TContext, TContextName, THandlerParameters>): this;
+}
+
+// @public
+export type ContextProvider<TContext extends {}, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+
+// @public
+export interface ContextSetup {
+    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): ContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+    // @internal
+    setCurrentPlugin(plugin?: string): void;
+}
+
 // @internal (undocumented)
 export interface CoreContext {
 }
 
 // @public
 export interface CoreSetup {
+    // (undocumented)
+    context: Pick<ContextSetup, 'createContextContainer'>;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -330,6 +349,9 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
+// @public
+export type Handler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
+
 // @public (undocumented)
 export type HttpBody = BodyInit | null | any;
 
@@ -481,6 +503,8 @@ export interface I18nStart {
 export interface InternalCoreSetup extends CoreSetup {
     // (undocumented)
     application: ApplicationSetup;
+    // (undocumented)
+    context: ContextSetup;
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
@@ -491,6 +515,10 @@ export interface InternalCoreSetup extends CoreSetup {
 export interface InternalCoreStart extends CoreStart {
     // (undocumented)
     application: ApplicationStart;
+    // Warning: (ae-forgotten-export) The symbol "ContextStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    context: ContextStart;
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)

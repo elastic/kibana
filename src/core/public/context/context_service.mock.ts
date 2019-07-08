@@ -17,39 +17,36 @@
  * under the License.
  */
 
-import { PluginsService, PluginsServiceSetup } from './plugins_service';
+import { ContextStart, ContextService, ContextSetup } from './context_service';
+import { contextMock } from './context.mock';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PluginsServiceSetup> = {
-    contracts: new Map(),
+  const setupContract: jest.Mocked<ContextSetup> = {
+    createContextContainer: jest.fn().mockImplementation(() => contextMock.create()),
+    setCurrentPlugin: jest.fn(),
   };
-  // we have to suppress type errors until decide how to mock es6 class
-  return setupContract as PluginsServiceSetup;
+  return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<PluginsServiceSetup> = {
-    contracts: new Map(),
+  const startContract: jest.Mocked<ContextStart> = {
+    setCurrentPlugin: jest.fn(),
   };
-  // we have to suppress type errors until decide how to mock es6 class
-  return startContract as PluginsServiceSetup;
+  return startContract;
 };
 
-type PluginsServiceContract = PublicMethodsOf<PluginsService>;
+type ContextServiceContract = PublicMethodsOf<ContextService>;
 const createMock = () => {
-  const mocked: jest.Mocked<PluginsServiceContract> = {
-    setPluginDependencies: jest.fn(),
+  const mocked: jest.Mocked<ContextServiceContract> = {
     setup: jest.fn(),
     start: jest.fn(),
-    stop: jest.fn(),
   };
-
-  mocked.setup.mockResolvedValue(createSetupContractMock());
-  mocked.start.mockResolvedValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
-export const pluginsServiceMock = {
+export const contextServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,

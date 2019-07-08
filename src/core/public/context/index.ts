@@ -17,10 +17,5 @@
  * under the License.
  */
 
-export function mapToObject<V = unknown>(map: ReadonlyMap<string, V>) {
-  const result: Record<string, V> = Object.create(null);
-  for (const [key, value] of map) {
-    result[key] = value;
-  }
-  return result;
-}
+export { ContextService, ContextSetup, ContextStart } from './context_service';
+export { ContextContainer, ContextProvider, Handler } from './context';

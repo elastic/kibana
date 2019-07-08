@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginName } from '../../server';
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
@@ -35,11 +35,11 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
 export interface PluginsServiceSetup {
-  contracts: Map<string, unknown>;
+  contracts: ReadonlyMap<string, unknown>;
 }
 /** @internal */
 export interface PluginsServiceStart {
-  contracts: Map<string, unknown>;
+  contracts: ReadonlyMap<string, unknown>;
 }
 
 /**
@@ -50,15 +50,28 @@ export interface PluginsServiceStart {
  */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   /** Plugin wrappers in topological order. */
-  private readonly plugins: Map<
-    PluginName,
-    PluginWrapper<unknown, Record<string, unknown>>
-  > = new Map();
+  private readonly plugins = new Map<PluginName, PluginWrapper<unknown, Record<string, unknown>>>();
+  private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
+
   private readonly satupPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext) {}
 
-  public async setup(deps: PluginsServiceSetupDeps) {
+  public setPluginDependencies(plugins: Array<{ id: PluginName; plugin: DiscoveredPlugin }>) {
+    // Setup map of dependencies
+    const allPluginNames = new Set<PluginName>(plugins.map(p => p.id));
+    plugins.forEach(({ id, plugin }) =>
+      this.pluginDependencies.set(id, [
+        ...plugin.requiredPlugins,
+        ...plugin.optionalPlugins.filter(optPlugin => allPluginNames.has(optPlugin)),
+      ])
+    );
+
+    return this.pluginDependencies;
+  }
+
+  public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
+    this.setPluginDependencies(deps.injectedMetadata.getPlugins());
     // Construct plugin wrappers, depending on the topological order set by the server.
     deps.injectedMetadata
       .getPlugins()
@@ -75,12 +88,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
-      const pluginDeps = new Set([
-        ...plugin.requiredPlugins,
-        ...plugin.optionalPlugins.filter(optPlugin => this.plugins.get(optPlugin)),
-      ]);
+      // Set global context variable for current plugin setting up
+      deps.context.setCurrentPlugin(pluginName);
 
-      const pluginDepContracts = [...pluginDeps.keys()].reduce(
+      const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
         (depContracts, dependencyName) => {
           // Only set if present. Could be absent if plugin does not have client-side code or is a
           // missing optional plugin.
@@ -104,20 +115,21 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       this.satupPlugins.push(pluginName);
     }
 
+    // Exiting plugin context, unset global
+    deps.context.setCurrentPlugin(undefined);
+
     // Expose setup contracts
     return { contracts };
   }
 
-  public async start(deps: PluginsServiceStartDeps) {
+  public async start(deps: PluginsServiceStartDeps): Promise<PluginsServiceStart> {
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
-      const pluginDeps = new Set([
-        ...plugin.requiredPlugins,
-        ...plugin.optionalPlugins.filter(optPlugin => this.plugins.get(optPlugin)),
-      ]);
+      // Set global context variable for current plugin setting up
+      deps.context.setCurrentPlugin(pluginName);
 
-      const pluginDepContracts = [...pluginDeps.keys()].reduce(
+      const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
         (depContracts, dependencyName) => {
           // Only set if present. Could be absent if plugin does not have client-side code or is a
           // missing optional plugin.
@@ -138,6 +150,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         )
       );
     }
+
+    // Exiting plugin context, unset global
+    deps.context.setCurrentPlugin(undefined);
 
     // Expose start contracts
     return { contracts };
