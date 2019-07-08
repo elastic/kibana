@@ -5,18 +5,29 @@
 [float]
 === Using inspector to troubleshoot {es} requests
 
-The Maps application uses the {ref}/search-search.html[{es}} search API] to get documents and aggregation results.
+The Maps application uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}.
 Use Inspector to troubleshoot these requests.
 
-Open Inspector by clicking *inspect* button.
+Open Inspector by clicking the *Inspect* button.
+The most recent requests for each layer is viewable in inspector.
+You can switch between different requests by opening the request drop down and clicking the name of the request.
+
+[role="screenshot"]
+image::maps/images/inspector.png[]
 
 [float]
-=== Ensure geospatial data
+=== Features are not displayed.
+
+* Use Inspector to view {es} responses. Ensure the response is not empty.
+* Ensure geometry uses the correct latitude and longitude ordering.
+  ** Geo-points expressed as strings are ordered as `"latitude,longitude"`. Geo-points expressed as arrays are ordered as the reverse: `[longitude, latitude]`.
+  ** Geo-shapes expressed as geojson provide coordinates as `[longitude, latitude]`.
+* Ensure fill color and border color are distinguishable from map tiles. Its hard to see white features on a white background.
 
 [float]
-=== WMS and TMS tiles are not being displayed
+=== Tiles are not displayed
 
-. CORS
-. Tiles are not served in correct coordinate system.
+* Ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
+* Ensure tiles have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
 
 
