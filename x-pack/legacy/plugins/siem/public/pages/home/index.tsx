@@ -27,6 +27,7 @@ import { Overview } from '../overview';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
+import { MlHostConditional } from '../../components/ml/conditional_links/ml_conditional_links';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -129,6 +130,7 @@ export const HomePage = pure(() => (
                     <Route path="/network" component={NetworkContainer} />
                     <Route path="/timelines" component={Timelines} />
                     <Route path="/link-to" component={LinkToPage} />
+                    <Route path="/ml-to-hosts" component={MlHostConditional} />
                     <Route component={NotFoundPage} />
                   </Switch>
                 </EuiPageBody>
