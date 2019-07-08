@@ -9,7 +9,6 @@ import { Server } from 'hapi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import mappings from './mappings.json';
-
 import { PLUGIN_ID } from './common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
@@ -29,6 +28,7 @@ export const lens: LegacyPluginInitializer = kibana => {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
+      visTypes: ['plugins/lens/register_vis_type_alias'],
       savedObjectsManagement: {
         lens: {
           defaultSearchField: 'title',
