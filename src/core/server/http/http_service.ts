@@ -25,7 +25,7 @@ import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
 import { Logger } from '../logging';
 import { CoreContext } from '../core_context';
-import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
+import { HttpConfig, HttpConfigType } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 import { SslConfig, SslConfigType } from './ssl_config';
@@ -145,10 +145,6 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       port,
       ssl: new SslConfig(ssl),
     };
-
-    for (const [key, val] of Object.entries(cfg)) {
-      httpConfig.schema.validateKey(key, val);
-    }
 
     const baseConfig = await this.config$.pipe(first()).toPromise();
     const finalConfig = { ...baseConfig, ...cfg };

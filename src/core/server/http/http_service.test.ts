@@ -17,8 +17,14 @@
  * under the License.
  */
 
+///<reference path="./selfsigned.d.ts" />
 import { mockHttpServer } from './http_service.test.mocks';
 
+import crypto from 'crypto';
+import { tmpdir } from 'os';
+import { writeFileSync, unlinkSync } from 'fs';
+import { join } from 'path';
+import selfsigned from 'selfsigned';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpService, Router } from '.';
@@ -138,6 +144,13 @@ test('spins up notReady server until started if configured with `autoListen:true
 
 // this is an integration test!
 test('creates and sets up second http server', async () => {
+  const tmp = tmpdir();
+  const keyFile = join(tmp, 'tmp-key');
+  const certFile = join(tmp, 'tmp-cert');
+  const attrs = [{ name: 'commonName', value: 'kibana.dev' }];
+  const pems = selfsigned.generate(attrs, { days: 365 });
+  writeFileSync(keyFile, pems.private, 'utf8');
+  writeFileSync(certFile, pems.cert, 'utf8');
   const configService = createConfigService({
     host: 'localhost',
     port: 1234,
@@ -152,9 +165,9 @@ test('creates and sets up second http server', async () => {
   const ssl = {
     enabled: true,
     redirectHttpFromPort: port,
-    certificate: '',
-    key: '',
-    certificateAuthorities: [''],
+    certificate: certFile,
+    key: keyFile,
+    certificateAuthorities: undefined,
     cipherSuites: cryptoConstants.defaultCoreCipherList.split(':'),
     keyPassphrase: undefined,
     supportedProtocols: ['TLSv1.1', 'TLSv1.2'],
@@ -181,6 +194,8 @@ test('creates and sets up second http server', async () => {
   await service.stop();
   expect(server.isListening()).toBeFalsy();
   expect(server.isListening(port)).toBeFalsy();
+  unlinkSync(certFile);
+  unlinkSync(keyFile);
 });
 
 test('logs error if already set up', async () => {
