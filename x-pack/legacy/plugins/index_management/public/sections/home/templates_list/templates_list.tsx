@@ -78,7 +78,7 @@ export const TemplatesList: React.FunctionComponent = () => {
             />
           </EuiText>
         </EuiTitle>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <EuiSwitch
           id="checkboxShowSystemIndexTemplates"
           checked={showSystemTemplates}
