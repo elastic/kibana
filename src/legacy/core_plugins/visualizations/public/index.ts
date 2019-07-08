@@ -58,11 +58,14 @@ export interface VisualizationsSetup {
 /** @public types */
 export {
   Vis,
+  visFactory,
+  DefaultEditorSize,
   VisParams,
   VisProvider,
   VisState,
-  VisualizationController,
-  VisType,
+  // VisualizationController,
+  // VisType,
+  VisTypeAlias,
   VisTypesRegistry,
   Status,
 } from './types';

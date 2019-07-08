@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 
 const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();

@@ -9,13 +9,20 @@ image::images/code-repo-management.png[]
 ==== Add and delete a repo
 The <<code-getting-started, Getting Started>> provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine tune the hostname of the git clone URL in your `kibana.yml` file.
 
-For security reasons, Code allows only a few trusted hostnames, such as github.com, by default. You can add SSH key to {kib} to clone private repo.
+For security reasons, Code allows only a few trusted hostnames, such as github.com, by default. You can add an SSH key to {kib} to clone private repos.
 
 Deleting a repo removes it from local storage and the Elasticsearch index.
 
 [float]
 ==== Reindex a repo
-*Code* automatically reindexes an imported repo, but in some cases you might need to manually refresh the index. For example, you might refresh an index  after a new language server is installed. Or, you might want to immediately update the index to the HEAD revision. Click *Reindex* to initiate a reindex.
+You can set *Code* to automatically reindex imported repos at set intervals by set the following config in `kibana.yaml`.
+
+[source,yaml]
+----
+xpack.code.disableIndexScheduler: false
+----
+
+In some cases you might need to manually refresh the index besides automatic indexing. For example, you might refresh an index  after a new language server is installed. Or, you might want to immediately update the index to the HEAD revision. Click *Reindex* to initiate a reindex.
 
 [float]
 ==== Clone URL management
@@ -30,16 +37,16 @@ You can add your own hostname (for example, acme.com) to the whitelist by adding
 
 [source,yaml]
 ----
-xpack.code.gitHostWhitelist: [ "github.com", "gitlab.com", "bitbucket.org", "gitbox.apache.org", "eclipse.org", "acme.com" ]
+xpack.code.security.gitHostWhitelist: [ "github.com", "gitlab.com", "bitbucket.org", "gitbox.apache.org", "eclipse.org", "acme.com" ]
 ----
 
-Set `xpack.code.gitHostWhitelist` to [] (empty list) allow any hostname.
+Set `xpack.code.security.gitHostWhitelist` to [] (empty list) allow any hostname.
 
 You can also control the protocol to use for the clone address. By default, the following protocols are supported: `[ 'https', 'git', 'ssh' ]`. You can change this value by adding the following line to your `config/kibana.yaml` file.  In this example, the user only wants to support the `https` protocol:
 
 [source,yaml]
 ----
-xpack.code.gitProtocolWhitelist: [ "https" ]
+xpack.code.security.gitProtocolWhitelist: [ "https" ]
 ----
 
 [float]

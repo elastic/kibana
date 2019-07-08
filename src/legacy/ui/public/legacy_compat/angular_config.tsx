@@ -79,7 +79,7 @@ export const configureAppAngularModule = (angularModule: IModule) => {
 
 const getEsUrl = (newPlatform: InternalCoreStart) => {
   const a = document.createElement('a');
-  a.href = newPlatform.http.prependBasePath('/elasticsearch');
+  a.href = newPlatform.http.basePath.prepend('/elasticsearch');
   const protocolPort = /https/.test(a.protocol) ? 443 : 80;
   const port = a.port || protocolPort;
   return {

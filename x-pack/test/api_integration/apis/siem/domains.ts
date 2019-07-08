@@ -5,14 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { domainsQuery } from '../../../../plugins/siem/public/containers/domains/index.gql_query';
+import { domainsQuery } from '../../../../legacy/plugins/siem/public/containers/domains/index.gql_query';
 import {
   Direction,
   DomainsFields,
   FlowDirection,
   FlowTarget,
   GetDomainsQuery,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -47,6 +47,7 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -81,6 +82,7 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -115,6 +117,7 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

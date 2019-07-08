@@ -137,6 +137,8 @@ kibana_vars=(
     xpack.reporting.roles.allow
     xpack.searchprofiler.enabled
     xpack.security.authc.providers
+    xpack.security.authc.oidc.realm
+    xpack.security.authc.saml.realm
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey

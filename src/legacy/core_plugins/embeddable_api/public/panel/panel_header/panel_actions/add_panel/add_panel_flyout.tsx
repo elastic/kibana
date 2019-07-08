@@ -38,7 +38,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { SavedObjectAttributes } from '../../../../../../../server/saved_objects';
+import { SavedObjectAttributes } from 'src/core/server/saved_objects';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddables/embeddable_factory_not_found_error';
 import { IContainer } from '../../../../containers';
 
@@ -63,7 +63,7 @@ export class AddPanelFlyout extends React.Component<Props> {
 
     this.lastToast = toastNotifications.addSuccess({
       title: i18n.translate(
-        'kbn.embeddables.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
+        'embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
         {
           defaultMessage: '{savedObjectName} was added',
           values: {
@@ -103,15 +103,13 @@ export class AddPanelFlyout extends React.Component<Props> {
         inputDisplay: (
           <EuiText>
             <FormattedMessage
-              id="kbn.embeddables.addPanel.createNewDefaultOption"
+              id="embeddableApi.addPanel.createNewDefaultOption"
               defaultMessage="Create new ..."
             />
           </EuiText>
         ),
       },
-
-      ...this.props.container.embeddableFactories
-        .getAll()
+      ...[...this.props.container.embeddableFactories.values()]
         .filter(
           factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
         )
@@ -119,7 +117,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           inputDisplay: (
             <EuiText>
               <FormattedMessage
-                id="kbn.embeddables.addPanel.createNew"
+                id="embeddableApi.addPanel.createNew"
                 defaultMessage="Create new {factoryName}"
                 values={{
                   factoryName: factory.getDisplayName(),
@@ -139,7 +137,7 @@ export class AddPanelFlyout extends React.Component<Props> {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage id="kbn.embeddables.addPanelsTitle" defaultMessage="Add panels" />
+              <FormattedMessage id="embeddableApi.addPanel.Title" defaultMessage="Add panels" />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
@@ -147,8 +145,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           <SavedObjectFinder
             onChoose={this.onAddPanel}
             savedObjectMetaData={
-              this.props.container.embeddableFactories
-                .getAll()
+              [...this.props.container.embeddableFactories.values()]
                 .filter(
                   embeddableFactory =>
                     Boolean(embeddableFactory.savedObjectMetaData) &&
@@ -159,7 +156,7 @@ export class AddPanelFlyout extends React.Component<Props> {
               >
             }
             showFilter={true}
-            noItemsMessage={i18n.translate('kbn.embeddables.addPanel.noMatchingObjectsMessage', {
+            noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
               defaultMessage: 'No matching objects found.',
             })}
           />

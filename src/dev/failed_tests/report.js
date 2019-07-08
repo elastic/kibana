@@ -33,12 +33,30 @@ const indent = text => (
   `  ${text.split('\n').map(l => `  ${l}`).join('\n')}`
 );
 
-const isLikelyIrrelevant = ({ failure }) => {
+const getFailureText = (testCase) => {
+  const [failureNode] = testCase.failure;
+
+  if (failureNode && typeof failureNode === 'object' && typeof failureNode._ === 'string') {
+    return stripAnsi(failureNode._);
+  }
+
+  return stripAnsi(String(failureNode));
+};
+
+const isLikelyIrrelevant = ({ name, failure }) => {
   if (failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID')) {
     return true;
   }
 
   if (failure.includes('Error: No Living connections')) {
+    return true;
+  }
+
+  if (name.includes('"after all" hook') && failure.includes(`Cannot read property 'shutdown' of undefined`)) {
+    return true;
+  }
+
+  if (failure.includes('Unable to read artifact info') && failure.includes('Service Temporarily Unavailable')) {
     return true;
   }
 
@@ -79,9 +97,8 @@ export const filterFailures = () => createMapStream((testSuite) => {
       const failureCase = {
         ...testCase.$,
         // Strip ANSI color characters
-        failure: stripAnsi(testCase.failure[0])
+        failure: getFailureText(testCase)
       };
-
 
       if (isLikelyIrrelevant(failureCase)) {
         console.log(`Ignoring likely irrelevant failure: ${failureCase.classname} - ${failureCase.name}\n${indent(failureCase.failure)}`);

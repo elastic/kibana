@@ -28,7 +28,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
-import { Query, data } from 'plugins/data';
+// @ts-ignore
+import { data } from 'plugins/data/setup';
+import { Query } from 'plugins/data';
 
 const { QueryBarInput } = data.query.ui;
 
@@ -98,13 +100,13 @@ function FilterRow({
         label={`${filterLabel}${customLabel ? ` - ${customLabel}` : ''}`}
         labelAppend={FilterControl}
         fullWidth={true}
-        className="visEditorSidebar__aggParamFormRow"
+        compressed
       >
         <QueryBarInput
           query={value}
           indexPatterns={[agg.getIndexPattern()]}
           appName="filtersAgg"
-          onChange={query => onChangeValue(id, query, customLabel)}
+          onChange={(query: Query) => onChangeValue(id, query, customLabel)}
           disableAutoFocus={!autoFocus}
           data-test-subj={dataTestSubj}
           bubbleSubmitEvent={true}
@@ -123,7 +125,7 @@ function FilterRow({
             },
           })}
           fullWidth={true}
-          className="visEditorSidebar__aggParamFormRow"
+          compressed
         >
           <EuiFieldText
             value={customLabel}

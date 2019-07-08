@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { Query, TimeRange } from 'ui/embeddable';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { DashboardViewMode } from '../dashboard/dashboard_view_mode';
 import * as DashboardSelectors from '../dashboard/selectors';
 import { PanelId } from '../dashboard/selectors/types';

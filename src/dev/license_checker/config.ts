@@ -29,6 +29,7 @@ export const LICENSE_WHITELIST = [
   '(MIT OR Apache-2.0)',
   '(MIT OR GPL-3.0)',
   '(WTFPL OR MIT)',
+  '(Unlicense OR Apache-2.0)',
   'AFLv2.1',
   'Apache 2.0',
   'Apache License, v2.0',
@@ -66,6 +67,7 @@ export const LICENSE_WHITELIST = [
   'Unlicense',
   'WTFPL OR ISC',
   'WTFPL',
+  'Nuclide software',
 ];
 
 // The following list only applies to licenses that
@@ -105,4 +107,6 @@ export const LICENSE_OVERRIDES = {
 
   // TODO remove this once we upgrade past or equal to v1.0.2
   'babel-plugin-mock-imports@1.0.1': ['MIT'],
+
+  '@elastic/node-ctags@1.0.2': ['Nuclide software'],
 };

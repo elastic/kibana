@@ -17,21 +17,19 @@
  * under the License.
  */
 
-import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { SimpleSavedObject } from 'ui/saved_objects';
+import stubbedLogstashFields from './logstash_fields';
+import { SimpleSavedObject } from '../legacy/ui/public/saved_objects/simple_saved_object';
 
-export function FixturesStubbedSavedObjectIndexPatternProvider() {
-  const mockLogstashFields = stubbedLogstashFields();
+const mockLogstashFields = stubbedLogstashFields();
 
-  return function (id) {
-    return new SimpleSavedObject(undefined, {
-      id,
-      type: 'index-pattern',
-      attributes: {
-        customFormats: '{}',
-        fields: JSON.stringify(mockLogstashFields)
-      },
-      version: 2
-    });
-  };
+export function stubbedSavedObjectIndexPattern(id) {
+  return new SimpleSavedObject(undefined, {
+    id,
+    type: 'index-pattern',
+    attributes: {
+      customFormats: '{}',
+      fields: mockLogstashFields
+    },
+    version: 2
+  });
 }

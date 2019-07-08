@@ -29,7 +29,9 @@ export function injectVars(server) {
   // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
   const { types: allTypes } = server.savedObjects;
   const savedObjectsManagement = server.getSavedObjectsManagement();
-  const importAndExportableTypes = allTypes.filter(type => savedObjectsManagement.isImportAndExportable(type));
+  const importAndExportableTypes = allTypes.filter(type =>
+    savedObjectsManagement.isImportAndExportable(type)
+  );
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
@@ -37,6 +39,8 @@ export function injectVars(server) {
     regionmapsConfig: regionmap,
     mapConfig: mapConfig,
     importAndExportableTypes,
+    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
+    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
     tilemapsConfig: {
       deprecated: {
         isOverridden: isOverridden,

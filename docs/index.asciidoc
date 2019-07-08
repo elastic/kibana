@@ -54,6 +54,8 @@ include::apm/index.asciidoc[]
 
 include::uptime/index.asciidoc[]
 
+include::siem/index.asciidoc[]
+
 include::graph/index.asciidoc[]
 
 include::dev-tools.asciidoc[]

@@ -16,7 +16,7 @@ export declare class ClusterClient
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(config, log)](./kibana-plugin-server.clusterclient.(constructor).md) |  | Constructs a new instance of the <code>ClusterClient</code> class |
+|  [(constructor)(config, log, getAuthHeaders)](./kibana-plugin-server.clusterclient.(constructor).md) |  | Constructs a new instance of the <code>ClusterClient</code> class |
 
 ## Properties
 
@@ -28,6 +28,6 @@ export declare class ClusterClient
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [asScoped(req)](./kibana-plugin-server.clusterclient.asscoped.md) |  | Creates an instance of <code>ScopedClusterClient</code> based on the configuration the current cluster client that exposes additional <code>callAsCurrentUser</code> method scoped to the provided req. Consumers shouldn't worry about closing scoped client instances, these will be automatically closed as soon as the original cluster client isn't needed anymore and closed. |
+|  [asScoped(request)](./kibana-plugin-server.clusterclient.asscoped.md) |  | Creates an instance of <code>ScopedClusterClient</code> based on the configuration the current cluster client that exposes additional <code>callAsCurrentUser</code> method scoped to the provided req. Consumers shouldn't worry about closing scoped client instances, these will be automatically closed as soon as the original cluster client isn't needed anymore and closed. |
 |  [close()](./kibana-plugin-server.clusterclient.close.md) |  | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
 

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { KbnTestProvider } from './types';
-import { IpToHostResponse } from '../../../../plugins/infra/server/routes/ip_to_hostname';
+import { IpToHostResponse } from '../../../../legacy/plugins/infra/server/routes/ip_to_hostname';
 
 const ipToHostNameTest: KbnTestProvider = ({ getService }) => {
   const supertest = getService('supertest');

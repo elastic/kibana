@@ -20,23 +20,22 @@
 import { ResponseObject, Server } from 'hapi';
 
 import {
-  ElasticsearchServiceSetup,
   ConfigService,
-  LoggerFactory,
+  ElasticsearchServiceSetup,
   InternalCoreSetup,
   InternalCoreStart,
+  LoggerFactory,
+  SavedObjectsClientContract,
+  SavedObjectsService,
 } from '../../core/server';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import {
-  SavedObjectsClient,
-  SavedObjectsService,
-  SavedObjectsSchema,
-  SavedObjectsManagement,
-} from './saved_objects';
 import { Capabilities } from '../../core/public';
 
 export interface KibanaConfig {
@@ -75,7 +74,7 @@ declare module 'hapi' {
   }
 
   interface Request {
-    getSavedObjectsClient(): SavedObjectsClient;
+    getSavedObjectsClient(): SavedObjectsClientContract;
     getBasePath(): string;
     getUiSettingsService(): any;
     getCapabilities(): Promise<Capabilities>;
@@ -104,7 +103,6 @@ export default class KbnServer {
     };
     stop: null;
     params: {
-      serverOptions: ElasticsearchServiceSetup;
       handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };
@@ -127,4 +125,4 @@ export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
 export { IndexPatternsService } from './index_patterns';
-export { SavedObject, SavedObjectsClient, SavedObjectsService } from './saved_objects';
+export { SavedObjectsService, SavedObjectsClient } from 'src/core/server';
