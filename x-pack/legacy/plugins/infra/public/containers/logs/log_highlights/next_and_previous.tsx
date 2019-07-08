@@ -8,7 +8,7 @@ import { isNumber } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { TimeKey } from '../../../../common/time';
-import { getLogEntryIndexAtTime } from '../../../utils/log_entry';
+import { getLogEntryIndexAtTime, getLogEntryIndexBeforeTime } from '../../../utils/log_entry';
 import { LogEntryHighlights } from './data_fetching';
 
 export const useNextAndPrevious = ({
@@ -50,7 +50,10 @@ export const useNextAndPrevious = ({
   useEffect(
     () => {
       if (currentTimeKey === null && entries.length > 0) {
-        const initialTimeKey = entries[0].key;
+        const initialIndex = visibleMidpoint
+          ? clampValue(getLogEntryIndexBeforeTime(entries, visibleMidpoint), 0, entries.length - 1)
+          : 0;
+        const initialTimeKey = entries[initialIndex].key;
         setCurrentTimeKey(initialTimeKey);
       }
     },
