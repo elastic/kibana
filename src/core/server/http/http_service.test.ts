@@ -17,7 +17,6 @@
  * under the License.
  */
 
-///<reference path="./selfsigned.d.ts" />
 import { mockHttpServer } from './http_service.test.mocks';
 
 import crypto from 'crypto';
