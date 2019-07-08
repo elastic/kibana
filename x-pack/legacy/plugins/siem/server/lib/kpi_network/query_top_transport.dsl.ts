@@ -8,7 +8,7 @@ import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody } from './types';
 
-export const buildTopTransportQuery = ({
+export const buildTopTransportProtocolsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,

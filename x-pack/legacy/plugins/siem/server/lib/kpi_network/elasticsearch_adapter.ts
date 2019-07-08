@@ -26,7 +26,7 @@ import { buildUniqueFlowIdsQuery } from './query_unique_flow.dsl';
 import { buildTopIpsQuery } from './query_top_ips.dsl';
 import { buildTransportBytesQuery } from './query_transport_bytes.dsl';
 import { buildTopPortsQuery } from './query_top_ports.dsl';
-import { buildTopTransportQuery } from './query_top_transport.dsl';
+import { buildTopTransportProtocolsQuery } from './query_top_transport.dsl';
 
 const formatHistogramData = (
   data: Array<{ key: number; count: { value: number } }>
@@ -102,15 +102,24 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
     request: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<KpiIpDetailsData> {
+    const connectionsQuery: KpiNetworkESMSearchBody[] = buildNetworkEventsQuery(options);
     const transportBytesQuery: KpiNetworkESMSearchBody[] = buildTransportBytesQuery(options);
     const topIpsQuery: KpiNetworkESMSearchBody[] = buildTopIpsQuery(options);
     const topPortsQuery: KpiNetworkESMSearchBody[] = buildTopPortsQuery(options);
-    const topTransportQuery: KpiNetworkESMSearchBody[] = buildTopTransportQuery(options);
+    const topTransportProtocolsQuery: KpiNetworkESMSearchBody[] = buildTopTransportProtocolsQuery(
+      options
+    );
     const response = await this.framework.callWithRequest<KpiIpDetailsHit, TermAggregation>(
       request,
       'msearch',
       {
-        body: [...transportBytesQuery, ...topIpsQuery, ...topPortsQuery, ...topTransportQuery],
+        body: [
+          ...connectionsQuery,
+          ...transportBytesQuery,
+          ...topIpsQuery,
+          ...topPortsQuery,
+          ...topTransportProtocolsQuery,
+        ],
       }
     );
 
