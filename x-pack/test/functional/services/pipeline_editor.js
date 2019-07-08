@@ -123,15 +123,15 @@ export function PipelineEditorProvider({ getService }) {
      */
     async assertInputs(expectedValues) {
       const values = await propsAsync({
-        id: testSubjects.getProperty(SUBJ_INPUT_ID, 'value'),
-        description: testSubjects.getProperty(SUBJ_INPUT_DESCRIPTION, 'value'),
+        id: testSubjects.getAttribute(SUBJ_INPUT_ID, 'value'),
+        description: testSubjects.getAttribute(SUBJ_INPUT_DESCRIPTION, 'value'),
         pipeline: aceEditor.getValue(SUBJ_UI_ACE_PIPELINE),
-        workers: testSubjects.getProperty(SUBJ_INPUT_WORKERS, 'value'),
-        batchSize: testSubjects.getProperty(SUBJ_INPUT_BATCH_SIZE, 'value'),
-        queueType: testSubjects.getProperty(SUBJ_SELECT_QUEUE_TYPE, 'value'),
-        queueMaxBytesNumber: testSubjects.getProperty(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
-        queueMaxBytesUnits: testSubjects.getProperty(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
-        queueCheckpointWrites: testSubjects.getProperty(
+        workers: testSubjects.getAttribute(SUBJ_INPUT_WORKERS, 'value'),
+        batchSize: testSubjects.getAttribute(SUBJ_INPUT_BATCH_SIZE, 'value'),
+        queueType: testSubjects.getAttribute(SUBJ_SELECT_QUEUE_TYPE, 'value'),
+        queueMaxBytesNumber: testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
+        queueMaxBytesUnits: testSubjects.getAttribute(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
+        queueCheckpointWrites: testSubjects.getAttribute(
           SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES,
           'value'
         ),

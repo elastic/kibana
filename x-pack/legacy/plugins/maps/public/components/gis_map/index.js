@@ -8,11 +8,12 @@ import { connect } from 'react-redux';
 import { GisMap } from './view';
 import { getFlyoutDisplay, getIsFullScreen, exitFullScreen, FLYOUT_STATE } from '../../store/ui';
 import { triggerRefreshTimer } from '../../actions/store_actions';
-import { getRefreshConfig, getMapInitError } from '../../selectors/map_selectors';
+import { areLayersLoaded, getRefreshConfig, getMapInitError } from '../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   const flyoutDisplay = getFlyoutDisplay(state);
   return {
+    areLayersLoaded: areLayersLoaded(state),
     layerDetailsVisible: flyoutDisplay === FLYOUT_STATE.LAYER_PANEL,
     addLayerVisible: flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD,
     noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE,

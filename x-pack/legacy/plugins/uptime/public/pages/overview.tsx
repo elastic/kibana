@@ -11,7 +11,6 @@ import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
-  ErrorList,
   FilterBar,
   MonitorList,
   Snapshot,
@@ -35,9 +34,10 @@ interface OverviewPageProps {
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = (
-  queryChangedEvent: { query?: { text: string }; queryText?: string }
-) => void;
+export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
+  query?: { text: string };
+  queryText?: string;
+}) => void;
 
 export const OverviewPage = ({
   basePath,
@@ -50,7 +50,17 @@ export const OverviewPage = ({
     UptimeSettingsContext
   );
   const [params, updateUrl] = useUrlParams(history, location);
-  const { dateRangeStart, dateRangeEnd, search } = params;
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    // TODO: reintegrate pagination in future release
+    // monitorListPageIndex,
+    // monitorListPageSize,
+    // TODO: reintegrate sorting in future release
+    // monitorListSortDirection,
+    // monitorListSortField,
+    search,
+  } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -89,9 +99,19 @@ export const OverviewPage = ({
 
   const linkParameters = stringifyUrlParams(params);
 
+  // TODO: reintroduce for pagination and sorting
+  // const onMonitorListChange = ({ page: { index, size }, sort: { field, direction } }: Criteria) => {
+  //   updateUrl({
+  //     monitorListPageIndex: index,
+  //     monitorListPageSize: size,
+  //     monitorListSortDirection: direction,
+  //     monitorListSortField: field,
+  //   });
+  // };
+
   return (
     <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
+      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
         <FilterBar
           currentQuery={filterQueryString}
           error={error}
@@ -101,12 +121,7 @@ export const OverviewPage = ({
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={4}>
-            <Snapshot
-              absoluteStartDate={absoluteStartDate}
-              absoluteEndDate={absoluteEndDate}
-              colors={colors}
-              variables={sharedProps}
-            />
+            <Snapshot variables={sharedProps} />
           </EuiFlexItem>
           <EuiFlexItem grow={8}>
             <SnapshotHistogram
@@ -122,15 +137,28 @@ export const OverviewPage = ({
         <MonitorList
           absoluteStartDate={absoluteStartDate}
           absoluteEndDate={absoluteEndDate}
-          basePath={basePath}
           dangerColor={colors.danger}
-          dateRangeStart={dateRangeStart}
-          dateRangeEnd={dateRangeEnd}
+          implementsCustomErrorState={true}
           linkParameters={linkParameters}
-          variables={sharedProps}
+          successColor={colors.success}
+          // TODO: reintegrate pagination in future release
+          // pageIndex={monitorListPageIndex}
+          // pageSize={monitorListPageSize}
+          // TODO: reintegrate sorting in future release
+          // sortDirection={monitorListSortDirection}
+          // sortField={monitorListSortField}
+          // TODO: reintroduce for pagination and sorting
+          // onChange={onMonitorListChange}
+          variables={{
+            ...sharedProps,
+            // TODO: reintegrate pagination in future release
+            // pageIndex: monitorListPageIndex,
+            // pageSize: monitorListPageSize,
+            // TODO: reintegrate sorting in future release
+            // sortField: monitorListSortField,
+            // sortDirection: monitorListSortDirection,
+          }}
         />
-        <EuiSpacer size="s" />
-        <ErrorList linkParameters={linkParameters} variables={sharedProps} />
       </EmptyState>
     </Fragment>
   );

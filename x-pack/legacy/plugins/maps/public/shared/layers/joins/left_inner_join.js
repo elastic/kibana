@@ -10,10 +10,6 @@ import { VectorStyle } from '../styles/vector_style';
 
 export class LeftInnerJoin {
 
-  static toHash(descriptor) {
-    return JSON.stringify(descriptor);
-  }
-
   constructor(joinDescriptor, inspectorAdapters) {
     this._descriptor = joinDescriptor;
     this._rightSource = new ESJoinSource(joinDescriptor.right, inspectorAdapters);
@@ -31,43 +27,45 @@ export class LeftInnerJoin {
     return false;
   }
 
+  getRightMetricFields() {
+    return this._rightSource.getMetricFields();
+  }
+
   getJoinFields() {
-    return this._rightSource.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
+    return this.getRightMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
     });
   }
 
+  // Source request id must be static and unique because the re-fetch logic uses the id to locate the previous request.
+  // Elasticsearch sources have a static and unique id so that requests can be modified in the inspector.
+  // Using the right source id as the source request id because it meets the above criteria.
   getSourceId() {
-    return LeftInnerJoin.toHash(this._descriptor);
+    return `join_source_${this._rightSource.getId()}`;
   }
 
   getLeftFieldName() {
     return this._descriptor.leftField;
   }
 
-  joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
-    const joinFields = this._rightSource.getMetricFields();
-    featureCollection.features.forEach(feature => {
-      // Clean up old join property values
-      joinFields.forEach(({ propertyKey }) => {
-        delete feature.properties[propertyKey];
-        const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
-        delete feature.properties[stylePropertyName];
-      });
-
-      const joinKey = feature.properties[this._descriptor.leftField];
-      if (propertiesMap && propertiesMap.has(joinKey)) {
-        Object.assign(feature.properties,  propertiesMap.get(joinKey));
-      }
-    });
+  joinPropertiesToFeature(feature, propertiesMap, rightMetricFields) {
+    for (let j = 0; j < rightMetricFields.length; j++) {
+      const { propertyKey } = rightMetricFields[j];
+      delete feature.properties[propertyKey];
+      const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
+      delete feature.properties[stylePropertyName];
+    }
+    const joinKey = feature.properties[this._descriptor.leftField];
+    if (propertiesMap && propertiesMap.has(joinKey)) {
+      Object.assign(feature.properties,  propertiesMap.get(joinKey));
+      return true;
+    } else {
+      return false;
+    }
   }
 
   getRightJoinSource() {
     return this._rightSource;
-  }
-
-  getId() {
-    return this._descriptor.id;
   }
 
   toDescriptor() {

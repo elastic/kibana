@@ -36,6 +36,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
+        refresh: expect.any(Function),
         status: 'loading'
       });
     });
@@ -46,6 +47,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
+        refresh: expect.any(Function),
         status: 'loading'
       });
     });
@@ -57,6 +59,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'response from hook',
         error: undefined,
+        refresh: expect.any(Function),
         status: 'success'
       });
     });
@@ -77,6 +80,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
+        refresh: expect.any(Function),
         status: 'loading'
       });
     });
@@ -87,6 +91,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
+        refresh: expect.any(Function),
         status: 'loading'
       });
     });
@@ -98,6 +103,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: expect.any(Error),
+        refresh: expect.any(Function),
         status: 'failure'
       });
     });
@@ -118,6 +124,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
+        refresh: expect.any(Function),
         status: 'loading'
       });
 
@@ -127,6 +134,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'first response',
         error: undefined,
+        refresh: expect.any(Function),
         status: 'success'
       });
 
@@ -145,6 +153,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'first response',
         error: undefined,
+        refresh: expect.any(Function),
         status: 'loading'
       });
 
@@ -155,8 +164,40 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'second response',
         error: undefined,
+        refresh: expect.any(Function),
         status: 'success'
       });
+    });
+
+    it('should return the same object reference when data is unchanged between rerenders', async () => {
+      const hook = renderHook(
+        ({ callback, args }) => useFetcher(callback, args),
+        {
+          initialProps: {
+            callback: async () => 'data response',
+            args: ['a']
+          }
+        }
+      );
+      await hook.waitForNextUpdate();
+      const firstResult = hook.result.current;
+      hook.rerender();
+      const secondResult = hook.result.current;
+
+      // assert: subsequent rerender returns the same object reference
+      expect(secondResult === firstResult).toEqual(true);
+
+      hook.rerender({
+        callback: async () => {
+          return 'second response';
+        },
+        args: ['b']
+      });
+      await hook.waitForNextUpdate();
+      const thirdResult = hook.result.current;
+
+      // assert: rerender with different data returns a new object
+      expect(secondResult === thirdResult).toEqual(false);
     });
   });
 });

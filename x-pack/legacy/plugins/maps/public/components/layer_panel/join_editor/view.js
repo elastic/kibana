@@ -12,7 +12,8 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiTitle,
-  EuiSpacer
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { Join } from './resources/join';
@@ -73,10 +74,16 @@ export function JoinEditor({ joins, layer, onChange }) {
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h5>
-              <FormattedMessage
-                id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-                defaultMessage="Term joins"
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoinTooltip', {
+                  defaultMessage: 'Use term joins to augment this layer with properties for data driven styling.'
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
+                  defaultMessage="Term joins"
+                />
+              </EuiToolTip>
             </h5>
           </EuiTitle>
         </EuiFlexItem>

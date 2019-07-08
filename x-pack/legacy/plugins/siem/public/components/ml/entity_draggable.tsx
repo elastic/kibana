@@ -41,7 +41,7 @@ export const EntityDraggable = React.memo<Props>(
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <>{`${entityName}: “${entityValue}”`}</>
+            <>{`${entityName}: "${entityValue}"`}</>
           )
         }
       />
