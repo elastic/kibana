@@ -175,16 +175,12 @@ function createIntegrationList(
   registryItems: RegistryList,
   integrationObjects: InstallationSavedObject[]
 ) {
-  const integrationList: IntegrationList = [];
-
-  for (const item of registryItems) {
-    const installedObject: InstallationSavedObject | undefined = integrationObjects.find(
-      ({ id }) => id === `${item.name}-${item.version}`
-    );
-
-    const integration = createInstallationObject(item, installedObject);
-    integrationList.push(integration);
-  }
+  const integrationList: IntegrationList = registryItems.map(item =>
+    createInstallationObject(
+      item,
+      integrationObjects.find(({ id }) => id === `${item.name}-${item.version}`)
+    )
+  );
 
   return integrationList.sort(sortByName);
 }
