@@ -61,7 +61,7 @@ export const MappingsEditor = ({
       minLines={6}
       aria-label={
         <FormattedMessage
-          id="xpack.index_management.mappingsEditor"
+          id="xpack.idxMgmt.mappingsEditor"
           defaultMessage="Index mappings editor"
         />
       }
