@@ -21,9 +21,12 @@ import React from 'react';
 
 import { EuiRange, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
-function PrecisionParamEditor({ agg, config, value, setValue }: AggParamEditorProps<number>) {
+const config = chrome.getUiSettingsClient();
+
+function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<number>) {
   if (agg.params.autoPrecision) {
     return null;
   }

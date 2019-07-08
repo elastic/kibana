@@ -54,12 +54,9 @@ function RawJsonParamEditor({
     setValidity(isValidJson(textValue));
   };
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow

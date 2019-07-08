@@ -3,6 +3,7 @@
 # For more info, see https://help.github.com/articles/about-codeowners/
 
 # App Architecture
+/src/plugins/data/ @elastic/kibana-app-arch
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
 
 # APM

@@ -24,32 +24,158 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
         },
       ]
     }
+    from={1560578400000}
+    id="statItems"
+    index={0}
     key="mock-keys"
+    to={1560837600000}
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-bdVaJa ggIbLt"
+        className="sc-htpNat dTaUoP"
       >
         <div
-          className="euiFlexItem sc-bdVaJa ggIbLt"
+          className="euiFlexItem sc-htpNat dTaUoP"
         >
           <EuiPanel
             grow={true}
             hasShadow={false}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
             paddingSize="m"
           >
             <div
               className="euiPanel euiPanel--paddingMedium"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
             >
-              <EuiTitle
-                size="xxxs"
+              <EuiFlexGroup
+                gutterSize="none"
               >
-                <h6
-                  className="euiTitle euiTitle--xxxsmall"
+                <div
+                  className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  HOSTS
-                </h6>
-              </EuiTitle>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiTitle
+                        size="xxxs"
+                      >
+                        <h6
+                          className="euiTitle euiTitle--xxxsmall"
+                        >
+                          HOSTS
+                        </h6>
+                      </EuiTitle>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <Connect(pure(Component))
+                        inspectIndex={0}
+                        queryId="statItems"
+                        show={false}
+                        title="KPI HOSTS"
+                      >
+                        <pure(Component)
+                          id=""
+                          inspect={null}
+                          inspectIndex={0}
+                          isInspected={false}
+                          loading={false}
+                          queryId="statItems"
+                          refetch={null}
+                          selectedInspectIndex={0}
+                          setIsInspected={[Function]}
+                          show={false}
+                          title="KPI HOSTS"
+                        >
+                          <Component
+                            id=""
+                            inspect={null}
+                            inspectIndex={0}
+                            isInspected={false}
+                            loading={false}
+                            queryId="statItems"
+                            refetch={null}
+                            selectedInspectIndex={0}
+                            setIsInspected={[Function]}
+                            show={false}
+                            title="KPI HOSTS"
+                          >
+                            <styled.div
+                              showInspect={false}
+                            >
+                              <div
+                                className="sc-bwzfXH jbTioC"
+                              >
+                                <EuiButtonIcon
+                                  aria-label="Inspect"
+                                  className=""
+                                  color="primary"
+                                  data-test-subj="inspect-icon-button"
+                                  iconSize="m"
+                                  iconType="inspect"
+                                  onClick={[Function]}
+                                  title="Inspect"
+                                  type="button"
+                                >
+                                  <button
+                                    aria-label="Inspect"
+                                    className="euiButtonIcon euiButtonIcon--primary"
+                                    data-test-subj="inspect-icon-button"
+                                    onClick={[Function]}
+                                    title="Inspect"
+                                    type="button"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      size="m"
+                                      type="inspect"
+                                    >
+                                      <EuiIconEmpty
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        style={null}
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        />
+                                      </EuiIconEmpty>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                                <ModalInspectQuery
+                                  closeModal={[Function]}
+                                  data-test-subj="inspect-modal"
+                                  isShowing={false}
+                                  request={null}
+                                  response={null}
+                                  title="KPI HOSTS"
+                                />
+                              </div>
+                            </styled.div>
+                          </Component>
+                        </pure(Component)>
+                      </Connect(pure(Component))>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
               <EuiFlexGroup>
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -58,10 +184,10 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
-                      className="sc-bdVaJa ggIbLt"
+                      className="sc-htpNat dTaUoP"
                     >
                       <div
-                        className="euiFlexItem sc-bdVaJa ggIbLt"
+                        className="euiFlexItem sc-htpNat dTaUoP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -73,17 +199,17 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                           >
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bdVaJa ggIbLt"
+                                className="sc-htpNat dTaUoP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bdVaJa ggIbLt"
+                                  className="euiFlexItem sc-htpNat dTaUoP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-bwzfXH hCEwEt"
+                                      className="sc-bxivhb eHEKZQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-bwzfXH hCEwEt"
+                                        className="euiTitle euiTitle--medium sc-bxivhb eHEKZQ"
                                         data-test-subj="stat-title"
                                       >
                                         --
@@ -141,32 +267,158 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
         },
       ]
     }
+    from={1560578400000}
+    id="statItems"
+    index={0}
     key="mock-keys"
+    to={1560837600000}
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-bdVaJa ggIbLt"
+        className="sc-htpNat dTaUoP"
       >
         <div
-          className="euiFlexItem sc-bdVaJa ggIbLt"
+          className="euiFlexItem sc-htpNat dTaUoP"
         >
           <EuiPanel
             grow={true}
             hasShadow={false}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
             paddingSize="m"
           >
             <div
               className="euiPanel euiPanel--paddingMedium"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
             >
-              <EuiTitle
-                size="xxxs"
+              <EuiFlexGroup
+                gutterSize="none"
               >
-                <h6
-                  className="euiTitle euiTitle--xxxsmall"
+                <div
+                  className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  HOSTS
-                </h6>
-              </EuiTitle>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiTitle
+                        size="xxxs"
+                      >
+                        <h6
+                          className="euiTitle euiTitle--xxxsmall"
+                        >
+                          HOSTS
+                        </h6>
+                      </EuiTitle>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <Connect(pure(Component))
+                        inspectIndex={0}
+                        queryId="statItems"
+                        show={false}
+                        title="KPI HOSTS"
+                      >
+                        <pure(Component)
+                          id=""
+                          inspect={null}
+                          inspectIndex={0}
+                          isInspected={false}
+                          loading={false}
+                          queryId="statItems"
+                          refetch={null}
+                          selectedInspectIndex={0}
+                          setIsInspected={[Function]}
+                          show={false}
+                          title="KPI HOSTS"
+                        >
+                          <Component
+                            id=""
+                            inspect={null}
+                            inspectIndex={0}
+                            isInspected={false}
+                            loading={false}
+                            queryId="statItems"
+                            refetch={null}
+                            selectedInspectIndex={0}
+                            setIsInspected={[Function]}
+                            show={false}
+                            title="KPI HOSTS"
+                          >
+                            <styled.div
+                              showInspect={false}
+                            >
+                              <div
+                                className="sc-bwzfXH jbTioC"
+                              >
+                                <EuiButtonIcon
+                                  aria-label="Inspect"
+                                  className=""
+                                  color="primary"
+                                  data-test-subj="inspect-icon-button"
+                                  iconSize="m"
+                                  iconType="inspect"
+                                  onClick={[Function]}
+                                  title="Inspect"
+                                  type="button"
+                                >
+                                  <button
+                                    aria-label="Inspect"
+                                    className="euiButtonIcon euiButtonIcon--primary"
+                                    data-test-subj="inspect-icon-button"
+                                    onClick={[Function]}
+                                    title="Inspect"
+                                    type="button"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      size="m"
+                                      type="inspect"
+                                    >
+                                      <EuiIconEmpty
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        style={null}
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        />
+                                      </EuiIconEmpty>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                                <ModalInspectQuery
+                                  closeModal={[Function]}
+                                  data-test-subj="inspect-modal"
+                                  isShowing={false}
+                                  request={null}
+                                  response={null}
+                                  title="KPI HOSTS"
+                                />
+                              </div>
+                            </styled.div>
+                          </Component>
+                        </pure(Component)>
+                      </Connect(pure(Component))>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
               <EuiFlexGroup>
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -175,10 +427,10 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
-                      className="sc-bdVaJa ggIbLt"
+                      className="sc-htpNat dTaUoP"
                     >
                       <div
-                        className="euiFlexItem sc-bdVaJa ggIbLt"
+                        className="euiFlexItem sc-htpNat dTaUoP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -191,17 +443,17 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                             0
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bdVaJa ggIbLt"
+                                className="sc-htpNat dTaUoP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bdVaJa ggIbLt"
+                                  className="euiFlexItem sc-htpNat dTaUoP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-bwzfXH hCEwEt"
+                                      className="sc-bxivhb eHEKZQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-bwzfXH hCEwEt"
+                                        className="euiTitle euiTitle--medium sc-bxivhb eHEKZQ"
                                         data-test-subj="stat-title"
                                       >
                                         --
@@ -344,32 +596,158 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
         },
       ]
     }
+    from={1560578400000}
+    id="statItems"
+    index={0}
     key="mock-keys"
+    to={1560837600000}
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-bdVaJa ggIbLt"
+        className="sc-htpNat dTaUoP"
       >
         <div
-          className="euiFlexItem sc-bdVaJa ggIbLt"
+          className="euiFlexItem sc-htpNat dTaUoP"
         >
           <EuiPanel
             grow={true}
             hasShadow={false}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
             paddingSize="m"
           >
             <div
               className="euiPanel euiPanel--paddingMedium"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
             >
-              <EuiTitle
-                size="xxxs"
+              <EuiFlexGroup
+                gutterSize="none"
               >
-                <h6
-                  className="euiTitle euiTitle--xxxsmall"
+                <div
+                  className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  UNIQUE_PRIVATE_IPS
-                </h6>
-              </EuiTitle>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiTitle
+                        size="xxxs"
+                      >
+                        <h6
+                          className="euiTitle euiTitle--xxxsmall"
+                        >
+                          UNIQUE_PRIVATE_IPS
+                        </h6>
+                      </EuiTitle>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <Connect(pure(Component))
+                        inspectIndex={0}
+                        queryId="statItems"
+                        show={false}
+                        title="KPI UNIQUE_PRIVATE_IPS"
+                      >
+                        <pure(Component)
+                          id=""
+                          inspect={null}
+                          inspectIndex={0}
+                          isInspected={false}
+                          loading={false}
+                          queryId="statItems"
+                          refetch={null}
+                          selectedInspectIndex={0}
+                          setIsInspected={[Function]}
+                          show={false}
+                          title="KPI UNIQUE_PRIVATE_IPS"
+                        >
+                          <Component
+                            id=""
+                            inspect={null}
+                            inspectIndex={0}
+                            isInspected={false}
+                            loading={false}
+                            queryId="statItems"
+                            refetch={null}
+                            selectedInspectIndex={0}
+                            setIsInspected={[Function]}
+                            show={false}
+                            title="KPI UNIQUE_PRIVATE_IPS"
+                          >
+                            <styled.div
+                              showInspect={false}
+                            >
+                              <div
+                                className="sc-bwzfXH jbTioC"
+                              >
+                                <EuiButtonIcon
+                                  aria-label="Inspect"
+                                  className=""
+                                  color="primary"
+                                  data-test-subj="inspect-icon-button"
+                                  iconSize="m"
+                                  iconType="inspect"
+                                  onClick={[Function]}
+                                  title="Inspect"
+                                  type="button"
+                                >
+                                  <button
+                                    aria-label="Inspect"
+                                    className="euiButtonIcon euiButtonIcon--primary"
+                                    data-test-subj="inspect-icon-button"
+                                    onClick={[Function]}
+                                    title="Inspect"
+                                    type="button"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      size="m"
+                                      type="inspect"
+                                    >
+                                      <EuiIconEmpty
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        style={null}
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        />
+                                      </EuiIconEmpty>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                                <ModalInspectQuery
+                                  closeModal={[Function]}
+                                  data-test-subj="inspect-modal"
+                                  isShowing={false}
+                                  request={null}
+                                  response={null}
+                                  title="KPI UNIQUE_PRIVATE_IPS"
+                                />
+                              </div>
+                            </styled.div>
+                          </Component>
+                        </pure(Component)>
+                      </Connect(pure(Component))>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
               <EuiFlexGroup>
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -378,10 +756,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueSourceIps"
                   >
                     <EuiFlexItem
-                      className="sc-bdVaJa ggIbLt"
+                      className="sc-htpNat dTaUoP"
                     >
                       <div
-                        className="euiFlexItem sc-bdVaJa ggIbLt"
+                        className="euiFlexItem sc-htpNat dTaUoP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -395,11 +773,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-bdVaJa ggIbLt"
+                                className="sc-htpNat dTaUoP"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa ggIbLt"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-htpNat dTaUoP"
                                 >
                                   <EuiIcon
                                     color="#DB1374"
@@ -438,17 +816,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </Styled(EuiFlexItem)>
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bdVaJa ggIbLt"
+                                className="sc-htpNat dTaUoP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bdVaJa ggIbLt"
+                                  className="euiFlexItem sc-htpNat dTaUoP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-bwzfXH hCEwEt"
+                                      className="sc-bxivhb eHEKZQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-bwzfXH hCEwEt"
+                                        className="euiTitle euiTitle--medium sc-bxivhb eHEKZQ"
                                         data-test-subj="stat-title"
                                       >
                                         1714
@@ -469,10 +847,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueDestinationIps"
                   >
                     <EuiFlexItem
-                      className="sc-bdVaJa ggIbLt"
+                      className="sc-htpNat dTaUoP"
                     >
                       <div
-                        className="euiFlexItem sc-bdVaJa ggIbLt"
+                        className="euiFlexItem sc-htpNat dTaUoP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -486,11 +864,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-bdVaJa ggIbLt"
+                                className="sc-htpNat dTaUoP"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa ggIbLt"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-htpNat dTaUoP"
                                 >
                                   <EuiIcon
                                     color="#490092"
@@ -529,17 +907,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </Styled(EuiFlexItem)>
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bdVaJa ggIbLt"
+                                className="sc-htpNat dTaUoP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bdVaJa ggIbLt"
+                                  className="euiFlexItem sc-htpNat dTaUoP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-bwzfXH hCEwEt"
+                                      className="sc-bxivhb eHEKZQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-bwzfXH hCEwEt"
+                                        className="euiTitle euiTitle--medium sc-bxivhb eHEKZQ"
                                         data-test-subj="stat-title"
                                       >
                                         2,359
@@ -569,10 +947,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                 >
                   <Styled(EuiFlexItem)>
                     <EuiFlexItem
-                      className="sc-bdVaJa ggIbLt"
+                      className="sc-htpNat dTaUoP"
                     >
                       <div
-                        className="euiFlexItem sc-bdVaJa ggIbLt"
+                        className="euiFlexItem sc-htpNat dTaUoP"
                       >
                         <Memo(mockConstructor)
                           barChart={
@@ -616,74 +994,65 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                   </Styled(EuiFlexItem)>
                   <Styled(EuiFlexItem)>
                     <EuiFlexItem
-                      className="sc-bdVaJa ggIbLt"
+                      className="sc-htpNat dTaUoP"
                     >
                       <div
-                        className="euiFlexItem sc-bdVaJa ggIbLt"
+                        className="euiFlexItem sc-htpNat dTaUoP"
                       >
-                        <Connect(GlobalTimeComponent)>
-                          <GlobalTimeComponent
-                            deleteAllQuery={[Function]}
-                            from={0}
-                            setGlobalQuery={[Function]}
-                            to={1}
-                          >
-                            <Memo(mockConstructor)
-                              areaChart={
-                                Array [
+                        <Memo(mockConstructor)
+                          areaChart={
+                            Array [
+                              Object {
+                                "color": "#DB1374",
+                                "key": "uniqueSourceIpsHistogram",
+                                "value": Array [
                                   Object {
-                                    "color": "#DB1374",
-                                    "key": "uniqueSourceIpsHistogram",
-                                    "value": Array [
-                                      Object {
-                                        "x": 1556888400000,
-                                        "y": 565975,
-                                      },
-                                      Object {
-                                        "x": 1556931600000,
-                                        "y": 1084366,
-                                      },
-                                      Object {
-                                        "x": 1556974800000,
-                                        "y": 12280,
-                                      },
-                                    ],
+                                    "x": 1556888400000,
+                                    "y": 565975,
                                   },
                                   Object {
-                                    "color": "#490092",
-                                    "key": "uniqueDestinationIpsHistogram",
-                                    "value": Array [
-                                      Object {
-                                        "x": 1556888400000,
-                                        "y": 565975,
-                                      },
-                                      Object {
-                                        "x": 1556931600000,
-                                        "y": 1084366,
-                                      },
-                                      Object {
-                                        "x": 1556974800000,
-                                        "y": 12280,
-                                      },
-                                    ],
+                                    "x": 1556931600000,
+                                    "y": 1084366,
                                   },
-                                ]
-                              }
-                              configs={
-                                Object {
-                                  "axis": Object {
-                                    "xTickFormatter": [Function],
-                                    "yTickFormatter": [Function],
+                                  Object {
+                                    "x": 1556974800000,
+                                    "y": 12280,
                                   },
-                                  "series": Object {
-                                    "xScaleType": "time",
-                                    "yScaleType": "linear",
+                                ],
+                              },
+                              Object {
+                                "color": "#490092",
+                                "key": "uniqueDestinationIpsHistogram",
+                                "value": Array [
+                                  Object {
+                                    "x": 1556888400000,
+                                    "y": 565975,
                                   },
-                                }
-                              }
-                            />
-                          </GlobalTimeComponent>
-                        </Connect(GlobalTimeComponent)>
+                                  Object {
+                                    "x": 1556931600000,
+                                    "y": 1084366,
+                                  },
+                                  Object {
+                                    "x": 1556974800000,
+                                    "y": 12280,
+                                  },
+                                ],
+                              },
+                            ]
+                          }
+                          configs={
+                            Object {
+                              "axis": Object {
+                                "xTickFormatter": [Function],
+                                "yTickFormatter": [Function],
+                              },
+                              "series": Object {
+                                "xScaleType": "time",
+                                "yScaleType": "linear",
+                              },
+                            }
+                          }
+                        />
                       </div>
                     </EuiFlexItem>
                   </Styled(EuiFlexItem)>

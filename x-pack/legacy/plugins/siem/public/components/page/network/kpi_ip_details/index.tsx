@@ -34,13 +34,22 @@ const FlexGroup = styled(EuiFlexGroup)`
 export const KpiIpDetailsBaseComponent = ({
   fieldsMapping,
   data,
+  id,
+  from,
+  to,
 }: {
-  fieldsMapping: Readonly<Array<StatItems<KpiValue>>>;
+  fieldsMapping: Array<StatItems<KpiValue>>;
   data: KpiIpDetailsData;
+  id: string;
+  from: number;
+  to: number;
 }) => {
-  const statItemsProps: Readonly<Array<StatItemsProps<KpiValue>>> = useKpiMatrixStatus(
+  const statItemsProps: Array<StatItemsProps<KpiValue>> = useKpiMatrixStatus(
     fieldsMapping,
-    data
+    data,
+    id,
+    from,
+    to
   );
 
   return (
@@ -62,10 +71,10 @@ export const KpiIpDetailsComponent = React.memo<KpiIpDetailsProps>(({ data, load
   ) : (
     <EuiFlexGroup wrap>
       <EuiFlexItem grow={1}>
-        {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
+        {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappings, idx) => (
           <React.Fragment key={`kpi-ip-details-row-${idx}`}>
             {idx !== 0 && <EuiSpacer size="l" />}
-            <KpiIpDetailsBaseComponent data={data} fieldsMapping={mappingsPerLine} />
+            <KpiIpDetailsBaseComponent data={data} fieldsMapping={mappings} />
           </React.Fragment>
         ))}
       </EuiFlexItem>

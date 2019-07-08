@@ -33,9 +33,11 @@ jest.mock('../empty_value', () => ({
   getEmptyTagValue: jest.fn().mockReturnValue('--'),
 }));
 
+const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
+const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+
 describe('Stat Items Component', () => {
   const state: State = mockGlobalState;
-
   const store = createStore(state, apolloClientObservable);
   const mockHostsValue = null;
 
@@ -46,7 +48,11 @@ describe('Stat Items Component', () => {
           <StatItemsComponent
             fields={[{ key: 'hosts', value: mockHostsValue, color: '#3185FC', icon: 'cross' }]}
             description="HOSTS"
+            from={from}
+            id="statItems"
+            index={0}
             key="mock-keys"
+            to={to}
           />
         </ReduxStoreProvider>
       ),
@@ -59,7 +65,11 @@ describe('Stat Items Component', () => {
             description="HOSTS"
             areaChart={[]}
             barChart={[]}
+            from={from}
+            id="statItems"
+            index={0}
             key="mock-keys"
+            to={to}
           />
         </ReduxStoreProvider>
       ),
@@ -153,7 +163,11 @@ describe('Stat Items Component', () => {
         },
       ],
       description: 'UNIQUE_PRIVATE_IPS',
+      from,
+      id: 'statItems',
+      index: 0,
       key: 'mock-keys',
+      to,
     };
     let wrapper: ReactWrapper;
     beforeAll(() => {
@@ -252,8 +266,11 @@ describe('useKpiMatrixStatus', () => {
     data: KpiNetworkData | KpiHostsData;
   }) => {
     const statItemsProps: Readonly<Array<StatItemsProps<KpiValue>>> = useKpiMatrixStatus(
-      fieldsMapping,
-      data
+      fieldsMapping as Array<StatItemsProps<KpiValue>>,
+      data,
+      'statItem',
+      from,
+      to
     );
 
     return (

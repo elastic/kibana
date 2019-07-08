@@ -14,8 +14,9 @@ import { InputsModelId } from '../../store/inputs/constants';
 
 interface TimelineRefetchDispatch {
   setTimelineQuery: ActionCreator<{
-    inputId: InputsModelId;
     id: string;
+    inputId: InputsModelId;
+    inspect: inputsModel.InspectQuery | null;
     loading: boolean;
     refetch: inputsModel.Refetch;
   }>;
@@ -24,6 +25,7 @@ interface TimelineRefetchDispatch {
 interface TimelineRefetchProps {
   children: React.ReactNode;
   id: string;
+  inspect: inputsModel.InspectQuery | null;
   loading: boolean;
   refetch: inputsModel.Refetch;
 }
@@ -32,9 +34,9 @@ type OwnProps = TimelineRefetchDispatch & TimelineRefetchProps;
 
 class TimelineRefetchComponent extends React.PureComponent<OwnProps> {
   public componentDidUpdate(prevProps: OwnProps) {
-    const { loading, id, refetch } = this.props;
+    const { loading, id, inspect, refetch } = this.props;
     if (prevProps.loading !== loading) {
-      this.props.setTimelineQuery({ inputId: 'timeline', id, loading, refetch });
+      this.props.setTimelineQuery({ id, inputId: 'timeline', inspect, loading, refetch });
     }
   }
 

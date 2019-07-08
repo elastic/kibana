@@ -19,14 +19,17 @@ import {
   NetworkTopNFlowSortField,
   PageInfo,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { networkTopNFlowQuery } from './index.gql_query';
 
+const ID = 'networkTopNFlowQuery';
+
 export interface NetworkTopNFlowArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   networkTopNFlow: NetworkTopNFlowEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -41,6 +44,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface NetworkTopNFlowComponentReduxProps {
+  isInspected: boolean;
   limit: number;
   flowDirection: FlowDirection;
   topNFlowSort: NetworkTopNFlowSortField;
@@ -56,7 +60,8 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'networkTopNFlowQuery',
+      id = ID,
+      isInspected,
       children,
       filterQuery,
       skip,
@@ -91,6 +96,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
           },
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -124,6 +130,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.NetworkTopNFlow.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.NetworkTopNFlow.totalCount', data),
@@ -139,8 +146,14 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const mapStateToProps = (state: State) => getNetworkTopNFlowSelector(state);
-
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getNetworkTopNFlowSelector(state),
+      isInspected,
+    };
+  };
   return mapStateToProps;
 };
 

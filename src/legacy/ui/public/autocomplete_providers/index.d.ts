@@ -22,23 +22,19 @@
  */
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-export type AutocompleteProvider = (
-  args: {
-    config: {
-      get(configKey: string): any;
-    };
-    indexPatterns: StaticIndexPattern[];
-    boolFilter?: any;
-  }
-) => GetSuggestions;
+export type AutocompleteProvider = (args: {
+  config: {
+    get(configKey: string): any;
+  };
+  indexPatterns: StaticIndexPattern[];
+  boolFilter?: any;
+}) => GetSuggestions;
 
-export type GetSuggestions = (
-  args: {
-    query: string;
-    selectionStart: number;
-    selectionEnd: number;
-  }
-) => Promise<AutocompleteSuggestion[]>;
+export type GetSuggestions = (args: {
+  query: string;
+  selectionStart: number;
+  selectionEnd: number;
+}) => Promise<AutocompleteSuggestion[]>;
 
 export type AutocompleteSuggestionType =
   | 'field'

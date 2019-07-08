@@ -15,6 +15,7 @@ const euiColorVis3 = '#490092';
 export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
     key: 'UniqueIps',
+    index: 4,
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
@@ -47,6 +48,7 @@ export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
 export const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
     key: 'networkEvents',
+    index: 0,
     fields: [
       {
         key: 'networkEvents',
@@ -61,6 +63,7 @@ export const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
   },
   {
     key: 'dnsQueries',
+    index: 1,
     fields: [
       {
         key: 'dnsQueries',
@@ -73,6 +76,7 @@ export const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
   },
   {
     key: 'uniqueFlowId',
+    index: 2,
     fields: [
       {
         key: 'uniqueFlowId',
@@ -85,6 +89,7 @@ export const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
   },
   {
     key: 'tlsHandshakes',
+    index: 3,
     fields: [
       {
         key: 'tlsHandshakes',

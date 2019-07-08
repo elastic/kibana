@@ -35,15 +35,7 @@ interface Props {
   isFilterQueryDraftValid: boolean;
   kqlMode: KqlMode;
   timelineId: string;
-  updateKqlMode: (
-    {
-      id,
-      kqlMode,
-    }: {
-      id: string;
-      kqlMode: KqlMode;
-    }
-  ) => void;
+  updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   setKqlFilterQueryDraft: (expression: string) => void;
 }
 

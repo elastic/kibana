@@ -45,6 +45,7 @@ const usersTests: KbnTestProvider = ({ getService }) => {
                 limit: 10,
                 cursor: null,
               },
+              inspect: false,
             },
           })
           .then(resp => {
