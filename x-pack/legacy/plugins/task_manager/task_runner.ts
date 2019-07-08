@@ -12,7 +12,7 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import { minutesFromNow, intervalFromDate } from './lib/intervals';
+import { minutesFromNow, intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
 import {
@@ -178,7 +178,8 @@ export class TaskManagerRunner implements TaskRunner {
         attempts,
         retryAt: this.definition.getRetryDelay
           ? new Date(
-              now.valueOf() + this.definition.getRetryDelay(attempts, Boom.clientTimeout()) * 1000
+              intervalFromNow(this.definition.timeout!)!.valueOf() +
+                this.definition.getRetryDelay(attempts, Boom.clientTimeout()) * 1000
             )
           : minutesFromNow(attempts * 5), // incrementally backs off an extra 5m per failure
       });
