@@ -75,6 +75,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showQueryBar: true,
     showFilterBar: true,
     showDatePicker: true,
+    showAutoRefreshOnly: false,
   };
 
   public filterBarRef: Element | null = null;

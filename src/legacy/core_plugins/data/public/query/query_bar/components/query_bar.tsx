@@ -82,7 +82,8 @@ interface State {
 export class QueryBarUI extends Component<Props, State> {
   public static defaultProps = {
     showQueryInput: true,
-    showDatePicker: true,
+    showDatePicker: false,
+    showAutoRefreshOnly: false,
   };
 
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
