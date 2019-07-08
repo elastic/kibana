@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { joinRows } from '../../functions/common/join_rows';
-import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof joinRows>> = {
@@ -18,7 +17,7 @@ export const help: FunctionHelp<FunctionFactory<typeof joinRows>> = {
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.joinRows.args.columnHelpText', {
-      defaultMessage: 'The column or field from which to extract the unique values ',
+      defaultMessage: 'The column or field from which to extract the unique values.',
     }),
     distinct: i18n.translate('xpack.canvas.functions.joinRows.args.distinctHelpText', {
       defaultMessage: 'Extract only unique values?',

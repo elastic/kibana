@@ -28,10 +28,10 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
       defaultMessage: 'The line color.',
     }),
     lines: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesHelpText', {
-      defaultMessage: 'The width of the line',
+      defaultMessage: 'The width of the line.',
     }),
     bars: i18n.translate('xpack.canvas.functions.seriesStyle.args.barsHelpText', {
-      defaultMessage: 'The width of bars',
+      defaultMessage: 'The width of bars.',
     }),
     points: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsHelpText', {
       defaultMessage: 'Size of points on line',

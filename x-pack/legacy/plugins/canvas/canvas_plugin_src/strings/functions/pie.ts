@@ -31,7 +31,7 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
         'The percentage of the container area to use as a radius for the label circle.',
     }),
     labels: i18n.translate('xpack.canvas.functions.pie.args.labelsHelpText', {
-      defaultMessage: 'Displays the pie labels?',
+      defaultMessage: 'Display the pie labels?',
     }),
     legend: i18n.translate('xpack.canvas.functions.pie.args.legendHelpText', {
       defaultMessage:

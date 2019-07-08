@@ -34,7 +34,7 @@ export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
       },
     }),
     max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
-      defaultMessage: 'The maximum number of times the image can repeat',
+      defaultMessage: 'The maximum number of times the image can repeat.',
     }),
     size: i18n.translate('xpack.canvas.functions.repeatImage.args.sizeHelpText', {
       defaultMessage:

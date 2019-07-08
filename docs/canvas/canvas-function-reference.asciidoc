@@ -1295,7 +1295,7 @@ Default: `100`
 
 |`labels`
 |`boolean`
-|Displays the pie labels?
+|Display the pie labels?
 
 Default: `true`
 
