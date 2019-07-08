@@ -108,9 +108,8 @@ export class StylePropertyLegendRow extends Component {
   }
 
   _isStatic() {
-    const { type, options } = this.props;
-    return type === VectorStyle.STYLE_TYPE.STATIC ||
-        !options.field || !options.field.name;
+    return this.props.type === VectorStyle.STYLE_TYPE.STATIC ||
+        !this.props.options.field || !this.props.options.field.name;
   }
 
   render() {

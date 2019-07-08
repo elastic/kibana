@@ -181,8 +181,8 @@ export class VectorLayer extends AbstractLayer {
 
   getLegendDetails() {
     const getFieldLabel = async fieldName => {
-      const oridinalFields = await this.getOrdinalFields();
-      const field = oridinalFields.find(({ name }) => {
+      const ordinalFields = await this.getOrdinalFields();
+      const field = ordinalFields.find(({ name }) => {
         return name === fieldName;
       });
 
