@@ -16,4 +16,9 @@ describe('serialize', () => {
     const result = serialize('1562605032000');
     expect(result).toBe(1562605032000);
   });
+
+  it('serializes non-date and non-numeric values to NaN', () => {
+    const result = serialize('foo');
+    expect(result).toBeNaN();
+  });
 });
