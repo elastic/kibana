@@ -47,10 +47,9 @@ export function TopNavMenu(props: Props) {
   }
 
   function renderSearchBar() {
-    if (!props.showSearchBar) return;
-
     // Validate presense of all required fields
     if (
+      !props.showSearchBar ||
       !props.appName ||
       !props.query ||
       !props.screenTitle ||
@@ -58,7 +57,7 @@ export function TopNavMenu(props: Props) {
       !props.indexPatterns ||
       !props.store
     ) {
-      throw 'Missing attributes to initialize search bar';
+      return;
     }
 
     return (
