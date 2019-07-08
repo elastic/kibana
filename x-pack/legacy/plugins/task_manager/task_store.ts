@@ -159,9 +159,7 @@ export class TaskStore {
     // Activate template creation / update
     if (existingVersion > 0) {
       this.logger.info(
-        `Upgrading ${
-          this.index
-        } index template. Old version: ${existingVersion}, New version: ${TEMPLATE_VERSION}.`
+        `Upgrading ${this.index} index template. Old version: ${existingVersion}, New version: ${TEMPLATE_VERSION}.`
       );
     } else {
       this.logger.info(`Installing ${this.index} index template version: ${TEMPLATE_VERSION}.`);
@@ -210,9 +208,7 @@ export class TaskStore {
 
     this._isInitialized = true;
     this.logger.info(
-      `Installed ${
-        this.index
-      } index template: version ${TEMPLATE_VERSION} (API version ${API_VERSION})`
+      `Installed ${this.index} index template: version ${TEMPLATE_VERSION} (API version ${API_VERSION})`
     );
 
     return templateResult;

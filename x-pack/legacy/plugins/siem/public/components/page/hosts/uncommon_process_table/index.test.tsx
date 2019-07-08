@@ -24,12 +24,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = shallow(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -42,12 +43,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -66,12 +68,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -91,12 +94,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -116,12 +120,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -141,12 +146,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -166,12 +172,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -190,12 +197,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -214,12 +222,13 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
-            totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
+            totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
