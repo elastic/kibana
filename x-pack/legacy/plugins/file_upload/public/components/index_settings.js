@@ -8,18 +8,29 @@ import React, { Fragment, Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiSelect, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getExistingIndices, getExistingIndexPatterns }
-  from '../util/indexing_service';
+import {
+  getExistingIndexNames,
+  getExistingIndexPatternNames,
+  checkIndexPatternValid,
+} from '../util/indexing_service';
 
 export class IndexSettings extends Component {
 
   state = {
     indexNameError: '',
     indexDisabled: true,
-    indexPatterns: null,
-    indexNames: null,
     indexName: '',
+    indexNameList: [],
+    indexPatternList: [],
   };
+
+  async componentDidMount() {
+    this.setState({
+      // Set once on component load
+      indexNameList: await getExistingIndexNames(),
+      indexPatternList: await getExistingIndexPatternNames(),
+    });
+  }
 
   componentDidUpdate(prevProps, prevState) {
     const { indexNameError, indexName } = this.state;
@@ -36,48 +47,24 @@ export class IndexSettings extends Component {
     }
   }
 
-  async _getIndexNames() {
-    if (this.state.indexNames) {
-      return this.state.indexNames;
-    }
-    const indices = await getExistingIndices();
-    const indexNames = indices
-      ? indices.map(({ name }) => name)
-      : [];
-    this.setState({ indexNames });
-    return indexNames;
-  }
-
-  async _getIndexPatterns() {
-    if (this.state.indexPatterns) {
-      return this.state.indexPatterns;
-    }
-    const patterns = await getExistingIndexPatterns();
-    const indexPatterns = patterns
-      ? patterns.map(({ name }) => name)
-      : [];
-    this.setState({ indexPatterns });
-    return indexPatterns;
-  }
-
   _setIndexName = async name => {
     const errorMessage = await this._isIndexNameAndPatternValid(name);
     return this.setState({
       indexName: name,
       indexNameError: errorMessage
     });
-  }
+  };
 
   _onIndexChange = async ({ target }) => {
     const name = target.value;
     await this._setIndexName(name);
     this.props.setIndexName(name);
-  }
+  };
 
   _isIndexNameAndPatternValid = async name => {
-    const indexNames = await this._getIndexNames();
-    const indexPatterns = await this._getIndexPatterns();
-    if (indexNames.find(i => i === name) || indexPatterns.find(i => i === name)) {
+    const { indexNameList, indexPatternList } = this.state;
+    const nameAlreadyInUse = [ ...indexNameList, ...indexPatternList ].includes(name);
+    if (nameAlreadyInUse) {
       return (
         <FormattedMessage
           id="xpack.fileUpload.indexSettings.indexNameAlreadyExistsErrorMessage"
@@ -86,13 +73,8 @@ export class IndexSettings extends Component {
       );
     }
 
-    const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
-    if (
-      (name !== name.toLowerCase()) || // name should be lowercase
-      (name === '.' || name === '..')   || // name can't be . or ..
-      name.match(/^[-_+]/) !== null  || // name can't start with these chars
-      name.match(reg) !== null // name can't contain these chars
-    ) {
+    const indexPatternValid = await checkIndexPatternValid(name);
+    if (!indexPatternValid) {
       return (
         <FormattedMessage
           id="xpack.fileUpload.indexSettings.indexNameContainsIllegalCharactersErrorMessage"
@@ -101,7 +83,7 @@ export class IndexSettings extends Component {
       );
     }
     return '';
-  }
+  };
 
   render() {
     const { setSelectedIndexType, indexTypes } = this.props;
