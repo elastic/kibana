@@ -13,7 +13,7 @@ Array [
                 "min": 1528113600000,
               },
               "field": "@timestamp",
-              "fixed_interval": 10,
+              "interval": 10,
               "min_doc_count": 0,
             },
           },
