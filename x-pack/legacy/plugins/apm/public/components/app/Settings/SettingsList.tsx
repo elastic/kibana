@@ -292,7 +292,8 @@ export function SettingsList() {
           <ManagedTable
             columns={COLUMNS}
             items={data}
-            initialSort={{ field: 'service.name', direction: 'asc' }}
+            initialSortField="service.name"
+            initialSortDirection="asc"
             initialPageSize={50}
           />
         ) : (
