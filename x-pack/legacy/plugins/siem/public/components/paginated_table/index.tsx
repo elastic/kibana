@@ -19,6 +19,8 @@ import React, { memo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
+import { HostsTableColumns } from '../page/hosts/hosts_table';
+import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
 
@@ -42,37 +44,13 @@ export interface Criteria {
   sort?: SortingBasicTable;
 }
 
+declare type BasicTableColumns = AuthTableColumns | HostsTableColumns;
+
+declare type SiemTables = BasicTableProps<BasicTableColumns>;
+
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
-export interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
-  columns:
-    | [Columns<T>]
-    | [Columns<T>, Columns<U>]
-    | [Columns<T>, Columns<U>, Columns<V>]
-    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>]
-    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>]
-    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>]
-    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>, Columns<Z>]
-    | [
-        Columns<T>,
-        Columns<U>,
-        Columns<V>,
-        Columns<W>,
-        Columns<X>,
-        Columns<Y>,
-        Columns<Z>,
-        Columns<AA>
-      ]
-    | [
-        Columns<T>,
-        Columns<U>,
-        Columns<V>,
-        Columns<W>,
-        Columns<X>,
-        Columns<Y>,
-        Columns<Z>,
-        Columns<AA>,
-        Columns<AB>
-      ];
+export interface BasicTableProps<T> {
+  columns: T;
   dataTestSubj?: string;
   headerCount: number;
   headerSupplement?: React.ReactElement;
@@ -108,8 +86,7 @@ export interface Columns<T> {
   width?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const PaginatedTable = memo<BasicTableProps<any>>(
+export const PaginatedTable = memo<SiemTables>(
   ({
     columns,
     dataTestSubj = DEFAULT_DATA_TEST_SUBJ,

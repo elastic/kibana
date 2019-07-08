@@ -57,6 +57,18 @@ interface AuthenticationTableDispatchProps {
   }>;
 }
 
+export declare type AuthTableColumns = [
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>
+];
+
 type AuthenticationTableProps = OwnProps &
   AuthenticationTableReduxProps &
   AuthenticationTableDispatchProps;
@@ -134,17 +146,7 @@ export const AuthenticationTable = connect(
   }
 )(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (): [
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>
-] => [
+const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.USER,
     truncateText: false,

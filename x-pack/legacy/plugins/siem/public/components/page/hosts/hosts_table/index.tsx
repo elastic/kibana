@@ -78,17 +78,18 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 50,
   },
 ];
+export declare type HostsTableColumns = [
+  Columns<HostFields['name']>,
+  Columns<HostItem['lastSeen']>,
+  Columns<OsFields['name']>,
+  Columns<OsFields['version']>
+];
 
 class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   private memoizedColumns: (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ) => [
-    Columns<HostFields['name']>,
-    Columns<HostItem['lastSeen']>,
-    Columns<OsFields['name']>,
-    Columns<OsFields['version']>
-  ];
+  ) => HostsTableColumns;
   private memoizedSorting: (
     trigger: string,
     sortField: HostsFields,
@@ -150,12 +151,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   private getMemoizeHostsColumns = (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ): [
-    Columns<HostFields['name']>,
-    Columns<HostItem['lastSeen']>,
-    Columns<OsFields['name']>,
-    Columns<OsFields['version']>
-  ] => getHostsColumns(type, indexPattern);
+  ): HostsTableColumns => getHostsColumns(type, indexPattern);
 
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {
