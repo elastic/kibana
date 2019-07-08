@@ -38,13 +38,10 @@ export const useSiemJobs = (refetchData: boolean): Return => {
     setLoading(false);
   };
 
-  useEffect(
-    () => {
-      setLoading(true);
-      fetchFunc();
-    },
-    [refetchData]
-  );
+  useEffect(() => {
+    setLoading(true);
+    fetchFunc();
+  }, [refetchData]);
 
   return [loading, siemJobs];
 };

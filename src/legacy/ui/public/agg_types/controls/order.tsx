@@ -37,19 +37,16 @@ function OrderParamEditor({
   });
   const isValid = !!value;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      compressed
     >
       <EuiSelect
         options={aggParam.options.raw}

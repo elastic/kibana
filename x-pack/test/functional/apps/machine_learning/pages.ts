@@ -11,7 +11,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('page navigation', () => {
+  describe('page navigation', function() {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

@@ -20,10 +20,4 @@ export interface InfraMetadataAdapter {
     nodeId: string,
     nodeType: string
   ): Promise<InfraMetricsAdapterResponse>;
-  getLogMetadata(
-    req: InfraFrameworkRequest,
-    sourceConfiguration: InfraSourceConfiguration,
-    nodeId: string,
-    nodeType: string
-  ): Promise<InfraMetricsAdapterResponse>;
 }

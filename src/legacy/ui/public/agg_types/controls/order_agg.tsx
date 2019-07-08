@@ -31,22 +31,19 @@ function OrderAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  useEffect(
-    () => {
-      if (responseValueAggs) {
-        const orderBy = agg.params.orderBy;
+  useEffect(() => {
+    if (responseValueAggs) {
+      const orderBy = agg.params.orderBy;
 
-        // we aren't creating a custom aggConfig
-        if (!orderBy || orderBy !== 'custom') {
-          setValue(null);
-        } else {
-          const paramDef = agg.type.params.byName.orderAgg;
-          setValue(value || paramDef.makeOrderAgg(agg));
-        }
+      // we aren't creating a custom aggConfig
+      if (!orderBy || orderBy !== 'custom') {
+        setValue(null);
+      } else {
+        const paramDef = agg.type.params.byName.orderAgg;
+        setValue(value || paramDef.makeOrderAgg(agg));
       }
-    },
-    [agg.params.orderBy, responseValueAggs]
-  );
+    }
+  }, [agg.params.orderBy, responseValueAggs]);
 
   const [innerState, setInnerState] = useState(true);
 
