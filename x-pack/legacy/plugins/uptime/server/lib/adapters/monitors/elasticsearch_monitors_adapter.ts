@@ -69,6 +69,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             filter: [
               { range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } },
               { term: { 'monitor.id': monitorId } },
+              { term: { 'monitor.status': 'up' } },
               // if location is truthy, add it as a filter. otherwise add nothing
               ...(!!location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
@@ -80,6 +81,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             date_histogram: {
               field: '@timestamp',
               fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+              missing: null,
             },
             aggs: {
               location: {
