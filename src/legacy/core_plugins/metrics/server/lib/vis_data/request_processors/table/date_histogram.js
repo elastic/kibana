@@ -18,6 +18,7 @@
  */
 
 import { set } from 'lodash';
+import { dateHistogramInterval } from '../../../../../../data/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
@@ -41,19 +42,19 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
 
         set(doc, `${aggRoot}.timeseries.date_histogram`, {
           field: timeField,
-          interval: intervalString,
           min_doc_count: 0,
           time_zone: timezone,
           extended_bounds: {
             min: from.valueOf(),
             max: to.valueOf(),
           },
+          ...dateHistogramInterval(intervalString),
         });
 
         set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
-          ...meta,
-          bucketSize,
+          timeField,
           intervalString,
+          bucketSize,
         });
       });
     };

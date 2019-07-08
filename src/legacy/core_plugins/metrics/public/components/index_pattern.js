@@ -19,13 +19,6 @@
 
 import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FieldSelect } from './aggs/field_select';
-import { createSelectHandler } from './lib/create_select_handler';
-import { createTextHandler } from './lib/create_text_handler';
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../common/panel_types';
-import { YesNo } from './yes_no';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -35,11 +28,36 @@ import {
   EuiComboBox,
   EuiText,
 } from '@elastic/eui';
+import { FieldSelect } from './aggs/field_select';
+import { createSelectHandler } from './lib/create_select_handler';
+import { createTextHandler } from './lib/create_text_handler';
+import { YesNo } from './yes_no';
 import { ES_TYPES } from '../../common/es_types';
+import { FormValidationContext } from '../contexts/form_validation_context';
+import {
+  isGteInterval,
+  validateReInterval,
+  isAutoInterval,
+  AUTO_INTERVAL,
+} from './lib/get_interval';
+import { i18n } from '@kbn/i18n';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../common/timerange_data_modes';
+import { PANEL_TYPES } from '../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
+
+const validateIntervalValue = intervalValue => {
+  const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
+
+  if (isAutoOrGteInterval) {
+    return {
+      isValid: true,
+    };
+  }
+  return validateReInterval(intervalValue);
+};
 
 const htmlId = htmlIdGenerator();
 
@@ -53,6 +71,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
+  const updateControlValidity = useContext(FormValidationContext);
   const uiRestrictions = useContext(UIRestrictionsContext);
 
   const timeRangeOptions = [
@@ -75,17 +94,20 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   const defaults = {
     default_index_pattern: '',
     [indexPatternName]: '*',
-    [intervalName]: 'auto',
+    [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
 
   const model = { ...defaults, ..._model };
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
+  const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
   );
   const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
+
+  updateControlValidity(intervalName, intervalValidation.isValid);
 
   return (
     <div className="index-pattern">
@@ -162,6 +184,8 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
+            isInvalid={!intervalValidation.isValid}
+            error={intervalValidation.errorMessage}
             id={htmlId('interval')}
             label={i18n.translate('tsvb.indexPattern.intervalLabel', {
               defaultMessage: 'Interval',
@@ -173,10 +197,11 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             })}
           >
             <EuiFieldText
+              isInvalid={!intervalValidation.isValid}
               disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
-              onChange={handleTextChange(intervalName, 'auto')}
+              onChange={handleTextChange(intervalName, AUTO_INTERVAL)}
               value={model[intervalName]}
-              placeholder={'auto'}
+              placeholder={AUTO_INTERVAL}
             />
           </EuiFormRow>
         </EuiFlexItem>

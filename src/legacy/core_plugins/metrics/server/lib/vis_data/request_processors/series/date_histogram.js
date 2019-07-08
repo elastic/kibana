@@ -16,42 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { set } from 'lodash';
 
-import { offsetTime } from '../../offset_time';
-import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
+import { set } from 'lodash';
+import { dateHistogramInterval } from '../../../../../../data/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
+import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 
 export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
-    let meta = {
-      timeField,
-      seriesId: series.id,
-    };
+    const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
 
     const getDateHistogramForLastBucketMode = () => {
-      const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
       const { from, to } = offsetTime(req, series.offset_time);
       const timezone = capabilities.searchTimezone;
 
       set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
-        interval: intervalString,
         min_doc_count: 0,
         time_zone: timezone,
         extended_bounds: {
           min: from.valueOf(),
           max: to.valueOf(),
         },
+        ...dateHistogramInterval(intervalString),
       });
-
-      meta = {
-        ...meta,
-        bucketSize,
-        intervalString,
-      };
     };
 
     const getDateHistogramForEntireTimerangeMode = () =>
@@ -64,7 +55,14 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
       ? getDateHistogramForLastBucketMode()
       : getDateHistogramForEntireTimerangeMode();
 
-    set(doc, `aggs.${series.id}.meta`, meta);
+    // master
+
+    set(doc, `aggs.${series.id}.meta`, {
+      timeField,
+      intervalString,
+      bucketSize,
+      seriesId: series.id,
+    });
 
     return next(doc);
   };
