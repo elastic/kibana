@@ -21,11 +21,10 @@ import { DataFrameJobListColumn, DataFrameJobListRow } from './common';
 import { getActions } from './actions';
 
 export const getColumns = (
-  getJobs: () => void,
   expandedRowItemIds: JobId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<JobId[]>>
 ) => {
-  const actions = getActions(getJobs);
+  const actions = getActions();
 
   function toggleDetails(item: DataFrameJobListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);

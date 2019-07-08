@@ -8,14 +8,17 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../../services/ml_api_service';
 
-import { DataFrameJobListRow } from '../common';
+import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../../common';
 
-import { GetJobs } from './get_jobs';
+import { DATA_FRAME_TASK_STATE, DataFrameJobListRow } from '../common';
 
-export const stopJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListRow) => {
+export const stopJob = async (d: DataFrameJobListRow) => {
   try {
-    await ml.dataFrame.stopDataFrameTransformsJob(d.config.id);
-    getJobs(true);
+    await ml.dataFrame.stopDataFrameTransformsJob(
+      d.config.id,
+      d.state.task_state === DATA_FRAME_TASK_STATE.FAILED,
+      true
+    );
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.jobsList.stopJobSuccessMessage', {
         defaultMessage: 'Data frame job {jobId} stopped successfully.',
@@ -30,4 +33,5 @@ export const stopJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListRo
       })
     );
   }
+  refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
 };

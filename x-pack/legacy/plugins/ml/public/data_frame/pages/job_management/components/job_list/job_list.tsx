@@ -111,7 +111,7 @@ export const DataFrameJobList: SFC = () => {
     );
   }
 
-  const columns = getColumns(getJobs, expandedRowItemIds, setExpandedRowItemIds);
+  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds);
 
   const sorting = {
     sort: {

@@ -8,18 +8,23 @@ import { Dictionary } from '../../../../../../common/types/common';
 
 import { JobId, DataFrameTransformWithId } from '../../../../common';
 
-export enum DATA_FRAME_RUNNING_STATE {
+export enum DATA_FRAME_TASK_STATE {
+  FAILED = 'failed',
   STARTED = 'started',
   STOPPED = 'stopped',
 }
-type RunningState = DATA_FRAME_RUNNING_STATE.STARTED | DATA_FRAME_RUNNING_STATE.STOPPED;
+
+type DataFrameTaskState =
+  | DATA_FRAME_TASK_STATE.FAILED
+  | DATA_FRAME_TASK_STATE.STARTED
+  | DATA_FRAME_TASK_STATE.STOPPED;
 
 export interface DataFrameJobState {
   checkpoint: number;
   current_position: Dictionary<any>;
   // indexer_state is a backend internal attribute
   // and should not be considered in the UI.
-  indexer_state: RunningState;
+  indexer_state: DataFrameTaskState;
   progress?: {
     docs_remaining: number;
     percent_complete: number;
@@ -27,7 +32,7 @@ export interface DataFrameJobState {
   };
   // task_state is the attribute to check against if a job
   // is running or not.
-  task_state: RunningState;
+  task_state: DataFrameTaskState;
 }
 
 export interface DataFrameJobStats {
@@ -67,6 +72,6 @@ export function isCompletedBatchJob(item: DataFrameJobListRow) {
   return (
     item.state.checkpoint === 1 &&
     item.config.sync === undefined &&
-    item.state.task_state === DATA_FRAME_RUNNING_STATE.STOPPED
+    item.state.task_state === DATA_FRAME_TASK_STATE.STOPPED
   );
 }
