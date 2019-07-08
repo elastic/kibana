@@ -137,7 +137,6 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
     // resposible for setting up an initial value when there is no default value
     if (!list.length) {
       updateValues([
-        ...models,
         {
           id: generateId(),
           ...config.defaultValue,
