@@ -31,7 +31,7 @@ import {
 } from './lib/get_interval';
 import { PANEL_TYPES } from '../../common/panel_types';
 
-const MIN_CHART_HEIGHT = 250;
+const MIN_CHART_HEIGHT = 300;
 
 class VisEditorVisualizationUI extends Component {
   constructor(props) {
