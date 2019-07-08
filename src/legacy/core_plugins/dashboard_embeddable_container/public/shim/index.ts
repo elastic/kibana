@@ -18,6 +18,7 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npSetup, npStart } from 'ui/new_platform';
 import { embeddablePlugin } from '../../../embeddable_api/public';
 import { Plugin } from './plugin';
