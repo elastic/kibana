@@ -115,12 +115,9 @@ function TimeIntervalParamEditor({
     }
   };
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow

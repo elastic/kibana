@@ -14,3 +14,11 @@ export const assertUnreachable = (
 ): never => {
   throw new Error(`${message} ${x}`);
 };
+
+export const inspectStringifyObject = (obj: unknown) => {
+  try {
+    return JSON.stringify(obj, null, 2);
+  } catch {
+    return 'Sorry about that, something went wrong.';
+  }
+};

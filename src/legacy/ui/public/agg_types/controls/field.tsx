@@ -78,16 +78,13 @@ function FieldParamEditor({
 
   const isValid = !!value && !errors.length;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
+  useEffect(() => {
+    setValidity(isValid);
 
-      if (!!errors.length) {
-        setTouched();
-      }
-    },
-    [isValid]
-  );
+    if (!!errors.length) {
+      setTouched();
+    }
+  }, [isValid]);
 
   useEffect(() => {
     // set field if only one available

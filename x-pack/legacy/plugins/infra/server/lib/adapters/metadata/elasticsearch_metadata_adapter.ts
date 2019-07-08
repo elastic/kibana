@@ -73,60 +73,6 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       buckets,
     };
   }
-
-  public async getLogMetadata(
-    req: InfraFrameworkRequest,
-    sourceConfiguration: InfraSourceConfiguration,
-    nodeId: string,
-    nodeType: 'host' | 'container' | 'pod'
-  ): Promise<InfraMetricsAdapterResponse> {
-    const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
-    const logQuery = {
-      allowNoIndices: true,
-      ignoreUnavailable: true,
-      index: sourceConfiguration.logAlias,
-      body: {
-        query: {
-          bool: {
-            filter: {
-              term: { [idFieldName]: nodeId },
-            },
-          },
-        },
-        size: 0,
-        aggs: {
-          nodeName: {
-            terms: {
-              field: NAME_FIELDS[nodeType],
-              size: 1,
-            },
-          },
-          metrics: {
-            terms: {
-              field: 'event.dataset',
-              size: 1000,
-            },
-          },
-        },
-      },
-    };
-
-    const response = await this.framework.callWithRequest<
-      any,
-      { metrics?: InfraMetadataAggregationResponse; nodeName?: InfraMetadataAggregationResponse }
-    >(req, 'search', logQuery);
-
-    const buckets =
-      response.aggregations && response.aggregations.metrics
-        ? response.aggregations.metrics.buckets
-        : [];
-
-    return {
-      id: nodeId,
-      name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
-      buckets,
-    };
-  }
 }
 
 const getIdFieldName = (sourceConfiguration: InfraSourceConfiguration, nodeType: string) => {

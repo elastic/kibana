@@ -61,14 +61,11 @@ function ExtendedBoundsParamEditor({
     });
   }
 
-  useEffect(
-    () => {
-      setValidity(isValid);
+  useEffect(() => {
+    setValidity(isValid);
 
-      return () => setValidity(true);
-    },
-    [isValid]
-  );
+    return () => setValidity(true);
+  }, [isValid]);
 
   const handleChange = (ev: ChangeEvent<HTMLInputElement>, name: string) => {
     setValue({

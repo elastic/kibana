@@ -46,12 +46,9 @@ function SizeParamEditor({
   );
   const isValid = disabled || Number(value) > 0;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow

@@ -31,17 +31,14 @@ function SubAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  useEffect(
-    () => {
-      // we aren't creating a custom aggConfig
-      if (agg.params.metricAgg !== 'custom') {
-        setValue(null);
-      } else if (!agg.params.customMetric) {
-        setValue(agg.type.params.byName.customMetric.makeAgg(agg));
-      }
-    },
-    [value, responseValueAggs]
-  );
+  useEffect(() => {
+    // we aren't creating a custom aggConfig
+    if (agg.params.metricAgg !== 'custom') {
+      setValue(null);
+    } else if (!agg.params.customMetric) {
+      setValue(agg.type.params.byName.customMetric.makeAgg(agg));
+    }
+  }, [value, responseValueAggs]);
 
   const [innerState, setInnerState] = useState(true);
 
@@ -58,7 +55,6 @@ function SubAggParamEditor({
       indexPattern={agg.getIndexPattern()}
       responseValueAggs={responseValueAggs}
       state={state}
-      vis={subAggParams.vis}
       onAggParamsChange={(...rest) => {
         // to force update when sub-agg params are changed
         setInnerState(!innerState);

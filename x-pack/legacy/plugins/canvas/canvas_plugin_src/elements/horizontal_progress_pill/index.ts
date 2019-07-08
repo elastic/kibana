@@ -19,8 +19,6 @@ export const horizontalProgressPill: ElementFactory = () => ({
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"
-| progress shape="horizontalPill" label={formatnumber 0%} font={font size=24 family="${
-    openSans.value
-  }" color="#000000" align=center}
+| progress shape="horizontalPill" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}
 | render`,
 });

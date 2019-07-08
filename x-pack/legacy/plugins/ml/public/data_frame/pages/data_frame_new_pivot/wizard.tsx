@@ -146,7 +146,7 @@ export const Wizard: SFC = React.memo(() => {
     },
     {
       title: i18n.translate('xpack.ml.dataframe.transformsWizard.jobDetailsStepTitle', {
-        defaultMessage: 'Job details',
+        defaultMessage: 'Transform details',
       }),
       children: (
         <Fragment>
