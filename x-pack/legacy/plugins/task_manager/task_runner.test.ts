@@ -245,11 +245,11 @@ describe('TaskManagerRunner', () => {
     ).toBeLessThan(100);
   });
 
-  test('uses getBackpressureDelay function on error when defined', async () => {
+  test('uses getRetryDelay function on error when defined', async () => {
     const initialAttempts = _.random(0, 2);
     const backpressureDelay = _.random(15, 100);
     const id = Date.now().toString();
-    const getBackpressureDelayStub = sinon.stub().returns(backpressureDelay);
+    const getRetryDelayStub = sinon.stub().returns(backpressureDelay);
     const error = new Error('Dangit!');
     const { runner, store } = testOpts({
       instance: {
@@ -258,7 +258,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          getBackpressureDelay: getBackpressureDelayStub,
+          getRetryDelay: getRetryDelayStub,
           createTaskRunner: () => ({
             async run() {
               throw error;
@@ -271,7 +271,7 @@ describe('TaskManagerRunner', () => {
     await runner.run();
 
     sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWith(getBackpressureDelayStub, initialAttempts, error);
+    sinon.assert.calledWith(getRetryDelayStub, initialAttempts, error);
     const instance = store.update.args[0][0];
 
     expect(
@@ -279,11 +279,11 @@ describe('TaskManagerRunner', () => {
     ).toBeLessThan(100);
   });
 
-  test('uses getBackpressureDelay to set retryAt when defined', async () => {
+  test('uses getRetryDelay to set retryAt when defined', async () => {
     const id = _.random(1, 20).toString();
     const initialAttempts = _.random(0, 2);
     const backpressureDelay = _.random(15, 100);
-    const getBackpressureDelayStub = sinon.stub().returns(backpressureDelay);
+    const getRetryDelayStub = sinon.stub().returns(backpressureDelay);
     const { runner, store } = testOpts({
       instance: {
         id,
@@ -292,7 +292,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
-          getBackpressureDelay: getBackpressureDelayStub,
+          getRetryDelay: getRetryDelayStub,
           createTaskRunner: () => ({
             run: async () => undefined,
           }),
@@ -303,7 +303,7 @@ describe('TaskManagerRunner', () => {
     await runner.claimOwnership();
 
     sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWith(getBackpressureDelayStub, initialAttempts + 1);
+    sinon.assert.calledWith(getRetryDelayStub, initialAttempts + 1);
     const instance = store.update.args[0][0];
 
     expect(

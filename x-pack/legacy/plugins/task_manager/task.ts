@@ -111,7 +111,7 @@ export interface TaskDefinition {
    * Function that returns the delay in seconds to wait before attempting the
    * failed task again.
    */
-  getBackpressureDelay?: (attempts: number, error: object) => number;
+  getRetryDelay?: (attempts: number, error: object) => number;
 
   /**
    * The numer of workers / slots a running instance of this task occupies.
@@ -145,7 +145,7 @@ export const validateTaskDefinition = Joi.object({
     .min(1)
     .default(1),
   createTaskRunner: Joi.func().required(),
-  getBackpressureDelay: Joi.func().optional(),
+  getRetryDelay: Joi.func().optional(),
 }).default();
 
 /**
