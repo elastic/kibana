@@ -37,12 +37,9 @@ function OrderParamEditor({
   });
   const isValid = !!value;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
@@ -53,7 +50,7 @@ function OrderParamEditor({
     >
       <EuiSelect
         options={aggParam.options.raw}
-        value={value.value}
+        value={value && value.value}
         onChange={ev => setValue(aggParam.options.byValue[ev.target.value])}
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}

@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiPopover,
   EuiExpression,
+  EuiFormHelpText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { data } from 'plugins/data/setup';
@@ -72,6 +73,12 @@ export class WhereExpression extends Component {
         }
       >
         <div className="mapFilterEditor" data-test-subj="mapJoinWhereFilterEditor">
+          <EuiFormHelpText className="mapJoinExpressionHelpText">
+            <FormattedMessage
+              id="xpack.maps.layerPanel.whereExpression.helpText"
+              defaultMessage="Use a query to narrow right source."
+            />
+          </EuiFormHelpText>
           <QueryBar
             query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
             onSubmit={this._onQueryChange}

@@ -66,12 +66,9 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different snapshot.
-  useEffect(
-    () => {
-      setActiveTab(TAB_SUMMARY);
-    },
-    [repositoryName, snapshotId]
-  );
+  useEffect(() => {
+    setActiveTab(TAB_SUMMARY);
+  }, [repositoryName, snapshotId]);
 
   let tabs;
 
@@ -198,6 +195,18 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                             [{ repository: repositoryName, snapshot: snapshotId }],
                             onSnapshotDeleted
                           )
+                        }
+                        isDisabled={snapshotDetails.isManagedRepository}
+                        title={
+                          snapshotDetails.isManagedRepository
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.snapshotDetails.deleteManagedRepositorySnapshotButtonTitle',
+                                {
+                                  defaultMessage:
+                                    'You cannot delete a snapshot stored in a managed repository.',
+                                }
+                              )
+                            : null
                         }
                       >
                         <FormattedMessage

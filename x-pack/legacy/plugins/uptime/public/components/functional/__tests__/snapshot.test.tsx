@@ -11,21 +11,16 @@ import { SnapshotComponent } from '../snapshot';
 
 describe('Snapshot component', () => {
   const snapshot: SnapshotType = {
-    up: 8,
-    down: 2,
-    total: 10,
+    counts: {
+      up: 8,
+      down: 2,
+      mixed: 0,
+      total: 10,
+    },
   };
 
   it('renders without errors', () => {
-    const wrapper = shallowWithIntl(
-      <SnapshotComponent
-        absoluteStartDate={1548697920000}
-        absoluteEndDate={1548700920000}
-        colors={{ danger: '#F050F0', mean: '#001100', range: '#FF00FF', success: '#000000' }}
-        data={{ snapshot }}
-        loading={false}
-      />
-    );
+    const wrapper = shallowWithIntl(<SnapshotComponent data={{ snapshot }} loading={false} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

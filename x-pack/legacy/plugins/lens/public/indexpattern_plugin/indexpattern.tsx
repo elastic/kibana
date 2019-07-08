@@ -10,8 +10,6 @@ import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import uuid from 'uuid';
-import { Datasource, DataType } from '..';
-import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -22,7 +20,7 @@ import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { buildColumnForOperationType, getOperationTypesForField } from './operations';
-import { IndexPatternDataPanel } from './datapanel';
+import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
 
