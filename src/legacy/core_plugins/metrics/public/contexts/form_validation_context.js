@@ -17,7 +17,6 @@
  * under the License.
  */
 
-exports.snapshot = require('./snapshot');
-exports.source = require('./source');
-exports.archive = require('./archive');
-exports.build_snapshots = require('./build_snapshots');
+import React from 'react';
+
+export const FormValidationContext = React.createContext({});
