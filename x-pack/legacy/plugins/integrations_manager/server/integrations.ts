@@ -112,11 +112,10 @@ export async function handleRequestDelete(req: InstallFeatureRequest) {
 
 export async function getObjects(pkgkey: string, type: string): Promise<SavedObject[]> {
   const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`);
-  const toBeSavedObjects = new Map();
-
-  for (const path of paths) {
-    collectReferences(path, toBeSavedObjects, 'dashboard');
-  }
+  const toBeSavedObjects = paths.reduce((map, path) => {
+    collectReferences(map, { path, desiredType: 'dashboard' });
+    return map;
+  }, new Map());
 
   return Array.from(toBeSavedObjects.values(), ensureJsonValues);
 }
@@ -130,9 +129,8 @@ function getAsset(key: string) {
 }
 
 function collectReferences(
-  path: string,
   toBeSavedObjects: Map<string, SavedObject> = new Map(),
-  desiredType: string = 'dashboard'
+  { path, desiredType = 'dashboard' }
 ) {
   const [pkgkey, service, type, file] = path.split('/');
   if (type !== desiredType) return;
@@ -144,13 +142,13 @@ function collectReferences(
   if (!asset.id) asset.id = file.replace('.json', '');
   toBeSavedObjects.set(path, asset);
 
-  for (const reference of asset.references) {
-    collectReferences(
-      `${pkgkey}/${service}/${reference.type}/${reference.id}.json`,
-      toBeSavedObjects,
-      reference.type
-    );
-  }
+  return asset.references.reduce((map, reference) => {
+    collectReferences(toBeSavedObjects, {
+      path: `${pkgkey}/${service}/${reference.type}/${reference.id}.json`,
+      desiredType: reference.type,
+    });
+    return map;
+  }, toBeSavedObjects);
 }
 
 // the assets from the registry are malformed
