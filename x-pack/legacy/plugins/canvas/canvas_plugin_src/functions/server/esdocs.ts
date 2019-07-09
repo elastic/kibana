@@ -16,6 +16,7 @@ interface Arguments {
   query: string;
   sort: string;
   fields: string;
+  metaFields: string;
   count: number;
 }
 
@@ -30,29 +31,35 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
       types: ['filter'],
     },
     args: {
-      index: {
-        types: ['string'],
-        default: '_all',
-        help: argHelp.index,
-      },
       query: {
         types: ['string'],
         aliases: ['_', 'q'],
         help: argHelp.query,
         default: '-_index:.kibana',
       },
-      sort: {
-        types: ['string'],
-        help: argHelp.sort,
+      count: {
+        types: ['number'],
+        default: 100,
+        help: argHelp.count,
       },
       fields: {
         help: argHelp.fields,
         types: ['string'],
       },
-      count: {
-        types: ['number'],
-        default: 100,
-        help: argHelp.count,
+      index: {
+        types: ['string'],
+        default: '_all',
+        help: argHelp.index,
+      },
+      // TODO: This arg isn't being used in the function.
+      // We need to restore this functionality or remove it as an arg.
+      metaFields: {
+        help: argHelp.metaFields,
+        types: ['string'],
+      },
+      sort: {
+        types: ['string'],
+        help: argHelp.sort,
       },
     },
     fn: (context, args, handlers) => {

@@ -38,6 +38,12 @@ export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
         example: 'logstash-*',
       },
     }),
+    metaFields: i18n.translate('xpack.canvas.functions.esdocs.args.metaFieldsHelpText', {
+      defaultMessage: 'Comma separated list of meta fields. For example, "{example}".',
+      values: {
+        example: '_index,_type',
+      },
+    }),
     sort: i18n.translate('xpack.canvas.functions.esdocs.args.sortHelpText', {
       defaultMessage:
         'The sort direction formatted as `"{directions}"`. For example, `"{example1}"` or `"{example2}"`.',
