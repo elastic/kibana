@@ -7,6 +7,7 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 import { AlertAction } from '../types';
+import { SECONDS_REGEX, MINUTES_REGEX, HOURS_REGEX, DAYS_REGEX } from '../lib';
 
 interface UpdateRequest extends Hapi.Request {
   params: {
@@ -15,7 +16,7 @@ interface UpdateRequest extends Hapi.Request {
   payload: {
     enabled: boolean;
     alertTypeId: string;
-    interval: number;
+    interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
   };
@@ -32,8 +33,23 @@ export function updateAlertRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
-            enabled: Joi.boolean().required(),
-            interval: Joi.number().required(),
+      enabled: Joi.boolean().required(),
+            interval: Joi.alternatives()
+              .try(
+                Joi.string()
+                  .regex(SECONDS_REGEX, 'seconds')
+                  .required(),
+                Joi.string()
+                  .regex(MINUTES_REGEX, 'minutes')
+                  .required(),
+                Joi.string()
+                  .regex(HOURS_REGEX, 'hours')
+                  .required(),
+                Joi.string()
+                  .regex(DAYS_REGEX, 'days')
+                  .required()
+              )
+              .required(),
             alertTypeParams: Joi.object().required(),
             actions: Joi.array()
               .items(

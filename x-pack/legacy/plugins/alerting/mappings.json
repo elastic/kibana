@@ -8,7 +8,7 @@
         "type": "keyword"
       },
       "interval": {
-        "type": "long"
+        "type": "keyword"
       },
       "actions": {
         "type": "nested",

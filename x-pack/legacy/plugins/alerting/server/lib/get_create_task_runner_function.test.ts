@@ -53,7 +53,7 @@ const mockedAlertTypeSavedObject = {
   attributes: {
     enabled: true,
     alertTypeId: '123',
-    interval: 10000,
+    interval: '10s',
     alertTypeParams: {
       bar: true,
     },

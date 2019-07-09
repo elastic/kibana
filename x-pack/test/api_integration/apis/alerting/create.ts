@@ -61,7 +61,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
             enabled: true,
             alertTypeId: 'test.noop',
             alertTypeParams: {},
-            interval: 10000,
+            interval: '10s',
             scheduledTaskId: resp.body.scheduledTaskId,
           });
           expect(typeof resp.body.scheduledTaskId).to.be('string');
@@ -140,6 +140,24 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
             message: 'alertTypeParams invalid: child "param1" fails because ["param1" is required]',
           });
         });
+    });
+
+    it(`should return 400 when interval is wrong syntax`, async () => {
+      const { body: error } = await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ interval: '10x' }))
+        .expect(400);
+      expect(error).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          'child "interval" fails because ["interval" with value "10x" fails to match the seconds (5s) pattern, "interval" with value "10x" fails to match the minutes (5m) pattern, "interval" with value "10x" fails to match the hours (5h) pattern, "interval" with value "10x" fails to match the days (5d) pattern]',
+        validation: {
+          source: 'payload',
+          keys: ['interval', 'interval', 'interval', 'interval'],
+        },
+      });
     });
   });
 }

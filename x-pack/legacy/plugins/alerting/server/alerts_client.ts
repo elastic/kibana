@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { validateAlertTypeParams } from './lib';
+import { validateAlertTypeParams, parseDuration } from './lib';
 
 interface ConstructorOptions {
   log: Log;
@@ -45,7 +45,7 @@ interface UpdateOptions {
   id: string;
   data: {
     enabled: boolean;
-    interval: number;
+    interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
   };
@@ -183,7 +183,7 @@ export class AlertsClient {
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, interval: number, basePath: string) {
+  private async scheduleAlert(id: string, alertTypeId: string, interval: string, basePath: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
       params: {
@@ -193,7 +193,7 @@ export class AlertsClient {
       state: {
         // This is here because we can't rely on the task manager's internal runAt.
         // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + interval),
+        scheduledRunAt: new Date(Date.now() + parseDuration(interval)),
         previousScheduledRunAt: null,
         alertTypeState: {},
         alertInstances: {},

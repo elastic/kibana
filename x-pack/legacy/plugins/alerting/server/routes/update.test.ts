@@ -15,7 +15,7 @@ beforeEach(() => jest.resetAllMocks());
 const mockedResponse = {
   id: '1',
   alertTypeId: '1',
-  interval: 12000,
+  interval: '12s',
   alertTypeParams: {
     otherField: false,
   },
@@ -36,7 +36,7 @@ test('calls the update function with proper parameters', async () => {
     url: '/api/alert/1',
     payload: {
       enabled: true,
-      interval: 12000,
+      interval: '12s',
       alertTypeParams: {
         otherField: false,
       },
@@ -75,7 +75,7 @@ test('calls the update function with proper parameters', async () => {
             "otherField": false,
           },
           "enabled": true,
-          "interval": 12000,
+          "interval": "12s",
         },
         "id": "1",
       },

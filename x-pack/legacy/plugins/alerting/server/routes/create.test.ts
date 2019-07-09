@@ -12,7 +12,7 @@ createAlertRoute(server);
 
 const mockedAlert = {
   alertTypeId: '1',
-  interval: 10000,
+  interval: '10s',
   alertTypeParams: {
     bar: true,
   },
@@ -59,7 +59,7 @@ test('creates an alert with proper parameters', async () => {
         "bar": true,
       },
       "id": "123",
-      "interval": 10000,
+      "interval": "10s",
     }
   `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
@@ -81,7 +81,31 @@ test('creates an alert with proper parameters', async () => {
             "bar": true,
           },
           "enabled": true,
-          "interval": 10000,
+          "interval": "10s",
+        },
+      },
+    ]
+  `);
+  expect(alertsClient.create).toHaveBeenCalledTimes(1);
+  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "data": Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "2",
+              "params": Object {
+                "foo": true,
+              },
+            },
+          ],
+          "alertTypeId": "1",
+          "alertTypeParams": Object {
+            "bar": true,
+          },
+          "enabled": true,
+          "interval": "10s",
         },
       },
     ]
