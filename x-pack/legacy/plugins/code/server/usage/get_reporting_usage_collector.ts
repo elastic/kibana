@@ -13,10 +13,11 @@ import { getReportingUsage } from './get_reporting_usage';
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
-export function getReportingUsageCollector(server: any) {
+export function getReportingUsageCollector(server: any, isReady: boolean) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
+    isReady,
     fetch: (callCluster: any) => getReportingUsage(server, callCluster),
 
     /*
