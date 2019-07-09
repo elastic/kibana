@@ -21,14 +21,14 @@ export const stopJob = async (d: DataFrameJobListRow) => {
     );
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.jobsList.stopJobSuccessMessage', {
-        defaultMessage: 'Data frame job {jobId} stopped successfully.',
+        defaultMessage: 'Data frame transform {jobId} stopped successfully.',
         values: { jobId: d.config.id },
       })
     );
   } catch (e) {
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.jobsList.stopJobErrorMessage', {
-        defaultMessage: 'An error occurred stopping the data frame job {jobId}: {error}',
+        defaultMessage: 'An error occurred stopping the data frame transform {jobId}: {error}',
         values: { jobId: d.config.id, error: JSON.stringify(e) },
       })
     );
