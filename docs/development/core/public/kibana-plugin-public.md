@@ -27,9 +27,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
+|  [ChromeNavControl](./kibana-plugin-public.chromenavcontrol.md) |  |
+|  [ChromeNavControls](./kibana-plugin-public.chromenavcontrols.md) | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-public.chromenavlink.md) |  |
+|  [ChromeNavLinks](./kibana-plugin-public.chromenavlinks.md) | [APIs](./kibana-plugin-public.chromenavlinks.md) for manipulating nav links. |
+|  [ChromeRecentlyAccessed](./kibana-plugin-public.chromerecentlyaccessed.md) | [APIs](./kibana-plugin-public.chromerecentlyaccessed.md) for recently accessed history. |
+|  [ChromeRecentlyAccessedHistoryItem](./kibana-plugin-public.chromerecentlyaccessedhistoryitem.md) |  |
+|  [ChromeStart](./kibana-plugin-public.chromestart.md) | ChromeStart allows plugins to customize the global chrome header UI and enrich the UX with additional information about the current location of the browser. |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
+|  [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) |  |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
@@ -50,11 +57,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Type Alias | Description |
 |  --- | --- |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
-|  [ChromeStart](./kibana-plugin-public.chromestart.md) |  |
+|  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
-|  [UiSettingsSetup](./kibana-plugin-public.uisettingssetup.md) |  |
+|  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 

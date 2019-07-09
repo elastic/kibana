@@ -62,7 +62,11 @@ Style all the Y-axes of the chart.
 *Labels - Rotate*:::: You can enter the number in degrees for how much you want to rotate labels
 *Labels - Truncate*:::: You can enter the size in pixels to which the label is truncated
 *Scale to Data Bounds*:::: The default Y-axis bounds are zero and the maximum value returned in the data. Check
-                           this box to change both upper and lower bounds to match the values returned in the data.
+                           this box to change both upper and lower bounds to match the values returned in the data. 
+                           Checking this option may cause that the bar, which value equals to the lower bounds/
+                           upper bounds (in case only negative values are depicted) is hidden. 
+                           To avoid that, you can define bounds margin. Via bounds margin you specify a value, 
+                           which decreases/increases the lower/upper bounds when displaying the plot.
 *Custom Extents*:::: You can define custom minimum and maximum for each axis
 
 [float]

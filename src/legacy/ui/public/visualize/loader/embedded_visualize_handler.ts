@@ -33,7 +33,7 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
-// @ts-ignore
+// @ts-ignore untyped dependency
 import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';

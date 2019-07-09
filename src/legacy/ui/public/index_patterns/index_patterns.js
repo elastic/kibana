@@ -27,9 +27,9 @@ import { FieldsFetcher } from './fields_fetcher';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 
 export class IndexPatterns {
-  constructor(basePath, config, savedObjectsClient) {
+  constructor(config, savedObjectsClient) {
     const getProvider = indexPatternsGetProvider(savedObjectsClient);
-    const apiClient = new IndexPatternsApiClient(basePath);
+    const apiClient = new IndexPatternsApiClient();
 
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
@@ -65,7 +65,7 @@ export class IndexPatterns {
 
   make = (id) => {
     return (new IndexPattern(id,
-      this.config,
+      cfg => this.config.get(cfg),
       this.savedObjectsClient,
       this.cache,
       this.fieldsFetcher,
@@ -84,11 +84,11 @@ import { uiModules } from '../modules';
 const module = uiModules.get('kibana/index_patterns');
 let _service;
 module.service('indexPatterns', function (chrome) {
-  if (!_service) _service = new IndexPatterns(chrome.getBasePath(), chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
+  if (!_service) _service = new IndexPatterns(chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
   return _service;
 });
 
 export const IndexPatternsProvider = (chrome) => {
-  if (!_service) _service = new IndexPatterns(chrome.getBasePath(), chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
+  if (!_service) _service = new IndexPatterns(chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
   return _service;
 };

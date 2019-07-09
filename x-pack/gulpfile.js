@@ -38,4 +38,4 @@ require('./tasks/dev')(gulp, gulpHelpers);
 require('./tasks/prepare')(gulp, gulpHelpers);
 require('./tasks/report')(gulp, gulpHelpers);
 require('./tasks/test')(gulp, gulpHelpers);
-require('./plugins/canvas/tasks')(gulp, gulpHelpers);
+require('./legacy/plugins/canvas/tasks')(gulp, gulpHelpers);

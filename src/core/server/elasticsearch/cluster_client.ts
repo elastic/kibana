@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import Boom from 'boom';
 import { Client } from 'elasticsearch';
 import { get } from 'lodash';
-import { filterHeaders, Headers } from '../http/router';
+import { Request } from 'hapi';
+
+import { ElasticsearchErrorHelpers } from './errors';
+import { GetAuthHeaders, isRealRequest } from '../http';
+import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
 import {
   ElasticsearchClientConfig,
@@ -28,6 +30,15 @@ import {
 } from './elasticsearch_client_config';
 import { ScopedClusterClient } from './scoped_cluster_client';
 
+/**
+ * Support Legacy platform request for the period of migration.
+ *
+ * @public
+ */
+
+export type LegacyRequest = Request;
+
+const noop = () => undefined;
 /**
  * The set of options that defines how API call should be made and result be
  * processed.
@@ -85,14 +96,17 @@ async function callAPI(
       throw err;
     }
 
-    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-    const wwwAuthHeader: string = get(err, 'body.error.header[WWW-Authenticate]');
-
-    boomError.output.headers['WWW-Authenticate'] =
-      wwwAuthHeader || 'Basic realm="Authorization Required"';
-
-    throw boomError;
+    throw ElasticsearchErrorHelpers.decorateNotAuthorizedError(err);
   }
+}
+
+/**
+ * Fake request object created manually by Kibana plugins.
+ * @public
+ */
+export interface FakeRequest {
+  /** Headers used for authentication against Elasticsearch */
+  headers: Headers;
 }
 
 /**
@@ -119,7 +133,11 @@ export class ClusterClient {
    */
   private isClosed = false;
 
-  constructor(private readonly config: ElasticsearchClientConfig, private readonly log: Logger) {
+  constructor(
+    private readonly config: ElasticsearchClientConfig,
+    private readonly log: Logger,
+    private readonly getAuthHeaders: GetAuthHeaders = noop
+  ) {
     this.client = new Client(parseElasticsearchClientConfig(config, log));
   }
 
@@ -163,9 +181,10 @@ export class ClusterClient {
    * scoped to the provided req. Consumers shouldn't worry about closing
    * scoped client instances, these will be automatically closed as soon as the
    * original cluster client isn't needed anymore and closed.
-   * @param req - Request the `ScopedClusterClient` instance will be scoped to.
+   * @param request - Request the `ScopedClusterClient` instance will be scoped to.
+   * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
    */
-  public asScoped(req: { headers?: Headers } = {}) {
+  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest) {
     // It'd have been quite expensive to create and configure client for every incoming
     // request since it involves parsing of the config, reading of the SSL certificate and
     // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
@@ -181,11 +200,11 @@ export class ClusterClient {
       );
     }
 
-    const headers = req.headers
-      ? filterHeaders(req.headers, this.config.requestHeadersWhitelist)
-      : req.headers;
-
-    return new ScopedClusterClient(this.callAsInternalUser, this.callAsCurrentUser, headers);
+    return new ScopedClusterClient(
+      this.callAsInternalUser,
+      this.callAsCurrentUser,
+      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist)
+    );
   }
 
   /**
@@ -209,5 +228,17 @@ export class ClusterClient {
     if (this.isClosed) {
       throw new Error('Cluster client cannot be used after it has been closed.');
     }
+  }
+
+  private getHeaders(
+    request?: KibanaRequest | LegacyRequest | FakeRequest
+  ): Record<string, string | string[] | undefined> {
+    if (!isRealRequest(request)) {
+      return request && request.headers ? request.headers : {};
+    }
+    const authHeaders = this.getAuthHeaders(request);
+    const headers = ensureRawRequest(request).headers;
+
+    return { ...headers, ...authHeaders };
   }
 }

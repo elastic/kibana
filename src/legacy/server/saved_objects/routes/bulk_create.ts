@@ -19,7 +19,7 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectAttributes, SavedObjectsClientContract } from '../';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
 import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
 
 interface SavedObject {

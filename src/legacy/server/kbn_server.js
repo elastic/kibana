@@ -18,6 +18,8 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
+
+
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -55,7 +57,7 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    const { setupDeps, startDeps, serverOptions, handledConfigPaths, logger } = core;
+    const { setupDeps, startDeps, handledConfigPaths, logger } = core;
     this.newPlatform = {
       coreContext: {
         logger,
@@ -64,7 +66,6 @@ export default class KbnServer {
       start: startDeps,
       stop: null,
       params: {
-        serverOptions,
         handledConfigPaths,
       },
     };

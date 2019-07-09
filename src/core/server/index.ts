@@ -48,11 +48,18 @@ export {
   Headers,
   ScopedClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
   APICaller,
+  FakeRequest,
+  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
+  AuthHeaders,
+  AuthResultData,
   AuthToolkit,
+  GetAuthHeaders,
   KibanaRequest,
   KibanaRequestRoute,
   OnPreAuthHandler,
@@ -74,6 +81,28 @@ export {
   PluginInitializerContext,
   PluginName,
 } from './plugins';
+
+export {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  SavedObjectsErrorHelpers,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsMigrationVersion,
+  SavedObjectsService,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+} from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -114,7 +143,6 @@ export interface InternalCoreSetup {
  * @public
  */
 export interface InternalCoreStart {
-  http: HttpServiceStart;
   plugins: PluginsServiceStart;
 }
 

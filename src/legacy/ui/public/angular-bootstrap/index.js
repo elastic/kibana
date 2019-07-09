@@ -22,35 +22,17 @@ uiModules.get('kibana', [
  */
 angular.module('ui.bootstrap', [
   'ui.bootstrap.tpls',
-  'ui.bootstrap.transition',
   'ui.bootstrap.bindHtml',
-  'ui.bootstrap.modal',
   'ui.bootstrap.tooltip',
 ]);
 
 angular.module('ui.bootstrap.tpls', [
-  'template/modal/backdrop.html',
-  'template/modal/window.html',
   'template/tooltip/tooltip-html-unsafe-popup.html',
   'template/tooltip/tooltip-popup.html',
 ]);
 
 import './bindHtml/bindHtml';
-import './modal/modal';
 import './tooltip/tooltip';
-import './transition/transition';
-
-import backdrop from './modal/backdrop.html';
-
-angular.module('template/modal/backdrop.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/modal/backdrop.html', backdrop);
-}]);
-
-import modal from './modal/window.html';
-
-angular.module('template/modal/window.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/modal/window.html', modal);
-}]);
 
 import tooltipUnsafePopup from './tooltip/tooltip-html-unsafe-popup.html';	
 

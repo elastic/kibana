@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server, ServerOptions } from 'hapi';
+import { Server } from 'hapi';
 import { HttpService } from './http_service';
 import { HttpServerSetup } from './http_server';
 import { HttpServiceSetup } from './http_service';
@@ -27,7 +27,6 @@ type ServiceSetupMockType = jest.Mocked<HttpServiceSetup> & {
 };
 const createSetupContractMock = () => {
   const setupContract: ServiceSetupMockType = {
-    options: ({} as unknown) as ServerOptions,
     // we can mock some hapi server method when we need it
     server: {} as Server,
     registerOnPreAuth: jest.fn(),
@@ -43,6 +42,7 @@ const createSetupContractMock = () => {
     auth: {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
+      getAuthHeaders: jest.fn(),
     },
     createNewServer: jest.fn(),
   };
@@ -73,4 +73,5 @@ const createHttpServiceMock = () => {
 export const httpServiceMock = {
   create: createHttpServiceMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

@@ -36,7 +36,6 @@ import * as types from 'ui/index_patterns';
 
 const config = chrome.getUiSettingsClient();
 const savedObjectsClient = chrome.getSavedObjectsClient();
-const basePath = chrome.getBasePath();
 /**
  * Index Patterns Service
  *
@@ -51,7 +50,7 @@ const basePath = chrome.getBasePath();
 export class IndexPatternsService {
   public setup() {
     return {
-      indexPatterns: new IndexPatterns(basePath, config, savedObjectsClient),
+      indexPatterns: new IndexPatterns(config, savedObjectsClient),
     };
   }
 
@@ -76,7 +75,7 @@ const ui = {
   IndexPatternSelect,
 };
 
-export { validateIndexPattern, constants, fixtures, ui };
+export { validateIndexPattern, constants, fixtures, ui, IndexPatterns };
 
 /** @public */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;

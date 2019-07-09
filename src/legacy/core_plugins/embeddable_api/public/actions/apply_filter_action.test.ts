@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import '../np_core.test.mocks';
+import '../ui_capabilities.test.mocks';
+jest.mock('ui/new_platform');
 import {
   FilterableEmbeddable,
   FilterableEmbeddableFactory,
@@ -39,7 +40,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  embeddableFactories.reset();
+  embeddableFactories.clear();
 });
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {

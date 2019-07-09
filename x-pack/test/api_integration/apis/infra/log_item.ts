@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { flyoutItemQuery } from '../../../../plugins/infra/public/containers/logs/flyout_item.gql_query';
-import { FlyoutItemQuery } from '../../../../plugins/infra/public/graphql/types';
+import { flyoutItemQuery } from '../../../../legacy/plugins/infra/public/containers/logs/flyout_item.gql_query';
+import { FlyoutItemQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const logItemTests: KbnTestProvider = ({ getService }) => {
