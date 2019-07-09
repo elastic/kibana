@@ -63,7 +63,7 @@ export function getServices() {
     return services;
   }
 
-  const callCluster = esServer.getCallCluster();
+  const callCluster = esServer.es.getCallCluster();
 
   const savedObjects = kbnServer.server.savedObjects;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient();
