@@ -122,8 +122,12 @@ export class LanguageServerController implements ILanguageServerHandler {
       if (ls.languageServerHandlers) {
         if (ls.builtinWorkspaceFolders) {
           if (ls.languageServerHandlers) {
-            const h = await (ls.languageServerHandlers as Promise<ILanguageServerHandler>);
-            await h.exit();
+            try {
+              const h = await (ls.languageServerHandlers as Promise<ILanguageServerHandler>);
+              await h.exit();
+            } catch (e) {
+              // expected error because of handler launch failed
+            }
           }
         } else {
           const handlers = ls.languageServerHandlers as LanguageServerHandlerMap;
@@ -158,10 +162,14 @@ export class LanguageServerController implements ILanguageServerHandler {
     for (const languageServer of this.languageServers) {
       if (languageServer.languageServerHandlers) {
         if (languageServer.builtinWorkspaceFolders) {
-          const handler = await (languageServer.languageServerHandlers as Promise<
-            ILanguageServerHandler
-          >);
-          await handler.unloadWorkspace(workspaceDir);
+          try {
+            const handler = await (languageServer.languageServerHandlers as Promise<
+              ILanguageServerHandler
+            >);
+            await handler.unloadWorkspace(workspaceDir);
+          } catch (err) {
+            // expected error because of handler launch failed
+          }
         } else {
           const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
           const realPath = fs.realpathSync(workspaceDir);
