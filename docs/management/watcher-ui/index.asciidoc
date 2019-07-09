@@ -12,7 +12,6 @@ With the Watcher UI, you can:
 
 * Create a simple threshold watch
 * View your watch history and action status
-* Acknowledge a watch to prevent too many executions
 * Edit, deactivate, and delete a watch
 * Create more advanced watches using API syntax
 
@@ -28,15 +27,17 @@ watch&#8212;input, schedule, condition, and actions.
 
 [float]
 [[watcher-security]]
-=== Required roles for Watcher
+=== Watcher security
 
-To use Watcher, you must have the built-in `kibana_user` role.  
-You must also have one of the following Watcher roles:
+If the {es} {security-features} are enabled, you must have the
+{stack-ov}/security-privileges.html[manage-watcher or monitor_watcher]
+cluster privileges to use Watcher in {kib}.
 
-* `watcher_admin` can perform all Watcher actions, such as creating a new watch 
-or editing an existing one.
+Alternately, you can have the built-in `kibana_user` role
+and either of these watcher roles:
 
-* `watcher_user` can view all existing watches, but cannot create or edit watches.
+* `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
+* `watcher_user`. You can view watches, but not create or edit them.
 
 You can manage roles in *Management > Security > Roles*, or use the 
 <<role-management-api, Kibana Role Management API>>. Watches are shared between 
