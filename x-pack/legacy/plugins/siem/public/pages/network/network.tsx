@@ -168,6 +168,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         startDate={from}
                         endDate={to}
                         skip={isInitializing}
+                        type={networkModel.NetworkType.page}
                         narrowDateRange={(score, interval) => {
                           const fromTo = scoreIntervalToDateTime(score, interval);
                           setAbsoluteRangeDatePicker({
