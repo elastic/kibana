@@ -121,7 +121,6 @@ interface Props extends ReactIntl.InjectedIntlProps {
   onPanelsUpdated: (updatedPanels: SavedDashboardPanelMap) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
-  abortSignal?: AbortSignal;
 }
 
 interface State {
@@ -252,7 +251,6 @@ class DashboardGridUi extends React.Component<Props, State> {
           <DashboardPanel
             panelId={panel.panelIndex}
             embeddableFactory={this.embeddableFactoryMap[panel.type]}
-            abortSignal={this.props.abortSignal}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
           />

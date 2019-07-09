@@ -33,7 +33,6 @@ export type OnEmbeddableStateChanged = (embeddableStateChanges: EmbeddableState)
 export abstract class EmbeddableFactory<T extends SavedObjectAttributes = SavedObjectAttributes> {
   public readonly name: string;
   public readonly savedObjectMetaData?: SavedObjectMetaData<T>;
-  protected abortSignal?: AbortSignal;
 
   /**
    *
@@ -43,15 +42,12 @@ export abstract class EmbeddableFactory<T extends SavedObjectAttributes = SavedO
   constructor({
     name,
     savedObjectMetaData,
-    abortSignal,
   }: {
     name: string;
     savedObjectMetaData?: SavedObjectMetaData<T>;
-    abortSignal?: AbortSignal;
   }) {
     this.name = name;
     this.savedObjectMetaData = savedObjectMetaData;
-    this.abortSignal = abortSignal;
   }
 
   /**
@@ -65,7 +61,6 @@ export abstract class EmbeddableFactory<T extends SavedObjectAttributes = SavedO
    */
   public abstract create(
     containerMetadata: { id: string },
-    onEmbeddableStateChanged: OnEmbeddableStateChanged,
-    abortSignal?: AbortSignal
+    onEmbeddableStateChanged: OnEmbeddableStateChanged
   ): Promise<Embeddable>;
 }

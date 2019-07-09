@@ -51,7 +51,6 @@ export interface DashboardPanelProps {
   initialized: boolean;
   panel: SavedDashboardPanel;
   className?: string;
-  abortSignal?: AbortSignal;
 }
 
 export interface DashboardPanelUiProps extends DashboardPanelProps {
@@ -90,14 +89,13 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
       embeddableStateChanged,
       embeddableIsInitialized,
       embeddableError,
-      abortSignal,
     } = this.props;
 
     if (!initialized) {
       embeddableIsInitializing();
       embeddableFactory
         // @ts-ignore -- going away with Embeddable V2
-        .create(panel, embeddableStateChanged, abortSignal)
+        .create(panel, embeddableStateChanged)
         .then((embeddable: Embeddable) => {
           if (this.mounted) {
             this.embeddable = embeddable;
