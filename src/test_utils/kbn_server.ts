@@ -239,6 +239,7 @@ export function createTestServers({
 
       return {
         stop: async () => await es.cleanup(),
+        es,
         hosts: [esTestConfig.getUrl()],
         username: esTestConfig.getUrlParts().username,
         password: esTestConfig.getUrlParts().password,
