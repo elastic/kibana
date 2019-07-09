@@ -149,10 +149,6 @@ export const mockResponse = {
           ip_count: {
             value: 1,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -182,10 +178,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -211,10 +203,6 @@ export const mockResponse = {
           },
           ip_count: {
             value: 5,
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           domain: {
             buckets: [
@@ -245,10 +233,6 @@ export const mockResponse = {
           ip_count: {
             value: 1,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -275,10 +259,6 @@ export const mockResponse = {
           ip_count: {
             value: 3,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -304,10 +284,6 @@ export const mockResponse = {
           },
           ip_count: {
             value: 2,
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -337,10 +313,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -369,10 +341,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -398,10 +366,6 @@ export const mockResponse = {
           },
           ip_count: {
             value: 2,
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           domain: {
             buckets: [
@@ -429,10 +393,6 @@ export const mockResponse = {
           ip_count: {
             value: 2,
           },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
-          },
           domain: {
             buckets: [
               {
@@ -452,10 +412,6 @@ export const mockResponse = {
                 key: 'inbound',
               },
             ],
-          },
-          timestamp: {
-            value: 155052446412,
-            value_as_string: '2019-02-18T21:14:24.000Z',
           },
           ip_count: {
             value: 2,
@@ -493,7 +449,6 @@ export const mockResult = {
       },
       node: {
         _id: '1.1.1.1',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 11276023407,
           packets: 1025631,
@@ -513,7 +468,6 @@ export const mockResult = {
       },
       node: {
         _id: '2.2.2.2',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 5469323342,
           packets: 2811441,
@@ -533,7 +487,6 @@ export const mockResult = {
       },
       node: {
         _id: '3.3.3.3',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 3807671322,
           packets: 4494034,
@@ -553,7 +506,6 @@ export const mockResult = {
       },
       node: {
         _id: '4.4.4.4',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 166517626,
           packets: 3194782,
@@ -573,7 +525,6 @@ export const mockResult = {
       },
       node: {
         _id: '5.5.5.5',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 104785026,
           packets: 1838597,
@@ -593,7 +544,6 @@ export const mockResult = {
       },
       node: {
         _id: '6.6.6.6',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 28804250,
           packets: 482982,
@@ -613,7 +563,6 @@ export const mockResult = {
       },
       node: {
         _id: '7.7.7.7',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 23032363,
           packets: 400623,
@@ -633,7 +582,6 @@ export const mockResult = {
       },
       node: {
         _id: '8.8.8.8',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 21424889,
           packets: 344357,
@@ -653,7 +601,6 @@ export const mockResult = {
       },
       node: {
         _id: '9.9.9.9',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 19205000,
           packets: 355663,
@@ -673,7 +620,6 @@ export const mockResult = {
       },
       node: {
         _id: '10.10.10.10',
-        timestamp: '2019-02-18T21:14:24.000Z',
         network: {
           bytes: 11407633,
           packets: 199360,

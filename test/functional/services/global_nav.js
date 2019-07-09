@@ -45,8 +45,7 @@ export function GlobalNavProvider({ getService }) {
 
     async badgeExistsOrFail(expectedLabel) {
       await testSubjects.existOrFail('headerBadge');
-      const element = await testSubjects.find('headerBadge');
-      const actualLabel = await element.getAttribute('data-test-badge-label');
+      const actualLabel = await testSubjects.getAttribute('headerBadge', 'data-test-badge-label');
       expect(actualLabel.toUpperCase()).to.equal(expectedLabel.toUpperCase());
     }
 
