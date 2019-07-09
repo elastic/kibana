@@ -126,6 +126,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
           tableType,
         })
       }
+      updateProps={{ totalCount }}
     />
   )
 );
