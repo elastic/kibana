@@ -19,7 +19,7 @@
 
 import { IndexedArray } from '../../indexed_array';
 
-interface SelectValueProp {
+interface OptionedValueProp {
   value: string;
   text: string;
 }
@@ -30,10 +30,10 @@ interface SelectOptions<T> extends IndexedArray<T> {
   };
 }
 
-interface SelectParamEditorProps<T = SelectValueProp> {
+interface OptionedParamEditorProps<T = OptionedValueProp> {
   aggParam: {
     options: SelectOptions<T>;
   };
 }
 
-export { SelectValueProp, SelectParamEditorProps };
+export { OptionedValueProp, OptionedParamEditorProps };

@@ -99,7 +99,7 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'aggregate',
-      type: 'select',
+      type: 'optioned',
       editorComponent: wrapWithInlineComp(TopAggregateParamEditor),
       options: [
         {
@@ -164,7 +164,7 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'sortOrder',
-      type: 'select',
+      type: 'optioned',
       default: 'desc',
       editorComponent: OrderParamEditor,
       options: [
