@@ -29,6 +29,7 @@ import { getRowItemDraggables } from '../../../tables/helpers';
 interface OwnProps {
   data: AuthenticationsEdges[];
   loading: boolean;
+  id: string;
   hasNextPage: boolean;
   nextCursor: string;
   totalCount: number;
@@ -71,6 +72,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
     data,
     hasNextPage,
+    id,
     limit,
     loading,
     loadMore,
@@ -85,6 +87,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
       headerUnit={i18n.UNIT(totalCount)}
+      id={id}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}

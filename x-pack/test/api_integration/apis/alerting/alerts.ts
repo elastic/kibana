@@ -44,7 +44,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            interval: 100,
+            interval: '1s',
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
               index: esTestIndexName,

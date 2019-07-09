@@ -49,12 +49,9 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     [setHighlightTerm]
   );
   const clearHighlightTerm = useCallback(() => setHighlightTerm(''), [setHighlightTerm]);
-  useEffect(
-    () => {
-      debouncedOnChange([highlightTerm]);
-    },
-    [highlightTerm]
-  );
+  useEffect(() => {
+    debouncedOnChange([highlightTerm]);
+  }, [highlightTerm]);
 
   const button = (
     <EuiButtonEmpty color="text" size="xs" iconType="brush" onClick={togglePopover}>

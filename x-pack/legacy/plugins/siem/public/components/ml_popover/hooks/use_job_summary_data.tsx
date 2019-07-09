@@ -23,10 +23,10 @@ export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false):
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
+  const userPermissions = hasMlUserPermissions(capabilities);
 
   const fetchFunc = async () => {
     if (jobIds.length > 0) {
-      const userPermissions = hasMlUserPermissions(capabilities);
       if (userPermissions) {
         const data: Job[] = await jobsSummary(jobIds, {
           'kbn-version': config.kbnVersion,
@@ -41,13 +41,10 @@ export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false):
     setLoading(false);
   };
 
-  useEffect(
-    () => {
-      setLoading(true);
-      fetchFunc();
-    },
-    [jobIds.join(','), refetchSummaryData]
-  );
+  useEffect(() => {
+    setLoading(true);
+    fetchFunc();
+  }, [jobIds.join(','), refetchSummaryData, userPermissions]);
 
   return [loading, jobSummaryData];
 };

@@ -45,77 +45,68 @@ function MetricAggParamEditor({
   });
   const isValid = !!value;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (responseValueAggs && value && value !== 'custom') {
-        // ensure that metricAgg is set to a valid agg
-        const respAgg = responseValueAggs
-          .filter(isCompatibleAgg)
-          .find(aggregation => aggregation.id === value);
+  useEffect(() => {
+    if (responseValueAggs && value && value !== 'custom') {
+      // ensure that metricAgg is set to a valid agg
+      const respAgg = responseValueAggs
+        .filter(isCompatibleAgg)
+        .find(aggregation => aggregation.id === value);
 
-        if (!respAgg) {
-          setValue();
-        }
+      if (!respAgg) {
+        setValue();
       }
-    },
-    [responseValueAggs]
-  );
+    }
+  }, [responseValueAggs]);
 
-  useEffect(
-    () => {
-      // check buckets
-      const lastBucket: AggConfig = findLast(
-        state.aggs,
-        aggr => aggr.type && aggr.type.type === 'buckets'
+  useEffect(() => {
+    // check buckets
+    const lastBucket: AggConfig = findLast(
+      state.aggs,
+      aggr => aggr.type && aggr.type.type === 'buckets'
+    );
+    const bucketHasType = lastBucket && lastBucket.type;
+    const bucketIsHistogram =
+      bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
+    const canUseAggregation = lastBucket && bucketIsHistogram;
+
+    // remove errors on all buckets
+    state.aggs.forEach((aggr: AggConfig) => {
+      if (aggr.error) {
+        subAggParams.onAggErrorChanged(aggr);
+      }
+    });
+
+    if (canUseAggregation) {
+      subAggParams.onAggParamsChange(
+        lastBucket.params,
+        'min_doc_count',
+        lastBucket.type.name === 'histogram' ? 1 : 0
       );
-      const bucketHasType = lastBucket && lastBucket.type;
-      const bucketIsHistogram =
-        bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
-      const canUseAggregation = lastBucket && bucketIsHistogram;
-
-      // remove errors on all buckets
-      state.aggs.forEach((aggr: AggConfig) => {
-        if (aggr.error) {
-          subAggParams.onAggErrorChanged(aggr);
-        }
-      });
-
-      if (canUseAggregation) {
-        subAggParams.onAggParamsChange(
-          lastBucket.params,
-          'min_doc_count',
-          lastBucket.type.name === 'histogram' ? 1 : 0
+    } else {
+      if (lastBucket) {
+        subAggParams.onAggErrorChanged(
+          lastBucket,
+          i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
+            defaultMessage:
+              'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
+            values: { type: agg.type.title },
+            description: 'Date Histogram and Histogram should not be translated',
+          })
         );
-      } else {
-        if (lastBucket) {
-          subAggParams.onAggErrorChanged(
-            lastBucket,
-            i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
-              defaultMessage:
-                'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
-              values: { type: agg.type.title },
-              description: 'Date Histogram and Histogram should not be translated',
-            })
-          );
-        }
       }
+    }
 
-      return () => {
-        // clear errors in last bucket before component destroyed
-        if (lastBucket && lastBucket.error) {
-          subAggParams.onAggErrorChanged(lastBucket);
-        }
-      };
-    },
-    [value, responseValueAggs]
-  );
+    return () => {
+      // clear errors in last bucket before component destroyed
+      if (lastBucket && lastBucket.error) {
+        subAggParams.onAggErrorChanged(lastBucket);
+      }
+    };
+  }, [value, responseValueAggs]);
 
   const options = responseValueAggs
     ? responseValueAggs
@@ -145,7 +136,12 @@ function MetricAggParamEditor({
   }
 
   return (
-    <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation ? !isValid : false}>
+    <EuiFormRow
+      label={label}
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      compressed
+    >
       <EuiSelect
         options={options}
         value={value || EMPTY_VALUE}

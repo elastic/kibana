@@ -117,7 +117,7 @@ export function init(server: Server, options: any) {
       if (checkResult.me) {
         await initCodeNode(server, serverOptions, log);
       } else {
-        await initNonCodeNode(codeNodeUrl, server, serverOptions, log);
+        await initNonCodeNode(codeNodeUrl, server, log);
       }
     } else {
       // codeNodeUrl not set, single node mode
@@ -126,12 +126,7 @@ export function init(server: Server, options: any) {
   });
 }
 
-async function initNonCodeNode(
-  url: string,
-  server: Server,
-  serverOptions: ServerOptions,
-  log: Logger
-) {
+async function initNonCodeNode(url: string, server: Server, log: Logger) {
   log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
   redirectRoute(server, url, log);
 }

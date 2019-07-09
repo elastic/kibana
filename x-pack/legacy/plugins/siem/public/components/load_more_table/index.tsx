@@ -81,6 +81,7 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
   headerUnit: string | React.ReactElement;
+  id?: string;
   itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
@@ -97,6 +98,7 @@ interface BasicTableState {
   isEmptyTable: boolean;
   isPopoverOpen: boolean;
   paginationLoading: boolean;
+  showInspect: boolean;
 }
 
 type Func<T> = (arg: T) => string | number;
@@ -120,6 +122,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     isEmptyTable: this.props.pageOfItems.length === 0,
     isPopoverOpen: false,
     paginationLoading: false,
+    showInspect: false,
   };
 
   static getDerivedStateFromProps<T, U, V, W, X, Y, Z, AA, AB>(
@@ -145,6 +148,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       headerTitle,
       headerTooltip,
       headerUnit,
+      id,
       itemsPerRow,
       limit,
       loading,
@@ -196,7 +200,11 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         </EuiContextMenuItem>
       ));
     return (
-      <EuiPanel data-test-subj={dataTestSubj}>
+      <EuiPanel
+        data-test-subj={dataTestSubj}
+        onMouseEnter={this.mouseEnter}
+        onMouseLeave={this.mouseLeave}
+      >
         <BasicTableContainer>
           {loading && (
             <>
@@ -213,7 +221,9 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           )}
 
           <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}
+            id={id}
+            showInspect={this.state.showInspect}
+            subtitle={<>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</>}
             title={headerTitle}
             tooltip={headerTooltip}
           >
@@ -286,6 +296,20 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       </EuiPanel>
     );
   }
+
+  private mouseEnter = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      showInspect: true,
+    }));
+  };
+
+  private mouseLeave = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      showInspect: false,
+    }));
+  };
 
   private onButtonClick = () => {
     this.setState(prevState => ({
