@@ -124,7 +124,7 @@ export function TopNavMenu(props: Props) {
 
 TopNavMenu.defaultProps = {
   showSearchBar: false,
-  showQueryBarInline: false,
+  showSearchBarInline: false,
   showQueryBar: true,
   showQueryInput: true,
   showDatePicker: true,

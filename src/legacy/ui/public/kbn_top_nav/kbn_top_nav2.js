@@ -43,13 +43,13 @@ module.directive('kbnTopNav2', () => {
 
       // Pass in storage
       const localStorage = new Storage(window.localStorage);
-      child.setAttribute('storage', 'storage');
+      child.setAttribute('store', 'store');
 
       // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
-        $scope.storage = localStorage;
+        $scope.store = localStorage;
 
         // Watch the disableButton functions
         $scope.$watch(() => {
@@ -102,6 +102,7 @@ module.directive('kbnTopNav2Helper', (reactDirective) => {
 
       'appName',
       'screenTitle',
+      'store',
       'dateRangeFrom',
       'dateRangeTo',
       'isRefreshPaused',
