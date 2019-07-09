@@ -1,0 +1,19 @@
+[[breaking-changes-7.3]]
+== Breaking changes in 7.3
+++++
+<titleabbrev>7.3</titleabbrev>
+++++
+
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 7.3.
+
+See also <<release-highlights-7.3.0, release highlights>> and <<release-notes-7.3.0, release notes>>.
+
+coming[7.3.0]
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+//tag::notable-breaking-changes[]
+
+// end::notable-breaking-changes[]
