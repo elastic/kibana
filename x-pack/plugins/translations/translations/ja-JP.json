@@ -6176,7 +6176,6 @@
     "xpack.ml.dataframe.definePivotForm.indexPatternLabel": "インデックスパターン",
     "xpack.ml.dataframe.definePivotForm.queryHelpText": "クエリ文字列でソースデータをフィルタリングしてください (オプション)。",
     "xpack.ml.dataframe.definePivotForm.queryLabel": "クエリ",
-    "xpack.ml.dataframe.definePivotForm.queryPlaceholder": "検索…",
     "xpack.ml.dataframe.definePivotForm.savedSearchLabel": "保存された検索",
     "xpack.ml.dataframe.definePivotSummary.aggregationsLabel": "アグリゲーション（集計）",
     "xpack.ml.dataframe.definePivotSummary.groupByLabel": "グループ分けの条件",
