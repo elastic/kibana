@@ -29,35 +29,29 @@ const ErrorGroupOverview: React.SFC = () => {
     uiFilters
   } = useUrlParams();
 
-  const { data: errorDistributionData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadErrorDistribution({
-          serviceName,
-          start,
-          end,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadErrorDistribution({
+        serviceName,
+        start,
+        end,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, uiFilters]);
 
-  const { data: errorGroupListData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadErrorGroupList({
-          serviceName,
-          start,
-          end,
-          sortField,
-          sortDirection,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
-  );
+  const { data: errorGroupListData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadErrorGroupList({
+        serviceName,
+        start,
+        end,
+        sortField,
+        sortDirection,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
 
   useTrackPageview({ app: 'apm', path: 'error_group_overview' });
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
