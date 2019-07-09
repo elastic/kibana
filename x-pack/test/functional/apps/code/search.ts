@@ -15,7 +15,8 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Search', () => {
+  describe('Search', function() {
+    this.tags('smoke');
     const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
     const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
     const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
@@ -85,6 +86,20 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
           expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
           expect(await results[1].getVisibleText()).to.equal('src/models/User.ts');
           expect(await results[2].getVisibleText()).to.equal('src/config/passport.js');
+        });
+      });
+
+      it('Full text search with complex query terms', async () => {
+        log.debug('Full text search with complex query terms');
+        // Fill in the search query bar with a complex query which could result in multiple
+        // terms.
+        await PageObjects.code.fillSearchQuery('postUpdateProfile');
+        await PageObjects.code.submitSearchQuery();
+
+        await retry.tryForTime(5000, async () => {
+          const results = await testSubjects.findAll(searchResultListSelector);
+          expect(results).to.have.length(1);
+          expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
         });
       });
 

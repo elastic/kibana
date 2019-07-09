@@ -42,6 +42,7 @@ class StaticPlot extends PureComponent {
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
+            stack={serie.stack}
           />
         );
       case 'area':
@@ -53,8 +54,9 @@ class StaticPlot extends PureComponent {
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
-            stroke={serie.color}
+            stroke={serie.stack ? 'rgba(0,0,0,0)' : serie.color}
             fill={serie.areaColor || rgba(serie.color, 0.3)}
+            stack={serie.stack}
           />
         );
       case 'areaMaxHeight':

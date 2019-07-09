@@ -24,7 +24,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Repository, WorkerReservedProgress } from '../../../model';
 import { deleteRepo, indexRepo, initRepoCommand } from '../../actions';
-import { RepoState, RepoStatus } from '../../reducers/status';
+import { RepoState, RepoStatus } from '../../actions/status';
 
 const stateColor = {
   [RepoState.CLONING]: 'secondary',

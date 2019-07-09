@@ -68,17 +68,14 @@ export function useLastEventTimeQuery<TCache = object>(
       );
   }
 
-  useEffect(
-    () => {
-      try {
-        fetchLastEventTime();
-      } catch (err) {
-        updateLastSeen(null);
-        updateErrorMessage(err.toString());
-      }
-    },
-    [indexKey, details.hostName, details.ip]
-  );
+  useEffect(() => {
+    try {
+      fetchLastEventTime();
+    } catch (err) {
+      updateLastSeen(null);
+      updateErrorMessage(err.toString());
+    }
+  }, [indexKey, details.hostName, details.ip]);
 
   return { lastSeen, loading, errorMessage };
 }

@@ -2903,6 +2903,7 @@ Array [
 .c4 {
   color: #98a2b3;
   padding-bottom: 0;
+  padding-right: 8px;
 }
 
 .c7 {
@@ -5002,7 +5003,7 @@ Array [
           >
             <circle
               cx={360}
-              cy={189.74989696}
+              cy={132.27231180799998}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -5010,9 +5011,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#3185fc",
+                  "fill": "#f98510",
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "#f98510",
                   "strokeWidth": 1,
                 }
               }
@@ -5036,7 +5037,7 @@ Array [
             />
             <circle
               cx={360}
-              cy={132.27231180799998}
+              cy={189.74989696}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -5044,9 +5045,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#f98510",
+                  "fill": "#3185fc",
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "#3185fc",
                   "strokeWidth": 1,
                 }
               }

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -28,7 +26,7 @@ import 'brace/theme/textmate';
 import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
 import {
-  loadRepository,
+  useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
 } from '../../../../services/http';
 import { textService } from '../../../../services/text';
@@ -45,24 +43,23 @@ import {
 import { BASE_PATH } from '../../../../constants';
 import { TypeDetails } from './type_details';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositoryName: Repository['name'];
   onClose: () => void;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
+export const RepositoryDetails: React.FunctionComponent<Props> = ({
   repositoryName,
   onClose,
   onRepositoryDeleted,
-  history,
 }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const { error, data: repositoryDetails } = loadRepository(repositoryName);
+  const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
 
@@ -75,13 +72,10 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 
   // Reset verification state when repository name changes, either from adjust URL or clicking
   // into a different repository in table list.
-  useEffect(
-    () => {
-      setVerification(undefined);
-      setIsLoadingVerification(false);
-    },
-    [repositoryName]
-  );
+  useEffect(() => {
+    setVerification(undefined);
+    setIsLoadingVerification(false);
+  }, [repositoryName]);
 
   const renderBody = () => {
     if (repositoryDetails) {
@@ -378,9 +372,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={history.createHref({
-                    pathname: `${BASE_PATH}/edit_repository/${repositoryName}`,
-                  })}
+                  href={`#${BASE_PATH}/edit_repository/${repositoryName}`}
                   fill
                   color="primary"
                 >
@@ -419,5 +411,3 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     </EuiFlyout>
   );
 };
-
-export const RepositoryDetails = withRouter(RepositoryDetailsUi);
