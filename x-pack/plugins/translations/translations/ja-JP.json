@@ -6035,7 +6035,6 @@
     "xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage": "ジョブ ID {jobId} の詳細が見つからなかったため例を表示できません",
     "xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel": "例を表示",
     "xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel": "数列を表示",
-    "xpack.ml.anomaliesTable.maxSeverityColumnName": "最高深刻度",
     "xpack.ml.anomaliesTable.metricDescriptionSortColumnName": "説明",
     "xpack.ml.anomaliesTable.noMatchingAnomaliesFoundTitle": "一致する注釈が見つかりません",
     "xpack.ml.anomaliesTable.severityColumnName": "深刻度",

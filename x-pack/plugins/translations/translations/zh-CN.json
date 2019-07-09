@@ -6035,7 +6035,6 @@
     "xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage": "无法查看示例，因为未找到作业 ID {jobId} 的详细信息",
     "xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel": "查看示例",
     "xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel": "查看序列",
-    "xpack.ml.anomaliesTable.maxSeverityColumnName": "最大严重性",
     "xpack.ml.anomaliesTable.metricDescriptionSortColumnName": "描述",
     "xpack.ml.anomaliesTable.noMatchingAnomaliesFoundTitle": "未找到任何匹配的异常",
     "xpack.ml.anomaliesTable.severityColumnName": "严重性",
