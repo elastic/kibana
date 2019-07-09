@@ -215,6 +215,7 @@ describe('TaskManagerRunner', () => {
   });
 
   test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
+    const timeoutMinutes = 1;
     const id = _.random(1, 20).toString();
     const initialAttempts = _.random(0, 2);
     const { runner, store } = testOpts({
@@ -225,6 +226,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          timeout: `${timeoutMinutes}m`,
           createTaskRunner: () => ({
             run: async () => undefined,
           }),
@@ -241,7 +243,11 @@ describe('TaskManagerRunner', () => {
     expect(instance.status).toBe('running');
     expect(Math.abs(Date.now() - instance.startedAt.getTime())).toBeLessThan(100);
     expect(
-      Math.abs(minutesFromNow((initialAttempts + 1) * 5).getTime() - instance.retryAt.getTime())
+      Math.abs(
+        minutesFromNow((initialAttempts + 1) * 5).getTime() +
+          timeoutMinutes * 60 * 1000 -
+          instance.retryAt.getTime()
+      )
     ).toBeLessThan(100);
   });
 

@@ -170,18 +170,20 @@ export class TaskManagerRunner implements TaskRunner {
     const attempts = this.instance.attempts + 1;
     const now = new Date();
 
+    const timeoutDate = intervalFromNow(this.definition.timeout!)!;
+
     try {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
         startedAt: now,
         attempts,
-        retryAt: this.definition.getRetryDelay
-          ? new Date(
-              intervalFromNow(this.definition.timeout!)!.valueOf() +
-                this.definition.getRetryDelay(attempts, Boom.clientTimeout()) * 1000
-            )
-          : minutesFromNow(attempts * 5), // incrementally backs off an extra 5m per failure
+        retryAt: new Date(
+          timeoutDate.getTime() +
+            (this.definition.getRetryDelay
+              ? this.definition.getRetryDelay(attempts, Boom.clientTimeout()) * 1000
+              : attempts * 5 * 60 * 1000) // incrementally backs off an extra 5m per failure
+        ),
       });
 
       return true;
