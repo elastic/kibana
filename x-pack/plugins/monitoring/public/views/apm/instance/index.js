@@ -12,14 +12,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { find, get } from 'lodash';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
-import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/apm/instances/:uuid', {
@@ -54,27 +52,20 @@ uiRoutes.when('/apm/instances/:uuid', {
         $injector
       });
 
-      function onBrush({ xaxis }) {
-        timefilter.setTime({
-          from: moment(xaxis.from),
-          to: moment(xaxis.to),
-          mode: 'absolute',
-        });
-      }
-
       $scope.$watch(() => this.data, data => {
         title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
-        this.renderReact(data, onBrush);
+        this.renderReact(data);
       });
     }
 
-    renderReact(data, onBrush) {
+    renderReact(data) {
       const component = (
         <I18nContext>
           <ApmServerInstance
             summary={data.apmSummary || {}}
             metrics={data.metrics || {}}
-            onBrush={onBrush}
+            onBrush={this.onBrush}
+            zoomInfo={this.zoomInfo}
           />
         </I18nContext>
       );
