@@ -115,35 +115,26 @@ describe('Modal Inspect', () => {
       wrapper.update();
 
       expect(
-        wrapper
-          .find('.euiDescriptionList__title')
-          .first()
-          .text()
+        wrapper.find('.euiDescriptionList__title span[data-test-subj="index-pattern-title"]').text()
       ).toBe('Index pattern');
       expect(
         wrapper
-          .find('.euiDescriptionList__description')
-          .first()
+          .find('.euiDescriptionList__description span[data-test-subj="index-pattern-description"]')
           .text()
       ).toBe('auditbeat-*, filebeat-*, packetbeat-*, winlogbeat-*');
       expect(
-        wrapper
-          .find('.euiDescriptionList__title')
-          .at(1)
-          .text()
+        wrapper.find('.euiDescriptionList__title span[data-test-subj="query-time-title"]').text()
       ).toBe('Query time');
       expect(
         wrapper
-          .find('.euiDescriptionList__description')
-          .at(1)
+          .find('.euiDescriptionList__description span[data-test-subj="query-time-description"]')
           .text()
       ).toBe('880ms');
       expect(
         wrapper
-          .find('.euiDescriptionList__title')
-          .at(2)
+          .find('.euiDescriptionList__title span[data-test-subj="request-timestamp-title"]')
           .text()
-      ).toBe('Request time');
+      ).toBe('Request timestamp');
     });
 
     test('Click on request Tab', () => {

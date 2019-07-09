@@ -102,35 +102,43 @@ export const ModalInspectQuery = ({
   }> = [
     {
       title: (
-        <>
+        <span data-test-subj="index-pattern-title">
           {i18n.INDEX_PATTERN}
           <EuiIconTip content={i18n.INDEX_PATTERN_DESC} position="top" type="iInCircle" />
-        </>
+        </span>
       ),
-      description:
-        inspectRequest != null ? inspectRequest.index.join(', ') : i18n.SOMETHING_WENT_WRONG,
+      description: (
+        <span data-test-subj="index-pattern-description">
+          {inspectRequest != null ? inspectRequest.index.join(', ') : i18n.SOMETHING_WENT_WRONG}
+        </span>
+      ),
     },
 
     {
       title: (
-        <>
+        <span data-test-subj="query-time-title">
           {i18n.QUERY_TIME}
           <EuiIconTip content={i18n.QUERY_TIME_DESC} position="top" type="iInCircle" />
-        </>
+        </span>
       ),
-      description:
-        inspectResponse != null
-          ? `${numeral(inspectResponse.took).format('0,0')}ms`
-          : i18n.SOMETHING_WENT_WRONG,
+      description: (
+        <span data-test-subj="query-time-description">
+          {inspectResponse != null
+            ? `${numeral(inspectResponse.took).format('0,0')}ms`
+            : i18n.SOMETHING_WENT_WRONG}
+        </span>
+      ),
     },
     {
       title: (
-        <>
+        <span data-test-subj="request-timestamp-title">
           {i18n.REQUEST_TIMESTAMP}
           <EuiIconTip content={i18n.REQUEST_TIMESTAMP_DESC} position="top" type="iInCircle" />
-        </>
+        </span>
       ),
-      description: new Date().toISOString(),
+      description: (
+        <span data-test-subj="request-timestamp-description">{new Date().toISOString()}</span>
+      ),
     },
   ];
 

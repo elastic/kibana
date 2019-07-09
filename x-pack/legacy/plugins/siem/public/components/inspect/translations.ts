@@ -27,7 +27,8 @@ export const INDEX_PATTERN = i18n.translate('xpack.siem.inspect.modal.indexPatte
 export const INDEX_PATTERN_DESC = i18n.translate(
   'xpack.siem.inspect.modal.indexPatternDescription',
   {
-    defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
+    defaultMessage:
+      'The index pattern that connected to the Elasticsearch indices. These indices can be configured in Kibana > Advanced Settings.',
   }
 );
 
@@ -37,19 +38,16 @@ export const QUERY_TIME = i18n.translate('xpack.siem.inspect.modal.queryTimeLabe
 
 export const QUERY_TIME_DESC = i18n.translate('xpack.siem.inspect.modal.queryTimeDescription', {
   defaultMessage:
-    'The time it took to process the query. ' +
-    'Does not include the time to send the request or parse it in the browser.',
+    'The time it took to process the query. Does not include the time to send the request or parse it in the browser.',
 });
 
 export const REQUEST_TIMESTAMP = i18n.translate('xpack.siem.inspect.modal.reqTimestampLabel', {
-  defaultMessage: 'Request time',
+  defaultMessage: 'Request timestamp',
 });
 
 export const REQUEST_TIMESTAMP_DESC = i18n.translate(
   'xpack.siem.inspect.modal.reqTimestampDescription',
   {
-    defaultMessage:
-      'The time of the request from the browser to Elasticsearch and back. ' +
-      'Does not include the time the requested waited in the queue.',
+    defaultMessage: 'Time when the start of the request has been logged',
   }
 );
