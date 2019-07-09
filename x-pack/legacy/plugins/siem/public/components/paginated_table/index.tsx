@@ -19,7 +19,6 @@ import React, { memo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
-import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
@@ -43,6 +42,13 @@ export interface Criteria {
   page?: { index: number; size: number };
   sort?: SortingBasicTable;
 }
+
+declare type HostsTableColumns = [
+  Columns<string>,
+  Columns<string>,
+  Columns<string>,
+  Columns<string>
+];
 
 declare type BasicTableColumns = AuthTableColumns | HostsTableColumns;
 
