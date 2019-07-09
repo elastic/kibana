@@ -71,6 +71,7 @@ describe('code in multiple nodes', () => {
   let nonCodeNode: Root;
 
   let kbnRootServer: any;
+  let kbn: any;
   let esServer: any;
   const pluginPaths = resolve(__dirname, '../../../../../');
 
@@ -93,7 +94,7 @@ describe('code in multiple nodes', () => {
     });
 
     esServer = await servers.startES();
-    const kbn = await servers.startKibana();
+    kbn = await servers.startKibana();
     kbnRootServer = kbn.root;
   }
 
@@ -127,7 +128,7 @@ describe('code in multiple nodes', () => {
   // @ts-ignore
   after(async function() {
     await nonCodeNode.shutdown();
-    await kbnRootServer.stop();
+    await kbn.stop();
     await esServer.stop();
   });
 
@@ -140,7 +141,7 @@ describe('code in multiple nodes', () => {
   });
 
   it('Non-code node setup should fail if code node is shutdown', async () => {
-    await kbnRootServer.stop();
+    await kbn.stop();
     await request.get(nonCodeNode, '/api/code/setup').expect(502);
 
     // TODO restart root clearly is hard to do during platform migration

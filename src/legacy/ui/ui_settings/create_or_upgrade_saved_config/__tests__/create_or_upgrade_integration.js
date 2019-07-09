@@ -25,8 +25,8 @@ import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient;
+  let kbn;
   let kbnServer;
-  let kbnRootServer;
   let esServer;
   let servers;
 
@@ -35,8 +35,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       adjustTimeout: (t) => this.timeout(t),
     });
     esServer = await servers.startES();
-    const kbn = await servers.startKibana();
-    kbnRootServer = kbn.root;
+    kbn = await servers.startKibana();
     kbnServer = kbn.kbnServer;
 
     const savedObjects = kbnServer.server.savedObjects;
@@ -72,7 +71,7 @@ describe('createOrUpgradeSavedConfig()', () => {
 
   after(() => {
     esServer.stop();
-    kbnRootServer.stop();
+    kbn.stop();
   });
 
   it('upgrades the previous version on each increment', async function () {

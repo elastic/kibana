@@ -25,8 +25,8 @@ import manageUuid from '../manage_uuid';
 describe('legacy/core_plugins/kibana/server/lib', function () {
   describe('manage_uuid', function () {
     const testUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
+    let kbn;
     let kbnServer;
-    let kbnRootServer;
     let esServer;
     let config;
     let servers;
@@ -39,8 +39,7 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
       });
       esServer = await servers.startES();
 
-      const kbn = await servers.startKibana();
-      kbnRootServer = kbn.root;
+      kbn = await servers.startKibana();
       kbnServer = kbn.kbnServer;
     });
 
@@ -52,7 +51,7 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
 
     after(() => {
       esServer.stop();
-      kbnRootServer.stop();
+      kbn.stop();
     });
 
     it('ensure config uuid is validated as a guid', async function () {

@@ -16,7 +16,7 @@ import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';
 import { contractTests } from './test_contract';
 
 let kbnServer: any;
-let kbnRootServer: any;
+let kbn: any;
 let esServer: any;
 contractTests('Kibana  Framework Adapter', {
   async before() {
@@ -25,12 +25,11 @@ contractTests('Kibana  Framework Adapter', {
       settings: TestKbnServerConfig,
     });
     esServer = await servers.startES();
-    const kbn = await servers.startKibana();
-    kbnRootServer = kbn.root;
+    kbn = await servers.startKibana();
     kbnServer = kbn.kbnServer;
   },
   async after() {
-    await kbnRootServer.stop();
+    await kbn.stop();
     await esServer.stop();
   },
   adapterSetup: () => {

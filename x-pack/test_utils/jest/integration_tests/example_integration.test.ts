@@ -8,6 +8,7 @@ import * as kbnTestServer from '../../../../src/test_utils/kbn_server';
 import { TestKbnServerConfig } from '../../kbn_server_config';
 
 describe('example integration test with kbn server', async () => {
+  let kbn: any;
   let kbnServer: any;
   let kbnRootServer: any;
   let esServer: any;
@@ -17,7 +18,7 @@ describe('example integration test with kbn server', async () => {
       settings: TestKbnServerConfig,
     });
     esServer = await servers.startES();
-    const kbn = await servers.startKibana();
+    kbn = await servers.startKibana();
     kbnRootServer = kbn.root;
     kbnServer = kbn.kbnServer;
 
@@ -27,7 +28,7 @@ describe('example integration test with kbn server', async () => {
 
   afterAll(async () => {
     await esServer.stop();
-    await kbnRootServer.stop();
+    await kbn.stop();
   });
 
   it('should have started new platform server correctly', () => {
